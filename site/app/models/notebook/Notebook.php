@@ -104,7 +104,7 @@ class Notebook extends AbstractModel {
                 $this->file_submissions[] = $notebook_cell;
             }
         }
-        
+
         $this->image_paths = $this->getNotebookImagePaths();
 
         // Setup $this->inputs

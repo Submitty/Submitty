@@ -85,13 +85,12 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(0, 1, success_text=[], error_text=['Cannot restore a user that is currently in the queue. Please remove them first.'])
         self.assertEqual(base_queue_history_count+2, self.queueHistoryCount(False))
         self.assertEqual(2, self.currentQueueCount())
-        self.openFilterSettings()
         self.toggleFirstQueueFilter()#turn 'custom code' off
         self.assertEqual(0, self.currentQueueCount())
         self.toggleFirstQueueFilter()#turn 'custom code' back on
         self.assertEqual(2, self.currentQueueCount())
+        self.openFilterSettings()
         self.closeFirstQueue()
-        self.expectedAlerts(1, 0, success_text=['Closed queue: "custom code"'], error_text=[])
         self.openFilterSettings()
         self.emptyFirstQueue()
         self.expectedAlerts(1, 0, success_text=['Queue emptied'], error_text=[])
@@ -224,12 +223,12 @@ class TestOfficeHoursQueue(BaseTestCase):
 
     #this checks how many visible students are in the queue
     def toggleFirstQueueFilter(self):
-        self.wait_for_element((By.CLASS_NAME, f'queue_filter'))
-        self.driver.find_element(By.CLASS_NAME, f'queue_filter').click()
+        self.wait_for_element((By.CLASS_NAME, f'filter-buttons'))
+        self.driver.find_element(By.CLASS_NAME, f'filter-buttons').click()
 
     def closeFirstQueue(self):
-        self.wait_for_element((By.CLASS_NAME, 'close_queue_btn'))
-        self.driver.find_element(By.CLASS_NAME, 'close_queue_btn').click()
+        self.wait_for_element((By.CLASS_NAME, 'toggle-queue-checkbox'))
+        self.driver.find_element(By.CLASS_NAME, 'toggle-queue-checkbox').click()
         self.check_socket_message('toggle_queue')
 
     def emptyFirstQueue(self):

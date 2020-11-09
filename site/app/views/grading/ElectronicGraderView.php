@@ -1491,7 +1491,7 @@ HTML;
                 "display_version" => $display_version
             ]);
     }
-    
+
     /**
      * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable

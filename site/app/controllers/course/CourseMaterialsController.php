@@ -242,6 +242,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $hide_from_students = $_POST['hide_from_students'];
+        $sort_priority = floatval($_POST['sort_priority']);
 
         $requested_path = "";
         if (isset($_POST['requested_path'])) {
@@ -260,6 +261,8 @@ class CourseMaterialsController extends AbstractController {
         $json = FileUtils::readJsonFile($fp);
         $files_to_modify = is_dir($requested_path) ? FileUtils::getAllFiles($requested_path, [], true) : [['path' => $requested_path]];
 
+        $file_path_release_datetime = "";
+        $external_link = "";
         foreach ($files_to_modify as $file) {
             $file_path = $file['path'];
             $file_path_release_datetime = empty($release_time) ? $json[$file_path]['release_datetime'] : $release_time;
@@ -267,6 +270,7 @@ class CourseMaterialsController extends AbstractController {
 
             $json[$file_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
         }
+        $json[$requested_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link, 'sort_priority' => $sort_priority];
 
         FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
@@ -305,6 +309,11 @@ class CourseMaterialsController extends AbstractController {
         $hide_from_students = null;
         if (isset($_POST['hide_from_students'])) {
             $hide_from_students = $_POST['hide_from_students'];
+        }
+
+        $sort_priority = 0;
+        if (isset($_POST['sort_priority'])) {
+            $sort_priority = $_POST['sort_priority'];
         }
 
         if (empty($sections) && !is_null($sections)) {
@@ -468,6 +477,7 @@ class CourseMaterialsController extends AbstractController {
                                     'sections' => $sections_exploded,
                                     'hide_from_students' => $hide_from_students,
                                     'external_link' => $is_external_link_file,
+                                    'sort_priority' => $sort_priority
                                 ];
                             }
                             else {
@@ -475,6 +485,7 @@ class CourseMaterialsController extends AbstractController {
                                     'release_datetime' => $release_time,
                                     'hide_from_students' => $hide_from_students,
                                     'external_link' => $is_external_link_file,
+                                    'sort_priority' => $sort_priority
                                 ];
                             }
                         }
@@ -489,10 +500,10 @@ class CourseMaterialsController extends AbstractController {
                                 if ($sections_exploded == null) {
                                     $sections_exploded = [];
                                 }
-                                $json[$dst] = ['release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $is_external_link_file];
+                                $json[$dst] = ['release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $is_external_link_file, 'sort_priority' => $sort_priority];
                             }
                             else {
-                                $json[$dst] = ['release_datetime' => $release_time, 'hide_from_students' => $hide_from_students, 'external_link' => $is_external_link_file];
+                                $json[$dst] = ['release_datetime' => $release_time, 'hide_from_students' => $hide_from_students, 'external_link' => $is_external_link_file, 'sort_priority' => $sort_priority];
                             }
                         }
                     }

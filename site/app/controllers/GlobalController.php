@@ -112,7 +112,7 @@ class GlobalController extends AbstractController {
             "id" => "nav-sidebar-submitty",
             "icon" => "fa-star"
          ]);
-    
+
         if ($unread_notifications_count !== null) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['notifications']),
@@ -161,7 +161,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
         }
-            
+
         if ($this->core->getConfig()->isPollsEnabled()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['polls']),
@@ -426,7 +426,7 @@ class GlobalController extends AbstractController {
             "class" => "nav-row short-line",
         ]);
     }
-          
+
     // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
