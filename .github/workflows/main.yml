@@ -24,7 +24,7 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
-    php-static:
+    php-lint/static:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -87,7 +87,7 @@ jobs:
             python3 -m pip install --upgrade pip
             python3 -m pip install flake8 flake8-bugbear
         - name: Run python linting
-          run : flake8
+          run : python3 -m flake8
 
     python-unit:
       runs-on: ubuntu-latest
@@ -106,7 +106,7 @@ jobs:
             python3 -m pip install SQLAlchemy jsonschema
         - name: Run migrator python unit tests
           run : |
-            pushd migrations
+            pushd migration
             python3 -m unittest discover
             popd
         - name: Run autograding python unit tests
