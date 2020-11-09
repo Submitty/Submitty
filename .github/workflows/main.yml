@@ -111,7 +111,7 @@ jobs:
             popd
         - name: Run autograding python unit tests
           run : |
-            pushd autograding
+            pushd autograder
             python3 -m unittest discover
             popd
         - name: Run python_submitty_utils python unit tests
