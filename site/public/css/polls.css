@@ -1,13 +1,13 @@
-.dropdown_wrapper h2 {
+.dropdown-wrapper h2 {
     display: inline;
     margin: 0px;
 }
 
-.dropdown_bar {
+.dropdown-bar {
     padding: 0px 0px 20px 0px;
 }
 
-.dropdown_arrow {
+.dropdown-arrow {
     border: solid black;
     border-width: 0 5px 5px 0;
     display: inline-block;

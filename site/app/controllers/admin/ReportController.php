@@ -362,7 +362,7 @@ class ReportController extends AbstractController {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
             $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
-        
+
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
 
