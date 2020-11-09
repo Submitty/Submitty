@@ -31,7 +31,6 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
-            - run: composer validate
             - name: Cache Composer
               id: composer-cache
               uses: actions/cache@v2
