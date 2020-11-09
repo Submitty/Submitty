@@ -1,0 +1,47 @@
+name: Linting and Static Analysis
+
+#run php lint, phpstan, eslint, and pylint on any push or a PR to master
+on:
+    push:
+    pull_request:
+        branches: [ master ]
+jobs:
+    #cache from npm or setup node first then run eslint
+    eslint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run lint
+    phplint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - run: composer validate
+            - name: Cache Composer
+              id: composer-cache
+              uses: actions/cache@v2
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                    ${{ runner.os }}-php-
+           - name: Install PHP Dependencies
+             if: steps.composer-cache.outputs.cache-hit != 'true'
+             run: composer install --prefer-dist --dev
+           - name: Run PHP linting and Static Analysis
+             run: php vendor/bin/phpcs --standard=tests/ruleset.xml
+             run: php vendor/bin/phpstan analyze app
