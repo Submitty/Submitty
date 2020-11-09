@@ -37,7 +37,7 @@
     "submitty/php-codesniffer": "2.3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "0.12.49"
+    "phpstan/phpstan": "0.12.54"
   },
   "scripts": {
     "test": "phpunit -c tests/phpunit.xml",
