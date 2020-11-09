@@ -103,7 +103,7 @@ jobs:
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip
-            python3 -m pip install SQLAlchemy jsonschema jsonref pytz
+            python3 -m pip install SQLAlchemy jsonschema jsonref pytz tzlocal
         - name: Run migrator python unit tests
           run : |
             pushd migration
