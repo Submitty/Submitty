@@ -24,7 +24,7 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
-    php-lint/static:
+    php-lint-static:
         runs-on: ubuntu-latest
         defaults:
             run:
