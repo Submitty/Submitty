@@ -3,8 +3,11 @@ name: Submitty CI-1
 #run php lint, phpstan, eslint, and pylint on any push or a PR to master
 on:
     push:
+      branches-ignore:
+        - master
     pull_request:
-        branches: [ master ]
+        branches: 
+          - master
 jobs:
     #cache from npm or setup node first then run eslint
     eslint:
