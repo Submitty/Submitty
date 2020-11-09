@@ -22,8 +22,9 @@ jobs:
                   restore-keys: |
                        ${{ runner.os }}-cache-node-modules-
             - run: npm install
-            - run: npm run lint
-    phplint:
+            - name: Run eslint
+              run: npm run lint
+    php:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -38,10 +39,13 @@ jobs:
                   path: vendor
                   key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
-                    ${{ runner.os }}-php-
-           - name: Install PHP Dependencies
-             if: steps.composer-cache.outputs.cache-hit != 'true'
-             run: composer install --prefer-dist --dev
-           - name: Run PHP linting and Static Analysis
-             run: php vendor/bin/phpcs --standard=tests/ruleset.xml
-             run: php vendor/bin/phpstan analyze app
+                      ${{ runner.os }}-php-
+
+            - name: Install php dependencies
+              if: steps.composer-cache.outputs.cache-hit != 'true'
+              run: composer install --prefer-dist --dev
+
+            - name: Run php linting and static analysis
+              run : | 
+                  php vendor/bin/phpcs --standard=tests/ruleset.xml
+                  php vendor/bin/phpstan analyze app
