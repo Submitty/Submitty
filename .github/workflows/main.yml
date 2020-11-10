@@ -45,8 +45,9 @@ jobs:
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-composer-
-              run: composer install --prefer-dist --dev
 
+            - name: Install dependencies
+              run: composer install --prefer-dist --dev
             - name: Run php linting and static analysis
               run : |
                   php vendor/bin/phpcs --standard=tests/ruleset.xml
@@ -66,7 +67,6 @@ jobs:
           - name: Cache Composer
             id: composer-cache
             run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
           - name: Install Composer
             uses: actions/cache@v2
             with:
@@ -74,6 +74,7 @@ jobs:
                 key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                 restore-keys: |
                     ${{ runner.os }}-composer-
+          - name: Install dependencies
             run: composer install --prefer-dist --dev
           - name: Run php unit tests
             run : php vendor/bin/phpunit --configuration tests/phpunit.xml
