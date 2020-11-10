@@ -279,7 +279,7 @@ class AutoGradingView extends AbstractView {
         }
         return ''; // ?
     }
-    
+
     /**
      * @param string $file_path
      * @return string

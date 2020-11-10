@@ -21,14 +21,15 @@ const char *GLOBAL_config_json_string = "";
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 3) {
-    std::cout << "USAGE: " << argv[0] << " [input file] [output_file]" << std::endl;
+  if (argc != 4) {
+    std::cout << "USAGE: " << argv[0] << " [input file] [output_file] [assignment_id]" << std::endl;
     return 0;
   }
   std::cout << "FILENAME " << argv[0] << std::endl;
 
   std::string input_file = argv[1];
   std::string output_file = argv[2];
+  std::string assignment_id = argv[3];
 
   std::ifstream ifs(input_file);
   nlohmann::json instructor_json;
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
   }
 
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json output_json = FillInConfigDefaults(instructor_json, output_file);  // don't know the username yet
+  nlohmann::json output_json = FillInConfigDefaults(instructor_json, assignment_id);  // don't know the username yet
 
   // =================================================================================
   // EXPORT THE JSON FILE

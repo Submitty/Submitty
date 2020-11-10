@@ -16,6 +16,7 @@ use app\exceptions\IOException;
  * @method array getNotebook()
  * @method array getImagePaths()
  * @method array getFileSubmissions()
+ * @method array getItemPool()
  */
 
 class Notebook extends AbstractModel {
@@ -29,6 +30,8 @@ class Notebook extends AbstractModel {
     protected $image_paths;
     /** @prop @var array of file_submission notebook cells */
     protected $file_submissions = [];
+    /** @prop @var array of items. **/
+    protected $item_pool = [];
 
 
     public function __construct(Core $core, array $details, string $gradeable_id) {
@@ -43,6 +46,7 @@ class Notebook extends AbstractModel {
          // Setup $this->notebook
         $actual_input = [];
         $this->notebook = [];
+        $this->item_pool = $details["item_pool"] ?? [];
 
         // For each item in the notebook array inside the $details collect data and assign to variables in
         // $this->notebook
@@ -104,7 +108,7 @@ class Notebook extends AbstractModel {
                 $this->file_submissions[] = $notebook_cell;
             }
         }
-        
+
         $this->image_paths = $this->getNotebookImagePaths();
 
         // Setup $this->inputs
@@ -284,5 +288,15 @@ class Notebook extends AbstractModel {
 
     public function getNumParts(): int {
         return count($this->file_submissions);
+    }
+
+    public function getTestCases(): array {
+        $ret = [];
+        foreach($this->item_pool as $item) {
+            if($item["testcases"]) {
+                $ret += $item["testcases"];
+            }
+        }
+        return $ret;
     }
 }

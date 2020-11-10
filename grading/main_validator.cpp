@@ -449,12 +449,12 @@ nlohmann::json getItemWithName(std::string item_name, const nlohmann::json& conf
 /**
 * Get all global testcase objects for an assignment + all testcases specified in .submit.notebook
 */
-std::vector<TestCase> getTestcasesForSubmission(const nlohmann::json& config_json) {
+std::vector<TestCase> getTestcasesForSubmission(nlohmann::json& config_json) {
 
   std::vector<TestCase> testcase_array;
-  nlohmann::json::const_iterator testcases = config_json.find("testcases");
+  nlohmann::json::iterator testcases = config_json.find("testcases");
   assert (testcases != config_json.end());
-  for (nlohmann::json::const_iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+  for (nlohmann::json::iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
     std::string testcase_id = tc->value("testcase_id", "");
     assert(testcase_id != "");
     nlohmann::json testcase_config = *tc;
@@ -465,28 +465,44 @@ std::vector<TestCase> getTestcasesForSubmission(const nlohmann::json& config_jso
   std::ifstream ifs(".submit.notebook");
   if(ifs.is_open()) {
     nlohmann::json notebook_data = nlohmann::json::parse(ifs);
-    nlohmann::json notebook_testcase_ids = notebook_data.value("item_pools_selected", nlohmann::json::array());
-    nlohmann::json::const_iterator itempool = config_json.find("item_pool");
+    nlohmann::json item_selections = notebook_data.value("item_pools_selected", nlohmann::json::array());
+    int current_item = 0;
+    nlohmann::json::iterator notebook = config_json.find("notebook");
 
-    for (nlohmann::json::const_iterator item = notebook_testcase_ids.begin(); item != notebook_testcase_ids.end(); item++) {
+    for (nlohmann::json::iterator part = notebook->begin(); part != notebook->end(); part++) {
+      std::string type = part->value("type", "");
+      std::cout << "type was " << type << std::endl;
+      if (type != "item") {
+        continue;
+      }
+
       nlohmann::json item_config;
-      assert(item->is_string());
-      std::string item_name = *item;
+      int points = part->value("points", 0);
+
+      // If this is an "item," find out what we selected for it using the item_selections iterator
+      assert(current_item < item_selections.size());
+      assert(item_selections[current_item].is_string());
+      std::string item_selected = item_selections[current_item];
+      current_item++;
 
       try {
-        item_config = getItemWithName(item_name, config_json);
+        item_config = getItemWithName(item_selected, config_json);
       } catch(char* c) {
         std::cout << c << std::endl;
         continue;
       }
 
-      nlohmann::json::const_iterator item_testcases = item_config.find("testcases");
+      nlohmann::json::iterator item_testcases = item_config.find("testcases");
 
-      if(item_testcases == item_config.end()) {
+      if(item_testcases == item_config.end() || item_config["testcases"].size() == 0) {
         continue;
       }
 
-      for(nlohmann::json::const_iterator item_testcase = item_testcases->begin(); item_testcase != item_testcases->end(); item_testcase++) {
+      if(item_testcases->find("points") == item_testcases->end()) {
+        (*item_testcases)[0]["points"] = points;
+      }
+
+      for(nlohmann::json::iterator item_testcase = item_testcases->begin(); item_testcase != item_testcases->end(); item_testcase++) {
         TestCase my_testcase(*item_testcase, (*item_testcase)["testcase_id"], "");
         testcase_array.push_back(my_testcase);
       }

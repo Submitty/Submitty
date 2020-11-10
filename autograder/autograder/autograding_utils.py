@@ -458,6 +458,15 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
     # save the logs!
     shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
 
+    # Save the .submit.notebook
+    # Copy the .submit.notebook to tmp_work for validation
+    submit_notebook_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        shutil.copy(
+            submit_notebook_path,
+            os.path.join(tmp_results, ".submit.notebook")
+        )
+
 
 def allow_only_one_part(path, log_path=os.devnull):
     """

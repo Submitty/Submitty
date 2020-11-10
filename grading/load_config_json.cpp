@@ -167,9 +167,9 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
   }
 }
 
-void ComputeGlobalValues(nlohmann::json &whole_config, std::string assignment_directory) {
+void ComputeGlobalValues(nlohmann::json &whole_config, const std::string& assignment_id) {
 
-  whole_config["id"] = getAssignmentIdFromCurrentDirectory(std::string(assignment_directory));
+  whole_config["id"] = assignment_id;
   int total_nonec = 0;
   int total_ec = 0;
 
@@ -1040,7 +1040,7 @@ nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id) {
 }
 
 
-nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_directory) {
+nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_id) {
 
   AddGlobalDefaults(config_json);
   int testcase_id = 0;
@@ -1079,6 +1079,8 @@ nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::stri
       RewriteDeprecatedMyersDiff(*item_testcases, config_json);
       InflateTestcases(*item_testcases, config_json, testcase_id);
     }
+  } else {
+    config_json["item_pool"] = nlohmann::json::array();
   }
 
   ValidateNotebooks(config_json);
@@ -1101,7 +1103,7 @@ nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::stri
     }
   }
 
-  ComputeGlobalValues(config_json, assignment_directory);
+  ComputeGlobalValues(config_json, assignment_id);
 
   return config_json;
 }
@@ -1805,8 +1807,14 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
 
         // Pass forward other items
         out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
+        //TODO: Add support for the other types of points
         if(in_notebook_cell.find("points") != in_notebook_cell.end()){
           out_notebook_cell["points"] = in_notebook_cell["points"];
+          out_notebook_cell["non_hidden_non_extra_credit_points"] = in_notebook_cell["points"];
+        }
+        else {
+          out_notebook_cell["points"] = 0;
+          out_notebook_cell["non_hidden_non_extra_credit_points"] = 0;
         }
       }
       // Else unknown type was passed in throw exception

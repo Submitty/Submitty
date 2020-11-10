@@ -5,7 +5,7 @@
 
 void AddGlobalDefaults(nlohmann::json &whole_config);
 
-void ComputeGlobalValues(nlohmann::json &whole_config, std::string assignment_directory);
+void ComputeGlobalValues(nlohmann::json &whole_config, const std::string& assignment_id);
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config);
 
@@ -34,7 +34,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
 
 nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id);
 
-nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_directory);
+nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_id);
 
 void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json &testcase);
 

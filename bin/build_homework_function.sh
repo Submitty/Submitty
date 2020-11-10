@@ -167,7 +167,6 @@ function build_homework {
 
     # Remove cpp markers and run the complete config json through a python json syntax checker.
     python3 ${GRADINGCODE}/json_syntax_checker.py complete_config.json
-    ls -la
     py_res=$?
     if (( $cpp_res != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
@@ -184,7 +183,7 @@ function build_homework {
         ${GRADINGCODE}/empty_custom_function.cpp -pthread -g -std=c++11 -lseccomp -o configure.out
 
 
-    ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json
+    ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json $assignment
     configure_res=$?
 
     if (( $configure_res != 0 )); then

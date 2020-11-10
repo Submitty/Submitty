@@ -144,10 +144,7 @@ class AutoGradedVersion extends AbstractModel {
             $part_names = $config->getPartNames();
             $notebook_model = null;
             if ($config->isNotebookGradeable()) {
-                $notebook_model = $config->getUserSpecificNotebook(
-                    $submitter_id,
-                    $gradeable->getId()
-                );
+                $notebook_model = $config->getUserSpecificNotebook($submitter_id);
 
                 $part_names = range(1, $notebook_model->getNumParts());
             }
@@ -242,8 +239,11 @@ class AutoGradedVersion extends AbstractModel {
             }, $history);
         }
 
+        // var_dump($config->getPersonalizedTestcases($submitter_id));
+        // var_dump($result_details['testcases']);
+
         // Load the testcase results (and calculate early incentive points)
-        foreach ($config->getTestcases() as $testcase) {
+        foreach ($config->getPersonalizedTestcases($submitter_id) as $testcase) {
             if (!isset($result_details['testcases'][$testcase->getIndex()])) {
                 // TODO: Autograding results file was incomplete.  This is a big problem, but how should
                 // TODO:   we handle this error
