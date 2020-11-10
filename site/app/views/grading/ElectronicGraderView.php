@@ -934,13 +934,15 @@ HTML;
             );
 
             $old_files = [];
-            for ($i = 1; $i <= $notebook_model->getNumParts(); $i++) {
-                foreach ($display_version_instance->getPartFiles($i)['submissions'] as $file) {
-                    $old_files[] = [
-                        'name' => str_replace('\'', '\\\'', $file['name']),
-                        'size' => number_format($file['size'] / 1024, 2),
-                        'part' => $i
-                    ];
+            if ($display_version_instance !== null) {
+                for ($i = 1; $i <= $notebook_model->getNumParts(); $i++) {
+                    foreach ($display_version_instance->getPartFiles($i)['submissions'] as $file) {
+                        $old_files[] = [
+                            'name' => str_replace('\'', '\\\'', $file['name']),
+                            'size' => number_format($file['size'] / 1024, 2),
+                            'part' => $i
+                        ];
+                    }
                 }
             }
 
