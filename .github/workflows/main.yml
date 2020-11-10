@@ -5,7 +5,6 @@ on:
     push:
   
 jobs:
-    #cache from npm or setup node first then run eslint
     eslint:
         runs-on: ubuntu-latest
         defaults:
@@ -13,6 +12,9 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2.1.2
+              with:
+                node-version: '10'
             - name: Cache Node Modules
               uses: actions/cache@v2
               with:
@@ -23,6 +25,8 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
+
+
     php-lint-static:
         runs-on: ubuntu-latest
         defaults:
@@ -30,53 +34,57 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
+            - uses: shivammathur/setup-php@2.7.0
             - name: Cache Composer
               id: composer-cache
               uses: actions/cache@v2
               with:
-                  path: vendor
-                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                  path: ${{ steps.composercache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
-                      ${{ runner.os }}-php-
+                      ${{ runner.os }}-composer-
 
             - name: Install php dependencies
-              if: steps.composer-cache.outputs.cache-hit != 'true'
               run: composer install --prefer-dist --dev
 
             - name: Run php linting and static analysis
               run : |
                   php vendor/bin/phpcs --standard=tests/ruleset.xml
                   php vendor/bin/phpstan analyze app
+
+
     php-unit:
       runs-on: ubuntu-latest
       defaults:
           run:
               working-directory: site
       steps:
-         #TODO figure out how to share steps between composer installs instead of copying and pasting
           - uses: actions/checkout@v2
+          - uses: shivammathur/setup-php@2.7.0
+            with:
+              extensions: imagick
           - name: Cache Composer
             id: composer-cache
             uses: actions/cache@v2
             with:
-                path: vendor
-                key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                path: ${{ steps.composercache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                 restore-keys: |
-                    ${{ runner.os }}-php-
+                    ${{ runner.os }}-composer-
 
           - name: Install php dependencies
-          #TODO cache image magic later
-            run: |
-              composer install --prefer-dist --dev
-              sudo apt-get install -y php-imagick 
-
+            run: composer install --prefer-dist --dev
           - name: Run php unit tests
             run : php vendor/bin/phpunit --configuration tests/phpunit.xml
+
 
     python-lint:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
         - name: Cache Pip
           uses: actions/cache@v2
           with:
@@ -91,10 +99,14 @@ jobs:
         - name: Run python linting
           run : python3 -m flake8
 
+
     python-unit:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
         - name: Cache Pip
           uses: actions/cache@v2
           with:
