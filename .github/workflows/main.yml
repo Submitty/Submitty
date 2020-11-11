@@ -125,12 +125,6 @@ jobs:
             pushd migration
             python3 -m unittest discover
             popd
-        - name: Run autograding python unit tests
-          run : |
-            pushd autograder
-            echo "Skipping autograding tests!"
-            #python3 -m unittest discover
-            popd
         - name: Run python_submitty_utils python unit tests
           run : |
             pushd python_submitty_utils
