@@ -334,7 +334,7 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
     # copy output files
     test_input_path = os.path.join(tmp_autograding, 'test_input')
     # Copy test input files into tmp_work_test_input.
-    copy_contents_into(job_id, test_input_path, tmp_work_test_input, tmp_logs)
+    copy_contents_into(config, job_id, test_input_path, tmp_work_test_input, tmp_logs)
 
     # Lock down permissions on the unzipped folders/test input folder to stop untrusted users from gaining access.
     lock_down_folder_permissions(tmp_work_test_input)
@@ -636,7 +636,7 @@ def copy_contents_into(config, job_id, source, target, tmp_logs):
             if os.path.isdir(os.path.join(source,item)):
                 if os.path.isdir(os.path.join(target,item)):
                     # recurse
-                    copy_contents_into(job_id,os.path.join(source,item),os.path.join(target,item),tmp_logs)
+                    copy_contents_into(config, job_id,os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
                     config.logger.log_message(
                         "ERROR: the target subpath is a file not a directory "

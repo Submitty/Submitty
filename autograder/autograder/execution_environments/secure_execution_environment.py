@@ -68,6 +68,7 @@ class SecureExecutionEnvironment():
         if is_test_environment is False:
             self.SUBMITTY_INSTALL_DIR = config.submitty['submitty_install_dir']
 
+        self.config = config
         self.logger = config.logger
 
     def _run_pre_commands(self, target_directory):
@@ -139,12 +140,11 @@ class SecureExecutionEnvironment():
 
         if os.path.exists(provided_code_path):
             autograding_utils.copy_contents_into(
+                self.config,
                 self.job_id,
                 provided_code_path,
                 directory,
                 self.tmp_logs,
-                self.log_path,
-                self.stack_trace_log_path
             )
 
         # Copy compile.out to the current directory.
@@ -243,10 +243,11 @@ class SecureExecutionEnvironment():
         # Copy in test input files.
         test_input_path = os.path.join(self.tmp_work, 'test_input')
         autograding_utils.copy_contents_into(
+            self.config,
             self.job_id,
             test_input_path,
             directory,
-            self.tmp_logs
+            self.tmp_logs,
         )
 
         if os.path.exists(self.random_input_directory):
@@ -255,7 +256,7 @@ class SecureExecutionEnvironment():
                 ["*.txt", ],
                 self.random_input_directory,
                 directory,
-                self.tmp_logs
+                self.tmp_logs,
             )
 
         # Copy runner.out to the current directory.
@@ -290,12 +291,11 @@ class SecureExecutionEnvironment():
 
         # Copy any instructor provided solution to the testcase folder
         autograding_utils.copy_contents_into(
+            self.config,
             self.job_id,
             self.instructor_solution_path,
             directory,
             self.tmp_logs,
-            self.log_path,
-            self.stack_trace_log_path
         )
 
         # Fix permissions on the solution code.
@@ -317,12 +317,11 @@ class SecureExecutionEnvironment():
         # generation code lives right now)
         # TODO: Should we separate out input from the instructor_solution directory?
         autograding_utils.copy_contents_into(
+            self.config,
             self.job_id,
             self.instructor_solution_path,
             self.random_input_directory,
             self.tmp_logs,
-            self.log_path,
-            self.stack_trace_log_path
         )
 
         # copy run.out to the current directory
