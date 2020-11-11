@@ -165,7 +165,7 @@ def log_container_meta(log_path, event="", name="", container="", time=0):
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     time_unit = "sec"
     parts = (easy_to_read_date, name, container, event, f"{time:.3f}", time_unit)
-    write_to_log(log_path, ' | '.join(parts)())
+    write_to_log(log_path, ' | '.join(parts))
 
 
 def write_to_log(log_path, message):
