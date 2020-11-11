@@ -167,8 +167,8 @@ def prepare_autograding_and_submission_zip(
         "",
         job_id=job_id,
         is_batch=is_batch_job,
-        jobname="zip",
-        which_untrusted=item_name,
+        which_untrusted="zip",
+        jobname=item_name,
         timelabel="wait:",
         elapsed_time=waittime,
     )
@@ -405,8 +405,8 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
             grade_result,
             job_id=job_id,
             is_batch=is_batch_job,
-            jobname="unzip",
-            which_untrusted=item_name,
+            which_untrusted="unzip",
+            jobname=item_name,
             timelabel="grade:",
             elapsed_time=gradingtime,
         )
