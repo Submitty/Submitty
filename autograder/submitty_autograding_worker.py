@@ -12,7 +12,6 @@ import traceback
 import zipfile
 from pathlib import Path
 
-from autograder import autograding_utils
 from autograder import grade_item
 from autograder import config as submitty_config
 
