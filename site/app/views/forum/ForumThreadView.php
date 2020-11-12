@@ -505,7 +505,7 @@ class ForumThreadView extends AbstractView {
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-            
+
             // Get first post of each thread. To be used later
             // to obtain the content of the post to be displayed
             // in the modal.

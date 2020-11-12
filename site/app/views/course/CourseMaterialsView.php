@@ -207,7 +207,7 @@ class CourseMaterialsView extends AbstractView {
             $restored["/course_materials/" . $key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
         }
         $priorities = $restored;
-        
+
         $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
