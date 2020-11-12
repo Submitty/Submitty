@@ -14,6 +14,19 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class NotebookBuilderController extends AbstractController {
 
+    /** @var string The username of the linux user who should own notebook builder files */
+    private $expected_owner;
+
+    /** @var string The groupname of the linux group who should own notebook builder files */
+    private $expected_group;
+
+    public function __construct(\app\libraries\Core $core) {
+        parent::__construct($core);
+
+        $this->expected_owner = $this->core->getConfig()->getPhpUser();
+        $this->expected_group = $this->core->getConfig()->getCourse() . '_tas_www';
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
@@ -30,18 +43,6 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl());
         }
 
-        // If mode is new then generate a new config directory and place a default config.json inside of it
-        // Redirect to same page but with mode now set to 'edit'
-        if ($mode === 'new') {
-            $autograding_config_controller = new AutogradingConfigController($this->core);
-            $config_dir = $autograding_config_controller->createConfigDirectory();
-            $gradeable->setAutogradingConfigPath($config_dir);
-            $this->core->getQueries()->updateGradeable($gradeable);
-            $json_path = FileUtils::joinPaths($config_dir, 'config.json');
-            file_put_contents($json_path, '{"notebook": [], "testcases": []}');
-            return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
-        }
-
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
 
         if (!$gradeable->isUsingUploadedConfig()) {
@@ -49,9 +50,52 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($failure_url);
         }
 
-        $images = json_encode($this->getFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
+        // If mode is new then generate a new config directory and place a default config.json inside of it
+        if ($mode === 'new') {
+            $autograding_config_controller = new AutogradingConfigController($this->core);
+            $config_dir = $autograding_config_controller->createConfigDirectory();
+
+            // Verify new directory was created
+            $permission_failures = FileUtils::checkForPermissionErrors($config_dir, $this->expected_owner, $this->expected_group);
+            if ($permission_failures) {
+                foreach ($permission_failures as $failure) {
+                    $this->core->addErrorMessage($failure);
+                }
+
+                return new RedirectResponse($failure_url);
+            }
+
+            $gradeable->setAutogradingConfigPath($config_dir);
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $json_path = FileUtils::joinPaths($config_dir, 'config.json');
+            file_put_contents($json_path, '{"notebook": [], "testcases": []}');
+
+            // Verify default json was created
+            $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->expected_owner, $this->expected_group);
+            if ($permission_failures) {
+                foreach ($permission_failures as $failure) {
+                    $this->core->addErrorMessage($failure);
+                }
+
+                return new RedirectResponse($failure_url);
+            }
+
+            // Redirect to same page but with mode now set to 'edit'
+            return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
+        }
 
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
+
+        $permission_failures = $this->checkPermissions($gradeable->getAutogradingConfigPath());
+        if ($permission_failures) {
+            foreach ($permission_failures as $failure) {
+                $this->core->addErrorMessage($failure);
+            }
+
+            return new RedirectResponse($failure_url);
+        }
+
+        $images = json_encode($this->getFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
 
         $json_contents = file_get_contents($json_path);
         $config_string = Utils::stripComments($json_contents);
@@ -90,12 +134,18 @@ class NotebookBuilderController extends AbstractController {
 
         // Overwrite existing configuration with newly uploaded one
         $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
-        $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
-        $permission_res = $this->updateGroupPermission($json_path);
+        move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
+        $this->updateGroupPermission($json_path);
+
+        // Check for permission failures
+        $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->expected_owner, $this->expected_group);
+        if ($permission_failures) {
+            return JsonResponse::getErrorResponse('An error occurred saving the modified config.json.', $permission_failures);
+        }
 
         $this->rebuildGradeable($gradeable);
 
-        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('An error occurred saving the modified config.json.');
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
@@ -153,12 +203,24 @@ class NotebookBuilderController extends AbstractController {
         $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
         FileUtils::createDir($directory_path);
 
+        // Check for permission failures on subdirectory which will hold uploaded file
+        $permission_failures = FileUtils::checkForPermissionErrors($directory_path, $this->expected_owner, $this->expected_group);
+        if ($permission_failures) {
+            return JsonResponse::getErrorResponse('Failure creating sub-directory.', $permission_failures);
+        }
+
         // Move uploaded file
         $full_path = FileUtils::joinPaths($directory_path, $_FILES['file']['name']);
-        $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
-        $permission_res = $this->updateGroupPermission($full_path);
+        move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
+        $this->updateGroupPermission($full_path);
 
-        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
+        // Check for permission failures on uploaded file
+        $permission_failures = FileUtils::checkForPermissionErrors($full_path, $this->expected_owner, $this->expected_group);
+        if ($permission_failures) {
+            return JsonResponse::getErrorResponse('Failure uploading file.', $permission_failures);
+        }
+
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
@@ -191,8 +253,7 @@ class NotebookBuilderController extends AbstractController {
      * @return bool True if operation was successful, false otherwise.
      */
     private function updateGroupPermission(string $path): bool {
-        $group = $this->core->getConfig()->getCourse() . '_tas_www';
-        return chgrp($path, $group);
+        return chgrp($path, $this->expected_group);
     }
 
     /**
@@ -224,5 +285,26 @@ class NotebookBuilderController extends AbstractController {
         }
 
         return $result;
+    }
+
+    /**
+     * Recursively check that all files and sub-directories in the given $autograding_dir are correctly setup and
+     * usable by notebook builder.
+     *
+     * @param string $autograding_dir Absolute path to the autograding directory.
+     * @return array An array of error messages, or an empty array of no errors were detected.
+     */
+    private function checkPermissions(string $autograding_dir): array {
+        $errors = [];
+        $files = [];
+
+        $files[] = $autograding_dir;
+
+        FileUtils::getDirContents($autograding_dir, $files);
+        foreach ($files as $file) {
+            $errors = array_merge($errors, FileUtils::checkForPermissionErrors($file, $this->expected_owner, $this->expected_group));
+        }
+
+        return $errors;
     }
 }
