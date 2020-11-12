@@ -710,20 +710,20 @@ function togglePanelLayoutModes(forceVal = false) {
             return false; // Break the loop
         }
         return true;
-      })
-    }
-    if (nextIdx === -1) {
-      taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-        leftTop: panelElements[0].str,
-        leftBottom: panelElements[1].str,
-        rightTop: panelElements[2].str,
-        rightBottom: null,
-      } : {
-        leftTop: panelElements[0].str,
-          leftBottom: null,
-          rightTop: panelElements[1].str,
-          rightBottom: panelElements[2].str,
-      };;
+      });
+      if (nextIdx === -1) {
+        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
+          leftTop: panelElements[0].str,
+          leftBottom: panelElements[1].str,
+          rightTop: panelElements[2].str,
+          rightBottom: null,
+        } : {
+          leftTop: panelElements[0].str,
+            leftBottom: null,
+            rightTop: panelElements[1].str,
+            rightBottom: panelElements[2].str,
+        };
+      }
     }
     initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
@@ -847,11 +847,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
-  if (isOverallCommentOpen()) {
-    // Overall comment is open, so just close it
-    closeOverallComment(true);
-  }
-  else if (openComponentId === NO_COMPONENT_ID) {
+  if (openComponentId === NO_COMPONENT_ID) {
     // No component is open, so open the first one
     let componentId = getComponentIdByOrder(0);
     toggleComponent(componentId, true).then(function () {
@@ -859,8 +855,9 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, so open the general comment
-    toggleOverallComment(true).then(function () {
+    // Last component is open, scroll to general comment for easier access
+    //TODO: Add "Overall Comment" focusing, control
+    closeComponent(openComponentId, true).then(function () {
       scrollToOverallComment();
     });
   }
@@ -880,18 +877,11 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
-  if (isOverallCommentOpen()) {
-    // Overall comment open, so open the last component
-    let componentId = getComponentIdByOrder(numComponents - 1);
-    toggleComponent(componentId, true).then(function () {
-      scrollToComponent(componentId);
-    });
-  }
-  else if (openComponentId === NO_COMPONENT_ID) {
+  if (openComponentId === NO_COMPONENT_ID) {
     // No Component is open, so open the overall comment
-    toggleOverallComment(true).then(function () {
-      scrollToOverallComment();
-    });
+    // Targets the box outside of the container, can use tab to focus comment
+    //TODO: Add "Overall Comment" focusing, control
+    scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
     // First component is open, so close it

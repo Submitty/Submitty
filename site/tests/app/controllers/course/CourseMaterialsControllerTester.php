@@ -101,7 +101,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $filename_full => [
                 "release_datetime" => $_POST['release_time'],
                 'hide_from_students' => null,
-                'external_link' => false
+                'external_link' => false,
+                'sort_priority' => 0
             ]
         ];
         $this->assertEquals($expected_json, $json);
@@ -146,7 +147,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json1 = [
             'release_datetime' => $_POST['release_time'],
             'hide_from_students' => null,
-            'external_link' => false
+            'external_link' => false,
+            'sort_priority' => 0
         ];
 
         $this->assertEquals($expected_json1, $json[$keys[1]]);
@@ -184,7 +186,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . "/" . $name => [
                 'release_datetime' => $_POST['release_time'],
                 'hide_from_students' => null,
-                'external_link' => false
+                'external_link' => false,
+                'sort_priority' => 0
             ]
         ];
 
@@ -204,7 +207,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . "/" . $name => [
                 'release_datetime' => $new_date,
                 'hide_from_students' => null,
-                'external_link' => false
+                'external_link' => false,
             ]
         ];
 
@@ -229,7 +232,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json2 = [
             'release_datetime' => $new_date,
             'hide_from_students' => null,
-            'external_link' => false
+            'external_link' => false,
         ];
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
@@ -288,7 +291,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $filename_full => [
                 "release_datetime" => $_POST['release_time'],
                 "hide_from_students" => null,
-                'external_link' => false
+                'external_link' => false,
+                'sort_priority' => 0
             ]
         ];
 
