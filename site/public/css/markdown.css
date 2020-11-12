@@ -1,0 +1,32 @@
+/*
+ * This file defines a standardized set of styling rules for html elements which have been converted from
+ * markdown to html using our markdown parser.
+ *
+ * To utilize these rules simply add 'markdown' to the class attribute of the parent container which holds the
+ * converted markdown.
+ *
+ * Beware when making changes here, as your changes are likely to affect the look and feel of several pages on submitty.
+ */
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+    margin: 0
+}
+
+.markdown p {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.markdown ol,
+.markdown ul {
+    margin-bottom: 12px;
+}
+
+.markdown li {
+    margin-left: 25px;
+}
