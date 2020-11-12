@@ -205,10 +205,8 @@
         fd.append('poll_id', pollid);
         if ($(accepting_answers_checkbox).is(':checked')) {
             $(visible_checkbox).prop('checked', true);
-            // send post request for opening poll: setOpen
             url += "/setOpen";
         } else {
-            // send post request for ending poll: setEnded
             url += "/setEnded";
         }
         $.ajax({
@@ -218,9 +216,6 @@
             processData: false,
             cache: false,
             contentType: false,
-            success: function(data) {
-                console.log("updatePollAcceptingAnswers sucess!");
-            },
             error: function(err) {
                 console.error(err);
                 window.alert("Something went wrong. Please try again.");
@@ -238,10 +233,8 @@
         fd.append('poll_id', pollid);
         if (!$(visible_checkbox).is(':checked')) {
             $(accepting_answers_checkbox).prop('checked',false);
-            // send post request for closing poll: setClosed
             url += "/setClosed";
         } else {
-            // send post request for ending poll: setEnded
             url += "/setEnded";
         }
         $.ajax({
@@ -251,9 +244,6 @@
             processData: false,
             cache: false,
             contentType: false,
-            success: function(data) {
-                console.log("updatePollVisible sucess!");
-            },
             error: function(err) {
                 console.error(err);
                 window.alert("Something went wrong. Please try again.");
