@@ -473,11 +473,11 @@ WHERE status = 1"
      * Order: Favourite and Announcements => Announcements only => Favourite only => Others
      *
      * @param  int[]    $categories_ids     Filter threads having atleast provided categories
-     * @param  int[]    $thread_status      Filter threads having thread status among            $thread_status
+     * @param  int[]    $thread_status      Filter threads having thread status among $thread_status
      * @param  bool     $unread_threads     Filter threads to show only unread threads
      * @param  bool     $show_deleted       Consider deleted threads
      * @param  bool     $show_merged_thread Consider merged threads
-     * @param  string   $current_user       user_id of currrent user
+     * @param  string   $current_user       user_id of current user
      * @param  int      $blockNumber        Index of window of thread list(-1 for last)
      * @param  int      $thread_id          If blockNumber is not known, find it using thread_id
      * @return array    Ordered filtered threads - array('block_number' => int, 'threads' => array(threads))
