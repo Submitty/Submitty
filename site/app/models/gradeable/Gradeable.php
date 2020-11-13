@@ -95,7 +95,7 @@ class Gradeable extends AbstractModel {
     const ROTATING_SECTION = 0;
     const REGISTRATION_SECTION = 1;
     const ALL_ACCESS = 2;
-    
+
     /**
      * Enum range for blind and unblind grading:
      * 1 is unblind, 2 is single blind, 3 is double blind
@@ -257,15 +257,15 @@ class Gradeable extends AbstractModel {
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
-        
+
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
         }
-        
+
         if (array_key_exists('limited_access_blind', $details)) {
             $this->setLimitedAccessBlind($details['limited_access_blind']);
         }
-        
+
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);

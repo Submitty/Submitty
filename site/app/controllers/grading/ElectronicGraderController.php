@@ -732,7 +732,7 @@ class ElectronicGraderController extends AbstractController {
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
         $view_all = $view === 'all';
-        
+
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
@@ -1141,21 +1141,21 @@ class ElectronicGraderController extends AbstractController {
 
         $this->core->redirect($return_url);
     }
-    
+
     /**
      * Given a gradeable, the logged in user, and if the logged in user is a peer
      * determine if the user should be single, double, or unblind grading
      */
-    
+
     private function amIBlindGrading($gradeable, $user, $peer) {
         if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
             return "double";
         }
-        
+
         if (($peer && $gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
             return "single";
         }
-        
+
         return "unblind";
     }
 
@@ -1189,9 +1189,9 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-        
+
         $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
-        
+
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         $order_all_sections = null;

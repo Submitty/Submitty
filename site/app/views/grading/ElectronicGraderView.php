@@ -882,12 +882,10 @@ HTML;
         if ($this->core->getConfig()->isRegradeEnabled()) {
             $isRegradePanel = true;
         }
-        
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
         }
-        
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
         $this->core->getOutput()->enableMobileViewport();
 
