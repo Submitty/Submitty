@@ -189,6 +189,21 @@ class PollController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/polls/setClosed", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return RedirectResponse
+     */
+    public function closePoll() {
+        if (!isset($_POST["poll_id"])) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $this->core->getQueries()->closePoll($_POST["poll_id"]);
+
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
      * @return MultiResponse
      */
