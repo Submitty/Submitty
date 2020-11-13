@@ -239,8 +239,6 @@ class AutoGradedVersion extends AbstractModel {
             }, $history);
         }
 
-        // var_dump($config->getPersonalizedTestcases($submitter_id));
-        // var_dump($result_details['testcases']);
 
         // Load the testcase results (and calculate early incentive points)
         foreach ($config->getPersonalizedTestcases($submitter_id) as $testcase) {

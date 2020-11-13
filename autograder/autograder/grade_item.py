@@ -128,7 +128,7 @@ def run_compilation(testcases, config, which_untrusted, seperator, log_file):
     print(f"{seperator}COMPILATION STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
-        if tc.type != 'Execution':
+        if tc.type != 'Execution' and not os.path.exists(tc.secure_environment.directory):
             tc.execute()
             killall(config, which_untrusted, log_file)
 
@@ -154,7 +154,7 @@ def run_execution(testcases, config, which_untrusted, seperator, log_file):
     print(f"{seperator}RUNNER STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
-        if tc.type == 'Execution':
+        if tc.type == 'Execution' and not os.path.exists(tc.secure_environment.directory):
             tc.execute()
             killall(config, which_untrusted, log_file)
 

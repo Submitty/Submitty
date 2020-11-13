@@ -61,7 +61,7 @@ class AutogradingConfig extends AbstractModel {
 
     /** @prop @var array Array of notebook objects */
     protected $notebook_config = [];
-    /** @prop @var AutogradingTestcase[] Cut-down information about autograding test cases*/
+    /** @prop @var array Cut-down information about autograding test cases*/
     private $base_testcases = [];
 
     /* Properties if early submission incentive enabled */
@@ -132,7 +132,7 @@ class AutogradingConfig extends AbstractModel {
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
 
-        $this->base_testcases = $this->parseTestCases($details["testcases"]);
+        $this->base_testcases = $details["testcases"];
         $this->setTestCasePoints();
 
         if (isset($details['early_submission_incentive'])) {
@@ -173,7 +173,7 @@ class AutogradingConfig extends AbstractModel {
     public function toArray() {
         $details = parent::toArray();
 
-        $details['testcases'] = parent::parseObject($this->base_testcases);
+        $details['testcases'] = parent::parseObject($this->parseTestCases($this->base_testcases));
         $details["all_testcases"] = parent::parseObject($this->getAllTestCases());
         return $details;
     }
@@ -189,8 +189,8 @@ class AutogradingConfig extends AbstractModel {
             $this->gradeable_id,
             $submitter_id
         );
-        $ret = array_merge($this->base_testcases, $this->parseTestCases($user_notebook->getTestCases()));
-        return $ret;
+        $personalized_testcases = array_merge($this->base_testcases, $user_notebook->getTestCases());
+        return $this->parseTestCases($personalized_testcases);
     }
 
     /**
@@ -198,7 +198,7 @@ class AutogradingConfig extends AbstractModel {
      * @return AutogradingTestcase[]
      */
     public function getBaseTestCases() {
-        return $this->base_testcases;
+        return $this->parseTestCases($this->base_testcases);
     }
 
     /**
@@ -211,7 +211,8 @@ class AutogradingConfig extends AbstractModel {
             $this->notebook_config,
             $this->gradeable_id
         );
-        return array_merge($this->base_testcases, $this->parseTestCases($notebook->getTestCases()));
+        $all_testcases = array_merge($this->base_testcases, $notebook->getTestCases());
+        return $this->parseTestCases($all_testcases);
     }
 
 
