@@ -83,6 +83,10 @@ class FormOptionsWidget extends Widget {
             }
             else {
                 this.appendStatusMessage(result.message);
+
+                if (result.data && Array.isArray(result.data)) {
+                    result.data.forEach(msg => this.appendStatusMessage(msg));
+                }
             }
         };
 

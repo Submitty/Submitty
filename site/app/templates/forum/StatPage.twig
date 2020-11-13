@@ -73,7 +73,7 @@
             for(var i=0;i<posts.length;i++){
                 var post_string = posts[i];
                 post_string = escapeSpecialChars(post_string);
-                var thread_title = thread_titles[i]["title"];
+                var thread_title = thread_titles[i];
                 thread_title = escapeSpecialChars(thread_title);
                 $(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 

@@ -55,18 +55,19 @@ fi
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
-       && "$1" != "restart_web" && "$1" != "disable_shipper_worker" ]]; then
+       && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
     echo -e "   ./INSTALL_SUBMITTY.sh clean test"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
-    echo -e "   ./INSTALL_SUBMITTY.sh restart_web"
+    echo -e "   ./INSTALL_SUBMITTY.sh skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh disable_shipper_worker"
     exit 1
 fi
@@ -228,6 +229,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
 fi
 # ------------------------------------------------------------------------
 
@@ -267,6 +269,7 @@ if [ "${WORKER}" == 0 ]; then
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
     chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
 
     # php needs to be able to read containers config
     chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json
@@ -726,7 +729,7 @@ fi
 
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
-    if [[ "$#" -ge 1 && $1 == "restart_web" ]]; then
+    if [[ "$#" == 0 || ("$#" == 1 && $1 != "skip_web_restart") || ("$#" -ge 2  && ($1 != "skip_web_restart" && $2 != "skip_web_restart")) ]]; then
         PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
         echo -n "restarting php${PHP_VERSION}-fpm..."
         systemctl restart php${PHP_VERSION}-fpm

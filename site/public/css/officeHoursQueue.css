@@ -62,3 +62,17 @@ th{
   background: var(--standard-light-gray);
   padding: .75rem;
 }
+
+#contact_info {
+    width: 620px;
+}
+
+.fully-transparent {
+    background:transparent!important;
+    color:white;
+}
+
+.filter-buttons:hover, .filter-buttons:focus{
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}

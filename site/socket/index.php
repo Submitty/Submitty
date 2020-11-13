@@ -8,7 +8,7 @@ use Ratchet\WebSocket\WsServer;
 use app\libraries\Core;
 use app\libraries\socket\Server;
 
-require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 $core = new Core();
 
@@ -21,14 +21,15 @@ $core->loadCourseDatabase();
 $core->getOutput()->loadTwig();
 $core->getOutput()->setInternalResources();
 
+$ws_server = new WsServer(new Server($core));
+
 $server = IoServer::factory(
-    new HttpServer(
-        new WsServer(
-            new Server($core)
-        )
-    ),
+    new HttpServer($ws_server),
     41983,
     '127.0.0.1'
 );
+
+//send messages every 30 seconds to keep active connections alive
+$ws_server->enableKeepAlive($server->loop);
 
 $server->run();
