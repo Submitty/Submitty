@@ -17,7 +17,8 @@ class PollView extends AbstractView {
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
-            'future_polls' => $future_polls
+            'future_polls' => $future_polls,
+            'drop_down_value' => $this->core->getPollsDropdownStates()
           ]);
     }
 

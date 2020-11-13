@@ -731,6 +731,33 @@ class Core {
     }
 
     /**
+    * Check if we have a saved cookie session with the dropdown states for each of the instructor
+    * polls sections (today, old, future), otherwise sets it to the default dropdown states.
+    *
+    * @return array list of three booleans for dropdown states
+    */
+    public function getPollsDropdownStates(): array {
+        $todayDropdownState = true;
+        $oldDropdownState = false;
+        $futureDropdownState = false;
+        if (isset($_COOKIE['polls_today_dropdown'])) {
+            var_dump("got in the if statement");
+        } else {
+            $user_id = $this->user_id;
+            var_dump("got in the else statement");
+            $token = TokenManager::generateSessionToken(
+                    $this->session_manager->newSession($user_id),
+                    $user_id,
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession(),
+                    true
+                );
+            Utils::setCookie('polls_today_dropdown', (string) $token, $token->getClaim('expire_time'));
+        }
+        return array($todayDropdownState, $oldDropdownState, $futureDropdownState);
+    }
+
+    /**
      * Check if the user has a valid jwt in the header.
      *
      * @param Request $request

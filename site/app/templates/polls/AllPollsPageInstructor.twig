@@ -7,10 +7,10 @@
         <div class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow down"></i>
+                <i class="dropdown-arrow{{drop_down_value[0] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="today-table" class="table table-striped" style="width:100%;">
+        <table id="today-table" class="table table-striped" style="width:100%;{{ drop_down_value[0] ? '' : ' display: none;'}}">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
@@ -89,10 +89,10 @@
         <div class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow right"></i>
+                <i class="dropdown-arrow{{drop_down_value[1] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="older-table" class="table table-striped" style="width:100%; display: none;">
+        <table id="older-table" class="table table-striped" style="width:100%; display: none;{{ drop_down_value[1] ? '' : ' display: none;'}}">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
@@ -164,10 +164,10 @@
         <div class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow right"></i>
+                <i class="dropdown-arrow{{drop_down_value[2] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="future-table" class="table table-striped" style="width:100%; display: none;">
+        <table id="future-table" class="table table-striped" style="width:100%; display: none;{{ drop_down_value[2] ? '' : ' display: none;'}}">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
