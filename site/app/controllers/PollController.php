@@ -191,7 +191,7 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/setClosed", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     public function closePoll() {
         if (!isset($_POST["poll_id"])) {
@@ -202,9 +202,7 @@ class PollController extends AbstractController {
         }
         $this->core->getQueries()->closePoll($_POST["poll_id"]);
 
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['polls']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
     /**
