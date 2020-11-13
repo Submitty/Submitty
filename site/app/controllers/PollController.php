@@ -196,9 +196,7 @@ class PollController extends AbstractController {
     public function closePoll() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $this->core->getQueries()->closePoll($_POST["poll_id"]);
 
