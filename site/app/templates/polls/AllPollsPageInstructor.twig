@@ -7,7 +7,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div class="dropdown-bar">
+        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "today_polls_dropdown")' class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{drop_down_value[0] ? ' down' : ' right'}}"></i>
@@ -72,13 +72,13 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div class="dropdown-bar">
+        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "old_polls_dropdown")' class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{drop_down_value[1] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="older-table" class="table table-striped" style="width:100%; display: none;{{ drop_down_value[1] ? '' : ' display: none;'}}">
+        <table id="older-table" class="table table-striped" style="width:100%;{{ drop_down_value[1] ? '' : ' display: none;'}}">
             <col style="width: 20%">
             <col style="width: 14%">
             <col style="width: 10%">
@@ -139,13 +139,13 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div class="dropdown-bar">
+        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "future_polls_dropdown")' class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{drop_down_value[2] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="future-table" class="table table-striped" style="width:100%; display: none;{{ drop_down_value[2] ? '' : ' display: none;'}}">
+        <table id="future-table" class="table table-striped" style="width:100%;{{ drop_down_value[2] ? '' : ' display: none;'}}">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
@@ -250,4 +250,27 @@
             }
         });
     }
+
+    function updateDropdownStates(curr_state, cookie_key) {
+        let csrf_token = $("#csrf_token").val();
+        let url = $("#base_url").val() + "/updateDropdownStates";
+        let fd = new FormData();
+        fd.append('csrf_token', csrf_token);
+        fd.append('new_state', !curr_state);
+        fd.append('cookie_key', cookie_key)
+        console.log(cookie_key);
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            error: function(err) {
+                console.error(err);
+                window.alert("Something went wrong. Please try again.");
+            }
+        });
+    }
+
 </script>

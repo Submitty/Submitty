@@ -10,6 +10,7 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\libraries\routers\FeatureFlag;
 
 /**
@@ -201,6 +202,18 @@ class PollController extends AbstractController {
         $this->core->getQueries()->closePoll($_POST["poll_id"]);
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+    }
+
+    /**
+    * @Route("/courses/{_semester}/{_course}/polls/updateDropdownStates", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return JsonResponse
+    */
+    public function updateDropdownStates() {
+        $user_id = $this->core->getUser()->getId();
+        $expire_time = time() + (7 * 24 * 60 * 60); // 7 days from now
+        Utils::setCookie($_POST["cookie_key"], $_POST["new_state"], $expire_time);
+        return JsonResponse::getSuccessResponse($_COOKIE[$_POST["cookie_key"]]);
     }
 
     /**
