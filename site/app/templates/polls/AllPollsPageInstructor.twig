@@ -35,10 +35,10 @@
                     <tr>
                         <td> {{ poll.getName() }} </td>
                         <td>
-                            <input class="key_to_click" tabindex="0" type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getName() }}", "{{ poll.getID() }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
+                            <input class="key_to_click" tabindex="0" type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
-                            <input class="key_to_click" tabindex="1" type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getName() }}", "{{ poll.getID() }}")' {{ poll.isOpen ? 'checked' : ''}}>
+                            <input class="key_to_click" tabindex="1" type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/editPoll">
@@ -103,10 +103,10 @@
                         <td> {{ poll.getName() }} </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td>
-                            <input class="key_to_click" tabindex="0" type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getName() }}", "{{ poll.getID() }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
+                            <input class="key_to_click" tabindex="0" type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
-                            <input class="key_to_click" tabindex="1" type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getName() }}", "{{ poll.getID() }}")' {{ poll.isOpen ? 'checked' : ''}}>
+                            <input class="key_to_click" tabindex="1" type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/editPoll">
@@ -195,7 +195,7 @@
 
 <script>
 
-    function updatePollAcceptingAnswers(pollname, pollid) {
+    function updatePollAcceptingAnswers(pollid) {
         let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
         let visible_checkbox = "#poll_" + pollid + "_visible";
         let csrf_token = $("#csrf_token").val();
@@ -223,7 +223,7 @@
         });
     }
 
-    function updatePollVisible(pollname, pollid) {
+    function updatePollVisible(pollid) {
         let visible_checkbox = "#poll_" + pollid + "_visible";
         let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
         let csrf_token = $("#csrf_token").val();
