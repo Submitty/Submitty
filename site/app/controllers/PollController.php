@@ -205,10 +205,10 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/courses/{_semester}/{_course}/polls/updateDropdownStates", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/updateDropdownStates", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
-    */
+     */
     public function updateDropdownStates() {
         $user_id = $this->core->getUser()->getId();
         $expire_time = time() + (7 * 24 * 60 * 60); // 7 days from now
