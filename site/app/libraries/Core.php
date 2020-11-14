@@ -731,6 +731,23 @@ class Core {
     }
 
     /**
+    * Check if we have a saved cookie session with the dropdown states for each of the instructor
+    * polls sections (today, old, future), otherwise sets it to the default dropdown states (true, false, false).
+    *
+    * @return array list of three booleans for dropdown states
+    */
+    public function getPollsDropdownStates(): array {
+        $ret = array(true, false, false); // corresponding to default dropdown states for (today, old, future)
+        $cookie_keys = array('today_polls_dropdown', 'old_polls_dropdown', 'future_polls_dropdown');
+        for ($i = 0; $i < count($cookie_keys); $i++) {
+            if (array_key_exists($cookie_keys[$i], $_COOKIE)) {
+                $ret[$i] = $_COOKIE[$cookie_keys[$i]] === 'true';
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * Check if the user has a valid jwt in the header.
      *
      * @param Request $request
