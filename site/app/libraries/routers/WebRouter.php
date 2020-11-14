@@ -46,16 +46,7 @@ class WebRouter {
         $this->reader = new AnnotationReader();
         $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
-        $collection = new RouteCollection();
-        $special_cases = [
-            'superuser',
-            'AuthenticationController.php',
-            'HomePageController.php'
-        ];
-        foreach ($special_cases as $case) {
-            $collection->addCollection($loader->load(realpath(__DIR__ . "/../../controllers/" . $case)));
-        }
-        $collection->addCollection($loader->load(realpath(__DIR__ . "/../../controllers")));
+        $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
         $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         $this->parameters = $matcher->matchRequest($this->request);
