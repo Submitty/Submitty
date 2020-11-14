@@ -577,7 +577,14 @@ class AutoGradingView extends AbstractView {
                 'marks' => $component_marks,
             ];
         }, $peer_graded_components);
-
+        $peer_anon_component_data = $peer_component_data;
+        for ($i = 1; $i < count($peer_anon_component_data)+1; $i++)  {
+            for ($j = 0; $j < count($peer_anon_component_data[$i]['peer_ids']); $j++)  {
+                $peer_id = $peer_anon_component_data[$i]['peer_ids'][$j];
+                $anon_id = $this->core->getQueries()->getAnonId($peer_id)[$peer_id];
+                $peer_anon_component_data[$i]['peer_ids'][$j] = $anon_id;
+            }
+        }
         $unique_graders = array_unique($graders_found);
         $peer_aliases = [];
         $num_peers = 0;
@@ -589,6 +596,7 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
+            $anon_id = $this->core->getQueries()->getAnonId($grader_id)[$grader_id];
             if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
                 $peer_aliases[$grader_id] = $grader_id;
             }
@@ -596,7 +604,7 @@ class AutoGradingView extends AbstractView {
                 $peer_aliases[$grader_id] = $alias;
             }
             // Effectively sorts peers by $num_peers.
-            array_push($ordered_graders, $grader_id);
+            array_push($ordered_graders, $anon_id);
         }
 
         $id = $this->core->getUser()->getId();
@@ -693,7 +701,6 @@ class AutoGradingView extends AbstractView {
         $this->core->getOutput()->addInternalCss('ta-grading.css');
 
         $gradeable_id = $gradeable->getId();
-
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -706,6 +713,7 @@ class AutoGradingView extends AbstractView {
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,
+            'peer_anon_component_data' => $peer_anon_component_data,
             'peer_max' => $peer_max,
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
