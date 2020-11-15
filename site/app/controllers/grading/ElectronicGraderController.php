@@ -79,7 +79,7 @@ class ElectronicGraderController extends AbstractController {
             if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0 && $ov->getTaGradedGradeable() != null) {
                 if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
-                        if ($ov->getAutoGradedGradeable()->getTotalPoints() >=0 or $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
+                        if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
                         }
                         else {
