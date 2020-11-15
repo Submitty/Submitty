@@ -92,7 +92,7 @@ function switch_feedback_modes() {
                     {% endif %}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_anon_component_data, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping)  }}
             {# /Peer Component boxes #}
         {% endif %}
 
@@ -220,7 +220,7 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_anon_component_data, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% for grader in ordered_graders %}
@@ -233,13 +233,13 @@ function switch_feedback_modes() {
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
                 <table class="mobile-table" id="peer-feedback-table-{{grader}}">
                     <tbody>
-                        {% for component in peer_anon_component_data %}
+                        {% for component in peer_components %}
                             <div class="box-info">
                                     <h4>{{ component.title|escape }}
                                     </h4>
                                     <p>
                                         {% for mark in component.marks %}
-                                            {% if mark.earned[grader] %}
+                                            {% if mark.earned[anon_grader_id_mapping[grader]] %}
                                                 <i class="far fa-check-square fa-1g"></i>
                                             {% else %}
                                                 <i class="far fa-square fa-1g"></i>
@@ -253,13 +253,13 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if overall_comments[grader] is not empty %}
+                {% if overall_comments[anon_grader_id_mapping[grader]] is not empty %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">
                             Overall note from grader:
                         </p>
                         <p class="overall-comment">
-                            <span class='gradeable_comment'>{{ overall_comments[grader] | nl2br }}</span>
+                            <span class='gradeable_comment'>{{ overall_comments[anon_grader_id_mapping[grader]] | nl2br }}</span>
                         </p>
                     </div>
                 {% endif %}

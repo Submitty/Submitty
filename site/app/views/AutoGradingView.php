@@ -577,16 +577,17 @@ class AutoGradingView extends AbstractView {
                 'marks' => $component_marks,
             ];
         }, $peer_graded_components);
-        $peer_anon_component_data = $peer_component_data;
+        /*$peer_anon_component_data = $peer_component_data;
         for ($i = 1; $i < count($peer_anon_component_data)+1; $i++)  {
             for ($j = 0; $j < count($peer_anon_component_data[$i]['peer_ids']); $j++)  {
                 $peer_id = $peer_anon_component_data[$i]['peer_ids'][$j];
                 $anon_id = $this->core->getQueries()->getAnonId($peer_id)[$peer_id];
                 $peer_anon_component_data[$i]['peer_ids'][$j] = $anon_id;
             }
-        }
+        }*/
         $unique_graders = array_unique($graders_found);
         $peer_aliases = [];
+        $anon_grader_id_mapping = [];
         $num_peers = 0;
         // Sort the graders ids so that peer alias assignment stays mostly consistent.
         // TODO: Eventually we want to move to having a students anonid be displayable
@@ -599,10 +600,13 @@ class AutoGradingView extends AbstractView {
             $anon_id = $this->core->getQueries()->getAnonId($grader_id)[$grader_id];
             if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
                 $peer_aliases[$grader_id] = $grader_id;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
             }
             else {
                 $peer_aliases[$grader_id] = $alias;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $alias;
             }
+            $anon_grader_id_mapping[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $anon_id);
         }
@@ -699,7 +703,6 @@ class AutoGradingView extends AbstractView {
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-
         $gradeable_id = $gradeable->getId();
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
@@ -713,7 +716,8 @@ class AutoGradingView extends AbstractView {
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,
-            'peer_anon_component_data' => $peer_anon_component_data,
+            #'peer_anon_component_data' => $peer_anon_component_data,
+            'anon_grader_id_mapping' => $anon_grader_id_mapping,
             'peer_max' => $peer_max,
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,

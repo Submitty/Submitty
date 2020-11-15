@@ -2861,7 +2861,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        $gradeable->setPeerFeedback($grader_id, $user_id, $feedback);
+        $gradeable->setPeerFeedback($this->core->getQueries()->getAnonId($grader_id), $user_id, $feedback);
         $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
         return true;
     }
