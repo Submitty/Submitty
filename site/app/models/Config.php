@@ -77,6 +77,7 @@ use app\libraries\FileUtils;
  * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
+ * @method string getPhpUser()
  */
 
 class Config extends AbstractModel {
@@ -274,6 +275,9 @@ class Config extends AbstractModel {
     /** @prop @var DateTimeFormat */
     protected $date_time_format;
 
+    /** @prop @var string */
+    protected $php_user;
+
     /**
      * Config constructor.
      *
@@ -430,8 +434,12 @@ class Config extends AbstractModel {
         $this->latest_commit = $version_json['short_installed_commit'];
 
         $users_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty_users.json'));
-        if ($users_json !== false && isset($users_json['verified_submitty_admin_user'])) {
-            $this->verified_submitty_admin_user = $users_json['verified_submitty_admin_user'];
+        if ($users_json !== false) {
+            if (isset($users_json['verified_submitty_admin_user'])) {
+                $this->verified_submitty_admin_user = $users_json['verified_submitty_admin_user'];
+            }
+
+            $this->php_user = $users_json['php_user'];
         }
     }
 

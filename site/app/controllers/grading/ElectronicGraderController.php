@@ -370,7 +370,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return;
         }
- 
+
         // get the requested version
         $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
         if ($version_instance === false) {
@@ -1946,7 +1946,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $is_notebook_gradeable = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+        $is_notebook_gradeable = ($gradeable->getAutogradingConfig() !== null) && $gradeable->getAutogradingConfig()->isNotebookGradeable();
 
         if ($is_notebook_gradeable) {
             if ($is_itempool_linked === 'true') {
