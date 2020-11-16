@@ -84,12 +84,28 @@ use app\controllers\admin\AdminGradeableController;
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
+ * @method void setStudentSubmit($can_student_submit)
+ * @method void setLimitedAccessBlind($limited_access_blind)
+ * @method int getLimitedAccessBlind()
+ * @method void setPeerBlind($peer_blind)
+ * @method int getPeerBlind()
+ * @method void setInstructorBlind($peer_blind)
+ * @method int getInstructorBlind()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
     const ROTATING_SECTION = 0;
     const REGISTRATION_SECTION = 1;
     const ALL_ACCESS = 2;
+
+    /**
+     * Enum range for blind and unblind grading:
+     * 1 is unblind, 2 is single blind, 3 is double blind
+    */
+
+    const UNBLIND_GRADING = 1;
+    const SINGLE_BLIND_GRADING = 2;
+    const DOUBLE_BLIND_GRADING = 3;
 
     /* Properties for all types of gradeables */
 
@@ -217,6 +233,13 @@ class Gradeable extends AbstractModel {
     protected $discussion_thread_id = '';
     /** @prop @var string are a list of hidden files and the lowest_access_group that can see those files */
     protected $hidden_files = "";
+    /** @prop @var bool will limited access graders grade the gradeable blindly*/
+    protected $limited_access_blind = 1;
+    /** @prop @var bool will peer graders grade the gradeable blindly*/
+    protected $peer_blind = 3;
+    /** @prop @var bool will instructors have blind peer grading enabled*/
+    protected $instructor_blind = 1;
+
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -238,6 +261,15 @@ class Gradeable extends AbstractModel {
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
+
+        if (array_key_exists('peer_blind', $details)) {
+            $this->setPeerBlind($details['peer_blind']);
+        }
+
+        if (array_key_exists('limited_access_blind', $details)) {
+            $this->setLimitedAccessBlind($details['limited_access_blind']);
+        }
+
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);

@@ -197,6 +197,8 @@ CREATE TABLE public.electronic_gradeable (
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
+    eg_limited_access_blind integer DEFAULT 1,
+    eg_peer_blind integer DEFAULT 3,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
     eg_hidden_files character varying(1024),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
