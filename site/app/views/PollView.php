@@ -7,7 +7,7 @@ use app\libraries\FileUtils;
 
 class PollView extends AbstractView {
 
-    public function showPollsInstructor($todays_polls, $older_polls, $future_polls) {
+    public function showPollsInstructor($todays_polls, $older_polls, $future_polls, $dropdown_states) {
         $this->core->getOutput()->addBreadcrumb("Polls");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
@@ -18,7 +18,7 @@ class PollView extends AbstractView {
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
             'future_polls' => $future_polls,
-            'drop_down_value' => $this->core->getPollsDropdownStates()
+            'dropdown_states' => $dropdown_states
           ]);
     }
 
