@@ -328,7 +328,7 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
     if os.path.exists(random_output_path):
-        pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
+        pattern_copy("work_to_random_output", [os.path.join(random_output_path, '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
     # timestamp of first access to the gradeable page
     first_access_string = ""
     # grab the submission time
