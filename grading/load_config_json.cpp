@@ -151,10 +151,11 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
   // directory.
   nlohmann::json::iterator parts = whole_config.find("part_names");
   if (parts != whole_config.end()) {
-    whole_config["part_names"] =  nlohmann::json::array();
+    nlohmann::json tmp =  nlohmann::json::array();
     for (int i = 0; i < parts->size(); i++) {
-      whole_config["part_names"].push_back((*parts)[i]);
+      tmp.push_back((*parts)[i]);
     }
+    whole_config["part_names"] = tmp;
   }
 
   // But, if there are input fields, but there are no explicit parts
