@@ -473,11 +473,11 @@ WHERE status = 1"
      * Order: Favourite and Announcements => Announcements only => Favourite only => Others
      *
      * @param  int[]    $categories_ids     Filter threads having atleast provided categories
-     * @param  int[]    $thread_status      Filter threads having thread status among            $thread_status
+     * @param  int[]    $thread_status      Filter threads having thread status among $thread_status
      * @param  bool     $unread_threads     Filter threads to show only unread threads
      * @param  bool     $show_deleted       Consider deleted threads
      * @param  bool     $show_merged_thread Consider merged threads
-     * @param  string   $current_user       user_id of currrent user
+     * @param  string   $current_user       user_id of current user
      * @param  int      $blockNumber        Index of window of thread list(-1 for last)
      * @param  int      $thread_id          If blockNumber is not known, find it using thread_id
      * @return array    Ordered filtered threads - array('block_number' => int, 'threads' => array(threads))
@@ -4385,6 +4385,8 @@ AND gc_id IN (
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
+                  eg_limited_access_blind AS limited_access_blind,
+                  eg_peer_blind AS peer_blind,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
@@ -5052,6 +5054,8 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
+                $gradeable->getLimitedAccessBlind(),
+                $gradeable->getPeerBlind(),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isRegradeAllowed(),
@@ -5081,6 +5085,8 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
+                  eg_limited_access_blind,
+                  eg_peer_blind,
                   eg_grade_inquiry_start_date,
                   eg_grade_inquiry_due_date,
                   eg_regrade_allowed,
@@ -5088,7 +5094,7 @@ AND gc_id IN (
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5198,6 +5204,8 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
+                    $gradeable->getLimitedAccessBlind(),
+                    $gradeable->getPeerBlind(),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isRegradeAllowed(),
@@ -5227,6 +5235,8 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
+                      eg_limited_access_blind=?,
+                      eg_peer_blind=?,
                       eg_grade_inquiry_start_date=?,
                       eg_grade_inquiry_due_date=?,
                       eg_regrade_allowed=?,

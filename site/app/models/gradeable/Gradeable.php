@@ -82,12 +82,28 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
+ * @method void setStudentSubmit($can_student_submit)
+ * @method void setLimitedAccessBlind($limited_access_blind)
+ * @method int getLimitedAccessBlind()
+ * @method void setPeerBlind($peer_blind)
+ * @method int getPeerBlind()
+ * @method void setInstructorBlind($peer_blind)
+ * @method int getInstructorBlind()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
     const ROTATING_SECTION = 0;
     const REGISTRATION_SECTION = 1;
     const ALL_ACCESS = 2;
+
+    /**
+     * Enum range for blind and unblind grading:
+     * 1 is unblind, 2 is single blind, 3 is double blind
+    */
+
+    const UNBLIND_GRADING = 1;
+    const SINGLE_BLIND_GRADING = 2;
+    const DOUBLE_BLIND_GRADING = 3;
 
     /* Properties for all types of gradeables */
 
@@ -213,7 +229,12 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-
+    /** @prop @var bool will limited access graders grade the gradeable blindly*/
+    protected $limited_access_blind = 1;
+    /** @prop @var bool will peer graders grade the gradeable blindly*/
+    protected $peer_blind = 3;
+    /** @prop @var bool will instructors have blind peer grading enabled*/
+    protected $instructor_blind = 1;
 
     /**
      * Gradeable constructor.
@@ -235,6 +256,14 @@ class Gradeable extends AbstractModel {
         $this->setTaInstructions($details['ta_instructions']);
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
+        }
+
+        if (array_key_exists('peer_blind', $details)) {
+            $this->setPeerBlind($details['peer_blind']);
+        }
+
+        if (array_key_exists('limited_access_blind', $details)) {
+            $this->setLimitedAccessBlind($details['limited_access_blind']);
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {

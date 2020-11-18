@@ -22,7 +22,7 @@
         <button title="Show/Hide Autograding Testcases (Press A)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleAutograding(); updateCookies();"> <i class="fas fa-list icon-header" ></i> </button>
         <button title="Show/Hide Grading Rubric (Press G)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleRubric(); updateCookies();"> <i class="fas fa-edit icon-header" ></i> </button>
         <button title="Show/Hide Submission and Results Browser (Press O)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleSubmissions(); updateCookies();"> <i class="fas fa-folder-open icon-header" ></i> </button>
-        {% if ((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) %}
+        {% if (((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) and (not limited_access_blind)) %}
             <button title="Show/Hide Student Information (Press S)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleInfo(); updateCookies();"> <i class="fas fa-user icon-header" ></i> </button>
         {% endif %}
         {% if peer_gradeable and not i_am_a_peer %}

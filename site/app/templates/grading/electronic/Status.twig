@@ -124,9 +124,6 @@
 </script>
 <body onload="document.getElementById('defaultOpen').click();">
 
-{% set double_blind = false %}
-{% set single_blind = false %}
-
 <!-- If grader is limited access or full access grader -->
 {% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}
 <div class="content gradeable_message">
@@ -138,7 +135,7 @@
         <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
         <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material.<br>
             You must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
-{% if double_blind == true %}            
+{% if blind_status == 3 %}            
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be <em>blinded</em>.<br>
             You should not attempt to discover the identities of the students.<br>
             However, their identities may be unintentionally or unavoidably revealed.<br>
@@ -159,12 +156,12 @@
     <ul>
         <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
         <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
-{% if double_blind == true %}            
+{% if blind_status == 3 %}            
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be double-blind.<br>
             You should not attempt to discover the identities of your classmates.<br>
             However, the identities of the classmates may be unintentionally or unavoidably revealed.<br>
             Please respect your classmates' privacy.</li>
-{% elseif single_blind == true %}
+{% elseif blind_status == 2 %}
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be single-blind.</li>
 {% else %}
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be unblinded.</li>
@@ -200,6 +197,7 @@
 
                 Grading Index
             </a>
+            
             <ul style="margin-left: 25px; margin-top: -5px; float: left">
                 <li>View Submissions</li>
                 {%  if team_assignment %}
