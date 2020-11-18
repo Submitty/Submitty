@@ -160,7 +160,8 @@ function checkNotebookScroll() {
     $('#notebook-view').scroll(delayedNotebookSave());
   } else {
     $('#notebook-view').off('scroll');
-    localStorage.removeItem('ta-grading-notebook-view-scroll');
+    localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+    localStorage.removeItem('ta-grading-notebook-view-scroll-item');
   }
 }
 
@@ -175,33 +176,49 @@ function delayedNotebookSave() {
 function notebookScrollLoad() {
   var notebookView = $('#notebook-view');
   if (notebookView !== 0 && notebookView.is(":visible")) {
-    var elementID = localStorage.getItem('ta-grading-notebook-view-scroll');
-    if (elementID) {
-      var element = $('#' + elementID);
+    var elementID = localStorage.getItem('ta-grading-notebook-view-scroll-id');
+    var element = null;
+    if (elementID === null) {
+      elementID = localStorage.getItem('ta-grading-notebook-view-scroll-item');
+      if (elementID !== null) {
+        element = $('[data-item-ref=' + elementID + ']');
+        if(element.length !== 0) {
+          element = element.first();
+        }
+      }
+    } else {
+      element = $('#' + elementID);
+    }
+    if (element !== null) {
       if(element.length !== 0) {
         notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
-        return;
+      } else {
+        localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+        localStorage.removeItem('ta-grading-notebook-view-scroll-item');
       }
-      //Invalid element, remove here
-      localStorage.removeItem('ta-grading-notebook-view-scroll');
     }
   }
 }
 
 function notebookScrollSave() {
   var notebookView = $('#notebook-view');
-  if (notebookView.length !== 0 && notebookView.is(":visible")) {
+  if (notebookView.length !== 0 && notebookView.is(':visible')) {
     var notebookTop = $('#notebook-view').offset().top;
     var element = $('#content_0');
     while (element.length !== 0) {
       if (element.offset().top > notebookTop) {
-      // if(element.offset().top + element.offsetHeight() > notebookTop) {
         break;
       }
       element = element.next();
     }
     if (element.length !== 0) {
-      localStorage.setItem('ta-grading-notebook-view-scroll', element.attr('id'));
+      if (element.attr('data-item-ref') === undefined) {
+        localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('id'));
+        localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+      } else {
+        localStorage.setItem('ta-grading-notebook-view-scroll-item', element.attr('data-item-ref'));
+        localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+      }
     }
   }
 }
