@@ -117,8 +117,12 @@ $(function () {
       const panelId = panelSpanId.split(/(_|-)btn/)[0];
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
+      checkNotebookScroll();
     }
   });
+  notebookScrollLoad();
+
+  checkNotebookScroll();
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -145,6 +149,62 @@ $(function () {
   });
 
 });
+
+function checkNotebookScroll() {
+  if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.leftBottom === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.rightTop === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.rightBottom === 'notebook-view'
+    || taLayoutDet.currentOpenPanel === 'notebook-view'
+  ) {
+    $('#notebook-view').scroll(delayedNotebookSave());
+  } else {
+    $('#notebook-view').off('scroll');
+    localStorage.removeItem('ta-grading-notebook-view-scroll');
+  }
+}
+
+function delayedNotebookSave() {
+  var timer;
+  return function() {
+    timer && clearTimeout(timer);
+    timer = setTimeout(notebookScrollSave, 250);
+  }
+}
+
+function notebookScrollLoad() {
+  var notebookView = $('#notebook-view');
+  if (notebookView !== 0 && notebookView.is(":visible")) {
+    var elementID = localStorage.getItem('ta-grading-notebook-view-scroll');
+    if (elementID) {
+      var element = $('#' + elementID);
+      if(element.length !== 0) {
+        notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
+        return;
+      }
+      //Invalid element, remove here
+      localStorage.removeItem('ta-grading-notebook-view-scroll');
+    }
+  }
+}
+
+function notebookScrollSave() {
+  var notebookView = $('#notebook-view');
+  if (notebookView.length !== 0 && notebookView.is(":visible")) {
+    var notebookTop = $('#notebook-view').offset().top;
+    var element = $('#content_0');
+    while (element.length !== 0) {
+      if (element.offset().top > notebookTop) {
+      // if(element.offset().top + element.offsetHeight() > notebookTop) {
+        break;
+      }
+      element = element.next();
+    }
+    if (element.length !== 0) {
+      localStorage.setItem('ta-grading-notebook-view-scroll', element.attr('id'));
+    }
+  }
+}
 
 // returns taLayoutDet object from LS, and if its not present returns empty object
 function getSavedTaLayoutDetails() {
