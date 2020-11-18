@@ -187,7 +187,7 @@ function notebookScrollLoad() {
         }
       }
     } else {
-      element = $('#' + elementID);
+      element = $('[data-non-item-ref=' + elementID + ']');
     }
     if (element !== null) {
       if(element.length !== 0) {
@@ -213,7 +213,7 @@ function notebookScrollSave() {
     }
     if (element.length !== 0) {
       if (element.attr('data-item-ref') === undefined) {
-        localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('id'));
+        localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
         localStorage.removeItem('ta-grading-notebook-view-scroll-item');
       } else {
         localStorage.setItem('ta-grading-notebook-view-scroll-item', element.attr('data-item-ref'));
