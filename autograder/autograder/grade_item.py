@@ -416,7 +416,7 @@ def grade_from_zip(
                     False
                 )
             except Exception:
-                traceback.print_exc()
+                config.logger.log_stack_trace(traceback.format_exc(), job_id=job_id)
             subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
     # Zip the results
