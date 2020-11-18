@@ -73,7 +73,7 @@ class UserSpecificNotebook extends Notebook {
         $new_notebook = [];
         $seen_items = [];
         $tests = [];
-        
+
         $item_ref = 0;
 
         foreach ($raw_notebook as $notebook_cell) {
@@ -83,7 +83,7 @@ class UserSpecificNotebook extends Notebook {
 
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {
-                    for($i = 0; $i < count($item_data['notebook']); $i++) {
+                    for ($i = 0; $i < count($item_data['notebook']); $i++) {
                         $item_data['notebook'][$i]["item_ref"] = $item_ref;
                     }
                     $item_ref++;
