@@ -1884,7 +1884,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $is_notebook_gradeable = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+        $is_notebook_gradeable = ($gradeable->getAutogradingConfig() !== null) && $gradeable->getAutogradingConfig()->isNotebookGradeable();
 
         if ($is_notebook_gradeable) {
             if ($is_itempool_linked === 'true') {
