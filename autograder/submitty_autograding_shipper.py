@@ -495,6 +495,15 @@ def unpack_job(
         with open(local_done_queue_file, 'r') as infile:
             local_done_queue_obj = json.load(infile)
 
+        # Reproduce all stack trace entries in the queue file into our local stack trace log.
+        if len(local_done_queue_file['errors']) > 0:
+            config.logger.log_message(
+                f"NOTE: Job {local_done_queue_obj['identifier']} has stack trace messages. "
+                "Check the stack traces log for details."
+            )
+            for trace_obj in local_done_queue_file['errors']:
+                config.loger.log_stack_trace(**trace_obj)
+
         # Check to make certain that the job we received was the correct job
         if random_identifier != local_done_queue_obj['identifier']:
             msg = f"{which_machine} returned a stale job (ids don't match). Discarding."

@@ -29,11 +29,13 @@ class Logger:
             self, *,
             log_dir: str,
             stack_trace_dir: str,
+            catpure_traces: bool = False,
             # This used to be "UNKNOWN", but "NO JOB" better describes the circumstances.
             job_id: str = "NO JOB",
     ):
         self.log_dir = log_dir
         self.stack_trace_dir = stack_trace_dir
+        self.capture_traces = catpure_traces
         self.accumulated_traces = []
         self.job_id = job_id
 
@@ -84,7 +86,18 @@ class Logger:
             job_id: Optional[str] = None
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
-        self.accumulated_traces.append(trace)
+        # Save the parameters to this trace so we can duplicate these on the
+        # shipper's end once the job finishes.
+        #
+        # TODO: Maybe we want to store time info too? Might need to think a bit
+        #       more in terms of the stack traces log file format.
+        if self.capture_traces:
+            self.accumulated_traces.append({
+                'trace': trace,
+                'is_batch': is_batch,
+                'which_untrusted': which_untrusted,
+                'job_id': job_id,
+            })
         # Always run this since this could be deleted without us knowing
         os.makedirs(self.stack_trace_dir, exist_ok=True)
 

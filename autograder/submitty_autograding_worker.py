@@ -109,6 +109,7 @@ def worker_process(
                     queue_obj = json.load(infile)
                     queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
                     queue_obj['autograding_status'] = response
+                    queue_obj['errors'] = config.logger.accumulated_traces
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
                 # Clean up temporary files.
@@ -118,6 +119,8 @@ def worker_process(
                     os.remove(submission_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(todo_queue_file)
+                # Clear out accumulated stack traces in the logger.
+                config.logger.accumulated_traces.clear()
             counter = 0
         else:
             if counter >= 10:
