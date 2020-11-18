@@ -148,8 +148,6 @@ def grade_from_zip(
                     complete_config_obj,
                     gradeable_config_obj,
                     queue_obj,
-                    config.log_path,
-                    config.error_path,
                     False
                 )
             except Exception:
@@ -415,8 +413,6 @@ def grade_from_zip(
                     complete_config_obj,
                     gradeable_config_obj,
                     queue_obj,
-                    config.log_path,
-                    config.error_path,
                     False
                 )
             except Exception:
