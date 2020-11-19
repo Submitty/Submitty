@@ -36,6 +36,34 @@ class ForumController extends AbstractController {
         return (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
+    private function showUnreadThreads() {
+        $unread_threads = false;
+        if (!empty($_COOKIE['unread_select_value'])) {
+            $unread_threads = ($_COOKIE['unread_select_value'] === 'true');
+        }
+        return $unread_threads;
+    }
+
+    private function getSavedCategoryIds($currentCourse, $category_ids) {
+        if (empty($category_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
+            $category_ids = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
+        }
+        foreach ($category_ids as &$id) {
+            $id = (int) $id;
+        }
+        return $category_ids;
+    }
+
+    private function getSavedThreadStatus($thread_status) {
+        if (empty($thread_status) && !empty($_COOKIE['forum_thread_status'])) {
+            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
+        }
+        foreach ($thread_status as &$status) {
+            $status = (int) $status;
+        }
+        return $thread_status;
+    }
+
     private function returnUserContentToPage($error, $isThread, $thread_id) {
         //Notify User
         $this->core->addErrorMessage($error);
@@ -808,18 +836,10 @@ class ForumController extends AbstractController {
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
-        if (empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
-            $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
-        }
-        if (empty($thread_status) && !empty($_COOKIE['forum_thread_status'])) {
-            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
-        }
-        foreach ($categories_ids as &$id) {
-            $id = (int) $id;
-        }
-        foreach ($thread_status as &$status) {
-            $status = (int) $status;
-        }
+
+        $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
+        $thread_status = $this->getSavedThreadStatus($thread_status);
+
         $max_thread = 0;
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, -1);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : [];
@@ -852,32 +872,40 @@ class ForumController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
+     */
+    public function showFullThreads() {
+        // preparing the params for threads
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $show_deleted = $this->showDeleted();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
+        $category_ids = $this->getSavedCategoryIds($currentCourse, []);
+        $thread_status = $this->getSavedThreadStatus([]);
+        $unread_threads = $this->showUnreadThreads();
+
+        // Not used in the function
+        $max_threads = 0;
+        // use the default thread id
+        $thread_id = -1;
+        $pageNumber = 0;
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum");
+        $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"GET"})
      * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
     public function showThreads($thread_id = null, $option = 'tree') {
+
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
-        $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
-        $category_id = [$category_id];
-        $thread_status = [];
+        $category_id = in_array('thread_category', $_POST) ? [$_POST['thread_category']] : [];
+        $category_ids = $this->getSavedCategoryIds($currentCourse, $category_id);
+        $thread_status = $this->getSavedThreadStatus([]);
         $new_posts = [];
-        $unread_threads = false;
-        if (!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1) {
-            $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
-        }
-        if (!empty($_COOKIE['forum_thread_status'])) {
-            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
-        }
-        if (!empty($_COOKIE['unread_select_value'])) {
-            $unread_threads = ($_COOKIE['unread_select_value'] === 'true');
-        }
-        foreach ($category_id as &$id) {
-            $id = (int) $id;
-        }
-        foreach ($thread_status as &$status) {
-            $status = (int) $status;
-        }
+        $unread_threads = $this->showUnreadThreads();
 
         $max_thread = 0;
         $show_deleted = $this->showDeleted();
@@ -945,7 +973,7 @@ class ForumController extends AbstractController {
             } while ($count > 0);
         }
         $pageNumber = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+        $threads = $this->getSortedThreads($category_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         if (!empty($_REQUEST["ajax"])) {
             $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);

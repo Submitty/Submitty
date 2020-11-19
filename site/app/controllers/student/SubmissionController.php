@@ -138,7 +138,7 @@ class SubmissionController extends AbstractController {
                 $team_id = $team->getId();
             }
         }
-        
+
         $this->core->getQueries()->insertGradeableAccess(
             $gradeable->getId(),
             $user_id,
