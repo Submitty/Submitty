@@ -78,7 +78,7 @@
 {# Render a stdin command sent to a container #}
 {# @var object  action #}
 {%- macro renderStdin(action) -%}
-    Send the message "{{ action.string }}" via standard input to {{ _self.renderContainerList(action) }}
+    Send the message "{{ action.string | replace({"\n" : "\\n"}) | trim}}" via standard input to {{ _self.renderContainerList(action) }}
 {%- endmacro -%}
 
 
@@ -106,7 +106,7 @@
 {# Render the type action #}
 {# @var object action #}
 {%- macro renderType(action) -%}
-    Press the key sequence {{ action.string }} 
+    Press the key sequence {{ action.string }}
     {% if action.presses > 1 %}
         {{action.presses}} times
         {% if action.delay_in_seconds > 0 %}
@@ -119,7 +119,7 @@
 {# Render the key action #}
 {# @var object action #}
 {%- macro renderKey(action) -%}
-    Press {{ action.key_combination }} 
+    Press {{ action.key_combination }}
     {% if action.presses > 1 %}
         {{action.presses}} times
         {% if action.delay_in_seconds > 0 %}
@@ -132,18 +132,18 @@
 {# Render the click action #}
 {# @var object action #}
 {%- macro renderClick(action) -%}
-    Click the {{ action.mouse_button }} mouse button 
+    Click the {{ action.mouse_button }} mouse button
 {%- endmacro -%}
 
 
 {# Render the move mouse action #}
 {# @var object action #}
 {%- macro renderMoveMouse(action) -%}
-    Move the mouse 
+    Move the mouse
     {% if action.end_x != 0 %}
         {{action.end_x | abs}} pixels {{_self.convertXMovement(action.end_x)}}
         {% if action.end_y != 0 %}
-            and 
+            and
         {% endif %}
     {% endif %}
     {% if action.end_y != 0 %}
@@ -166,9 +166,9 @@
 {# Render the click and drag (standard) action #}
 {# @var object action #}
 {%- macro renderClickAndDrag(action) -%}
-    Click the {{action.mouse_button}} mouse button and move 
+    Click the {{action.mouse_button}} mouse button and move
     {% if action.start_x and action.start_y %}
-        from ({{action.start_x}}, {{action.start_y}}) 
+        from ({{action.start_x}}, {{action.start_y}})
     {% endif %}
     to ({{action.end_x}}, {{action.end_y}})
 {%- endmacro -%}
@@ -196,11 +196,11 @@
 {# Render the Click and Drag Delta action #}
 {# @var object action #}
 {%- macro renderClickAndDragDelta(action) -%}
-    Click the {{action.mouse_button}} mouse button and move 
+    Click the {{action.mouse_button}} mouse button and move
     {% if action.end_x != 0 %}
         {{action.end_x | abs}} pixels {{_self.convertXMovement(action.end_x)}}
         {% if action.end_y != 0 %}
-            and 
+            and
         {% endif %}
     {% endif %}
     {% if action.end_y != 0 %}

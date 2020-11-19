@@ -318,6 +318,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
             'verified_submitty_admin_user' => null,
+            'php_user' => null,
             'queue_enabled' => true,
             'queue_contact_info' => true,
             'queue_message' => '',
