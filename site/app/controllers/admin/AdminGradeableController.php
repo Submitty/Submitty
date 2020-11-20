@@ -912,7 +912,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'hidden_files' => "",
+                'hidden_files' => [],
                 'limited_access_blind' => 1,
                 'peer_blind' => 3
             ]);
@@ -930,7 +930,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
                 'has_due_date' => false,
-                'hidden_files' => ""
+                'hidden_files' => []
             ]);
         }
 
