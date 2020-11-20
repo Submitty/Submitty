@@ -772,7 +772,6 @@ class Access {
                             return false;
                         }
                     }
-                }
                     break;
                 case "submitter":
                     $submitter = $this->core->getQueries()->getSubmitterById($value);
