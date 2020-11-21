@@ -38,7 +38,7 @@
             {# Handle if cell is short_answer #}
             {% elseif cell.type == "short_answer" %}
 
-                <div>
+                <div class="markdown">
                     {% if cell.label %}
                         {{ cell.label | markdown }}
                     {% else %}
@@ -108,7 +108,7 @@
                           class="mc"
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
-                        <legend>
+                        <legend class="markdown">
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
@@ -119,7 +119,7 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
 
                                 <input type="checkbox" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
@@ -131,7 +131,7 @@
                             </label>
                         {% endfor %}
                     {% else %}
-                        <legend>
+                        <legend class="markdown">
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
@@ -142,7 +142,7 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
                                 <input type="radio" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
