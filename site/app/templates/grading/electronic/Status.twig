@@ -111,7 +111,7 @@
                 var dataAuto = tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputAuto.value='';
-                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
                 +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
                 '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
                 {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
@@ -124,9 +124,6 @@
 </script>
 <body onload="document.getElementById('defaultOpen').click();">
 
-{% set double_blind = false %}
-{% set single_blind = false %}
-
 <!-- If grader is limited access or full access grader -->
 {% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}
 <div class="content gradeable_message">
@@ -138,7 +135,7 @@
         <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
         <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material.<br>
             You must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
-{% if double_blind == true %}            
+{% if blind_status == 3 %}            
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be <em>blinded</em>.<br>
             You should not attempt to discover the identities of the students.<br>
             However, their identities may be unintentionally or unavoidably revealed.<br>
@@ -159,12 +156,12 @@
     <ul>
         <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
         <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
-{% if double_blind == true %}            
+{% if blind_status == 3 %}            
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be double-blind.<br>
             You should not attempt to discover the identities of your classmates.<br>
             However, the identities of the classmates may be unintentionally or unavoidably revealed.<br>
             Please respect your classmates' privacy.</li>
-{% elseif single_blind == true %}
+{% elseif blind_status == 2 %}
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be single-blind.</li>
 {% else %}
         <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be unblinded.</li>
@@ -200,6 +197,7 @@
 
                 Grading Index
             </a>
+            
             <ul style="margin-left: 25px; margin-top: -5px; float: left">
                 <li>View Submissions</li>
                 {%  if team_assignment %}
@@ -784,6 +782,14 @@
                                             <br/>
                                             Standard Deviation: {{ component.getStandardDeviation() }} <br/>
                                             Count: {{ component.getCount() }} <br/>
+                                            {% for grader, data in component.getGraderInfo() %}
+                                                {% if loop.first == grader %}
+                                                    <p> Graders: 
+                                                {% else %}
+                                                    <p style="padding-left:3.7em">
+                                                {% endif %}
+                                                {{ grader }} (count {{ data['count'] }} - avg {{ data['avg'] }} - stddev {{ data['std_dev'] }}) </p1>
+                                            {% endfor%}
                                         </div>
                                     {% endfor %}
                                     <br/>

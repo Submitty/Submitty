@@ -292,7 +292,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return;
         }
- 
+
         // get the requested version
         $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
         if ($version_instance === false) {
@@ -727,7 +727,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
+    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC", $anon_mode = false) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -824,7 +824,7 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -1143,6 +1143,23 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Given a gradeable, the logged in user, and if the logged in user is a peer
+     * determine if the user should be single, double, or unblind grading
+     */
+
+    private function amIBlindGrading($gradeable, $user, $peer) {
+        if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+            return "double";
+        }
+
+        if (($peer && $gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
+            return "single";
+        }
+
+        return "unblind";
+    }
+
+    /**
      * Display the electronic grading page
      *
      * @param $who_id This is the user we wish to view, this field will only be passed on when the request originates
@@ -1155,10 +1172,11 @@ class ElectronicGraderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $version = null) {
-        // If the version is set, user is requesting for new TA grading interface
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false, $version = null) {
         $showNewInterface = isset($version);
-
+        if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
+            $anon_mode = true;
+        }
         /** @var Gradeable $gradeable */
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -1168,6 +1186,12 @@ class ElectronicGraderController extends AbstractController {
         }
         $peer = $gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            $peer = true;
+        }
+
+        $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
+
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         $order_all_sections = null;
@@ -1185,7 +1209,7 @@ class ElectronicGraderController extends AbstractController {
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = false;
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from);
-            if ($id_from_anon !== null) {
+            if ($blind_grading !== "unblind" || $anon_mode) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
             else {
@@ -1230,21 +1254,16 @@ class ElectronicGraderController extends AbstractController {
 
             // Reassign who_id
             if (!is_null($goToStudent)) {
-                $who_id = $peer ? $goToStudent->getAnonId() :   $goToStudent->getId();
-            }
-            else {
-                // There is no next/prev student found
-                // Either the grading is completed or current user has no ungraded assigned student left to grade
-                $error_msg = "No " . $to . " assigned " . ($to_ungraded ? "ungraded" : "") . " student found!";
-                $this->core->addErrorMessage($error_msg);
-                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
+                $who_id = $goToStudent->getId();
+                if ($blind_grading || $anon_mode) {
+                    $who_id = $goToStudent->getAnonId();
+                }
             }
         }
-
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
         $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
-        if ($id_from_anon !== null) {
+        if ($blind_grading || $anon_mode) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
         else {
@@ -1865,7 +1884,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $is_notebook_gradeable = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+        $is_notebook_gradeable = ($gradeable->getAutogradingConfig() !== null) && $gradeable->getAutogradingConfig()->isNotebookGradeable();
 
         if ($is_notebook_gradeable) {
             if ($is_itempool_linked === 'true') {

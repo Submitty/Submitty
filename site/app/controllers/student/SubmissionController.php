@@ -138,7 +138,7 @@ class SubmissionController extends AbstractController {
                 $team_id = $team->getId();
             }
         }
-        
+
         $this->core->getQueries()->insertGradeableAccess(
             $gradeable->getId(),
             $user_id,
@@ -173,7 +173,7 @@ class SubmissionController extends AbstractController {
             // Only show hidden test cases if the display version is the graded version (and grades are released)
             $show_hidden = false;
             if ($graded_gradeable != null) {
-                $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                $show_hidden = (!$gradeable->isTaGrading() || $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
                 // can this user access grade inquiries for this graded_gradeable
                 $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
             }

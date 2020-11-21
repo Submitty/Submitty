@@ -136,13 +136,13 @@ class UserSpecificNotebook extends Notebook {
      * @return int the index of the question to select
      */
     private function getNotebookHash(string $item_label, int $from_pool_count): int {
-    
+
         $gid = $this->gradeable_id;
         $uid = $this->user_id;
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
+
         $hash = hexdec(substr(md5("{$item_label}|{$gid}|{$uid}|{$semester}|{$course}"), 24, 8));
 
         $selected = $hash % $from_pool_count;

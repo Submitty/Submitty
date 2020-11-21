@@ -20,7 +20,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         $this->core = $this->createMockCore($this->config, $user_details);
     }
 
- 
+
     public function testShowDockerInterface() {
         $mock_data = [
             'success' => true,
