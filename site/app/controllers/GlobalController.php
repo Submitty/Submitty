@@ -432,11 +432,17 @@ class GlobalController extends AbstractController {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
+        $week = (int) $now->format('W');
 
         switch ($month) {
             case 12:
                 break;
             case 11:
+                //November (Thanksgiving)
+                //last week of Novemeber
+                if ($week === 48) {
+                    $duck_img = 'moorthy_duck/11-november.svg';
+                }
                 break;
             case 10:
                 //October (Halloween)
