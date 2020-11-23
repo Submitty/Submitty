@@ -432,7 +432,7 @@ class GlobalController extends AbstractController {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
-        $week = (int) $now->format('W');
+        $year = $now->format('Y');
 
         switch ($month) {
             case 12:
@@ -440,7 +440,8 @@ class GlobalController extends AbstractController {
             case 11:
                 //November (Thanksgiving)
                 //last week of Novemeber
-                if ($week === 48) {
+                $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
+                if ($tgt_date === $now->format('Y-W-n')) {
                     $duck_img = 'moorthy_duck/11-november.svg';
                 }
                 break;
