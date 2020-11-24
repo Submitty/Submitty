@@ -1,12 +1,12 @@
 <?php
 
-namespace app\models;
+namespace app\libraries;
 
 use app\exceptions\FileNotFoundException;
 use app\exceptions\MalformedDataException;
-use app\libraries\Core;
+use app\models\User;
 
-class CourseMaterial extends AbstractModel {
+class CourseMaterialsUtils {
 
     /**
      * Determine if a course materials file has been released
@@ -66,15 +66,15 @@ class CourseMaterial extends AbstractModel {
         return true;
     }
 
-     /**
-      * Determine if a course materials file can be viewed by the current user's section
-      *
-      * @param Core $core Application core
-      * @param string $path_to_file Full path to the file that we would like to check is allowed to be viewed
-      * @param user $current_user the current user
-      * @return bool Indicates if the file has been released or not
-      * @throws FileNotFoundException The course_materials_file_data.json was not found
-      */
+    /**
+     * Determine if a course materials file can be viewed by the current user's section
+     *
+     * @param Core $core Application core
+     * @param string $path_to_file Full path to the file that we would like to check is allowed to be viewed
+     * @param user $current_user the current user
+     * @return bool Indicates if the file has been released or not
+     * @throws FileNotFoundException The course_materials_file_data.json was not found
+     */
     public static function isSectionAllowed(Core $core, string $path_to_file, user $current_user) {
         // Before students are allowed to view or download a course materials file we must ensure
         // it has been released.  To return true the file metadata must be found in course_materials_file_data.json
