@@ -132,7 +132,7 @@ class MiscController extends AbstractController {
                 }
 
                 $json = FileUtils::readJsonFile($this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
-                if (!$this->core->getUser()->accessGrading() && !CourseMaterialsUtils::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $path)) {
+                if (!$this->core->getUser()->accessGrading() && !CourseMaterialsUtils::isUserAllowedByAllowList($json, $this->core->getUser()->getId(), $path)) {
                     $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                     return false;
                 }
@@ -223,7 +223,7 @@ class MiscController extends AbstractController {
             }
 
             $json = FileUtils::readJsonFile($this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
-            if (!$this->core->getUser()->accessGrading() && !CourseMaterialsUtils::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $path)) {
+            if (!$this->core->getUser()->accessGrading() && !CourseMaterialsUtils::isUserAllowedByAllowList($json, $this->core->getUser()->getId(), $path)) {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
