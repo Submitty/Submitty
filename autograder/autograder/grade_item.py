@@ -440,6 +440,7 @@ def grade_from_zip(
 
     # Remove the tmp directory.
     shutil.rmtree(working_directory)
+    autograding_utils.cleanup_stale_containers(which_untrusted)
     return my_results_zip_file
 
 

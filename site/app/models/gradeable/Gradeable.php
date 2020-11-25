@@ -82,6 +82,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
+ * @method string getHiddenFiles()
+ * @method void setHiddenFiles($hidden_files)
  * @method void setStudentSubmit($can_student_submit)
  * @method void setLimitedAccessBlind($limited_access_blind)
  * @method int getLimitedAccessBlind()
@@ -229,6 +231,8 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
+    /** @prop @var string are a list of hidden files and the lowest_access_group that can see those files */
+    protected $hidden_files = "";
     /** @prop @var bool will limited access graders grade the gradeable blindly*/
     protected $limited_access_blind = 1;
     /** @prop @var bool will peer graders grade the gradeable blindly*/
@@ -285,6 +289,9 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            if (array_key_exists('hidden_files', $details)) {
+                $this->setHiddenFiles($details['hidden_files']);
+            }
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
