@@ -1434,7 +1434,7 @@ ORDER BY {$orderby}",
         $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component WHERE g_id=?", [$g_id]);
         return intval($this->course_db->row()['cnt']);
     }
-    
+
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
          $u_or_t = "u";
         $users_or_teams = "users";

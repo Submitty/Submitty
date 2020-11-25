@@ -31,7 +31,7 @@ class GradedComponent extends AbstractModel {
     private $ta_graded_gradeable = null;
     /** @prop @var string Id of the component this grade is attached to */
     protected $component_id = 0;
-    
+
     /** If the component is peer */
     private $is_peer = false;
 
