@@ -20,7 +20,7 @@
     "ramsey/uuid": "4.1.0",
     "aptoma/twig-markdown": "3.3.0",
     "erusev/parsedown": "1.7.4",
-    "lcobucci/jwt": "3.3.2",
+    "lcobucci/jwt": "3.4.0",
     "symfony/routing": "4.4.15",
     "symfony/config": "4.4.11",
     "symfony/http-foundation": "4.4.11",
