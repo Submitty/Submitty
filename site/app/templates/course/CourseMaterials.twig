@@ -43,30 +43,34 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "") }}
+        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) %}
     {# Files on top #}
     {% for dir, path in files %}
         {% if path is not iterable %}
-            {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir, authorized_by_allow_list) }}
         {% else %}
-            {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir, authorized_by_allow_list) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) %}
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
     {% set this_external_link = external_link[path] %}
 
     {% set greater_than_student = userGroup < 4 %}
-    {% set visible_to_student = this_hide_from_students == 'off' and (this_file_section is null or user_section in this_file_section) %}
+    {% set visible_to_student =
+        this_hide_from_students == 'off' and
+        (this_file_section is null or user_section in this_file_section) and
+        authorized_by_allow_list[path]
+    %}
 
     {% if greater_than_student or visible_to_student %}
     <div class="file-container">
@@ -146,9 +150,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_dir(self, dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+        {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) }}
     {% else %}
     <div class="folder-container">
 
@@ -176,7 +180,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+            {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) }}
 
         </div>
     </div>
