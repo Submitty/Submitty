@@ -4385,12 +4385,15 @@ AND gc_id IN (
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
+                  eg_limited_access_blind AS limited_access_blind,
+                  eg_peer_blind AS peer_blind,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
-                  eg_precision AS precision
+                  eg_precision AS precision,
+                  eg_hidden_files as hidden_files
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
               LEFT JOIN (
@@ -5052,12 +5055,15 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
+                $gradeable->getLimitedAccessBlind(),
+                $gradeable->getPeerBlind(),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isRegradeAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
-                $gradeable->isDiscussionBased()
+                $gradeable->isDiscussionBased(),
+                $gradeable->getHiddenFiles()
             ];
             $this->course_db->query(
                 "
@@ -5081,14 +5087,17 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
+                  eg_limited_access_blind,
+                  eg_peer_blind,
                   eg_grade_inquiry_start_date,
                   eg_grade_inquiry_due_date,
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
-                  eg_has_discussion
+                  eg_has_discussion,
+                  eg_hidden_files
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5198,12 +5207,15 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
+                    $gradeable->getLimitedAccessBlind(),
+                    $gradeable->getPeerBlind(),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isRegradeAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
                     $gradeable->isDiscussionBased(),
+                    $gradeable->getHiddenFiles(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -5227,12 +5239,15 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
+                      eg_limited_access_blind=?,
+                      eg_peer_blind=?,
                       eg_grade_inquiry_start_date=?,
                       eg_grade_inquiry_due_date=?,
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
-                      eg_has_discussion=?
+                      eg_has_discussion=?,
+                      eg_hidden_files=?
                     WHERE g_id=?",
                     $params
                 );
@@ -6985,7 +7000,7 @@ AND gc_id IN (
 
     public function getTodaysPolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date = ? or status='open' order by poll_id DESC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date = ? order by name", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -6998,7 +7013,7 @@ AND gc_id IN (
 
     public function getOlderPolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date < ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date < ? order by release_date DESC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -7011,7 +7026,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date DESC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
