@@ -2288,6 +2288,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get the graded gradeable
+        $who_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id);
         if ($graded_gradeable === false) {
             return;
