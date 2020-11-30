@@ -222,6 +222,21 @@ def lock_down_folder_permissions(top_dir):
     # Chmod a directory to take away group and other rwx.
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
 
+def cleanup_stale_containers(user_id_of_runner):
+    # Remove any docker containers left over from past runs.
+    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', f'name={user_id_of_runner}']).split()
+    if len(old_containers) > 0:
+        print('REMOVING STALE CONTAINERS')
+    for old_container in old_containers:
+        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
+
+    # Remove any docker networks left over from past runs.
+    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', f'name={user_id_of_runner}']).split()
+    if len(old_containers) > 0:
+        print('REMOVING STALE NETWORKS')
+    for old_network in old_networks:
+        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+
 
 def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment, log_path, stack_trace_log_path, SUBMITTY_INSTALL_DIR):
     """
@@ -251,19 +266,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     os.mkdir(tmp_work)
     os.mkdir(tmp_work_test_input)
 
-    # Remove any docker containers left over from past runs.
-    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', 'name={0}'.format(user_id_of_runner)]).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE CONTAINERS')
-    for old_container in old_containers:
-        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
-
-    # Remove any docker networks left over from past runs.
-    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', 'name={0}'.format(user_id_of_runner)]).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE NETWORKS')
-    for old_network in old_networks:
-        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+    cleanup_stale_containers(user_id_of_runner)
 
     # Unzip the autograding and submission folders
     unzip_this_file(autograding_zip_file,tmp_autograding)

@@ -112,7 +112,7 @@ class GlobalController extends AbstractController {
             "id" => "nav-sidebar-submitty",
             "icon" => "fa-star"
          ]);
-    
+
         if ($unread_notifications_count !== null) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['notifications']),
@@ -161,7 +161,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
         }
-            
+
         if ($this->core->getConfig()->isPollsEnabled()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['polls']),
@@ -426,17 +426,24 @@ class GlobalController extends AbstractController {
             "class" => "nav-row short-line",
         ]);
     }
-          
+
     // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
+        $year = $now->format('Y');
 
         switch ($month) {
             case 12:
                 break;
             case 11:
+                //November (Thanksgiving)
+                //last week of Novemeber
+                $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
+                if ($tgt_date === $now->format('Y-W-n')) {
+                    $duck_img = 'moorthy_duck/11-november.svg';
+                }
                 break;
             case 10:
                 //October (Halloween)
