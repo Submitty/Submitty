@@ -318,11 +318,13 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
+        if ($graded_gradeable !== null) {
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
                 $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
                 $notebook,
                 $this->core->getUser()->getId()
             );
+        }
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
@@ -424,6 +426,10 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
+        $has_overridden_grades = false;
+        if (!is_null($graded_gradeable)) {
+            $graded_gradeable->hasOverriddenGrades();
+        }
         $numberUtils = new NumberUtils();
 
         // TODO: go through this list and remove the variables that are not used
@@ -475,7 +481,7 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
+            'has_overridden_grades' => $has_overridden_grades,
             'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),

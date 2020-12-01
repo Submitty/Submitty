@@ -243,7 +243,7 @@ class AutoGradedVersion extends AbstractModel {
         }
 
         // Load the testcase results (and calculate early incentive points)
-        if(!is_null($config)) {
+        if (!is_null($config)) {
             foreach ($config->getTestcases() as $testcase) {
                 if (!isset($result_details['testcases'][$testcase->getIndex()])) {
                     // TODO: Autograding results file was incomplete.  This is a big problem, but how should
