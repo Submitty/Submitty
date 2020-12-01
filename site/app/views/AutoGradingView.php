@@ -2,7 +2,7 @@
 
 namespace app\views;
 
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
@@ -280,7 +280,7 @@ class AutoGradingView extends AbstractView {
         }
         return ''; // ?
     }
-    
+
     /**
      * @param string $file_path
      * @return string
@@ -589,7 +589,12 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
-            $peer_aliases[$grader_id] = $alias;
+            if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
+                $peer_aliases[$grader_id] = $grader_id;
+            }
+            else {
+                $peer_aliases[$grader_id] = $alias;
+            }
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $grader_id);
         }

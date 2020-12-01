@@ -112,7 +112,7 @@ class Access {
 
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
-        
+
         $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.status.warnings"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
@@ -765,6 +765,12 @@ class Access {
                     }
                     else {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
+                    }
+                    $hidden_files = $args["gradeable"]->getHiddenFiles();
+                    foreach (explode(",", $hidden_files) as $file_regex) {
+                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
+                            return false;
+                        }
                     }
                     break;
                 case "submitter":

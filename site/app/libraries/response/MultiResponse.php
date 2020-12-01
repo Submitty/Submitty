@@ -64,6 +64,29 @@ class MultiResponse implements ResponseInterface {
         return new self(null, null, $redirect_response);
     }
 
+
+    /**
+     * Convert this MultiResponse into a json response instead
+     * Usefull when dealing with sending messages back to controllers
+     *
+     * @return JsonResponse
+     */
+    public function convertToJsonResponse(): JsonResponse {
+        if (!is_null($this->json_response)) {
+            return $this->json_response;
+        }
+
+        if (!is_null($this->redirect_response)) {
+            return JsonResponse::getErrorResponse("Error handling request, redirecting", $this->redirect_response->url, 302);
+        }
+
+        if (!is_null($this->web_response)) {
+            return JsonResponse::getErrorResponse("Webresponse not supported for this request type");
+        }
+
+        return JsonResponse::getFailResponse("Cannot handle request");
+    }
+
     /**
      * Renders the response.
      *

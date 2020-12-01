@@ -4,6 +4,7 @@ namespace app\views\course;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\models\CourseMaterial;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -23,13 +24,28 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link) {
+        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $folders, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link, &$authorized_by_allow_list) {
             $files[$start_dir_name] = [];
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
             $no_json = [];
 
             foreach ($course_materials_array as $file) {
+                if (in_array($file, $folders)) {
+                    $path = explode('/', $file);
+                    $working_dir = &$files[$start_dir_name];
+                    $filename = array_pop($path);
+
+                    foreach ($path as $dir) {
+                        if (!isset($working_dir[$dir])) {
+                            $working_dir[$dir] = [];
+                        }
+                        $working_dir = &$working_dir[$dir];
+                    }
+                    $working_dir[$filename] = [];
+                    continue;
+                }
+
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
                 array_push($in_dir, $expected_file_path);
@@ -50,6 +66,10 @@ class CourseMaterialsView extends AbstractView {
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
+
+                        // Determine file authorization based on this file 'user_allow_list'
+                        $authorized_by_allow_list[$expected_file_path] = CourseMaterial::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $expected_file_path);
+
                         if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
                             $contents = json_decode(file_get_contents($expected_file_path));
                             $external_link[$expected_file_path] = [$contents->url, $contents->name];
@@ -106,7 +126,6 @@ class CourseMaterialsView extends AbstractView {
                     }
                     $working_dir = &$working_dir[$dir];
                 }
-
                 $working_dir[$filename] = $expected_file_path;
 
                 if ($releaseData == $now_date_time->format("Y-m-d H:i:sO")) {
@@ -132,18 +151,70 @@ class CourseMaterialsView extends AbstractView {
         $file_sections = [];
         $hide_from_students = [];
         $external_link = [];
+        $priorities = [];
+        $folders = [];
+        $authorized_by_allow_list = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $path_length = strlen($expected_path) + 1;
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
-        //Sort the files/folders in alphabetical order
-        usort($course_materials_array, 'strnatcasecmp');
-
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
+        $sort_default = 0;
+
+        //Compound the priorities of directories inside of folders to preserve order
+        foreach ($course_materials_array as $key => &$material) {
+            $dirs = explode('/', $material);
+            array_pop($dirs);
+            $curr_path = "";
+            if (!isset($priorities[$material])) {
+                $priorities[$material] = 0.0;
+            }
+            $path = FileUtils::joinPaths($expected_path, $material);
+            $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+
+            foreach ($dirs as $dir) {
+                $curr_path = $curr_path . $dir;
+                $path = FileUtils::joinPaths($expected_path, $curr_path);
+                    $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+                if (!in_array($curr_path, $course_materials_array)) {
+                    array_push($course_materials_array, $curr_path);
+                    array_push($folders, $curr_path);
+                }
+                $curr_path = $curr_path . "/";
+            }
+        }
+
+        //Sort the files/folders by prioriy then alphabetical order
+        $sort_priotity = function ($a, $b) use ($priorities) {
+            if ($priorities[$b] == $priorities[$a]) {
+                if (strtolower($a) < strtolower($b)) {
+                    return -1;
+                }
+                else {
+                    return 1;
+                }
+            }
+            elseif ($priorities[$a] < $priorities[$b]) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        };
+        uasort($course_materials_array, $sort_priotity);
+
+        $restored = [];
+        //Restore the priorities for each file/folder
+        foreach ($priorities as $key => &$priority) {
+            $path = FileUtils::joinPaths($expected_path, $key);
+            $restored["/course_materials/" . $key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+        }
+        $priorities = $restored;
+
+        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
@@ -162,6 +233,7 @@ class CourseMaterialsView extends AbstractView {
             "folderPath" => $expected_path,
             "uploadFolderPath" => $upload_path,
             "submissions" => $submissions,
+            "priorities" => $priorities,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
             "inDir" => $in_dir,
@@ -174,7 +246,8 @@ class CourseMaterialsView extends AbstractView {
             "reg_sections" => $reg_sections,
             "file_sections" => $file_sections,
             "hide_from_students" => $hide_from_students,
-            "external_link" => $external_link
+            "external_link" => $external_link,
+            "authorized_by_allow_list" => $authorized_by_allow_list
         ]);
     }
 }

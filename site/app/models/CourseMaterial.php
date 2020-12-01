@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\exceptions\FileNotFoundException;
+use app\exceptions\MalformedDataException;
 use app\libraries\Core;
 
 class CourseMaterial extends AbstractModel {
@@ -35,11 +36,34 @@ class CourseMaterial extends AbstractModel {
         }
         else {
             $current_time = new \DateTime('now');
-            $release_time = \DateTime::createFromFormat('Y-m-d H:i:s', $meta_data->$path_to_file->release_datetime);
+            $release_time = new \DateTime($meta_data->$path_to_file->release_datetime);
+
+            // Ensure release time obtained from file was parsed correctly into a DateTime object
+            if ($release_time === false) {
+                throw new MalformedDataException("An error occurred parsing the file's release time data.");
+            }
 
             // If current time is greater than release time return true, else return false
             return $current_time > $release_time;
         }
+    }
+
+    /**
+     * Determine if a user is allowed to access a course materials file based on the file's user_allow_list.
+     *
+     * @param string $user_id A user_id, for example 'student' or 'aphacker'
+     * @param array $json Course materials metadata as loaded from the course materials metadata json
+     *                    This array must be loaded by FileUtils::readJsonFile() to be in the expected format!
+     * @param string $path_to_file Absolute path to the file in question
+     * @return bool True if user is allowed to access the file, or if user_allow_list is not in use
+     *              False if the given user was not found in the user_allow_list for this file
+     */
+    public static function isUserAllowedByAllowList(string $user_id, array $json, string $path_to_file): bool {
+        if (array_key_exists('user_allow_list', $json[$path_to_file])) {
+            return in_array($user_id, $json[$path_to_file]['user_allow_list']);
+        }
+
+        return true;
     }
 
      /**
