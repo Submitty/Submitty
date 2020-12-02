@@ -602,8 +602,13 @@ def zip_my_directory(path,zipfilename):
 def unzip_this_file(zipfilename,path):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
+    _, file_ext = os.path.splitext(zipfilename)
     zip_ref = zipfile.ZipFile(zipfilename,'r')
-    zip_ref.extractall(path)
+    if file_ext is ".pptx":
+        zip_ref.extract(path)
+    else:
+        zip_ref.extractall(path)
+
     zip_ref.close()
 
 # ==================================================================================
