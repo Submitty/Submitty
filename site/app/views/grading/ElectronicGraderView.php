@@ -42,6 +42,7 @@ class ElectronicGraderView extends AbstractView {
         $autograded_average,
         $overall_scores,
         $overall_average,
+        $overridden_average,
         int $total_submissions,
         int $individual_viewed_grade,
         int $total_students_submitted,
@@ -78,6 +79,7 @@ class ElectronicGraderView extends AbstractView {
         $viewed_percent = 0;
         $overall_total = 0;
         $overall_percentage = 0;
+        $overridden_percentage = 0;
         $autograded_percentage = 0;
         $component_percentages = [];
         $component_overall_score = 0;
@@ -221,6 +223,11 @@ class ElectronicGraderView extends AbstractView {
                         $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                     }
                 }
+                if ($overridden_average !== null) {
+                    if ($overall_total != 0) {
+                        $overridden_percentage = round($overridden_average->getAverageScore() / $overall_total * 100);
+                    }
+                }
                 if ($autograded_average !== null) {
                     if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
                         $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
@@ -297,6 +304,8 @@ class ElectronicGraderView extends AbstractView {
             "overall_scores" => $overall_scores,
             "overall_total" => $overall_total,
             "overall_percentage" => $overall_percentage,
+            "overridden_average" => $overridden_average,
+            "overridden_percentage" => $overridden_percentage,
             "autograded_percentage" => $autograded_percentage,
             "autograded_average" => $autograded_average,
             "component_averages" => $component_averages,
@@ -315,6 +324,7 @@ class ElectronicGraderView extends AbstractView {
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
+            "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'ignore'
         ]);
     }
 

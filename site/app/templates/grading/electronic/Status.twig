@@ -735,6 +735,20 @@
                     </div>
                     <div class = "box col-md-6">
                         {# RIGHT CHUNK#}
+
+                        {% if not peer %}
+                            <a class="btn btn-default" style="float: right"
+                                onclick="changeOverride()">
+                                {% if include_overridden == 'ignore' %}
+                                    Separate Grade Overrides
+                                {% elseif include_overridden == 'separate' %}
+                                    Combine Grade Overrides
+                                {% else %}
+                                    Ignore Grade Overrides
+                                {% endif %}
+                            </a>
+                        {% endif %}
+
                         {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                             <br>
                             <b>Statistics for Completely Graded Assignments: </b>
@@ -748,6 +762,18 @@
                                     Count: {{ overall_average.getCount() }} <br/>
                                 {% endif %}
                             </div>
+
+                            {% if overridden_average != null and overridden_average.getCount() > 0 and include_overridden == 'separate' %}
+                                <br>
+                                <b>Statistics for Overridden Assignments: </b>
+                                <br/>
+                                <div style="margin-left: 20px">
+                                    Average: {{ overridden_average.getAverageScore() }} / {{ overall_total }} ({{ overridden_percentage }}%)<br/>
+                                    Standard Deviation: {{ overridden_average.getStandardDeviation() }} <br/>
+                                    Count: {{ overridden_average.getCount() }} <br/>
+                                </div>
+                            {% endif %}
+
                             {% if autograding_non_extra_credit != 0 %}
                                 {# Only show autograder if we have autograding points #}
                                 <br/>
@@ -889,6 +915,21 @@
 </body>
 {# Tab Buttons #}
 <script>
+    
+    function changeOverride() {
+        var status = '{{ include_overridden }}';
+
+        if (status == 'ignore') {
+            document.cookie = "include_overridden=separate;";
+        }
+        else if (status == 'separate') {
+            document.cookie = "include_overridden=combine;";
+        }
+        else {
+            document.cookie = "include_overridden=ignore;";
+        }
+        location.reload();
+    }
 
     function openStat(evt, statName) {
         // Declare all variables
