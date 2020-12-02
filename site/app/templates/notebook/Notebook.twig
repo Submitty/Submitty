@@ -4,8 +4,9 @@
     {% set num_codeboxes = 0 %}
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
+    {% set data_non_item_ref = 0 %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}">
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
