@@ -318,13 +318,13 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-        if ($graded_gradeable !== null) {
-            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                $notebook,
-                $this->core->getUser()->getId()
-            );
-        }
+            if ($graded_gradeable !== null) {
+                $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                    $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                    $notebook,
+                    $this->core->getUser()->getId()
+                );
+            }
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();

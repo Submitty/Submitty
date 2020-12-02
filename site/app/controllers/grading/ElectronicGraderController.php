@@ -1261,8 +1261,8 @@ class ElectronicGraderController extends AbstractController {
             }
             if (is_null($who_id) || $who_id == '') {
                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
-                }
             }
+        }
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
         $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
