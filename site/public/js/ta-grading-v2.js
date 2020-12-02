@@ -117,8 +117,12 @@ $(function () {
       const panelId = panelSpanId.split(/(_|-)btn/)[0];
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
+      checkNotebookScroll();
     }
   });
+  notebookScrollLoad();
+
+  checkNotebookScroll();
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -145,6 +149,79 @@ $(function () {
   });
 
 });
+
+function checkNotebookScroll() {
+  if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.leftBottom === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.rightTop === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.rightBottom === 'notebook-view'
+    || taLayoutDet.currentOpenPanel === 'notebook-view'
+  ) {
+    $('#notebook-view').scroll(delayedNotebookSave());
+  } else {
+    $('#notebook-view').off('scroll');
+    localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+    localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+  }
+}
+
+function delayedNotebookSave() {
+  var timer;
+  return function() {
+    timer && clearTimeout(timer);
+    timer = setTimeout(notebookScrollSave, 250);
+  }
+}
+
+function notebookScrollLoad() {
+  var notebookView = $('#notebook-view');
+  if (notebookView !== 0 && notebookView.is(":visible")) {
+    var elementID = localStorage.getItem('ta-grading-notebook-view-scroll-id');
+    var element = null;
+    if (elementID === null) {
+      elementID = localStorage.getItem('ta-grading-notebook-view-scroll-item');
+      if (elementID !== null) {
+        element = $('[data-item-ref=' + elementID + ']');
+        if(element.length !== 0) {
+          element = element.first();
+        }
+      }
+    } else {
+      element = $('[data-non-item-ref=' + elementID + ']');
+    }
+    if (element !== null) {
+      if(element.length !== 0) {
+        notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
+      } else {
+        localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+        localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+      }
+    }
+  }
+}
+
+function notebookScrollSave() {
+  var notebookView = $('#notebook-view');
+  if (notebookView.length !== 0 && notebookView.is(':visible')) {
+    var notebookTop = $('#notebook-view').offset().top;
+    var element = $('#content_0');
+    while (element.length !== 0) {
+      if (element.offset().top > notebookTop) {
+        break;
+      }
+      element = element.next();
+    }
+    if (element.length !== 0) {
+      if (element.attr('data-item-ref') === undefined) {
+        localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
+        localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+      } else {
+        localStorage.setItem('ta-grading-notebook-view-scroll-item', element.attr('data-item-ref'));
+        localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+      }
+    }
+  }
+}
 
 // returns taLayoutDet object from LS, and if its not present returns empty object
 function getSavedTaLayoutDetails() {
@@ -563,7 +640,8 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $(id_str).toggleClass('active', eleVisibility);
-
+      $("#" + panel.str).find(".CodeMirror").each(function() {this.CodeMirror.refresh()});
+      
       if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
       } else {
@@ -710,20 +788,20 @@ function togglePanelLayoutModes(forceVal = false) {
             return false; // Break the loop
         }
         return true;
-      })
-    }
-    if (nextIdx === -1) {
-      taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-        leftTop: panelElements[0].str,
-        leftBottom: panelElements[1].str,
-        rightTop: panelElements[2].str,
-        rightBottom: null,
-      } : {
-        leftTop: panelElements[0].str,
-          leftBottom: null,
-          rightTop: panelElements[1].str,
-          rightBottom: panelElements[2].str,
-      };;
+      });
+      if (nextIdx === -1) {
+        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
+          leftTop: panelElements[0].str,
+          leftBottom: panelElements[1].str,
+          rightTop: panelElements[2].str,
+          rightBottom: null,
+        } : {
+          leftTop: panelElements[0].str,
+            leftBottom: null,
+            rightTop: panelElements[1].str,
+            rightBottom: panelElements[2].str,
+        };
+      }
     }
     initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
@@ -847,11 +925,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
-  if (isOverallCommentOpen()) {
-    // Overall comment is open, so just close it
-    closeOverallComment(true);
-  }
-  else if (openComponentId === NO_COMPONENT_ID) {
+  if (openComponentId === NO_COMPONENT_ID) {
     // No component is open, so open the first one
     let componentId = getComponentIdByOrder(0);
     toggleComponent(componentId, true).then(function () {
@@ -859,8 +933,9 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, so open the general comment
-    toggleOverallComment(true).then(function () {
+    // Last component is open, scroll to general comment for easier access
+    //TODO: Add "Overall Comment" focusing, control
+    closeComponent(openComponentId, true).then(function () {
       scrollToOverallComment();
     });
   }
@@ -880,18 +955,11 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
-  if (isOverallCommentOpen()) {
-    // Overall comment open, so open the last component
-    let componentId = getComponentIdByOrder(numComponents - 1);
-    toggleComponent(componentId, true).then(function () {
-      scrollToComponent(componentId);
-    });
-  }
-  else if (openComponentId === NO_COMPONENT_ID) {
+  if (openComponentId === NO_COMPONENT_ID) {
     // No Component is open, so open the overall comment
-    toggleOverallComment(true).then(function () {
-      scrollToOverallComment();
-    });
+    // Targets the box outside of the container, can use tab to focus comment
+    //TODO: Add "Overall Comment" focusing, control
+    scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
     // First component is open, so close it

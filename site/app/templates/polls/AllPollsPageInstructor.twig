@@ -1,25 +1,28 @@
 <div class="content">
+
     <h1> Polls </h1>
     <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
     <hr>
 
-    <div class="dropdown_wrapper">
-        <div class="dropdown_bar">
+    <div class="dropdown-wrapper">
+        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "today_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown_arrow down"></i>
+                <i class="dropdown-arrow{{dropdown_states['today'] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="today-table" class="table table-striped" style="width:100%;">
+        <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
             <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 16%">
+            <col style="width: 16%">
+            <col style="width: 16%">
+            <col style="width: 16%">
+            <col style="width: 16%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Toggle</th>
+                    <th scope="col">Visible</th>
+                    <th scope="col">Accepting Answers</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
                     <th scope="col">Delete</th>
@@ -29,44 +32,23 @@
                 {% for poll in todays_polls %}
                     <tr>
                         <td> {{ poll.getName() }} </td>
-                        {% if poll.isOpen() %}
-                            <td>
-                                <form method="post" action="{{ base_url }}/setEnded">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <button type="submit" class="btn btn-primary">End Poll</button>
-                                </form>
-                            </td>
-                        {% elseif poll.isClosed() %}
-                            <td>
-                                <form method="post" action="{{ base_url }}/setOpen">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <button type="submit" class="btn btn-primary">Open Poll</button>
-                                </form>
-                            </td>
-                        {% elseif poll.isEnded() %}
-                            <td>
-                                <form method="post" action="{{ base_url }}/setOpen">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <button type="submit" class="btn btn-primary">Reopen Poll</button>
-                                </form>
-                            </td>
-                        {% endif %}
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </form>
+                            <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
+                        </td>
+                        <td>
+                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">Edit Poll</button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/deletePoll">
@@ -85,23 +67,27 @@
     <br/>
     <hr>
 
-    <div class="dropdown_wrapper">
-        <div class="dropdown_bar">
+    <div class="dropdown-wrapper">
+        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "old_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown_arrow right"></i>
+                <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="older-table" class="table table-striped" style="width:100%; display: none;">
+        <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
             <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 14%">
+            <col style="width: 10%">
+            <col style="width: 15%">
+            <col style="width: 13%">
+            <col style="width: 15%">
+            <col style="width: 13%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Toggle</th>
+                    <th scope="col">Date Released</th>
+                    <th scope="col">Visible</th>
+                    <th scope="col">Accepting Answers</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
                     <th scope="col">Delete</th>
@@ -111,38 +97,24 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td> {{ poll.getName() }} </td>
-                        {% if poll.isOpen() %}
-                            <td>
-                                <form method="post" action="{{ base_url }}/setOpen">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <input type="hidden" name="open" value="FALSE"/>
-                                    <button type="submit" class="btn btn-primary">Close Poll</button>
-                                </form>
-                            </td>
-                        {% else %}
-                            <td>
-                                <form method="post" action="{{ base_url }}/setOpen">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <input type="hidden" name="open" value="TRUE"/>
-                                    <button type="submit" class="btn btn-primary">Open Poll</button>
-                                </form>
-                            </td>
-                        {% endif %}
+                        <td> {{ poll.getReleaseDate() }} </td>
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </form>
+                            <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
+                        </td>
+                        <td>
+                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">Edit Poll</button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/deletePoll">
@@ -160,14 +132,14 @@
     <br/>
     <hr>
 
-    <div class="dropdown_wrapper">
-        <div class="dropdown_bar">
+    <div class="dropdown-wrapper">
+        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "future_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown_arrow right"></i>
+                <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}}"></i>
             </div>
         </div>
-        <table id="future-table" class="table table-striped" style="width:100%; display: none;">
+        <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
@@ -176,7 +148,7 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Toggle</th>
+                    <th scope="col">Date Released</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
                     <th scope="col">Delete</th>
@@ -186,26 +158,18 @@
                 {% for poll in future_polls %}
                     <tr>
                         <td> {{ poll.getName() }} </td>
+                        <td> {{ poll.getReleaseDate() }} </td>
                         <td>
-                            <form method="post" action="{{ base_url }}/setOpen">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Open Poll</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/deletePoll">
@@ -220,3 +184,81 @@
         </table>
     </div>
 </div>
+
+<script>
+
+    function updatePollAcceptingAnswers(pollid, base_url) {
+        let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
+        let visible_checkbox = "#poll_" + pollid + "_visible";
+        let url = base_url;
+        let fd = new FormData();
+        fd.append('csrf_token', csrfToken);
+        fd.append('poll_id', pollid);
+        if ($(accepting_answers_checkbox).is(':checked')) {
+            $(visible_checkbox).prop('checked', true);
+            url += "/setOpen";
+        } else {
+            url += "/setEnded";
+        }
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            error: function(err) {
+                console.error(err);
+                window.alert("Something went wrong. Please try again.");
+            }
+        });
+    }
+
+    function updatePollVisible(pollid, base_url) {
+        let visible_checkbox = "#poll_" + pollid + "_visible";
+        let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
+        let url = base_url;
+        let fd = new FormData();
+        fd.append('csrf_token', csrfToken);
+        fd.append('poll_id', pollid);
+        if (!$(visible_checkbox).is(':checked')) {
+            $(accepting_answers_checkbox).prop('checked',false);
+            url += "/setClosed";
+        } else {
+            url += "/setEnded";
+        }
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            error: function(err) {
+                console.error(err);
+                window.alert("Something went wrong. Please try again.");
+            }
+        });
+    }
+
+    function updateDropdownStates(curr_state, cookie_key, base_url) {
+        let url = base_url + "/updateDropdownStates";
+        let fd = new FormData();
+        fd.append('csrf_token', csrfToken);
+        fd.append('new_state', !curr_state);
+        fd.append('cookie_key', cookie_key);
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            error: function(err) {
+                console.error(err);
+                window.alert("Something went wrong. Please try again.");
+            }
+        });
+    }
+
+</script>

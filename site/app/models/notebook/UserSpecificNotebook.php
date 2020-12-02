@@ -74,6 +74,8 @@ class UserSpecificNotebook extends Notebook {
         $seen_items = [];
         $tests = [];
 
+        $item_ref = 0;
+
         foreach ($raw_notebook as $notebook_cell) {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
                 //see if theres a target item pool and replace this with the actual notebook
@@ -81,6 +83,10 @@ class UserSpecificNotebook extends Notebook {
 
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {
+                    for ($i = 0; $i < count($item_data['notebook']); $i++) {
+                        $item_data['notebook'][$i]["item_ref"] = $item_ref;
+                    }
+                    $item_ref++;
                     $new_notebook = array_merge($new_notebook, $item_data['notebook']);
                     $test_cases = $item_data['testcases'] ?? [];
                     $tests = array_merge($tests, $test_cases);
@@ -136,13 +142,13 @@ class UserSpecificNotebook extends Notebook {
      * @return int the index of the question to select
      */
     private function getNotebookHash(string $item_label, int $from_pool_count): int {
-    
+
         $gid = $this->gradeable_id;
         $uid = $this->user_id;
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
+
         $hash = hexdec(substr(md5("{$item_label}|{$gid}|{$uid}|{$semester}|{$course}"), 24, 8));
 
         $selected = $hash % $from_pool_count;
