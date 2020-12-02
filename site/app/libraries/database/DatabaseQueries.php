@@ -1445,7 +1445,7 @@ ORDER BY {$orderby}",
             $user_or_team_id = "team_id";
         }
         $return = [];
-        $params = [$g_id];
+        $params = [$g_id, $g_id];
         $where = "";
         if (count($sections) > 0) {
             $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
@@ -1458,10 +1458,14 @@ FROM {$users_or_teams} AS {$u_or_t}
 INNER JOIN (
   SELECT * FROM gradeable_data AS gd
   LEFT JOIN (
-  gradeable_component_data AS gcd
-  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
+    gradeable_component_data AS gcd
+    INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+  ) AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
 ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+INNER JOIN electronic_gradeable_version AS egv
+  ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}
+  AND egv.active_version > 0
+  AND egv.g_id=?
 {$where}
 GROUP BY {$u_or_t}.{$section_key}
 ORDER BY {$u_or_t}.{$section_key}",
