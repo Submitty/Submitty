@@ -65,9 +65,9 @@ class TestSidebar(BaseTestCase):
                                 .find_elements(By.TAG_NAME, 'h1')[0].text)
             if(self.driver.find_element(By.ID, 'breadcrumbs')
                and len(self.driver.find_element(By.ID, 'breadcrumbs')
-                       .find_elements(By.TAG_NAME, 'h1')) > 0):
+                       .find_elements(By.TAG_NAME, 'span')) > 2):
                 heading_text.append(self.driver.find_element(By.ID, 'breadcrumbs')
-                                    .find_elements(By.TAG_NAME, 'h1')[0].text)
+                                    .find_elements(By.TAG_NAME, 'span')[2].text)
             self.assertIn(expected_text, heading_text)
             current_idx += 1
 
