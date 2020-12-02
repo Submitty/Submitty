@@ -245,6 +245,7 @@
 
             tgts = nb.querySelectorAll('.CodeMirror');
             for(let x of tgts){
+                x.CodeMirror.setOption("readOnly", true);
                 x.CodeMirror.refresh();
             }
 

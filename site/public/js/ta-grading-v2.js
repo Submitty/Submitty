@@ -640,7 +640,8 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $(id_str).toggleClass('active', eleVisibility);
-
+      $("#" + panel.str).find(".CodeMirror").each(function() {this.CodeMirror.refresh()});
+      
       if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
       } else {
