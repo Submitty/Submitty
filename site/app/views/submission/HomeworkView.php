@@ -318,11 +318,13 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                $notebook,
-                $this->core->getUser()->getId()
-            );
+            if ($graded_gradeable !== null) {
+                $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                    $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                    $notebook,
+                    $this->core->getUser()->getId()
+                );
+            }
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
@@ -371,23 +373,25 @@ class HomeworkView extends AbstractView {
             }
         }
         else {
-            // Get path to VCS_CHECKOUT
-            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
-            $who_id = $this->core->getUser()->getId();
-            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-            $version_path = FileUtils::joinPaths($user_path, $highest_version);
-            $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+            if ($graded_gradeable !== null) {
+                // Get path to VCS_CHECKOUT
+                $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
+                $who_id = $this->core->getUser()->getId();
+                $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+                $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+                $version_path = FileUtils::joinPaths($user_path, $highest_version);
+                $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
 
-            // Load repo and user id
-            if (file_exists($path)) {
-                $json = json_decode(file_get_contents($path), true);
-                if (!is_null($json)) {
-                    if (isset($json["git_user_id"])) {
-                        $github_user_id = $json["git_user_id"];
-                    }
-                    if (isset($json["git_repo_id"])) {
-                        $github_repo_id = $json["git_repo_id"];
+                // Load repo and user id
+                if (file_exists($path)) {
+                    $json = json_decode(file_get_contents($path), true);
+                    if (!is_null($json)) {
+                        if (isset($json["git_user_id"])) {
+                            $github_user_id = $json["git_user_id"];
+                        }
+                        if (isset($json["git_repo_id"])) {
+                            $github_repo_id = $json["git_repo_id"];
+                        }
                     }
                 }
             }
@@ -422,6 +426,10 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
+        $has_overridden_grades = false;
+        if (!is_null($graded_gradeable)) {
+            $graded_gradeable->hasOverriddenGrades();
+        }
         $numberUtils = new NumberUtils();
 
         // TODO: go through this list and remove the variables that are not used
@@ -473,7 +481,7 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
+            'has_overridden_grades' => $has_overridden_grades,
             'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
