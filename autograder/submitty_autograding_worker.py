@@ -156,6 +156,7 @@ def try_run_worker(
         # Re-raise the exception so the process doesn't look like it exited OK
         raise e
 
+
 # ==================================================================================
 # ==================================================================================
 def launch_workers(config, my_name, my_stats):
