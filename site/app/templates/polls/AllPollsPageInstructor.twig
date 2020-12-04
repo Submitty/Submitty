@@ -39,18 +39,16 @@
                             <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/deletePoll">
@@ -107,18 +105,16 @@
                             <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/deletePoll">
@@ -164,18 +160,16 @@
                         <td> {{ poll.getName() }} </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
+                            </a>
                         </td>
                         <td>
                             <form method="post" action="{{base_url}}/deletePoll">

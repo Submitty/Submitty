@@ -14,6 +14,8 @@ use app\models\User;
 
 class MiscController extends AbstractController {
 
+    const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
+
     /**
      * Get the current server time
      *
@@ -79,7 +81,7 @@ class MiscController extends AbstractController {
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $directory, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse("You do not have access to this file")
+                JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
             );
         }
 
@@ -106,14 +108,14 @@ class MiscController extends AbstractController {
                 return false;
             }
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-                $this->core->getOutput()->showError("You do not have access to this file");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
         }
         else {
             // Check access through Access library
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-                $this->core->getOutput()->showError("You do not have access to this file");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
 
@@ -126,6 +128,12 @@ class MiscController extends AbstractController {
                 }
                 if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
                     $this->core->getOutput()->showError("Your section may not access this file.");
+                    return false;
+                }
+
+                $json = FileUtils::readJsonFile($this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
+                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $path)) {
+                    $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                     return false;
                 }
             }
@@ -160,7 +168,7 @@ class MiscController extends AbstractController {
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-            $this->core->getOutput()->showError("You do not have access to this file");
+            $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
             return false;
         }
 
@@ -198,7 +206,7 @@ class MiscController extends AbstractController {
         $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path))));
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-            $this->core->getOutput()->showError("You do not have access to this file");
+            $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
             return false;
         }
 
@@ -210,7 +218,13 @@ class MiscController extends AbstractController {
                 return false;
             }
             elseif (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                $this->core->getOutput()->showError("You do not have access to this file.");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+
+            $json = FileUtils::readJsonFile($this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
+            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $path)) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
         }
@@ -221,7 +235,7 @@ class MiscController extends AbstractController {
                 strpos(basename($path), "upload_page_") !== false
                 && FileUtils::getContentType($path) !== "application/pdf"
             ) {
-                $this->core->getOutput()->showError("You do not have access to this file");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
         }
