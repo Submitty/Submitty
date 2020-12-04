@@ -434,10 +434,11 @@ class ElectronicGraderController extends AbstractController {
         $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
+        $total_users_who_submitted = 0;
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
-            $total_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
+            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $student_array = [];
@@ -537,7 +538,6 @@ class ElectronicGraderController extends AbstractController {
         //Either # of teams or # of students (for non-team assignments). Either case
         // this is the max # of submitted copies for this gradeable.
         $total_submissions = 0;
-        $temp = 0;
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
                 if ($key == 'NULL') {
@@ -545,13 +545,12 @@ class ElectronicGraderController extends AbstractController {
                 }
                 $total_submissions += $value;
             }
-            foreach ($total_who_submitted as $key => $value) {
+            foreach ($total_users_who_submitted as $key => $value) {
                 if ($key == 'NULL') {
                     continue;
                 }
-                $temp += $value;
+                $total_who_submitted += $value;
             }
-            $total_who_submitted = $temp;
             if (!$gradeable->isTeamAssignment() && $isPeerGradeable) {
                 $sections['peer_stu_grad'] = [
                    // Total peer components to grade = Number of peer components * Number of Students who submitted
