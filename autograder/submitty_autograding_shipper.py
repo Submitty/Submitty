@@ -200,9 +200,9 @@ def initialize(untrusted_queue):
 
 # ==================================================================================
 def add_fields_to_autograding_worker_json(
-        config: submitty_config.Config,
-        autograding_worker_json: dict,
-        entry: str
+    config: submitty_config.Config,
+    autograding_worker_json: dict,
+    entry: str
 ):
 
     submitty_config = os.path.join(
@@ -299,11 +299,11 @@ def update_worker_json(config: submitty_config.Config, name: str, entry: str):
 
 
 def establish_ssh_connection(
-        config: submitty_config.Config,
-        my_name: str,
-        user: str,
-        host: str,
-        only_try_once: bool = False
+    config: submitty_config.Config,
+    my_name: str,
+    user: str,
+    host: str,
+    only_try_once: bool = False
 ) -> paramiko.SSHClient:
     """
     Returns a connected paramiko ssh session.

@@ -26,12 +26,12 @@ class Logger:
     """Specialized logger class that accumulates stack traces."""
 
     def __init__(
-            self, *,
-            log_dir: str,
-            stack_trace_dir: str,
-            catpure_traces: bool = False,
-            # This used to be "UNKNOWN", but "NO JOB" better describes the circumstances.
-            job_id: str = "NO JOB",
+        self, *,
+        log_dir: str,
+        stack_trace_dir: str,
+        catpure_traces: bool = False,
+        # This used to be "UNKNOWN", but "NO JOB" better describes the circumstances.
+        job_id: str = "NO JOB",
     ):
         self.log_dir = log_dir
         self.stack_trace_dir = stack_trace_dir
@@ -58,13 +58,13 @@ class Logger:
         return os.path.join(self.stack_trace_dir, self._log_filename())
 
     def log_message(
-            self, message: str, *,
-            is_batch: bool = False,
-            which_untrusted: str = "",
-            jobname: str = "",
-            timelabel: str = "",
-            elapsed_time: Optional[int] = None,
-            job_id: Optional[str] = None
+        self, message: str, *,
+        is_batch: bool = False,
+        which_untrusted: str = "",
+        jobname: str = "",
+        timelabel: str = "",
+        elapsed_time: Optional[int] = None,
+        job_id: Optional[str] = None
     ):
         """Log a message to this logger's configured log directory."""
         now = dateutils.get_current_time()
@@ -80,10 +80,10 @@ class Logger:
         write_to_log(self.log_path, ' | '.join((str(x) for x in parts)))
 
     def log_stack_trace(
-            self, trace: str, *,
-            is_batch: bool = False,
-            which_untrusted: str = '',
-            job_id: Optional[str] = None
+        self, trace: str, *,
+        is_batch: bool = False,
+        which_untrusted: str = '',
+        job_id: Optional[str] = None
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
         # Save the parameters to this trace so we can duplicate these on the
@@ -359,15 +359,15 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
 
 
 def archive_autograding_results(
-        config,
-        working_directory: os.PathLike,
-        job_id: str,
-        which_untrusted: str,
-        is_batch_job: bool,
-        complete_config_obj: dict,
-        gradeable_config_obj: dict,
-        queue_obj: dict,
-        is_test_environment: bool
+    config,
+    working_directory: os.PathLike,
+    job_id: str,
+    which_untrusted: str,
+    is_batch_job: bool,
+    complete_config_obj: dict,
+    gradeable_config_obj: dict,
+    queue_obj: dict,
+    is_test_environment: bool
 ):
     """ After grading is finished, archive the results. """
 

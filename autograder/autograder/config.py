@@ -17,13 +17,13 @@ class Config:
     """
 
     def __init__(
-            self,
-            submitty: dict,
-            database: dict,
-            submitty_users: dict,
-            log_path: os.PathLike,
-            error_path: os.PathLike,
-            job_id: str = "NO JOB"
+        self,
+        submitty: dict,
+        database: dict,
+        submitty_users: dict,
+        log_path: os.PathLike,
+        error_path: os.PathLike,
+        job_id: str = "NO JOB"
     ):
         """
         dictionary objects rather than by reading json files.

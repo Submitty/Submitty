@@ -23,11 +23,11 @@ JOB_ID = '~WORK~'
 # ==================================================================================
 # ==================================================================================
 def worker_process(
-        config: submitty_config.Config,
-        which_machine: str,
-        address: str,
-        which_untrusted: str,
-        my_server: str
+    config: submitty_config.Config,
+    which_machine: str,
+    address: str,
+    which_untrusted: str,
+    my_server: str
 ):
 
     # verify the DAEMON_USER is running this script
