@@ -198,7 +198,7 @@ def launch_workers(config, my_name, my_stats):
         while True:
             alive = 0
             for i in range(0, num_workers):
-                if processes[i].is_alive:
+                if processes[i].is_alive():
                     alive = alive+1
                 else:
                     autograding_utils.log_message(
