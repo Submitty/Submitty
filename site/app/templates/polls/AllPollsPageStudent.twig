@@ -26,7 +26,7 @@
                         <td> {{ poll.getName() }} </td>
                         <td> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                         <td>
-                            <form method="post" action="{{ base_url }}/viewPoll">
+                            <a href="{{ base_url }}/viewPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 {% if poll.isOpen() %}
@@ -37,11 +37,11 @@
                                     {% endif %}
                                     </button>
                                 {% elseif poll.isEnded() %}
-                                    <button type="submit" class="btn btn-primary"> View Poll
+                                    <button type="submit" class="btn btn-primary"> View Poll </button>
                                 {% else %}
-                                    Closed
+                                    <a style="color:inherit ; pointer-events: none ; cursor: default ;" >Closed</a>
                                 {% endif %}
-                            </form>
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -74,7 +74,7 @@
                         <td> {{ poll.getName() }} </td>
                         <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                         <td>
-                            <form method="post" action="{{ base_url }}/viewPoll">
+                            <a href="{{ base_url }}/viewPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 {% if poll.isOpen() %}
@@ -85,11 +85,11 @@
                                     {% endif %}
                                     </button>
                                 {% elseif poll.isEnded() %}
-                                    <button type="submit" class="btn btn-primary"> View Poll
+                                    <button type="submit" class="btn btn-primary"> View Poll </button>
                                 {% else %}
-                                    Closed
+                                    <a style="color:inherit ; pointer-events: none ; cursor: default ;" >Closed</a>
                                 {% endif %}
-                            </form>
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
