@@ -338,14 +338,6 @@ class MiscController extends AbstractController {
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
-        
-        if ($gradeable->isGradeByRegistration()) {
-            $section = $graded_gradeable->getSubmitter()->getRegistrationSection();
-        }
-        else {
-            $section = $graded_gradeable->getSubmitter()->getRotatingSection();
-        }
-
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
             if (is_dir($path)) {
