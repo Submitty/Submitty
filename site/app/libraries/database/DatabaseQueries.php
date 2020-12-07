@@ -797,7 +797,7 @@ WHERE status = 1"
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", [$onOff, $thread_id]);
     }
 
-    public function addPinnedThread($user_id, $thread_id, $added) {
+    public function addBookmarkedThread($user_id, $thread_id, $added) {
         if ($added) {
             $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
         }
@@ -806,7 +806,7 @@ WHERE status = 1"
         }
     }
 
-    public function loadPinnedThreads($user_id) {
+    public function loadBookmarkedThreads($user_id) {
         $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", [$user_id]);
         $rows = $this->course_db->rows();
         $favorite_threads = [];
@@ -2833,7 +2833,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             "
             SELECT gtm.*, tm.*
             FROM gradeable_teams gtm
-            INNER JOIN teams tm 
+            INNER JOIN teams tm
             ON gtm.team_id = tm.team_id
             WHERE gtm.g_id = ? AND tm.user_id = ?",
             [$g_id,$user_id]
