@@ -36,16 +36,14 @@
                 {% for poll in todays_polls %}
                     <tr>
                         <td> {{ poll.getName() }} </td>
-                        <td>{{ poll.getReleaseDate() }}</td>
+                        <td></td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td>
-                            {{ poll.getUserResponses()|length }}
-                        </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
@@ -115,9 +113,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td>
-                            {{ poll.getUserResponses()|length }}
-                        </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
@@ -181,9 +177,7 @@
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td></td>
                         <td></td>
-                        <td>
-                            {{ poll.getUserResponses()|length }}
-                        </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
