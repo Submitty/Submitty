@@ -164,7 +164,7 @@ abstract class AbstractController {
      * @return \app\models\gradeable\GradedGradeable|bool false in the fail/error case
      */
     protected function tryGetGradedGradeable(Gradeable $gradeable, string $submitter_id, bool $render_json = true) {
-        if ($submitter_id === '' || $submitter_id === null) {
+        if ($submitter_id === '') {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Must provide a who_id (user/team id) parameter');
             }
