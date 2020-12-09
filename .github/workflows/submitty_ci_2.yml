@@ -79,8 +79,9 @@ jobs:
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
+              pushd Submitty
               sudo -E env "PATH=$PATH" bash Submitty/.setup/testing/autograder.sh
-              export SUBMITTY_REPOSITORY=$(pwd)/Submitty
+              export SUBMITTY_REPOSITORY=$(pwd)
               sudo -E env "PATH=$PATH" bash Submitty/.setup/testing/setup.sh
 
 
