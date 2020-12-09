@@ -3,7 +3,7 @@ name: Submitty CI-3
 #perform a full vagrant up
 
 on :
-  workflow_dispatch
+  push
 
 jobs:
   full-build:
@@ -15,6 +15,6 @@ jobs:
       - name: Install Submitty
         run: |
           sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT/
-          mv Submitty /usr/local/submitty/GIT_CHECKOUT/
+          sudo mv Submitty /usr/local/submitty/GIT_CHECKOUT/
           cd /usr/local/submitty/GIT_CHECKOUT/Submitty
           sudo bash ./.setup/install_system.sh
