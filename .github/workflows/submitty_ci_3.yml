@@ -17,6 +17,7 @@ jobs:
             python-version: '3.6'
       - name: Install Submitty
         run: |
+          python3 -m pip install --upgrade --force-reinstall pip
           pip install -U setuptools
           sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT/
           sudo mv Submitty /usr/local/submitty/GIT_CHECKOUT/
