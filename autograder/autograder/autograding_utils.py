@@ -29,13 +29,13 @@ class Logger:
         self, *,
         log_dir: str,
         stack_trace_dir: str,
-        catpure_traces: bool = False,
+        capture_traces: bool = False,
         # This used to be "UNKNOWN", but "NO JOB" better describes the circumstances.
         job_id: str = "NO JOB",
     ):
         self.log_dir = log_dir
         self.stack_trace_dir = stack_trace_dir
-        self.capture_traces = catpure_traces
+        self.capture_traces = capture_traces
         self.accumulated_traces = []
         self.job_id = job_id
 
