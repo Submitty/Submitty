@@ -86,6 +86,7 @@ class Logger:
         job_id: Optional[str] = None
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
+        job_id = job_id or self.job_id
         # Save the parameters to this trace so we can duplicate these on the
         # shipper's end once the job finishes.
         #
@@ -104,7 +105,6 @@ class Logger:
         now = dateutils.get_current_time()
         easy_to_read_date = dateutils.write_submitty_date(now, True)
         batch_string = "BATCH" if is_batch else ""
-        job_id = job_id or self.job_id
         header = ' | '.join((
             easy_to_read_date,
             f"{job_id:>6s}",

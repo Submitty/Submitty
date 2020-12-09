@@ -95,17 +95,17 @@ class TestLogger(unittest.TestCase):
             {
                 'trace': "Uh-oh!",
                 # The below are the default values for the function.
-                # Note the 'NO JOB': this value isn't in the function signature (it is None), but
+                # Note the 'TEST': this value isn't in the function signature (it is None), but
                 # is replaced with the logger instance's job ID when omitted.
                 'is_batch': False,
                 'which_untrusted': "",
-                'job_id': "NO JOB"
+                'job_id': "TEST"
             },
             {
                 'trace': "Batch uh-oh!",
                 'is_batch': True,
                 'which_untrusted': "",
-                'job_id': "NO JOB"
+                'job_id': "TEST"
             },
             {
                 'trace': "ID'd uh-oh!",
@@ -117,7 +117,7 @@ class TestLogger(unittest.TestCase):
                 'trace': "Specified uh-oh!",
                 'is_batch': False,
                 'which_untrusted': "localhost",
-                'job_id': "NO JOB"
+                'job_id': "TEST"
             },
             {
                 'trace': "Full uh-oh!",
