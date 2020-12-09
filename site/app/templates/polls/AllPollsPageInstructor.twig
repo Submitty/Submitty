@@ -12,16 +12,16 @@
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
-            <col style="width: 28%">
+            <col style="width: 28%; float:left;">
             <col style="width: 24%">
             <col style="width: 24%">
             <col style="width: 24%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
-                    <th scope="col">View Results</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
-                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
                         <td>
@@ -64,18 +64,18 @@
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
-            <col style="width: 25%">
+            <col style="width: 25%; float:left;">
             <col style="width: 20%">
             <col style="width: 15%">
             <col style="width: 20%">
             <col style="width: 20%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
-                    <th scope="col">View Results</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -85,7 +85,7 @@
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
-                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
@@ -118,14 +118,14 @@
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
-            <col style="width: 35%">
+            <col style="width: 35%; float:left;">
             <col style="width: 35%">
             <col style="width: 30%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Date Released</th>
-                    <th scope="col">View Results</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -135,7 +135,7 @@
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
-                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
@@ -154,26 +154,28 @@
 
 <script>
 
-    function newDeletePollForm(pollid, base_url) {
-        let url = base_url + "/deletePoll";
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('poll_id', pollid);
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            success: function(data) {
-                window.location.reload(false);
-            },
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
+    function newDeletePollForm(pollid, pollname, base_url) {
+        if (confirm("This will delete poll '" + pollname +"'. Are you sure?")) {
+            let url = base_url + "/deletePoll";
+            let fd = new FormData();
+            fd.append('csrf_token', csrfToken);
+            fd.append('poll_id', pollid);
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: fd,
+                processData: false,
+                cache: false,
+                contentType: false,
+                success: function(data) {
+                    window.location.reload(false);
+                },
+                error: function(err) {
+                    console.error(err);
+                    window.alert("Something went wrong. Please try again.");
+                }
+            });
+        }
     }
 
     function updatePollAcceptingAnswers(pollid, base_url) {
