@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: Submitty
       - uses: actions/setup-python@v2
         with:
             python-version: '3.6'
-        with:
-          path: Submitty
       - name: Install Submitty
         run: |
           sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT/
