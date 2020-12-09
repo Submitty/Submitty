@@ -1,0 +1,84 @@
+name: Submitty CI-2
+
+#run php lint, phpstan, eslint, and pylint on any push
+on:
+    push:
+
+env:
+  PGPASSWORD: submitty_dbuser
+
+jobs:
+    e2e:
+        runs-on: ubuntu-latest
+        services:
+          postgres:
+            image: postgres
+            env: 
+              POSTGRES_PASSWORD: ${PGPASSWORD}
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
+
+        steps:
+          - uses: actions/checkout@v2
+            with:
+              path: Submitty
+          - uses: actions/setup-python@v2
+            with:
+              python-version: '3.6'
+          - uses: shivammathur/setup-php@2.7.0
+            with:
+              extensions: imagick
+          - name: Cache Pip
+            uses: actions/cache@v2
+            with:
+              path: path ~/.cache/pip
+              key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+              restore-keys: |
+                ${{ runner.os }}-py-pip
+          - name: Install Python dependencies
+            run: |
+              python3 -m pip install --upgrade pip
+              python3 -m pip install python-pam
+              python3 -m pip install sqlalchemy
+              python3 -m pip install selenium
+              python3 -m pip install tzlocal
+              python3 -m pip install jsonschema
+              python3 -m pip install jsonref
+              python3 -m pip install docker
+              python3 -m pip install websocket_client
+              python3 -m pip install psycopg2
+          - name: Get compose cache dir
+            id: composer-cache
+            run: |
+              pushd Submitty/site
+              echo "::set-output name=dir::$(composer config cache-files-dir)"
+              popd
+          - name: Install Composer Cache
+            uses: actions/cache@v2
+            with:
+              path: ${{ steps.composer-cache.outputs.dir }}
+              key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
+              restore-keys: |
+                ${{ runner.os }}-php-composer-
+          - name: Install PHP dependencies
+            run: |
+              pushd Submitty/site
+              composer install --prefer-dist
+              popd
+          - name: Setup Submitty
+            run: |
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+              sudo apt install libseccomp-dev
+              sudo apt install libboost-all-dev
+              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+
+
+
+  
