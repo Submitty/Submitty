@@ -211,7 +211,7 @@ def launch_workers(config, my_name, my_stats):
                     config.log_path, JOB_ID,
                     message=f"ERROR: #workers={num_workers} != #alive={alive}"
                 )
-            time.sleep(1)
+            time.sleep(60)
 
     except KeyboardInterrupt:
         autograding_utils.log_message(
