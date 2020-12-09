@@ -12,10 +12,10 @@
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
-            <col style="width: 28%; float:left;">
-            <col style="width: 24%">
-            <col style="width: 24%">
-            <col style="width: 24%">
+            <col style="width: 22%">
+            <col style="width: 26%">
+            <col style="width: 26%">
+            <col style="width: 26%">
             <thead>
                 <tr>
                     <th scope="col"></th>
@@ -27,7 +27,7 @@
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td> 
+                        <td align="left"> 
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
@@ -64,7 +64,7 @@
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
-            <col style="width: 25%; float:left;">
+            <col style="width: 25%">
             <col style="width: 20%">
             <col style="width: 15%">
             <col style="width: 20%">
@@ -81,7 +81,7 @@
             <tbody>
                 {% for poll in older_polls %}
                     <tr>
-                        <td> 
+                        <td align="left"> 
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
@@ -118,9 +118,9 @@
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
-            <col style="width: 35%; float:left;">
-            <col style="width: 35%">
-            <col style="width: 30%">
+            <col style="width: 24%">
+            <col style="width: 38%">
+            <col style="width: 38%">
             <thead>
                 <tr>
                     <th scope="col"></th>
@@ -131,7 +131,7 @@
             <tbody>
                 {% for poll in future_polls %}
                     <tr>
-                        <td> 
+                        <td align="left"> 
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
