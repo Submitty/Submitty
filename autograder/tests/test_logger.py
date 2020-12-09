@@ -44,7 +44,7 @@ class TestLogger(unittest.TestCase):
         os.mkdir(AUTOGRADING_LOGS)
         os.mkdir(STACK_TRACES)
 
-    @mock.patch(Logger, '_log_filename', fake_log_filename)
+    @mock.patch('autograder.autogradingutils.Logger', '_log_filename', fake_log_filename)
     def _make_logger(self, capture_traces: bool = False) -> Logger:
         """Make a new logger object.
 
