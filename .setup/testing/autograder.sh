@@ -4,7 +4,6 @@ set -ev
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 MY_PATH="`dirname \"$0\"`"
-SUBMITTY_REPOSITORY=${MY_PATH}/../..
 SUBMITTY_DATA_DIR=/var/local/submitty
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}

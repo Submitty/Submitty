@@ -56,6 +56,11 @@ chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
 chmod -R 777 ${SUBMITTY_INSTALL_DIR}
 chmod -R 777 ${SUBMITTY_DATA_DIR}
 
+pwd
+ls ${SUBMITTY_REPOSITORY}
+echo "SUBMITTY_REPOSITORY dir :"
+echo $SUBMITTY_REPOSITORY
+
 echo -e "/var/run/postgresql
 submitty_dbuser
 submitty_dbpass

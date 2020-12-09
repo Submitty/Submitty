@@ -6,7 +6,7 @@ on:
 
 env:
   PGPASSWORD: submitty_dbuser
-  SUBMITTY_REPOSITORY: ${pwd}/Submitty/
+  SUBMITTY_REPOSITORY: ${pwd}/Submitty
   PHP_USER: submitty_php
   PHP_GROUP: submitty_php
   CGI_USER: submitty_cgi
@@ -76,8 +76,9 @@ jobs:
               popd
           - name: Setup Submitty
             run: |
-              #PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-              #PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+              echo ">>> ${SUBMITTY_REPOSITORY} <<<"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
               pushd Submitty
