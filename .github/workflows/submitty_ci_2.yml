@@ -6,7 +6,7 @@ on:
 
 env:
   PGPASSWORD: submitty_dbuser
-  SUBMITTY_REPOSITORY: ${pwd}/Submitty
+  SUBMITTY_REPOSITORY: $(pwd)/Submitty
   PHP_USER: submitty_php
   PHP_GROUP: submitty_php
   CGI_USER: submitty_cgi
