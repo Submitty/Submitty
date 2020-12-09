@@ -1,18 +1,5 @@
 #!/usr/bin/env bash
 
-SOURCE="${BASH_SOURCE[0]}"
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve
-  # it relative to the path where the symlink file was located
-  [[ ${SOURCE} != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
-source ${DIR}/../common/common_env.sh
-
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -33,7 +20,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
 mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
 
-python3 ${DIR}/../bin/create_untrusted_users.py
+python3 $SUBMITTY_REPOSITORY/.setup/bin/create_untrusted_users.py
 
 addgroup submitty_daemonphp
 addgroup submitty_daemoncgi

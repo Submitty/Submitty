@@ -9,6 +9,8 @@ env:
   PHP_USER: submitty_php
   PHP_GROUP: submitty_php
   CGI_USER: submitty_cgi
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
+  SUBMITTY_DATA_DIR: /var/local/submitty
 
 jobs:
     e2e:
@@ -79,9 +81,9 @@ jobs:
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
+              export SUBMITTY_REPOSITORY=$(pwd)/Submitty
               pushd Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
-              export SUBMITTY_REPOSITORY=$(pwd)
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
 

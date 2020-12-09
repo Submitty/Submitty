@@ -2,10 +2,6 @@
 
 set -ev
 
-SUBMITTY_INSTALL_DIR=/usr/local/submitty
-MY_PATH="`dirname \"$0\"`"
-SUBMITTY_DATA_DIR=/var/local/submitty
-
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src
@@ -102,7 +98,9 @@ popd
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-/bin/bash ../bin/update_repos.sh
+echo ">>> ${SUBMITTY_REPOSITORY}"
+ls $SUBMITTY_REPOSITORY
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then
     echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
