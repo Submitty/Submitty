@@ -17,13 +17,8 @@ jobs:
             python-version: '3.6'
       - name: Install Submitty
         run: |
-          which python
-          which pip
-          which easy_install
-          # sudo apt-get install python-setuptools
-          # python3 -m pip install --upgrade pip
-          # python3 -m pip install setuptools
-          # sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT/
-          # sudo mv Submitty /usr/local/submitty/GIT_CHECKOUT/
-          # cd /usr/local/submitty/GIT_CHECKOUT/Submitty
-          # sudo bash ./.setup/install_system.sh
+          pip install -U setuptools
+          sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT/
+          sudo mv Submitty /usr/local/submitty/GIT_CHECKOUT/
+          cd /usr/local/submitty/GIT_CHECKOUT/Submitty
+          sudo bash ./.setup/install_system.sh
