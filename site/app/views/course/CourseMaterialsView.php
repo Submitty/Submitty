@@ -151,7 +151,7 @@ class CourseMaterialsView extends AbstractView {
         $file_sections = [];
         $hide_from_students = [];
         $external_link = [];
-        $priorities = [];
+        $priorities = []; // Priority of course materials
         $folders = [];
         $authorized_by_allow_list = [];
         //Get the expected course materials path and files
@@ -170,15 +170,16 @@ class CourseMaterialsView extends AbstractView {
             array_pop($dirs);
             $curr_path = "";
             if (!isset($priorities[$material])) {
-                $priorities[$material] = 0.0;
+                $priorities[$material] = 0.0; // add to priority list and set priority to 0
             }
             $path = FileUtils::joinPaths($expected_path, $material);
+            // if piority exist, sort by sort_priority, else sort by default
             $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
 
             foreach ($dirs as $dir) {
                 $curr_path = $curr_path . $dir;
                 $path = FileUtils::joinPaths($expected_path, $curr_path);
-                    $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+                $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
                 if (!in_array($curr_path, $course_materials_array)) {
                     array_push($course_materials_array, $curr_path);
                     array_push($folders, $curr_path);
@@ -188,8 +189,9 @@ class CourseMaterialsView extends AbstractView {
         }
 
         //Sort the files/folders by prioriy then alphabetical order
-        $sort_priotity = function ($a, $b) use ($priorities) {
-            if ($priorities[$b] == $priorities[$a]) {
+        $sort_priority = function ($a, $b) use ($priorities) {
+            /* their code */
+            if ($priorities[$b] == $priorities[$a]) { // if same priority, we alphabetize
                 if (strtolower($a) < strtolower($b)) {
                     return -1;
                 }
@@ -204,7 +206,10 @@ class CourseMaterialsView extends AbstractView {
                 return 1;
             }
         };
-        uasort($course_materials_array, $sort_priotity);
+        
+        // probably an if else here for alphabetical or chronological
+        // uasort($course_materials_array, $sort_priority); // sort course material array with sort_priority function
+        
 
         $restored = [];
         //Restore the priorities for each file/folder
@@ -215,6 +220,35 @@ class CourseMaterialsView extends AbstractView {
         $priorities = $restored;
 
         $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
+
+        //Sort the files/folders by prioriy then chronological order
+        $sort_priority_chronological = function ($a, $b) use ($priorities, $file_release_dates, $expected_path) {
+            /* our code */
+            // foreach($file_release_dates as $result) {
+            //     echo "file path: {$a}";
+            // }
+            $a_path = FileUtils::joinPaths($expected_path, $a);
+            $b_path = FileUtils::joinPaths($expected_path, $b);
+            // echo "In our sort function:";
+            // var_dump($file_release_dates);
+            // var_dump($priorities);
+
+            // echo "a file path: {$a_path}";
+            // echo "b file path: {$b_path}";
+
+            // echo "a file: {$a}";
+            // echo "b file: {$b}";
+
+            if (strtotime($file_release_dates[$a_path]) < strtotime($file_release_dates[$b_path])) {
+                echo "IM HERERERE with {$a} and {$b}\n";
+                return -1;
+            } else {
+                echo "lalalalalalalal with {$a} and {$b}\n";
+                return 1;
+            }
+        };
+        uasort($course_materials_array, $sort_priority_chronological);
+        
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
