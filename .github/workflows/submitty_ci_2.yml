@@ -75,14 +75,13 @@ jobs:
               popd
           - name: Setup Submitty
             run: |
-              export SUBMITTY_REPOSITORY=$(pwd)/Submitty
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
-              pushd Submitty
-              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              sudo -E env "PATH=$PATH" bash Submitty/.setup/testing/autograder.sh
+              export SUBMITTY_REPOSITORY=$(pwd)/Submitty
+              sudo -E env "PATH=$PATH" bash Submitty/.setup/testing/setup.sh
 
 
 
