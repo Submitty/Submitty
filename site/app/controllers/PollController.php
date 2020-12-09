@@ -358,19 +358,15 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     public function deletePoll() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $this->core->getQueries()->deletePoll($_POST["poll_id"]);
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['polls']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
     /**
