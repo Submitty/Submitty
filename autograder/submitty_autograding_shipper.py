@@ -527,11 +527,11 @@ def unpack_job(
         # Reproduce all stack trace entries in the queue file into our local stack trace log.
         if len(local_done_queue_obj['errors']) > 0:
             config.logger.log_message(
-                f"NOTE: Job {local_done_queue_obj['identifier']} has stack trace messages. "
+                f"NOTE: Job {item_name} has stack trace messages. "
                 "Check the stack traces log for details."
             )
             for trace_obj in local_done_queue_obj['errors']:
-                config.loger.log_stack_trace(**trace_obj)
+                config.logger.log_stack_trace(**trace_obj)
 
         # Check to make certain that the job we received was the correct job
         if random_identifier != local_done_queue_obj['identifier']:
