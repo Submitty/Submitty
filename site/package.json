@@ -23,7 +23,7 @@
     "jspdf": "^1.5.3",
     "mermaid": "8.8.4",
     "pdfjs-dist": "2.2.228",
-    "plotly.js-dist": "1.56.0",
+    "plotly.js-dist": "1.58.2",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.3"
   },
