@@ -9,10 +9,34 @@ env:
   PHP_USER: submitty_php
   PHP_GROUP: submitty_php
   CGI_USER: submitty_cgi
-  SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_DATA_DIR: /var/local/submitty
 
 jobs:
+    # test:
+    #   runs-on: ubuntu-latest
+    #   steps:
+    #     - uses: actions/checkout@v2
+    #       with:
+    #           path: Submitty
+    #     - uses: actions/setup-python@v2
+    #       with:
+    #           python-version: '3.6'
+    #     - name: Setup Submitty
+    #       run: |
+    #         python3 -m pip install --upgrade pip
+    #         python3 -m pip install sqlalchemy
+    #         python3 -m pip install tzlocal
+    #         mkdir /var/run/postgresql
+    #         export SUBMITTY_REPOSITORY=$(pwd)/Submitty
+    #         export SUBMITTY_INSTALL_DIR=$(pwd)/usr/local/submitty
+    #         pushd Submitty
+    #         sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+    #         ls $SUBMITTY_INSTALL_DIR
+    #         ls $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT
+    #         #python3 migration/run_migrator.py
+    #         echo "/github/workspace/Submitty/migration/../../.."
+    #         ls /github/workspace/Submitty/migration/../../..
+
     e2e:
         runs-on: ubuntu-latest
         services:

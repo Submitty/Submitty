@@ -20,6 +20,8 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
 mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
 
+ln -s $SUBMITTY_REPOSITORY $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT
+
 python3 $SUBMITTY_REPOSITORY/.setup/bin/create_untrusted_users.py
 
 addgroup submitty_daemonphp
@@ -43,9 +45,6 @@ chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
 chmod -R 777 ${SUBMITTY_INSTALL_DIR}
 chmod -R 777 ${SUBMITTY_DATA_DIR}
 
-echo "SUBMITTY_REPOSITORY dir :"
-echo $SUBMITTY_REPOSITORY
-
 echo -e "/var/run/postgresql
 submitty_dbuser
 submitty_dbpass
@@ -64,7 +63,7 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --install-dir $SUBMITTY_INSTALL_DIR --data-dir $SUBMITTY_DATA_DIR
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
@@ -76,8 +75,8 @@ python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system mig
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
-systemctl start submitty_autograding_shipper
-systemctl start submitty_autograding_worker
-systemctl start submitty_websocket_server
+# systemctl start submitty_autograding_shipper
+# systemctl start submitty_autograding_worker
+# systemctl start submitty_websocket_server
 
 echo 'Finished setup.'
