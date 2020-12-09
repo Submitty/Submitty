@@ -1,0 +1,20 @@
+name: Submitty CI-3
+
+#perform a full vagrant up
+
+on :
+  workflow_dispatch
+
+jobs:
+  full-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: Submitty
+      - name: Install Submitty
+        run: |
+          mkdir -p /usr/local/submitty/GIT_CHECKOUT/
+          mv Submitty /usr/local/submitty/GIT_CHECKOUT/
+          cd /usr/local/submitty/GIT_CHECKOUT/Submitty
+          bash ./.setup/install_system.sh
