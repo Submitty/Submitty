@@ -1238,7 +1238,7 @@ class ElectronicGraderController extends AbstractController {
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
         $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
-        if ($blind_grading || $anon_mode) {
+        if ($blind_grading !== "unblind" || $anon_mode) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
         else {
