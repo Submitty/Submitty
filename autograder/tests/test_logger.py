@@ -4,7 +4,7 @@ import unittest
 
 from unittest import mock
 
-from autograding_utils import Logger
+from autograder.autograding_utils import Logger
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
