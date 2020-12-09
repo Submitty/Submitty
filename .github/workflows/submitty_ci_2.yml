@@ -7,6 +7,9 @@ on:
 env:
   PGPASSWORD: submitty_dbuser
   SUBMITTY_REPOSITORY: ${pwd}/Submitty/
+  PHP_USER: submitty_php
+  PHP_GROUP: submitty_php
+  CGI_USER: submitty_cgi
 
 jobs:
     e2e:
@@ -78,7 +81,6 @@ jobs:
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
               pushd Submitty
-              echo ${SUBMITTY_REPOSITORY}
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 

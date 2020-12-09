@@ -51,11 +51,6 @@ adduser submitty_daemon submitty_daemoncgi
 adduser submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
-cp -R /home/travis/.composer /home/${PHP_USER}/.composer
-chown -R ${PHP_USER}:${PHP_USER} /home/${PHP_USER}/.composer
-cp -R /home/travis/.cache /home/${PHP_USER}/.cache
-chown -R ${PHP_USER}:${PHP_USER} /home/${PHP_USER}/.cache
-
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
 chmod -R 777 ${SUBMITTY_INSTALL_DIR}
@@ -85,9 +80,6 @@ bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
 bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
-# necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
-usermod -a -G travis ${PHP_USER}
-usermod -a -G travis submitty_daemon
 
 # necessary to pass config path as submitty_repository is a symlink
 python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
