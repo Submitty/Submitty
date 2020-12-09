@@ -236,7 +236,7 @@ def cleanup_old_jobs(config: submitty_config.Config):
 
 if __name__ == "__main__":
     config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-    config = submitty_config.Config.path_constructor(config_dir, JOB_ID)
+    config = submitty_config.Config.path_constructor(config_dir, JOB_ID, capture_traces=True)
 
     cleanup_old_jobs(config)
     print('cleaned up old jobs')

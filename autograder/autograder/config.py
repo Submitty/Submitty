@@ -23,7 +23,8 @@ class Config:
         submitty_users: dict,
         log_path: os.PathLike,
         error_path: os.PathLike,
-        job_id: str = "NO JOB"
+        job_id: str = "NO JOB",
+        capture_traces: bool = False
     ):
         """
         dictionary objects rather than by reading json files.
@@ -44,11 +45,12 @@ class Config:
         self.logger = Logger(
             log_dir=self.log_path,
             stack_trace_dir=self.error_path,
-            job_id=job_id
+            job_id=job_id,
+            capture_traces=capture_traces
         )
 
     @classmethod
-    def path_constructor(cls, config_path, job_id):
+    def path_constructor(cls, config_path, job_id, *, capture_traces: bool = False):
         """
         Construct a config using the path to a folder containing a valid submitty.json,
         database.json, and submitty_users.json.
@@ -65,7 +67,9 @@ class Config:
         log_path = submitty['autograding_log_path']
         error_path = os.path.join(submitty['site_log_path'], 'autograding_stack_traces')
 
-        return cls(submitty, database, submitty_users, log_path, error_path, job_id)
+        return cls(
+            submitty, database, submitty_users, log_path, error_path, job_id, capture_traces
+        )
 
     def load_workers_json(self, config_path):
         """
