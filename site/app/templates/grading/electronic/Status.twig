@@ -739,12 +739,10 @@
                         {% if not peer %}
                             <a class="btn btn-default" style="float: right"
                                 onclick="changeOverride()">
-                                {% if include_overridden == 'ignore' %}
-                                    Separate Grade Overrides
-                                {% elseif include_overridden == 'separate' %}
-                                    Combine Grade Overrides
+                                {% if include_overridden == 'omit' %}
+                                    Include Grade Overrides
                                 {% else %}
-                                    Ignore Grade Overrides
+                                    Omit Grade Overrides
                                 {% endif %}
                             </a>
                         {% endif %}
@@ -762,17 +760,6 @@
                                     Count: {{ overall_average.getCount() }} <br/>
                                 {% endif %}
                             </div>
-
-                            {% if overridden_average != null and overridden_average.getCount() > 0 and include_overridden == 'separate' %}
-                                <br>
-                                <b>Statistics for Overridden Assignments: </b>
-                                <br/>
-                                <div style="margin-left: 20px">
-                                    Average: {{ overridden_average.getAverageScore() }} / {{ overall_total }} ({{ overridden_percentage }}%)<br/>
-                                    Standard Deviation: {{ overridden_average.getStandardDeviation() }} <br/>
-                                    Count: {{ overridden_average.getCount() }} <br/>
-                                </div>
-                            {% endif %}
 
                             {% if autograding_non_extra_credit != 0 %}
                                 {# Only show autograder if we have autograding points #}
@@ -919,14 +906,11 @@
     function changeOverride() {
         var status = '{{ include_overridden }}';
 
-        if (status == 'ignore') {
-            document.cookie = "include_overridden=separate;";
-        }
-        else if (status == 'separate') {
-            document.cookie = "include_overridden=combine;";
+        if (status == 'omit') {
+            document.cookie = "include_overridden=include;";
         }
         else {
-            document.cookie = "include_overridden=ignore;";
+            document.cookie = "include_overridden=omit;";
         }
         location.reload();
     }

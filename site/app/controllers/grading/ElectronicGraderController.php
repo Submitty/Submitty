@@ -455,7 +455,6 @@ class ElectronicGraderController extends AbstractController {
         $overall_scores = null;
         $order = null;
         $num_submitted = [];
-        $overridden_average = null;
         $num_unsubmitted = 0;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
@@ -555,9 +554,8 @@ class ElectronicGraderController extends AbstractController {
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            $override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'ignore';
+            $override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit';
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie);
-            $overridden_average = $this->core->getQueries()->getOverriddenGradesStatsFromGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
@@ -714,7 +712,6 @@ class ElectronicGraderController extends AbstractController {
             $autograded_average,
             $overall_scores,
             $overall_average,
-            $overridden_average,
             $total_submissions,
             $individual_viewed_grade ?? 0,
             $total_students_submitted,

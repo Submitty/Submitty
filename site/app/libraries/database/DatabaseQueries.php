@@ -1696,14 +1696,14 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $params = [$g_id, $count];
 
         // Check if we want to exlcude grade overridden gradeables
-        if (!$is_team && $override != 'ignore') { //'combine' 'separate' 'ignore'
+        if (!$is_team && $override == 'include') {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
                         WHERE u.user_id = grade_override.user_id 
                         AND grade_override.g_id=gc.g_id)";
         }
 
         // Check if we want to combine grade overridden marks within averages
-        if (!$is_team && $override == 'combine') {
+        if (!$is_team && $override == 'include') {
             $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
                 FROM grade_override
                 INNER JOIN users as u ON u.user_id = grade_override.user_id
@@ -1714,7 +1714,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
                 GROUP BY gd.gd_id, marks";
             $params[] = $g_id;
         }
-        
+
         $this->course_db->query(
             "
 SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
@@ -1744,14 +1744,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
         INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
         WHERE gc.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
-        ". $exclude ."
+        " . $exclude . "
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
-  )g WHERE count=?" . $include .
-")AS individual
-          ",
-            $params
+  )g WHERE count=?" . $include . ")AS individual",
+        $params
         );
         if (count($this->course_db->rows()) == 0) {
             return;
