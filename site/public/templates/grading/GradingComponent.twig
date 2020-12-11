@@ -3,7 +3,7 @@
 Required inputs:
     precision
     component: {id, title, ta_comment, student_comment, page, max_value}
-    graded_component: {grader_id, verifier_id, submitter_id, comment, score, mark_ids, graded_version, total_score}
+    graded_component: {grader_id, verifier_id, submitter_id, comment, notes, score, mark_ids, graded_version, total_score}
 
     show_verify_grader = can_verify and grader_id is defined and grader_id != your_user_id
     grading_disabled = version_conflict = graded_component.graded_version != -1 and graded_gradeable.auto_graded_gradeable.active_version != graded_component.graded_version
@@ -156,4 +156,21 @@ Required inputs:
             {% endif %}
         </div>
     {% endif %}
+{% endblock %}
+
+{% block internal_notes %}
+    <div class="internal-notes-container row">
+        <span class="col-no-gutters notes-title" data-title="Notes">Notes:</span>
+        <span class="col">
+            <textarea
+                    id="internal-notes"
+                    class="internal-notes-entry"
+                    onchange="{{ grading_disabled ? '' : 'onInternalNotesChange'}}"
+                    onkeyup="auto_grow(this)"
+                    rows="1"
+                    placeholder="Internal notes only visible to graders..."
+            >{{ graded_component.notes|escape }}</textarea>
+        </span>
+    </div>
+
 {% endblock %}

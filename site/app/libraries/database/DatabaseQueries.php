@@ -5333,6 +5333,7 @@ AND gc_id IN (
             $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getScore(),
             $graded_component->getComment(),
+            $graded_component->getNotes(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
             DateUtils::dateTimeToString($graded_component->getGradeTime()),
@@ -5345,12 +5346,13 @@ AND gc_id IN (
               gd_id,
               gcd_score,
               gcd_component_comment,
+              gcd_notes,
               gcd_grader_id,
               gcd_graded_version,
               gcd_grade_time,
               gcd_verifier_id,
               gcd_verify_time)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
 
@@ -5365,6 +5367,7 @@ AND gc_id IN (
                 $params = [
                     $graded_component->getScore(),
                     $graded_component->getComment(),
+                    $graded_component->getNotes(),
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
@@ -5377,6 +5380,7 @@ AND gc_id IN (
                     UPDATE gradeable_component_data SET
                       gcd_score=?,
                       gcd_component_comment=?,
+                      gcd_notes=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
                       gcd_grader_id=?,
@@ -5388,6 +5392,7 @@ AND gc_id IN (
                 $params = [
                   $graded_component->getScore(),
                   $graded_component->getComment(),
+                  $graded_component->getNotes(),
                   $graded_component->getGradedVersion(),
                   DateUtils::dateTimeToString($graded_component->getGradeTime()),
                   $graded_component->getTaGradedGradeable()->getId(),
@@ -5398,6 +5403,7 @@ AND gc_id IN (
                     UPDATE gradeable_component_data SET
                       gcd_score=?,
                       gcd_component_comment=?,
+                      gcd_notes=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?
                     WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
@@ -6439,6 +6445,7 @@ AND gc_id IN (
               gcd.array_comp_id,
               gcd.array_score,
               gcd.array_comment,
+              gcd.array_notes,
               gcd.array_grader_id,
               gcd.array_graded_version,
               gcd.array_grade_time,
@@ -6512,6 +6519,7 @@ AND gc_id IN (
                   json_agg(in_gcd.gc_id) AS array_comp_id,
                   json_agg(gcd_score) AS array_score,
                   json_agg(gcd_component_comment) AS array_comment,
+                  json_agg(gcd_notes) AS array_notes,
                   json_agg(in_gcd.gcd_grader_id) AS array_grader_id,
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
@@ -6695,6 +6703,7 @@ AND gc_id IN (
                 'comp_id',
                 'score',
                 'comment',
+                'notes',
                 'grader_id',
                 'graded_version',
                 'grade_time',

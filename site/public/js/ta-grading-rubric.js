@@ -266,11 +266,12 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
  * @param {int} graded_version
  * @param {number} custom_points
  * @param {string} custom_message
+ * @param {string} notes
  * @param {boolean} silent_edit True to edit marks assigned without changing the grader
  * @param {int[]} mark_ids
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, silent_edit, mark_ids) {
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, notes, silent_edit, mark_ids) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -283,6 +284,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
                 'graded_version': graded_version,
                 'custom_points': custom_points,
                 'custom_message': custom_message,
+                'notes': notes,
                 'silent_edit': silent_edit,
                 'mark_ids': mark_ids
             },
@@ -1256,12 +1258,14 @@ function getGradedComponentFromDOM(component_id) {
 
     let dataDOMElement = domElement.find('.graded-component-data');
     let gradedVersion = dataDOMElement.attr('data-graded_version');
+    let notes = domElement.find('textarea#internal-notes').val();
     if (gradedVersion === '') {
         gradedVersion = getDisplayVersion();
     }
     return {
         score: score,
         comment: comment,
+        notes: notes,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
         graded_version: parseInt(gradedVersion),
@@ -1945,6 +1949,18 @@ function onToggleCustomMark(me) {
 }
 
 /**
+ * Called when the internal notes have changed
+ * @param me DOM Element of the internal notes
+ */
+function onInternalNotesChange(me) {
+    updateInternalNotes(getComponentIdFromDOMElement(me))
+        .catch(function(err) {
+            console.error(err);
+            alert('Error updating internal notes! ' + err.message);
+        });
+}
+
+/**
  * Callback for the 'verify' buttons
  * @param me DOM Element of the verify button
  */
@@ -2480,6 +2496,16 @@ function toggleCustomMark(component_id) {
         return refreshGradedComponent(component_id, true);
     }
 }
+
+/**
+ * Call to update the internal notes for the given component
+ * @param {int} component_id
+ * @return {Promise}
+ */
+function updateInternalNotes(component_id) {
+    return refreshGradedComponent(component_id, true);
+}
+
 /**
  * Opens a component for instructor edit mode
  * NOTE: don't call this function on its own.  Call 'openComponent' Instead
@@ -2910,6 +2936,11 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
         }
     }
 
+    // Check that the internal notes haven't been changed
+    if (gcDOM.notes !== gcOLD.notes) {
+        return false;
+    }
+
     // Since the custom mark can be unchecked with text / point value, treat unchecked as blank score / point values
     if (gcDOM.custom_mark_selected) {
         return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
@@ -2990,6 +3021,7 @@ function saveGradedComponent(component_id) {
                 gradedComponent.graded_version,
                 gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
                 gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
+                gradedComponent.notes,
                 isSilentEditModeEnabled(),
                 gradedComponent.mark_ids);
         });

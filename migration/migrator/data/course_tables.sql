@@ -324,6 +324,7 @@ CREATE TABLE public.gradeable_component_data (
     gd_id integer NOT NULL,
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
+    gcd_notes character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
     gcd_graded_version integer,
     gcd_grade_time timestamp(6) with time zone NOT NULL,

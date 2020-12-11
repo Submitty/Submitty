@@ -1614,6 +1614,7 @@ class ElectronicGraderController extends AbstractController {
         $anon_id = $_POST['anon_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
         $custom_message = $_POST['custom_message'] ?? null;
+        $notes = $_POST['notes'] ?? '';
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
 
@@ -1722,6 +1723,7 @@ class ElectronicGraderController extends AbstractController {
                 $grader,
                 $custom_points,
                 $custom_message,
+                $notes,
                 $marks,
                 $component_version,
                 !$silent_edit
@@ -1736,7 +1738,7 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
+    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, string $notes, array $mark_ids, int $component_version, bool $overwrite) {
         // Only update the grader if we're set to overwrite it
         if ($overwrite) {
             $graded_component->setGrader($grader);
@@ -1746,6 +1748,7 @@ class ElectronicGraderController extends AbstractController {
             $graded_component->setGradedVersion($component_version);
         }
         $graded_component->setComment($custom_message);
+        $graded_component->setNotes($notes);
         $graded_component->setScore($custom_points);
         $graded_component->setGradeTime($this->core->getDateTimeNow());
 

@@ -16,7 +16,9 @@ use app\libraries\NumberUtils;
  * @method int getComponentId()
  * @method float getScore()
  * @method string getComment()
+ * @method string getNotes()
  * @method void setComment($comment)
+ * @method void setNotes($notes)
  * @method string getGraderId()
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
@@ -50,6 +52,8 @@ class GradedComponent extends AbstractModel {
     protected $score = 0.0;
     /** @prop @var string The comment on this mark / custom mark description */
     protected $comment = "";
+    /** @prop @var string The internal notes on this component that only graders can see */
+    protected $notes = "";
     /** @prop @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
     /** @prop @var int The submission version this grade is for */
@@ -84,6 +88,7 @@ class GradedComponent extends AbstractModel {
         $this->setGrader($grader);
 
         $this->setComment($details['comment'] ?? '');
+        $this->setNotes($details['notes'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
         $this->verifier_id = $details['verifier_id'] ?? '';

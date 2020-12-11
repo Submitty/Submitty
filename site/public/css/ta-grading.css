@@ -414,6 +414,22 @@ tr.is_publish {
     resize: vertical;
 }
 
+.gradeable .notes-title {
+    width: 112px;
+    padding-left: 2px;
+}
+
+.gradeable .internal-notes-container {
+    min-height: 28px;
+    padding: 3px;
+}
+
+.gradeable .internal-notes-entry {
+    width: 100%;
+    min-height: 30px;
+    resize: vertical;
+}
+
 #rubric-container {
     padding: 0 10px 0 10px;
 }
