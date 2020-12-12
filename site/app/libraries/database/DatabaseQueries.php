@@ -1749,7 +1749,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
-  )g WHERE count=?" . $include . ")AS individual", $params);
+  )g WHERE count=?" . $include . ")AS individual", 
+            $params
+        );
         if (count($this->course_db->rows()) == 0) {
             return;
         }
