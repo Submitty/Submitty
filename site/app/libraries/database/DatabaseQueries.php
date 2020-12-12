@@ -1749,9 +1749,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
-  )g WHERE count=?" . $include . ")AS individual",
-        $params
-        );
+  )g WHERE count=?" . $include . ")AS individual", $params);
         if (count($this->course_db->rows()) == 0) {
             return;
         }
@@ -3254,53 +3252,6 @@ ORDER BY gt.{$section_key}",
             $return[] = new SimpleGradeOverriddenUser($this->core, $row);
         }
         return $return;
-    }
-
-    /**
-     * Return an array of users with overridden Grades
-     *
-     * @param  string $gradeable_id
-     * @return SimpleGradeOverriddenUser[]
-     */
-    public function getOverriddenGradesStatsFromGradeable($g_id, $section_key, $is_team) {
-        // $u_or_t = "u";
-        // $users_or_teams = "users";
-        // $user_or_team_id = "user_id";
-        // if ($is_team) {
-        //     $u_or_t = "t";
-        //     $users_or_teams = "gradeable_teams";
-        //     $user_or_team_id = "team_id";
-        // }
-
-        $this->course_db->query(
-            "
-        SELECT round(AVG(marks)::numeric,2) AS avg_score, round(stddev_pop(marks)::numeric,2) AS std_dev, round(MAX(marks)::numeric,2) AS max, COUNT(*)
-        FROM grade_override
-        INNER JOIN users as u
-        ON 
-        u.user_id = grade_override.user_id
-        AND u.user_id IS NOT NULL
-        WHERE grade_override.g_id=?",
-            [$g_id]
-        );
-
-        // $this->course_db->query(
-        //     "
-        // SELECT round((AVG(marks),2) AS avg_score, round(stddev_pop(marks),2) AS std_dev, round(MAX(max),2) AS max, COUNT(*)
-        // FROM grade_override
-        // INNER JOIN {$users_or_teams} AS {$u_or_t} 
-        // ON 
-        // {$u_or_t}.{$user_or_team_id} = grade_override.{$user_or_team_id}
-        // AND {$u_or_t}.{$section_key} IS NOT NULL
-        // WHERE grade_override.g_id=?",
-        //     [$g_id]
-        // );
-
-        if (count($this->course_db->rows()) == 0) {
-            return;
-        }
-
-        return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
     /**
