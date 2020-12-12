@@ -222,32 +222,15 @@ class CourseMaterialsView extends AbstractView {
         $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
 
         //Sort the files/folders by prioriy then chronological order
-        $sort_priority_chronological = function ($a, $b) use ($priorities, $file_release_dates, $expected_path) {
-            /* our code */
-            // foreach($file_release_dates as $result) {
-            //     echo "file path: {$a}";
-            // }
-            $a_path = FileUtils::joinPaths($expected_path, $a);
-            $b_path = FileUtils::joinPaths($expected_path, $b);
-            // echo "In our sort function:";
-            // var_dump($file_release_dates);
-            // var_dump($priorities);
-
-            // echo "a file path: {$a_path}";
-            // echo "b file path: {$b_path}";
-
-            // echo "a file: {$a}";
-            // echo "b file: {$b}";
-
-            if (strtotime($file_release_dates[$a_path]) < strtotime($file_release_dates[$b_path])) {
-                echo "IM HERERERE with {$a} and {$b}\n";
-                return -1;
-            } else {
-                echo "lalalalalalalal with {$a} and {$b}\n";
+        $sort_priority_chronological = function ($a, $b) use ($file_release_dates, $expected_path) {
+            if (strtotime($file_release_dates[$a]) < strtotime($file_release_dates[$b])) {
                 return 1;
+            } else {
+                return -1;
             }
+            
         };
-        uasort($course_materials_array, $sort_priority_chronological);
+        uasort($submissions['course_materials'], $sort_priority_chronological);
         
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {

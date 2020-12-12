@@ -42,7 +42,7 @@
             </li>
         </ul>
     {% endif %}
-    <div class="inner-container" id="file-container">
+    <div class="inner-container" id="file-container">  {#displays all files#}
         {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
 
     </div>
