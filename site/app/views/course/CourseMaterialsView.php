@@ -145,7 +145,8 @@ class CourseMaterialsView extends AbstractView {
             }
         };
 
-        $submissions = [];
+        $submissions_chronological= [];
+        $submissions_alpha= [];
         $file_release_dates = [];
         $in_dir = [];
         $file_sections = [];
@@ -163,6 +164,10 @@ class CourseMaterialsView extends AbstractView {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $sort_default = 0;
+        $order = 1;
+        // $order = array(
+        //     "ordering" => 1,
+        // ); // 1 for chronological
 
         //Compound the priorities of directories inside of folders to preserve order
         foreach ($course_materials_array as $key => &$material) {
@@ -190,8 +195,8 @@ class CourseMaterialsView extends AbstractView {
 
         //Sort the files/folders by prioriy then alphabetical order
         $sort_priority = function ($a, $b) use ($priorities) {
-            /* their code */
-            if ($priorities[$b] == $priorities[$a]) { // if same priority, we alphabetize
+            if ($priorities[$b] == $priorities[$a]) { 
+                // if same priority, we alphabetize
                 if (strtolower($a) < strtolower($b)) {
                     return -1;
                 }
@@ -207,10 +212,6 @@ class CourseMaterialsView extends AbstractView {
             }
         };
         
-        // probably an if else here for alphabetical or chronological
-        // uasort($course_materials_array, $sort_priority); // sort course material array with sort_priority function
-        
-
         $restored = [];
         //Restore the priorities for each file/folder
         foreach ($priorities as $key => &$priority) {
@@ -219,9 +220,10 @@ class CourseMaterialsView extends AbstractView {
         }
         $priorities = $restored;
 
-        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
+        $add_files($this->core, $submissions_chronological, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
+        $add_files($this->core, $submissions_alpha, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
 
-        //Sort the files/folders by prioriy then chronological order
+        //Sort the files/folders by chronological order
         $sort_priority_chronological = function ($a, $b) use ($file_release_dates, $expected_path) {
             if (strtotime($file_release_dates[$a]) < strtotime($file_release_dates[$b])) {
                 return 1;
@@ -230,7 +232,20 @@ class CourseMaterialsView extends AbstractView {
             }
             
         };
-        uasort($submissions['course_materials'], $sort_priority_chronological);
+
+         //Sort the files/folders by alphabetical
+         $sort_priority_alpha = function ($a, $b) {
+            if (strtolower($a) < strtolower($b)) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        };
+
+        // uasort($course_materials_array, $sort_priority); // sort course material array with sort_priority function
+        uasort($submissions_chronological['course_materials'], $sort_priority_chronological);
+        uasort($submissions_alpha['course_materials'], $sort_priority_alpha);
         
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
@@ -249,8 +264,9 @@ class CourseMaterialsView extends AbstractView {
             'date_format' => 'Y-m-d H:i:s',
             "folderPath" => $expected_path,
             "uploadFolderPath" => $upload_path,
-            "submissions" => $submissions,
+            "submissions" => $submissions_chronological,
             "priorities" => $priorities,
+            "submissions_alpha" => $submissions_alpha,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
             "inDir" => $in_dir,
@@ -264,7 +280,8 @@ class CourseMaterialsView extends AbstractView {
             "file_sections" => $file_sections,
             "hide_from_students" => $hide_from_students,
             "external_link" => $external_link,
-            "authorized_by_allow_list" => $authorized_by_allow_list
+            "authorized_by_allow_list" => $authorized_by_allow_list,
+            "order" => $order
         ]);
     }
 }

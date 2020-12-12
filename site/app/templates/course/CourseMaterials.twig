@@ -19,6 +19,9 @@
                     {% endfor %}]
                     )' class="btn btn-primary key_to_click" tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
+            {# {% set ordering %} #}
+            {# <a onclick="checkCourseMaterialsOrdering()" class="btn btn-primary key_to_click" tabindex="0">Toggle to Change Order</a> #}
+            <a onclick='(function(){ order = 0 })();' class="btn btn-primary key_to_click" tabindex="0">Toggle to Change Order</a>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
@@ -43,8 +46,13 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">  {#displays all files#}
-        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
-
+        {% if order==1 %} {# chronological #}
+            {{ order }}
+            {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
+        {% else %}
+            {{ order }}
+            {{ self.display_files(self, submissions_alpha, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
+        {% endif %} 
     </div>
 </div>
 
