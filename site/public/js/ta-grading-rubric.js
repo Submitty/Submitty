@@ -2912,9 +2912,14 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
  * @returns {boolean}
  */
 function gradedComponentsEqual(gcDOM, gcOLD) {
-    // If the OLD component is undefined, they are only equal if no marks have been assigned
+    // If the OLD component is undefined, they are only equal if no marks have been assigned and no notes have been left
     if (gcOLD === undefined) {
-        return gcDOM.mark_ids.length === 0 && (!gcDOM.custom_mark_selected || (gcDOM.score === 0.0 && gcDOM.comment === ''));
+        return gcDOM.mark_ids.length === 0 && (!gcDOM.custom_mark_selected || (gcDOM.score === 0.0 && gcDOM.comment === '')) && (gcDOM.notes === '');
+    }
+
+    // If the notes have updated, we want to save
+    if (gcDOM.notes !== gcOLD.notes) {
+        return false;
     }
 
     // If its not the same version, then we want to save
@@ -2934,11 +2939,6 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
         if (!found) {
             return false;
         }
-    }
-
-    // Check that the internal notes haven't been changed
-    if (gcDOM.notes !== gcOLD.notes) {
-        return false;
     }
 
     // Since the custom mark can be unchecked with text / point value, treat unchecked as blank score / point values
@@ -2986,6 +2986,7 @@ function saveGradedComponent(component_id) {
     if (gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
         return Promise.resolve();
     }
+
     return ajaxGetComponentRubric(getGradeableId(), component_id)
         .then(function (component) {
             let missingMarks = [];

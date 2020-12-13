@@ -1760,6 +1760,7 @@ class ElectronicGraderController extends AbstractController {
             count($graded_component->getMarkIds()) === 0
             && $graded_component->getScore() === 0.0
             && $graded_component->getComment() === ''
+            && $graded_component->getNotes() === ''
         ) {
             $ta_graded_gradeable->deleteGradedComponent($graded_component->getComponent(), $graded_component->getGrader());
             $graded_component = null;
