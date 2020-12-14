@@ -13,6 +13,23 @@ env:
   POSTGRES_HOST: localhost
 
 jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+          with:
+              path: GIT_CHECKOUT/Submitty
+        - uses: actions/setup-python@v2
+          with:
+              python-version: '3.6'
+        - name: Setup Submitty
+          run: |
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty
+            sudo mkdir SUBMITTY_INSTALL_DIR
+            ln -s $(pwd)/GIT_CHECKOUT/Submitty $SUBMITTY_INSTALL_DIR
+            ls $SUBMITTY_INSTALL_DIR
+    
+
     e2e:
         runs-on: ubuntu-latest
         services:
