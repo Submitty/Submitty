@@ -17,7 +17,7 @@ jobs:
     #   steps:
     #     - uses: actions/checkout@v2
     #       with:
-    #           path: Submitty
+    #           path: GIT_CHECKOUT/Submitty
     #     - uses: actions/setup-python@v2
     #       with:
     #           python-version: '3.6'
@@ -25,17 +25,16 @@ jobs:
     #       run: |
     #         python3 -m pip install --upgrade pip
     #         python3 -m pip install sqlalchemy
-    #         python3 -m pip install tzlocal
+    #         python3 -m pip install tzlocal psycopg2
     #         mkdir /var/run/postgresql
-    #         export SUBMITTY_REPOSITORY=$(pwd)/Submitty
-    #         export SUBMITTY_INSTALL_DIR=$(pwd)/usr/local/submitty
-    #         pushd Submitty
+    #         export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
+    #         export SUBMITTY_INSTALL_DIR=$(pwd)
+    #         pushd GIT_CHECKOUT/Submitty
     #         sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
     #         ls $SUBMITTY_INSTALL_DIR
     #         ls $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT
     #         #python3 migration/run_migrator.py
-    #         echo "/github/workspace/Submitty/migration/../../.."
-    #         ls /github/workspace/Submitty/migration/../../..
+    
 
     e2e:
         runs-on: ubuntu-latest
@@ -55,7 +54,7 @@ jobs:
         steps:
           - uses: actions/checkout@v2
             with:
-              path: Submitty
+              path: GIT_CHECKOUT/Submitty
           - uses: actions/setup-python@v2
             with:
               python-version: '3.6'
@@ -84,7 +83,7 @@ jobs:
           - name: Get compose cache dir
             id: composer-cache
             run: |
-              pushd Submitty/site
+              pushd GIT_CHECKOUT/Submitty/site
               echo "::set-output name=dir::$(composer config cache-files-dir)"
               popd
           - name: Install Composer Cache
@@ -96,7 +95,7 @@ jobs:
                 ${{ runner.os }}-php-composer-
           - name: Install PHP dependencies
             run: |
-              pushd Submitty/site
+              pushd GIT_CHECKOUT/Submitty/site
               composer install --prefer-dist
               popd
           - name: Setup Submitty
@@ -105,8 +104,9 @@ jobs:
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
-              export SUBMITTY_REPOSITORY=$(pwd)/Submitty
-              pushd Submitty
+              export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
+              export SUBMITTY_INSTALL_DIR=$(pwd)
+              pushd GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
