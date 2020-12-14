@@ -2,6 +2,8 @@
 
 set -ev
 
+echo 'SUBMITTY_INSTALL_DIR : ' $SUBMITTY_INSTALL_DIR
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src

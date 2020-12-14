@@ -14,7 +14,7 @@ account required pam_unix.so" > /etc/pam.d/httpd'
 sed -i '25s/^/\#/' /etc/pam.d/common-password
 sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
-echo 'in testing/setup.sh, going to make data dir ' ${SUBMITTY_DATA_DIR}
+echo 'in testing/setup.sh, going to make data dir ' ${SUBMITTY_DATA_DIR} ', ' $SUBMITTY_INSTALL_DIR
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
