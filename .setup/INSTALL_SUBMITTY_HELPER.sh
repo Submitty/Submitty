@@ -32,8 +32,19 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
     VAGRANT=1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+if [ -z $SUBMITTY_REPOSITORY ]; then
+    SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
+fi
+
+if [ -z $SUBMITTY_INSTALL_DIR ]; then
+    SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+fi
+
+echo "THIS DIR:"
+echo $THIS_DIR
+
+echo "SUBMITTY_INSTALL_DIR"
+echo $SUBMITTY_INSTALL_DIR
 
 source ${THIS_DIR}/bin/versions.sh
 
@@ -140,6 +151,10 @@ PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+
+echo "SUBMITTY DATA_DIR"
+echo $SUBMITTY_DATA_DIR
+echo $PHP_USER
 
 ########################################################################################################################
 ########################################################################################################################
