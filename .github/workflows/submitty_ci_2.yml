@@ -123,7 +123,7 @@ jobs:
               export SUBMITTY_INSTALL_DIR=$(pwd)
               pushd GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
-              mkdir -p /usr/local/submitty/GIT_CHECKOUT
+              sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT
               ln -s $SUBMITTY_REPOSITORY/GIT_CHECKOUT /usr/local/submitty/GIT_CHECKOUT
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
