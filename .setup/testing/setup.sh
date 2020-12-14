@@ -48,7 +48,7 @@ chmod -R 777 ${SUBMITTY_DATA_DIR}
 echo -e "localhost
 5432
 submitty_dbuser
-submitty_dbpass
+submitty_dbuser
 America/New_York
 http://localhost
 
