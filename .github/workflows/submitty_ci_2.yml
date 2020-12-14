@@ -10,10 +10,24 @@ env:
   PHP_GROUP: submitty_php
   CGI_USER: submitty_cgi
   SUBMITTY_DATA_DIR: /var/local/submitty
+  POSTGRES_HOST: localhost
 
 jobs:
     # test:
     #   runs-on: ubuntu-latest
+    #   services:
+    #       postgres:
+    #         image: postgres:latest
+    #         env: 
+    #           POSTGRES_PASSWORD: submitty_dbuser
+    #         options: >-
+    #           --health-cmd pg_isready
+    #           --health-interval 10s
+    #           --health-timeout 5s
+    #           --health-retries 5
+    #         ports:
+    #           - 5432:5432
+
     #   steps:
     #     - uses: actions/checkout@v2
     #       with:
@@ -26,7 +40,8 @@ jobs:
     #         python3 -m pip install --upgrade pip
     #         python3 -m pip install sqlalchemy
     #         python3 -m pip install tzlocal psycopg2
-    #         mkdir /var/run/postgresql
+    #         PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+    #         PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
     #         export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
     #         export SUBMITTY_INSTALL_DIR=$(pwd)
     #         pushd GIT_CHECKOUT/Submitty
