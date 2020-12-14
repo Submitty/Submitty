@@ -488,6 +488,7 @@ echo -e "Compile and install analysis tools"
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 pwd
 ls
+echo ${SUBMITTY_INSTALL_DIR}
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
