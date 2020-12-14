@@ -40,11 +40,11 @@ if [ -z $SUBMITTY_INSTALL_DIR ]; then
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 fi
 
-echo "THIS DIR:"
-echo $THIS_DIR
+echo -e "THIS DIR:"
+echo -e $THIS_DIR
 
-echo "SUBMITTY_INSTALL_DIR"
-echo $SUBMITTY_INSTALL_DIR
+echo -e "SUBMITTY_INSTALL_DIR"
+echo -e $SUBMITTY_INSTALL_DIR
 
 source ${THIS_DIR}/bin/versions.sh
 
