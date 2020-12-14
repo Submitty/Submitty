@@ -19,11 +19,21 @@
                     {% endfor %}]
                     )' class="btn btn-primary key_to_click" tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
-            {# {% set ordering %} #}
-            {# <a onclick="checkCourseMaterialsOrdering()" class="btn btn-primary key_to_click" tabindex="0">Toggle to Change Order</a> #}
-            <a onclick='(function(){ order = 0 })();' class="btn btn-primary key_to_click" tabindex="0">Toggle to Change Order</a>
+            <a class="btn btn-primary key_to_click" href="{{ order_toggle_url }}">
+                {{ sort }}
+                {{ sort == 'chronological' ? 'Alphabetical' : 'Chrnological' }}
+                {{sort}}
+                {% if sort == "chronological" %}
+                    {% set sort  = "alphabetical" %}
+                {% else %}
+                    {% set sort  = "chronological" %}
+                {% endif %}
+                {{sort}}
+            </a>
+
         </div>
     {% endif %}
+
     <h1>Course Materials</h1>
     {% if userGroup==1 %}
         <ul style="justify-self: center" id="details-legend" class="table-bordered">
@@ -45,12 +55,11 @@
             </li>
         </ul>
     {% endif %}
+
     <div class="inner-container" id="file-container">  {#displays all files#}
-        {% if order==1 %} {# chronological #}
-            {{ order }}
+        {% if sort == "chronological" %} {# chronological #}
             {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
         {% else %}
-            {{ order }}
             {{ self.display_files(self, submissions_alpha, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
         {% endif %} 
     </div>
@@ -227,7 +236,6 @@
         if(folderCookie == "open"){
             //open all the folders
             openAllDivForCourseMaterials();
-            //
             {% for file in inDir %}
                 //if one of the subdirs, check if it is closed post opening all
                 var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));

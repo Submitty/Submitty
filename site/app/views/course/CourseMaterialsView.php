@@ -165,9 +165,8 @@ class CourseMaterialsView extends AbstractView {
         $json = FileUtils::readJsonFile($fp);
         $sort_default = 0;
         $order = 1;
-        // $order = array(
-        //     "ordering" => 1,
-        // ); // 1 for chronological
+        $sort = "alphabetical";
+        $details_base_url = "http://localhost:1501/courses/f20/sample/course_materials";
 
         //Compound the priorities of directories inside of folders to preserve order
         foreach ($course_materials_array as $key => &$material) {
@@ -281,7 +280,11 @@ class CourseMaterialsView extends AbstractView {
             "hide_from_students" => $hide_from_students,
             "external_link" => $external_link,
             "authorized_by_allow_list" => $authorized_by_allow_list,
-            "order" => $order
+            "order" => $order,
+            "details_base_url" => $details_base_url,
+            "sort" => $sort,
+            "order_toggle_url" => $details_base_url . '?' .
+                http_build_query(['sort' => $sort === 'chronological' ? 'alphabetical' : 'chronological']) // if it's coronological, don't display in url
         ]);
     }
 }
