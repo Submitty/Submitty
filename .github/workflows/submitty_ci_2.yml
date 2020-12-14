@@ -58,6 +58,7 @@ jobs:
             image: postgres
             env: 
               POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: submitty_dbuser
             options: >-
               --health-cmd pg_isready
               --health-interval 10s
