@@ -145,8 +145,8 @@ class CourseMaterialsView extends AbstractView {
             }
         };
 
-        $submissions_chronological= [];
-        $submissions_alpha= [];
+        $submissions_chronological = [];
+        $submissions_alpha = [];
         $file_release_dates = [];
         $in_dir = [];
         $file_sections = [];
@@ -194,7 +194,7 @@ class CourseMaterialsView extends AbstractView {
 
         //Sort the files/folders by prioriy then alphabetical order
         $sort_priority = function ($a, $b) use ($priorities) {
-            if ($priorities[$b] == $priorities[$a]) { 
+            if ($priorities[$b] == $priorities[$a]) {
                 // if same priority, we alphabetize
                 if (strtolower($a) < strtolower($b)) {
                     return -1;
@@ -210,7 +210,6 @@ class CourseMaterialsView extends AbstractView {
                 return 1;
             }
         };
-        
         $restored = [];
         //Restore the priorities for each file/folder
         foreach ($priorities as $key => &$priority) {
@@ -223,13 +222,13 @@ class CourseMaterialsView extends AbstractView {
         $add_files($this->core, $submissions_alpha, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
 
         //Sort the files/folders by chronological order
-        $sort_priority_chronological = function ($a, $b) use ($file_release_dates, $expected_path) {
+        $sort_priority_chronological = function ($a, $b) use ($file_release_dates) {
             if (strtotime($file_release_dates[$a]) < strtotime($file_release_dates[$b])) {
                 return 1;
-            } else {
+            }
+            else {
                 return -1;
             }
-            
         };
 
          //Sort the files/folders by alphabetical
