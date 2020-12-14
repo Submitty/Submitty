@@ -38,17 +38,8 @@ jobs:
               python-version: '3.6'
         - name: Setup Submitty
           run: |
-            python3 -m pip install --upgrade pip
-            python3 -m pip install sqlalchemy
-            python3 -m pip install tzlocal psycopg2
-            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-            export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
             export SUBMITTY_INSTALL_DIR=$(pwd)
-            pushd GIT_CHECKOUT/Submitty
-            sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-            ls $SUBMITTY_INSTALL_DIR
-            ls $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT
-            #python3 migration/run_migrator.py
+            echo $SUBMITTY_INSTALL_DIR
     
 
     e2e:

@@ -71,6 +71,8 @@ bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 
 python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
 
+export SUBMITTY_INSTALL_DIR=/usr/local/submitty
+ls $SUBMITTY_INSTALL_DIR
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
 systemctl start submitty_autograding_shipper
