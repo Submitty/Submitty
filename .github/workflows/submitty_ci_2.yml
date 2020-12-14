@@ -13,35 +13,6 @@ env:
   POSTGRES_HOST: localhost
 
 jobs:
-    test:
-      runs-on: ubuntu-latest
-      services:
-          postgres:
-            image: postgres:latest
-            env: 
-              POSTGRES_PASSWORD: submitty_dbuser
-              POSTGRES_USER: submitty_dbuser
-            options: >-
-              --health-cmd pg_isready
-              --health-interval 10s
-              --health-timeout 5s
-              --health-retries 5
-            ports:
-              - 5432:5432
-
-      steps:
-        - uses: actions/checkout@v2
-          with:
-              path: GIT_CHECKOUT/Submitty
-        - uses: actions/setup-python@v2
-          with:
-              python-version: '3.6'
-        - name: Setup Submitty
-          run: |
-            export SUBMITTY_INSTALL_DIR=$(pwd)
-            echo $SUBMITTY_INSTALL_DIR
-    
-
     e2e:
         runs-on: ubuntu-latest
         services:
