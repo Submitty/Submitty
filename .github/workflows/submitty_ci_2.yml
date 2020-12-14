@@ -26,7 +26,7 @@ jobs:
           run: |
             export SUBMITTY_INSTALL_DIR=/usr/local/submitty
             sudo mkdir SUBMITTY_INSTALL_DIR
-            sudo ln -s $(pwd)/GIT_CHECKOUT/Submitty $SUBMITTY_INSTALL_DIR
+            sudo ln -s $(pwd) $SUBMITTY_INSTALL_DIR
             ls $SUBMITTY_INSTALL_DIR
     
 
@@ -100,9 +100,11 @@ jobs:
               sudo apt install libboost-all-dev
               export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
               export SUBMITTY_INSTALL_DIR=$(pwd)
+              echo $SUBMITTY_INSTALL_DIR
               pushd GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo ln -s $(pwd) /usr/local/submitty
+              ls -la $SUBMITTY_INSTALL_DIR
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
 
