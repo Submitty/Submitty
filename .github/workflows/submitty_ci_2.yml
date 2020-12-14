@@ -124,7 +124,7 @@ jobs:
               pushd GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT
-              ln -s $SUBMITTY_REPOSITORY/GIT_CHECKOUT /usr/local/submitty/GIT_CHECKOUT
+              sudo ln -s $SUBMITTY_REPOSITORY/GIT_CHECKOUT /usr/local/submitty/GIT_CHECKOUT
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
 
