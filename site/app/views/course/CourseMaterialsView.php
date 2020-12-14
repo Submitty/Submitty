@@ -239,12 +239,11 @@ class CourseMaterialsView extends AbstractView {
             else {
                 return 1;
             }
-        };
+         };
 
         // uasort($course_materials_array, $sort_priority); // sort course material array with sort_priority function
         uasort($submissions_chronological['course_materials'], $sort_priority_chronological);
         uasort($submissions_alpha['course_materials'], $sort_priority_alpha);
-        
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
