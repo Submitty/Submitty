@@ -41,7 +41,7 @@ jobs:
             python3 -m pip install --upgrade pip
             python3 -m pip install sqlalchemy
             python3 -m pip install tzlocal psycopg2
-            #PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
             export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
             export SUBMITTY_INSTALL_DIR=$(pwd)
             pushd GIT_CHECKOUT/Submitty
@@ -123,6 +123,7 @@ jobs:
               export SUBMITTY_INSTALL_DIR=$(pwd)
               pushd GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+              mkdir -p /usr/local/submitty/GIT_CHECKOUT
               ln -s $SUBMITTY_REPOSITORY/GIT_CHECKOUT /usr/local/submitty/GIT_CHECKOUT
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
