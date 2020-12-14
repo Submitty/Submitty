@@ -93,7 +93,6 @@ chown root:root TestRunner.class
 chmod 444 TestRunner.class
 popd
 
-
 #################################################################
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
