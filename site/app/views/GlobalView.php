@@ -27,7 +27,7 @@ class GlobalView extends AbstractView {
 
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
-            $page_title = " Submitty Login";
+            $page_title = "Submitty Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
             $page_title = "Submitty " . $course_name . " " . $page_name;
