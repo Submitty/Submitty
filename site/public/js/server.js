@@ -375,22 +375,13 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 }
 
 function checkCourseMaterialsOrdering(order) {
-    // if (order == 0) {
-    //     order = 1;
-    //     reload = location.reload();
-    //     order = 1;
-    //     console.log(order);
-    // } else {
-    //     order = 0;
-    //     reload = location.reload();
-    //     order = 0;
-    //     console.log(order);
-    // }
-    
-    // $("#load").click(function () { 
-    //     order = order + 1;
-    //     console.log(order);
-    // });
+    if (order == 0) {
+        order = 1;
+        reload = location.reload();
+    } else {
+        order = 0;
+        reload = location.reload();
+    }
 }
   
 function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
