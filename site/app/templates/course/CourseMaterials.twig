@@ -20,15 +20,12 @@
                     )' class="btn btn-primary key_to_click" tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
             <a class="btn btn-primary key_to_click" href="{{ order_toggle_url }}">
-                {{ sort }}
                 {{ sort == 'chronological' ? 'Alphabetical' : 'Chrnological' }}
-                {{sort}}
                 {% if sort == "chronological" %}
                     {% set sort  = "alphabetical" %}
                 {% else %}
                     {% set sort  = "chronological" %}
                 {% endif %}
-                {{sort}}
             </a>
 
         </div>
