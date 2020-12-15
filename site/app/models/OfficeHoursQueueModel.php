@@ -157,6 +157,14 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $h . "h " . $m . "m " . $s . "s";
     }
 
+    public function getTimePaused($time_out, $time_paused) {
+        $diff = strtotime($time_out) - strtotime($time_paused);
+        $h = $diff / 3600 % 24;
+        $m = $diff / 60 % 60;
+        $s = $diff % 60;
+        return $h . "h " . $m . "m " . $s . "s";
+    }
+
     //gets the number of people ahead of you in the queue.
     //If no queue_code is passed it assumes you want the total number in all queues
     public function getQueueNumberAheadOfYou($queue_code = null) {

@@ -92,6 +92,13 @@
         {% endif %}
       </button>
     </form>
+    <p>
+      {% set time_out = 5400 %}
+      {% set time_paused = 5500 %}
+      {% set time_paused = viewer.getTimePaused(time_out, time_paused) %}
+      You have been paused for {{time_paused}}. 
+      Unpause if you want to unpause your position in the queue
+    </p>
   </div>
 {% else %}
   <div id="queue_status">
