@@ -38,14 +38,14 @@ jobs:
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              pip3 install .
+              pip3 install . --user
               popd
         - name: test3
           run: |
-              pip3 install sqlalchemy
-              pip3 install docker
-              pip3 install pyyaml
-              python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
+              pip3 install sqlalchemy --user
+              pip3 install docker --user
+              pip3 install pyyaml --user
+              sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
 
         # - name: Cache Pip
         #   uses: actions/cache@v2
@@ -201,11 +201,9 @@ jobs:
               pip3 install jsonref
               pip3 install websocket_client
               pip3 install psycopg2
-              pip3 install docker
+              pip3 install docker --user
               pip3 install pyyaml
-              #needs to be globally available to daemon user created later
-              sudo pip3 install docker
-              sudo pip3 install paramiko
+              sudo pip3 install paramiko --user
           - name: Get compose cache dir
             id: composer-cache
             run: |
@@ -240,14 +238,14 @@ jobs:
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              pip3 install .
+              pip3 install . --user
               popd
           - name: Setup website
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
+              sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
               sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
               echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
