@@ -206,6 +206,7 @@ jobs:
               #needs to be globally available to daemon user created later
               sudo pip3 install docker
               sudo pip3 install paramiko
+              sudo pip3 install tzlocal
           - name: Get compose cache dir
             id: composer-cache
             run: |
