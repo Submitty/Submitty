@@ -77,7 +77,7 @@ jobs:
           - name: Install dependencies
             run: composer install --prefer-dist --dev
           - name: Run php unit tests
-            run : php vendor/bin/phpunit --configuration tests/phpunit.xml
+            run : XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration tests/phpunit.xml
 
 
     python-lint:
