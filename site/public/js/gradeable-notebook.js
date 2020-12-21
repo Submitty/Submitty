@@ -67,14 +67,25 @@ function setCodeBox(codebox_id, state)
 
 const NOTEBOOK_DEFER_KEY = 'notebook-autosave';
 
-const NOTEBOOK_AUTOSAVE_KEY = `${window.location.pathname}-notebook-autosave`;
+const NOTEBOOK_AUTOSAVE_KEY_SUFFIX = `${window.location.pathname}-notebook-autosave`;
+
+/**
+ * Get the autosave key for the notebook.
+ * 
+ * This is a function because USER_ID is defined *after* this script is
+ * loaded -- thus, simply defining the constant w/ USER_ID results in an
+ * error since USER_ID is not yet defined.
+ */
+function notebookAutosaveKey() {
+    return `${USER_ID}-${NOTEBOOK_AUTOSAVE_KEY_SUFFIX}`;
+}
 
 /**
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
     if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
-        localStorage.setItem(NOTEBOOK_AUTOSAVE_KEY, JSON.stringify({
+        localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
             timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
             codebox: gatherInputAnswersByType("codebox")
@@ -88,7 +99,7 @@ function saveNotebookToLocal() {
  */
 function restoreNotebookFromLocal() {
     if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
-        const state = JSON.parse(localStorage.getItem(NOTEBOOK_AUTOSAVE_KEY));
+        const state = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
         
         if (state === null) {
             return;
@@ -141,7 +152,7 @@ $(document).ready(function () {
     });
 
     $("#submit").click(() => {
-        localStorage.removeItem(NOTEBOOK_AUTOSAVE_KEY);
+        localStorage.removeItem(notebookAutosaveKey());
         // Changes have been submitted; we don't need to warn the user anymore
         window.onbeforeunload = null;
     });
