@@ -41,7 +41,7 @@ jobs:
       steps:
         - name : setup local db
           run: |
-            mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             sudo apt update
             sudo apt-get install systemd
             sudo apt install postgresql postgresql-contrib
@@ -140,6 +140,7 @@ jobs:
           - name: Copy Repo
             run: |
               # have to copy first, absolute paths not supported by actions/checkout@v2
+                sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 cp -r SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           - uses: actions/setup-python@v2
             with:
