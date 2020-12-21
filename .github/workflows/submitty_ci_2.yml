@@ -17,14 +17,14 @@ jobs:
       runs-on: ubuntu-latest
       steps:
        - uses: actions/checkout@v2
+       - uses: actions/setup-python@v2
+         with:
+            python-version: '3.6'
        - name: install submitty python utils
          run: |
             pushd python_submitty_utils
             pip3 install .
             popd
-        # - uses: actions/setup-python@v2
-        #   with:
-        #     python-version: '3.6'
         # - name: Cache Pip
         #   uses: actions/cache@v2
         #   with:
