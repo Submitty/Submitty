@@ -13,19 +13,41 @@ env:
   POSTGRES_HOST: localhost
 
 jobs:
+    # test:
+    #   runs-on: ubuntu-latest
+    #   steps:
+    #     - uses: actions/checkout@v2
+    #     - uses: actions/setup-python@v2
+    #       with:
+    #         python-version: '3.6'
+    #     - name: Cache Pip
+    #       uses: actions/cache@v2
+    #       with:
+    #         path: path ~/.cache/pip
+    #         key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+    #         restore-keys: |
+    #           ${{ runner.os }}-py-pip
+    #     - name: Install Python dependencies
+    #       run: |
+    #         pip3 install --upgrade pip
+    #         sudo pip3 install paramiko
+    #     - name: test
+    #       run: |
+    #         adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #         sudo -H -u submitty_daemon python3 sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
+
     e2e-local:
       runs-on: ubuntu-latest
       steps:
         - name : setup local db
           run: |
-            pwd
             mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            # sudo apt update
-            # sudo apt-get install systemd
-            # sudo apt install postgresql postgresql-contrib
-            # sudo service postgresql  start
-            # sudo -u postgres psql -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-            # PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+            sudo apt update
+            sudo apt-get install systemd
+            sudo apt install postgresql postgresql-contrib
+            sudo service postgresql  start
+            sudo -u postgres psql -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - uses: actions/checkout@v2
           with:
             path: SUBMITTY_CPY/
@@ -49,16 +71,19 @@ jobs:
               ${{ runner.os }}-py-pip
         - name: Install Python dependencies
           run: |
-            python3 -m pip install --upgrade pip
-            python3 -m pip install python-pam
-            python3 -m pip install sqlalchemy
-            python3 -m pip install selenium
-            python3 -m pip install tzlocal
-            python3 -m pip install jsonschema
-            python3 -m pip install jsonref
-            python3 -m pip install docker
-            python3 -m pip install websocket_client
-            python3 -m pip install psycopg2
+            pip3 install --upgrade pip
+            pip3 install python-pam
+            pip3 install sqlalchemy
+            pip3 install selenium
+            pip3 install tzlocal
+            pip3 install jsonschema
+            pip3 install jsonref
+            pip3 install docker
+            pip3 install websocket_client
+            pip3 install psycopg2
+            #needs to be globally available to daemon user created later
+            sudo pip3 install paramiko
+
         - name: Get compose cache dir
           id: composer-cache
           run: |
@@ -84,9 +109,9 @@ jobs:
             export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
             export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            pwd
-            ls -lah
+            ls -la $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT/Submitty/.setup
             sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+            ls -la $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT/Submitty/.setup
             sudo ln -s $(pwd) /usr/local/submitty
             ls -la $SUBMITTY_INSTALL_DIR
             sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
@@ -111,7 +136,11 @@ jobs:
         steps:
           - uses: actions/checkout@v2
             with:
-              path: GIT_CHECKOUT/Submitty
+              path: SUBMITTY_CPY/
+          - name: Copy Repo
+            run: |
+              # have to copy first, absolute paths not supported by actions/checkout@v2
+                cp -r SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           - uses: actions/setup-python@v2
             with:
               python-version: '3.6'
@@ -127,20 +156,22 @@ jobs:
                 ${{ runner.os }}-py-pip
           - name: Install Python dependencies
             run: |
-              python3 -m pip install --upgrade pip
-              python3 -m pip install python-pam
-              python3 -m pip install sqlalchemy
-              python3 -m pip install selenium
-              python3 -m pip install tzlocal
-              python3 -m pip install jsonschema
-              python3 -m pip install jsonref
-              python3 -m pip install docker
-              python3 -m pip install websocket_client
-              python3 -m pip install psycopg2
+              pip3 install --upgrade pip
+              pip3 install python-pam
+              pip3 install sqlalchemy
+              pip3 install selenium
+              pip3 install tzlocal
+              pip3 install jsonschema
+              pip3 install jsonref
+              pip3 install docker
+              pip3 install websocket_client
+              pip3 install psycopg2
+              #needs to be globally available to daemon user created later
+              sudo pip3 install paramiko
           - name: Get compose cache dir
             id: composer-cache
             run: |
-              pushd GIT_CHECKOUT/Submitty/site
+              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               echo "::set-output name=dir::$(composer config cache-files-dir)"
               popd
           - name: Install Composer Cache
@@ -152,7 +183,7 @@ jobs:
                 ${{ runner.os }}-php-composer-
           - name: Install PHP dependencies
             run: |
-              pushd GIT_CHECKOUT/Submitty/site
+              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               composer install --prefer-dist
               popd
           - name: Setup Submitty
@@ -163,7 +194,7 @@ jobs:
               export SUBMITTY_REPOSITORY=$(pwd)/GIT_CHECKOUT/Submitty
               export SUBMITTY_INSTALL_DIR=$(pwd)
               echo $SUBMITTY_INSTALL_DIR
-              pushd GIT_CHECKOUT/Submitty
+              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo ln -s $(pwd) /usr/local/submitty
               ls -la $SUBMITTY_INSTALL_DIR

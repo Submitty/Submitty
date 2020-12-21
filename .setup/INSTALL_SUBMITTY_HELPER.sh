@@ -617,14 +617,14 @@ echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\
 
 ################################################################################################################
 ################################################################################################################
-# INSTALL SUBMITTY CRONTAB
+echo -e "INSTALL SUBMITTY CRONTAB"
 #############################################################
 
 cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
 
 ################################################################################################################
 ################################################################################################################
-# Allow course creation by daemon
+echo -e "Allow course creation by daemon"
 #############################################################
 
 cat ${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers | envsubst | cat - > /etc/sudoers.d/submitty
@@ -633,7 +633,7 @@ chown root:root /etc/sudoers.d/submitty
 
 ################################################################################################################
 ################################################################################################################
-# INSTALL & START GRADING SCHEDULER DAEMON
+echo -e "INSTALL & START GRADING SCHEDULER DAEMON"
 #############################################################
 # stop the submitty daemons (if they're running)
 for i in "${ALL_DAEMONS[@]}"; do
@@ -658,7 +658,7 @@ done
 if [ "${WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
-    sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
+    sudo -H -u ${DAEMON_USER} python3 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "done"
 fi
 
