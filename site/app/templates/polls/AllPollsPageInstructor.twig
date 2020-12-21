@@ -12,34 +12,40 @@
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
-            <col style="width: 22%">
-            <col style="width: 26%">
-            <col style="width: 26%">
-            <col style="width: 26%">
+            <col style="width: 30%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
             <thead>
                 <tr>
                     <th scope="col"></th>
+                    <th scope="col"></th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
+                    <th scope="col">Responses</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td align="left"> 
+                        <td align="left">
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
                             <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
+                        <td></td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
@@ -64,17 +70,19 @@
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
-            <col style="width: 25%">
-            <col style="width: 20%">
-            <col style="width: 15%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 30%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
             <thead>
                 <tr>
                     <th scope="col"></th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
+                    <th scope="col">Responses</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -95,6 +103,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
@@ -118,20 +127,26 @@
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
-            <col style="width: 24%">
-            <col style="width: 38%">
-            <col style="width: 38%">
+            <col style="width: 30%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
+            <col style="width: 14%">
             <thead>
                 <tr>
                     <th scope="col"></th>
                     <th scope="col">Date Released</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col">Responses</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for poll in future_polls %}
                     <tr>
-                        <td align="left"> 
+                        <td align="left">
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
@@ -139,6 +154,9 @@
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
+                        <td></td>
+                        <td></td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
