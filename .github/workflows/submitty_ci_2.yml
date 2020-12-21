@@ -85,6 +85,7 @@ jobs:
             pip3 install psycopg2
             #needs to be globally available to daemon user created later
             sudo pip3 install paramiko
+            sudo pip3 install docker
 
         - name: Get compose cache dir
           id: composer-cache
@@ -161,6 +162,7 @@ jobs:
               key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
+          - uses: nanasess/setup-chromedriver@master
           - name: Install Python dependencies
             run: |
               pip3 install --upgrade pip
@@ -204,7 +206,54 @@ jobs:
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              popd
+          - name: Setup website
+            run: |
+              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+              sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+              echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+              cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+              sudo mkdir -p /run/php
+              sudo chown www-data:www-data /run/php
+              sudo chmod 755 /run/php
+              sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+              sudo a2dissite 000-default
+              sudo rm -rf /etc/apache2/sites-available/*
+              sudo rm -rf /etc/apache2/sites-enabled/*
+              sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
+              sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
+              sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+              sudo chmod 0640 /etc/apache2/suexec/www-data
+              sudo a2ensite submitty
+              sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+              cat /etc/apache2/sites-available/submitty.conf
+              sudo apache2ctl -t
+              sudo service apache2 restart
+              sudo mkdir /etc/systemd/system/nginx.service.d
+              sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
+              sudo systemctl daemon-reload
+              sudo rm -rf /etc/nginx/sites-available/*
+              sudo rm -rf /etc/nginx/sites-enabled/*
+              sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+              sudo chmod 644 /etc/nginx/sites-available/submitty.conf
+              sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+              sudo service nginx restart
+          - name: Run tests
+            run: |
+              echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+              sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
+              echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+              pushd tests
+              TEST_URL="http://localhost" python3 -m unittest e2e.test_login
+              popd
+              SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+              sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+              bash tests/git_test.sh
+              sudo bash tests/test_site_error_log.sh
 
 
 
-  
+      
