@@ -172,6 +172,7 @@ jobs:
               pip3 install jsonref
               pip3 install websocket_client
               pip3 install psycopg2
+              pip3 install docker
               #needs to be globally available to daemon user created later
               sudo pip3 install docker
               sudo pip3 install paramiko
