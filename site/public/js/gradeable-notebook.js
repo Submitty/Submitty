@@ -108,7 +108,9 @@ function restoreNotebookFromLocal() {
         // First, we restore multiple choice answers
         for (const id in state.multiple_choice) {
             const values = state.multiple_choice[id];
-            const index = /multiple_choice_([0-9])+/.exec(id)[1];
+            // Extract the index from the ID generated from gatherInputAnswersByType()
+            // Index is stored after multiple_choice_, so substring it out
+            const index = id.substring("multiple_choice_".length);
             $(`#mc_field_${index} :input`).each((_index, element) => {
                 $(element).prop('checked', values.includes(element.value)).change();
             });
