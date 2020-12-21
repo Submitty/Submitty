@@ -16,13 +16,25 @@ jobs:
     test:
       runs-on: ubuntu-latest
       steps:
-       - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+       with:
+         path: SUBMITTY_CPY/
+      - name: Copy Repo
+      run: |
+        # have to copy first, absolute paths not supported by actions/checkout@v2
+          sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+          sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+          sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
+          pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+          popd
        - uses: actions/setup-python@v2
          with:
             python-version: '3.6'
        - name: install submitty python utils
          run: |
-            pushd python_submitty_utils
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
+            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
             pip3 install .
             popd
         # - name: Cache Pip
