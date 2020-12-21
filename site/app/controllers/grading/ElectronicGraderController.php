@@ -50,6 +50,88 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
+
+    /**
+     * Gnenerates histogram data needed for the TA stats page
+     * @param GradedGradeable[] $overall_scores
+     * @return array of histogram data
+     */
+    public function generateHistogramData($overall_scores) {
+        $histogram = [
+            "bTA" => [],
+            "tTA" => [],
+            "bAuto" => [],
+            "VerConf" => 0,
+            "noSub" => 0,
+            "noActive" => 0,
+            "GradeInq" => 0,
+            "IncompGrading" => 0,
+            "cancelledSub" => 0
+        ];
+
+        // Iterate through all the Scores
+        foreach ($overall_scores as $ov) {
+            if ($ov->getTaGradedGradeable() == null) {
+                continue;
+            }
+
+            // If Autograded, add the points to the array of autograded scores
+            if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0 && $ov->getTaGradedGradeable() != null) {
+                if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                    if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
+                        if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
+                            $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                        }
+                        else {
+                            $histogram["cancelledSub"] += 1;
+                        }
+                    }
+                }
+            }
+
+            if (!$ov->getAutoGradedGradeable()->hasSubmission()) {
+                // if no submission and not in Null section add to count
+                if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                    $histogram["noSub"] += 1;
+                }
+            }
+            elseif ($ov->getAutoGradedGradeable()->getActiveVersion() == 0) {
+                // if no active version and not in Null section add to count
+                if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                    $histogram["noActive"] += 1;
+                }
+            }
+            elseif ($ov->getGradeable()->isTaGrading()) {
+                if ($ov->getOrCreateTaGradedGradeable()->anyGrades()) {
+                    // if grade inquiry and not in Null section add to count
+                    if ($ov->hasActiveRegradeRequest()) {
+                        if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                            $histogram["noActive"] += 1;
+                        }
+                    }
+                    elseif ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->hasVersionConflict()) {
+                        // if version conflict and not in Null section add to count
+                        if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                            $histogram["VerConf"] += 1;
+                        }
+                    }
+                    elseif (!$ov->isTaGradingComplete()) {
+                        // if assignment incomplete and not in Null section add to count
+                        $histogram["IncompGrading"] += 1;
+                    }
+                    elseif ($ov->isTaGradingComplete()) {
+                        // otherwise add the overall grade to array and total score possible to array (possible future use)
+                        if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                            $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore()]);
+                            $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getGradeable()->getManualGradingPoints()]);
+                        }
+                    }
+                }
+            }
+        }
+        return $histogram;
+    }
+
     /**
      * Helper function for Randomization
      * @param Array $student_array
@@ -422,6 +504,7 @@ class ElectronicGraderController extends AbstractController {
         $sections = [];
         $total_users = [];
         $component_averages = [];
+        $histogram_data = [];
         $autograded_average = null;
         $overall_average = null;
         $overall_scores = null;
@@ -532,6 +615,7 @@ class ElectronicGraderController extends AbstractController {
             $overall_scores = $order->getSortedGradedGradeables();
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections);
+            $histogram_data = $this->generateHistogramData($overall_scores);
         }
         $sections = [];
         //Either # of teams or # of students (for non-team assignments). Either case
@@ -683,6 +767,7 @@ class ElectronicGraderController extends AbstractController {
             $autograded_average,
             $overall_scores,
             $overall_average,
+            $histogram_data,
             $total_submissions,
             $individual_viewed_grade ?? 0,
             $total_students_submitted,
