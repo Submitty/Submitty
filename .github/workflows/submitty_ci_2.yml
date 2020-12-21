@@ -201,9 +201,11 @@ jobs:
               pip3 install jsonref
               pip3 install websocket_client
               pip3 install psycopg2
-              pip3 install docker --user
+              pip3 install docker
               pip3 install pyyaml
-              sudo pip3 install paramiko --user
+              #needs to be globally available to daemon user created later
+              sudo pip3 install docker
+              sudo pip3 install paramiko
           - name: Get compose cache dir
             id: composer-cache
             run: |
