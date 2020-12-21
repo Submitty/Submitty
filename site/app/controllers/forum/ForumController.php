@@ -486,7 +486,7 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/announcements", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
-    public function alterAnnouncement($type) {
+    public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
 
@@ -496,7 +496,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/forum/threads/bookmark", methods={"POST"})
      */
-    public function bookmarkThread($type) {
+    public function bookmarkThread(bool $type) {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->addBookmarkedThread($current_user, $thread_id, $type);

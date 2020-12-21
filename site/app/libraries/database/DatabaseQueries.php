@@ -783,21 +783,21 @@ WHERE status = 1"
         return $this->course_db->rows();
     }
 
-    public function getThread($thread_id) {
+    public function getThread(int $thread_id) {
         $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
         return $this->course_db->row();
     }
 
-    public function getThreadTitle($thread_id) {
+    public function getThreadTitle(int $thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
         return $this->course_db->row()['title'];
     }
 
-    public function setAnnouncement($thread_id, $onOff) {
+    public function setAnnouncement(int $thread_id, bool $onOff) {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", [$onOff, $thread_id]);
     }
 
-    public function addBookmarkedThread($user_id, $thread_id, $added) {
+    public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
         if ($added) {
             $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
         }
@@ -806,7 +806,7 @@ WHERE status = 1"
         }
     }
 
-    public function loadBookmarkedThreads($user_id) {
+    public function loadBookmarkedThreads(string $user_id) {
         $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", [$user_id]);
         $rows = $this->course_db->rows();
         $favorite_threads = [];

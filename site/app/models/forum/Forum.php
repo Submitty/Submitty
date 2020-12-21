@@ -50,7 +50,7 @@ class Forum extends AbstractModel {
     }
 
 
-    public function bookmarkThread($thread_id, $toggle) {
+    public function bookmarkThread(int $thread_id, bool $toggle) {
         $user = $this->core->getUser()->getId();
 
         if (!$this->core->getQueries()->threadExists($thread_id)) {
