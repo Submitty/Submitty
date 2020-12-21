@@ -150,6 +150,14 @@
                                 <br/>
                                 Standard Deviation: {{ component.getStandardDeviation() }} <br/>
                                 Count: {{ component.getCount() }} <br/>
+                                {% for grader, data in component.getGraderInfo() %}
+		                            {% if loop.first == grader %}
+		                                <p> Graders: 
+		                            {% else %}
+		                                <p style="padding-left:3.7em">
+		                            {% endif %}
+		                            {{ grader }} (count {{ data['count'] }} - avg {{ data['avg'] }} - stddev {{ data['std_dev'] }}) </p1>
+		                        {% endfor%}
                             </div>
                         {% endfor %}
                         <br/>
