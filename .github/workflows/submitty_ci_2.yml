@@ -1,6 +1,5 @@
 name: Submitty CI-2
 
-#run php lint, phpstan, eslint, and pylint on any push
 on:
     push:
 
@@ -10,25 +9,88 @@ env:
   PHP_GROUP: submitty_php
   CGI_USER: submitty_cgi
   SUBMITTY_DATA_DIR: /var/local/submitty
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
   POSTGRES_HOST: localhost
 
 jobs:
-    test:
+    e2e-local:
       runs-on: ubuntu-latest
       steps:
+        - name : setup local db
+          run: |
+            pwd
+            mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            # sudo apt update
+            # sudo apt-get install systemd
+            # sudo apt install postgresql postgresql-contrib
+            # sudo service postgresql  start
+            # sudo -u postgres psql -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+            # PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - uses: actions/checkout@v2
           with:
-              path: GIT_CHECKOUT/Submitty
+            path: SUBMITTY_CPY/
+        - name: TEST
+          run: |
+            # have to copy firsdt, absolute paths not supported by actions/checkout@v2
+              cp -r SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+
         - uses: actions/setup-python@v2
           with:
-              python-version: '3.6'
+            python-version: '3.6'
+        - uses: shivammathur/setup-php@2.7.0
+          with:
+            extensions: imagick
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: path ~/.cache/pip
+            key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+              ${{ runner.os }}-py-pip
+        - name: Install Python dependencies
+          run: |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install python-pam
+            python3 -m pip install sqlalchemy
+            python3 -m pip install selenium
+            python3 -m pip install tzlocal
+            python3 -m pip install jsonschema
+            python3 -m pip install jsonref
+            python3 -m pip install docker
+            python3 -m pip install websocket_client
+            python3 -m pip install psycopg2
+        - name: Get compose cache dir
+          id: composer-cache
+          run: |
+            pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+            echo "::set-output name=dir::$(composer config cache-files-dir)"
+            popd
+        - name: Install Composer Cache
+          uses: actions/cache@v2
+          with:
+            path: ${{ steps.composer-cache.outputs.dir }}
+            key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-php-composer-
+        - name: Install PHP dependencies
+          run: |
+            pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+            composer install --prefer-dist
+            popd
         - name: Setup Submitty
           run: |
-            export SUBMITTY_INSTALL_DIR=/usr/local/submitty
-            sudo mkdir SUBMITTY_INSTALL_DIR
-            sudo ln -s $(pwd) $SUBMITTY_INSTALL_DIR
-            ls $SUBMITTY_INSTALL_DIR
-    
+            sudo apt install libseccomp-dev
+            sudo apt install libboost-all-dev
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
+            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            pwd
+            ls -lah
+            sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+            sudo ln -s $(pwd) /usr/local/submitty
+            ls -la $SUBMITTY_INSTALL_DIR
+            sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+
 
     e2e:
         runs-on: ubuntu-latest
