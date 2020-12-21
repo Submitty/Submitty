@@ -29,7 +29,7 @@
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td align="left"> 
+                        <td align="left">
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
@@ -124,23 +124,22 @@
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col"></th>
                     <th scope="col">Date Released</th>
-                    <th scope="col"></th>
                     <th scope="col">Responses</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for poll in future_polls %}
                     <tr>
-                        <td align="left"> 
+                        <td align="left">
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             </a>
@@ -148,13 +147,13 @@
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
                         </td>
-                        <td> {{ poll.getUserResponses()|length }} </td>
                     </tr>
                 {% endfor %}
             </tbody>
