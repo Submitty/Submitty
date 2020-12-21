@@ -227,6 +227,8 @@ jobs:
               popd
           - name: Install Submitty Python Utils
             run: |
+              export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
+              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install .
               popd
