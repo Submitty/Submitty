@@ -240,7 +240,7 @@ jobs:
               popd
           - name: Setup Submitty
             run: |
-              PGPASSWORD=${PGPASSWORD} psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
