@@ -1363,7 +1363,7 @@ ORDER BY {$orderby}",
         foreach ($sections as $val) {
             $return[$val] = 0;
         }
-        
+
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }

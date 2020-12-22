@@ -252,7 +252,7 @@ class LateDays extends AbstractModel {
 
     /**
      * Create late day information then cahce it
-     * 
+     *
      * @param $user_id
      */
     public static function cacheLateDayInfoForUser(Core $core, $user_id) {
@@ -266,11 +266,7 @@ class LateDays extends AbstractModel {
      */
     public function cacheLateDay() {
         foreach ($this->late_day_info as $g_id => $info) {
-            $this->core->getQueries()->cacheLateDayInfo(
-                $this->user->getId(), 
-                $g_id, 
-                $info->getStatus(), 
-                $info->getGradedGradeable()->getGradeable()->isTeamAssignment());
+            $this->core->getQueries()->cacheLateDayInfo($this->user->getId(), $g_id, $info->getStatus(), $info->getGradedGradeable()->getGradeable()->isTeamAssignment());
         }
     }
 
