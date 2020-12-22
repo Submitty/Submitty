@@ -352,7 +352,7 @@ class ElectronicGraderView extends AbstractView {
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
-            "histograms" => $histogram_data
+            "histograms" => $histogram_data,
             "show_late" => array_key_exists('show_late', $_COOKIE) ? $_COOKIE['show_late'] === 'true' : true
         ]);
     }

@@ -1347,17 +1347,12 @@ ORDER BY {$orderby}",
             users.user_id = electronic_gradeable_version.user_id
             AND users." . $section_key . " IS NOT NULL
             AND electronic_gradeable_version.active_version>0
+            AND electronic_gradeable_version.late_day_status=3
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
             ON 
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
-            INNER JOIN electronic_gradeable_data
-            ON 
-            electronic_gradeable_data.user_id = users.user_id
-            AND electronic_gradeable_data.g_id=electronic_gradeable.g_id
-            AND electronic_gradeable_data.g_version=electronic_gradeable_version.active_version
-            AND greatest(0, ceil((extract(EPOCH FROM(coalesce(electronic_gradeable_data.submission_time, electronic_gradeable.eg_submission_due_date) - electronic_gradeable.eg_submission_due_date)) - (300*60))/86400):: integer) > 0
             {$where}
             GROUP BY {$section_key}
             ORDER BY {$orderby}",
@@ -1584,17 +1579,12 @@ ORDER BY {$u_or_t}.{$section_key}",
             ON
             {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}
             AND egv.active_version>0
+            AND egv.late_day_status=3
             AND egv.g_id=?
             INNER JOIN electronic_gradeable AS eg
             ON 
             eg.g_id=egv.g_id
             AND eg.eg_submission_due_date IS NOT NULL
-            INNER JOIN electronic_gradeable_data AS egd
-            ON 
-            egd.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-            AND egd.g_id=eg.g_id
-            AND egv.active_version=egd.g_version
-            AND greatest(0, ceil((extract(EPOCH FROM(coalesce(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400):: integer) > 0
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
             ORDER BY {$u_or_t}.{$section_key}",
@@ -3214,16 +3204,11 @@ ORDER BY {$section_key}",
             AND gradeable_teams." . $section_key . " IS NOT NULL
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
+            AND electronic_gradeable_version.late_day_status=3
             INNER JOIN electronic_gradeable
             ON 
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
-            INNER JOIN electronic_gradeable_data
-            ON 
-            electronic_gradeable_data.team_id = gradeable_teams.team_id
-            AND electronic_gradeable_data.g_id=electronic_gradeable.g_id
-            AND electronic_gradeable_data.g_version=electronic_gradeable_version.active_version
-            AND greatest(0, ceil((extract(EPOCH FROM(coalesce(electronic_gradeable_data.submission_time, electronic_gradeable.eg_submission_due_date) - electronic_gradeable.eg_submission_due_date)) - (300*60))/86400):: integer) > 0
             {$where}
             GROUP BY {$section_key}
             ORDER BY {$section_key}",
