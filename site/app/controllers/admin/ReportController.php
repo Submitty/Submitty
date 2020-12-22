@@ -323,8 +323,6 @@ class ReportController extends AbstractController {
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
 
             if (!$gg->hasOverriddenGrades()) {
-                // $row[$gg->getGradeableId()] = 69;
-                // continue;
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
                     if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {

@@ -103,18 +103,6 @@
         </div>
         <div class = "box col-md-6">
             {# RIGHT CHUNK#}
-
-            {% if not peer %}
-                <a class="btn btn-default" style="float: right"
-                    onclick="changeOverride()">
-                    {% if include_overridden == 'omit' %}
-                        Include Grade Overrides
-                    {% else %}
-                        Omit Grade Overrides
-                    {% endif %}
-                </a>
-            {% endif %}
-                        
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                 <br>
                 <b>Statistics for Completely Graded Assignments: </b>
