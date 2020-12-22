@@ -45,6 +45,10 @@ class LateController extends AbstractController {
         );
     }
 
+    public function reccacheLateDays($user_id) {
+        app\models\gradeable\LateDays::cacheLateDayInfoForUser($this->core, $user_id);
+    }
+
     /**
      * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
@@ -97,6 +101,7 @@ class LateController extends AbstractController {
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
             $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
+            $this->reccacheLateDays($_POST['user_id']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
@@ -125,6 +130,7 @@ class LateController extends AbstractController {
             );
         }
         $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
+        $this->reccacheLateDays($_POST['user_id']);
         $this->core->addSuccessMessage("Late days entry removed");
 
         return $this->getLateDays();
@@ -238,6 +244,7 @@ class LateController extends AbstractController {
             }
             else {
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                $this->reccacheLateDays($_POST['user_id']);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }

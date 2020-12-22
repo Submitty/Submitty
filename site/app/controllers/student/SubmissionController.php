@@ -14,6 +14,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use Symfony\Component\Routing\Annotation\Route;
@@ -841,9 +842,8 @@ class SubmissionController extends AbstractController {
         return $this->uploadResult("Successfully deleted this PDF.");
     }
 
-    public function updateLateDays($user_id) {
-        // $user = $this->core->getQueries()->getUserById($user_id);
-        // $late_days = LateDays::fromUser($this->core, $user);
+    public function reccacheLateDays($user_id) {
+        LateDays::cacheLateDayInfoForUser($this->core, $user_id);
     }
 
     /**
@@ -1442,9 +1442,11 @@ class SubmissionController extends AbstractController {
             $content = "A team member, $original_user_id, submitted in the gradeable, " . $graded_gradeable->getGradeable()->getTitle();
             $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
             $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
+            $this->reccacheLateDays($team_id);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+            $this->reccacheLateDays($user_id);
         }
 
         if ($user_id === $original_user_id) {
@@ -1453,8 +1455,6 @@ class SubmissionController extends AbstractController {
         else {
             $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}";
         }
-
-        $this->updateLateDays($user_id);
 
         return $this->uploadResult($message);
     }
@@ -1611,6 +1611,7 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $submitter_id, null, $version);
         }
 
+        $this->reccacheLateDays($submitter_id);
 
         if ($new_version == 0) {
             $msg = "Cancelled submission for gradeable.";
