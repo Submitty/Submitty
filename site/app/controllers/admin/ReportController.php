@@ -213,6 +213,7 @@ class ReportController extends AbstractController {
      */
     private function mergeGradedGradeables(array $gradeables, User $user, array $user_graded_gradeables, array $team_graded_gradeables) {
         $ggs = [];
+        // var_dump($team_graded_gradeables);
         foreach ($gradeables as $g) {
             /** @var Gradeable $g */
             if ($g->isTeamAssignment()) {
@@ -223,7 +224,7 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$graded_gradeable->getSubmitter()->getId()][$graded_gradeable->getGradeableId()] ?? null);
+            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
             $ggs[] = $graded_gradeable;
         }
         return $ggs;
@@ -260,6 +261,7 @@ class ReportController extends AbstractController {
 
         $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
 
+        // var_dump($this->all_overrides);
         // Method to call the callback with the required parameters
         $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days, $all_polls) {
             $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
@@ -323,6 +325,8 @@ class ReportController extends AbstractController {
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
 
             if (!$gg->hasOverriddenGrades()) {
+                // $row[$gg->getGradeableId()] = 69;
+                // continue;
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
                     if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
