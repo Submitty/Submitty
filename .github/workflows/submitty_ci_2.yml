@@ -277,12 +277,9 @@ jobs:
               sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
               sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
-             # echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-             # cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
               sudo mkdir -p /run/php
               sudo chown www-data:www-data /run/php
               sudo chmod 755 /run/php
-             # sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
               sudo a2dissite 000-default
               sudo rm -rf /etc/apache2/sites-available/*
               sudo rm -rf /etc/apache2/sites-enabled/*
