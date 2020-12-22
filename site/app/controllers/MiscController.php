@@ -2,10 +2,10 @@
 
 namespace app\controllers;
 
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\models\CourseMaterial;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
@@ -119,21 +119,10 @@ class MiscController extends AbstractController {
                 return false;
             }
 
-            // If attempting to obtain course materials
-            if ($dir == 'course_materials') {
-                // If the user attempting to access the file is not at least a grader then ensure the file has been released
-                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
-                    $this->core->getOutput()->showError("You may not access this file until it is released.");
-                    return false;
-                }
-                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                    $this->core->getOutput()->showError("Your section may not access this file.");
-                    return false;
-                }
-
-                $json = FileUtils::readJsonFile($this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
-                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $path)) {
-                    $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+            if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
+                $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+                if ($access_failure) {
+                    $this->core->getOutput()->showError($access_failure);
                     return false;
                 }
             }
@@ -210,21 +199,10 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        // If attempting to obtain course materials
-        if ($dir == 'course_materials') {
-            // If the user attempting to access the file is not at least a grader then ensure the file has been released
-            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
-                $this->core->getOutput()->showError("You may not access this file until it is released.");
-                return false;
-            }
-            elseif (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                return false;
-            }
-
-            $json = FileUtils::readJsonFile($this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
-            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $path)) {
-                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+        if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
+            $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+            if ($access_failure) {
+                $this->core->getOutput()->showError($access_failure);
                 return false;
             }
         }
