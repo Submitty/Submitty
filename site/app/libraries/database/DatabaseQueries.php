@@ -3333,6 +3333,28 @@ ORDER BY gt.{$section_key}",
         return $return;
     }
 
+    public function cacheLateDayInfo($submitter_id, $g_id, $status, $is_team) {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+
+        $this->course_db->query(
+            "
+        UPDATE electronic_gradeable_version SET late_day_status = ? 
+        FROM electronic_gradeable_version
+        LEFT JOIN 
+            {$users_or_teams} AS {$u_or_t}
+        ON {$user_or_team_id}=?
+        AND g_id=?",
+            [$submitter_id, $g_id]
+        );
+    }
+
     /**
      * Return an array of users with late days
      *
@@ -6651,6 +6673,7 @@ AND gc_id IN (
 
               /* Active Submission Version */
               egv.active_version,
+              egv.late_day_status,
 
               /* Grade inquiry data */
              rr.array_grade_inquiries,
@@ -6814,7 +6837,8 @@ AND gc_id IN (
                 $gradeable,
                 new Submitter($this->core, $submitter),
                 [
-                    'late_day_exceptions' => $late_day_exceptions
+                    'late_day_exceptions' => $late_day_exceptions,
+                    'late_day_status' => $row['late_day_status']
                 ]
             );
             $ta_graded_gradeable = null;
