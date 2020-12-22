@@ -406,7 +406,7 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/getPollExport", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return JsonResponse
      */
     public function getPollExportData() {
         $polls = $this->core->getQueries()->getPolls();
@@ -430,7 +430,7 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/importPolls", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return JsonResponse
      */
     public function importPollsFromJSON() {
         $polls = json_decode($_POST["data"], true);
