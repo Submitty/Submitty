@@ -14,6 +14,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use Symfony\Component\Routing\Annotation\Route;
@@ -842,7 +843,7 @@ class SubmissionController extends AbstractController {
     }
 
     public function reccacheLateDays($user_id) {
-        LateDays::cacheLateDayInfoForUser($this->core, $this->submitter->getId());
+        LateDays::cacheLateDayInfoForUser($this->core, $user_id);
     }
 
     /**

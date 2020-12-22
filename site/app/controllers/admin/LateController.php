@@ -46,7 +46,7 @@ class LateController extends AbstractController {
     }
 
     public function reccacheLateDays($user_id) {
-        LateDays::cacheLateDayInfoForUser($this->core, $this->submitter->getId());
+        app\models\gradeable\LateDays::cacheLateDayInfoForUser($this->core, $user_id);
     }
 
     /**

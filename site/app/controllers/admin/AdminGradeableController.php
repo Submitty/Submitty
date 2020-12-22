@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -1010,11 +1011,6 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    /**
-     * Recalculate the late day information for every user in each grading section
-     *
-     * @param $gradeable
-     */
     private function recalculateCachedLateDays($gradeable) {
         $sections = $gradeable->getAllGradingSections();
 
