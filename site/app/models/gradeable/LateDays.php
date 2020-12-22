@@ -253,8 +253,8 @@ class LateDays extends AbstractModel {
     /**
      * Create late day information then cahce it
      *
-     * @param $core
-     * @param $user_id
+     * @param $core Core to construct the late day object
+     * @param $user_id User getting late day information recalculated
      */
     public static function cacheLateDayInfoForUser(Core $core, $user_id) {
         $user = $core->getQueries()->getUserById($user_id);

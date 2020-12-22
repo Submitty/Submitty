@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
+use app\models\gradeable\LateDays;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
@@ -46,7 +47,7 @@ class LateController extends AbstractController {
     }
 
     public function reccacheLateDays($user_id) {
-        app\models\gradeable\LateDays::cacheLateDayInfoForUser($this->core, $user_id);
+        LateDays::cacheLateDayInfoForUser($this->core, $user_id);
     }
 
     /**
