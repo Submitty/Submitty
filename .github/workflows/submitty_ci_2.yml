@@ -245,6 +245,12 @@ jobs:
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
+              sudo apt install apache2
+              sudo apt install apache2-suexec-custom
+              sudo apt install libapache2-mod-authnz-external
+              sudo apt install libapache2-mod-authz-unixgroup
+              sudo apt install libapache2-mod-wsgi-py3
+              sudo apt install nginx
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
