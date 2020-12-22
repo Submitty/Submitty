@@ -64,6 +64,8 @@ class LateDays extends AbstractModel {
             );
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
+
+        $this->cacheLateDayInfo();
     }
 
     /**
@@ -248,6 +250,16 @@ class LateDays extends AbstractModel {
         }
 
         return $late_days_remaining;
+    }
+
+    public function cacheLateDayInfo() {
+        foreach ($late_day_info as $g_id => $info) {
+            $this->core->getQueries()->cacheLateDayInfo(
+                $user->getId(), 
+                $g_id, 
+                $info->getStatus(), 
+                $info->getGradedGradeable()->getGradeable()->isTeamAssignment());
+        }
     }
 
     /**

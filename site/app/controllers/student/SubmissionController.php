@@ -841,6 +841,11 @@ class SubmissionController extends AbstractController {
         return $this->uploadResult("Successfully deleted this PDF.");
     }
 
+    public function updateLateDays($user_id) {
+        // $user = $this->core->getQueries()->getUserById($user_id);
+        // $late_days = LateDays::fromUser($this->core, $user);
+    }
+
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
@@ -1448,6 +1453,8 @@ class SubmissionController extends AbstractController {
         else {
             $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}";
         }
+
+        $this->updateLateDays($user_id);
 
         return $this->uploadResult($message);
     }
