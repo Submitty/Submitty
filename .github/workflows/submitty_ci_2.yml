@@ -26,6 +26,14 @@ jobs:
             sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
             pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
             popd
+        - name: local db
+          run: |
+            sudo apt update
+            sudo apt-get install systemd
+            sudo apt install postgresql postgresql-contrib
+            sudo service postgresql  start
+            sudo -u postgres psql -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+           # PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - uses: actions/setup-python@v2
           with:
             python-version: '3.6'
@@ -42,12 +50,14 @@ jobs:
               popd
         - name: test3
           run: |
+              sudo mkdir -p /var/local/submitty/courses
               sudo mkdir -p /usr/local/submitty/config/
               sudo touch /usr/local/submitty/config/database.json
               echo '{"authentication_method": "PamAuthentication","database_host": "/var/run/postgresql","database_port": 5432,"database_user": "submitty_dbuser", "database_password": "submitty_dbuser","debugging_enabled": true}' | sudo tee -a /usr/local/submitty/config/database.json
               pip3 install sqlalchemy --user
               pip3 install docker --user
               pip3 install pyyaml --user
+              pip3 install psycopg2 --user
               sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
 
         # - name: Cache Pip
@@ -157,7 +167,6 @@ jobs:
             image: postgres
             env: 
               POSTGRES_PASSWORD: submitty_dbuser
-              POSTGRES_USER: submitty_dbuser
             options: >-
               --health-cmd pg_isready
               --health-interval 10s
@@ -231,6 +240,7 @@ jobs:
               popd
           - name: Setup Submitty
             run: |
+              PGPASSWORD=${PGPASSWORD} psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt install libseccomp-dev
               sudo apt install libboost-all-dev
