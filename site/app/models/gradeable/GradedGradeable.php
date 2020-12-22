@@ -78,7 +78,27 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function isOnTimeSubmission() {
-        return $late_day_status == LateDayInfo::STATUS_GOOD || $late_day_status == LateDayInfo::STATUS_LATE;
+        // if there is no submission, ignore
+        if (!$this->hasSubmission()) {
+            return true;
+        }
+
+        // If there is no info cached, treat it as a normal gradeable
+        if (!$this->hasLateDayInfoCached()) {
+            var_dump($this->submitter->getId());
+            LateDays::cacheLateDayInfoForUser($this->core, $this->submitter->getId());
+            return true;
+        }
+
+        return $this->late_day_status == LateDayInfo::STATUS_GOOD || $this->late_day_status == LateDayInfo::STATUS_LATE;
+    }
+
+    /**
+     * Gets if the submitter submitted on time
+     * @return bool
+     */
+    public function hasLateDayInfoCached() {
+        return $this->late_day_status != null;
     }
 
     /**

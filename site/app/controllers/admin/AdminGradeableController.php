@@ -1010,6 +1010,23 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    /**
+     * Recalculate the late day information for every user in each grading section
+     *
+     * @param $gradeable
+     */
+    private function recalculateCachedLateDays($gradeable) {
+        $sections = $gradeable->getAllGradingSections();
+
+        foreach ($sections as $section) {
+            $submitters = $section->getSubmitters();
+
+            foreach ($submitters as $submitter) {
+                LateDays::cacheLateDayInfoForUser($this->core, $submitter->getId());
+            }
+        }
+    }
+
     private function updateGradeable(Gradeable $gradeable, $details) {
         $errors = [];
 
@@ -1050,6 +1067,8 @@ class AdminGradeableController extends AbstractController {
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;
+        $previous_late_days = $gradeable->getLateDays();
+        $previous_due_date = $gradeable->getSubmissionDueDate();
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
@@ -1139,6 +1158,11 @@ class AdminGradeableController extends AbstractController {
             throw new ValidationException('', $errors);
         }
         $this->core->getQueries()->updateGradeable($gradeable);
+
+        // Check if late days or the due date was changed
+        if ($previous_late_days != $gradeable->getLateDays() || $previous_due_date != $gradeable->getSubmissionDueDate()) {
+            $this->recalculateCachedLateDays($gradeable);
+        }
         // Only return updated properties if the changes were applied
         return $updated_properties;
     }
