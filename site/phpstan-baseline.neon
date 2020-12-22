@@ -134,7 +134,6 @@ parameters:
 			message: "#^Variable \\$all_teams might not be defined\\.$#"	
 			count: 2	
 			path: app/controllers/grading/ElectronicGraderController.php
-			
 		-
 			message: "#^Offset 0 does not exist on array\\(\\)\\.$#"
 			count: 1
