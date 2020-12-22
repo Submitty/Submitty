@@ -329,6 +329,7 @@ jobs:
               sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               pushd tests
+              curl -D - http://localhost:1501/authentication/login
               TEST_URL="http://localhost" python3 -m unittest e2e.test_login
               popd
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
