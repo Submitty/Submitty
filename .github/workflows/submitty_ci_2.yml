@@ -319,6 +319,11 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
+          - name: Debug
+            run : |
+              echo "!!!!"
+              ls -lah /var/log/apache2/
+              cat /var/log/apache2/error.log
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
@@ -335,9 +340,6 @@ jobs:
               sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
               bash tests/git_test.sh
               sudo bash tests/test_site_error_log.sh
-              echo "!!!!"
-              ls -lah /var/log/apache2/
-              cat /var/log/apache2/error.log
 
 
 
