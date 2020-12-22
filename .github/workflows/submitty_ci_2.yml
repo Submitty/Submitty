@@ -13,24 +13,42 @@ env:
   POSTGRES_HOST: localhost
 
 jobs:
-    # test:
-    #   runs-on: ubuntu-latest
-    #   steps:
-    #     - uses: actions/checkout@v2
-    #       with:
-    #         path: SUBMITTY_CPY/
-    #     - name: Copy Repo
-    #       run: |
-    #         sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-    #         sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-    #         sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
-    #         pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-    #         popd
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            path: SUBMITTY_CPY/
+        - name: Copy Repo
+          run: |
+            sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
+            pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+            popd
 
-    #     - uses: shivammathur/setup-php@2.7.0
-    #     - name: test
-    #       run: |
-    #         phpenv
+        - uses: shivammathur/setup-php@2.7.0
+        - name: test
+          run: |
+            pushd SUBMITTY_CPY
+            pwd
+            sudo mkdir -p /var/local/submitty/courses
+            sudo mkdir -p /usr/local/submitty/config/
+            sudo touch /usr/local/submitty/config/database.json
+            echo '{"authentication_method": "PamAuthentication","database_host": "/var/run/postgresql","database_port": 5432,"database_user": "submitty_dbuser", "database_password": "submitty_dbuser","debugging_enabled": true}' | sudo tee -a /usr/local/submitty/config/database.json
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
+            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+            TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+            sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
+            echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+            pushd tests
+            TEST_URL="http://localhost" python3 -m unittest e2e.test_login
+            popd
+            SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+            sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+            bash tests/git_test.sh
+            sudo bash tests/test_site_error_log.sh
         # - name: local db
         #   run: |
         #     sudo apt update
@@ -55,10 +73,6 @@ jobs:
         #       popd
         # - name: test3
         #   run: |
-        #       sudo mkdir -p /var/local/submitty/courses
-        #       sudo mkdir -p /usr/local/submitty/config/
-        #       sudo touch /usr/local/submitty/config/database.json
-        #       echo '{"authentication_method": "PamAuthentication","database_host": "/var/run/postgresql","database_port": 5432,"database_user": "submitty_dbuser", "database_password": "submitty_dbuser","debugging_enabled": true}' | sudo tee -a /usr/local/submitty/config/database.json
         #       pip3 install sqlalchemy --user
         #       pip3 install docker --user
         #       pip3 install pyyaml --user
@@ -305,6 +319,7 @@ jobs:
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+              pushd ${SUBMITTY_REPOSITORY}
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
