@@ -78,7 +78,27 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function isOnTimeSubmission() {
-        return $late_day_status == LateDayInfo::STATUS_GOOD || $late_day_status == LateDayInfo::STATUS_LATE;
+        // if there is no submission, ignore
+        if (!$this->hasSubmission()) {
+            return true;
+        }
+
+        // If there is no info cached, treat it as a normal gradeable
+        if (!$this->hasLateDayInfoCached()) {
+            var_dump($this->submitter->getId());
+            LateDays::cacheLateDayInfoForUser($this->core, $this->submitter->getId());
+            return true;
+        }
+
+        return $this->late_day_status == LateDayInfo::STATUS_GOOD || $this->late_day_status == LateDayInfo::STATUS_LATE;
+    }
+
+    /**
+     * Gets if the submitter submitted on time
+     * @return bool
+     */
+    public function hasLateDayInfoCached() {
+        return $this->late_day_status != null;
     }
 
     /**
@@ -87,28 +107,6 @@ class GradedGradeable extends AbstractModel {
      */
     public function getGradeable() {
         return $this->gradeable;
-    }
-
-    /**
-     * Gets if the submitter submitted on time
-     * @return bool
-     */
-    public function isOnTimeSubmission() {
-        if ($this->gradeable->isTeamAssignment()) {
-            $user = $this->getSubmitter()->getTeam()->getMemberUsersSorted()[0];
-        }
-        else {
-            $user = $this->getSubmitter()->getUser();
-        }
-        $late_day = new LateDays($this->gradeable->core, $user, [$this]);
-        //$late_day = LateDays::fromUser($this->core, $this->core->getUser());
-        $late_status = $late_day->getLateDayInfoByGradeable($this->gradeable)->getStatus();
-        return $late_status === LateDayInfo::STATUS_GOOD || $late_status === LateDayInfo::STATUS_LATE;
-        
-        // if (!$this->getAutoGradedGradeable()->hasActiveVersion()) {
-        //     return false;
-        // }
-        // return $this->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate() <= $this->getGradeable()->getLateDays();
     }
 
     /**

@@ -907,12 +907,6 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        foreach ($user_ids as $id) {
-             # code...
-            $user = $this->core->getQueries()->getUserById($id);
-            LateDays::fromUser($this->core, $user);
-         } 
-
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode);
 
         if ($show_edit_teams) {
@@ -1395,15 +1389,19 @@ class ElectronicGraderController extends AbstractController {
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $team));
                 $total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
                 $total_submitted = array_sum($this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
-                $non_late_total_submitted = $total_submitted - array_sum($gradeable->getBadSubmissionsByGradingSection('registration_section'));
-                $non_late_graded = $graded - array_sum($gradeable->getBadGradedComponents('registration_section'));
+                $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($gradeable_id, $sections, 'registration_section');
+                $non_late_total_submitted = $total_submitted - array_sum($late_submitted);
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $gradeable->isTeamAssignment());
+                $non_late_graded = $graded - array_sum($late_graded);
             }
             else {
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $team));
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
                 $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section'));
-                $non_late_total_submitted = $total_submitted - array_sum($gradeable->getBadSubmissionsByGradingSection('registration_section'));
-                $non_late_graded = $graded - array_sum($gradeable->getBadGradedComponents('registration_section'));
+                $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($gradeable_id, $sections, 'registration_section');
+                $non_late_total_submitted = $total_submitted - array_sum($late_submitted);
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $gradeable->isTeamAssignment());
+                $non_late_graded = $graded - array_sum($late_graded);
             }
         }
         else {
