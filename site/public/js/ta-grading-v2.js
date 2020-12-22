@@ -182,15 +182,12 @@ function notebookScrollLoad() {
       elementID = localStorage.getItem('ta-grading-notebook-view-scroll-item');
       if (elementID !== null) {
         element = $('[data-item-ref=' + elementID + ']');
-        if(element.length !== 0) {
-          element = element.first();
-        }
       }
     } else {
       element = $('[data-non-item-ref=' + elementID + ']');
     }
     if (element !== null) {
-      if(element.length !== 0) {
+      if (element.length !== 0) {
         notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
       } else {
         localStorage.removeItem('ta-grading-notebook-view-scroll-id');
@@ -205,12 +202,17 @@ function notebookScrollSave() {
   if (notebookView.length !== 0 && notebookView.is(':visible')) {
     var notebookTop = $('#notebook-view').offset().top;
     var element = $('#content_0');
-    while (element.length !== 0) {
-      if (element.offset().top > notebookTop) {
-        break;
+    if(notebookView.scrollTop() + notebookView.innerHeight() + 1 > notebookView[0].scrollHeight) {
+      element = $('[id^=content_').last();
+    } else {
+      while (element.length !== 0) {
+        if (element.offset().top > notebookTop) {
+          break;
+        }
+        element = element.next();
       }
-      element = element.next();
     }
+    
     if (element.length !== 0) {
       if (element.attr('data-item-ref') === undefined) {
         localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
