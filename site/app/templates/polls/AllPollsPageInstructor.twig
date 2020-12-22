@@ -2,6 +2,8 @@
 
     <h1> Polls </h1>
     <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
+    <a onclick="exportPolls()" class="btn btn-primary">Export</a>
+    <a onclick="importPolls()" class="btn btn-primary">Import</a>
     <hr>
 
     <div class="dropdown-wrapper">
@@ -278,6 +280,71 @@
                 window.alert("Something went wrong. Please try again.");
             }
         });
+    }
+
+    function exportPolls() {
+        let url = "{{base_url}}" + "/getPollExport";
+        $.ajax({
+            url: url,
+            type: "GET",
+            processData: false,
+            cache: false,
+            contentType: false,
+            error: function(err) {
+                console.error(err);
+                window.alert("Something went wrong. Please try again.");
+            },
+            success: function(response) {
+                let data = JSON.parse(response).data;
+                let text = JSON.stringify(data, null, "\t");
+                let element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+                element.setAttribute('download', "{{semester}}-{{course}}-polls.json");
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+        });
+    }
+
+    function importPolls() {
+        let input = document.createElement('input');
+        input.type = 'file';
+        
+        input.onchange = e => { 
+            let file = e.target.files[0];
+            let reader = new FileReader();
+            reader.readAsText(file,'UTF-8');
+            reader.onload = readerEvent => {
+                let content = readerEvent.target.result;
+                let url = "{{base_url}}" + "/importPolls";
+                let fd = new FormData();
+                fd.append('csrf_token', "{{csrf_token}}");
+                fd.append('data', content);
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: fd,
+                    processData: false,
+                    cache: false,
+                    contentType: false,
+                    error: function(err) {
+                        console.error(err);
+                        window.alert("Something went wrong. Please try again.");
+                    },
+                    success: function(response) {
+                        response = JSON.parse(response);
+                        if (response.status == "success") {
+                            location.reload();
+                        } else {
+                            window.alert("An error occurred in importing the polls. Make sure the file format is correct.");
+                        }
+                    }
+                })
+            }
+        }
+        input.click();  
     }
 
 </script>

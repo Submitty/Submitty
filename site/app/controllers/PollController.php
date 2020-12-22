@@ -402,4 +402,75 @@ class PollController extends AbstractController {
             )
         );
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/getPollExport", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return MultiResponse
+     */
+    public function getPollExportData() {
+        $polls = $this->core->getQueries()->getPolls();
+        $data = [];
+        foreach ($polls as $poll) {
+            $poll_array = [];
+            $poll_array["name"] = $poll->getName();
+            $poll_array["question"] = $poll->getQuestion();
+            $responses = [];
+            foreach ($poll->getResponses() as $response) {
+                $responses[$response] = $poll->getResponseString($response);
+            }
+            $poll_array["responses"] = $responses;
+            $poll_array["correct_responses"] = $poll->getAnswers();
+            $poll_array["release_date"] = $poll->getReleaseDate();
+            $data[] = $poll_array;
+        }
+        return JsonResponse::getSuccessResponse($data);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/importPolls", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return MultiResponse
+     */
+    public function importPollsFromJSON() {
+        $polls = json_decode($_POST["data"], true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            return JsonResponse::getFailResponse("Error in JSON format.");
+        }
+        $num_imported = 0;
+        $num_errors = 0;
+        foreach ($polls as $poll) {
+            if (
+                !array_key_exists("name", $poll) || !array_key_exists("question", $poll)
+                || !array_key_exists("responses", $poll) || !array_key_exists("correct_responses", $poll)
+                || !array_key_exists("release_date", $poll)
+            ) {
+                $num_errors = $num_errors + 1;
+                continue;
+            }
+            $name = $poll["name"];
+            $question = $poll["question"];
+            $responses = [];
+            $orders = [];
+            $i = 0;
+            foreach ($poll["responses"] as $id => $response) {
+                $response_id = intval($id);
+                $respones[$response_id] = $response;
+                $orders[$response_id] = $i;
+                $i = $i + 1;
+            }
+            $answers = $poll["correct_responses"];
+            $release_date = $poll["release_date"];
+            $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
+            $num_imported = $num_imported + 1;
+        }
+        if ($num_errors == 0) {
+            $this->core->addSuccessMessage("Successfully imported " . $num_imported . " polls");
+        }
+        else {
+            $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
+        }
+
+        return JsonResponse::getSuccessResponse();
+    }
 }
