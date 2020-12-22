@@ -455,7 +455,7 @@ class PollController extends AbstractController {
             $i = 0;
             foreach ($poll["responses"] as $id => $response) {
                 $response_id = intval($id);
-                $respones[$response_id] = $response;
+                $responses[$response_id] = $response;
                 $orders[$response_id] = $i;
                 $i = $i + 1;
             }
