@@ -251,10 +251,10 @@ class LateDays extends AbstractModel {
     }
 
     /**
-     * Create late day information then cahce it
+     * Create late day information then cache it
      *
-     * @param $core Core to construct the late day object
-     * @param $user_id User getting late day information recalculated
+     * @param Core $core Core to construct the late day object
+     * @param string $user_id User getting late day information recalculated
      */
     public static function cacheLateDayInfoForUser(Core $core, $user_id) {
         $user = $core->getQueries()->getUserById($user_id);
@@ -265,6 +265,8 @@ class LateDays extends AbstractModel {
 
     /**
      * Cache the late day information for this user
+     *
+     * @param bool $clear true if we are clearing the contents of the cache
      */
     public function cacheLateDay($clear = false) {
         foreach ($this->late_day_info as $g_id => $info) {
