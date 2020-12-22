@@ -42,6 +42,9 @@ jobs:
               popd
         - name: test3
           run: |
+              sudo mkdir -p /usr/local/submitty/config/
+              sudo touch /usr/local/submitty/config/database.json
+              echo '{"authentication_method": "PamAuthentication","database_host": "/var/run/postgresql","database_port": 5432,"database_user": "submitty_dbuser", "database_password": "submitty_dbuser","debugging_enabled": true}' | sudo tee -a /usr/local/submitty/config/database.json
               pip3 install sqlalchemy --user
               pip3 install docker --user
               pip3 install pyyaml --user
@@ -207,6 +210,7 @@ jobs:
               sudo pip3 install docker
               sudo pip3 install paramiko
               sudo pip3 install tzlocal
+              sudo pip3 install sqlalchemy
           - name: Get compose cache dir
             id: composer-cache
             run: |
