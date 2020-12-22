@@ -9,6 +9,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\gradeable\LateDays;
 
 /**
  * Class LateController
@@ -46,7 +47,7 @@ class LateController extends AbstractController {
     }
 
     public function reccacheLateDays($user_id) {
-        app\models\gradeable\LateDays::cacheLateDayInfoForUser($this->core, $user_id);
+        LateDays::cacheLateDayInfoForUser($this->core, $user_id);
     }
 
     /**
@@ -215,6 +216,7 @@ class LateController extends AbstractController {
             if ($team != null && $team->getSize() > 1) {
                 if ($option == 0) {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                    $this->reccacheLateDays($_POST['user_id']);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
@@ -222,6 +224,7 @@ class LateController extends AbstractController {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for ($i = 0; $i < count($team_member_ids); $i++) {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
+                        $this->reccacheLateDays($team_member_ids[$i]);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());

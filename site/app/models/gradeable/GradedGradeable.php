@@ -85,7 +85,6 @@ class GradedGradeable extends AbstractModel {
 
         // If there is no info cached, treat it as a normal gradeable
         if (!$this->hasLateDayInfoCached()) {
-            var_dump($this->submitter->getId());
             LateDays::cacheLateDayInfoForUser($this->core, $this->submitter->getId());
             return true;
         }
