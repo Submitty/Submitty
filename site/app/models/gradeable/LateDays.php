@@ -259,7 +259,6 @@ class LateDays extends AbstractModel {
     public static function cacheLateDayInfoForUser(Core $core, $user_id) {
         $user = $core->getQueries()->getUserById($user_id);
         $ld = LateDays::fromUser($core, $user);
-        //$ld->clearCachedLateData();
         $ld->cacheLateDay();
     }
 
@@ -272,13 +271,6 @@ class LateDays extends AbstractModel {
         foreach ($this->late_day_info as $g_id => $info) {
             $this->core->getQueries()->cacheLateDayInfo($this->user->getId(), $g_id, $clear ? null : $info->getStatus(), $info->getGradedGradeable()->getGradeable()->isTeamAssignment());
         }
-    }
-
-    /**
-     * Clear the cached late day information for this user
-     */
-    public function clearCachedLateData() {
-        //$this->core->getQueries()->clearCachedLateDayInfo($this->user->getId());
     }
 
     /**
