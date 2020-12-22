@@ -203,7 +203,7 @@ jobs:
               pip3 install jsonschema
               pip3 install jsonref
               pip3 install websocket_client
-              pip3 install psycopg2
+              pip3 install psycopg2 --user
               pip3 install docker
               pip3 install pyyaml
               #needs to be globally available to daemon user created later
@@ -211,7 +211,6 @@ jobs:
               sudo pip3 install paramiko
               sudo pip3 install tzlocal
               sudo pip3 install sqlalchemy
-              sudo pip3 install psycopg2
           - name: Get compose cache dir
             id: composer-cache
             run: |
