@@ -8,15 +8,22 @@ on:
     types: [ opened, edited, synchronize ]
 
 jobs:
-  publish:
-    runs-on: ubuntu-18.04
+  title-check:
+    runs-on: ubuntu-latest
     steps:
-      - uses: Slashgear/action-check-pr-title@v1.0.0
+      - uses: naveenk1223/action-pr-title@master
         with:
+          regex: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
+          
+          #allowed_prefixes: 'feature,fix,bugfix,patch,enhancement,hotfix' # title should start with the given prefix
+          #prefix_case_sensitive: false # title prefix are case insensitive
+          #min_length: 10 # Min length of the title
+          #max_length: -1 # Max length of the title
+
           #
           # pull request titles format rules here:
           # https://submitty.org/developer/how_to_contribute#how-to-make-a-pull-request-pr-to-submitty
           #
           # [<TYPE>:<MODULE> ] <SUBJECT>
           #
-          regex: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
+
