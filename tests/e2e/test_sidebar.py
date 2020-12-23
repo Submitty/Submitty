@@ -77,7 +77,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/user_profile', 'My Profile'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
-            [self.test_url + '/superuser/gradeables', 'Gradeables'],
+            [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
