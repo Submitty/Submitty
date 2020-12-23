@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - uses: dylanvann/check-pull-request-title
+      - uses: dylanvann/check-pull-request-title@v0.1.14
         with:
           #
           # pull request titles format rules here:
