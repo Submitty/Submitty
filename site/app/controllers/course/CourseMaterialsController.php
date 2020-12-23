@@ -3,13 +3,13 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\ErrorMessages;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\CourseMaterial;
 
 class CourseMaterialsController extends AbstractController {
     /**
@@ -126,7 +126,7 @@ class CourseMaterialsController extends AbstractController {
 
                 if (!$this->core->getUser()->accessGrading()) {
                     // only add the file if the section of student is allowed and course material is released!
-                    if (CourseMaterial::isSectionAllowed($this->core, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                    if (CourseMaterialsUtils::isSectionAllowed($json, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
                         $relativePath = substr($file_path, strlen($root_path) + 1);
                         $isFolderEmptyForMe = false;
                         $zip->addFile($file_path, $relativePath);

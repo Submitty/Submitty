@@ -799,21 +799,21 @@ SQL;
         return $this->course_db->rows();
     }
 
-    public function getThread($thread_id) {
+    public function getThread(int $thread_id) {
         $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
         return $this->course_db->row();
     }
 
-    public function getThreadTitle($thread_id) {
+    public function getThreadTitle(int $thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
         return $this->course_db->row()['title'];
     }
 
-    public function setAnnouncement($thread_id, $onOff) {
+    public function setAnnouncement(int $thread_id, bool $onOff) {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", [$onOff, $thread_id]);
     }
 
-    public function addPinnedThread($user_id, $thread_id, $added) {
+    public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
         if ($added) {
             $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
         }
@@ -822,7 +822,7 @@ SQL;
         }
     }
 
-    public function loadPinnedThreads($user_id) {
+    public function loadBookmarkedThreads(string $user_id) {
         $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", [$user_id]);
         $rows = $this->course_db->rows();
         $favorite_threads = [];
@@ -1464,7 +1464,7 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE active_version > 0 AND {$section_key} IN " . $this->createParamaterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -1473,6 +1473,7 @@ SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
 FROM {$users_or_teams} AS {$u_or_t}
 INNER JOIN (
   SELECT * FROM gradeable_data AS gd
+  INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
   LEFT JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
@@ -2849,7 +2850,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             "
             SELECT gtm.*, tm.*
             FROM gradeable_teams gtm
-            INNER JOIN teams tm 
+            INNER JOIN teams tm
             ON gtm.team_id = tm.team_id
             WHERE gtm.g_id = ? AND tm.user_id = ?",
             [$g_id,$user_id]

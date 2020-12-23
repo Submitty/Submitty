@@ -1,4 +1,7 @@
 <div class="notebook">
+    <script>
+        const USER_ID = "{{student_id}}";
+    </script>
 
     {# Render content #}
     {% set num_codeboxes = 0 %}
@@ -245,6 +248,7 @@
 
             tgts = nb.querySelectorAll('.CodeMirror');
             for(let x of tgts){
+                x.CodeMirror.setOption("readOnly", true);
                 x.CodeMirror.refresh();
             }
 

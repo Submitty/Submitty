@@ -420,11 +420,6 @@ parameters:
 			path: app/models/AbstractModel.php
 
 		-
-			message: "#^Class app\\\\models\\\\User referenced with incorrect case\\: app\\\\models\\\\user\\.$#"
-			count: 2
-			path: app/models/CourseMaterial.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$course_path\\)\\: Unexpected token \"\\$course_path\", expected type at offset 112$#"
 			count: 1
 			path: app/models/GradeableAutocheck.php
