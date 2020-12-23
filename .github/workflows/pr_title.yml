@@ -1,12 +1,11 @@
 name: 'PR Title Check'
 on:
   pull_request:
-    types:
-      # check when PR
-      # * is created,
-      # * title is edited, and
-      # * new commits are added (to ensure failing title blocks merging)
-      - [ opened, edited, synchronize ]
+    # check when PR
+    # * is created,
+    # * title is edited, and
+    # * new commits are added (to ensure failing title blocks merging)
+    types: [ opened, edited, synchronize ]
 
 jobs:
   publish:
