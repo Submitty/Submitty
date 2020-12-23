@@ -13,12 +13,10 @@ jobs:
     steps:
       - uses: naveenk1223/action-pr-title@master
         with:
-          regex: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
-          
           #
           # pull request titles format rules here:
           # https://submitty.org/developer/how_to_contribute#how-to-make-a-pull-request-pr-to-submitty
           #
-          # [<TYPE>:<MODULE> ] <SUBJECT>
+          # [<TYPE>:<MODULE>] <SUBJECT>
           #
-
+          regex: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
