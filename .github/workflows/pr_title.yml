@@ -1,0 +1,24 @@
+name: 'PR Title Check'
+on:
+  pull_request:
+    types:
+      # check when PR
+      # * is created,
+      # * title is edited, and
+      # * new commits are added (to ensure failing title blocks merging)
+      - [ opened, edited, synchronize ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: dylanvann/check-pull-request-title@v1
+        with:
+          #
+          # pull request titles format rules here:
+          # https://submitty.org/developer/how_to_contribute#how-to-make-a-pull-request-pr-to-submitty
+          #
+          # [<TYPE>:<MODULE> ] <SUBJECT>
+          #
+          pattern: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
