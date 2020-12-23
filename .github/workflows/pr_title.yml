@@ -11,8 +11,7 @@ jobs:
   publish:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
-      - uses: dylanvann/check-pull-request-title@v0.1.14
+      - uses: Slashgear/action-check-pr-title@1.0.0
         with:
           #
           # pull request titles format rules here:
@@ -20,4 +19,4 @@ jobs:
           #
           # [<TYPE>:<MODULE> ] <SUBJECT>
           #
-          pattern: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
+          regex: '^\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI/UX|Dependency):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$'
