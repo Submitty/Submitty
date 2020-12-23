@@ -11,7 +11,7 @@ jobs:
   publish:
     runs-on: ubuntu-18.04
     steps:
-      - uses: Slashgear/action-check-pr-title@1.0.0
+      - uses: Slashgear/action-check-pr-title@v1.0.0
         with:
           #
           # pull request titles format rules here:
