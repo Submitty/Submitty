@@ -1,9 +1,12 @@
 <div class="content">
-
     <h1> Polls </h1>
     <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
     <a onclick="exportPolls()" class="btn btn-primary">Export</a>
-    <a onclick="importPolls()" class="btn btn-primary">Import</a>
+    <form action="{{base_url}}/importPolls" method="post" id="import-polls-form" enctype="multipart/form-data" style="display: inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input onchange="importPolls()" type="file" id="polls-file" name="polls_file" style="display: none;"/>
+        <label for="polls-file" class="btn btn-primary">Import</label>
+    </form>
     <hr>
 
     <div class="dropdown-wrapper">
@@ -309,42 +312,7 @@
     }
 
     function importPolls() {
-        let input = document.createElement('input');
-        input.type = 'file';
-        
-        input.onchange = e => { 
-            let file = e.target.files[0];
-            let reader = new FileReader();
-            reader.readAsText(file,'UTF-8');
-            reader.onload = readerEvent => {
-                let content = readerEvent.target.result;
-                let url = "{{base_url}}" + "/importPolls";
-                let fd = new FormData();
-                fd.append('csrf_token', "{{csrf_token}}");
-                fd.append('data', content);
-                $.ajax({
-                    url: url,
-                    type: "POST",
-                    data: fd,
-                    processData: false,
-                    cache: false,
-                    contentType: false,
-                    error: function(err) {
-                        console.error(err);
-                        window.alert("Something went wrong. Please try again.");
-                    },
-                    success: function(response) {
-                        response = JSON.parse(response);
-                        if (response.status == "success") {
-                            location.reload();
-                        } else {
-                            window.alert("An error occurred in importing the polls. Make sure the file format is correct.");
-                        }
-                    }
-                })
-            }
-        }
-        input.click();  
+        $("#import-polls-form").submit();
     }
 
 </script>

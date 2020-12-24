@@ -408,7 +408,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
-    public function getPollExportData() {
+    public function getPollExportData(): JsonResponse {
         $polls = $this->core->getQueries()->getPolls();
         $data = [];
         foreach ($polls as $poll) {
@@ -430,12 +430,16 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/importPolls", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return JsonResponse
+     * @return RedirectResponse
      */
-    public function importPollsFromJSON() {
-        $polls = json_decode($_POST["data"], true);
+    public function importPollsFromJSON(): RedirectResponse {
+        $filename = $_FILES["polls_file"]["tmp_name"];
+        $file = fopen($filename, "r");
+        $contents = fread($file, filesize($filename));
+        $polls = json_decode($contents, true);
         if (json_last_error() != JSON_ERROR_NONE) {
-            return JsonResponse::getFailResponse("Error in JSON format.");
+            $this->core->addErrorMessage("Failed to read file. Make sure the file is the right format");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $num_imported = 0;
         $num_errors = 0;
@@ -470,7 +474,6 @@ class PollController extends AbstractController {
         else {
             $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
         }
-
-        return JsonResponse::getSuccessResponse();
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 }
