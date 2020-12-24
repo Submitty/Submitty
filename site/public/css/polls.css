@@ -88,4 +88,8 @@
 
 .active {
     background:var(--always-default-white);
+
+a.fas {
+    font-size: 18px;
+    padding-right: 10px;
 }
