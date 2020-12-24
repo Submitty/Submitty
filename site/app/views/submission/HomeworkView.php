@@ -328,6 +328,10 @@ class HomeworkView extends AbstractView {
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
+
+            $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
+            $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
         }
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
@@ -420,9 +424,6 @@ class HomeworkView extends AbstractView {
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
-        $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
-        $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
-        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalCss('submitbox.css');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
