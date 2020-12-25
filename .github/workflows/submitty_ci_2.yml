@@ -321,9 +321,14 @@ jobs:
               sudo service nginx restart
           - name: Debug
             run : |
-              echo "!!!!"
               ls -lah /var/log/apache2/
               cat /var/log/apache2/error.log
+          - name: Debug2
+            run : |
+              cat /var/log/nginx/error.log
+          - name: Debug3
+            run : |
+              cat /var/log/php7.2-fpm.log
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
