@@ -13,6 +13,7 @@ Jensen Li, 2020-current
 Eli Schiff 2019-current  
 Ben Kelly 2019-current  
 Hector Rodriguez Figueroa 2019-current  
+Kevin McKinney 2019-current  
 Shail Patel 2018-current  
 John (Jack) Hulton 2018-current  
 Jasmine Plum 2017-current  
