@@ -181,7 +181,7 @@ class NavigationView extends AbstractView {
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "edit_buttons" => $this->getAllEditButtons($gradeable),
-                    "delete_buttons" => $this->getAllDeleteButtons($gradeable),                    
+                    "delete_buttons" => $this->getAllDeleteButtons($gradeable),
                     "buttons" => $buttons,
                     "has_build_error" => $gradeable->anyBuildErrors()
                 ];
