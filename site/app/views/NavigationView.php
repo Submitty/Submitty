@@ -77,7 +77,7 @@ class NavigationView extends AbstractView {
 
     const DATE_FORMAT = "m/d/Y @ h:i A T";
 
-    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles, $show_edit_buttons = true) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -178,20 +178,15 @@ class NavigationView extends AbstractView {
 
                 $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
                 $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]);
-                $render_gradeable = [
+                $render_gradeable[] = [
                     "id" => $gradeable->getId(),
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
+                    "edit_buttons" => $this->getAllEditButtons($gradeable),
+                    "delete_buttons" => $this->getAllDeleteButtons($gradeable),                    
                     "buttons" => $buttons,
                     "has_build_error" => $gradeable->anyBuildErrors()
                 ];
-
-                if ($show_edit_buttons) {
-                    $render_gradeable["edit_buttons"] = $this->getAllEditButtons($gradeable);
-                    $render_gradeable["delete_buttons"] = $this->getAllDeleteButtons($gradeable);
-                }
-
-                $render_gradeables[] = $render_gradeable;
 
                 if (count($buttons) > $max_buttons) {
                     $max_buttons = count($buttons);
