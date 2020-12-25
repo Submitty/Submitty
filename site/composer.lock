@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43eb29b061a00c64e60ee565c60d9d93",
+    "content-hash": "9891a7a141f7ea9403f2e540e7963e57",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
-            "version": "3.3.0",
+            "version": "3.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aptoma/twig-markdown.git",
-                "reference": "bbafa0bec60086bf67500515476ce4e8b946a709"
+                "reference": "6399f4456a7ca2055dfd1b437c166b627b2470c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/bbafa0bec60086bf67500515476ce4e8b946a709",
-                "reference": "bbafa0bec60086bf67500515476ce4e8b946a709",
+                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/6399f4456a7ca2055dfd1b437c166b627b2470c4",
+                "reference": "6399f4456a7ca2055dfd1b437c166b627b2470c4",
                 "shasum": ""
             },
             "require": {
@@ -61,7 +61,7 @@
                 "markdown",
                 "twig"
             ],
-            "time": "2019-12-16T07:59:11+00:00"
+            "time": "2020-11-11T09:54:29+00:00"
         },
         {
             "name": "brick/math",
