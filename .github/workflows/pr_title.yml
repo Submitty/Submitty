@@ -19,4 +19,4 @@ jobs:
           #
           # [<TYPE>:<MODULE>] <SUBJECT>
           #
-          regex: '^(\[SYSADMIN ACTION\])?((\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI\/UX):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$)|(\[DevDependency\]|\[Dependency\]) .{2,70})$'
+          regex: '^(\[SYSADMIN ACTION\])?(\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI\/UX):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$|\[(DevDependency|Dependency)\] .{2,70})$'
