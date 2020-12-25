@@ -6,25 +6,23 @@ exp = '^(\[SYSADMIN ACTION\])?(\[(Bugfix|Feature|Refactor|Testing|Documentation|
 
 
 # should pass
-assert re.search(exp,"[Refactor:Autograding] xxxx") != None
-assert re.search(exp,"[Bugfix:Submission] xxxx") != None
-assert re.search(exp,"[VPAT:InstructorUI] xxxx") != None
-assert re.search(exp,"[UI/UX:API] xxxx") != None
-assert re.search(exp,"[SYSADMIN ACTION][Refactor:Autograding] xxxx") != None
-assert re.search(exp,"[DevDependency] xxxx") != None
-assert re.search(exp,"[Dependency] xxxx") != None
-assert re.search(exp,"[Bugfix:Submission] 0123456789012345678901234567890123456789") != None
-assert re.search(exp,"[Dependency] 0123456789012345678901234567890123456789012345678901234567890123456789") != None
+assert re.search(exp, "[Refactor:Autograding] xxxx")
+assert re.search(exp, "[Bugfix:Submission] xxxx")
+assert re.search(exp, "[VPAT:InstructorUI] xxxx")
+assert re.search(exp, "[UI/UX:API] xxxx")
+assert re.search(exp, "[SYSADMIN ACTION][Refactor:Autograding] xxxx")
+assert re.search(exp, "[DevDependency] xxxx")
+assert re.search(exp, "[Dependency] xxxx")
+assert re.search(exp, "[Bugfix:Submission] 0123456789012345678901234567890123456789")
+assert re.search(exp, "[Dependency] 0123456789012345678901234567890123456789012345678901234567890123456789")
 
 # should fail
-assert re.search(exp,"[UI//UX:API] xxxx") == None
-assert re.search(exp,"[UI\/UX:API] xxxx") == None
-assert re.search(exp,"[Refactor:RainbowGrades]") == None
-assert re.search(exp,"[BugFix:TAGrading] xxxx") == None
-assert re.search(exp,"[Dependency:Autograding] xxxx") == None
-assert re.search(exp,"[SYSADMINACTION][Refactor:Autograding] xxxx") == None
-assert re.search(exp,"[DevDependency:Autograding] xxxx") == None
-assert re.search(exp,"[Dependency] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") != None
-assert re.search(exp,"[Bugfix:Submission] 01234567890123456789012345678901234567890") == None
-assert re.search(exp,"[Dependency] 01234567890123456789012345678901234567890123456789012345678901234567890") == None
-
+assert not re.search(exp, "[UI//UX:API] xxxx")
+assert not re.search(exp, "[UI\/UX:API] xxxx")
+assert not re.search(exp, "[Refactor:RainbowGrades]")
+assert not re.search(exp, "[BugFix:TAGrading] xxxx")
+assert not re.search(exp, "[Dependency:Autograding] xxxx")
+assert not re.search(exp, "[SYSADMINACTION][Refactor:Autograding] xxxx")
+assert not re.search(exp, "[DevDependency:Autograding] xxxx")
+assert not re.search(exp, "[Bugfix:Submission] 01234567890123456789012345678901234567890")
+assert not re.search(exp, "[Dependency] 01234567890123456789012345678901234567890123456789012345678901234567890")
