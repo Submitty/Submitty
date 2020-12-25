@@ -75,8 +75,6 @@ class NavigationView extends AbstractView {
         ]
     ];
 
-    const DATE_FORMAT = "m/d/Y @ h:i A T";
-
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
@@ -178,7 +176,7 @@ class NavigationView extends AbstractView {
 
                 $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
                 $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]);
-                $render_gradeable[] = [
+                $render_gradeables[] = [
                     "id" => $gradeable->getId(),
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
