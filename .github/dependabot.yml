@@ -9,10 +9,6 @@ updates:
   labels:
   - dependencies
   versioning-strategy: increase
-  commit-message:
-    prefix: "[Dependency]"
-    prefix-development: "[DevDependency]"
-    include: "scope"
 - package-ecosystem: npm
   directory: "/site"
   schedule:
@@ -21,7 +17,3 @@ updates:
   open-pull-requests-limit: 10
   labels:
   - dependencies
-  commit-message:
-    prefix: "[Dependency]"
-    prefix-development: "[DevDependency]"
-    include: "scope"
