@@ -292,8 +292,8 @@ class Notebook extends AbstractModel {
 
     public function getTestCases(): array {
         $ret = [];
-        foreach($this->item_pool as $item) {
-            if($item["testcases"]) {
+        foreach ($this->item_pool as $item) {
+            if ($item["testcases"]) {
                 $ret += $item["testcases"];
             }
         }

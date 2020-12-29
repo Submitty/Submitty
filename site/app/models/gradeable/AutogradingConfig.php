@@ -10,7 +10,6 @@ use app\libraries\FileUtils;
 use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\Notebook;
 
-
 /**
  * Class AutogradingConfig
  * @package app\models\gradeable
@@ -217,15 +216,14 @@ class AutogradingConfig extends AbstractModel {
 
 
     public function getUserSpecificNotebook(string $user_id): UserSpecificNotebook {
-        $notebook = new UserSpecificNotebook(
+        // TODO: This used to append to the global testcase array
+        // $this->parseTestCases($notebook->getTestCases());
+        return new UserSpecificNotebook(
             $this->core,
             $this->notebook_config,
             $this->gradeable_id,
             $user_id
         );
-        // TODO: This used to append to the global testcase array
-        // $this->parseTestCases($notebook->getTestCases());
-        return $notebook;
     }
 
 
@@ -241,9 +239,9 @@ class AutogradingConfig extends AbstractModel {
 
     private function setTestCasePoints() {
         // Accumulate only the positive points
-        foreach($this->getBaseTestCases() as $testcase) {
+        foreach ($this->getBaseTestCases() as $testcase) {
             $points = $testcase->getPoints();
-            if($points > 0){
+            if ($points > 0) {
                 if ($testcase->isHidden()) {
                     if ($testcase->isExtraCredit()) {
                         $this->total_hidden_extra_credit += $points;
@@ -264,8 +262,8 @@ class AutogradingConfig extends AbstractModel {
         }
 
         // Now compute points for notebooks
-        foreach($this->notebook_config as $notebook_part) {
-            if($notebook_part["type"] !== "item") {
+        foreach ($this->notebook_config as $notebook_part) {
+            if ($notebook_part["type"] !== "item") {
                 continue;
             }
             $this->total_hidden_extra_credit += $notebook_part["hidden_extra_credit_points"];
@@ -273,9 +271,7 @@ class AutogradingConfig extends AbstractModel {
             $this->total_non_hidden_extra_credit += $notebook_part["non_hidden_extra_credit_points"];
             $this->total_non_hidden_non_extra_credit += $notebook_part["non_hidden_non_extra_credit_points"];
         }
-     }
-
-
+    }
 
     /**
      * Gets whether a load message should be loaded
@@ -343,7 +339,7 @@ class AutogradingConfig extends AbstractModel {
      * Gets if there are any user-viewable testcases
      * @return bool
      */
-    public function anyVisibleTestcases($submitter) : bool {
+    public function anyVisibleTestcases($submitter): bool {
         $testcases = $submitter ? $this->getPersonalizedTestcases($submitter) : $this->getAllTestCases();
         foreach ($testcases as $testcase) {
             if (!$testcase->isHidden()) {
