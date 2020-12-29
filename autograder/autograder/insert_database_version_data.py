@@ -54,8 +54,10 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
 
     if len(testcases) != len(results['testcases']):
-        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}, aborting")
-        raise Exception(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}, aborting")
+        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
+        raise Exception(
+            f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}"
+        )
     for i in range(len(testcases)):
         print(f"testcase[i]= {json.dumps(results['testcases'][i])}")
         if testcases[i]['hidden'] and testcases[i]['extra_credit']:

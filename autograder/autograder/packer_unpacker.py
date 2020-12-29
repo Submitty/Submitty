@@ -409,7 +409,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
             autograding_utils.log_message(
                 config.log_path,
                 job_id=job_id,
-                message=f"ERROR: Could not score into database"
+                message="ERROR: Could not score into database"
             )
             autograding_utils.log_stack_trace(
                 config.error_path,

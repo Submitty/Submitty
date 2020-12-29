@@ -29,7 +29,7 @@ def get_all_testcases(
     testcase_specs = complete_config_obj['testcases']
 
     for item in complete_config_obj['item_pool']:
-        testcase_specs += item_obj['testcases']
+        testcase_specs += item['testcases']
 
     # Construct the testcase objects
     for t in testcase_specs:
@@ -43,7 +43,7 @@ def get_all_testcases(
             False,
             queue_obj["regrade"],
             queue_obj["job_id"],
-            working_directory, # Need this
+            working_directory,
             testcase_objs,
             '',
             config.log_path,
@@ -53,6 +53,7 @@ def get_all_testcases(
         testcase_objs.append(tmp_test)
 
     return testcase_objs
+
 
 def get_testcases_for_user(
     complete_config_obj,
@@ -93,7 +94,7 @@ def get_testcases_for_user(
             False,
             queue_obj["regrade"],
             queue_obj["job_id"],
-            working_directory, # Need this
+            working_directory,
             testcase_objs,
             '',
             config.log_path,
@@ -260,7 +261,6 @@ def run_validation(
     autograding_utils.add_all_permissions(tmp_work)
 
 
-
 def archive(
     testcases,
     config,
@@ -296,15 +296,15 @@ def archive(
             False
         )
     except Exception:
-        print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"overall.txt"))
-        log_message(
+        print("\n\nERROR: Grading incomplete -- could not perform archival")
+        autograding_utils.log_message(
             queue_obj['job_id'],
             queue_obj["regrade"],
             which_untrusted,
             item_name,
-            message="ERROR: could not archive the results of grading. See stack trace for more info."
+            message="ERROR: could not archive autograding results. See stack trace for more info."
         )
-        log_stack_trace(
+        autograding_utils.log_stack_trace(
             queue_obj['job_id'],
             queue_obj["regrade"],
             which_untrusted,
@@ -375,7 +375,6 @@ def grade_from_zip(
             "generated_output",
             queue_obj["gradeable"]
         )
-
 
         testcases = list()
         for tmp_test in get_all_testcases(
