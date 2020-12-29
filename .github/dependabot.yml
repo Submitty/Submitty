@@ -1,0 +1,27 @@
+version: 2
+updates:
+- package-ecosystem: composer
+  directory: "/site"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  labels:
+  - dependencies
+  versioning-strategy: increase
+  commit-message:
+    prefix: "[Dependency]"
+    prefix-development: "[DevDependency]"
+    include: "scope"  
+- package-ecosystem: npm
+  directory: "/site"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  labels:
+  - dependencies
+  commit-message:
+    prefix: "[Dependency]"
+    prefix-development: "[DevDependency]"
+    include: "scope"  
