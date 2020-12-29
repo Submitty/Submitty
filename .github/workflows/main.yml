@@ -1,0 +1,136 @@
+name: Submitty CI-1
+
+#run php lint, phpstan, eslint, and pylint on any push
+on:
+    push:
+  
+jobs:
+    eslint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2.1.2
+              with:
+                node-version: '10'
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - name: Run eslint
+              run: npm run lint
+
+
+    php-lint-static:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: shivammathur/setup-php@2.7.0
+            - name: Cache Composer
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            - name: Install Composer
+              uses: actions/cache@v2
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --dev
+            - name: Run php linting and static analysis
+              run : |
+                  php vendor/bin/phpcs --standard=tests/ruleset.xml
+                  php vendor/bin/phpstan analyze app
+
+
+    php-unit:
+      runs-on: ubuntu-latest
+      defaults:
+          run:
+              working-directory: site
+      steps:
+          - uses: actions/checkout@v2
+          - uses: shivammathur/setup-php@2.7.0
+            with:
+              extensions: imagick
+          - name: Cache Composer
+            id: composer-cache
+            run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+          - name: Install Composer
+            uses: actions/cache@v2
+            with:
+                path: ${{ steps.composer-cache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                restore-keys: |
+                    ${{ runner.os }}-composer-
+          - name: Install dependencies
+            run: composer install --prefer-dist --dev
+          - name: Run php unit tests
+            run : XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration tests/phpunit.xml
+
+
+    python-lint:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+                ${{ runner.os }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install flake8 flake8-bugbear
+        - name: Run python linting
+          run : python3 -m flake8
+
+
+    python-unit:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+                ${{ runner.os }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install SQLAlchemy jsonschema jsonref pytz tzlocal
+        - name: Run migrator python unit tests
+          run : |
+            pushd migration
+            python3 -m unittest discover
+            popd
+        - name: Run python_submitty_utils python unit tests
+          run : |
+            pushd python_submitty_utils
+            python3 -m unittest discover
+            popd
+
+
+
+

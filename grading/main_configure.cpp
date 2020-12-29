@@ -9,16 +9,6 @@
 const char *GLOBAL_config_json_string = "";
 
 
-/*
-
-  Generates a file in json format containing all of the information defined in
-  config.json for easier parsing.
-
-*/
-
-// =====================================================================
-// =====================================================================
-
 int main(int argc, char *argv[]) {
 
   if (argc != 4) {

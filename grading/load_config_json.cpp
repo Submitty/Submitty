@@ -969,7 +969,9 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
   single_testcase["testcase_label"] = single_testcase.value("testcase_label", "");
   single_testcase["details"] = single_testcase.value("details","");
   single_testcase["extra_credit"] = single_testcase.value("extra_credit",false);
+  single_testcase["release_hidden_details"] = single_testcase.value("release_hidden_details", false);
   single_testcase["hidden"] = single_testcase.value("hidden", false);
+  assert(!(single_testcase["release_hidden_details"] && !single_testcase["hidden"]));
   single_testcase["view_testcase_message"] = single_testcase.value("view_testcase_message",true);
   single_testcase["publish_actions"] = single_testcase.value("publish_actions", false);
 

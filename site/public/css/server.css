@@ -351,10 +351,6 @@ td>a.active-sort {
     color: var(--always-default-white);
 }
 
-.content.gradeable_message p:not(:last-child){
-    padding-bottom: 20px;
-}
-
 .content.overridden_message {
     background-color: var(--important-post);
     color: black;
@@ -2058,7 +2054,7 @@ header > * {
     z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
     cursor: pointer; /* Add a pointer on hover */
   }
-  
+
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -2085,4 +2081,8 @@ header > * {
   }
   .custom-file-input:active::before {
     background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+  }
+
+  .mermaid-element {
+    width: 100%;
   }

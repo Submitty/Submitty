@@ -52,6 +52,7 @@ public:
   int getPoints() const { return _json.value("points", 0); }
   bool allowPartialCredit() const { return _json.value("partial_credit", true); }
   bool getHidden() const { return _json.value("hidden", false); }
+  bool getReleaseHiddenDetails() const { return _json.value("release_hidden_details", false); }
   bool getExtraCredit() const { return _json.value("extra_credit",false); }
   bool viewTestcaseMessage() const { return _json.value("view_testcase_message",true); }
   bool publishActions() const { return _json.value("publish_actions", false); }
