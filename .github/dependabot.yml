@@ -12,7 +12,6 @@ updates:
   commit-message:
     prefix: "[Dependency]"
     prefix-development: "[DevDependency]"
-    include: "scope"  
 - package-ecosystem: npm
   directory: "/site"
   schedule:
@@ -24,4 +23,3 @@ updates:
   commit-message:
     prefix: "[Dependency]"
     prefix-development: "[DevDependency]"
-    include: "scope"  
