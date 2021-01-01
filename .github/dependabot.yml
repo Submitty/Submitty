@@ -11,7 +11,7 @@ updates:
   versioning-strategy: increase
   commit-message:
     prefix: "[Dependency] "
-    prefix-development: "[DevDependency] "
+    prefix-development: "[DevDependency]"
 - package-ecosystem: npm
   directory: "/site"
   schedule:
@@ -22,4 +22,4 @@ updates:
   - dependencies
   commit-message:
     prefix: "[Dependency] "
-    prefix-development: "[DevDependency] "
+    prefix-development: "[DevDependency]"
