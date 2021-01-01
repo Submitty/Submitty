@@ -15,6 +15,10 @@ th{
   margin-bottom: .5rem;
 }
 
+.disable-audible {
+    display: none;
+}
+
 /*
   This will hide elements on phones. This is useful for extra content that
   is not normally needed such as a user id
