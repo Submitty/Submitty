@@ -204,7 +204,14 @@
   }
 
   window.isAudibleAlertEnabled = false;
-  window.notificationSound = new NotificationSound();
+
+  try {
+      window.notificationSound = new NotificationSound();
+      document.querySelector('.disable-audible').style.display = 'none';
+      document.querySelector('.enable-audible').style.display = 'inline-block';
+  } catch (e) {
+      console.error(e);
+  }
 
   function toggleAudibleAlert() {
       if (window.isAudibleAlertEnabled) {

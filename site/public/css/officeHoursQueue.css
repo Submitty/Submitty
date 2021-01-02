@@ -15,6 +15,7 @@ th{
   margin-bottom: .5rem;
 }
 
+.enable-audible,
 .disable-audible {
     display: none;
 }
