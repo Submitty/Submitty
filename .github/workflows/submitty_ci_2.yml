@@ -239,6 +239,7 @@ jobs:
               pip3 install websocket_client
               pip3 install python-pam
               pip3 install python-dateutil
+              pip3 install paramiko
               #needs to be globally available to daemon user created later
               sudo pip3 install docker
               sudo pip3 install paramiko
