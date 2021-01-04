@@ -180,6 +180,7 @@ jobs:
 
 
     e2e:
+        continue-on-error: true
         runs-on: ubuntu-latest
         services:
           postgres:
@@ -279,7 +280,9 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+              cat /etc/pam.d/common-password
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              cat /etc/pam.d/common-password
               popd
           - name: Install Submitty Python Utils
             run: |
@@ -293,7 +296,7 @@ jobs:
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
+              sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
               sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
               sudo mkdir -p /run/php
@@ -303,6 +306,7 @@ jobs:
               sudo rm -rf /etc/apache2/sites-available/*
               sudo rm -rf /etc/apache2/sites-enabled/*
               sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
+              ls -lah /etc/apache2/sites-available
               sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
               sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
               sudo chmod 0640 /etc/apache2/suexec/www-data
@@ -320,6 +324,9 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
+          - name: Debug
+            run: |
+              curl -o - localhost:1501
           - name: Debug
             run : |
               ls -lah /var/log/apache2/
