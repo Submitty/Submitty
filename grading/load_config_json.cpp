@@ -945,8 +945,9 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
   //move to load_json
   General_Helper(single_testcase);
   // For now we overwrite this field.
-  // DO NOT MERGE UNTIL THIS COMMENT IS REMOVED
-  single_testcase["testcase_id"] = "TMP_TESTCASE_ID" + std::to_string(testcase_id);
+  std::stringstream ss;
+  ss << "test" << std::setw(2) << std::setfill('0') << testcase_id + 1;
+  single_testcase["testcase_id"] =  ss.str();
   testcase_id++;
 
   if (!single_testcase["timestamped_stdout"].is_boolean()){
@@ -1463,7 +1464,7 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
     limit_test["type"] = "FileCheck";
     limit_test["title"] = "Submission Limit";
     limit_test["max_submissions"] = MAX_NUM_SUBMISSIONS;
-    limit_test["testcase_id"] = "submission_limit_test";
+    limit_test["testcase_id"] = "SubmissionLimit";
     if (total_points > 0) {
       limit_test["points"] = -5;
       limit_test["penalty"] = -0.1;
@@ -1750,9 +1751,6 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
       else if(type == "item"){
         std::string item_label = in_notebook_cell.value("item_label", "");
         nlohmann::json user_item_map = in_notebook_cell.value("user_item_map", nlohmann::json::object());
-
-        // Update the complete_config if we had a blank label
-        complete[i]["item_label"] = "";
 
         if(itempool_definitions == config_json.end()){
           std::cout << "ERROR: Found an \"item\" cell but no global item_pool was defined!" << std::endl;

@@ -1500,7 +1500,7 @@
             "rows" :{
               "description" : "Height of the short answer box in rows.",
               "type" : "integer",
-              "minimum" : 1
+              "minimum" : 0
             },
             "testcase_ref" : {
               "description" : "Used to reference a testcase_label",

@@ -274,8 +274,7 @@ void WriteToResultsJSON(const TestCase &my_testcase,
 
 
 void WriteToGradefile(const TestCase &my_testcase,std::ofstream& gradefile,int testcase_pts) {
-    gradefile << "Testcase"
-              << std::setw(3) << std::right << my_testcase.getID() << ": "
+    gradefile << my_testcase.getID() << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
     if (my_testcase.getExtraCredit()) {
       if (testcase_pts > 0) {

@@ -1,7 +1,7 @@
-Testcase  1: Compilation                                          3 /  3  
-Testcase  2: no subdirectory                                      5 /  5  
-Testcase  3: with subdirectory                                    5 /  5  
-Testcase  4: with nested subdirectories                           5 /  5  
-Testcase  5: Submission Limit                                             
+test01: Compilation                                          3 /  3  
+test02: no subdirectory                                      5 /  5  
+test03: with subdirectory                                    5 /  5  
+test04: with nested subdirectories                           5 /  5  
+SubmissionLimit: Submission Limit                                             
 Automatic grading total:                                         18 / 18
 Non-hidden automatic grading total:                              18 / 18

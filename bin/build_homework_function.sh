@@ -157,7 +157,7 @@ function build_homework {
     pushd $hw_build_path > /dev/null
 
     # Use the C Pre-Processor to strip the C & C++ comments from config.json
-    cpp $course_dir/build/${assignment}/config.json complete_config.json
+    cpp ${course_dir}/build/${assignment}/config.json complete_config.json
     cpp_res=$?
     if (( $cpp_res != 0 )); then
         echo -e "\nFailed to run cpp preprocessor on ${course_dir}/build/${assignment}/config.json"

@@ -4,7 +4,7 @@
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -20,11 +20,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Sum of 5 random numbers"
+            "test_name": "Sum of 5 random numbers"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 3 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
