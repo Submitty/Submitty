@@ -326,7 +326,7 @@ jobs:
               sudo service nginx restart
           - name: Debug
             run: |
-              curl -o - http://localhost:1501/
+              curl -o - http://localhost
           - name: Debug
             run : |
               ls -lah /var/log/apache2/
