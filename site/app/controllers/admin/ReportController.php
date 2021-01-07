@@ -67,6 +67,14 @@ class ReportController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
+        $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports');
+
+        // Check that the directory is writable, fail if not
+        if (!is_writable($poll_base_path)) {
+            $this->core->addErrorMessage('Unable to write to the poll summary directory');
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        }
+
         $g_sort_keys = [
             'type',
             'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
@@ -82,14 +90,7 @@ class ReportController extends AbstractController {
             return null;
         });
 
-
         if ($this->core->getConfig()->isPollsEnabled()) {
-            $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports');
-            // Check that the directory is writable, fail if not
-            if (!is_writable($base_path)) {
-                $this->core->addErrorMessage('Unable to write to the poll summary directory');
-                $this->core->redirect($this->core->buildCourseUrl(['reports']));
-            }
             $this->generatePollSummaryInternal($poll_base_path);
         }
 
@@ -383,18 +384,19 @@ class ReportController extends AbstractController {
      * Generates a summary of all polls over a semester if polling is enabled
      * @param string $base_path the base path to store the report
      */
-    private function generatePollSummaryInternal($base_path) {
+    private function generatePollSummaryInternal(string $base_path): void {
         $polls = $this->core->getQueries()->getPolls();
         $polls_data = [];
         foreach ($polls as $poll) {
-            $poll_data = [];
-            $poll_data["name"] = $poll->getName();
             $student_response_data = [];
             foreach ($poll->getUserResponses() as $student => $response) {
                 $student_response_data[$student] = $poll->isCorrect($response);
             }
             $poll_data["responses"] = $student_response_data;
-            $polls_data[] = $poll_data;
+            $polls_data[] = [
+                "name" => $poll->getName(),
+                "responses" => $student_response_data
+            ];
         }
         file_put_contents(FileUtils::joinPaths($base_path, "poll_summary.json"), FileUtils::encodeJson($polls_data));
     }
