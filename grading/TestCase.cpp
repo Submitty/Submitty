@@ -236,6 +236,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
 /*
   Find the testcase within whole_config which has testcase_id == which_testcase_id and return it
   Checks both the global testcase array and any testcases within an itempool.
+  This function assumes that the student calling it has been assigned which_testcase_id.
 */
 nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string which_testcase_id) {
 
@@ -252,7 +253,7 @@ nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string whi
   // If we didn't find the testcase in the global array, it might be in the item_pool.
   nlohmann::json::iterator itempool = whole_config.find("item_pool");
   if(testcases != whole_config.end()) {
-    //Each item in the itempool has one or more testcases
+    //Each item in the itempool has zero or more testcases
     for (nlohmann::json::iterator item = itempool->begin(); item != itempool->end(); item++) {
       nlohmann::json::iterator itempool_testcases = item->find("testcases");
       // Some items might have no testcases.

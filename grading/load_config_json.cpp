@@ -46,7 +46,6 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
   if (whole_config["autograding"].find("submission_to_validation") == whole_config["autograding"].end()) {
     whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
-    whole_config["autograding"]["submission_to_validation"].push_back("input_*.txt");
     whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
     whole_config["autograding"]["submission_to_validation"].push_back(".user_assigment_access.json");
   }
@@ -55,7 +54,6 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     for(int i = 0; i < all_testcase_ids.size(); i++) {
       whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/*.txt");
       whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/*_diff.json");
-      whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/input_*.txt");
     }
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
@@ -944,6 +942,7 @@ bool validShowValue(const nlohmann::json& v) {
 void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config, int& testcase_id) {
   //move to load_json
   General_Helper(single_testcase);
+  // TODO: Make certain that testcase ids are unique.
   // For now we overwrite this field.
   std::stringstream ss;
   ss << "test" << std::setw(2) << std::setfill('0') << testcase_id + 1;
@@ -1464,6 +1463,7 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
     limit_test["type"] = "FileCheck";
     limit_test["title"] = "Submission Limit";
     limit_test["max_submissions"] = MAX_NUM_SUBMISSIONS;
+    // TODO: check that there are no other testcases with id SubmissionLimit
     limit_test["testcase_id"] = "SubmissionLimit";
     if (total_points > 0) {
       limit_test["points"] = -5;

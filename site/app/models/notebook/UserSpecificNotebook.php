@@ -80,7 +80,7 @@ class UserSpecificNotebook extends Notebook {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
                 //see if theres a target item pool and replace this with the actual notebook
                 $tgt_item = $this->getItemFromPool($notebook_cell);
-                $points = $notebook_cell["points"];
+                $points = $notebook_cell["points"] ?? 0;
 
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {

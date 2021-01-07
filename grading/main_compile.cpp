@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
   try {
     testcase_config = find_testcase_by_id(config_json, testcase_to_compile);
   } catch(char* c) {
-    std::cout << c << std::endl;
+    std::cerr << "ERROR: " << c << std::endl;
     return 1;
   }
   TestCase my_testcase(testcase_config, testcase_to_compile, "");

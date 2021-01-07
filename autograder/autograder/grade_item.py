@@ -17,70 +17,40 @@ def get_item_from_item_pool(complete_config_obj, item_name):
     return None
 
 
-def get_all_testcases(
+def get_testcases(
     complete_config_obj,
     config,
     queue_obj,
     working_directory,
     which_untrusted,
-    item_name
+    item_name,
+    notebook_data = None
 ):
+    '''
+    Retrieve testcases from a config obj. If notebook_data is
+    not null, return testcases corresponding to it, else return all testcases.
+    '''
     testcase_objs = []
     testcase_specs = complete_config_obj['testcases']
 
-    for item in complete_config_obj['item_pool']:
-        testcase_specs += item['testcases']
-
-    # Construct the testcase objects
-    for t in testcase_specs:
-        tmp_test = testcase.Testcase(
-            config,
-            t['testcase_id'],
-            queue_obj,
-            complete_config_obj,
-            t,
-            which_untrusted,
-            False,
-            queue_obj["regrade"],
-            queue_obj["job_id"],
-            working_directory,
-            testcase_objs,
-            '',
-            config.log_path,
-            config.error_path,
-            is_test_environment=False
-        )
-        testcase_objs.append(tmp_test)
-
-    return testcase_objs
-
-
-def get_testcases_for_user(
-    complete_config_obj,
-    notebook_data,
-    config,
-    queue_obj,
-    working_directory,
-    which_untrusted,
-    item_name
-):
-    testcase_objs = []
-    testcase_specs = complete_config_obj['testcases']
-
-    # Gather the testcase specifications for all itempool testcases
-    for notebook_item in notebook_data:
-        item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
-        if item_dict is None:
-            autograding_utils.log_message(
-                config.log_path,
-                queue_obj["job_id"],
-                queue_obj["regrade"],
-                which_untrusted,
-                item_name,
-                message=f"ERROR: could not find {notebook_item} in item pool."
-            )
-            continue
-        testcase_specs += item_dict['testcases']
+    if notebook_data is not None:
+        # Gather the testcase specifications for all itempool testcases
+        for notebook_item in notebook_data:
+            item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
+            if item_dict is None:
+                autograding_utils.log_message(
+                    config.log_path,
+                    queue_obj["job_id"],
+                    queue_obj["regrade"],
+                    which_untrusted,
+                    item_name,
+                    message=f"ERROR: could not find {notebook_item} in item pool."
+                )
+                continue
+            testcase_specs += item_dict['testcases']
+    else:
+        for item in complete_config_obj['item_pool']:
+            testcase_specs += item['testcases']
 
     # Construct the testcase objects
     for t in testcase_specs:
@@ -281,7 +251,6 @@ def archive(
         tc.setup_for_archival(log_file)
 
     try:
-        # Perform archival.
         autograding_utils.archive_autograding_results(
             config,
             working_directory,
@@ -377,7 +346,7 @@ def grade_from_zip(
         )
 
         testcases = list()
-        for tmp_test in get_all_testcases(
+        for tmp_test in get_testcases(
             complete_config_obj,
             config,
             queue_obj,
@@ -438,14 +407,14 @@ def grade_from_zip(
             notebook_data = []
 
         # Load all testcases.
-        testcases = get_testcases_for_user(
+        testcases = get_testcases(
             complete_config_obj,
-            notebook_data,
             config,
             queue_obj,
             working_directory,
             which_untrusted,
-            item_name
+            item_name,
+            notebook_data = notebook_data
         )
 
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
