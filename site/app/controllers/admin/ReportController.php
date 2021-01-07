@@ -82,7 +82,7 @@ class ReportController extends AbstractController {
             return null;
         });
 
-        
+
         if ($this->core->getConfig()->isPollsEnabled()) {
             $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports');
             // Check that the directory is writable, fail if not
