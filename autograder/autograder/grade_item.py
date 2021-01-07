@@ -24,7 +24,7 @@ def get_testcases(
     working_directory,
     which_untrusted,
     item_name,
-    notebook_data = None
+    notebook_data=None
 ):
     '''
     Retrieve testcases from a config obj. If notebook_data is
@@ -414,7 +414,7 @@ def grade_from_zip(
             working_directory,
             which_untrusted,
             item_name,
-            notebook_data = notebook_data
+            notebook_data=notebook_data
         )
 
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
