@@ -131,7 +131,7 @@ class AutogradingConfig extends AbstractModel {
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
 
-        $this->base_testcases = $details["testcases"];
+        $this->base_testcases = $details["testcases"] ?? [];
         $this->setTestCasePoints();
 
         if (isset($details['early_submission_incentive'])) {
