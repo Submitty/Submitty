@@ -81,6 +81,18 @@ class ReportController extends AbstractController {
             $this->saveUserToFile($base_path, $a, $b, $c, $d);
             return null;
         });
+
+        
+        if ($this->core->getConfig()->isPollsEnabled()) {
+            $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports');
+            // Check that the directory is writable, fail if not
+            if (!is_writable($base_path)) {
+                $this->core->addErrorMessage('Unable to write to the poll summary directory');
+                $this->core->redirect($this->core->buildCourseUrl(['reports']));
+            }
+            $this->generatePollSummaryInternal($poll_base_path);
+        }
+
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->redirect($this->core->buildCourseUrl(['reports']));
         return $this->core->getOutput()->renderJsonSuccess();
@@ -365,6 +377,26 @@ class ReportController extends AbstractController {
         }
 
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
+    }
+
+    /**
+     * Generates a summary of all polls over a semester if polling is enabled
+     * @param string $base_path the base path to store the report
+     */
+    private function generatePollSummaryInternal($base_path) {
+        $polls = $this->core->getQueries()->getPolls();
+        $polls_data = [];
+        foreach ($polls as $poll) {
+            $poll_data = [];
+            $poll_data["name"] = $poll->getName();
+            $student_response_data = [];
+            foreach ($poll->getUserResponses() as $student => $response) {
+                $student_response_data[$student] = $poll->isCorrect($response);
+            }
+            $poll_data["responses"] = $student_response_data;
+            $polls_data[] = $poll_data;
+        }
+        file_put_contents(FileUtils::joinPaths($base_path, "poll_summary.json"), FileUtils::encodeJson($polls_data));
     }
 
     /**
