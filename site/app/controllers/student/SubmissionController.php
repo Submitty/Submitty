@@ -1167,7 +1167,7 @@ class SubmissionController extends AbstractController {
                 if (isset($uploaded_files[$i])) {
                     $uploaded_files[$i]["is_zip"] = [];
                     for ($j = 0; $j < $count[$i]; $j++) {
-                        if (mime_content_type($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
+                        if (mime_content_type($uploaded_files[$i]["tmp_name"][$j]) === "application/zip" && strtolower(pathinfo($uploaded_files[$i]["name"][$j], PATHINFO_EXTENSION)) === "zip") {
                             if (FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }

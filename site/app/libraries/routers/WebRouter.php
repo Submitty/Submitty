@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\models\User;
 
 class WebRouter {
     /** @var Core  */
@@ -381,8 +382,24 @@ class WebRouter {
             }
         }
 
+        if ($access_control->getLevel()) {
+            $access_test = false;
+            switch ($access_control->getLevel()) {
+                case 'SUPERUSER':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_SUPERUSER;
+                    break;
+                case 'FACULTY':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_FACULTY;
+                    break;
+                case 'USER':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_USER;
+                    break;
+            }
+            $access = $access && $access_test;
+        }
+
         if ($access_control->getPermission()) {
-            $access = $this->core->getAccess()->canI($access_control->getPermission());
+            $access = $access && $this->core->getAccess()->canI($access_control->getPermission());
         }
 
         return $access;
