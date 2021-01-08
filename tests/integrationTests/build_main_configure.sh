@@ -15,10 +15,10 @@ if (( $cpp_res != 0 )); then
     exit 1
 fi
 
-# Remove cpp markers and run the complete config json through a python json syntax checker.
+# Run the complete config json through a python json syntax checker.
 python3 ${GRADINGCODE}/json_syntax_checker.py ${config_directory}/complete_config.json
 py_res=$?
-if (( $cpp_res != 0 )); then
+if (( $py_res != 0 )); then
     echo -e "\nFailed to load the instructor config.json"
     exit 1
 fi
@@ -46,8 +46,3 @@ rm ${config_directory}/complete_config.json
 # Copy the build config into the config directory
 cp ${which_test_dir}/data/build_config.json ${config_directory}
 cp ${which_test_dir}/data/build_config.json ${config_directory}/complete_config.json
-cat ${config_directory}/complete_config.json
-
-ls -la .
-
-ls -la ${config_directory}

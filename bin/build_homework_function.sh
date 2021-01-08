@@ -165,10 +165,10 @@ function build_homework {
         exit 1
     fi
 
-    # Remove cpp markers and run the complete config json through a python json syntax checker.
+    # Run the complete config json through a python json syntax checker.
     python3 ${GRADINGCODE}/json_syntax_checker.py complete_config.json
     py_res=$?
-    if (( $cpp_res != 0 )); then
+    if (( $py_res != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
         popd > /dev/null
         exit 1
