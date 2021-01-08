@@ -37,6 +37,7 @@ use app\libraries\FileUtils;
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
  * @method string getCourseJsonPath()
+ * @method void setCourseLoaded(bool $loaded)
  * @method bool isCourseLoaded()
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
