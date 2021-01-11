@@ -12,6 +12,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\libraries\routers\FeatureFlag;
+use app\libraries\PollUtils;
 
 /**
  * @FeatureFlag("polls")
@@ -406,21 +407,7 @@ class PollController extends AbstractController {
      */
     public function getPollExportData(): JsonResponse {
         $polls = $this->core->getQueries()->getPolls();
-        $data = [];
-        foreach ($polls as $poll) {
-            $poll_array = [];
-            $poll_array["name"] = $poll->getName();
-            $poll_array["question"] = $poll->getQuestion();
-            $responses = [];
-            foreach ($poll->getResponses() as $response) {
-                $responses[$response] = $poll->getResponseString($response);
-            }
-            $poll_array["responses"] = $responses;
-            $poll_array["correct_responses"] = $poll->getAnswers();
-            $poll_array["release_date"] = $poll->getReleaseDate();
-            $data[] = $poll_array;
-        }
-        return JsonResponse::getSuccessResponse($data);
+        return JsonResponse::getSuccessResponse(PollUtils::getPollExportData($polls));
     }
 
     /**
