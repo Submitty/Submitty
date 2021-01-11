@@ -9,6 +9,7 @@ use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\PollUtils;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -67,7 +68,7 @@ class ReportController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
-        $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports');
+        $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'polls');
 
         // Check that the directory is writable, fail if not
         if ($this->core->getConfig()->isPollsEnabled() && !is_writable($poll_base_path)) {
@@ -388,16 +389,13 @@ class ReportController extends AbstractController {
         $polls = $this->core->getQueries()->getPolls();
         $polls_data = [];
         foreach ($polls as $poll) {
-            $student_response_data = [];
-            foreach ($poll->getUserResponses() as $student => $response) {
-                $student_response_data[$student] = $poll->isCorrect($response);
-            }
             $polls_data[] = [
-                "name" => $poll->getName(),
-                "responses" => $student_response_data
+                "id" => $poll->getID(),
+                "responses" => $poll->getUserResponses()
             ];
         }
-        file_put_contents(FileUtils::joinPaths($base_path, "poll_summary.json"), FileUtils::encodeJson($polls_data));
+        file_put_contents(FileUtils::joinPaths($base_path, "poll_responses_summary.json"), FileUtils::encodeJson($polls_data));
+        file_put_contents(FileUtils::joinPaths($base_path, "poll_data_summary.json"), FileUtils::encodeJson(PollUtils::getPollExportData($polls)));
     }
 
     /**

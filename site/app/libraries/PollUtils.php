@@ -12,6 +12,10 @@ use app\libraries\response\JsonResponse;
  * Contains various useful functions for the polling system.
  */
 class PollUtils {
+    /**
+     * Generates a PHP array containing the all the poll data used in the export procedure
+     * @param array $polls the array of polls to be summarized
+     */
     public static function getPollExportData(array $polls): array {
         $data = [];
         foreach ($polls as $poll) {
