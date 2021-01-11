@@ -70,7 +70,7 @@ class ReportController extends AbstractController {
         $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports');
 
         // Check that the directory is writable, fail if not
-        if (!is_writable($poll_base_path)) {
+        if ($this->core->getConfig()->isPollsEnabled() && !is_writable($poll_base_path)) {
             $this->core->addErrorMessage('Unable to write to the poll summary directory');
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
@@ -392,7 +392,6 @@ class ReportController extends AbstractController {
             foreach ($poll->getUserResponses() as $student => $response) {
                 $student_response_data[$student] = $poll->isCorrect($response);
             }
-            $poll_data["responses"] = $student_response_data;
             $polls_data[] = [
                 "name" => $poll->getName(),
                 "responses" => $student_response_data
