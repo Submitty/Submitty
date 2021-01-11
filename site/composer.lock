@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "714405fba3b183080828e22d617de26b",
+    "content-hash": "715c77265c0f7fef040dbf33be3c6c96",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3236,16 +3236,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.49",
+            "version": "0.12.65",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "9a6136c2b39d5214da78de37128d5fe08e5d5b05"
+                "reference": "1c7658668b28f8d647a8b874372acf14c4352688"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9a6136c2b39d5214da78de37128d5fe08e5d5b05",
-                "reference": "9a6136c2b39d5214da78de37128d5fe08e5d5b05",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1c7658668b28f8d647a8b874372acf14c4352688",
+                "reference": "1c7658668b28f8d647a8b874372acf14c4352688",
                 "shasum": ""
             },
             "require": {
@@ -3288,7 +3288,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-10-12T14:10:44+00:00"
+            "time": "2021-01-06T16:51:10+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
