@@ -2094,7 +2094,7 @@ class ElectronicGraderController extends AbstractController {
 
     public function saveComponentPages(Gradeable $gradeable, array $pages) {
         foreach ($gradeable->getComponents() as $component) {
-            if (!isset($orders[$component->getId()])) {
+            if (!isset($pages[$component->getId()])) {
                 throw new \InvalidArgumentException('Missing component id in pages array');
             }
             $page = $pages[$component->getId()];
