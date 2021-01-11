@@ -21,6 +21,7 @@
         "type" : "boolean"
       },
       "early_submission_incentive" : {
+        "type": "object",
         "properties" : {
           "message" : {
             "type" : "string"
@@ -46,6 +47,7 @@
         "type" : "string"
       },
       "load_gradeable_message" : {
+        "type": "object",
         "properties" : {
           "message" : {
             "type" : "string"
@@ -372,7 +374,7 @@
       },
       "part_names" : {
         "type" : "array",
-        "minLength" : 1,
+        "minItems" : 1,
         "items" : {
           "type" : "string"
         }
@@ -406,6 +408,7 @@
         "description" : "An array of objects containing a notebook element and an associated validator. Used for random notebook generation.",
         "type" : "array",
         "items" : {
+          "type": "object",
           "description" : "An object containing a notebook element and an associated validator. Used for random notebook generation.",
           "additionalProperties" : false,
           "required" : ["item_name", "notebook"],
@@ -442,6 +445,7 @@
   },
   "definitions" : {
     "submission_limit" : {
+      "type": "object",
       "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
       "required" : ["max_submissions", "penalty", "points", "title", "type"],
       "properties" : {
@@ -475,6 +479,7 @@
       }
     },
     "filecheck": {
+      "type": "object",
       "description" : "A file existence check",
       "additionalProperties" : false,
       "required" : ["type", "title", "actual_file"],
@@ -542,6 +547,7 @@
           "type" : "string"
         },
         "containers" : {
+          "type": "array",
           "description" : "Specifies the environment that will be invoked to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
           "items" : {
             "description" : "The environments used to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
@@ -549,6 +555,7 @@
           }
         },
         "solution_containers" : {
+          "type": "array",
           "description" : "Specifies the environment that will be invoked to process this testcase for generation of output automatically. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
           "items" : {
             "description" : "The environments used to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
@@ -596,7 +603,7 @@
                     "items" : {
                       "type" : "string"
                     },
-                    "minLength" : 1
+                    "minItems" : 1
                   }
                 }
               },
@@ -615,7 +622,7 @@
                     "items" : {
                       "type" : "string"
                     },
-                    "minLength" : 1
+                    "minItems" : 1
                   }
                 }
               },
@@ -634,7 +641,7 @@
                     "items" : {
                       "type" : "string"
                     },
-                    "minLength" : 1
+                    "minItems" : 1
                   }
                 }
               },
@@ -653,7 +660,7 @@
                     "items" : {
                       "type" : "string"
                     },
-                    "minLength" : 1
+                    "minItems" : 1
                   }
                 }
               }
@@ -676,9 +683,10 @@
             {
               "type" : "array",
               "items" : {
-                "type" : "string"
+                "type" : "string",
+                "minLength": 1
               },
-              "minLength" : 1
+              "minItems" : 1
             }
           ]
         },
@@ -1082,9 +1090,9 @@
             {
               "type" : "array",
               "items" : {
-                "type": "string",
-                "minItems" : 1
-              }
+                "type": "string"
+              },
+              "minItems" : 1
             }
           ]
         },
@@ -1097,9 +1105,9 @@
             {
               "type" : "array",
               "items" : {
-                "type": "string",
-                "minItems" : 1
-              }
+                "type": "string"
+              },
+              "minItems" : 1
             }
           ]
         },
@@ -1382,10 +1390,10 @@
             "method" : {
               "type" : "string",
               "enum" : ["ImageDiff"]
+            },
+            "acceptable_threshold" : {
+              "type" : "string"
             }
-          },
-          "acceptable_threshold" : {
-            "type" : "string"
           }
         },
         {
