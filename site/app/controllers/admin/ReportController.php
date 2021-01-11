@@ -355,6 +355,7 @@ class ReportController extends AbstractController {
         $user_data['legal_last_name'] = $user->getLegalLastName();
         $user_data['preferred_last_name'] = $user->getPreferredLastName();
         $user_data['registration_section'] = $user->getRegistrationSection();
+        $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y");
 
@@ -362,7 +363,7 @@ class ReportController extends AbstractController {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
             $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
-        
+
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
 

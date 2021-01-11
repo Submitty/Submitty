@@ -526,6 +526,9 @@
         "hidden" : {
           "type" : "boolean"
         },
+        "release_hidden_details" : {
+          "type" : "boolean"
+        },
         "view_testcase_message" : {
           "type" : "boolean"
         },

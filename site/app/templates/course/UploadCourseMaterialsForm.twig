@@ -58,6 +58,12 @@
             <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
         </label>
         <label>
+            <span>
+                <strong>Sorting rank (lower value = higher position):</strong>
+            </span>
+            <input id="upload_sort" value="0.0" type="text" size="26"/>
+        </label>
+        <label>
             <input id="hide-materials-checkbox" type="checkbox" value="off"/>
             Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
@@ -109,14 +115,15 @@
         </div>
     </div>
     <script>
-        function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
 
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
+                var sort = document.getElementById("upload_sort").value;
                 var cb = $("input#expand_zip_checkbox");
                 var expandZip = 'off';
                 if  ($('#expand-zip-checkbox').is(':checked'))  {
@@ -140,7 +147,7 @@
                 }
                 var cmPath = document.getElementById('cm_path').innerHTML;
                 var requestedPath = document.getElementById("input-provide-full-path").value;
-                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
+                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections);
                 e.stopPropagation();
             });
         });
