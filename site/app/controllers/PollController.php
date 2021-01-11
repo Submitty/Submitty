@@ -12,6 +12,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\libraries\routers\FeatureFlag;
+use app\libraries\PollUtils;
 
 /**
  * @FeatureFlag("polls")
@@ -397,5 +398,65 @@ class PollController extends AbstractController {
                 $results
             )
         );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/getPollExport", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return JsonResponse
+     */
+    public function getPollExportData(): JsonResponse {
+        $polls = $this->core->getQueries()->getPolls();
+        return JsonResponse::getSuccessResponse(PollUtils::getPollExportData($polls));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/importPolls", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return RedirectResponse
+     */
+    public function importPollsFromJSON(): RedirectResponse {
+        $filename = $_FILES["polls_file"]["tmp_name"];
+        $file = fopen($filename, "r");
+        $contents = fread($file, filesize($filename));
+        $polls = json_decode($contents, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            $this->core->addErrorMessage("Failed to read file. Make sure the file is the right format");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $num_imported = 0;
+        $num_errors = 0;
+        foreach ($polls as $poll) {
+            if (
+                !array_key_exists("name", $poll) || !array_key_exists("question", $poll)
+                || !array_key_exists("responses", $poll) || !array_key_exists("correct_responses", $poll)
+                || !array_key_exists("release_date", $poll)
+            ) {
+                $num_errors = $num_errors + 1;
+                continue;
+            }
+            $name = $poll["name"];
+            $question = $poll["question"];
+            $responses = [];
+            $orders = [];
+            $i = 0;
+            foreach ($poll["responses"] as $id => $response) {
+                $response_id = intval($id);
+                $responses[$response_id] = $response;
+                $orders[$response_id] = $i;
+                $i = $i + 1;
+            }
+            $answers = $poll["correct_responses"];
+            $release_date = $poll["release_date"];
+            $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
+            $num_imported = $num_imported + 1;
+        }
+        if ($num_errors == 0) {
+            $this->core->addSuccessMessage("Successfully imported " . $num_imported . " polls");
+        }
+        else {
+            $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
+        }
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 }

@@ -1,7 +1,12 @@
 <div class="content">
-
     <h1> Polls </h1>
     <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
+    <a onclick="exportPolls()" class="btn btn-primary">Export</a>
+    <form action="{{base_url}}/importPolls" method="post" id="import-polls-form" enctype="multipart/form-data" style="display: inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input onchange="importPolls()" type="file" id="polls-file" name="polls_file" style="display: none;"/>
+        <label for="polls-file" class="btn btn-primary">Import</label>
+    </form>
     <hr>
 
     <div class="dropdown-wrapper">
@@ -259,6 +264,36 @@
                 window.alert("Something went wrong. Please try again.");
             }
         });
+    }
+
+    function exportPolls() {
+        let url = "{{base_url}}" + "/getPollExport";
+        $.ajax({
+            url: url,
+            type: "GET",
+            processData: false,
+            cache: false,
+            contentType: false,
+            error: function(err) {
+                console.error(err);
+                window.alert("Something went wrong. Please try again.");
+            },
+            success: function(response) {
+                let data = JSON.parse(response).data;
+                let text = JSON.stringify(data, null, "\t");
+                let element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+                element.setAttribute('download', "{{semester}}-{{course}}-polls.json");
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+        });
+    }
+
+    function importPolls() {
+        $("#import-polls-form").submit();
     }
 
 </script>
