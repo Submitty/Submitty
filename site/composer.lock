@@ -4,32 +4,34 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "715c77265c0f7fef040dbf33be3c6c96",
+    "content-hash": "1cab9cd5a43b6549105d2628fb93c113",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
-            "version": "3.3.1",
+            "version": "3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aptoma/twig-markdown.git",
-                "reference": "6399f4456a7ca2055dfd1b437c166b627b2470c4"
+                "reference": "6612cb6543896ddd741b12db149cb69211997263"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/6399f4456a7ca2055dfd1b437c166b627b2470c4",
-                "reference": "6399f4456a7ca2055dfd1b437c166b627b2470c4",
+                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/6612cb6543896ddd741b12db149cb69211997263",
+                "reference": "6612cb6543896ddd741b12db149cb69211997263",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.0",
+                "php": "^7.0|^8.0",
                 "twig/twig": "^2.7.0|^3.0"
             },
             "require-dev": {
-                "codeclimate/php-test-reporter": "dev-master",
                 "erusev/parsedown": "^1.6",
-                "knplabs/github-api": "~1.4",
+                "guzzlehttp/guzzle": "^7.2",
+                "http-interop/http-factory-guzzle": "^1.0",
+                "knplabs/github-api": "~3.0",
                 "league/commonmark": "~0.5",
                 "michelf/php-markdown": "~1",
+                "php": "^7.2.5|^8.0",
                 "phpunit/phpunit": "~6.0|~5.0|~8.0"
             },
             "suggest": {
@@ -61,7 +63,7 @@
                 "markdown",
                 "twig"
             ],
-            "time": "2020-11-11T09:54:29+00:00"
+            "time": "2021-01-08T11:44:05+00:00"
         },
         {
             "name": "brick/math",
