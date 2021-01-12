@@ -401,7 +401,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/getPollExport", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/polls/export", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
@@ -411,7 +411,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/importPolls", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/import", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse
      */

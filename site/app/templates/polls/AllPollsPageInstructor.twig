@@ -2,7 +2,7 @@
     <h1> Polls </h1>
     <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
     <a onclick="exportPolls()" class="btn btn-primary">Export</a>
-    <form action="{{base_url}}/importPolls" method="post" id="import-polls-form" enctype="multipart/form-data" style="display: inline;">
+    <form action="{{base_url}}/import" method="post" id="import-polls-form" enctype="multipart/form-data" style="display: inline;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input onchange="importPolls()" type="file" id="polls-file" name="polls_file" style="display: none;"/>
         <label for="polls-file" class="btn btn-primary">Import</label>
@@ -267,7 +267,7 @@
     }
 
     function exportPolls() {
-        let url = "{{base_url}}" + "/getPollExport";
+        let url = "{{base_url}}" + "/export";
         $.ajax({
             url: url,
             type: "GET",
