@@ -417,10 +417,7 @@ class PollController extends AbstractController {
      */
     public function importPollsFromJSON(): RedirectResponse {
         $filename = $_FILES["polls_file"]["tmp_name"];
-        $file = fopen($filename, "r");
-        $contents = fread($file, filesize($filename));
-        $polls = json_decode($contents, true);
-        if (json_last_error() != JSON_ERROR_NONE) {
+        if ($polls === false) {
             $this->core->addErrorMessage("Failed to read file. Make sure the file is the right format");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -428,8 +425,10 @@ class PollController extends AbstractController {
         $num_errors = 0;
         foreach ($polls as $poll) {
             if (
-                !array_key_exists("name", $poll) || !array_key_exists("question", $poll)
-                || !array_key_exists("responses", $poll) || !array_key_exists("correct_responses", $poll)
+                !array_key_exists("name", $poll)
+                || !array_key_exists("question", $poll)
+                || !array_key_exists("responses", $poll)
+                || !array_key_exists("correct_responses", $poll)
                 || !array_key_exists("release_date", $poll)
             ) {
                 $num_errors = $num_errors + 1;
@@ -451,7 +450,7 @@ class PollController extends AbstractController {
             $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
             $num_imported = $num_imported + 1;
         }
-        if ($num_errors == 0) {
+        if ($num_errors === 0) {
             $this->core->addSuccessMessage("Successfully imported " . $num_imported . " polls");
         }
         else {
