@@ -215,7 +215,7 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if (!$gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($gradeable_id, $this->core->getUser()->getId())) {
+        if (!$gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($this->core->getUser()->getId())) {
             return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }
         else {
@@ -950,10 +950,7 @@ class SubmissionController extends AbstractController {
         $notebook = null;
         if ($is_notebook) {
             //need to force re-parse the notebook serverside again
-            $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
-                $who_id,
-                $gradeable_id
-            );
+            $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook($who_id);
 
             //save the notebook hashes and item selected
             $json = [

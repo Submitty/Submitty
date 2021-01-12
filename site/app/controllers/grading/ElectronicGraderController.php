@@ -1656,9 +1656,10 @@ class ElectronicGraderController extends AbstractController {
 
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
+        $submitter = $graded_gradeable->getSubmitter()->getId();
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
-        if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+        if (count($gradeable->getAutogradingConfig()->getPersonalizedTestcases($submitter)) > 1) {
             // NOTE/REDESIGN FIXME: We might have autograding that is
             // penalty only.  The available positive autograding
             // points might be zero.  Testing for autograding > 1 is
@@ -2807,10 +2808,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_config = $gradeable->getAutogradingConfig();
 
         $notebook_config = $gradeable_config->getNotebookConfig();
-        $hashes = $gradeable_config->getUserSpecificNotebook(
-            $who_id,
-            $gradeable->getId()
-        )->getHashes();
+        $hashes = $gradeable_config->getUserSpecificNotebook($who_id)->getHashes();
         $que_idx = 0;
         // loop through the notebook key, and find from_pool key in each object (or question)
         foreach ($notebook_config as $key => $item) {

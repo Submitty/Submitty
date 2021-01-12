@@ -1164,13 +1164,22 @@ def can_short_circuit(config_obj: str) -> bool:
     * It has one autograding test case and that test case is the submission limit check.
     """
 
-    testcases = config_obj['testcases']
-    if len(testcases) == 0:
+    base_testcases = config_obj['testcases']
+    num_testcases = len(base_testcases)
+
+    if 'item_pool' in config_obj:
+        for item in config_obj['item_pool']:
+            if 'testcases' in item:
+                num_testcases += len(item['testcases'])
+
+    # If there are no itempool or base testcases, we can short circuit
+    if num_testcases == 0:
         # No test cases, so this is trivially short-circuitable.
         return True
-    elif len(testcases) == 1:
+    # If there is only one testcase and it is a base testcase, check if it is submission limit
+    elif len(base_testcases) == 1 and num_testcases == 1:
         # We have only one test case; check if it's a submission limit check
-        return is_testcase_submission_limit(testcases[0])
+        return is_testcase_submission_limit(base_testcases[0])
     else:
         return False
 
@@ -1281,7 +1290,7 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     JSON file, zip up the results, and use the standard
     unpack_grading_results_zip function to place the results where they are
     expected. If something goes wrong during this process, then this function
-    will return False, signalling to the caller that this job should be graded
+    will return False, signaling to the caller that this job should be graded
     normally.
     """
     with open(queue_file) as fd:

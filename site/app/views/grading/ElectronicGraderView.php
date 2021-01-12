@@ -475,7 +475,7 @@ HTML;
             // student has received the penalty.  But if no one has
             // received the penalty maybe we omit it?  (expensive?/confusing?)
             // See also note in ElectronicGradeController.php
-            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+            if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
@@ -526,7 +526,7 @@ HTML;
                 }
             }
             // NOTE/REDESIGN FIXME: Same note as above.
-            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+            if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
                 if ($gradeable->isTaGrading()) {
@@ -927,7 +927,7 @@ HTML;
                             <div class="panel-item-section right-top"></div>
                             <div class="panel-item-section-drag-bar panel-item-right-drag"></div>
                             <div class="panel-item-section right-bottom"></div>
-                         </div>   
+                         </div>
                     </div>
 HTML;
         }
@@ -960,8 +960,7 @@ HTML;
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
 
             $notebook_model = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
-                $graded_gradeable->getSubmitter()->getId(),
-                $gradeable->getId()
+                $graded_gradeable->getSubmitter()->getId()
             );
 
             $notebook = $notebook_model->getNotebook();
