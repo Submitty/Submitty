@@ -2,17 +2,20 @@
 
 namespace tests\app\libraries;
 
+use app\libraries\Core;
 use app\libraries\PollUtils;
+use app\models\PollModel;
 
 class PollUtilsTester extends \PHPUnit\Framework\TestCase {
     use \phpmock\phpunit\PHPMock;
 
-    public function setUp(): void {
+    private $core;
 
+    public function setUp(): void {
+        $this->core = new Core();
     }
 
     public function tearDown(): void {
-
     }
 
     public function testExportDataWithEmptyPolls() {
@@ -22,5 +25,36 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertSame($actual_data, $expected_data);
     }
 
-
+    public function testExportDataWithNonEmptyPolls() {
+        $polls = [
+            new PollModel($this->core, 0, "Poll #1", "Is this the first poll?", ["Yes", "No", "Maybe"], [0, 2], "closed", ["bitdiddle" => 0, "aphacker" => 1], "2020-01-11"),
+            new PollModel($this->core, 1, "Poll #2", "Is this the second poll?", ["Yes", "No", "Definitely not"], [0], "open", ["bitdiddle" => 2, "aphacker" => 0], "2020-01-12"),
+            new PollModel($this->core, 2, "Poll #3", "Is this the fourth poll?", ["Yes", "No", "Maybe"], [1], "ended", ["bitdiddle" => 1, "aphacker" => 2], "2020-01-13"),
+        ];
+        $expected_data = [
+            "0" => [
+                "name" => "Poll #1",
+                "question" => "Is this the first poll?",
+                "responses" => ["Yes", "No", "Maybe"],
+                "correct_responses" => [0, 2],
+                "release_date" => "2020-01-11"
+            ],
+            "1" => [
+                "name" => "Poll #2",
+                "question" => "Is this the second poll?",
+                "responses" => ["Yes", "No", "Definitely not"],
+                "correct_responses" => [0],
+                "release_date" => "2020-01-12"
+            ],
+            "2" => [
+                "name" => "Poll #3",
+                "question" => "Is this the fourth poll?",
+                "responses" => ["Yes", "No", "Maybe"],
+                "correct_responses" => [1],
+                "release_date" => "2020-01-13"
+            ]
+        ];
+        $actual_data = PollUtils::getPollExportData($polls);
+        $this->assertSame($actual_data, $expected_data);
+    }
 }
