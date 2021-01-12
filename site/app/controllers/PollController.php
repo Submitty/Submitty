@@ -417,6 +417,7 @@ class PollController extends AbstractController {
      */
     public function importPollsFromJSON(): RedirectResponse {
         $filename = $_FILES["polls_file"]["tmp_name"];
+        $polls = FileUtils::readJsonFile($filename);
         if ($polls === false) {
             $this->core->addErrorMessage("Failed to read file. Make sure the file is the right format");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
