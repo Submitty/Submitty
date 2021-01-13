@@ -1244,7 +1244,7 @@ int execute(const std::string &cmd,
 
   std::string display_variable = display_variable2;
   if (display_variable == "NO_DISPLAY_SET") {
-    display_variable = ":1";
+    display_variable = ":0";
   }
 
 
@@ -1282,7 +1282,8 @@ int execute(const std::string &cmd,
   }
 
   if(window_mode){
-    std::cout <<"Window mode activated." << std::endl;
+    std::cout << "Window mode activated." << std::endl;
+    std::cout << "Going to setenv DISPLAY to " << display_variable << std::endl;
     setenv("DISPLAY", display_variable.c_str(), 1);
     invalid_windows = snapshotOfActiveWindows();
   }
