@@ -10,14 +10,14 @@ class Testcase():
     A Testcase contains a secure_execution_environment, which it uses to
     perform the various phases of autograding in a secure manner.
     """
-    def __init__(self, config, number, queue_obj, complete_config_obj, testcase_info,
+    def __init__(self, config, testcase_id, queue_obj, complete_config_obj, testcase_info,
                  untrusted_user, is_vcs, is_batch_job, job_id, autograding_directory,
                  previous_testcases, submission_string, log_path, stack_trace_log_path,
                  is_test_environment):
-        self.number = number
+        self.testcase_id = testcase_id
         self.queue_obj = queue_obj
         self.untrusted_user = untrusted_user
-        self.testcase_directory = "test{:02}".format(number)
+        self.testcase_directory = testcase_id
         self.type = testcase_info.get('type', 'Execution')
         self.machine = socket.gethostname()
         self.testcase_dependencies = previous_testcases.copy()
@@ -57,14 +57,14 @@ class Testcase():
             )
 
         # Determine whether or not this testcase has an input generation phase.
-        gen_cmds = complete_config_obj["testcases"][number-1].get('input_generation_commands', None)
+        gen_cmds = testcase_info.get('input_generation_commands', None)
         if gen_cmds is not None:
             self.has_input_generator_commands = len(gen_cmds) > 0
         else:
             self.has_input_generator_commands = False
 
         # Determine whether or not this testcase has an output generation phase.
-        solution_containers = complete_config_obj["testcases"][number-1].get(
+        solution_containers = testcase_info.get(
             'solution_containers',
             None
         )
@@ -85,7 +85,7 @@ class Testcase():
         else:
             success = self._run_execution()
 
-        test_id = f'{self.type.upper()} TESTCASE {self.number}'
+        test_id = f'{self.type.upper()} TESTCASE {self.testcase_id}'
         if success == 0:
             print(self.machine, self.untrusted_user, f"{test_id} OK")
         else:
@@ -112,7 +112,7 @@ class Testcase():
                 self.queue_obj["who"],
                 str(self.queue_obj["version"]),
                 self.submission_string,
-                '--testcase', str(self.number)
+                str(self.testcase_id)
             ]
             arguments += display_line
 
@@ -145,7 +145,7 @@ class Testcase():
                 self.queue_obj['who'],
                 str(self.queue_obj['version']),
                 self.submission_string,
-                '--testcase', str(self.number)
+                str(self.testcase_id)
             ]
 
             try:
@@ -183,7 +183,7 @@ class Testcase():
                 self.queue_obj['who'],
                 str(self.queue_obj['version']),
                 self.submission_string,
-                '--testcase', str(self.number),
+                str(self.testcase_id),
                 '--generation_type', str('input')
             ]
 
@@ -207,7 +207,7 @@ class Testcase():
                     self.secure_environment.random_input_directory
                 )
 
-            t_name = f"INPUT GENERATION TESTCASE {self.number}"
+            t_name = f"INPUT GENERATION TESTCASE {self.testcase_id}"
             if success == 0:
                 print(self.machine, self.untrusted_user, f"{t_name} OK")
             else:
@@ -237,7 +237,7 @@ class Testcase():
                     self.queue_obj["who"],
                     str(self.queue_obj["version"]),
                     self.submission_string,
-                    '--testcase', str(self.number),
+                    str(self.testcase_id),
                     '--generation_type', str('output')
                 ]
             elif self.queue_obj['generate_output']:
@@ -246,7 +246,7 @@ class Testcase():
                     'Generating Output',
                     '0',
                     '',
-                    '--testcase', str(self.number),
+                    str(self.testcase_id),
                     '--generation_type', str('output')
                 ]
 
@@ -270,7 +270,7 @@ class Testcase():
                     self.secure_environment.random_output_directory
                 )
 
-            t_name = f"OUTPUT GENERATION TESTCASE {self.number}"
+            t_name = f"OUTPUT GENERATION TESTCASE {self.testcase_id}"
             if success == 0:
                 print(self.machine, self.untrusted_user, f"{t_name} OK")
             else:

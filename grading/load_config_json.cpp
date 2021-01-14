@@ -15,6 +15,8 @@ extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
+  std::vector<std::string> all_testcase_ids = gatherAllTestcaseIds(whole_config);
+
   if (whole_config["autograding"].find("submission_to_compilation") == whole_config["autograding"].end()) {
     whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
     whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cxx");
@@ -36,23 +38,25 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 
   if (whole_config["autograding"].find("compilation_to_validation") == whole_config["autograding"].end()) {
-    whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDOUT*.txt");
-    whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDERR*.txt");
+    for(int i = 0; i < all_testcase_ids.size(); i++) {
+      whole_config["autograding"]["compilation_to_validation"].push_back(all_testcase_ids[i] + "/STDOUT*.txt");
+      whole_config["autograding"]["compilation_to_validation"].push_back(all_testcase_ids[i] + "/STDERR*.txt");
+    }
   }
 
   if (whole_config["autograding"].find("submission_to_validation") == whole_config["autograding"].end()) {
     whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
-    whole_config["autograding"]["submission_to_validation"].push_back("input_*.txt");
     whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
+    whole_config["autograding"]["submission_to_validation"].push_back(".user_assigment_access.json");
   }
 
   if (whole_config["autograding"].find("work_to_details") == whole_config["autograding"].end()) {
-    whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
-    whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
+    for(int i = 0; i < all_testcase_ids.size(); i++) {
+      whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/*.txt");
+      whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/*_diff.json");
+    }
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
-    //todo check up on how this works.
-    whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
     // archive the timestamped dispatcher actions
     whole_config["autograding"]["work_to_details"].push_back("**/dispatched_actions.txt");
   }
@@ -66,11 +70,6 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 * Add global booleans and configuration options to the configuration
 **/
 void AddGlobalDefaults(nlohmann::json &whole_config) {
-
-  /*************************************************
-  * Add Global File Copy Commands
-  **************************************************/
-  AddAutogradingConfiguration(whole_config);
 
   /*************************************************
   * Add Global Booleans
@@ -116,8 +115,135 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     whole_config["container_options"]["number_of_ports"] = 1; // connection
   }
 
+  /*************************************************
+  * Defaults previously found in main_configure
+  **************************************************/
+
+  if (whole_config.find("assignment_message") != whole_config.end()) {
+    whole_config["gradeable_message"] = whole_config.value("assignment_message","");
+    whole_config.erase("assignment_message");
+  }
+  whole_config["gradeable_message"] = whole_config.value("gradeable_message", "");
+
+  whole_config["load_gradeable_message"] = whole_config.value("load_gradeable_message", nlohmann::json::object());
+  whole_config["load_gradeable_message"]["message"] = whole_config["load_gradeable_message"].value("message", "");
+  whole_config["load_gradeable_message"]["first_time_only"] = whole_config["load_gradeable_message"].value("first_time_only", false);
+
+  whole_config["early_submission_incentive"] = whole_config.value("early_submission_incentive", nlohmann::json::object());
+  whole_config["early_submission_incentive"]["message"] = whole_config["early_submission_incentive"].value("message", "");
+  whole_config["early_submission_incentive"]["minimum_days_early"] = whole_config["early_submission_incentive"].value("minimum_days_early", 0);
+  whole_config["early_submission_incentive"]["minimum_points"] = whole_config["early_submission_incentive"].value("minimum_points", 0);
+  whole_config["early_submission_incentive"]["test_cases"] = whole_config["early_submission_incentive"].value("test_cases", std::vector<int>());
+
+  whole_config["max_submission_size"] = whole_config.value("max_submission_size",MAX_SUBMISSION_SIZE);
+
+  whole_config["required_capabilities"] = whole_config.value("required_capabilities","default");
+
+  // Configure defaults for hide_submitted_files
+  whole_config["hide_submitted_files"] = whole_config.value("hide_submitted_files", false);
+
+  // Configure defaults for hide_version_and_test_details
+  whole_config["hide_version_and_test_details"] = whole_config.value("hide_version_and_test_details", false);
+
+  // By default, we have one drop zone without a part label / sub
+  // directory.
+  nlohmann::json::iterator parts = whole_config.find("part_names");
+  if (parts != whole_config.end()) {
+    nlohmann::json tmp =  nlohmann::json::array();
+    for (int i = 0; i < parts->size(); i++) {
+      tmp.push_back((*parts)[i]);
+    }
+    whole_config["part_names"] = tmp;
+  }
+
+  // But, if there are input fields, but there are no explicit parts
+  // (drag & drop zones / "bucket"s for file upload), set part_names
+  // to an empty array (no zones for file drag & drop).
+
+  nlohmann::json::iterator in_notebook_cells = whole_config.find("notebook");
+  if (parts == whole_config.end() && in_notebook_cells != whole_config.end()) {
+    whole_config["part_names"] =  nlohmann::json::array();
+  }
 }
 
+void ComputeGlobalValues(nlohmann::json &whole_config, const std::string& assignment_id) {
+
+  whole_config["id"] = assignment_id;
+  int total_nonec = 0;
+  int total_ec = 0;
+
+  int visible = 0;
+  nlohmann::json::iterator testcases = whole_config.find("testcases");
+
+  assert (testcases != whole_config.end());
+
+  int max_submissions = MAX_NUM_SUBMISSIONS;
+  int total_time = 0;
+
+  nlohmann::json::iterator rl = whole_config.find("resource_limits");
+
+  for (typename nlohmann::json::iterator itr = testcases->begin(); itr != testcases->end(); itr++) {
+    int points = itr->value("points",0);
+    bool extra_credit = itr->value("extra_credit",false);
+    bool hidden = itr->value("hidden",false);
+    std::string test_id = itr->value("testcase_id","");
+    assert(test_id != "");
+
+    if (points > 0) {
+      if (!extra_credit)
+        total_nonec += points;
+      else
+        total_ec += points;
+      if (!hidden)
+        visible += points;
+    }
+    //container name only matters if we try to get the commands for this testcase.
+    std::string container_name = "";
+    nlohmann::json my_testcase_json = *itr;
+    TestCase my_testcase(my_testcase_json, test_id, container_name);
+    if (my_testcase.isSubmissionLimit()) {
+      max_submissions = my_testcase.getMaxSubmissions();
+    }
+  }
+  // DEPRECATED: Because of the addition of itempool grading, this should be computed in the shipper.
+  whole_config["max_possible_grading_time"] = 0;
+
+  //TODO: This will break down for itempool grading.
+  nlohmann::json grading_parameters = whole_config.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",total_nonec);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",total_ec);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+
+  std::string start_red_text = "\033[1;31m";
+  std::string end_red_text   = "\033[0m";
+  if (total_nonec != AUTO_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec
+        << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
+    throw "ERROR: Automated Points do not match testcases";
+  }
+
+  if (total_ec != EXTRA_CREDIT_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec
+        << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
+    throw "ERROR: Extra Credit Points do not match testcases.";
+  }
+
+  if (total_nonec + TA_POINTS != TOTAL_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total."
+        << end_red_text << "\n" << std::endl;
+    throw "ERROR: Automated Points and TA Points do not match total.";
+  }
+
+
+
+
+  whole_config["max_submissions"] = max_submissions;
+  whole_config["auto_pts"] = AUTO_POINTS;
+  whole_config["points_visible"] = visible;
+  whole_config["ta_pts"] = TA_POINTS;
+  whole_config["total_pts"] = TOTAL_POINTS;
+}
 
 // This function ensures that any file explicitly tagged as an
 // executable in a compilation step is validated and copied
@@ -130,6 +256,7 @@ void PreserveCompiledFiles(nlohmann::json& testcases, nlohmann::json &whole_conf
        my_testcase != testcases.end(); my_testcase++,which_testcase++) {
 
     std::string testcase_type = my_testcase->value("type","Execution");
+    std::string test_id = (*my_testcase)["testcase_id"];
     //Skip non compilation tests
     if(testcase_type != "Compilation"){
       continue;
@@ -138,9 +265,7 @@ void PreserveCompiledFiles(nlohmann::json& testcases, nlohmann::json &whole_conf
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
     // Add all executables to compilation_to_runner and compilation_to_validation
     for(std::vector<std::string>::iterator exe = executable_names.begin(); exe != executable_names.end(); exe++){
-      std::stringstream ss;
-      ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << *exe;
-      std::string executable_name = ss.str();
+      std::string executable_name = test_id + "/" + *exe;
 
       if(whole_config["autograding"]["compilation_to_runner"].find("executable_name") == whole_config["autograding"]["compilation_to_runner"].end()){
         whole_config["autograding"]["compilation_to_runner"].push_back(executable_name);
@@ -163,7 +288,7 @@ void ArchiveValidatedFiles(nlohmann::json &testcases, nlohmann::json &whole_conf
   for (nlohmann::json::iterator my_testcase = testcases.begin();
        my_testcase != testcases.end(); my_testcase++,which_testcase++) {
 
-
+    std::string test_id = (*my_testcase)["testcase_id"];
     nlohmann::json::iterator validators = my_testcase->find("validation");
     if (validators == my_testcase->end()) { /* no autochecks */ continue; }
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
@@ -188,9 +313,7 @@ void ArchiveValidatedFiles(nlohmann::json &testcases, nlohmann::json &whole_conf
         if (skip) { continue; }
 
         // THEN add each actual file to the list of files to archive
-        std::stringstream ss;
-        ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;
-        actual_file = ss.str();
+        actual_file = test_id + "/" + actual_file;
         whole_config["autograding"]["work_to_details"].push_back(actual_file);
       }
     }
@@ -693,8 +816,9 @@ void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
 
       assert(testcase.length() == 6);
 
-      std::string prefix = testcase.substr(0,4);
-      assert(prefix == "test");
+      // TODO: This was removed due to testcase_ids.
+      // std::string prefix = testcase.substr(0,4);
+      // assert(prefix == "test");
 
       std::string number = testcase.substr(4,6);
       int remainder = std::stoi( number );
@@ -800,10 +924,10 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &testcases, nlohmann::json &whole
   }
 }
 
-void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config){
+void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config, int& testcase_id){
 
   for (typename nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++){
-      InflateTestcase(*itr, whole_config);
+      InflateTestcase(*itr, whole_config, testcase_id);
   }
 }
 
@@ -815,9 +939,15 @@ bool validShowValue(const nlohmann::json& v) {
            v == "on_success"));
 }
 
-void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config) {
+void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config, int& testcase_id) {
   //move to load_json
   General_Helper(single_testcase);
+  // TODO: Make certain that testcase ids are unique.
+  // For now we overwrite this field.
+  std::stringstream ss;
+  ss << "test" << std::setw(2) << std::setfill('0') << testcase_id + 1;
+  single_testcase["testcase_id"] =  ss.str();
+  testcase_id++;
 
   if (!single_testcase["timestamped_stdout"].is_boolean()){
     single_testcase["timestamped_stdout"] = whole_config["timestamped_stdout"];
@@ -835,6 +965,16 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
     assert (single_testcase.value("type","Execution") == "Execution");
     Execution_Helper(single_testcase);
   }
+
+  single_testcase["testcase_label"] = single_testcase.value("testcase_label", "");
+  single_testcase["details"] = single_testcase.value("details","");
+  single_testcase["extra_credit"] = single_testcase.value("extra_credit",false);
+  single_testcase["release_hidden_details"] = single_testcase.value("release_hidden_details", false);
+  single_testcase["hidden"] = single_testcase.value("hidden", false);
+  assert(!(single_testcase["release_hidden_details"] && !single_testcase["hidden"]));
+  single_testcase["view_testcase_message"] = single_testcase.value("view_testcase_message",true);
+  single_testcase["publish_actions"] = single_testcase.value("publish_actions", false);
+
 
   nlohmann::json::iterator itr = single_testcase.find("validation");
   if (itr != single_testcase.end()) {
@@ -890,60 +1030,85 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
 
 // =====================================================================
 // =====================================================================
+nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id) {
+    nlohmann::json config_json;
+    std::stringstream sstr(GLOBAL_config_json_string);
 
-nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
-  nlohmann::json answer;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> answer;
+    sstr >> config_json;
 
-  AddGlobalDefaults(answer);
+    if (student_id != "") {
+      CustomizeAutoGrading(student_id, config_json);
+    }
+    return config_json;
+}
 
+
+nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_id) {
+
+  AddGlobalDefaults(config_json);
+  int testcase_id = 0;
   /**
   * Validate/complete-ify the global testcases array.
   **/
-  nlohmann::json::iterator testcases = answer.find("testcases");
-  if(testcases == answer.end()) {
-    answer["testcases"] = nlohmann::json::array();
-    testcases = answer.find("testcases");
+  nlohmann::json::iterator testcases = config_json.find("testcases");
+  if(testcases == config_json.end()) {
+    config_json["testcases"] = nlohmann::json::array();
+    testcases = config_json.find("testcases");
   }
 
-  AddDockerConfiguration(*testcases, answer);
-  FormatDispatcherActions(*testcases, answer);
-  formatPreActions(*testcases, answer);
-  FormatGraphicsActions(*testcases, answer);
-  RewriteDeprecatedMyersDiff(*testcases, answer);
-  InflateTestcases(*testcases, answer);
-  ArchiveValidatedFiles(*testcases, answer);
-  PreserveCompiledFiles(*testcases, answer);
+  AddDockerConfiguration(*testcases, config_json);
+  FormatDispatcherActions(*testcases, config_json);
+  formatPreActions(*testcases, config_json);
+  FormatGraphicsActions(*testcases, config_json);
+  RewriteDeprecatedMyersDiff(*testcases, config_json);
+  std::cout << "Inflating testcases" << std::endl;
+  InflateTestcases(*testcases, config_json, testcase_id);
 
   /**
   * Validate/complete-ify the testcases in each item in the item_pool.
   **/
-  nlohmann::json::iterator item_pool = answer.find("item_pool");
-  if(item_pool != answer.end()) {
-    for(nlohmann::json::iterator item = answer["item_pool"].begin(); item != answer["item_pool"].end(); item++) {
-      nlohmann::json::iterator item_testcases = (*item).find("testcases");
-      if(item_testcases == (*item).end()) {
+  nlohmann::json::iterator item_pool = config_json.find("item_pool");
+  if(item_pool != config_json.end()) {
+    for(nlohmann::json::iterator item = config_json["item_pool"].begin(); item != config_json["item_pool"].end(); item++) {
+      nlohmann::json::iterator item_testcases = item->find("testcases");
+      if(item_testcases == item->end()) {
         (*item)["testcases"] = nlohmann::json::array();
-        item_testcases = (*item).find("testcases");
+        item_testcases = item->find("testcases");
       }
-      AddDockerConfiguration(*item_testcases, answer);
-      FormatDispatcherActions(*item_testcases, answer);
-      formatPreActions(*item_testcases, answer);
-      FormatGraphicsActions(*item_testcases, answer);
-      RewriteDeprecatedMyersDiff(*item_testcases, answer);
-      InflateTestcases(*item_testcases, answer);
-      ArchiveValidatedFiles(*item_testcases, answer);
-      PreserveCompiledFiles(*item_testcases, answer);
+      AddDockerConfiguration(*item_testcases, config_json);
+      FormatDispatcherActions(*item_testcases, config_json);
+      formatPreActions(*item_testcases, config_json);
+      FormatGraphicsActions(*item_testcases, config_json);
+      RewriteDeprecatedMyersDiff(*item_testcases, config_json);
+      InflateTestcases(*item_testcases, config_json, testcase_id);
+    }
+  } else {
+    config_json["item_pool"] = nlohmann::json::array();
+  }
+
+  ValidateNotebooks(config_json);
+  AddSubmissionLimitTestCase(config_json);
+
+  /*************************************************
+  * Add Global File Copy Commands
+  * This step must come last, as it requires all
+  * testcase ids to be in place.
+  **************************************************/
+  AddAutogradingConfiguration(config_json);
+  // Archive validated and compiled files (must be done after AddAutogradingConfiguration)
+  ArchiveValidatedFiles(*testcases, config_json);
+  PreserveCompiledFiles(*testcases, config_json);
+  if(item_pool != config_json.end()) {
+    for(nlohmann::json::iterator item = config_json["item_pool"].begin(); item != config_json["item_pool"].end(); item++) {
+      nlohmann::json::iterator item_testcases = item->find("testcases");
+      ArchiveValidatedFiles(*item_testcases, config_json);
+      PreserveCompiledFiles(*item_testcases, config_json);
     }
   }
 
+  ComputeGlobalValues(config_json, assignment_id);
 
-  AddSubmissionLimitTestCase(answer);
-  if (rcsid != "") {
-    CustomizeAutoGrading(rcsid,answer);
-  }
-  return answer;
+  return config_json;
 }
 
 /**
@@ -1275,13 +1440,15 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   bool has_limit_test = false;
 
   // count total points and search for submission limit testcase
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
+  nlohmann::json::iterator testcases = config_json.find("testcases");
+  assert (testcases != config_json.end());
+  for (nlohmann::json::iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
     //This input to testcase is only necessary if the testcase needs to retrieve its 'commands'
     std::string container_name = "";
-    TestCase my_testcase(config_json,i,container_name);
-    int points = (*tc)[i].value("points",0);
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    TestCase my_testcase(*tc, testcase_id, container_name);
+    int points = tc->value("points", 0);
     if (points > 0) {
       total_points += points;
     }
@@ -1296,6 +1463,8 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
     limit_test["type"] = "FileCheck";
     limit_test["title"] = "Submission Limit";
     limit_test["max_submissions"] = MAX_NUM_SUBMISSIONS;
+    // TODO: check that there are no other testcases with id SubmissionLimit
+    limit_test["testcase_id"] = "SubmissionLimit";
     if (total_points > 0) {
       limit_test["points"] = -5;
       limit_test["penalty"] = -0.1;
@@ -1305,10 +1474,6 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
     }
     config_json["testcases"].push_back(limit_test);
   }
-
-
-  // FIXME:  ugly...  need to reset the id...
-  //TestCase::reset_next_test_case_id();
 }
 
 void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
@@ -1403,3 +1568,286 @@ void VerifyGraderDeductions(nlohmann::json &json_graders) {
     std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
   }
 }
+
+std::vector<std::string> gatherAllTestcaseIds(const nlohmann::json& complete_config){
+  std::vector<std::string> testcase_names;
+  nlohmann::json::const_iterator testcases = complete_config.find("testcases");
+  assert (testcases != complete_config.end());
+  for (nlohmann::json::const_iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    testcase_names.push_back(testcase_id);
+  }
+
+  nlohmann::json::const_iterator item_pool = complete_config.find("item_pool");
+  if (item_pool != complete_config.end()){
+    for(nlohmann::json::const_iterator item_itr = item_pool->begin(); item_itr != item_pool->end(); item_itr++) {
+      nlohmann::json item_testcases = item_itr->value("testcases", nlohmann::json::array());
+      for(nlohmann::json::iterator it_itr = item_testcases.begin(); it_itr != item_testcases.end(); it_itr++) {
+        std::string testcase_id = it_itr->value("testcase_id", "");
+        assert(testcase_id != "");
+        testcase_names.push_back(testcase_id);
+      }
+    }
+  }
+
+  return testcase_names;
+}
+
+void ValidateNotebooks(nlohmann::json& config_json) {
+  if (config_json.find("notebook") != config_json.end()){
+    config_json["notebook"] = ValidateANotebook(config_json["notebook"], config_json);
+  }
+
+  if(config_json.find("item_pool") != config_json.end()){
+    int i = 0;
+    for(nlohmann::json::iterator itr = config_json["item_pool"].begin(); itr != config_json["item_pool"].end(); itr++, i++) {
+      config_json["item_pool"][i]["item_name"] = (*itr)["item_name"];
+      config_json["item_pool"][i]["notebook"] = ValidateANotebook((*itr)["notebook"], config_json);
+    }
+  }
+}
+
+nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann::json& config_json) {
+    // Setup "notebook" items inside the 'j' json item that will be passed forward
+    nlohmann::json complete = nlohmann::json::array();
+    nlohmann::json::const_iterator itempool_definitions = config_json.find("item_pool");
+    int i = 0;
+    for (nlohmann::json::const_iterator itr = notebook.begin(); itr != notebook.end(); itr++, i++){
+      const nlohmann::json in_notebook_cell = (*itr);
+      nlohmann::json out_notebook_cell;
+
+      // Get type field
+      std::string type = in_notebook_cell.value("type", "");
+      assert(type != "");
+      out_notebook_cell["type"] = type;
+
+      // Get testcase_ref if it exists
+      std::string testcase_ref = in_notebook_cell.value("testcase_ref", "");
+      if(testcase_ref != ""){
+        out_notebook_cell["testcase_ref"] = testcase_ref;
+      }
+
+      // Handle each specific note book cell type
+      // Handle markdown data
+      if(type == "markdown"){
+          // Get markdown items
+          std::string markdown_string = in_notebook_cell.value("markdown_string", "");
+          std::string markdown_file = in_notebook_cell.value("markdown_file", "");
+
+          // Assert only one was passed in
+          assert(
+                  (markdown_string != "" && markdown_file == "") ||
+                  (markdown_string == "" && markdown_file != "")
+                  );
+
+          // Pass forward the item that was passed in
+          if(markdown_string != ""){
+              out_notebook_cell["markdown_string"] = markdown_string;
+          }
+          else{
+              out_notebook_cell["markdown_file"] = markdown_file;
+          }
+      }
+      // Handle image data
+      else if(type == "image"){
+          // Get req image items
+          std::string image = in_notebook_cell.value("image", "");
+
+          // Assert req fields were not empty
+          assert(image != "");
+
+          // Get optional image items
+          int height = in_notebook_cell.value("height", 0);
+          int width = in_notebook_cell.value("width", 0);
+          std::string alt_text = in_notebook_cell.value("alt_text", "Instructor provided image");
+
+          // Pass forward populated items
+          out_notebook_cell["image"] = image;
+          out_notebook_cell["alt_text"] = alt_text;
+
+          if(height > 0){
+              out_notebook_cell["height"] = height;
+          }
+
+          if(width > 0){
+              out_notebook_cell["width"] = width;
+          }
+      }
+      // Handle file_submission
+      else if(type == "file_submission"){
+          // required field
+          std::string directory = in_notebook_cell.value("directory","");
+          assert (directory != "");
+
+          // optional field
+          std::string label = in_notebook_cell.value("label","");
+
+          // Pass forward populated items
+          out_notebook_cell["directory"] = directory;
+          out_notebook_cell["label"] = label;
+      }
+      // Handle short_answer data
+      else if(type == "short_answer"){
+          // Get req short_answer items
+          std::string filename = in_notebook_cell.value("filename", "");
+
+          // Assert req fields were not empty
+          assert(filename != "");
+
+          // Get optional short_answer items
+          std::string initial_value = in_notebook_cell.value("initial_value", "");
+          std::string programming_language = in_notebook_cell.value("programming_language", "");
+          int rows = in_notebook_cell.value("rows", 0);
+
+          // Pass forward populated items
+          out_notebook_cell["filename"] = filename;
+          out_notebook_cell["initial_value"] = initial_value;
+          out_notebook_cell["rows"] = rows;
+
+          if(programming_language != ""){
+              out_notebook_cell["programming_language"] = programming_language;
+          }
+      }
+      // Handle multiple choice data
+      else if(type == "multiple_choice"){
+          // Get req multiple choice items
+          std::string filename = in_notebook_cell.value("filename", "");
+
+          // Assert filename was present
+          assert(filename != "");
+
+          // Get choices
+          nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
+
+          int num_of_choices = 0;
+          for (auto it = choices.begin(); it != choices.end(); ++it){
+              // Reassign the value of this iteration to choice
+              nlohmann::json choice = it.value();
+
+              // Get value and description
+              std::string value = choice.value("value", "");
+              std::string description = choice.value("description", "");
+
+              // Assert choice value and description were in fact present
+              assert(value != "");
+              assert(description != "");
+
+              num_of_choices++;
+          }
+
+          // Assert choices was not empty
+          assert(num_of_choices > 0);
+
+          bool allow_multiple = in_notebook_cell.value("allow_multiple", false);
+          bool randomize_order = in_notebook_cell.value("randomize_order", false);
+
+          // Pass forward items
+          out_notebook_cell["filename"] = filename;
+          out_notebook_cell["choices"] = choices;
+          out_notebook_cell["allow_multiple"] = allow_multiple;
+          out_notebook_cell["randomize_order"] = randomize_order;
+      }
+      else if(type == "item"){
+        std::string item_label = in_notebook_cell.value("item_label", "");
+        nlohmann::json user_item_map = in_notebook_cell.value("user_item_map", nlohmann::json::object());
+
+        if(itempool_definitions == config_json.end()){
+          std::cout << "ERROR: Found an \"item\" cell but no global item_pool was defined!" << std::endl;
+          throw -1;
+        }
+        //Search through the global item_pool to find if the items in this itempool exist
+        if(in_notebook_cell.find("from_pool") == in_notebook_cell.end()){
+          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label)
+                    << " does not have a from_pool" << std::endl;
+          throw -1;
+        }
+        nlohmann::json in_notebook_cell_from_pool = in_notebook_cell.value("from_pool", nlohmann::json::array());
+        //std::cout << "Checking for " << in_notebook_cell_item_pool.size() << " items among a global set of "
+        //          << itempool_definitions->size() << " items" << std::endl;
+
+        if(in_notebook_cell_from_pool.size() == 0){
+          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label)
+                    << " has an empty from_pool, requires at least one item!" << std::endl;
+          throw -1;
+        }
+
+        for(int j=0; j<in_notebook_cell_from_pool.size(); j++){
+          bool found_global_itempool_item = false;
+          for(int k=0; k<itempool_definitions->size(); k++) {
+            if ((*itempool_definitions)[k]["item_name"] == in_notebook_cell_from_pool[j]) {
+              found_global_itempool_item = true;
+              break;
+            }
+          }
+          if(!found_global_itempool_item){
+            std::cout << "ERROR: item with label \"" << (item_label.empty() ? "[no label]" : item_label);
+            std::cout << "\" requested undefined item: " << in_notebook_cell_from_pool[j] << std::endl;
+            throw -1;
+          }
+          /*else{
+            std::cout << "Found global itempool item " << in_notebook_cell_from_pool[j] << " for item with label: "
+                      << (item_label.empty() ? "[no label]" : item_label) << std::endl;
+          }*/
+        }
+        // Check if the indices mapped to users are in 'from_pool' array range
+        for (auto i=user_item_map.begin(); i!=user_item_map.end(); i++) {
+           int item_index = i.value();
+           if(item_index < 0 || item_index >= in_notebook_cell_from_pool.size()) {
+               std::cout << "ERROR: user (" << i.key() <<") mapped with index \"" << item_index;
+               std::cout << "\" which is out of 'from_pool' array range: 0 to " << user_item_map.size() << std::endl;
+               throw -1;
+           }
+        }
+
+        // Write the empty string if no label provided, otherwise pass forward item_label
+        out_notebook_cell["item_label"] = item_label;
+
+        // Write the empty object if no 'mapping' provided, otherwise pass forward user_item_map
+        out_notebook_cell["user_item_map"] = user_item_map;
+
+        // Pass forward other items
+        out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
+        //TODO: Add support for the other types of points
+        if(in_notebook_cell.find("points") != in_notebook_cell.end()){
+          out_notebook_cell["points"] = in_notebook_cell["points"];
+          out_notebook_cell["non_hidden_non_extra_credit_points"] = in_notebook_cell["points"];
+        }
+        else {
+          out_notebook_cell["points"] = 0;
+          out_notebook_cell["non_hidden_non_extra_credit_points"] = 0;
+        }
+      }
+      // Else unknown type was passed in throw exception
+      else{
+        std::cout << "An unknown notebook cell type was detected in the supplied config.json file: '" << type << "'. Build failed." << std::endl;
+        throw -1;
+      }
+
+      // Add this newly validated notebook cell to the one being sent forward
+      assert(type != "item" || out_notebook_cell.find("item_label") != out_notebook_cell.end());
+      complete.push_back(out_notebook_cell);
+    }
+    return complete;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

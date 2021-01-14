@@ -1012,11 +1012,11 @@ function setupSortableComponents() {
 
 /**
  * Key press handler for jquery sortable elements
- * @param e
+ * @param {KeyboardEvent} e
  */
 function keyPressHandler(e) {
     // Enable ctrl-a to select all
-    if (e.keyCode === 65 && e.ctrlKey) {
+    if (e.code === "KeyA" && e.ctrlKey) {
         e.target.select()
     }
 }
@@ -1389,7 +1389,7 @@ function getOpenComponentIds() {
  * @return {int}
  */
 function getComponentIdByOrder(order) {
-    return $('.component-container').eq(order).find('.component').attr('data-component_id');
+    return parseInt($('.component-container').eq(order).find('.component').attr('data-component_id'));
 }
 
 /**
@@ -2364,7 +2364,7 @@ function closeAllComponents(save_changes) {
     //  but just in case there is...
     getOpenComponentIds().forEach(function (id) {
         sequence = sequence.then(function () {
-            return closeComponent(id);
+            return closeComponent(id, save_changes);
         });
     });
     return sequence;
@@ -2931,7 +2931,7 @@ function saveComponent(component_id) {
         let gradedComponent = getGradedComponentFromDOM(component_id);
         if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
             if (!confirm("Are you sure you want to delete the custom mark?")) {
-                return promise.reject();
+                return Promise.reject();
             }
         }
         // We're in grade mode, so save the graded component

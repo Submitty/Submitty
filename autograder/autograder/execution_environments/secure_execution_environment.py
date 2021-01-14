@@ -2,7 +2,6 @@ import os
 import shutil
 import stat
 import traceback
-
 from .. import autograding_utils
 
 
@@ -206,7 +205,7 @@ class SecureExecutionEnvironment():
             "user_assignment_settings.json"
         )
         submit_timestamp = os.path.join(self.tmp_submission, "submission", ".submit.timestamp")
-        user_assignment_access = os.path.join(self.tmp_submission, "user_assignment_access.json")
+        user_assignment_access = os.path.join(self.tmp_submission, ".user_assignment_access.json")
 
         if os.path.exists(user_assignment_settings):
             shutil.copy(user_assignment_settings, directory)
@@ -400,8 +399,8 @@ class SecureExecutionEnvironment():
         details_dir = os.path.join(self.tmp_results, "details", self.name)
         public_dir = os.path.join(self.tmp_results, "results_public", self.name)
 
-        os.mkdir(details_dir)
-        os.mkdir(public_dir)
+        os.makedirs(details_dir, exist_ok=True)
+        os.makedirs(public_dir, exist_ok=True)
 
         # Remove any test input files.
         test_input_path = os.path.join(self.tmp_work, 'test_input')

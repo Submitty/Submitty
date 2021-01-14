@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
     "testcases": [
         {
             "autochecks": [
@@ -37,11 +39,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Python - Static Analysis"
+            "test_name": "Python - Static Analysis"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 2 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

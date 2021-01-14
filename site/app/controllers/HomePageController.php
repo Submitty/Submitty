@@ -272,7 +272,7 @@ class HomePageController extends AbstractController {
         }
         return $response;
     }
-    
+
     /**
      * @Route("/update", methods={"GET"})
      * @return MultiResponse|WebResponse

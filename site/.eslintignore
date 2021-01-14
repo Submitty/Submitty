@@ -17,6 +17,7 @@ public/js/gradeable.js
 public/js/latedays.js
 public/js/menu.js
 public/js/notebook_builder/*
+public/js/notification-sound.js
 public/js/pdf/PDFAnnotate.js
 public/js/pdf/PDFAnnotateEmbedded.js
 public/js/pdf/PDFInitToolbar.js

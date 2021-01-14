@@ -1,42 +1,48 @@
 {
+    "automatic_grading_total": 20,
+    "nonhidden_automatic_grading_total": 20,
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT.txt",
+                {
+                    "description": "STDOUT.txt",
                     "actual_file": "test02/STDOUT.txt"
                 }
             ],
             "points_awarded": 8,
-            "test_name": "Test 2 Sum of 5 random numbers"
+            "test_name": "Sum of 5 random numbers"
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT.txt",
+                {
+                    "description": "STDOUT.txt",
                     "actual_file": "test03/STDOUT.txt"
                 }
             ],
             "points_awarded": 6,
-            "test_name": "Test 3 Sum of 10 random numbers"
+            "test_name": "Sum of 10 random numbers"
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT_0.txt",
+                {
+                    "description": "STDOUT_0.txt",
                     "actual_file": "test04/STDOUT_0.txt"
                 },
-                {                    "description": "STDOUT_1.txt",
+                {
+                    "description": "STDOUT_1.txt",
                     "actual_file": "test04/STDOUT_1.txt"
                 }
             ],
             "points_awarded": 4,
-            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+            "test_name": "Is it random?  (Is it different on each run?)"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 5 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

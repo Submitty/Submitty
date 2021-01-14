@@ -2,10 +2,10 @@
 
 namespace app\controllers;
 
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\models\CourseMaterial;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
@@ -13,6 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
 class MiscController extends AbstractController {
+
+    const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
 
     /**
      * Get the current server time
@@ -25,7 +27,7 @@ class MiscController extends AbstractController {
     public function getServerTime(): JsonResponse {
         return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
     }
-    
+
     /**
      * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
      */
@@ -79,7 +81,7 @@ class MiscController extends AbstractController {
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $directory, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse("You do not have access to this file")
+                JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
             );
         }
 
@@ -106,26 +108,21 @@ class MiscController extends AbstractController {
                 return false;
             }
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-                $this->core->getOutput()->showError("You do not have access to this file");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
         }
         else {
             // Check access through Access library
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-                $this->core->getOutput()->showError("You do not have access to this file");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
 
-            // If attempting to obtain course materials
-            if ($dir == 'course_materials') {
-                // If the user attempting to access the file is not at least a grader then ensure the file has been released
-                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
-                    $this->core->getOutput()->showError("You may not access this file until it is released.");
-                    return false;
-                }
-                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                    $this->core->getOutput()->showError("Your section may not access this file.");
+            if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
+                $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+                if ($access_failure) {
+                    $this->core->getOutput()->showError($access_failure);
                     return false;
                 }
             }
@@ -160,7 +157,7 @@ class MiscController extends AbstractController {
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-            $this->core->getOutput()->showError("You do not have access to this file");
+            $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
             return false;
         }
 
@@ -198,19 +195,14 @@ class MiscController extends AbstractController {
         $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path))));
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-            $this->core->getOutput()->showError("You do not have access to this file");
+            $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
             return false;
         }
 
-        // If attempting to obtain course materials
-        if ($dir == 'course_materials') {
-            // If the user attempting to access the file is not at least a grader then ensure the file has been released
-            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
-                $this->core->getOutput()->showError("You may not access this file until it is released.");
-                return false;
-            }
-            elseif (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                $this->core->getOutput()->showError("You do not have access to this file.");
+        if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
+            $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+            if ($access_failure) {
+                $this->core->getOutput()->showError($access_failure);
                 return false;
             }
         }
@@ -221,7 +213,7 @@ class MiscController extends AbstractController {
                 strpos(basename($path), "upload_page_") !== false
                 && FileUtils::getContentType($path) !== "application/pdf"
             ) {
-                $this->core->getOutput()->showError("You do not have access to this file");
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
         }
@@ -242,8 +234,9 @@ class MiscController extends AbstractController {
 
         $anon_id = $user_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         }
+
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
@@ -251,7 +244,11 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, $gradeable->isTeamAssignment());
+
+        if ($gradeable->isTeamAssignment()) {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $user_id);
+        }
 
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
@@ -319,7 +316,6 @@ class MiscController extends AbstractController {
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
-
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
             if (is_dir($path)) {
@@ -335,17 +331,18 @@ class MiscController extends AbstractController {
                     }
                     $file_path = $file->getRealPath();
                     $relative_path = substr($file_path, strlen($path) + 1);
-
-                    // For scanned exams, the directories get polluted with the images of the split apart
-                    // pages, so we selectively only grab the PDFs there. For all other types,
-                    // we can grab all files regardless of type.
-                    if ($gradeable->isScannedExam()) {
-                        if (mime_content_type($file_path) === 'application/pdf') {
+                    if ($this->core->getAccess()->canI("path.read", ["dir" => $folder_name, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+                        // For scanned exams, the directories get polluted with the images of the split apart
+                        // pages, so we selectively only grab the PDFs there. For all other types,
+                        // we can grab all files regardless of type.
+                        if ($gradeable->isScannedExam()) {
+                            if (mime_content_type($file_path) === 'application/pdf') {
+                                $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
+                            }
+                        }
+                        else {
                             $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
                         }
-                    }
-                    else {
-                        $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
                     }
                 }
             }
@@ -377,7 +374,7 @@ class MiscController extends AbstractController {
                 $this->core->redirect($this->core->buildCourseUrl());
             }
         }
-        
+
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
@@ -449,7 +446,7 @@ class MiscController extends AbstractController {
                     }
                     else {
                         $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable]);
-                        
+
                         foreach ($graded_gradeables as $gg) { //get each graded gradeable
                             $user = $gg->getSubmitter()->getId();
                             $version = $gg->getAutoGradedGradeable()->getActiveVersion();
@@ -538,7 +535,7 @@ class MiscController extends AbstractController {
                                     // Get real and relative path for current file
                                     $filePath = $file_in_folder->getRealPath();
                                     $relativePath = substr($filePath, strlen($temp_path) + 1);
-                                    
+
                                     // Add current file to archive
                                     $zip_stream->addFileFromPath($file . "/" . $relativePath, $filePath);
                                 }

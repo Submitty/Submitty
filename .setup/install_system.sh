@@ -429,6 +429,9 @@ if [ ${WORKER} == 0 ]; then
 
     a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
+    # Install nginx to serve websocket connections
+    sudo apt-get install -qqy nginx-full
+
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
     if [ ${VAGRANT} == 1 ]; then
@@ -481,9 +484,21 @@ EOF
         fi
     fi
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
+    cp -n ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
+
+
+    #################################################################
+    # NGINX SETUP
+    #################
+    # remove default site which would cause server to mess up
+    rm -f /etc/nginx/sites*/default
+    cp -n ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+    chmod 644 /etc/nginx/sites-available/submitty.conf
+    rm -f /etc/nginx/sites-enabled/submitty.conf
+    ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+
 
     #################################################################
     # PHP SETUP
@@ -594,10 +609,12 @@ if [ ! -d "${clangsrc}" ]; then
 
     mkdir -p ${clangsrc}
 
-    # checkout the clang sources
-    git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
-    git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
-    git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
+    # clone the clang sources, circa Nov. 2018
+    git clone --depth 1 --branch llvmorg-7.1.0 https://github.com/llvm/llvm-project.git ${clangsrc}/source
+    cp -R ${clangsrc}/source/llvm ${clangsrc}/llvm
+    cp -R ${clangsrc}/source/clang ${clangsrc}/llvm/tools
+    cp -R ${clangsrc}/source/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/
+    mv ${clangsrc}/llvm/tools/clang/tools/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/extra
 
     # initial cmake for llvm tools (might take a bit of time)
     mkdir -p ${clangbuild}
@@ -686,7 +703,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 echo Beginning Install Submitty Script
-bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
 
 # (re)start the submitty grading scheduler daemon
@@ -810,6 +827,7 @@ su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_US
 ###################
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
+    service nginx restart
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi

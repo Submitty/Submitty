@@ -290,7 +290,7 @@ class ReportController extends AbstractController {
                     // This user had no results, so generate results
                     $ggs = $this->mergeGradedGradeables($all_gradeables, $u, [], $team_graded_gradeables);
                     $late_days = new LateDays($this->core, $u, $ggs, $all_late_days[$u->getId()] ?? []);
-                    $results[$current_user->getId()] = $per_user_callback($u, $ggs, $late_days);
+                    $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days, $all_polls);
                 }
             }
         }
@@ -355,6 +355,7 @@ class ReportController extends AbstractController {
         $user_data['legal_last_name'] = $user->getLegalLastName();
         $user_data['preferred_last_name'] = $user->getPreferredLastName();
         $user_data['registration_section'] = $user->getRegistrationSection();
+        $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y");
 
@@ -362,7 +363,7 @@ class ReportController extends AbstractController {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
             $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
-        
+
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
 

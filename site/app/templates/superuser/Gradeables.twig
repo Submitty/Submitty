@@ -1,0 +1,48 @@
+{% import _self as self %}
+
+<div class="content">
+    <h1>Pending Gradeables</h1>
+    {% if gradeable_sections|length > 0 %}
+        <div id="gradeables">
+        {% for list_section, info in gradeable_sections %}
+            <div style='margin-bottom: 20px'>
+                <div id="{{ info.section_id }}" class="course-section-heading">
+                    <div class="course-section-title">
+                        {{ info.title }}
+                        {% if info.subtitle != "" %}
+                            &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <table class='table table-striped table-bordered persist-area' style='text-align: left'>
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Gradeable</th>
+                            <th>Submission Closes</th>
+                            <th>Grading Opens</th>
+                            <th>Grading Closes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for id, gradeable in info.gradeables %}
+                        <tr>
+                            <td>{{ id|split('_')|slice(0, 2)|join(' ') }}</td>
+                            <td>{{ gradeable.title }}</td>
+                            <td>{{ (gradeable.submission != '') ? gradeable.submission|date('m/d/Y @ h:i A T') : '' }}</td>
+                            <td>{{ gradeable.grading_open|date('m/d/Y @ h:i A T') }}</td>
+                            <td>{{ gradeable.grading_due|date('m/d/Y @ h:i A T') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="container">
+            <p>There are currently no assignments posted.  Please check back later.</p>
+        </div>
+    {% endif %}
+</div>

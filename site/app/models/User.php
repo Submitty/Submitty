@@ -350,6 +350,10 @@ class User extends AbstractModel {
         return $this->access_level < 3;
     }
 
+    public function isSuperUser() {
+        return $this->access_level === self::LEVEL_SUPERUSER;
+    }
+
     public function setPassword($password) {
         if (!empty($password)) {
             $info = password_get_info($password);
@@ -522,5 +526,12 @@ class User extends AbstractModel {
     public function onTeam(string $gradeable_id): bool {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
         return $team !== null;
+    }
+
+    /**
+     * Checks if the user has invites to multiple teams for the given assignment
+     */
+    public function hasMultipleTeamInvites(string $gradeable_id): bool {
+        return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
     }
 }
