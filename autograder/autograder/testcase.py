@@ -106,7 +106,7 @@ class Testcase():
             print("LOGGING BEGIN my_runner.out", file=logfile)
 
             # Used in graphics gradeables
-            display_sys_variable = "NOT_FOUND"
+            display_sys_variable = ""
             with open(autograding_worker_json) as f:
                 data = json.load(f)
                 for machine in data:
