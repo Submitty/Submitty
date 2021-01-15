@@ -1,8 +1,12 @@
 import os
 import traceback
 import socket
+import json
 
 from .execution_environments import jailed_sandbox, container_network
+
+
+autograding_worker_json = "/var/local/submitty/autograding_TODO/autograding_worker.json"
 
 
 class Testcase():
@@ -102,9 +106,13 @@ class Testcase():
             print("LOGGING BEGIN my_runner.out", file=logfile)
 
             # Used in graphics gradeables
-            display_sys_variable = os.environ.get('DISPLAY', None)
-            display_line = [] if display_sys_variable is None else ['--display',
-                                                                    str(display_sys_variable)]
+            display_sys_variable = ""
+            with open(autograding_worker_json) as f:
+                data = json.load(f)
+                if "display_environment_variable" in data:
+                    display_sys_variable = data["display_environment_variable"]
+            display_line = [] if display_sys_variable is "" else ['--display',
+                                                                  str(display_sys_variable)]
 
             logfile.flush()
             arguments = [
