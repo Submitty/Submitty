@@ -903,7 +903,7 @@ HTML;
         		    <div class="content-items-container">
                     <div class="content-item content-item-right">
 HTML;
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from,  ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2));
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2));
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
@@ -1059,13 +1059,13 @@ HTML;
                 ]);
             }
         }
-        $return .= <<<HTML
-                    </div>
-                </div>
-            </div>
-		</div>
-HTML;
-        return $return;
+
+        return $return . <<<HTML
+                                             </div>
+                                         </div>
+                                     </div>
+                         		</div>
+                         HTML;
     }
 
     /**
