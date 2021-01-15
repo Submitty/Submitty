@@ -109,8 +109,9 @@ class Testcase():
             display_sys_variable = "NOT_FOUND"
             with open(autograding_worker_json) as f:
                 data = json.load(f)
-                if "display_environment_variable" in data:
-                    display_sys_variable = data["display_environment_variable"]
+                for machine in data:
+                    if "display_environment_variable" in data[machine]:
+                        display_sys_variable = data[machine]["display_environment_variable"]
             display_line = [] if display_sys_variable is "" else ['--display',
                                                                   str(display_sys_variable)]
 
