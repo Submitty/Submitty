@@ -112,7 +112,7 @@ class Testcase():
                 for machine in data:
                     if "display_environment_variable" in data[machine]:
                         display_sys_variable = data[machine]["display_environment_variable"]
-            display_line = [] if display_sys_variable is "" else ['--display',
+            display_line = [] if display_sys_variable == "" else ['--display',
                                                                   str(display_sys_variable)]
 
             logfile.flush()
