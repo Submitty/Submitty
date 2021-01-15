@@ -1241,6 +1241,11 @@ int execute(const std::string &cmd,
       const std::string display_variable2,
       const bool timestamped_stdout) {
 
+  if (windowed) {
+    std::cout << "Execution has no graphics display" << std::endl;
+  } else {
+    std::cout << "Graphics display is enabled and set to: '" << display_variable2 << "'" << std::endl;
+  }
 
   std::string display_variable = display_variable2;
   if (display_variable == "NO_DISPLAY_SET") {
