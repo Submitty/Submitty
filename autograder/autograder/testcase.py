@@ -106,7 +106,7 @@ class Testcase():
             print("LOGGING BEGIN my_runner.out", file=logfile)
 
             # Used in graphics gradeables
-            display_sys_variable = ""
+            display_sys_variable = "NOT_FOUND"
             with open(autograding_worker_json) as f:
                 data = json.load(f)
                 if "display_environment_variable" in data:
