@@ -9,6 +9,7 @@ import subprocess
 import docker
 import traceback
 import argparse
+import ssh_jump_proxy
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
 SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
@@ -67,6 +68,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
 
     return success
 
+
 def run_commands_on_worker(user, host, commands, operation='unspecified operation'):
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
@@ -74,10 +76,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
     else:
         success = False
         try:
-            ssh = paramiko.SSHClient()
-            ssh.get_host_keys()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user, timeout=60)
+            (target_connection,intermediate_connection) = ssh_connection_allowing_jump_proxy(user,host)
         except Exception as e:
             print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
             return False
@@ -85,7 +84,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             success = True
             for command in commands:
                 print(f'{host}: performing {command}')
-                (stdin, stdout, stderr) = ssh.exec_command(command, timeout=60)
+                (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=60)
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
                     print(f"ERROR: Failure performing {operation} on {user}@{host}")
@@ -94,7 +93,9 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             print(f"ERROR: Failure performing {operation} on {host} due to error {str(e)}")
             success = False
         finally:
-            ssh.close()
+            target_connection.close()
+            if intermediate_connection:
+                intermediate_connection.close()
             return success
 
 # Rsynch the local (primary) codebase to a worker machine.
