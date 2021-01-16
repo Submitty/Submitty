@@ -22,11 +22,6 @@ import subprocess
 import random
 import urllib
 
-#import sys
-#sys.path.append('../sbin/shipper_utils')
-#import ssh_jump_proxy
-
-
 from enum import Enum
 from math import floor
 from os import PathLike
@@ -44,9 +39,12 @@ JOB_ID = '~SHIP~'
 
 
 
+import sys
+sys.path.append('/usr/local/submitty/sbin/shipper_utils/')
+import ssh_jump_proxy
 
 
-
+"""
 def ssh_connection_allowing_jump_proxy(target_user, target_host):
 
     # load and parse the ssh config
@@ -86,11 +84,7 @@ def ssh_connection_allowing_jump_proxy(target_user, target_host):
     except Exception as e:
         print("ERROR: could not open a connection to the target host: "+str(e))
         raise e
-
-
-
-
-
+"""
 
 
 def instantiate_global_variables(config):
@@ -372,12 +366,8 @@ def establish_ssh_connection(
     ssh = None
     retry_delay = .1
     while not connected:
-        #ssh = paramiko.SSHClient()
-        #ssh.get_host_keys()
-        #ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            (target_connection,intermediate_connection) = ssh_connection_allowing_jump_proxy(user,host)
-            #ssh.connect(hostname=host, username=user, timeout=10)
+            (target_connection,intermediate_connection) = ssh_jump_proxy.ssh_connection_allowing_jump_proxy(user,host)
             connected = True
         except Exception:
             if only_try_once:
