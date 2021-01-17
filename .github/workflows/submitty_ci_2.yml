@@ -14,6 +14,14 @@ env:
   PHP_VER: 7.4
 
 jobs:
+    test-2:
+      runs-on: ubuntu-latest
+      steps:
+        - name : foo
+          run : |
+            cat /etc/pam.d/common-password 
+            
+
     test:
       runs-on: ubuntu-latest
       steps:
@@ -48,8 +56,8 @@ jobs:
             sudo apt install php${PHP_VER}-fpm
         - name: setup
           run: |
-            useradd -m submitty_cgi
-            useradd -m submitty_php
+            sudo useradd -m submitty_cgi
+            sudo useradd -m submitty_php
             cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
             # cat /etc/php/$PHP_VER/fpm/php-fpm.conf
@@ -192,6 +200,7 @@ jobs:
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              cat /etc/pam.d/common-password 
               popd
           - name: Install Submitty Python Utils
             run: |
@@ -199,6 +208,7 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install . --user
+              sudo pip3 install .
               popd
           - name: Setup website
             run: |
@@ -222,7 +232,6 @@ jobs:
               sudo chmod 0640 /etc/apache2/suexec/www-data
               sudo a2ensite submitty
               sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-              cat /etc/apache2/sites-available/submitty.conf
               sudo apache2ctl -t
               sudo service php${PHP_VER}-fpm restart
               sudo service apache2 restart
