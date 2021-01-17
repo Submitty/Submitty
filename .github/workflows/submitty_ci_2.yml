@@ -19,7 +19,12 @@ jobs:
       steps:
         - name : foo
           run : |
-            cat /etc/pam.d/common-password 
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
+            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo apt install python-setuptools
+            pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+            sudo pip3 install . --user
+            popd
             
 
     test:
@@ -76,7 +81,7 @@ jobs:
             sudo apachectl configtest
             sudo service php${PHP_VER}-fpm restart
             sudo service php${PHP_VER}-fpm restart
-            cat /var/log/php7.4-fpm.log
+            sudo cat /var/log/php7.4-fpm.log
             sudo service apache2 restart
             sudo mkdir /etc/systemd/system/nginx.service.d
             sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
@@ -200,7 +205,7 @@ jobs:
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-              cat /etc/pam.d/common-password 
+              sudo cat /etc/pam.d/common-password 
               popd
           - name: Install Submitty Python Utils
             run: |
@@ -208,7 +213,6 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install . --user
-              sudo pip3 install .
               popd
           - name: Setup website
             run: |
