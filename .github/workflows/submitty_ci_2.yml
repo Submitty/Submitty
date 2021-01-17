@@ -45,11 +45,15 @@ jobs:
             sudo apt install libapache2-mod-authz-unixgroup
             sudo apt install libapache2-mod-wsgi-py3
             sudo apt install nginx
+            sudo apt install php${PHP_VER}-fpm
         - name: setup
           run: |
+            useradd -m submitty_cgi
+            useradd -m submitty_php
             cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            sudo a2enmod include suexec
-            sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
+            sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+            # cat /etc/php/$PHP_VER/fpm/php-fpm.conf
+            sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/pool.d/www.conf
             sudo rm -rf /etc/apache2/sites-available/*
             sudo rm -rf /etc/apache2/sites-enabled/*
             sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
@@ -57,12 +61,16 @@ jobs:
             sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
             sudo chmod 0640 /etc/apache2/suexec/www-data
             sudo a2ensite submitty
+            sudo service php${PHP_VER}-fpm start
+            ls -lah /run/php/
             sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
             sudo apache2ctl -t
+            sudo apachectl configtest
+            sudo service php${PHP_VER}-fpm restart
+            cat /var/log/php7.4-fpm.log
             sudo service apache2 restart
             sudo mkdir /etc/systemd/system/nginx.service.d
             sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
-            sudo systemctl daemon-reload
             sudo rm -rf /etc/nginx/sites-available/*
             sudo rm -rf /etc/nginx/sites-enabled/*
             sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
@@ -72,6 +80,13 @@ jobs:
         - name: curl
           run: |
             curl localhost
+            ls -lah /var/log/apache2/
+            echo "submitty"
+            cat /var/log/apache2/submitty.log
+            echo "error"
+            cat /var/log/apache2/error.log
+            echo "other_vhosts_access"
+            cat /var/log/apache2/other_vhosts_access.log
 
     e2e:
         continue-on-error: true
@@ -170,6 +185,7 @@ jobs:
               sudo apt install libapache2-mod-authz-unixgroup
               sudo apt install libapache2-mod-wsgi-py3
               sudo apt install nginx
+              sudo apt install php${PHP_VER}-fpm
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
@@ -231,7 +247,7 @@ jobs:
           - name: Debug3
             run : |
               ls -lah /var/log/
-              sudo cat /var/log/php7.2-fpm.log
+              sudo cat /var/log/php${PHP_VER}-fpm.log
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
