@@ -17,13 +17,27 @@ jobs:
     test-2:
       runs-on: ubuntu-latest
       steps:
+        - uses: actions/checkout@v2
+          with:
+            path: SUBMITTY_CPY/
+        - name: Copy Repo
+          run: |
+            # have to copy first, absolute paths not supported by actions/checkout@v2
+              sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+              sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+              sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
+              ln -s ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site /usr/local/submitty/site       
+        - name: Install dependencies
+          run: python3 -m pip install --upgrade pip setuptools wheel     
         - name : foo
           run : |
             export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
             export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             sudo apt install python-setuptools
             pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-            sudo pip3 install . --user
+            pip3 install . --user
+            echo "from submitty_utils import dateutils" > test.py
+            sudo python3 test.py
             popd
             
 
@@ -147,7 +161,7 @@ jobs:
           - uses: nanasess/setup-chromedriver@master
           - name: Install Python dependencies
             run: |
-              pip3 install --upgrade pip
+              python3 -m pip install --upgrade pip setuptools wheel     
               pip3 install python-pam
               pip3 install sqlalchemy
               pip3 install selenium
