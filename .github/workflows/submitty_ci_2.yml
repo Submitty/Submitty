@@ -238,7 +238,6 @@ jobs:
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               sudo sed -i '12s/.*/Defaults env_keep += "PYTHONPATH"/' /etc/sudoers
               pip3 install . --user
-              sudo -H pip3 install . --user
               popd
           - name: Setup website
             run: |
