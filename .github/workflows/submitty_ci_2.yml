@@ -235,7 +235,7 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install . --user
-              sudo pip3 install . --user
+              sudo -H pip3 install . --user
               popd
           - name: Setup website
             run: |
