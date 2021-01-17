@@ -37,12 +37,10 @@ IN_PROGRESS_PATH = ''
 JOB_ID = '~SHIP~'
 
 
-"""
-This function is copied, would rather use the version in this file instead.
-import sys
-sys.path.append('/usr/local/submitty/sbin/shipper_utils/')
-import ssh_jump_proxy
-"""
+# This function is copied, would rather use the version in this file instead.
+# import sys
+# sys.path.append('/usr/local/submitty/sbin/shipper_utils/')
+# import ssh_jump_proxy
 def ssh_connection_allowing_jump_proxy(target_user, target_host):
 
     # load and parse the ssh config
@@ -214,7 +212,7 @@ def delete_files(
         sftp = ssh = None
 
         try:
-            (ssh,intermediate_connection) = establish_ssh_connection(config, '', user, host)
+            (ssh, intermediate_connection) = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -237,6 +235,7 @@ def delete_files(
                 ssh.close()
             if intermediate_connection is not None:
                 intermediate_connection.close()
+
 
 def worker_folder(worker_name):
     return os.path.join(IN_PROGRESS_PATH, worker_name)
@@ -367,12 +366,13 @@ def establish_ssh_connection(
     is set to true. If only_try_once is true, raise whatever connection error is thrown.
     """
     connected = False
-    ssh = None
+    target_connection = None
+    intermediate_connection = None
     retry_delay = .1
     while not connected:
         try:
-            (target_connection,intermediate_connection) = ssh_connection_allowing_jump_proxy(user,host)
-            #(target_connection,intermediate_connection) = ssh_jump_proxy.ssh_connection_allowing_jump_proxy(user,host)
+            (target_connection,
+             intermediate_connection) = ssh_connection_allowing_jump_proxy(user, host)
             connected = True
         except Exception:
             if only_try_once:
@@ -388,7 +388,7 @@ def establish_ssh_connection(
                 config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
-    return (target_connection,intermediate_connection)
+    return (target_connection, intermediate_connection)
 
 
 # ==================================================================================
