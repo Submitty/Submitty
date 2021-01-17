@@ -35,7 +35,7 @@ jobs:
             export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             sudo apt install python-setuptools
             pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-            pip3 install . --user
+            sudo pip3 install . --user
             echo "from submitty_utils import dateutils" > test.py
             sudo python3 test.py
             popd
@@ -105,6 +105,10 @@ jobs:
             sudo chmod 644 /etc/nginx/sites-available/submitty.conf
             sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
             sudo service nginx restart
+        - name: composer
+          run : |
+            cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+            composer install --prefer-dist
         - name: curl
           run: |
             curl localhost
@@ -218,7 +222,11 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+              echo "before"
+              cat /etc/pam.d/common-password
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              echo "after"
+              cat /etc/pam.d/common-password
               sudo cat /etc/pam.d/common-password 
               popd
           - name: Install Submitty Python Utils
@@ -227,6 +235,7 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install . --user
+              sudo pip3 install .
               popd
           - name: Setup website
             run: |
