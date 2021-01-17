@@ -67,6 +67,7 @@ jobs:
             sudo apache2ctl -t
             sudo apachectl configtest
             sudo service php${PHP_VER}-fpm restart
+            sudo service php${PHP_VER}-fpm restart
             cat /var/log/php7.4-fpm.log
             sudo service apache2 restart
             sudo mkdir /etc/systemd/system/nginx.service.d
@@ -223,6 +224,7 @@ jobs:
               sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
               cat /etc/apache2/sites-available/submitty.conf
               sudo apache2ctl -t
+              sudo service php${PHP_VER}-fpm restart
               sudo service apache2 restart
               sudo mkdir /etc/systemd/system/nginx.service.d
               sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
