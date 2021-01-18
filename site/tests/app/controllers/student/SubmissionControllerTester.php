@@ -186,6 +186,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
             $autograding_details = [
+                'id' => 'test',
                 'max_submission_size' => $max_size,
                 'part_names' => array_fill(0, $num_parts, "")
             ];

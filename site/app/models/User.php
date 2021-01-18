@@ -350,6 +350,10 @@ class User extends AbstractModel {
         return $this->access_level < 3;
     }
 
+    public function isSuperUser() {
+        return $this->access_level === self::LEVEL_SUPERUSER;
+    }
+
     public function setPassword($password) {
         if (!empty($password)) {
             $info = password_get_info($password);
