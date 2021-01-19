@@ -320,7 +320,8 @@ def establish_ssh_connection(
     while not connected:
         try:
             (target_connection,
-             intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user, host)
+             intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,
+                                                                                          host)
             connected = True
         except Exception:
             if only_try_once:
