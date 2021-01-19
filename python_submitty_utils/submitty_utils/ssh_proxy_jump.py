@@ -14,15 +14,20 @@ def ssh_connection_allowing_proxy_jump(target_user, target_host):
     intermediate_host = None
     intermediate_user = None
     config_file = os.path.expanduser("~")+"/.ssh/config"
-    if (os.path.exists(config_file)):
+    if os.path.exists(config_file):
         conf = paramiko.SSHConfig()
-        conf.parse(open(config_file))
-        o = conf.lookup(target_host)
-        if 'proxyjump' in o:
-            (intermediate_user, intermediate_host) = str(o['proxyjump']).split('@')
-        if 'identityfile' in o:
-            my_key_filename = o['identityfile'][0]
-
+        with open(config_file) as f:
+            try:
+                conf.parse(f)
+                target_host_object = conf.lookup(target_host)
+                if 'proxyjump' in target_host_object:
+                    (intermediate_user,
+                     intermediate_host) = str(target_host_object['proxyjump']).split('@')
+                if 'identityfile' in target_host_object:
+                    my_key_filename = target_host_object['identityfile'][0]
+            except Exception as e:
+                print("ERROR: unexpected syntax/formatting of ssh config: "+str(e))
+                raise e
     try:
         # if this connection has a jump proxy, open that connection first
         my_sock = None
