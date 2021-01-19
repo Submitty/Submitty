@@ -404,11 +404,20 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/export", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return JsonResponse
      */
-    public function getPollExportData(): JsonResponse {
-        $polls = $this->core->getQueries()->getPolls();
-        return JsonResponse::getSuccessResponse(PollUtils::getPollExportData($polls));
+    public function getPollExportData() {
+        $polls = PollUtils::getPollExportData($this->core->getQueries()->getPolls());
+        $file_name = date("Y-m-d") . "-" . $this->core->getConfig()->getSemester() . "-" . $this->core->getConfig()->getCourse() . "-" . "poll-data" . ".json";
+        $data = FileUtils::encodeJson($polls);
+        if ($data === false) {
+            $this->core->addErrorMessage("Failed to export poll data. Please try again");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        header("Content-type: " . "application/json");
+        header('Content-Disposition: attachment; filename="' . $file_name . '"');
+        $this->core->getOutput()->renderString($data);
     }
 
     /**

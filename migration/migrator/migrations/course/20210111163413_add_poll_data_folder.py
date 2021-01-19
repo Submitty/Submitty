@@ -1,5 +1,4 @@
-import os
-import grp
+import shutil
 from pathlib import Path
 
 def up(config, database, semester, course):
@@ -13,10 +12,9 @@ def up(config, database, semester, course):
 
     # get course group
     course_group_id = course_dir.stat().st_gid
-    course_group = grp.getgrgid(course_group_id)[0]
 
     # set the owner/group/permissions
-    os.system("chown -R "+php_user+":"+course_group+" "+str(polls_dir))
+    shutil.chown(polls_dir, php_user, course_group_id)
 
 
 def down(config, database, semester, course):
