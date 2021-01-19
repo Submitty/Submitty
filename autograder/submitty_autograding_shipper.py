@@ -12,7 +12,7 @@ import contextlib
 import datetime
 import multiprocessing
 from pathlib import Path
-from submitty_utils import dateutils, string_utils
+from submitty_utils import dateutils, string_utils, ssh_proxy_jump
 import operator
 import paramiko
 import tempfile
@@ -103,7 +103,7 @@ def copy_files(
             # - In one case it's set to the name of the running thread
             # - In one case it's set to None
             # Setting it to an empty string shouldn't lose us any debugging information.
-            ssh = establish_ssh_connection(config, '', user, host)
+            (ssh, intermediate_connection) = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -124,6 +124,8 @@ def copy_files(
                 sftp.close()
             if ssh is not None:
                 ssh.close()
+            if intermediate_connection is not None:
+                intermediate_connection.close()
 
 
 def delete_files(
@@ -158,7 +160,7 @@ def delete_files(
         sftp = ssh = None
 
         try:
-            ssh = establish_ssh_connection(config, '', user, host)
+            (ssh, intermediate_connection) = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -179,6 +181,8 @@ def delete_files(
                 sftp.close()
             if ssh is not None:
                 ssh.close()
+            if intermediate_connection is not None:
+                intermediate_connection.close()
 
 
 def worker_folder(worker_name):
@@ -310,14 +314,14 @@ def establish_ssh_connection(
     is set to true. If only_try_once is true, raise whatever connection error is thrown.
     """
     connected = False
-    ssh = None
+    target_connection = None
+    intermediate_connection = None
     retry_delay = .1
     while not connected:
-        ssh = paramiko.SSHClient()
-        ssh.get_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh.connect(hostname=host, username=user, timeout=10)
+            (target_connection,
+             intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,
+                                                                                          host)
             connected = True
         except Exception:
             if only_try_once:
@@ -333,7 +337,7 @@ def establish_ssh_connection(
                 config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
-    return ssh
+    return (target_connection, intermediate_connection)
 
 
 # ==================================================================================
