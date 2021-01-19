@@ -9,7 +9,7 @@ import subprocess
 import docker
 import traceback
 import argparse
-import ssh_jump_proxy
+from submitty_utils import ssh_proxy_jump
 
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
@@ -77,7 +77,8 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
     else:
         success = False
         try:
-            (target_connection,intermediate_connection) = ssh_jump_proxy.ssh_connection_allowing_jump_proxy(user,host)
+            (target_connection,
+             intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
         except Exception as e:
             print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
             return False

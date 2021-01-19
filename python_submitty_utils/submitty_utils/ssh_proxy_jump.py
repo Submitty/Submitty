@@ -2,7 +2,12 @@ import os
 import paramiko
 
 
-def ssh_connection_allowing_jump_proxy(target_user, target_host):
+def ssh_connection_allowing_proxy_jump(target_user, target_host):
+    """
+    Uses paramiko package to connect to a remote machine via ssh either
+    directly or through an intermediary machine specified using a proxyjump
+    in the current user's ssh config file.
+    """
 
     # load and parse the ssh config
     my_key_filename = None

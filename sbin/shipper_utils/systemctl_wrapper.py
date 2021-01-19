@@ -6,7 +6,7 @@ from os import path
 import sys
 import json
 import paramiko
-import ssh_jump_proxy
+from submitty_utils import ssh_proxy_jump
 
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
@@ -94,7 +94,8 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
   script_directory = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'systemctl_wrapper.py')
   command = "sudo {0} {1} --daemon {2}".format(script_directory, mode, daemon)
   try:
-      (target_connection,intermediate_connection) = ssh_jump_proxy.ssh_connection_allowing_jump_proxy(user,host)
+      (target_connection,
+       intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
