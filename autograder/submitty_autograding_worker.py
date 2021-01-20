@@ -74,7 +74,6 @@ def worker_process(
                     autograding_zip,
                     submission_zip
                 )
-                i = 10 / 0
                 shutil.copyfile(results_zip_tmp, results_zip)
                 os.remove(results_zip_tmp)
                 # At this point, we will assume that grading has progressed successfully enough to
