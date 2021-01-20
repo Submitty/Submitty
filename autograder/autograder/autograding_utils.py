@@ -83,7 +83,8 @@ class Logger:
         self, trace: str, *,
         is_batch: bool = False,
         which_untrusted: str = '',
-        job_id: Optional[str] = None
+        job_id: Optional[str] = None,
+        jobname: Optional[str] = None,
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
         job_id = job_id or self.job_id
@@ -98,6 +99,7 @@ class Logger:
                 'is_batch': is_batch,
                 'which_untrusted': which_untrusted,
                 'job_id': job_id,
+                'jobname': jobname,
             })
         # Always run this since this could be deleted without us knowing
         os.makedirs(self.stack_trace_dir, exist_ok=True)
@@ -109,7 +111,8 @@ class Logger:
             easy_to_read_date,
             f"{job_id:>6s}",
             f"{batch_string:>5s}",
-            f"{which_untrusted:>11s}"
+            f"{which_untrusted:>11s}",
+            f"{jobname:75s}",
         ))
         message = f"{header}\n{trace}\n"
         write_to_log(self.stack_trace_path, message)
