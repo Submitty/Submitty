@@ -258,8 +258,6 @@ def archive(
             complete_config_obj,
             gradeable_config_obj,
             queue_obj,
-            config.log_path,
-            config.error_path,
             False
         )
     except Exception:
@@ -269,14 +267,14 @@ def archive(
             job_id=queue_obj['job_id'],
             is_batch=queue_obj["regrade"],
             which_untrusted=which_untrusted,
-            item_name=item_name,
+            jobname=item_name,
         )
         config.logger.log_stack_trace(
             traceback.format_exc(),
             job_id=queue_obj['job_id'],
             is_batch=queue_obj["regrade"],
             which_untrusted=which_untrusted,
-            item_name=item_name,
+            jobname=item_name,
         )
     subprocess.call(['ls', '-lR', '.'], stdout=log_file)
 
