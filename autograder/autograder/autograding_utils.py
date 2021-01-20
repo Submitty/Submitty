@@ -84,7 +84,7 @@ class Logger:
         is_batch: bool = False,
         which_untrusted: str = '',
         job_id: Optional[str] = None,
-        jobname: Optional[str] = None,
+        jobname: str = "",
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
         job_id = job_id or self.job_id
