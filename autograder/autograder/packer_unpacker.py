@@ -397,15 +397,13 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
                 str(queue_obj["version"])
             )
         except Exception:
-            autograding_utils.log_message(
-                config.log_path,
+            config.logger.log_message(
+                message="ERROR: Could not score into database",
                 job_id=job_id,
-                message="ERROR: Could not score into database"
             )
-            autograding_utils.log_stack_trace(
-                config.error_path,
+            config.logger.log_stack_trace(
+                trace=traceback.format_exc(),
                 job_id=job_id,
-                trace=traceback.format_exc()
             )
             return False
 

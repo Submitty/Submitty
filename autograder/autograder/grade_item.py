@@ -38,13 +38,12 @@ def get_testcases(
         for notebook_item in notebook_data:
             item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
             if item_dict is None:
-                autograding_utils.log_message(
-                    config.log_path,
-                    queue_obj["job_id"],
-                    queue_obj["regrade"],
-                    which_untrusted,
-                    item_name,
-                    message=f"ERROR: could not find {notebook_item} in item pool."
+                config.log_message(
+                    f"ERROR: could not find {notebook_item} in item pool.",
+                    job_id=queue_obj["job_id"],
+                    is_batch=queue_obj["regrade"],
+                    which_untrusted=which_untrusted,
+                    jobname=item_name,
                 )
                 continue
             testcase_specs += item_dict['testcases']
@@ -266,19 +265,19 @@ def archive(
         )
     except Exception:
         print("\n\nERROR: Grading incomplete -- could not perform archival")
-        autograding_utils.log_message(
-            queue_obj['job_id'],
-            queue_obj["regrade"],
-            which_untrusted,
-            item_name,
-            message="ERROR: could not archive autograding results. See stack trace for more info."
+        config.logger.log_message(
+            "ERROR: could not archive autograding results. See stack trace for more info.",
+            job_id=queue_obj['job_id'],
+            is_batch=queue_obj["regrade"],
+            which_untrusted=which_untrusted,
+            item_name=item_name,
         )
-        autograding_utils.log_stack_trace(
-            queue_obj['job_id'],
-            queue_obj["regrade"],
-            which_untrusted,
-            item_name,
-            trace=traceback.format_exc()
+        config.logger.log_stack_trace(
+            traceback.format_exc(),
+            job_id=queue_obj['job_id'],
+            is_batch=queue_obj["regrade"],
+            which_untrusted=which_untrusted,
+            item_name=item_name,
         )
     subprocess.call(['ls', '-lR', '.'], stdout=log_file)
 
