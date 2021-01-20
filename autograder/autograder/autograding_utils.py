@@ -106,15 +106,13 @@ class Logger:
 
         now = dateutils.get_current_time()
         easy_to_read_date = dateutils.write_submitty_date(now, True)
-        batch_string = "BATCH" if is_batch else ""
-        header = ' | '.join((
-            easy_to_read_date,
-            f"{job_id:>6s}",
-            f"{batch_string:>5s}",
-            f"{which_untrusted:>11s}",
-            f"{jobname:75s}",
-        ))
-        message = f"{header}\n{trace}\n"
+        message = f"[{easy_to_read_date}][{job_id:>6s}]\n"
+        message += f"== Batch? {is_batch}\n"
+        message += f"== Which: {which_untrusted}\n"
+        message += f"==   Job: {jobname}\n"
+        for line in trace.splitlines():
+            message += f"== {line}\n"
+        message = message.strip()
         write_to_log(self.stack_trace_path, message)
 
 
