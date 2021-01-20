@@ -1060,13 +1060,12 @@ HTML;
             }
         }
 
-        $return .= <<<HTML
+        return $return . <<<HTML
                                              </div>
                                          </div>
                                      </div>
                          		</div>
 HTML;
-        return $return;
     }
 
     /**
