@@ -74,6 +74,7 @@ def worker_process(
                     autograding_zip,
                     submission_zip
                 )
+                i = 10 / 0
                 shutil.copyfile(results_zip_tmp, results_zip)
                 os.remove(results_zip_tmp)
                 # At this point, we will assume that grading has progressed successfully enough to
@@ -145,14 +146,12 @@ def try_run_worker(
         worker_process(config, which_machine, address, which_untrusted, my_server)
     except Exception as e:
         config.logger.log_message(
-            config.log_path,
-            message=f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
+            f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
             which_untrusted=which_untrusted,
         )
         config.logger.log_stack_trace(
-            config.error_path,
+            traceback.format_exc(),
             which_untrusted=which_untrusted,
-            trace=traceback.format_exc(),
         )
         # Re-raise the exception so the process doesn't look like it exited OK
         raise e
