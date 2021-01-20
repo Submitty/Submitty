@@ -144,10 +144,7 @@ class AutoGradedVersion extends AbstractModel {
             $part_names = $config->getPartNames();
             $notebook_model = null;
             if ($config->isNotebookGradeable()) {
-                $notebook_model = $config->getUserSpecificNotebook(
-                    $submitter_id,
-                    $gradeable->getId()
-                );
+                $notebook_model = $config->getUserSpecificNotebook($submitter_id);
 
                 $part_names = range(1, $notebook_model->getNumParts());
             }
@@ -242,27 +239,30 @@ class AutoGradedVersion extends AbstractModel {
             }, $history);
         }
 
+
         // Load the testcase results (and calculate early incentive points)
-        foreach ($config->getTestcases() as $testcase) {
-            if (!isset($result_details['testcases'][$testcase->getIndex()])) {
-                // TODO: Autograding results file was incomplete.  This is a big problem, but how should
-                // TODO:   we handle this error
-            }
-            if (
-                $result_details != null
-                && count($result_details['testcases']) > $testcase->getIndex()
-                && $result_details['testcases'][$testcase->getIndex()] != null
-            ) {
-                $graded_testcase = new AutoGradedTestcase(
-                    $this->core,
-                    $testcase,
-                    $results_path,
-                    $results_public_path,
-                    $result_details['testcases'][$testcase->getIndex()]
-                );
-                $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
-                if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
-                    $this->early_incentive_points += $graded_testcase->getPoints();
+        if (!is_null($config)) {
+            foreach ($config->getPersonalizedTestcases($submitter_id) as $testcase) {
+                if (!isset($result_details['testcases'][$testcase->getIndex()])) {
+                    // TODO: Autograding results file was incomplete.  This is a big problem, but how should
+                    // TODO:   we handle this error
+                }
+                if (
+                    $result_details != null
+                    && count($result_details['testcases']) > $testcase->getIndex()
+                    && $result_details['testcases'][$testcase->getIndex()] != null
+                ) {
+                    $graded_testcase = new AutoGradedTestcase(
+                        $this->core,
+                        $testcase,
+                        $results_path,
+                        $results_public_path,
+                        $result_details['testcases'][$testcase->getIndex()]
+                    );
+                    $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+                    if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+                        $this->early_incentive_points += $graded_testcase->getPoints();
+                    }
                 }
             }
         }

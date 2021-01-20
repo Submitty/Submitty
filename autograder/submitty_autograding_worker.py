@@ -130,6 +130,34 @@ def worker_process(
             time.sleep(1)
 
 
+def try_run_worker(
+    config: submitty_config.Config,
+    which_machine: str,
+    address: str,
+    which_untrusted: str,
+    my_server: str
+):
+    """Try and run `worker_process`.
+
+    If `worker_process` fails, print a message to the log before letting the thread die.
+    """
+    try:
+        worker_process(config, which_machine, address, which_untrusted, my_server)
+    except Exception as e:
+        config.logger.log_message(
+            config.log_path,
+            message=f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
+            which_untrusted=which_untrusted,
+        )
+        config.logger.log_stack_trace(
+            config.error_path,
+            which_untrusted=which_untrusted,
+            trace=traceback.format_exc(),
+        )
+        # Re-raise the exception so the process doesn't look like it exited OK
+        raise e
+
+
 # ==================================================================================
 # ==================================================================================
 def launch_workers(config, my_name, my_stats):
@@ -159,7 +187,7 @@ def launch_workers(config, my_name, my_stats):
     for i in range(0, num_workers):
         u = "untrusted" + str(i).zfill(2)
         p = multiprocessing.Process(
-            target=worker_process, args=(config, which_machine, address, u, my_server)
+            target=try_run_worker, args=(config, which_machine, address, u, my_server)
         )
         p.start()
         processes.append(p)
@@ -169,13 +197,13 @@ def launch_workers(config, my_name, my_stats):
         while True:
             alive = 0
             for i in range(0, num_workers):
-                if processes[i].is_alive:
+                if processes[i].is_alive():
                     alive = alive+1
                 else:
                     config.logger.log_message(f"ERROR: process {i} is not alive")
             if alive != num_workers:
                 config.logger.log_message(f"ERROR: #workers={num_workers} != #alive={alive}")
-            time.sleep(1)
+            time.sleep(60)
 
     except KeyboardInterrupt:
         config.logger.log_message("grade_scheduler.py keyboard interrupt")

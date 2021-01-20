@@ -1,5 +1,5 @@
-Testcase  1: Compilation                                          2 /  2  
-Testcase  2: Testing                                              5 /  5  
-Testcase  3: Submission Limit                                             
+test01: Compilation                                          2 /  2  
+test02: Testing                                              5 /  5  
+SubmissionLimit: Submission Limit                                             
 Automatic grading total:                                          7 /  7
 Non-hidden automatic grading total:                               7 /  7

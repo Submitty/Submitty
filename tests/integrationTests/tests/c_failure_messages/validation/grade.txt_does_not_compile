@@ -1,8 +1,8 @@
-Testcase  1: Compilation                                          0 /  5  
-Testcase  2: NORMAL GRADING:  (hiding the details)                0 / 10  
-Testcase  3: BEHIND THE SCENES:  raw output                       0 /  5  
-Testcase  4: BEHIND THE SCENES:  checking the sorted output       0 /  5  
-Testcase  5: BEHIND THE SCENES:  checking the second and third words   0 /  5  
-Testcase  6: Submission Limit                                             
+test01: Compilation                                          0 /  5  
+test02: NORMAL GRADING:  (hiding the details)                0 / 10  
+test03: BEHIND THE SCENES:  raw output                       0 /  5  
+test04: BEHIND THE SCENES:  checking the sorted output       0 /  5  
+test05: BEHIND THE SCENES:  checking the second and third words   0 /  5  
+SubmissionLimit: Submission Limit                                             
 Automatic grading total:                                          0 / 30
 Non-hidden automatic grading total:                               0 / 30

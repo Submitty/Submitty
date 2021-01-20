@@ -12,7 +12,7 @@ import contextlib
 import datetime
 import multiprocessing
 from pathlib import Path
-from submitty_utils import dateutils, string_utils
+from submitty_utils import dateutils, string_utils, ssh_proxy_jump
 import operator
 import paramiko
 import tempfile
@@ -103,7 +103,7 @@ def copy_files(
             # - In one case it's set to the name of the running thread
             # - In one case it's set to None
             # Setting it to an empty string shouldn't lose us any debugging information.
-            ssh = establish_ssh_connection(config, '', user, host)
+            (ssh, intermediate_connection) = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -124,6 +124,8 @@ def copy_files(
                 sftp.close()
             if ssh is not None:
                 ssh.close()
+            if intermediate_connection is not None:
+                intermediate_connection.close()
 
 
 def delete_files(
@@ -158,7 +160,7 @@ def delete_files(
         sftp = ssh = None
 
         try:
-            ssh = establish_ssh_connection(config, '', user, host)
+            (ssh, intermediate_connection) = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -179,6 +181,8 @@ def delete_files(
                 sftp.close()
             if ssh is not None:
                 ssh.close()
+            if intermediate_connection is not None:
+                intermediate_connection.close()
 
 
 def worker_folder(worker_name):
@@ -311,14 +315,14 @@ def establish_ssh_connection(
     is set to true. If only_try_once is true, raise whatever connection error is thrown.
     """
     connected = False
-    ssh = None
+    target_connection = None
+    intermediate_connection = None
     retry_delay = .1
     while not connected:
-        ssh = paramiko.SSHClient()
-        ssh.get_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh.connect(hostname=host, username=user, timeout=10)
+            (target_connection,
+             intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,
+                                                                                          host)
             connected = True
         except Exception:
             if only_try_once:
@@ -328,8 +332,7 @@ def establish_ssh_connection(
             config.logger.log_message(
                 f"{my_name} Could not establish connection with {user}@{host} going to re-try."
             )
-            config.logger.log_stack_trace(traceback.format_exc())
-    return ssh
+    return (target_connection, intermediate_connection)
 
 
 # ==================================================================================
@@ -1115,13 +1118,22 @@ def can_short_circuit(config_obj: str) -> bool:
     * It has one autograding test case and that test case is the submission limit check.
     """
 
-    testcases = config_obj['testcases']
-    if len(testcases) == 0:
+    base_testcases = config_obj['testcases']
+    num_testcases = len(base_testcases)
+
+    if 'item_pool' in config_obj:
+        for item in config_obj['item_pool']:
+            if 'testcases' in item:
+                num_testcases += len(item['testcases'])
+
+    # If there are no itempool or base testcases, we can short circuit
+    if num_testcases == 0:
         # No test cases, so this is trivially short-circuitable.
         return True
-    elif len(testcases) == 1:
+    # If there is only one testcase and it is a base testcase, check if it is submission limit
+    elif len(base_testcases) == 1 and num_testcases == 1:
         # We have only one test case; check if it's a submission limit check
-        return is_testcase_submission_limit(testcases[0])
+        return is_testcase_submission_limit(base_testcases[0])
     else:
         return False
 
@@ -1232,7 +1244,7 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     JSON file, zip up the results, and use the standard
     unpack_grading_results_zip function to place the results where they are
     expected. If something goes wrong during this process, then this function
-    will return False, signalling to the caller that this job should be graded
+    will return False, signaling to the caller that this job should be graded
     normally.
     """
     with open(queue_file) as fd:

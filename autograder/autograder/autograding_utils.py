@@ -248,6 +248,13 @@ def setup_for_validation(config, working_directory, complete_config, is_vcs, tes
     custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
     copy_contents_into(config, job_id, custom_validation_code_path, tmp_work, tmp_logs)
 
+    # Copy the .submit.notebook to tmp_work for validation
+    submit_notebook_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        shutil.copy(
+            submit_notebook_path,
+            os.path.join(tmp_work, '.submit.notebook')
+        )
 
 
     # Copy the validation script into this directory.
@@ -396,7 +403,7 @@ def archive_autograding_results(
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
     if os.path.exists(random_output_path):
-        pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
+        pattern_copy("work_to_random_output", [os.path.join(random_output_path, '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
     # timestamp of first access to the gradeable page
     first_access_string = ""
     # grab the submission time
@@ -421,30 +428,10 @@ def archive_autograding_results(
         os.chown(history_file, int(config.submitty_users['daemon_uid']),ta_group_id)
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
-
+    grade_result = ""
     if "generate_output" not in queue_obj:
         try:
             shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
-        except:
-            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
-            config.logger.log_message(
-                "ERROR: grade.txt does not exist",
-                job_id=job_id,
-                is_batch=is_batch_job,
-                which_untrusted=which_untrusted,
-                jobname=item_name
-            )
-            config.logger.log_stack_trace(
-                traceback.format_exc(),
-                job_id=job_id,
-                is_batch=is_batch_job,
-                which_untrusted=which_untrusted,
-                jobname=item_name,
-            )
-
-        grade_result = ""
-        try:
             with open(os.path.join(tmp_work,"grade.txt")) as f:
                 lines = f.readlines()
                 for line in lines:
@@ -453,22 +440,21 @@ def archive_autograding_results(
                         grade_result = line
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
-                config.logger.log_message(
-                    "ERROR: grade.txt does not exist",
-                    job_id=job_id,
-                    is_batch=is_batch_job,
-                    which_untrusted=which_untrusted,
-                    jobname=item_name
-                )
-                config.logger.log_stack_trace(
-                    traceback.format_exc(),
-                    job_id=job_id,
-                    is_batch=is_batch_job,
-                    which_untrusted=which_untrusted,
-                    jobname=item_name,
-                )
-
+                f.write(f"\n\nERROR: Grading incomplete -- Could not process {os.path.join(tmp_work,'grade.txt')}")
+            config.logger.log_message(
+                "ERROR: could not process grade.txt. See stack trace entry for more details.",
+                job_id=job_id,
+                is_batch=is_batch_job,
+                which_untrusted=which_untrusted,
+                jobname=item_name,
+            )
+            config.logger.log_stack_trace(
+                traceback.format_exc(),
+                job_id=job_id,
+                is_batch=is_batch_job,
+                which_untrusted=which_untrusted,
+                jobname=item_name,
+            )
 
         gradeable_deadline_string = gradeable_config_obj["date_due"]
         submission_datetime = dateutils.read_submitty_date(submission_string)
@@ -509,21 +495,21 @@ def archive_autograding_results(
             shutil.move(results_json_path, os.path.join(tmp_results, "results.json"))
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
-                config.logger.log_message(
-                    "ERROR: results.json read/write error",
-                    job_id=job_id,
-                    is_batch=is_batch_job,
-                    which_untrusted=which_untrusted,
-                    jobname=item_name,
-                )
-                config.logger.log_stack_trace(
-                    traceback.format_exc(),
-                    job_id=job_id,
-                    is_batch=is_batch_job,
-                    which_untrusted=which_untrusted,
-                    jobname=item_name,
-                )
+                f.write(f"\n\nERROR: Grading incomplete -- Could not open/write {os.path.join(tmp_work,'results.json')}")
+            config.logger.log_message(
+                "ERROR: results.json read/write error",
+                job_id=job_id,
+                is_batch=is_batch_job,
+                which_untrusted=which_untrusted,
+                jobname=item_name,
+            )
+            config.logger.log_stack_trace(
+                traceback.format_exc(),
+                job_id=job_id,
+                is_batch=is_batch_job,
+                which_untrusted=which_untrusted,
+                jobname=item_name,
+            )
 
         # Rescue custom validator files
         custom_validator_output_directory = os.path.join(tmp_results, "custom_validator_output")
@@ -564,6 +550,15 @@ def archive_autograding_results(
 
     # save the logs!
     shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
+
+    # Save the .submit.notebook
+    # Copy the .submit.notebook to tmp_work for validation
+    submit_notebook_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        shutil.copy(
+            submit_notebook_path,
+            os.path.join(tmp_results, ".submit.notebook")
+        )
 
 
 def allow_only_one_part(path, log_path=os.devnull):

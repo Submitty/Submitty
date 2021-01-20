@@ -71,13 +71,13 @@ class TestSidebar(BaseTestCase):
             self.assertIn(expected_text, heading_text)
             current_idx += 1
 
-
     def test_click_sidebar_links_superuser(self):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']

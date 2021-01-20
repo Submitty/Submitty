@@ -1,13 +1,21 @@
 {
-    "assignment_message": "Submit each part of your homework to the right bucket or you will not receive credit.",
+    "auto_pts": 9,
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
             "**/*.class"
         ],
         "compilation_to_validation": [
-            "test*/STDOUT*.txt",
-            "test*/STDERR*.txt"
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "test02/STDOUT*.txt",
+            "test02/STDERR*.txt",
+            "test03/STDOUT*.txt",
+            "test03/STDERR*.txt",
+            "test04/STDOUT*.txt",
+            "test04/STDERR*.txt",
+            "SubmissionLimit/STDOUT*.txt",
+            "SubmissionLimit/STDERR*.txt"
         ],
         "submission_to_compilation": [
             "**/*.cpp",
@@ -27,11 +35,18 @@
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "test*/*.txt",
-            "test*/*_diff.json",
+            "test01/*.txt",
+            "test01/*_diff.json",
+            "test02/*.txt",
+            "test02/*_diff.json",
+            "test03/*.txt",
+            "test03/*_diff.json",
+            "test04/*.txt",
+            "test04/*_diff.json",
+            "SubmissionLimit/*.txt",
+            "SubmissionLimit/*_diff.json",
             "**/README.txt",
             "input_*.txt",
-            "test*/input_*.txt",
             "**/dispatched_actions.txt",
             "test01/STDOUT_0.txt",
             "test01/STDOUT_1.txt",
@@ -59,19 +74,40 @@
         "single_port_per_container": false,
         "use_router": false
     },
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
+    },
+    "gradeable_message": "Submit each part of your homework to the right bucket or you will not receive credit.",
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
+    "id": "python_multipart_static_analysis",
+    "item_pool": [],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 100000,
+    "max_submissions": 20,
     "part_names": [
         "Problem 1: Temperature",
         "Problem 2: Variables",
         "Problem 3: Area & Volume",
         "Problem 4: Count Odd"
     ],
+    "points_visible": 9,
     "publish_actions": false,
+    "required_capabilities": "default",
     "resource_limits": {
         "RLIMIT_AS": "RLIM_INFINITY",
         "RLIMIT_CPU": 60,
         "RLIMIT_NPROC": 100,
         "RLIMIT_SIGPENDING": 100
     },
+    "ta_pts": 0,
     "testcases": [
         {
             "containers": [
@@ -87,10 +123,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -102,6 +142,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test01",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Convert Temperature",
             "use_router": false,
@@ -143,7 +185,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -156,10 +199,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 1,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -171,6 +218,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test02",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Legal Variable Names",
             "type": "FileCheck",
@@ -187,7 +236,8 @@
                     "show_expected": "never",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -205,10 +255,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 4,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -220,6 +274,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test03",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Volume and Area",
             "use_router": false,
@@ -299,7 +355,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -315,10 +372,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -330,6 +391,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test04",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Count Odd",
             "use_router": false,
@@ -371,17 +434,18 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "max_submissions": 20,
             "penalty": -0.1,
             "points": -5,
-            "publish_actions": false,
-            "timestamped_stdout": false,
+            "testcase_id": "SubmissionLimit",
             "title": "Submission Limit",
             "type": "FileCheck"
         }
     ],
-    "timestamped_stdout": false
+    "timestamped_stdout": false,
+    "total_pts": 9
 }
