@@ -86,9 +86,13 @@ def worker_process(
                 # If we threw an error while grading, log it.
                 config.logger.log_message(
                     f"ERROR attempting to unzip graded item: {which_machine} "
-                    f"{which_untrusted}. for more details, see traces entry."
+                    f"{which_untrusted}. for more details, see traces entry.",
+                    which_untrusted=which_untrusted,
                 )
-                config.logger.log_stack_trace(traceback.format_exc())
+                config.logger.log_stack_trace(
+                    traceback.format_exc(),
+                    which_untrusted=which_untrusted,
+                )
                 # TODO: It is possible that autograding failed after multiple steps.
                 # In this case, we may be able to salvage a portion of the autograding_results
                 # directory.
