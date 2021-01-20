@@ -40,6 +40,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
+ * @method string getRegistrationSubsection()
  */
 class User extends AbstractModel {
 
@@ -100,6 +101,8 @@ class User extends AbstractModel {
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
+    /** @prop @var string What is the registration subsection that the user was assigned to for the course */
+    protected $registration_subsection = null;
 
     /**
      * @prop
@@ -198,6 +201,8 @@ class User extends AbstractModel {
         }
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
+
+        $this->setRegistrationSubsection($details['registration_subsection']);
     }
 
     /**
@@ -416,6 +421,10 @@ class User extends AbstractModel {
 
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
+    }
+
+    public function setRegistrationSubsection($section) {
+        $this->registration_subsection = ($section !== null) ? $section : null;
     }
 
     public function setRotatingSection($section) {
