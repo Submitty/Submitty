@@ -407,7 +407,7 @@ class PollController extends AbstractController {
      */
     public function getPollExportData() {
         $polls = PollUtils::getPollExportData($this->core->getQueries()->getPolls());
-        $file_name = date("Y-m-d") . "-" . $this->core->getConfig()->getSemester() . "-" . $this->core->getConfig()->getCourse() . "-" . "poll-data" . ".json";
+        $file_name = date("Y-m-d") . "_" . $this->core->getConfig()->getSemester() . "_" . $this->core->getConfig()->getCourse() . "_" . "poll_questions" . ".json";
         $data = FileUtils::encodeJson($polls);
         if ($data === false) {
             $this->core->addErrorMessage("Failed to export poll data. Please try again");
