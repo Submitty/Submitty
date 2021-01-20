@@ -534,7 +534,7 @@ def unpack_job(
                 "Check the stack traces log for details."
             )
             for trace_obj in local_done_queue_obj['errors']:
-                config.logger.log_stack_trace(**trace_obj)
+                config.logger.log_stack_trace(**trace_obj, is_replay=True)
 
         # Check to make certain that the job we received was the correct job
         if random_identifier != local_done_queue_obj['identifier']:
