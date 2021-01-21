@@ -18,7 +18,9 @@ class PollView extends AbstractView {
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
             'future_polls' => $future_polls,
-            'dropdown_states' => $dropdown_states
+            'dropdown_states' => $dropdown_states,
+            'semester' => $this->core->getConfig()->getSemester(),
+            'course' => $this->core->getConfig()->getCourse()
           ]);
     }
 

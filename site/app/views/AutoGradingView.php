@@ -93,6 +93,7 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
+
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
             'gradeable_id' => $gradeable->getId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId(),
@@ -701,8 +702,9 @@ class AutoGradingView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
+        $this->core->getOutput()->addInternalCss('electronic.css');
         $gradeable_id = $gradeable->getId();
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),

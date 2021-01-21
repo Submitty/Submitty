@@ -10,12 +10,10 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\routers\FeatureFlag;
+use app\libraries\PollUtils;
 
-/**
- * @FeatureFlag("polls")
- */
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -397,5 +395,74 @@ class PollController extends AbstractController {
                 $results
             )
         );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/export", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function getPollExportData() {
+        $polls = PollUtils::getPollExportData($this->core->getQueries()->getPolls());
+        $file_name = date("Y-m-d") . "-" . $this->core->getConfig()->getSemester() . "-" . $this->core->getConfig()->getCourse() . "-" . "poll-data" . ".json";
+        $data = FileUtils::encodeJson($polls);
+        if ($data === false) {
+            $this->core->addErrorMessage("Failed to export poll data. Please try again");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        header("Content-type: " . "application/json");
+        header('Content-Disposition: attachment; filename="' . $file_name . '"');
+        $this->core->getOutput()->renderString($data);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/import", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return RedirectResponse
+     */
+    public function importPollsFromJSON(): RedirectResponse {
+        $filename = $_FILES["polls_file"]["tmp_name"];
+        $polls = FileUtils::readJsonFile($filename);
+        if ($polls === false) {
+            $this->core->addErrorMessage("Failed to read file. Make sure the file is the right format");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $num_imported = 0;
+        $num_errors = 0;
+        foreach ($polls as $poll) {
+            if (
+                !array_key_exists("name", $poll)
+                || !array_key_exists("question", $poll)
+                || !array_key_exists("responses", $poll)
+                || !array_key_exists("correct_responses", $poll)
+                || !array_key_exists("release_date", $poll)
+            ) {
+                $num_errors = $num_errors + 1;
+                continue;
+            }
+            $name = $poll["name"];
+            $question = $poll["question"];
+            $responses = [];
+            $orders = [];
+            $i = 0;
+            foreach ($poll["responses"] as $id => $response) {
+                $response_id = intval($id);
+                $responses[$response_id] = $response;
+                $orders[$response_id] = $i;
+                $i = $i + 1;
+            }
+            $answers = $poll["correct_responses"];
+            $release_date = $poll["release_date"];
+            $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
+            $num_imported = $num_imported + 1;
+        }
+        if ($num_errors === 0) {
+            $this->core->addSuccessMessage("Successfully imported " . $num_imported . " polls");
+        }
+        else {
+            $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
+        }
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 }

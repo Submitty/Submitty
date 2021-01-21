@@ -74,34 +74,33 @@
         <textarea class="config-row" name="queue_message" id="queue-message">{{ fields['queue_message'] }}</textarea>
 
 
-        {% if feature_flag_enabled('polls') %}
-            <h2>Online Polls</h2>
-            <hr>
-            <div id="polls_enabled_wrapper" class="config-row checkbox-row">
-                <input type="checkbox" name="polls_enabled" id="polls-enabled" value="true" {{ fields['polls_enabled'] ? 'checked': '' }} />
-                <label for="polls-enabled">
-                    <span class="option-title">Enable Online Polls</span>
-                    <br>
-                    <span class="option-alt">Choose whether to enable online polling for this course.</span>
-                </label>
-            </div>
-
-            <label class="config-row" for="polls_pts_for_correct">
-                <span class="option-title">Points for correct</span>
+        <h2>Online Polls</h2>
+        <hr>
+        <div id="polls_enabled_wrapper" class="config-row checkbox-row">
+            <input type="checkbox" name="polls_enabled" id="polls-enabled" value="true" {{ fields['polls_enabled'] ? 'checked': '' }} />
+            <label for="polls-enabled">
+                <span class="option-title">Enable Online Polls</span>
                 <br>
-                <span class="option-alt">Number of points awarded for correctly answering a poll.</span>
-                <br>
+                <span class="option-alt">Choose whether to enable online polling for this course.</span>
             </label>
-            <input type="number" class="config-row" step="0.1" max="1.0" min="0.0" name="polls_pts_for_correct" id="polls_pts_for_correct" value="{{ fields['polls_pts_for_correct'] }}" />
+        </div>
 
-            <label class="config-row" for="polls_pts_for_incorrect">
-                <span class="option-title">Points for incorrect</span>
-                <br>
-                <span class="option-alt">Number of points awarded for incorrectly answering a poll.</span>
-                <br>
-            </label>
-            <input type="number" class="config-row" step="0.1" max="1.0" min="0.0" name="polls_pts_for_incorrect" id="polls_pts_for_incorrect" value="{{ fields['polls_pts_for_incorrect'] }}"/>
-        {% endif %}
+        <label class="config-row" for="polls_pts_for_correct">
+            <span class="option-title">Points for correct</span>
+            <br>
+            <span class="option-alt">Number of points awarded for correctly answering a poll.</span>
+            <br>
+        </label>
+        <input type="number" class="config-row" step="0.1" max="1.0" min="0.0" name="polls_pts_for_correct" id="polls_pts_for_correct" value="{{ fields['polls_pts_for_correct'] }}" />
+
+        <label class="config-row" for="polls_pts_for_incorrect">
+            <span class="option-title">Points for incorrect</span>
+            <br>
+            <span class="option-alt">Number of points awarded for incorrectly answering a poll.</span>
+            <br>
+        </label>
+        <input type="number" class="config-row" step="0.1" max="1.0" min="0.0" name="polls_pts_for_incorrect" id="polls_pts_for_incorrect" value="{{ fields['polls_pts_for_incorrect'] }}"/>
+
         <h2>Submissions</h2>
         <hr>
 
