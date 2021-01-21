@@ -12,12 +12,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\routers\FeatureFlag;
 use app\libraries\PollUtils;
 
-/**
- * @FeatureFlag("polls")
- */
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
