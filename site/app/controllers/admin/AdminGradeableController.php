@@ -214,7 +214,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
-            $this->core->getOutput()->addInternalCss('ta-grading.css');
+            $this->core->getOutput()->addInternalCss('electronic.css');
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
@@ -222,7 +222,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -266,7 +265,8 @@ class AdminGradeableController extends AbstractController {
             'csrf_token' => $this->core->getCsrfToken(),
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
-            'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()])
+            'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
+            'hidden_files' => $gradeable->getHiddenFiles()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -912,6 +912,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
+                'hidden_files' => "",
                 'limited_access_blind' => 1,
                 'peer_blind' => 3
             ]);
@@ -928,7 +929,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'has_due_date' => false
+                'has_due_date' => false,
+                'hidden_files' => ""
             ]);
         }
 
@@ -1137,7 +1139,6 @@ class AdminGradeableController extends AbstractController {
             throw new ValidationException('', $errors);
         }
         $this->core->getQueries()->updateGradeable($gradeable);
-
         // Only return updated properties if the changes were applied
         return $updated_properties;
     }

@@ -39,7 +39,7 @@ bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${G
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
-  raise 'vagrant-vbguest is not installed!'
+  raise 'vagrant-vbguest is not installed! To install, run: vagrant plugin install vagrant-vbguest'
 end
 
 Vagrant.configure(2) do |config|

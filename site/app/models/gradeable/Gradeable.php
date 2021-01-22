@@ -82,6 +82,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
+ * @method string getHiddenFiles()
+ * @method void setHiddenFiles($hidden_files)
  * @method void setStudentSubmit($can_student_submit)
  * @method void setLimitedAccessBlind($limited_access_blind)
  * @method int getLimitedAccessBlind()
@@ -229,6 +231,8 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
+    /** @prop @var string are a list of hidden files and the lowest_access_group that can see those files */
+    protected $hidden_files = "";
     /** @prop @var bool will limited access graders grade the gradeable blindly*/
     protected $limited_access_blind = 1;
     /** @prop @var bool will peer graders grade the gradeable blindly*/
@@ -285,6 +289,9 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            if (array_key_exists('hidden_files', $details)) {
+                $this->setHiddenFiles($details['hidden_files']);
+            }
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
@@ -1996,6 +2003,43 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Can a given user view this gradeable
+     */
+    public function canView(User $user): bool {
+        //Remove incomplete gradeables for non-instructors
+        if (
+            !$user->accessAdmin()
+            && $this->getType() == GradeableType::ELECTRONIC_FILE
+            && !$this->hasAutogradingConfig()
+        ) {
+            return false;
+        }
+
+        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
+            return false;
+        }
+
+        // if student view false, never show
+        if (!$this->isStudentView() && !$user->accessGrading()) {
+            return false;
+        }
+
+        // if student view is true and they can only view after grades are released, filter appropriately
+        if ($this->isStudentView() && $this->isStudentViewAfterGrades() && !$user->accessGrading()) {
+            return $this->isTaGradeReleased();
+        }
+
+        //If we're not instructor and this is not open to TAs
+        $date = $this->core->getDateTimeNow();
+        if ($this->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
      * Gets a multidimensional array containing data for all possible default configuration paths
      *
      * @return array

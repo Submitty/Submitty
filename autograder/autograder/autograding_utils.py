@@ -187,6 +187,13 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
     copy_contents_into(job_id, custom_validation_code_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
 
+    # Copy the .submit.notebook to tmp_work for validation
+    submit_notebook_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        shutil.copy(
+            submit_notebook_path,
+            os.path.join(tmp_work, '.submit.notebook')
+        )
 
 
     # Copy the validation script into this directory.
@@ -222,6 +229,21 @@ def lock_down_folder_permissions(top_dir):
     # Chmod a directory to take away group and other rwx.
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
 
+def cleanup_stale_containers(user_id_of_runner):
+    # Remove any docker containers left over from past runs.
+    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', f'name={user_id_of_runner}']).split()
+    if len(old_containers) > 0:
+        print('REMOVING STALE CONTAINERS')
+    for old_container in old_containers:
+        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
+
+    # Remove any docker networks left over from past runs.
+    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', f'name={user_id_of_runner}']).split()
+    if len(old_containers) > 0:
+        print('REMOVING STALE NETWORKS')
+    for old_network in old_networks:
+        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+
 
 def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment, log_path, stack_trace_log_path, SUBMITTY_INSTALL_DIR):
     """
@@ -251,19 +273,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     os.mkdir(tmp_work)
     os.mkdir(tmp_work_test_input)
 
-    # Remove any docker containers left over from past runs.
-    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', 'name={0}'.format(user_id_of_runner)]).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE CONTAINERS')
-    for old_container in old_containers:
-        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
-
-    # Remove any docker networks left over from past runs.
-    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', 'name={0}'.format(user_id_of_runner)]).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE NETWORKS')
-    for old_network in old_networks:
-        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+    cleanup_stale_containers(user_id_of_runner)
 
     # Unzip the autograding and submission folders
     unzip_this_file(autograding_zip_file,tmp_autograding)
@@ -321,7 +331,7 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
     if os.path.exists(random_output_path):
-        pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
+        pattern_copy("work_to_random_output", [os.path.join(random_output_path, '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
     # timestamp of first access to the gradeable page
     first_access_string = ""
     # grab the submission time
@@ -346,18 +356,10 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
         os.chown(history_file, int(config.submitty_users['daemon_uid']),ta_group_id)
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
-
+    grade_result = ""
     if "generate_output" not in queue_obj:
         try:
             shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
-        except:
-            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
-            log_message(log_path, job_id, is_batch_job, which_untrusted, item_name, message="ERROR: grade.txt does not exist")
-            log_stack_trace(stack_trace_log_path, job_id, is_batch_job, which_untrusted, item_name, trace=traceback.format_exc())
-
-        grade_result = ""
-        try:
             with open(os.path.join(tmp_work,"grade.txt")) as f:
                 lines = f.readlines()
                 for line in lines:
@@ -366,10 +368,23 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
                         grade_result = line
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
-                log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
-                log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
-
+                f.write(f"\n\nERROR: Grading incomplete -- Could not process {os.path.join(tmp_work,'grade.txt')}")
+            log_message(
+                log_path,
+                job_id,
+                is_batch_job,
+                which_untrusted,
+                item_name,
+                message="ERROR: could not process grade.txt. See stack trace entry for more details."
+            )
+            log_stack_trace(
+                stack_trace_log_path,
+                job_id,
+                is_batch_job,
+                which_untrusted,
+                item_name,
+                trace=traceback.format_exc()
+            )
 
         gradeable_deadline_string = gradeable_config_obj["date_due"]
         submission_datetime = dateutils.read_submitty_date(submission_string)
@@ -410,9 +425,9 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
             shutil.move(results_json_path, os.path.join(tmp_results, "results.json"))
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
-                log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
-                log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+                f.write(f"\n\nERROR: Grading incomplete -- Could not open/write {os.path.join(tmp_work,'results.json')}")
+            log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
+            log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
         # Rescue custom validator files
         custom_validator_output_directory = os.path.join(tmp_results, "custom_validator_output")
@@ -445,6 +460,15 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
 
     # save the logs!
     shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
+
+    # Save the .submit.notebook
+    # Copy the .submit.notebook to tmp_work for validation
+    submit_notebook_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        shutil.copy(
+            submit_notebook_path,
+            os.path.join(tmp_results, ".submit.notebook")
+        )
 
 
 def allow_only_one_part(path, log_path=os.devnull):

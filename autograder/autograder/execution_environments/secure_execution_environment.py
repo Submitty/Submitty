@@ -399,8 +399,8 @@ class SecureExecutionEnvironment():
         details_dir = os.path.join(self.tmp_results, "details", self.name)
         public_dir = os.path.join(self.tmp_results, "results_public", self.name)
 
-        os.mkdir(details_dir)
-        os.mkdir(public_dir)
+        os.makedirs(details_dir, exist_ok=True)
+        os.makedirs(public_dir, exist_ok=True)
 
         # Remove any test input files.
         test_input_path = os.path.join(self.tmp_work, 'test_input')
