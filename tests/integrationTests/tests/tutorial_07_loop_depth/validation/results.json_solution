@@ -10,11 +10,11 @@
                 }
             ],
             "points_awarded": 10,
-            "test_name": "Test 1 Python - Determine Loop Depth"
+            "test_name": "Python - Determine Loop Depth"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 2 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

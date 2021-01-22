@@ -1227,10 +1227,8 @@ class ElectronicGraderController extends AbstractController {
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false, $version = null) {
-        $showNewInterface = isset($version);
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
@@ -1479,18 +1477,14 @@ class ElectronicGraderController extends AbstractController {
         $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
 
         $this->core->getOutput()->addInternalCss('forum.css');
-        if ($showNewInterface) {
-            $this->core->getOutput()->addInternalCss('electronic.css');
-        }
-        else {
-            $this->core->getOutput()->addInternalCss('ta-grading.css');
-        }
+        $this->core->getOutput()->addInternalCss('electronic.css');
+
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $showNewInterface);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -1656,9 +1650,10 @@ class ElectronicGraderController extends AbstractController {
 
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
+        $submitter = $graded_gradeable->getSubmitter()->getId();
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
-        if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+        if (count($gradeable->getAutogradingConfig()->getPersonalizedTestcases($submitter)) > 1) {
             // NOTE/REDESIGN FIXME: We might have autograding that is
             // penalty only.  The available positive autograding
             // points might be zero.  Testing for autograding > 1 is
@@ -2094,7 +2089,7 @@ class ElectronicGraderController extends AbstractController {
 
     public function saveComponentPages(Gradeable $gradeable, array $pages) {
         foreach ($gradeable->getComponents() as $component) {
-            if (!isset($orders[$component->getId()])) {
+            if (!isset($pages[$component->getId()])) {
                 throw new \InvalidArgumentException('Missing component id in pages array');
             }
             $page = $pages[$component->getId()];
@@ -2807,10 +2802,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_config = $gradeable->getAutogradingConfig();
 
         $notebook_config = $gradeable_config->getNotebookConfig();
-        $hashes = $gradeable_config->getUserSpecificNotebook(
-            $who_id,
-            $gradeable->getId()
-        )->getHashes();
+        $hashes = $gradeable_config->getUserSpecificNotebook($who_id)->getHashes();
         $que_idx = 0;
         // loop through the notebook key, and find from_pool key in each object (or question)
         foreach ($notebook_config as $key => $item) {
