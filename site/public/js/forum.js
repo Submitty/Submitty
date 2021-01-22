@@ -1655,7 +1655,7 @@ function sortTable(sort_element_index, reverse=false){
     }
 
     var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
-    var headers = row0.getElementsByTagName("TD");
+    var headers = row0.getElementsByTagName("TH");
 
     for(var i = 0;i<headers.length;i++){
         var index = headers[i].innerHTML.indexOf(' ↓');

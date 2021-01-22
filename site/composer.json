@@ -33,11 +33,11 @@
     "maennchen/zipstream-php": "^2.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "8.5.13",
+    "phpunit/phpunit": "8.5.14",
     "submitty/php-codesniffer": "2.3.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "0.12.65"
+    "phpstan/phpstan": "0.12.68"
   },
   "scripts": {
     "test": "phpunit -c tests/phpunit.xml",
