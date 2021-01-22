@@ -85,7 +85,7 @@ class Logger:
         which_untrusted: str = '',
         job_id: Optional[str] = None,
         jobname: str = "",
-        is_replay: bool = False,
+        echo_source: Optional[str] = None,
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
         job_id = job_id or self.job_id
@@ -107,9 +107,10 @@ class Logger:
 
         now = dateutils.get_current_time()
         easy_to_read_date = dateutils.write_submitty_date(now, True)
-        replay_string = "REPLAY" if is_replay else ""
 
-        message = f"[{easy_to_read_date}][{job_id:>6s}][{replay_string:>6s}]\n"
+        message = f"[{easy_to_read_date}][{job_id:>6s}]\n"
+        if echo_source is not None:
+            message += f"== (Echoed from {echo_source})\n"
         message += f"== Batch? {is_batch}\n"
         message += f"== Which: {which_untrusted}\n"
         message += f"==   Job: {jobname}\n"
