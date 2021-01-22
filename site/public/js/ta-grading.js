@@ -1175,6 +1175,7 @@ function newEditPeerComponentsForm() {
 
 function openFrame(html_file, url_file, num) {
   let iframe = $('#file_viewer_' + num);
+  let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
     let iframeId = "file_viewer_" + num + "_iframe";
     let directory = "";
@@ -1193,12 +1194,18 @@ function openFrame(html_file, url_file, num) {
     }
     // handle pdf
     if (url_file.substring(url_file.length - 3) === "pdf") {
-      expandFile(html_file, url_file).then(function(){
+      openPDFEditor(html_file, url_file).then(function(){
         loadPDFToolbar();
       });
     }
     else {
-      iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+      let frameHtml = `
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}');" 
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
+                width="95%">
+        </iframe>
+      `;
+      iframe.html(frameHtml);
       if(iframe.hasClass("full_panel")){
         $('#'+iframeId).attr("height", "1200px");
       }
@@ -1222,6 +1229,7 @@ function openFrame(html_file, url_file, num) {
 
 function openFile(html_file, url_file) {
   var directory = "";
+  let display_file_url = buildCourseUrl(['display_file']);
   if (url_file.includes("submissions")) {
     directory = "submissions";
     url_file = url_file;
@@ -1238,17 +1246,18 @@ function openFile(html_file, url_file) {
   else if (url_file.includes("split_pdf")) {
     directory = "split_pdf";
   }
-  window.open("{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+  window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
   return false;
 }
-//TODO: Name better
-function expandFile(name, path, page_num = 0) {
+
+
+function openPDFEditor(name, path, page_num = 0) {
   // debugger;
   if($('#viewer').length != 0){
     $('#viewer').remove();
   }
 
-  let promise = loadFile(name, path, page_num);
+  let promise = loadPDF(name, path, page_num);
   $('#file-view').show();
   $("#grading_file_name").html(name);
   let precision = $("#submission_browser").width()-$("#directory_view").width();
@@ -1259,16 +1268,18 @@ function expandFile(name, path, page_num = 0) {
   return promise;
 }
 
-function loadFile(name, path, page_num = 0) {
+function loadPDF(name, path, page_num) {
   let extension = name.split('.').pop();
+  let gradeable_id = document.getElementById('submission_browser').dataset.gradeableId;
+  let anon_submitter_id = document.getElementById('submission_browser').dataset.anonSubmitterId;
   if (extension == "pdf") {
     $('#pdf_annotation_bar').show();
     $('#save_status').show();
     return $.ajax({
       type: 'POST',
-      url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
+      url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'pdf']),
       data: {
-        'user_id': '{{ anon_submitter_id }}',
+        'user_id': anon_submitter_id,
         'filename': name,
         'file_path': path,
         'page_num': page_num,
