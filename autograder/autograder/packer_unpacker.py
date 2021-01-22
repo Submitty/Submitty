@@ -8,6 +8,7 @@ import dateutil.parser
 import string
 import random
 import zipfile
+import traceback
 
 from submitty_utils import dateutils
 from . import insert_database_version_data, autograding_utils
@@ -392,16 +393,30 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
 
     if "generate_output" not in queue_obj:
         # add information to the database
-        insert_database_version_data.insert_into_database(
-            config,
-            queue_obj["semester"],
-            queue_obj["course"],
-            queue_obj["gradeable"],
-            queue_obj["user"],
-            queue_obj["team"],
-            queue_obj["who"],
-            True if queue_obj["is_team"] else False,
-            str(queue_obj["version"]))
+        try:
+            insert_database_version_data.insert_into_database(
+                config,
+                queue_obj["semester"],
+                queue_obj["course"],
+                queue_obj["gradeable"],
+                queue_obj["user"],
+                queue_obj["team"],
+                queue_obj["who"],
+                True if queue_obj["is_team"] else False,
+                str(queue_obj["version"])
+            )
+        except Exception:
+            autograding_utils.log_message(
+                config.log_path,
+                job_id=job_id,
+                message="ERROR: Could not score into database"
+            )
+            autograding_utils.log_stack_trace(
+                config.error_path,
+                job_id=job_id,
+                trace=traceback.format_exc()
+            )
+            return False
 
     if "generate_output" not in queue_obj:
         is_batch_job = queue_obj["regrade"]

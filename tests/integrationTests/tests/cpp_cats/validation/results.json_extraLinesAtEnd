@@ -10,11 +10,11 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 1 README"
+            "test_name": "README"
         },
         {
             "points_awarded": 3,
-            "test_name": "Test 2 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -26,7 +26,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 3 Regular char by char comparision"
+            "test_name": "Regular char by char comparision"
         },
         {
             "autochecks": [
@@ -38,7 +38,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 4 Test of by word comparison"
+            "test_name": "Test of by word comparison"
         },
         {
             "autochecks": [
@@ -50,7 +50,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 5 Test of by line comparison"
+            "test_name": "Test of by line comparison"
         },
         {
             "autochecks": [
@@ -62,7 +62,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 6 Test of by line without whitespace comparison"
+            "test_name": "Test of by line without whitespace comparison"
         },
         {
             "autochecks": [
@@ -74,11 +74,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 7 Regular char by char comparision NO PARTIAL CREDIT"
+            "test_name": "Regular char by char comparision NO PARTIAL CREDIT"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 8 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
