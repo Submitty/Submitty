@@ -80,6 +80,7 @@ class UserSpecificNotebook extends Notebook {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
                 //see if theres a target item pool and replace this with the actual notebook
                 $tgt_item = $this->getItemFromPool($notebook_cell);
+                $points = $notebook_cell["points"] ?? 0;
 
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {
@@ -89,6 +90,12 @@ class UserSpecificNotebook extends Notebook {
                     $item_ref++;
                     $new_notebook = array_merge($new_notebook, $item_data['notebook']);
                     $test_cases = $item_data['testcases'] ?? [];
+                    // TODO: This method of checking should be replaced once we have a more strict
+                    //  definition of how points are defined.
+                    if (count($test_cases) > 0 && isset($test_cases[0]["points"]) === false) {
+                        $test_cases[0]["points"] = $points;
+                    }
+
                     $tests = array_merge($tests, $test_cases);
                 }
 
@@ -173,5 +180,9 @@ class UserSpecificNotebook extends Notebook {
         }
 
         return $ret;
+    }
+
+    public function getTestCases(): array {
+        return $this->test_cases;
     }
 }

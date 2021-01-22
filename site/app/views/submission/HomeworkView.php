@@ -301,10 +301,7 @@ class HomeworkView extends AbstractView {
         $notebook_file_submissions = [];
         $notebook_model = null;
         if ($config->isNotebookGradeable()) {
-            $notebook_model = $config->getUserSpecificNotebook(
-                $this->core->getUser()->getId(),
-                $gradeable->getId()
-            );
+            $notebook_model = $config->getUserSpecificNotebook($this->core->getUser()->getId());
 
             $notebook = $notebook_model->getNotebook();
             $num_parts = $notebook_model->getNumParts();

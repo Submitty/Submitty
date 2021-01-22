@@ -1,10 +1,10 @@
 {
-     "automatic_grading_total": 18,
-     "nonhidden_automatic_grading_total": 18,
-     "testcases": [
+    "automatic_grading_total": 18,
+    "nonhidden_automatic_grading_total": 18,
+    "testcases": [
         {
             "points_awarded": 3,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -22,7 +22,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 2 no subdirectory"
+            "test_name": "no subdirectory"
         },
         {
             "autochecks": [
@@ -40,7 +40,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 3 with subdirectory"
+            "test_name": "with subdirectory"
         },
         {
             "autochecks": [
@@ -58,11 +58,11 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 4 with nested subdirectories"
+            "test_name": "with nested subdirectories"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 5 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
