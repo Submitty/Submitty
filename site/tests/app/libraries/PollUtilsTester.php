@@ -32,26 +32,32 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
             new PollModel($this->core, 2, "Poll #3", "Is this the fourth poll?", ["Yes", "No", "Maybe"], [1], "ended", ["bitdiddle" => 1, "aphacker" => 2], "2020-01-13"),
         ];
         $expected_data = [
-            "0" => [
+            [
+                "id" => 0,
                 "name" => "Poll #1",
                 "question" => "Is this the first poll?",
                 "responses" => ["Yes", "No", "Maybe"],
                 "correct_responses" => [0, 2],
-                "release_date" => "2020-01-11"
+                "release_date" => "2020-01-11",
+                "status" => "closed"
             ],
-            "1" => [
+            [
+                "id" => 1,
                 "name" => "Poll #2",
                 "question" => "Is this the second poll?",
                 "responses" => ["Yes", "No", "Definitely not"],
                 "correct_responses" => [0],
-                "release_date" => "2020-01-12"
+                "release_date" => "2020-01-12",
+                "status" => "open"
             ],
-            "2" => [
+            [
+                "id" => 2,
                 "name" => "Poll #3",
                 "question" => "Is this the fourth poll?",
                 "responses" => ["Yes", "No", "Maybe"],
                 "correct_responses" => [1],
-                "release_date" => "2020-01-13"
+                "release_date" => "2020-01-13",
+                "status" => "ended"
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);

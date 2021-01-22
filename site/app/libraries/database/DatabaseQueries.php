@@ -7004,7 +7004,7 @@ AND gc_id IN (
 
     public function getPolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls order by poll_id DESC");
+        $this->course_db->query("SELECT * from polls order by poll_id ASC");
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 

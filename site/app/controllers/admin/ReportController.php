@@ -394,8 +394,8 @@ class ReportController extends AbstractController {
                 "responses" => $poll->getUserResponses()
             ];
         }
-        FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_responses_summary.json"), $polls_data);
-        FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_data_summary.json"), PollUtils::getPollExportData($polls));
+        FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_responses.json"), $polls_data);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_questions.json"), PollUtils::getPollExportData($polls));
     }
 
     /**
