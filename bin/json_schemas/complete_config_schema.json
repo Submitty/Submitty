@@ -406,7 +406,7 @@
       },
       "part_names" : {
         "type" : "array",
-        "minItems" : 1,
+        "minItems" : 0,
         "items" : {
           "type" : "string"
         }
