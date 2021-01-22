@@ -1,7 +1,12 @@
 <div class="content">
-
     <h1> Polls </h1>
     <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
+    <a href="{{base_url}}/export" class="btn btn-primary">Export</a>
+    <form action="{{base_url}}/import" method="post" id="import-polls-form" enctype="multipart/form-data" style="display: inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input onchange="importPolls()" type="file" id="polls-file" name="polls_file" style="display: none;"/>
+        <label for="polls-file" class="btn btn-primary">Import</label>
+    </form>
     <hr>
 
     <div class="dropdown-wrapper">
@@ -12,31 +17,30 @@
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
-            <col style="width: 23%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
                     <th scope="col"></th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
                     <th scope="col">Responses</th>
-                    <th scope="col">Edit</th>
-                    <th scope="col">View Results</th>
-                    <th scope="col">Delete</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td></td>
+                        <td align="left">
+                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            </a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
+                            {{ poll.getName() }}
+                        </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
@@ -45,23 +49,10 @@
                         </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </a>
-                        </td>
-                        <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
-                        </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/deletePoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -81,31 +72,32 @@
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
-            <col style="width: 23%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 15%">
+            <col style="width: 15%">
+            <col style="width: 15%">
+            <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
                     <th scope="col">Responses</th>
-                    <th scope="col">Edit</th>
-                    <th scope="col">View Results</th>
-                    <th scope="col">Delete</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for poll in older_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
+                        <td align="left"> 
+                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            </a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
+                            {{ poll.getName() }}
+                        </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
@@ -115,23 +107,10 @@
                         </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Edit Poll</button>
-                            </a>
-                        </td>
-                        <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
-                        </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/deletePoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -150,52 +129,35 @@
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
-            <col style="width: 23%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Date Released</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
                     <th scope="col">Responses</th>
-                    <th scope="col">Edit</th>
-                    <th scope="col">View Results</th>
-                    <th scope="col">Delete</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for poll in future_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getReleaseDate() }} </td>
-                        <td></td>
-                        <td></td>
-                        <td> {{ poll.getUserResponses()|length }} </td>
-                        <td>
-                            <a href="{{base_url}}/editPoll/{{ poll.getID() }}">
+                        <td align="left">
+                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Edit Poll</button>
                             </a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
+                            {{ poll.getName() }}
                         </td>
+                        <td> {{ poll.getReleaseDate() }} </td>
+                        <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
-                        </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/deletePoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -205,6 +167,30 @@
 </div>
 
 <script>
+
+    function newDeletePollForm(pollid, pollname, base_url) {
+        if (confirm("This will delete poll '" + pollname +"'. Are you sure?")) {
+            let url = base_url + "/deletePoll";
+            let fd = new FormData();
+            fd.append('csrf_token', csrfToken);
+            fd.append('poll_id', pollid);
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: fd,
+                processData: false,
+                cache: false,
+                contentType: false,
+                success: function(data) {
+                    window.location.reload(false);
+                },
+                error: function(err) {
+                    console.error(err);
+                    window.alert("Something went wrong. Please try again.");
+                }
+            });
+        }
+    }
 
     function updatePollAcceptingAnswers(pollid, base_url) {
         let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
@@ -278,6 +264,10 @@
                 window.alert("Something went wrong. Please try again.");
             }
         });
+    }
+
+    function importPolls() {
+        $("#import-polls-form").submit();
     }
 
 </script>

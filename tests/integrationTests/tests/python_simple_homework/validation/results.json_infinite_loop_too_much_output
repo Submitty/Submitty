@@ -32,11 +32,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Lab 1 Checkpoint 1"
+            "test_name": "Lab 1 Checkpoint 1"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 2 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

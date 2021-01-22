@@ -3,6 +3,7 @@
         "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
         "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD"
     ],
+    "auto_pts": 10,
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -10,8 +11,14 @@
             "test01/a.out"
         ],
         "compilation_to_validation": [
-            "test*/STDOUT*.txt",
-            "test*/STDERR*.txt",
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "test02/STDOUT*.txt",
+            "test02/STDERR*.txt",
+            "test03/STDOUT*.txt",
+            "test03/STDERR*.txt",
+            "SubmissionLimit/STDOUT*.txt",
+            "SubmissionLimit/STDERR*.txt",
             "test01/a.out"
         ],
         "submission_to_compilation": [
@@ -29,16 +36,21 @@
         ],
         "submission_to_validation": [
             "**/README.txt",
-            "input_*.txt",
-            "**/*.pdf"
+            "**/*.pdf",
+            ".user_assigment_access.json"
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "test*/*.txt",
-            "test*/*_diff.json",
+            "test01/*.txt",
+            "test01/*_diff.json",
+            "test02/*.txt",
+            "test02/*_diff.json",
+            "test03/*.txt",
+            "test03/*_diff.json",
+            "SubmissionLimit/*.txt",
+            "SubmissionLimit/*_diff.json",
             "**/README.txt",
             "input_*.txt",
-            "test*/input_*.txt",
             "**/dispatched_actions.txt",
             "test01/STDERR.txt",
             "test01/STDOUT.txt",
@@ -55,11 +67,32 @@
         "single_port_per_container": false,
         "use_router": false
     },
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
+    },
+    "gradeable_message": "",
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
+    "id": "12_system_calls",
+    "item_pool": [],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 100000,
+    "max_submissions": 20,
+    "points_visible": 10,
     "publish_actions": false,
+    "required_capabilities": "default",
     "resource_limits": {
         "RLIMIT_CPU": 10,
         "RLIMIT_NPROC": 20
     },
+    "ta_pts": 0,
     "testcases": [
         {
             "containers": [
@@ -74,11 +107,15 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
             "executable_name": "a.out",
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -90,6 +127,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test01",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Compilation",
             "type": "Compilation",
@@ -119,7 +158,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -134,10 +174,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 4,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -149,6 +193,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test02",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "./a.out 10",
             "use_router": false,
@@ -172,7 +218,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -187,10 +234,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 4,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -202,6 +253,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test03",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "./a.out 30",
             "use_router": false,
@@ -225,17 +278,18 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "max_submissions": 20,
             "penalty": -0.1,
             "points": -5,
-            "publish_actions": false,
-            "timestamped_stdout": false,
+            "testcase_id": "SubmissionLimit",
             "title": "Submission Limit",
             "type": "FileCheck"
         }
     ],
-    "timestamped_stdout": false
+    "timestamped_stdout": false,
+    "total_pts": 10
 }

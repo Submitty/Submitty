@@ -4,7 +4,7 @@
     "testcases": [
         {
             "points_awarded": 5,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -14,7 +14,7 @@
                 }
             ],
             "points_awarded": 10,
-            "test_name": "Test 2 NORMAL GRADING:  (hiding the details)"
+            "test_name": "NORMAL GRADING:  (hiding the details)"
         },
         {
             "autochecks": [
@@ -26,7 +26,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 3 BEHIND THE SCENES:  raw output"
+            "test_name": "BEHIND THE SCENES:  raw output"
         },
         {
             "autochecks": [
@@ -38,7 +38,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 4 BEHIND THE SCENES:  checking the sorted output"
+            "test_name": "BEHIND THE SCENES:  checking the sorted output"
         },
         {
             "autochecks": [
@@ -50,11 +50,11 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 5 BEHIND THE SCENES:  checking the second and third words"
+            "test_name": "BEHIND THE SCENES:  checking the second and third words"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 6 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
