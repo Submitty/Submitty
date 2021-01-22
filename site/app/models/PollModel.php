@@ -90,13 +90,6 @@ class PollModel extends AbstractModel {
         return in_array($response, $this->getResponses()) && in_array($response, $this->answers);
     }
 
-    public function getScore($user_id) {
-        if (!isset($this->user_responses[$user_id])) {
-            return 0.0;
-        }
-        return $this->isCorrect($this->user_responses[$user_id]) ? (float) $this->core->getConfig()->getPollsPtsForCorrect() : (float) $this->core->getConfig()->getPollsPtsForIncorrect();
-    }
-
     public function isInPast() {
         return date("Y-m-d") > $this->release_date;
     }
