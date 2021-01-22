@@ -39,6 +39,9 @@
                             <td></td>
                             <td>
                                 {{ registration }}
+                                {% if  student.getRegistrationSubsection is not null %}
+                                     -  {{ student.getRegistrationSubsection }}
+                                {% endif %}
                                 {% if student.isManualRegistration() %}
                                     <i class="fas fa-hammer" title="Manually Registered"></i>
                                 {% endif %}
