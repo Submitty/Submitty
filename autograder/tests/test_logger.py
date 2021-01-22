@@ -84,10 +84,12 @@ class TestLogger(unittest.TestCase):
         logger.log_stack_trace("Uh-oh!")
         logger.log_stack_trace("Batch uh-oh!", is_batch=True)
         logger.log_stack_trace("ID'd uh-oh!", job_id="UH-OH!")
+        logger.log_stack_trace("Jobname uh-oh!", jobname="some long job name here")
         logger.log_stack_trace("Specified uh-oh!", which_untrusted="localhost")
         logger.log_stack_trace(
             "Full uh-oh!",
-            is_batch=True, which_untrusted="localhost", job_id="UH-OH!"
+            is_batch=True, which_untrusted="localhost", job_id="UH-OH!",
+            jobname="some long job name here"
         )
 
         # Accumulated traces should occur chronologically
@@ -99,31 +101,43 @@ class TestLogger(unittest.TestCase):
                 # is replaced with the logger instance's job ID when omitted.
                 'is_batch': False,
                 'which_untrusted': "",
-                'job_id': "TEST"
+                'job_id': "TEST",
+                'jobname': "",
             },
             {
                 'trace': "Batch uh-oh!",
                 'is_batch': True,
                 'which_untrusted': "",
-                'job_id': "TEST"
+                'job_id': "TEST",
+                'jobname': "",
             },
             {
                 'trace': "ID'd uh-oh!",
                 'is_batch': False,
                 'which_untrusted': "",
-                'job_id': "UH-OH!"
+                'job_id': "UH-OH!",
+                'jobname': "",
+            },
+            {
+                'trace': "Jobname uh-oh!",
+                'is_batch': False,
+                'which_untrusted': "",
+                'job_id': "TEST",
+                'jobname': "some long job name here",
             },
             {
                 'trace': "Specified uh-oh!",
                 'is_batch': False,
                 'which_untrusted': "localhost",
-                'job_id': "TEST"
+                'job_id': "TEST",
+                'jobname': "",
             },
             {
                 'trace': "Full uh-oh!",
                 'is_batch': True,
                 'which_untrusted': "localhost",
-                'job_id': "UH-OH!"
+                'job_id': "UH-OH!",
+                "jobname": "some long job name here",
             },
         ]
 
