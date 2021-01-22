@@ -10,6 +10,7 @@ import os
 
 from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
+from . import grade_item
 
 
 def str2bool(v):
@@ -28,12 +29,37 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     hidden_non_ec = 0
     hidden_ec = 0
 
-    testcases = get_testcases(config, semester, course, gradeable_id)
+    user_or_team_id = team_id if is_team else user_id
+
+    tmp_submission = os.path.join(
+        config.submitty['submitty_data_dir'],
+        'courses',
+        semester,
+        course,
+        'results',
+        gradeable_id,
+        user_or_team_id,
+        version
+    )
+
+    submit_notebook_path = os.path.join(tmp_submission, ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        with open(submit_notebook_path, 'r') as infile:
+            notebook_data = json.load(infile).get('item_pools_selected', [])
+    else:
+        print(f'could not find {submit_notebook_path}')
+        notebook_data = []
+
+    testcases = get_testcases(config, semester, course, gradeable_id, notebook_data)
     results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
 
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
+        raise Exception(
+            f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}"
+        )
     for i in range(len(testcases)):
+        print(f"testcase[i]= {json.dumps(results['testcases'][i])}")
         if testcases[i]['hidden'] and testcases[i]['extra_credit']:
             hidden_ec += results['testcases'][i]['points']
         elif testcases[i]['hidden']:
@@ -158,7 +184,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine.dispose()
 
 
-def get_testcases(config, semester, course, g_id):
+def get_testcases(config, semester, course, g_id, notebook_data):
     """
     Get all the testcases for a homework from its build json file. This should have a 1-to-1
     correspondance with the testcases that come from the results.json file.
@@ -168,7 +194,7 @@ def get_testcases(config, semester, course, g_id):
     :param g_id:
     :return:
     """
-    testcases = []
+    testcase_specs = []
     build_file = os.path.join(
         config.submitty['submitty_data_dir'],
         "courses",
@@ -181,11 +207,23 @@ def get_testcases(config, semester, course, g_id):
     if os.path.isfile(build_file):
         with open(build_file) as build_file:
             build_json = json.load(build_file)
-            if 'testcases' in build_json and build_json['testcases'] is not None:
-                for testcase in build_json['testcases']:
-                    testcases.append({'hidden': testcase['hidden'],
-                                      'extra_credit': testcase['extra_credit'],
-                                      'points': testcase['points']})
+        if 'testcases' in build_json and build_json['testcases'] is not None:
+            testcase_specs += build_json['testcases']
+    else:
+        print(f'could not find {build_file}')
+
+    for notebook_item in notebook_data:
+        item_dict = grade_item.get_item_from_item_pool(build_json, notebook_item)
+        if item_dict is not None and 'testcases' in item_dict:
+            testcase_specs += item_dict['testcases']
+
+    testcases = []
+    print(json.dumps(testcase_specs, indent=4))
+    for testcase in testcase_specs:
+        testcases.append({
+                'hidden': testcase.get('hidden', False),
+                'extra_credit': testcase.get('extra_credit', False)
+            })
     return testcases
 
 

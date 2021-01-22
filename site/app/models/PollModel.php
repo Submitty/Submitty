@@ -44,6 +44,10 @@ class PollModel extends AbstractModel {
         return array_keys($this->responses);
     }
 
+    public function getResponsesWithKeys() {
+        return $this->responses;
+    }
+
     public function getAnswers() {
         return $this->answers;
     }

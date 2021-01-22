@@ -4,11 +4,11 @@
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Class Compilation"
+            "test_name": "Class Compilation"
         },
         {
             "points_awarded": 2,
-            "test_name": "Test 2 Student and Instructor JUnit Test Compilation"
+            "test_name": "Student and Instructor JUnit Test Compilation"
         },
         {
             "autochecks": [
@@ -42,7 +42,7 @@
                 }
             ],
             "points_awarded": 4,
-            "test_name": "Test 3 JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests"
+            "test_name": "JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests"
         },
         {
             "autochecks": [
@@ -62,11 +62,11 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 4 JaCoCo - Instructor JUnit Tests"
+            "test_name": "JaCoCo - Instructor JUnit Tests"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 5 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
