@@ -394,10 +394,6 @@ class User extends AbstractModel {
         $this->notification_settings[$key] = $value;
     }
 
-    public function getRegistrationSubsection() {
-        return $this->registration_subsection;
-    }
-
     /**
      * Set the preferred first name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
@@ -426,10 +422,6 @@ class User extends AbstractModel {
 
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
-    }
-
-    public function setRegistrationSubsection($section) {
-        $this->registration_subsection = $section;
     }
 
     public function setRotatingSection($section) {
