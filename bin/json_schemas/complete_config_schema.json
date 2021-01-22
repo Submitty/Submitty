@@ -4,6 +4,38 @@
   "type": "object",
   "required" : ["autograding", "autograding_method", "container_options", "testcases", "timestamped_stdout", "publish_actions"],
   "properties" : {
+      "total_pts" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "integer"
+      },
+      "id" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "string"
+      },
+      "ta_pts" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "integer"
+      },
+      "max_submissions" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "integer"
+      },
+      "gradeable_message" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "string"
+      },
+      "auto_pts" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "integer"
+      },
+      "points_visible" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "integer"
+      },
+      "max_possible_grading_time" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "integer"
+      },
       "timestamped_stdout" : {
         "description" : "Timestamp student standard output files",
         "type" : "boolean"
@@ -447,11 +479,14 @@
     "submission_limit" : {
       "type": "object",
       "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
-      "required" : ["max_submissions", "penalty", "points", "title", "type"],
+      "required" : ["max_submissions", "penalty", "points", "title", "type", "testcase_id"],
       "properties" : {
         "timestamped_stdout" : {
           "description" : "Add timestamps to student standard output files",
           "type" : "boolean"
+        },
+        "testcase_id" : {
+          "type" : "string"
         },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",
@@ -482,10 +517,13 @@
       "type": "object",
       "description" : "A file existence check",
       "additionalProperties" : false,
-      "required" : ["type", "title", "actual_file"],
+      "required" : ["type", "title", "actual_file", "testcase_id"],
       "properties" : {
         "timestamped_stdout" : {
           "type" : "boolean"
+        },
+        "testcase_id" : {
+          "type" : "string"
         },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",
@@ -515,10 +553,14 @@
       "additionalProperties" : false,
       "required" : ["containers", "solution_containers", "dispatcher_actions",
                     "pre_commands", "single_port_per_container",
-                    "use_router", "title", "validation", "timestamped_stdout", "publish_actions"],
+                    "use_router", "title", "validation", "timestamped_stdout", "publish_actions",
+                    "testcase_id"],
       "properties" : {
         "timestamped_stdout" : {
           "type" : "boolean"
+        },
+        "testcase_id" : {
+          "type" : "string"
         },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",
@@ -1466,7 +1508,7 @@
             "rows" :{
               "description" : "Height of the short answer box in rows.",
               "type" : "integer",
-              "minimum" : 1
+              "minimum" : 0
             },
             "testcase_ref" : {
               "description" : "Used to reference a testcase_label",
@@ -1579,8 +1621,24 @@
               "description" : "Mapping of username to index of 'from_pool' array. Users in this mapping, will only be shown item corresponding to the mentioned index next to their username and no hash-based randomization will be done for them."
             },
             "points" : {
-              "type" : "number",
+              "type" : "integer",
               "description" : "The number of points that this item is worth."
+            },
+            "non_hidden_extra_credit_points" : {
+              "type" : "integer",
+              "description" : "The number of non hidden extra credit points that this item is worth."
+            },
+            "non_hidden_non_extra_credit_points" : {
+              "type" : "integer",
+              "description" : "The number of non hidden, non extra credit points that this item is worth."
+            },
+            "hidden_extra_credit_points" : {
+              "type" : "integer",
+              "description" : "The number of hidden extra credit points that this item is worth."
+            },
+            "hidden_non_extra_credit_points" : {
+              "type" : "integer",
+              "description" : "The number of hidden non extra credit points that this item is worth."
             },
             "item_label" : {
               "type" : "string"
