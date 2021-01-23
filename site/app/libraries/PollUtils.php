@@ -18,17 +18,19 @@ class PollUtils {
     public static function getPollExportData(array $polls): array {
         $data = [];
         foreach ($polls as $poll) {
-            $poll_array = [];
-            $poll_array["name"] = $poll->getName();
-            $poll_array["question"] = $poll->getQuestion();
             $responses = [];
             foreach ($poll->getResponses() as $response) {
                 $responses[$response] = $poll->getResponseString($response);
             }
-            $poll_array["responses"] = $responses;
-            $poll_array["correct_responses"] = $poll->getAnswers();
-            $poll_array["release_date"] = $poll->getReleaseDate();
-            $data[$poll->getID()] = $poll_array;
+            $data[] = [
+                "id" => $poll->getID(),
+                "name" => $poll->getName(),
+                "question" => $poll->getQuestion(),
+                "responses" => $responses,
+                "correct_responses" => $poll->getAnswers(),
+                "release_date" => $poll->getReleaseDate(),
+                "status" => $poll->getStatus()
+            ];
         }
         return $data;
     }
