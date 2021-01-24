@@ -1227,7 +1227,7 @@ function openFrame(html_file, url_file, num) {
   return false;
 }
 
-function openFile(html_file, url_file) {
+function popOutSubmittedFile(html_file, url_file) {
   var directory = "";
   let display_file_url = buildCourseUrl(['display_file']);
   if (url_file.includes("submissions")) {

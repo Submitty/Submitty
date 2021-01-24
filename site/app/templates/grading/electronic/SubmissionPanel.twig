@@ -84,7 +84,7 @@
             <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a id = 'open_file_{{ dir }}' onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            <a id = 'open_file_{{ dir }}' onclick='popOutSubmittedFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             <a onclick='expandFile("{{ dir }}", "{{ path }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ path }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         </div>
