@@ -14,6 +14,22 @@ env:
   PHP_VER: 7.4
 
 jobs:
+    test-2:
+      continue-on-error: true
+      runs-on: ubuntu-latest
+      steps:
+        - name: foo
+          continue-on-error: true
+          run : |
+            sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
+            echo aphacker:aphacker | sudo chpasswd
+        - name: debug
+          run : |
+            cat /etc/pam.d/common-password
+        - name: debug
+          run : |
+            cat /var/log/debug.log
+            
 
     test:
       runs-on: ubuntu-latest
@@ -248,7 +264,11 @@ jobs:
           - name: Debug
             run: |
               ls -lah /var/local/submitty/
-              cat /var/local/submitty/logs/site_errors/*.log
+              sudo cat /var/local/submitty/logs/site_errors/*.log
+          - name: debug
+            run: |
+              pwd
+              ls -lah
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 

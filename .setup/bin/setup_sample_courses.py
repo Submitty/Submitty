@@ -640,7 +640,7 @@ class User(object):
 
     def set_password(self):
         print("Setting password for user {}...".format(self.id))
-        os.system("echo {}:{} | chpasswd".format(self.id, self.password))
+        os.system("echo {}:{} | sudo chpasswd".format(self.id, self.password))
 
     def get_detail(self, course, detail):
         if self.courses is not None and course in self.courses:
