@@ -22,10 +22,13 @@ jobs:
           continue-on-error: true
           run : |
             sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
-            echo aphacker:aphacker | chpasswd
+            echo aphacker:aphacker | sudo chpasswd
         - name: debug
           run : |
             cat /etc/pam.d/common-password
+        - name: debug
+          run : |
+            cat /var/log/debug.log
             
 
     test:
