@@ -19,6 +19,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: foo
+          continue-on-error: true
           run : |
             sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
             echo aphacker:aphacker | chpasswd
