@@ -20,30 +20,9 @@ jobs:
         - uses: actions/checkout@v2
         - name: foo
           run : |
-            sudo sed -i '12s/.*/Defaults env_keep += "PYTHONPATH"/' /etc/sudoers
-            cat /etc/sudoers
-            cd python_submitty_utils
-            python3 -m pip install --upgrade pip setuptools wheel     
-            sudo -H pip3 install . --user
-        # - name: Copy Repo
-        #   run: |
-        #     # have to copy first, absolute paths not supported by actions/checkout@v2
-        #       sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-        #       sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-        #       sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
-        #       ln -s ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site /usr/local/submitty/site       
-        # - name: Install dependencies
-        #   run: python3 -m pip install --upgrade pip setuptools wheel     
-        # - name : foo
-        #   run : |
-        #     export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-        #     export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-        #     sudo apt install python-setuptools
-        #     pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-        #     sudo pip3 install . --user
-        #     echo "from submitty_utils import dateutils" > test.py
-        #     sudo python3 test.py
-        #     popd
+            useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
+            echo aphacker:aphacker | chpasswd
+            cat /etc/pam.d/common-password
             
 
     test:
