@@ -12,23 +12,6 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.4
-
-jobs:
-    test-2:
-      continue-on-error: true
-      runs-on: ubuntu-latest
-      steps:
-        - name: foo
-          continue-on-error: true
-          run : |
-            sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
-            echo aphacker:aphacker | sudo chpasswd
-        - name: debug
-          run : |
-            cat /etc/pam.d/common-password
-        - name: debug
-          run : |
-            cat /var/log/debug.log
             
 
     test:
@@ -262,17 +245,9 @@ jobs:
             run: |
               curl http://localhost
           - name: Debug
-            run : |
-              ls -lah /var/log/apache2/
-              cat /var/log/apache2/error.log
-          - name: Debug2
-            run : |
-              ls -lah /var/log/nginx
-              sudo cat /var/log/nginx/error.log
-          - name: Debug3
-            run : |
-              ls -lah /var/log/
-              sudo cat /var/log/php${PHP_VER}-fpm.log
+            run: |
+              ls -lah /var/local/submitty/
+              cat /var/local/submitty/logs/site_errors/*.log
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
