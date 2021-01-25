@@ -13,23 +13,40 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 7.4
 
+
+
+
 jobs:
+#     test-2:
+#       continue-on-error: true
+#       runs-on: ubuntu-latest
+#       steps:
+#         - name: foo
+#           continue-on-error: true
+#           run : |
+#             sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
+#             echo aphacker:aphacker | sudo chpasswd
+#         - name: debug
+#           run : |
+#             cat /etc/pam.d/common-password
+#         - name: debug
+#           run : |
+#             cat /var/log/debug.log
+  
     test-2:
-      continue-on-error: true
       runs-on: ubuntu-latest
       steps:
-        - name: foo
-          continue-on-error: true
-          run : |
-            sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
-            echo aphacker:aphacker | sudo chpasswd
-        - name: debug
-          run : |
-            cat /etc/pam.d/common-password
-        - name: debug
-          run : |
-            cat /var/log/debug.log
-            
+        - uses: actions/checkout@v2
+        - name: install
+          run: |
+            python3 -m pip install --upgrade pip setuptools wheel     
+            cd python_submitty_utils
+            pip3 install . --user
+            pip3 install jsonschema
+            pip3 install jsonref
+        - name: test
+          run: |
+            sudo python3 bin/config_syntax_check.py           
 
     test:
       runs-on: ubuntu-latest
@@ -263,12 +280,15 @@ jobs:
               curl http://localhost
           - name: Debug
             run: |
-              ls -lah /var/local/submitty/
+              sudo ls -lah /var/local/submitty/
               sudo cat /var/local/submitty/logs/site_errors/*.log
           - name: debug
             run: |
               pwd
               ls -lah
+          - name: debug3
+            run: |
+              curl http://localhost:80/home
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
