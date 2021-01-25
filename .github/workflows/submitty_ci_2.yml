@@ -18,11 +18,12 @@ jobs:
       continue-on-error: true
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v2
         - name: foo
           run : |
             sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
             echo aphacker:aphacker | chpasswd
+        - name: debug
+          run : |
             cat /etc/pam.d/common-password
             
 
