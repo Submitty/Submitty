@@ -20,7 +20,7 @@ jobs:
         - uses: actions/checkout@v2
         - name: foo
           run : |
-            useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
+            sudo useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false aphacker
             echo aphacker:aphacker | chpasswd
             cat /etc/pam.d/common-password
             
