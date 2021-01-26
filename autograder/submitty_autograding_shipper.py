@@ -855,7 +855,7 @@ def checkout_vcs_repo(config, my_file, which_branch):
             which_branch = 'master'
         # END DEPRECATED NOTE
         # -----------------------------------------------------------
-        
+
         # grab the submission time
         # with open(os.path.join(submission_path, ".submit.timestamp")) as submission_time_file:
         #     submission_string = submission_time_file.read().rstrip()
