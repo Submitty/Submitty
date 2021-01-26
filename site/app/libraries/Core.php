@@ -528,9 +528,9 @@ class Core {
             return;
         }
         header('Location: ' . $url, true, $http_response_code);
-        if (!$this->testing) {
-            die();
-        }
+        // if (!$this->testing) {
+        //     die();
+        // }
     }
 
     /**
