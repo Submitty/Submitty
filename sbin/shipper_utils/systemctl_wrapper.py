@@ -6,6 +6,8 @@ from os import path
 import sys
 import json
 import paramiko
+from submitty_utils import ssh_proxy_jump
+
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
 SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
@@ -71,6 +73,7 @@ def perform_systemctl_command_on_all_workers(daemon, mode):
     greatest_status = max(greatest_status, status)
   return greatest_status
 
+
 # This function performs a systemctl command (mode) on a given daemon on a given machine
 def perform_systemctl_command_on_worker(daemon, mode, target):
   if not target in WORKERS:
@@ -91,21 +94,21 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
   script_directory = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'systemctl_wrapper.py')
   command = "sudo {0} {1} --daemon {2}".format(script_directory, mode, daemon)
   try:
-      ssh = paramiko.SSHClient()
-      ssh.get_host_keys()
-      ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(hostname = host, username = user, timeout=60)
+      (target_connection,
+       intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
   try:
-      (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
+      (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=5)
       status = int(stdout.channel.recv_exit_status())
   except Exception as e:
       print("ERROR: Command did not properly execute: ".format(host, str(e)))
       status = EXIT_CODES['failure']
   finally:
-      ssh.close()
+      target_connection.close()
+      if intermediate_connection:
+          intermediate_connection.close()
       return status
 
 def disable_machine(target):
