@@ -850,7 +850,8 @@ def checkout_vcs_repo(config, my_file, which_branch):
         ]
         try:
             subprocess.check_call(ls_branch_command)
-        except subprocess.CalledProcessError as error:
+        except subprocess.CalledProcessError:
+            #except subprocess.CalledProcessError as error:
             # then try the deprecated master branch instead
             which_branch = 'master'
         # END DEPRECATED NOTE
@@ -939,7 +940,8 @@ def checkout_vcs_repo(config, my_file, which_branch):
                     print(str(error), file=f)
                     print("\n", file=f)
                     print("Check to be sure the repository is not empty.\n", file=f)
-                    print("Check to be sure the repository has a " + which_branch + " branch.\n", file=f)
+                    print("Check to be sure the repository has a " + which_branch +
+                          " branch.\n", file=f)
                     print(
                         "And check to be sure the timestamps on the " + which_branch +
                         " branch are reasonable.\n",
