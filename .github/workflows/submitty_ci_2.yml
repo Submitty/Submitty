@@ -279,13 +279,15 @@ jobs:
             run: |
               curl http://localhost
           - name: Debug
+            continue-on-error: true
             run: |
               sudo ls -lah /var/local/submitty/
+              sudo ls -lah /var/local/submitty/logs/site_errors/
               sudo cat /var/local/submitty/logs/site_errors/*.log
           - name: debug
             run: |
-              pwd
-              ls -lah
+              chmod -R a+rw  /var/local/submitty
+              chmod -R a+rw /usr/local/submitty
           - name: debug3
             run: |
               curl http://localhost:80/home
