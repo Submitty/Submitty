@@ -779,7 +779,7 @@ def valid_github_repo_id(repoid):
     return True
 
 
-def checkout_vcs_repo(config, my_file):
+def checkout_vcs_repo(config, my_file, which_branch):
     print("SHIPPER CHECKOUT VCS REPO ", my_file)
 
     with open(my_file, 'r') as infile:
@@ -841,6 +841,22 @@ def checkout_vcs_repo(config, my_file):
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
         checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
 
+
+        # -----------------------------------------------------------
+        # NOTE: THIS MAY EVENTUALLY BE DEPRECATED AND REMOVED
+        # If the specified branch does not exist (or the repo does not exist)
+        ls_branch_command = [
+            '/usr/bin/git', 'ls-remote', '--exit-code', vcs_path, which_branch
+        ]
+        try:
+            subprocess.check_call(ls_branch_command)
+        except subprocess.CalledProcessError as error:
+            # then try the deprecated master branch instead
+            which_branch = 'master'
+        # END DEPRECATED NOTE
+        # -----------------------------------------------------------
+
+
         # grab the submission time
         # with open(os.path.join(submission_path, ".submit.timestamp")) as submission_time_file:
         #     submission_string = submission_time_file.read().rstrip()
@@ -856,7 +872,7 @@ def checkout_vcs_repo(config, my_file):
         #     "fatal: The remote end hung up unexpectedly"
         #
         # clone_command = ['/usr/bin/git', 'clone', vcs_path, checkout_path,
-        #                  '--shallow-since='+submission_string, '-b', 'master']
+        #                  '--shallow-since='+submission_string, '-b', '<WHICH_BRANCH>']
 
         # OPTION: A shallow clone, with just the most recent commit.
         #
@@ -867,7 +883,7 @@ def checkout_vcs_repo(config, my_file):
         #  So we choose this option!  (for now)
         #
         clone_command = [
-            '/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', 'master'
+            '/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', which_branch
         ]
 
         with open(checkout_log_file, 'a') as f:
@@ -885,13 +901,13 @@ def checkout_vcs_repo(config, my_file):
             os.chdir(checkout_path)
 
             # determine which version we need to checkout
-            # if the repo is empty or the master branch does not exist, this command will fail
+            # if the repo is empty or the specified branch does not exist, this command will fail
             try:
-                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', 'master'])
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', which_branch])
                 # old method:  when we had the full history, roll-back to a version by date
                 # what_version = subprocess.check_output(['git', 'rev-list', '-n', '1',
                 #                                         '--before="'+submission_string+'"',
-                #                                         'master'])
+                #                                         which_branch])
                 what_version = str(what_version.decode('utf-8')).rstrip()
                 if what_version == "":
                     # oops, pressed the grade button before a valid commit
@@ -913,20 +929,20 @@ def checkout_vcs_repo(config, my_file):
             except subprocess.CalledProcessError as error:
                 autograding_utils.log_message(
                     config.log_path, job_id,
-                    message=f"ERROR: failed to determine version on master branch {error}"
+                    message=f"ERROR: failed to determine version on {which_branch} branch {error}"
                 )
                 os.chdir(checkout_path)
                 error_path = os.path.join(
-                    checkout_path, "failed_to_determine_version_on_master_branch.txt"
+                    checkout_path, "failed_to_determine_version_on_specifed_branch.txt"
                 )
                 with open(error_path, 'w') as f:
                     print(str(error), file=f)
                     print("\n", file=f)
                     print("Check to be sure the repository is not empty.\n", file=f)
-                    print("Check to be sure the repository has a master branch.\n", file=f)
+                    print("Check to be sure the repository has a " + which_branch + " branch.\n", file=f)
                     print(
-                        "And check to be sure the timestamps on the master branch are "
-                        "reasonable.\n",
+                        "And check to be sure the timestamps on the " + which_branch +
+                        " branch are reasonable.\n",
                         file=f
                     )
 
@@ -1018,7 +1034,7 @@ def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
         vcs_file = f[len(folder)+1:]
         no_vcs_file = f[len(folder)+1+5:]
         # do the checkout
-        updated_obj = checkout_vcs_repo(config, folder+"/"+vcs_file)
+        updated_obj = checkout_vcs_repo(config, folder+"/"+vcs_file, 'main')
         # save the regular grading queue file
         with open(os.path.join(folder, no_vcs_file), "w") as queue_file:
             json.dump(updated_obj, queue_file)
