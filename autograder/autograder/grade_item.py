@@ -52,7 +52,7 @@ def get_testcases(
         for item in complete_config_obj['item_pool']:
             testcase_specs += item['testcases']
 
-    is_vcs = queue_obj['vcs_checkout'],
+    is_vcs = queue_obj['vcs_checkout']
 
     # Construct the testcase objects
     for t in testcase_specs:
