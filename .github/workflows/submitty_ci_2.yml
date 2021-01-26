@@ -286,8 +286,8 @@ jobs:
               sudo cat /var/local/submitty/logs/site_errors/*.log
           - name: debug
             run: |
-              chmod -R a+rw  /var/local/submitty
-              chmod -R a+rw /usr/local/submitty
+              sudo chmod -R a+rw  /var/local/submitty
+              sudo chmod -R a+rw /usr/local/submitty
           - name: debug3
             run: |
               curl http://localhost:80/home
