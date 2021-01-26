@@ -851,7 +851,7 @@ def checkout_vcs_repo(config, my_file, which_branch):
         try:
             subprocess.check_call(ls_branch_command)
         except subprocess.CalledProcessError:
-            #except subprocess.CalledProcessError as error:
+            # except subprocess.CalledProcessError as error:
             # then try the deprecated master branch instead
             which_branch = 'master'
         # END DEPRECATED NOTE
