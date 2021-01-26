@@ -54,8 +54,7 @@ class SimpleGraderView extends AbstractView {
             else {
                 $section = $graded_gradeable->getSubmitter()->getUser()->getRotatingSection();
             }
-
-
+            
             $display_section = ($section === null) ? "NULL" : $section;
 
             if (!array_key_exists($section, $sections)) {
