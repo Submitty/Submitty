@@ -44,6 +44,7 @@ class SimpleGraderView extends AbstractView {
 
         $num_users = 0;
         $sections = [];
+        $subsections = [];
 
         // Iterate through every row
         /** @var GradedGradeable $graded_gradeable */
@@ -54,6 +55,8 @@ class SimpleGraderView extends AbstractView {
             else {
                 $section = $graded_gradeable->getSubmitter()->getUser()->getRotatingSection();
             }
+
+            $subsection = $graded_gradeable->getSubmitter()->getUser()->getRegistrationSubsection();
 
             $display_section = ($section === null) ? "NULL" : $section;
 
@@ -66,6 +69,7 @@ class SimpleGraderView extends AbstractView {
                 ];
             }
             $sections[$section]["rows"][] = $graded_gradeable;
+            $subsections[$graded_gradeable->getSubmitter()->getUser()->getId()] = $subsection;
 
             if ($graded_gradeable->getSubmitter()->getUser()->getRegistrationSection() != "") {
                 $num_users++;
@@ -91,6 +95,7 @@ class SimpleGraderView extends AbstractView {
             "components_text" => $components_text,
             "sort" => $sort,
             "sections" => $sections,
+            "subsections" => $subsections,
             "component_ids" => $component_ids,
             "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
             "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']),
