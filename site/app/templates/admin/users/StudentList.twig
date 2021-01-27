@@ -39,7 +39,7 @@
                             <td></td>
                             <td>
                                 {{ registration }}
-                                {% if  student.getRegistrationSubsection is not null %}
+                                {% if  student.getRegistrationSubsection is not empty %}
                                      -  {{ student.getRegistrationSubsection }}
                                 {% endif %}
                                 {% if student.isManualRegistration() %}
