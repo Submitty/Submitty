@@ -18,6 +18,19 @@ env:
 
 jobs:
     test-3:
+      services:
+        postgres:
+          image: postgres
+          env: 
+            POSTGRES_PASSWORD: submitty_dbuser
+            POSTGRES_USER: postgres
+          options: >-
+            --health-cmd pg_isready
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+          ports:
+            - 5432:5432
       continue-on-error: true
       runs-on: ubuntu-latest
       steps:
@@ -54,6 +67,8 @@ jobs:
         - name: foo
           continue-on-error: true
           run : |
+            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
             sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
   
     test-2:
