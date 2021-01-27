@@ -2,7 +2,7 @@ import re
 
 
 # paste this from pr_title.yml
-exp = r"^(\[SYSADMIN ACTION\])?(\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI\/UX):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$|\[(DevDependency|Dependency)\] .{2,70})$"
+exp = r"^(\[SYSADMIN ACTION\])?(\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI\/UX):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|Submini\/Polls|HelpQueue|CourseMaterials|Plagiarism|RainbowGrades|System|Developer|API)\] .{2,40}$|\[(DevDependency|Dependency)\] .{2,70})$"
 
 
 # should pass
