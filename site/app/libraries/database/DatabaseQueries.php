@@ -950,8 +950,8 @@ VALUES (?,?,?,?,?,?)",
             $params
         );
 
-        $params = [$user->getRotatingSection(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
+        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
@@ -1000,8 +1000,8 @@ WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=? WHERE user_id=?", $params);
+            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -6402,7 +6402,8 @@ AND gc_id IN (
               u.last_updated,
               u.grading_registration_sections,
               u.registration_section, u.rotating_section,
-              ldeu.late_day_exceptions';
+              ldeu.late_day_exceptions,
+              u.registration_subsection';
             $submitter_inject = '
             JOIN (
                 SELECT u.*, sr.grading_registration_sections
