@@ -18,80 +18,18 @@ env:
 
 jobs:
     test-3:
-      services:
-        postgres:
-          image: postgres
-          env: 
-            POSTGRES_PASSWORD: submitty_dbuser
-            POSTGRES_USER: postgres
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-          ports:
-            - 5432:5432
-      continue-on-error: true
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
-          with:
-            path: SUBMITTY_CPY/
-        - name: Copy Repo
-          run: |
-            # have to copy first, absolute paths not supported by actions/checkout@v2
-              sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
-              ln -s ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site /usr/local/submitty/site
         - uses: actions/setup-python@v2
           with:
             python-version: '3.6'
-        - name: install
-          run : |
-            python3 -m pip install --upgrade pip setuptools wheel     
-            pip3 install docker sqlalchemy pyyaml psycopg2
-            sudo mkdir -p /usr/local/submitty/config/
-            sudo mkdir -p /var/local/submitty/courses
-            sudo chmod -R a+rw  /var/local/submitty
-            sudo chmod -R a+rw /usr/local/submitty
-            touch /usr/local/submitty/config/database.json
-            sudo apt-get update
-            sudo apt install libseccomp-dev
-            sudo apt install libboost-all-dev
-        - name: install 2
-          run : |
-            cd $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT/Submitty/python_submitty_utils
-            pip3 install . --user
-        - name: test
-          run: |
-            echo { \"database_user\" : \"submitty_dbuser\", \"database_password\" : \"submitty_dbuser\" } > /usr/local/submitty/config/database.json
-            cat /usr/local/submitty/config/database.json
         - name: foo
-          continue-on-error: true
-          run : |
-            export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-            PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-            cd /usr/local/submitty/GIT_CHECKOUT/Submitty/
-            sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-            sudo -E env "PATH=$PATH" python3 .setup/bin/setup_sample_courses.py --no_submissions sample
-          
-    test-2:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: install
           run: |
-            python3 -m pip install --upgrade pip setuptools wheel     
             cd python_submitty_utils
+            python3 -m pip install --upgrade pip setuptools wheel     
             pip3 install . --user
-            pip3 install jsonschema
-            pip3 install jsonref
-        - name: test
-          run: |
-            sudo python3 bin/config_syntax_check.py           
+            pip list       
 
     test:
       runs-on: ubuntu-latest
@@ -279,6 +217,7 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install . --user
+              pip3 list
               popd
           - name: Setup website
             run: |
