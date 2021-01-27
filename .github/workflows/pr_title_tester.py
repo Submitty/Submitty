@@ -2,7 +2,7 @@ import re
 
 
 # paste this from pr_title.yml
-exp = r"^(\[SYSADMIN ACTION\])?(\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI\/UX):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|RainbowGrades|System|Developer|API)\] .{2,40}$|\[(DevDependency|Dependency)\] .{2,70})$"
+exp = r"^(\[SYSADMIN ACTION\])?(\[(Bugfix|Feature|Refactor|Testing|Documentation|VPAT|UI\/UX):(Submission|Autograding|Forum|Notifications|TAGrading|InstructorUI|SubminiPolls|HelpQueue|CourseMaterials|Plagiarism|RainbowGrades|System|Developer|API)\] .{2,40}$|\[(DevDependency|Dependency)\] .{2,70})$"
 
 
 # should pass
@@ -10,6 +10,8 @@ assert re.search(exp, "[Refactor:Autograding] xxxx")
 assert re.search(exp, "[Bugfix:Submission] xxxx")
 assert re.search(exp, "[VPAT:InstructorUI] xxxx")
 assert re.search(exp, "[UI/UX:API] xxxx")
+assert re.search(exp, "[Bugfix:SubminiPolls] xxxx")
+assert re.search(exp, "[Feature:HelpQueue] xxxx")
 assert re.search(exp, "[SYSADMIN ACTION][Refactor:Autograding] xxxx")
 assert re.search(exp, "[DevDependency] xxxx")
 assert re.search(exp, "[Dependency] xxxx")
