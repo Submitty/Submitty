@@ -67,6 +67,8 @@ jobs:
         - name: foo
           continue-on-error: true
           run : |
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
+            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
             PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
             cd /usr/local/submitty/GIT_CHECKOUT/Submitty/
