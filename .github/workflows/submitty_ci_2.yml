@@ -56,6 +56,9 @@ jobs:
             sudo chmod -R a+rw  /var/local/submitty
             sudo chmod -R a+rw /usr/local/submitty
             touch /usr/local/submitty/config/database.json
+            sudo apt-get update
+            sudo apt install libseccomp-dev
+            sudo apt install libboost-all-dev
         - name: install 2
           run : |
             cd $SUBMITTY_INSTALL_DIR/GIT_CHECKOUT/Submitty/python_submitty_utils
