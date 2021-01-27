@@ -69,8 +69,9 @@ jobs:
           run : |
             PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
             PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-            sudo -E env "PATH=$PATH" bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/testing/setup.sh
-            sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
+            cd /usr/local/submitty/GIT_CHECKOUT/Submitty/
+            sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+            sudo -E env "PATH=$PATH" python3 .setup/bin/setup_sample_courses.py --no_submissions sample
           
     test-2:
       runs-on: ubuntu-latest
