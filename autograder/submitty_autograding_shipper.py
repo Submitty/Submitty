@@ -564,10 +564,6 @@ def unpack_job(
                 f"ERROR: failure returned by {worker_name}. View stack traces for more info",
                 jobname=item_name
             )
-            config.logger.log_stack_trace(
-                f"ERROR: {worker_name} returned the following error:\n"
-                f"{local_done_queue_obj['autograding_status']['message']}",
-            )
             print(f'{worker_name} returned a failed job.')
             status = GradingStatus.FAILURE
         # If we hit this else statement, a bad status was returned.
