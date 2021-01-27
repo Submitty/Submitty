@@ -216,12 +216,14 @@ jobs:
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              python3 -m pip install . --user
-              python -m pip install . --user
+              pip3 install . --user
               pip3 list
+              pip3 show submitty_utils
               popd
           - name: Setup website
             run: |
+              pip3 list
+              pip3 show submitty_utils
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo chmod -R a+rwx ${SUBMITTY_DATA_DIR}
