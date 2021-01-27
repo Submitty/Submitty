@@ -303,7 +303,7 @@ if [[ $? -ne "0" ]] ; then
     exit
 fi
 
-python3 ${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py -e course --course ${semester} ${course} migrate --initial
+sudo -E env "PATH=$PATH" python3 ${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py -e course --course ${semester} ${course} migrate --initial
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit
