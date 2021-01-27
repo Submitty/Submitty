@@ -791,20 +791,21 @@ function togglePanelLayoutModes(forceVal = false) {
         }
         return true;
       })
+      if (nextIdx === -1) {
+        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
+          leftTop: panelElements[0].str,
+          leftBottom: panelElements[1].str,
+          rightTop: panelElements[2].str,
+          rightBottom: null,
+        } : {
+          leftTop: panelElements[0].str,
+            leftBottom: null,
+            rightTop: panelElements[1].str,
+            rightBottom: panelElements[2].str,
+        };
+      }
     }
-    if (nextIdx === -1) {
-      taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-        leftTop: panelElements[0].str,
-        leftBottom: panelElements[1].str,
-        rightTop: panelElements[2].str,
-        rightBottom: null,
-      } : {
-        leftTop: panelElements[0].str,
-          leftBottom: null,
-          rightTop: panelElements[1].str,
-          rightBottom: panelElements[2].str,
-      };;
-    }
+
     initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
   }
