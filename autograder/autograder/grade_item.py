@@ -38,13 +38,12 @@ def get_testcases(
         for notebook_item in notebook_data:
             item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
             if item_dict is None:
-                autograding_utils.log_message(
-                    config.log_path,
-                    queue_obj["job_id"],
-                    queue_obj["regrade"],
-                    which_untrusted,
-                    item_name,
-                    message=f"ERROR: could not find {notebook_item} in item pool."
+                config.log_message(
+                    f"ERROR: could not find {notebook_item} in item pool.",
+                    job_id=queue_obj["job_id"],
+                    is_batch=queue_obj["regrade"],
+                    which_untrusted=which_untrusted,
+                    jobname=item_name,
                 )
                 continue
             testcase_specs += item_dict['testcases']
@@ -185,13 +184,12 @@ def run_validation(
 
     # Copy sensitive expected output files into tmp_work.
     autograding_utils.setup_for_validation(
+        config,
         working_directory,
         complete_config_obj,
         is_vcs,
         testcases,
         queue_obj["job_id"],
-        config.log_path,
-        config.error_path
     )
 
     with open(os.path.join(tmp_logs, "validator_log.txt"), 'w') as logfile:
@@ -262,25 +260,23 @@ def archive(
             complete_config_obj,
             gradeable_config_obj,
             queue_obj,
-            config.log_path,
-            config.error_path,
             False
         )
     except Exception:
         print("\n\nERROR: Grading incomplete -- could not perform archival")
-        autograding_utils.log_message(
-            queue_obj['job_id'],
-            queue_obj["regrade"],
-            which_untrusted,
-            item_name,
-            message="ERROR: could not archive autograding results. See stack trace for more info."
+        config.logger.log_message(
+            "ERROR: could not archive autograding results. See stack trace for more info.",
+            job_id=queue_obj['job_id'],
+            is_batch=queue_obj["regrade"],
+            which_untrusted=which_untrusted,
+            jobname=item_name,
         )
-        autograding_utils.log_stack_trace(
-            queue_obj['job_id'],
-            queue_obj["regrade"],
-            which_untrusted,
-            item_name,
-            trace=traceback.format_exc()
+        config.logger.log_stack_trace(
+            traceback.format_exc(),
+            job_id=queue_obj['job_id'],
+            is_batch=queue_obj["regrade"],
+            which_untrusted=which_untrusted,
+            jobname=item_name,
         )
     subprocess.call(['ls', '-lR', '.'], stdout=log_file)
 
@@ -295,19 +291,14 @@ def grade_from_zip(
 
     os.chdir(config.submitty['submitty_data_dir'])
 
-    # A useful shorthand for a long variable name
-    install_dir = config.submitty['submitty_install_dir']
-
     # Removes the working directory if it exists, creates subdirectories and unzips files.
     autograding_utils.prepare_directory_for_autograding(
+        config,
         working_directory,
         which_untrusted,
         autograding_zip_file,
         submission_zip_file,
         False,
-        config.log_path,
-        config.error_path,
-        install_dir
     )
 
     # Now that the files are unzipped, we no longer need them.
@@ -390,15 +381,14 @@ def grade_from_zip(
             str(queue_obj["version"])
         )
 
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            is_batch_job,
-            which_untrusted,
-            item_name,
-            "wait:",
-            waittime,
-            ""
+        config.logger.log_message(
+            "",
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted=which_untrusted,
+            jobname=item_name,
+            timelabel="wait:",
+            elapsed_time=waittime,
         )
 
         notebook_data_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")

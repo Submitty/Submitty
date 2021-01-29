@@ -12,7 +12,6 @@ import traceback
 import zipfile
 from pathlib import Path
 
-from autograder import autograding_utils
 from autograder import grade_item
 from autograder import config as submitty_config
 
@@ -23,14 +22,17 @@ JOB_ID = '~WORK~'
 
 # ==================================================================================
 # ==================================================================================
-def worker_process(config, which_machine, address, which_untrusted, my_server):
+def worker_process(
+    config: submitty_config.Config,
+    which_machine: str,
+    address: str,
+    which_untrusted: str,
+    my_server: str
+):
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
-        autograding_utils.log_message(
-            config.log_path, JOB_ID,
-            message="ERROR: must be run by DAEMON_USER"
-        )
+        config.logger.log_message("ERROR: must be run by DAEMON_USER")
         raise SystemExit(
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
         )
@@ -82,14 +84,14 @@ def worker_process(config, which_machine, address, which_untrusted, my_server):
                     }
             except Exception:
                 # If we threw an error while grading, log it.
-                autograding_utils.log_message(
-                    config.log_path, JOB_ID,
-                    message=f"ERROR attempting to unzip graded item: {which_machine} "
-                            f"{which_untrusted}. for more details, see traces entry."
+                config.logger.log_message(
+                    f"ERROR attempting to unzip graded item: {which_machine} "
+                    f"{which_untrusted}. for more details, see traces entry.",
+                    which_untrusted=which_untrusted,
                 )
-                autograding_utils.log_stack_trace(
-                    config.error_path, JOB_ID,
-                    trace=traceback.format_exc()
+                config.logger.log_stack_trace(
+                    traceback.format_exc(),
+                    which_untrusted=which_untrusted,
                 )
                 # TODO: It is possible that autograding failed after multiple steps.
                 # In this case, we may be able to salvage a portion of the autograding_results
@@ -111,6 +113,7 @@ def worker_process(config, which_machine, address, which_untrusted, my_server):
                     queue_obj = json.load(infile)
                     queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
                     queue_obj['autograding_status'] = response
+                    queue_obj['errors'] = config.logger.accumulated_traces
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
                 # Clean up temporary files.
@@ -120,6 +123,8 @@ def worker_process(config, which_machine, address, which_untrusted, my_server):
                     os.remove(submission_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(todo_queue_file)
+                # Clear out accumulated stack traces in the logger.
+                config.logger.accumulated_traces.clear()
             counter = 0
         else:
             if counter >= 10:
@@ -143,15 +148,13 @@ def try_run_worker(
     try:
         worker_process(config, which_machine, address, which_untrusted, my_server)
     except Exception as e:
-        autograding_utils.log_message(
-            config.log_path,
-            message=f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
+        config.logger.log_message(
+            f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
             which_untrusted=which_untrusted,
         )
-        autograding_utils.log_stack_trace(
-            config.error_path,
+        config.logger.log_stack_trace(
+            traceback.format_exc(),
             which_untrusted=which_untrusted,
-            trace=traceback.format_exc(),
         )
         # Re-raise the exception so the process doesn't look like it exited OK
         raise e
@@ -168,10 +171,7 @@ def launch_workers(config, my_name, my_stats):
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
         )
 
-    autograding_utils.log_message(
-        config.log_path, JOB_ID,
-        message="grade_scheduler.py launched"
-    )
+    config.logger.log_message("grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
@@ -202,22 +202,13 @@ def launch_workers(config, my_name, my_stats):
                 if processes[i].is_alive():
                     alive = alive+1
                 else:
-                    autograding_utils.log_message(
-                        config.log_path, JOB_ID,
-                        message=f"ERROR: process {i} is not alive"
-                    )
+                    config.logger.log_message(f"ERROR: process {i} is not alive")
             if alive != num_workers:
-                autograding_utils.log_message(
-                    config.log_path, JOB_ID,
-                    message=f"ERROR: #workers={num_workers} != #alive={alive}"
-                )
+                config.logger.log_message(f"ERROR: #workers={num_workers} != #alive={alive}")
             time.sleep(60)
 
     except KeyboardInterrupt:
-        autograding_utils.log_message(
-            config.log_path, JOB_ID,
-            message="grade_scheduler.py keyboard interrupt"
-        )
+        config.logger.log_message("grade_scheduler.py keyboard interrupt")
 
         # just kill everything in this group id right now
         # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
@@ -237,14 +228,11 @@ def launch_workers(config, my_name, my_stats):
         for i in range(0, num_workers):
             processes[i].join()
 
-    autograding_utils.log_message(
-        config.log_path, JOB_ID,
-        message="grade_scheduler.py terminated"
-    )
+    config.logger.log_message("grade_scheduler.py terminated")
 
 
 # ==================================================================================
-def read_autograding_worker_json(config, worker_json_path):
+def read_autograding_worker_json(config: submitty_config.Config, worker_json_path: os.PathLike):
     try:
         with open(worker_json_path, 'r') as infile:
             name_and_stats = json.load(infile)
@@ -257,34 +245,28 @@ def read_autograding_worker_json(config, worker_json_path):
             "Submitty host yet?"
         ) from e
     except Exception as e:
-        autograding_utils.log_stack_trace(config.log_path, trace=traceback.format_exc())
+        config.logger.log_stack_trace(traceback.format_exc())
         raise SystemExit(f"ERROR loading autograding_worker.json file: {e}")
     return name, stats
 
 
 # ==================================================================================
 # Removes any existing files or folders in the autograding_done folder.
-def cleanup_old_jobs(config):
+def cleanup_old_jobs(config: submitty_config.Config):
     for file_path in Path(config.submitty['submitty_data_dir'], "autograding_DONE").glob("*"):
         file_path = str(file_path)
-        autograding_utils.log_message(
-            config.log_path, JOB_ID,
-            message=f"Remove autograding DONE file: {file_path}"
-        )
+        config.logger.log_message(f"Remove autograding DONE file: {file_path}")
         try:
             os.remove(file_path)
         except Exception:
-            autograding_utils.log_stack_trace(
-                config.log_path, JOB_ID,
-                trace=traceback.format_exc()
-            )
+            config.logger.log_stack_trace(traceback.format_exc())
 
 # ==================================================================================
 
 
 if __name__ == "__main__":
     config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-    config = submitty_config.Config.path_constructor(config_dir)
+    config = submitty_config.Config.path_constructor(config_dir, JOB_ID, capture_traces=True)
 
     cleanup_old_jobs(config)
     print('cleaned up old jobs')
@@ -294,6 +276,6 @@ if __name__ == "__main__":
             config.submitty['submitty_data_dir'],
             'autograding_TODO',
             'autograding_worker.json'
-        )
+        ),
     )
     launch_workers(config, my_name, my_stats)
