@@ -11,6 +11,7 @@ import json
 import os
 import sys
 import shutil
+import tempfile
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 from submitty_utils import db_utils
@@ -32,14 +33,71 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs', 'git')
 
 
-def create_folder(folder):
+def add_empty_commit(folder,which_branch):
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        os.system('git clone '+folder+' tmp')
+        os.chdir('tmp')
+        os.system('git checkout -b ' + which_branch)
+        os.system("git " +
+                  "-c user.name=submitty -c user.email=submitty@example.com commit " +
+                  "--allow-empty -m 'initial empty commit' " +
+                  "--author='submitty <submitty@example.com>'")
+        os.system('git push origin ' + which_branch)
+
+
+def create_new_repo(folder, which_branch):
+
+    # create the folder & initialize an empty bare repo
+    os.makedirs(folder, mode=0o770)
+    os.chdir(folder)
+    # note: --initial-branch option requires git 2.28.0 or greater
+    os.system('git init --bare --shared --initial-branch=' + which_branch)
+
+    # unfortuantely, when an empty repo with no branches is cloned,
+    # the active branch and HEAD does NOT default to the specified branch
+
+    # so let's manually specify the initial branch 
+    os.system('git symbolic-ref HEAD refs/heads/main')
+
+    # and explicitly add an empty commit to the specified branch
+    # so that the repository is not empty
+    add_empty_commit(folder,which_branch)
+
+    print('FINISHED making new repo ' + folder)
+
+    
+def create_or_update_repo(folder, which_branch):
+    which_branch = 'main'
+
+    print ("create or update repo "+folder)
+
     if not os.path.isdir(folder):
-        os.makedirs(folder, mode=0o770)
+
+        # create the repo, if it does not exist
+        create_new_repo(folder,which_branch)
+        
+    else:
+
         os.chdir(folder)
-        os.system('git init --bare --shared')
-        for root, dirs, files in os.walk(folder):
-            for entry in files + dirs:
-                shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
+
+        # whether or not this repo was newly created, set the default HEAD
+        # on the origin repo
+        os.system('git symbolic-ref HEAD refs/heads/'+which_branch)
+
+        
+        # and explicitly add an empty commit to the specified branch
+        # so that the repository is not empty
+        add_empty_commit(folder,which_branch)
+        
+        # if no commits, add a fake commit
+        
+        
+    # set/correct the permissions of all files
+    os.chdir(folder)
+    for root, dirs, files in os.walk(folder):
+        for entry in files + dirs:
+            shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
 
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
@@ -126,7 +184,7 @@ if is_team:
     teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_folder(os.path.join(vcs_course, args.repo_name, team.team_id))
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), 'main')
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
@@ -134,4 +192,4 @@ else:
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        create_folder(os.path.join(vcs_course, args.repo_name, user.user_id))
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), 'main')
