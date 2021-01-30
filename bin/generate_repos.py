@@ -4,6 +4,10 @@ This script will generate the repositories for a specified course and semester
 for each student that currently does not have a repository. You can either make
 the repositories at a per course level (for a repo that would carry through
 all gradeables for example) or on a per gradeable level.
+
+usage:
+sudo /usr/local/submitty/bin/generate_repos.py <semester> <course_code> <project_name/gradeable_id>
+
 """
 
 import argparse
@@ -12,6 +16,7 @@ import os
 import sys
 import shutil
 import tempfile
+import subprocess
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 from submitty_utils import db_utils
@@ -32,9 +37,22 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     JSON = json.load(open_file)
 VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs', 'git')
 
-
+# =======================================================================
 def add_empty_commit(folder,which_branch):
 
+    assert (os.path.isdir(folder))
+    os.chdir(folder)
+
+    # check to see if there are any branches in the repo with commits
+    result = subprocess.run(['git', 'branch', '-v'], stdout=subprocess.PIPE)
+    s = result.stdout.decode('utf-8')
+    if s != "":
+        # do nothing if there is at least one branch with a commit
+        print('NOTE: this repo is non-empty (has a commit on at least one branch)')
+        return
+
+    # otherwise clone to a non-bare repo and add an empty commit
+    # to the specified branch
     with tempfile.TemporaryDirectory() as tmpdirname:
         os.system('git clone '+folder+' tmp')
         os.chdir('tmp')
@@ -45,7 +63,10 @@ def add_empty_commit(folder,which_branch):
                   "--author='submitty <submitty@example.com>'")
         os.system('git push origin ' + which_branch)
 
+    print(f'Made new empty commit on branch {which_branch} in repo {folder}')
 
+
+# =======================================================================
 def create_new_repo(folder, which_branch):
 
     # create the folder & initialize an empty bare repo
@@ -57,40 +78,36 @@ def create_new_repo(folder, which_branch):
     # unfortuantely, when an empty repo with no branches is cloned,
     # the active branch and HEAD does NOT default to the specified branch
 
-    # so let's manually specify the initial branch 
-    os.system('git symbolic-ref HEAD refs/heads/main')
+    # so let's manually specify the initial branch
+    os.system('git symbolic-ref HEAD refs/heads/' + which_branch)
 
     # and explicitly add an empty commit to the specified branch
     # so that the repository is not empty
     add_empty_commit(folder,which_branch)
 
-    print('FINISHED making new repo ' + folder)
+    print(f'Created new repo {folder}')
 
-    
+
+# =======================================================================
 def create_or_update_repo(folder, which_branch):
-    which_branch = 'main'
-
-    print ("create or update repo "+folder)
+    print ('--------------------------------------------')
+    print (f'Create or update repo {folder}')
 
     if not os.path.isdir(folder):
-
-        # create the repo, if it does not exist
+        # if the repo doesn't already exist, create it
         create_new_repo(folder,which_branch)
-        
-    else:
 
+    else:
         os.chdir(folder)
 
         # whether or not this repo was newly created, set the default HEAD
         # on the origin repo
         os.system('git symbolic-ref HEAD refs/heads/'+which_branch)
 
-        
-        # and explicitly add an empty commit to the specified branch
-        # so that the repository is not empty
+        # if this repo has no branches with valid commits, add an
+        # empty commit to the specified branch so that the repository
+        # is not empty
         add_empty_commit(folder,which_branch)
-        
-        # if no commits, add a fake commit
         
         
     # set/correct the permissions of all files
@@ -99,6 +116,8 @@ def create_or_update_repo(folder, which_branch):
         for entry in files + dirs:
             shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
 
+
+# =======================================================================
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
 parser.add_argument("--non-interactive", action='store_true', default=False)
@@ -178,13 +197,15 @@ if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     shutil.chown(os.path.join(vcs_course, args.repo_name), group=DAEMONCGI_GROUP)
 
 
+which_branch = 'main'
+
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)
     select = teams_table.select().where(teams_table.c.g_id == bindparam('gradeable_id')).order_by(teams_table.c.team_id)
     teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), 'main')
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), which_branch)
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
@@ -192,4 +213,4 @@ else:
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), 'main')
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), which_branch)
