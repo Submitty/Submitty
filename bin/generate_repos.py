@@ -17,6 +17,7 @@ import sys
 import shutil
 import tempfile
 import subprocess
+import re
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 from submitty_utils import db_utils
@@ -192,12 +193,24 @@ elif not args.non_interactive:
         print ("exiting");
         sys.exit()
 
+
+# Load the git branch for autgrading from the course config file
+course_config_file = os.path.join('/var/local/submitty/courses/',
+                                  args.semester, args.course,
+                                  'config', 'config.json')
+with open(course_config_file) as open_file:
+    COURSE_JSON = json.load(open_file)
+course_git_autograding_branch = COURSE_JSON['course_details']['git_autograding_branch']
+# verify that the branch only contains alphabetic characters a-z
+if not re.match('^[a-z]+$',course_git_autograding_branch):
+    print (f"Invalid course git autograding branch '{course_git_autograding_branch}'")
+    course_git_autograding_branch = 'main'
+print ("The git autograding branch for this course is: " + course_git_autograding_branch)
+
+
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
     shutil.chown(os.path.join(vcs_course, args.repo_name), group=DAEMONCGI_GROUP)
-
-
-which_branch = 'main'
 
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)
@@ -205,7 +218,7 @@ if is_team:
     teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), which_branch)
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), course_git_autograding_branch)
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
@@ -213,4 +226,4 @@ else:
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), which_branch)
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), course_git_autograding_branch)
