@@ -1301,7 +1301,7 @@ HTML;
      */
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
-        $query = array();
+        $query = [];
         parse_str(parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY), $query);
         unset($query["gradeable_version"]);
         $version_change_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
