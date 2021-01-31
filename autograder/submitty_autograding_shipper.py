@@ -759,7 +759,7 @@ def checkout_vcs_repo(config, my_file):
         if 'git_autograding_branch' in COURSE_JSON['course_details']:
             which_branch = COURSE_JSON['course_details']['git_autograding_branch']
     # verify that the branch only contains alphabetic characters a-z
-    if not re.match('^[a-z]+$',which_branch):
+    if not re.match('^[a-z]+$', which_branch):
         which_branch = 'main'
 
     vcs_info = packer_unpacker.get_vcs_info(
