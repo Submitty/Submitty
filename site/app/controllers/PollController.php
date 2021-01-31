@@ -135,6 +135,14 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+        $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $this->core->getQueries()->getNextPollId() . ".png");
+        if (array_key_exists("image_file", $_FILES)) {
+            $file = $_FILES["image_file"];
+            copy($file["tmp_name"], $file_path);
+        }
+        else {
+            $file_path = null;
+        }
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
@@ -152,7 +160,7 @@ class PollController extends AbstractController {
                 $answers[] = $_POST["option_id_" . $i];
             }
         }
-        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
+        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders, $file_path);
 
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))

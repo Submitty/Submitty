@@ -2,7 +2,7 @@
     {% if not poll is defined %}
         <h1> Add a New Poll </h1>
 
-        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll">
+        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
@@ -22,6 +22,12 @@
                     placeholder="Enter question here..."
                     maxlength="5000"></textarea>
             </label>
+            <br/><br/>
+
+            <label for="image-file">
+                Optional Image:
+            </label>
+            <input type="file" id="image-file" name="image_file"/>
             <br/><br/>
 
             <label for="poll-date">

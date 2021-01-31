@@ -58,11 +58,18 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->enableMobileViewport();
+        $image_path = $poll->getImagePath();
+        $file_data = null;
+        if ($image_path != null) {
+            $file_data = base64_encode(file_get_contents($image_path));
+            $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
+        }
         return $this->core->getOutput()->renderTwigTemplate("polls/PollPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
             'user_id' => $this->core->getUser()->getId(),
+            'file_data' => $file_data
           ]);
     }
 

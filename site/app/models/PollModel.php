@@ -15,8 +15,9 @@ class PollModel extends AbstractModel {
     protected $user_responses;
     protected $release_date;
     protected $status;
+    protected $image_path;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date) {
+    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
@@ -26,6 +27,7 @@ class PollModel extends AbstractModel {
         $this->status = $status;
         $this->user_responses = $user_responses;
         $this->release_date = $release_date;
+        $this->image_path = $image_path;
     }
 
     public function getID() {
@@ -100,5 +102,9 @@ class PollModel extends AbstractModel {
 
     public function isToday() {
         return date("Y-m-d") == $this->release_date;
+    }
+
+    public function getImagePath() {
+        return $this->image_path;
     }
 }
