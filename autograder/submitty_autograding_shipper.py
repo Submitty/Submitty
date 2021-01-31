@@ -21,6 +21,7 @@ import traceback
 import subprocess
 import random
 import urllib
+import re
 
 from enum import Enum
 from math import floor
@@ -733,7 +734,7 @@ def valid_github_repo_id(repoid):
     return True
 
 
-def checkout_vcs_repo(config, my_file, which_branch):
+def checkout_vcs_repo(config, my_file):
     print("SHIPPER CHECKOUT VCS REPO ", my_file)
 
     with open(my_file, 'r') as infile:
@@ -749,6 +750,17 @@ def checkout_vcs_repo(config, my_file, which_branch):
     submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
+
+    # Load the git branch for autgrading from the course config file
+    which_branch = 'undefined'
+    course_config_file = os.path.join(course_dir, "config", "config.json")
+    with open(course_config_file) as open_file:
+        COURSE_JSON = json.load(open_file)
+        if 'git_autograding_branch' in COURSE_JSON['course_details']:
+            which_branch = COURSE_JSON['course_details']['git_autograding_branch']
+    # verify that the branch only contains alphabetic characters a-z
+    if not re.match('^[a-z]+$',which_branch):
+        which_branch = 'main'
 
     vcs_info = packer_unpacker.get_vcs_info(
         config,
@@ -796,18 +808,23 @@ def checkout_vcs_repo(config, my_file, which_branch):
         checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
 
         # -----------------------------------------------------------
-        # NOTE: THIS MAY EVENTUALLY BE DEPRECATED AND REMOVED
-        # If the specified branch does not exist (or the repo does not exist)
+        # First see if the course-specified branch exists
         ls_branch_command = [
             '/usr/bin/git', 'ls-remote', '--exit-code', vcs_path, which_branch
         ]
         try:
             subprocess.check_call(ls_branch_command)
         except subprocess.CalledProcessError:
-            # except subprocess.CalledProcessError as error:
-            # then try the deprecated master branch instead
-            which_branch = 'master'
-        # END DEPRECATED NOTE
+            # Then try to use the 'main' branch -- the recommended default
+            # starting in 2020
+            which_branch = 'main'
+            ls_branch_command[4] = which_branch
+            try:
+                subprocess.check_call(ls_branch_command)
+            except subprocess.CalledProcessError:
+                # Last chance use the 'master' branch -- the default until 2020
+                which_branch = 'master'
+
         # -----------------------------------------------------------
 
         # grab the submission time
@@ -985,7 +1002,7 @@ def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
         vcs_file = f[len(folder)+1:]
         no_vcs_file = f[len(folder)+1+5:]
         # do the checkout
-        updated_obj = checkout_vcs_repo(config, folder+"/"+vcs_file, 'main')
+        updated_obj = checkout_vcs_repo(config, folder+"/"+vcs_file)
         # save the regular grading queue file
         with open(os.path.join(folder, no_vcs_file), "w") as queue_file:
             json.dump(updated_obj, queue_file)
