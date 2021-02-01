@@ -622,3 +622,11 @@
 .thread-left-cont {
     flex: 3;
 }
+
+.display-inline {
+  display: inline !important;
+}
+
+.expiration {
+  display: none;
+}

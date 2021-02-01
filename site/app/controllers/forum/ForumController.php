@@ -304,11 +304,19 @@ class ForumController extends AbstractController {
             $lock_thread_date = null;
         }
 
-
         $thread_status = $_POST["thread_status"];
 
         $pinned = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) || (isset($_POST["pinThread"]) && $_POST["pinThread"] == "pinThread" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
+        $expiration = $_POST["expirationDate"];
+
+        if (empty($expiration) && $pinned) {
+          $expiration = date("Y-m-d", strtotime('+7 days'));
+          $expiration .= " " . date("H:i:s");
+        }
+        elseif (!$pinned) {
+          $expiration = '1900-01-01 00:00:00';
+        }
 
         $categories_ids  = [];
         foreach ($_POST["cat"] as $category_id) {
@@ -329,7 +337,7 @@ class ForumController extends AbstractController {
             }
             else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $expiration);
 
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];

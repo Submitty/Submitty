@@ -417,7 +417,7 @@ class ForumThreadView extends AbstractView {
         $activeThread = $this->core->getQueries()->getThread($currentThread);
 
         $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . $activeThread['title'];
-        $activeThreadAnnouncement = $activeThread['pinned'];
+        $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
 
         $thread_id = $activeThread['id'];
 
@@ -731,7 +731,7 @@ class ForumThreadView extends AbstractView {
                 $used_active = true;
                 $activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
                 $activeThread = $thread;
-                if ($thread["pinned"]) {
+                if ($thread["pinned_expiration"] > date("Y-m-d H:i:s")) {
                     $activeThreadAnnouncement = true;
                 }
                 if ($thread_id_p == -1) {
@@ -818,7 +818,7 @@ class ForumThreadView extends AbstractView {
                 "categories" => $categories_content,
                 "link" => $link,
                 "class" => $class,
-                "pinned" => $thread["pinned"],
+                "pinned" => $thread["pinned_expiration"] > date("Y-m-d H:i:s"),
                 "favorite" => $favorite,
                 "merged_thread_id" => $thread['merged_thread_id'],
                 "status" => $thread["status"],

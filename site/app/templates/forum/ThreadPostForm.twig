@@ -164,6 +164,10 @@
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
+            <div class = "expiration">
+              <label class="inline-block" for="experationDate">{{ "Experation Date" }}</label>
+              <input type="date" class="date_picker" name="expirationDate" id="expirationDate"/>
+            </div>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
@@ -193,20 +197,25 @@
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop('disabled', true);
+                $(".expiration").addClass("display-inline");
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop('disabled', false);
+                $(".expiration").removeClass("display-inline");
             }
         });
 
         $(".pinThread-checkbox").click(function (){
+            $(".expiration").toggleClass("display-inline");
             if($(".pinThread-checkbox").prop("checked")){
                 $(".pinThread-checkbox").prop("checked", true);
+                $(".expiration").addClass("display-inline");
                 $("#thread_status").val(0);
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
+                $(".expiration").removeClass("display-inline");
             }
         });
     });

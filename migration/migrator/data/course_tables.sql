@@ -995,6 +995,7 @@ CREATE TABLE public.threads (
     is_visible boolean NOT NULL,
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
+    pinned_expiration timestamp with time zone DEFAULT '1900-01-01 00:00:00-05'::timestamp with time zone NOT NULL,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 
@@ -2199,4 +2200,3 @@ ALTER TABLE ONLY public.gradeable_access
 --
 -- PostgreSQL database dump complete
 --
-
