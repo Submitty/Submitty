@@ -123,6 +123,6 @@ apt-get -qqy autoremove
 # https://git-scm.com/docs/git-init/2.28.0
 # need the --initial-branch option
 # for creating student submission vcs git repositories
-sudo add-apt-repository ppa:git-core/ppa -y
-sudo apt-get install git -y
+add-apt-repository ppa:git-core/ppa -y
+apt-get install git -y
 # ------------------------------------------------------------------

@@ -752,7 +752,7 @@ def checkout_vcs_repo(config, my_file):
     results_path = os.path.join(course_dir, "results", partial_path)
 
     # Load the git branch for autgrading from the course config file
-    which_branch = 'undefined'
+    which_branch = 'main'
     course_config_file = os.path.join(course_dir, "config", "config.json")
     with open(course_config_file) as open_file:
         COURSE_JSON = json.load(open_file)

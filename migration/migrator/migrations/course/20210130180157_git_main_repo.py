@@ -15,8 +15,9 @@ def up(config, database, semester, course):
         # which indicates which branch should be used when grading
         # student submissions by vcs/git
         
-        # we'll default existing courses to 'master', which was the standard
-        # until mid 2020 -- new courses will default to 'main'
+        # we'll default existing courses to 'master', which was the git standard
+        # convention/default until mid 2020 -- new courses will default to 'main'
+        # which is the git developers community is now recommending 
         if not 'git_autograding_branch' in j['course_details']:
             j['course_details']['git_autograding_branch'] = 'master'
         f.close()

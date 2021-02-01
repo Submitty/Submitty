@@ -55,14 +55,14 @@ def add_empty_commit(folder,which_branch):
     # otherwise clone to a non-bare repo and add an empty commit
     # to the specified branch
     with tempfile.TemporaryDirectory() as tmpdirname:
-        os.system('git clone '+folder+' tmp')
-        os.chdir('tmp')
-        os.system('git checkout -b ' + which_branch)
+        os.system(f'git clone {folder} {tmpdirname}')
+        os.chdir(tmpdirname)
+        os.system(f'git checkout -b {which_branch}')
         os.system("git " +
                   "-c user.name=submitty -c user.email=submitty@example.com commit " +
                   "--allow-empty -m 'initial empty commit' " +
                   "--author='submitty <submitty@example.com>'")
-        os.system('git push origin ' + which_branch)
+        os.system(f'git push origin {which_branch}')
 
     print(f'Made new empty commit on branch {which_branch} in repo {folder}')
 
@@ -74,13 +74,13 @@ def create_new_repo(folder, which_branch):
     os.makedirs(folder, mode=0o770)
     os.chdir(folder)
     # note: --initial-branch option requires git 2.28.0 or greater
-    os.system('git init --bare --shared --initial-branch=' + which_branch)
+    os.system(f'git init --bare --shared --initial-branch={which_branch}')
 
     # unfortuantely, when an empty repo with no branches is cloned,
     # the active branch and HEAD does NOT default to the specified branch
 
     # so let's manually specify the initial branch
-    os.system('git symbolic-ref HEAD refs/heads/' + which_branch)
+    os.system(f'git symbolic-ref HEAD refs/heads/{which_branch}')
 
     # and explicitly add an empty commit to the specified branch
     # so that the repository is not empty
@@ -103,7 +103,7 @@ def create_or_update_repo(folder, which_branch):
 
         # whether or not this repo was newly created, set the default HEAD
         # on the origin repo
-        os.system('git symbolic-ref HEAD refs/heads/'+which_branch)
+        os.system(f'git symbolic-ref HEAD refs/heads/{which_branch')
 
         # if this repo has no branches with valid commits, add an
         # empty commit to the specified branch so that the repository
