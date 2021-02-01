@@ -8,23 +8,21 @@ def up(config, database, semester, course):
 
     if config_file.is_file():
 
-        f = open(config_file, 'r')
-        j = json.load(f)
+        with open(config_file) as f:
+            j = json.load(f)
 
-        # add a default for the parameter 'git_autograding_branch',
-        # which indicates which branch should be used when grading
-        # student submissions by vcs/git
-        
-        # we'll default existing courses to 'master', which was the standard
-        # until mid 2020 -- new courses will default to 'main'
-        if not 'git_autograding_branch' in j['course_details']:
-            j['course_details']['git_autograding_branch'] = 'master'
-        f.close()
+            # add a default for the parameter 'git_autograding_branch',
+            # which indicates which branch should be used when grading
+            # student submissions by vcs/git
+
+            # we'll default existing courses to 'master', which was the standard
+            # until mid 2020 -- new courses will default to 'main'
+            if not 'git_autograding_branch' in j['course_details']:
+                j['course_details']['git_autograding_branch'] = 'master'
 
         # write out the file
-        f = open(config_file, 'w')
-        json.dump(j, f, indent=4)
-        f.close()
+        with open(config_file, 'w') as f:
+            json.dump(j, f, indent=4)
 
 
 def down(config, database, semester, course):
