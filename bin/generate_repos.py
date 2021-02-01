@@ -103,7 +103,7 @@ def create_or_update_repo(folder, which_branch):
 
         # whether or not this repo was newly created, set the default HEAD
         # on the origin repo
-        os.system(f'git symbolic-ref HEAD refs/heads/{which_branch')
+        os.system(f'git symbolic-ref HEAD refs/heads/{which_branch}')
 
         # if this repo has no branches with valid commits, add an
         # empty commit to the specified branch so that the repository
