@@ -1359,6 +1359,7 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     queue_obj['gradingtime'] = grading_time
     queue_obj['grade_result'] = autograde_result_msg
     queue_obj['which_untrusted'] = '(short-circuited)'
+    queue_obj['which_machine'] = '(short-circuited)'
 
     # Save the augmented queue object
     with open(queue_file_json_path, 'w') as fd:

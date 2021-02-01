@@ -291,6 +291,7 @@ def prepare_autograding_and_submission_zip(
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
     obj["job_id"] = job_id
+    obj["which_machine"] = which_machine
 
     with open(os.path.join(tmp_submission, "queue_file.json"), 'w') as outfile:
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
