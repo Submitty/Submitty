@@ -85,7 +85,6 @@ jobs:
             sudo chmod 0640 /etc/apache2/suexec/www-data
             sudo a2ensite submitty
             sudo service php${PHP_VER}-fpm start
-            ls -lah /run/php/
             sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
             sudo apache2ctl -t
             sudo apachectl configtest
@@ -235,8 +234,6 @@ jobs:
               popd
           - name: Setup website
             run: |
-              pip3 list
-              pip3 show submitty_utils
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo chmod -R a+rwx ${SUBMITTY_DATA_DIR}
@@ -252,7 +249,6 @@ jobs:
               sudo rm -rf /etc/apache2/sites-available/*
               sudo rm -rf /etc/apache2/sites-enabled/*
               sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
-              ls -lah /etc/apache2/sites-available
               sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
               sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
               sudo chmod 0640 /etc/apache2/suexec/www-data
@@ -272,7 +268,7 @@ jobs:
               sudo service nginx restart
           - name: Debug
             run: |
-              curl http://localhost
+              curl http://localhost/index.php?semester=s21&course=sample
           - name: Debug
             continue-on-error: true
             run: |
@@ -285,7 +281,13 @@ jobs:
               sudo chmod -R a+rw /usr/local/submitty
           - name: debug3
             run: |
-              curl http://localhost:80/home
+              curl http://localhost/home
+          - name: debug4
+            continue-on-error: true
+            run: |
+              sudo ls -lah /usr/local/submitty/
+              sudo ls -lah /usr/local/submitty/site/public
+              sudo ls -lah ls /var/local/submitty/courses/s21/
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
