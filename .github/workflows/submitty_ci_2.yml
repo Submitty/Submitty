@@ -182,6 +182,7 @@ jobs:
               sudo pip3 install paramiko
               sudo pip3 install tzlocal
               sudo pip3 install sqlalchemy
+              sudo pip3 install jsonref
           - name: Get compose cache dir
             id: composer-cache
             run: |
