@@ -14,22 +14,31 @@ env:
   PHP_VER: 7.4
 
 
-
-
 jobs:
     test-3:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
+          with:
+            path: SUBMITTY_CPY/
         - uses: actions/setup-python@v2
           with:
             python-version: '3.6'
         - name: foo
           run: |
-            cd python_submitty_utils
+            sudo apt-get install python3-setuptools
             python3 -m pip install --upgrade pip setuptools wheel     
-            pip3 install . --user
-            pip list       
+            sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
+            ln -s ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site /usr/local/submitty/site
+            export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
+            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+            umask 022
+            sudo -H pip3 install .
+            sudo pip3 show submitty_utils
+            popd      
 
     test:
       runs-on: ubuntu-latest
@@ -216,9 +225,12 @@ jobs:
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              umask 022
-              sudo pip3 install .
+              pip3 install .
               pip3 show submitty_utils
+              sudo apt-get install python3-setuptools
+              umask 022
+              sudo -H pip3 install .
+              sudo pip3 show submitty_utils
               popd
           - name: Setup website
             run: |
