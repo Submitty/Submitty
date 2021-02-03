@@ -60,9 +60,6 @@ set_exception_handler("exception_handler");
 
 function error_handler() {
     $error = error_get_last();
-    if($error === NULL){
-        return;
-    }
     if ($error['type'] === E_ERROR) {
         exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file
         " . $error['file'] . " on line " . $error['line']));
