@@ -360,8 +360,10 @@ def prepare_job(
 
     # prepare the zip files
     try:
+        machine_name = my_name[:my_name.rfind('_')]
         zips = packer_unpacker.prepare_autograding_and_submission_zip(
             config,
+            machine_name,
             which_machine,
             which_untrusted,
             next_directory,
