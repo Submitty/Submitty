@@ -170,9 +170,10 @@ jobs:
             run: |
               sudo service apache2 restart
               curl http://localhost/index.php?semester=s21&course=sample
+          - name: cat
+            run : |
               sudo cat /var/log/php7.2-fpm.log 
-              sudo ls -lah /var/log/apache
-              sudo ls -lah /var/log/apache2/
+              sudo cat /var/log/apache2/*
           - name: Debug
             continue-on-error: true
             run: |
