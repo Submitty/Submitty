@@ -1265,7 +1265,7 @@ function openFrame(html_file, url_file, num) {
     }
     // handle pdf
     if (url_file.substring(url_file.length - 3) === "pdf") {
-      openPDFEditor(html_file, url_file).then(function(){
+      viewFileFullPanel(html_file, url_file).then(function(){
         loadPDFToolbar();
       });
     }
@@ -1322,7 +1322,7 @@ function popOutSubmittedFile(html_file, url_file) {
 }
 
 
-function openPDFEditor(name, path, page_num = 0) {
+function viewFileFullPanel(name, path, page_num = 0) {
   // debugger;
   if($('#viewer').length != 0){
     $('#viewer').remove();
