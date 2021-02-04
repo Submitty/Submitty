@@ -77,6 +77,13 @@ class BaseTestCase(unittest.TestCase):
         self.use_websockets = use_websockets
         self.socket_page = socket_page
 
+        print("**********Config:")
+        print("user id ", self.user_id)
+        print("user name ", self.user_name)
+        print("f semester ",self.full_semester)
+        print("use log in ",self.use_log_in)
+        print("test url ", self.test_url)
+
     def setUp(self):
         # attempt to set-up the connection to Chrome. Repeat a handful of times
         # in-case Chrome crashes during initialization
