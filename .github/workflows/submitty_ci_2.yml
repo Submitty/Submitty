@@ -170,6 +170,9 @@ jobs:
             run: |
               sudo service apache2 restart
               curl -v http://localhost/index.php?semester=s21&course=sample
+          - name: Debug
+            run: |
+              curl -v http://localhost/authentication/login
           - name: cat
             run : |
               sudo cat /var/log/php7.2-fpm.log 
