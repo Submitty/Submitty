@@ -29,7 +29,8 @@ class PollUtils {
                 "responses" => $responses,
                 "correct_responses" => $poll->getAnswers(),
                 "release_date" => $poll->getReleaseDate(),
-                "status" => $poll->getStatus()
+                "status" => $poll->getStatus(),
+                "image_file" => $poll->getImagePath()
             ];
         }
         return $data;
