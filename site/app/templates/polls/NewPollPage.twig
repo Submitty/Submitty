@@ -55,7 +55,7 @@
     {% else %}
         <h1> Edit Poll </h1>
 
-        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits">
+        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
@@ -75,6 +75,12 @@
                     rows="10" cols="30"
                     maxlength="5000">{{ poll.getQuestion() }}</textarea>
             </label>
+            <br/><br/>
+
+            <label for="image-file">
+                Optional Image:
+            </label>
+            <input type="file" id="image-file" name="image_file"/>
             <br/><br/>
 
             <label for="poll-date">
