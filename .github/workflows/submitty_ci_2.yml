@@ -166,9 +166,13 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
           - name: Debug
+            continue-on-error: true
             run: |
               sudo service apache2 restart
               curl http://localhost/index.php?semester=s21&course=sample
+              sudo cat /var/log/php7.2-fpm.log 
+              sudo ls -lah /var/log/apache
+              sudo ls -lah /var/log/apache2/
           - name: Debug
             continue-on-error: true
             run: |
