@@ -169,7 +169,7 @@ jobs:
             continue-on-error: true
             run: |
               sudo service apache2 restart
-              curl http://localhost/index.php?semester=s21&course=sample
+              curl -v http://localhost/index.php?semester=s21&course=sample
           - name: cat
             run : |
               sudo cat /var/log/php7.2-fpm.log 
@@ -186,7 +186,7 @@ jobs:
               sudo chmod -R a+rw /usr/local/submitty
           - name: debug3
             run: |
-              curl http://localhost/home
+              curl -v http://localhost/home
           - name: debug4
             continue-on-error: true
             run: |
