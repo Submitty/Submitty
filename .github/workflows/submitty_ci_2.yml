@@ -11,7 +11,7 @@ env:
   SUBMITTY_DATA_DIR: /var/local/submitty
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.4
+  PHP_VER: 7.2
 
 
 jobs:
@@ -90,7 +90,6 @@ jobs:
             sudo apachectl configtest
             sudo service php${PHP_VER}-fpm restart
             sudo service php${PHP_VER}-fpm restart
-            sudo cat /var/log/php7.4-fpm.log
             sudo service apache2 restart
             sudo mkdir /etc/systemd/system/nginx.service.d
             sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
