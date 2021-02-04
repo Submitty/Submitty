@@ -136,7 +136,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        
+
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
