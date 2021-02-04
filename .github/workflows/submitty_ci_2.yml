@@ -15,107 +15,7 @@ env:
 
 
 jobs:
-    test-3:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-          with:
-            path: SUBMITTY_CPY/
-        - uses: actions/setup-python@v2
-          with:
-            python-version: '3.6'
-        - name: foo
-          run: |
-            sudo apt-get install python3-setuptools
-            python3 -m pip install --upgrade pip setuptools wheel     
-            sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
-            ln -s ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site /usr/local/submitty/site
-            export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-            export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-            umask 022
-            sudo -H pip3 install .
-            sudo pip3 show submitty_utils
-            popd      
-
-    test:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-          with:
-            path: SUBMITTY_CPY/
-        - name: Copy Repo
-          run: |
-            # have to copy first, absolute paths not supported by actions/checkout@v2
-              sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo chmod -R go+rwx ${SUBMITTY_INSTALL_DIR}
-              ln -s ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site /usr/local/submitty/site
-
-        - uses: shivammathur/setup-php@2.7.0
-          with:
-            php-version: ${PHP_VER}
-        - name: install
-          run: |
-            sudo apt-get update
-            sudo apt install libseccomp-dev
-            sudo apt install libboost-all-dev
-            sudo apt install apache2
-            sudo apt install apache2-suexec-custom
-            sudo apt install libapache2-mod-authnz-external
-            sudo apt install libapache2-mod-authz-unixgroup
-            sudo apt install libapache2-mod-wsgi-py3
-            sudo apt install nginx
-            sudo apt install php${PHP_VER}-fpm
-        - name: setup
-          run: |
-            sudo useradd -m submitty_cgi
-            sudo useradd -m submitty_php
-            cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-            sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
-            # cat /etc/php/$PHP_VER/fpm/php-fpm.conf
-            sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/pool.d/www.conf
-            sudo rm -rf /etc/apache2/sites-available/*
-            sudo rm -rf /etc/apache2/sites-enabled/*
-            sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
-            sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
-            sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
-            sudo chmod 0640 /etc/apache2/suexec/www-data
-            sudo a2ensite submitty
-            sudo service php${PHP_VER}-fpm start
-            sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-            sudo apache2ctl -t
-            sudo apachectl configtest
-            sudo service php${PHP_VER}-fpm restart
-            sudo service php${PHP_VER}-fpm restart
-            sudo service apache2 restart
-            sudo mkdir /etc/systemd/system/nginx.service.d
-            sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
-            sudo rm -rf /etc/nginx/sites-available/*
-            sudo rm -rf /etc/nginx/sites-enabled/*
-            sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
-            sudo chmod 644 /etc/nginx/sites-available/submitty.conf
-            sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
-            sudo service nginx restart
-        - name: composer
-          run : |
-            cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-            composer install --prefer-dist
-        - name: curl
-          run: |
-            curl localhost
-            ls -lah /var/log/apache2/
-            echo "submitty"
-            cat /var/log/apache2/submitty.log
-            echo "error"
-            cat /var/log/apache2/error.log
-            echo "other_vhosts_access"
-            cat /var/log/apache2/other_vhosts_access.log
-
     e2e:
-        continue-on-error: true
         runs-on: ubuntu-latest
         services:
           postgres:
@@ -267,6 +167,7 @@ jobs:
               sudo service nginx restart
           - name: Debug
             run: |
+              sudo service apache2 restart
               curl http://localhost/index.php?semester=s21&course=sample
           - name: Debug
             continue-on-error: true
