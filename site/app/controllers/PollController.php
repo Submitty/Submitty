@@ -154,9 +154,7 @@ class PollController extends AbstractController {
         }
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
 
@@ -354,9 +352,7 @@ class PollController extends AbstractController {
         }
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
 
