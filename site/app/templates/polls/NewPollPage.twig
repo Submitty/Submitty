@@ -85,7 +85,7 @@
                     <div id="response_{{response}}_wrapper">
                         <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
                         <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
-                        <input aria-label="Is correct" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
+                        <input aria-label="Is correct" class="correct_box" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
                         <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
                         rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
                         <div class="move-btn up-btn">
