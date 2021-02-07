@@ -26,7 +26,7 @@
             User Numeric ID:
             <input type="text" name="user_numeric_id" id="user_numeric_id" placeholder="Digits Only (Optional)" />
         </label>
-        <label for="user_firstname">
+        <label >
             Legal First Name:
             <input type="text" name="user_firstname" id="user_firstname" placeholder="(Required)" />
         </label>
@@ -66,7 +66,7 @@
         </p>
         <label for="registration_subsection" class="full-width">
             Registration Subsection:
-            <input type="text" name="registration_subsection" id="registration_subsection" placeholder="(Optional)" />
+            <input type="text" value="{{ registration_subsection }}" name="registration_subsection" id="registration_subsection" placeholder="(Optional)" />
         </label>
         <label for="rotating_section" class="full-width">
             Rotating Section:
