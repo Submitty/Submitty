@@ -59,7 +59,8 @@ jobs:
           - uses: nanasess/setup-chromedriver@master
           - name: Install Python dependencies
             run: |
-              python3 -m pip install --upgrade pip setuptools wheel     
+              python3 -m pip install --upgrade pip setuptools wheel   
+              pip3 -v  
               pip3 install python-pam
               pip3 install sqlalchemy
               pip3 install selenium
