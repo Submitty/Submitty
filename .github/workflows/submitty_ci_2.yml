@@ -60,7 +60,7 @@ jobs:
           - name: Install Python dependencies
             run: |
               python3 -m pip install --upgrade pip setuptools wheel   
-              pip3 -v  
+              sudo python3 -m pip install --upgrade pip setuptools wheel   
               pip3 install python-pam
               pip3 install sqlalchemy
               pip3 install selenium
