@@ -123,7 +123,7 @@ class BaseTestCase(unittest.TestCase):
         self.driver.get(self.test_url + url)
         print("getting ",  self.test_url + url )
         html = self.driver.execute_script("return document.body.innerHTML;")
-        print(self.driver.page_source)
+        
         # Frog robot
         self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
 
@@ -144,7 +144,6 @@ class BaseTestCase(unittest.TestCase):
             user_name = self.user_name
 
         self.get(url)
-        print(self.driver.page_source)
         self.assertIn(title, self.driver.title)
         self.driver.find_element(By.NAME, 'user_id').send_keys(user_id)
         self.driver.find_element(By.NAME, 'password').send_keys(user_password)
@@ -157,6 +156,7 @@ class BaseTestCase(unittest.TestCase):
 
         # instead, just make sure this element exists
         self.driver.find_element(By.ID, "logout")
+        print(self.driver.page_source)
 
         self.logged_in = True
 

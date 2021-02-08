@@ -17,6 +17,8 @@ class TestLogin(BaseTestCase):
         """
         url = "/courses/" + self.semester + "/sample/gradeable/open_homework"
         self.log_in(url, title='Submitty')
+        print("Logged in!")
+        print(self.driver.page_source)
         self.assertEqual(self.test_url + url, self.driver.current_url)
         cookies = list(filter(lambda x: x['name'] == 'submitty_token', self.driver.get_cookies()))
         self.assertEqual(1, len(cookies))
