@@ -80,13 +80,6 @@ class BaseTestCase(unittest.TestCase):
         self.use_websockets = use_websockets
         self.socket_page = socket_page
 
-        print("**********Config:")
-        print("user id ", self.user_id)
-        print("user name ", self.user_name)
-        print("f semester ",self.full_semester)
-        print("use log in ",self.use_log_in)
-        print("test url ", self.test_url)
-
     def setUp(self):
         # attempt to set-up the connection to Chrome. Repeat a handful of times
         # in-case Chrome crashes during initialization
@@ -121,7 +114,6 @@ class BaseTestCase(unittest.TestCase):
         if url[0] != "/":
             url = "/" + url
         self.driver.get(self.test_url + url)
-        print("getting ",  self.test_url + url )
         html = self.driver.execute_script("return document.body.innerHTML;")
         
         # Frog robot
@@ -146,7 +138,6 @@ class BaseTestCase(unittest.TestCase):
         self.get(url)
         self.assertIn(title, self.driver.title)
 
-        print("logging in as ", user_id, user_password )
         self.driver.find_element(By.NAME, 'user_id').send_keys(user_id)
         self.driver.find_element(By.NAME, 'password').send_keys(user_password)
         self.driver.find_element(By.NAME, 'login').click()
@@ -157,7 +148,6 @@ class BaseTestCase(unittest.TestCase):
         # self.assertEqual("Logout "+user_name, self.driver.find_element(By.ID, "logout").get_attribute('innerText').strip(' \t\r\n'))
 
         # instead, just make sure this element exists
-        print(self.driver.page_source)
         self.driver.find_element(By.ID, "logout")
 
         self.logged_in = True
