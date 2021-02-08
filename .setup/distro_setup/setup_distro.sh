@@ -20,14 +20,8 @@ echo "Setting up distro: ${DISTRO} ${VERSION}"
 source ${CURRENT_DIR}/${DISTRO}/${VERSION}/setup_distro.sh
 
 # Install pip after we've installed python within the setup_distro.sh
-if [ ! -x "$(command -v pip2)" ] || [ ! -x "$(command -v pip3)" ]; then
+if [ ! -x "$(command -v pip3)" ]; then
     wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-fi
-
-if [ ! -x "$(command -v pip2)" ]; then
-    python2 /tmp/get-pip.py
-else
-    pip2 install -U pip
 fi
 
 if [ ! -x "$(command -v pip3)" ]; then

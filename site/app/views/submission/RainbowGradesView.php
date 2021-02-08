@@ -21,7 +21,7 @@ class RainbowGradesView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Manage Students', $manage_url);
         $this->core->getOutput()->addBreadcrumb($user->getDisplayFullName());
         $this->core->getOutput()->addInternalCss('rainbow-grades.css');
-        
+
         return $this->core->getOutput()->renderTwigTemplate("submission/RainbowGrades.twig", [
             "show_summary" => $display_rainbow_grades_summary && $grade_file !== null,
             "grade_file" => $grade_file,

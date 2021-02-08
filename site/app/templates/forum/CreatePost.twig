@@ -18,11 +18,11 @@
 
             {% if isCurrentFavorite %}
 
-                <a class="current-favorite key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark reverse_golden_hover"></i></a>
+                <a class="current-favorite key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark reverse_golden_hover"></i></a>
 
             {% else %}
 
-                <a class="pinned-thread key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover"></i></a>
+                <a class="pinned-thread key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover"></i></a>
 
             {% endif %}
 

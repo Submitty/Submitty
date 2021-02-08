@@ -197,7 +197,10 @@ CREATE TABLE public.electronic_gradeable (
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
+    eg_limited_access_blind integer DEFAULT 1,
+    eg_peer_blind integer DEFAULT 3,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
+    eg_hidden_files character varying(1024),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -287,6 +290,41 @@ CREATE TABLE public.gradeable (
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
 );
+
+
+--
+-- Name: gradeable_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_access (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    accessor_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT access_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: gradeable_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.gradeable_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gradeable_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.gradeable_access_id_seq OWNED BY public.gradeable_access.id;
 
 
 --
@@ -472,20 +510,6 @@ CREATE TABLE public.gradeable_teams (
     rotating_section integer
 );
 
-
---
--- Name: gradeable_access; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.gradeable_access (
-    id SERIAL NOT NULL PRIMARY KEY,
-    g_id character varying(255) NOT NULL ,
-    user_id character varying(255),
-    team_id character varying(255),
-    accessor_id character varying(255),
-    "timestamp" timestamp with time zone NOT NULL,
-    CONSTRAINT access_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
-);
 
 --
 -- Name: grading_registration; Type: TABLE; Schema: public; Owner: -
@@ -1038,6 +1062,7 @@ CREATE TABLE public.users (
     last_updated timestamp(6) with time zone,
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
+    registration_subsection character varying(255),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1058,6 +1083,13 @@ CREATE TABLE public.viewed_responses (
 --
 
 ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nextval('public.categories_list_category_id_seq'::regclass);
+
+
+--
+-- Name: gradeable_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access ALTER COLUMN id SET DEFAULT nextval('public.gradeable_access_id_seq'::regclass);
 
 
 --
@@ -1197,6 +1229,14 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 ALTER TABLE ONLY public.grade_override
     ADD CONSTRAINT grade_override_pkey PRIMARY KEY (user_id, g_id);
+
+
+--
+-- Name: gradeable_access gradeable_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
 
 
 --
@@ -1647,6 +1687,38 @@ ALTER TABLE ONLY public.grade_override
 
 ALTER TABLE ONLY public.grade_override
     ADD CONSTRAINT grade_override_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_access gradeable_access_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_access gradeable_access_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
+
+
+--
+-- Name: gradeable_access gradeable_access_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
@@ -2167,33 +2239,6 @@ ALTER TABLE ONLY public.viewed_responses
 
 ALTER TABLE ONLY public.viewed_responses
     ADD CONSTRAINT viewed_responses_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: gradeable_access gradeable_access_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-ALTER TABLE ONLY public.gradeable_access
-    ADD CONSTRAINT gradeable_access_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
-
-
---
--- Name: gradeable_access gradeable_access_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-ALTER TABLE ONLY public.gradeable_access
-    ADD CONSTRAINT gradeable_access_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
-
---
--- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-ALTER TABLE ONLY public.gradeable_access
-    ADD CONSTRAINT gradeable_access_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
-
---
--- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-ALTER TABLE ONLY public.gradeable_access
-    ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
-
 
 
 --

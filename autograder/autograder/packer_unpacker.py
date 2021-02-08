@@ -8,6 +8,7 @@ import dateutil.parser
 import string
 import random
 import zipfile
+import traceback
 
 from submitty_utils import dateutils
 from . import insert_database_version_data, autograding_utils
@@ -24,11 +25,7 @@ def get_queue_time(next_directory, next_to_grade):
 def load_queue_file_obj(config, job_id, next_directory, next_to_grade):
     queue_file = os.path.join(next_directory, next_to_grade)
     if not os.path.isfile(queue_file):
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            message=f"ERROR: the file does not exist {queue_file}"
-        )
+        config.logger.log_message(f"ERROR: the file does not exist {queue_file}", job_id=job_id)
         raise RuntimeError("ERROR: the file does not exist", queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
@@ -113,6 +110,7 @@ def unzip_queue_file(zipfilename):
 # ==================================================================================
 def prepare_autograding_and_submission_zip(
     config,
+    machine_name: str,
     which_machine,
     which_untrusted,
     next_directory,
@@ -138,10 +136,9 @@ def prepare_autograding_and_submission_zip(
         item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
         submission_path = os.path.join(config.submitty['submitty_data_dir'], "courses", item_name)
         if not os.path.isdir(submission_path):
-            autograding_utils.log_message(
-                config.log_path,
-                job_id,
-                message=f"ERROR: the submission directory does not exist {submission_path}"
+            config.logger.log_message(
+                f"ERROR: the submission directory does not exist: {submission_path}",
+                job_id=job_id
             )
             raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
         print(which_machine, which_untrusted, "prepare zip", submission_path)
@@ -168,15 +165,14 @@ def prepare_autograding_and_submission_zip(
     queue_time = get_queue_time(next_directory, next_to_grade)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-    autograding_utils.log_message(
-        config.log_path,
-        job_id,
-        is_batch_job,
-        "zip",
-        item_name,
-        "wait:",
-        waittime,
-        ""
+    config.logger.log_message(
+        "",
+        job_id=job_id,
+        is_batch=is_batch_job,
+        which_untrusted="zip",
+        jobname=item_name,
+        timelabel="wait:",
+        elapsed_time=waittime,
     )
 
     # --------------------------------------------------------
@@ -207,18 +203,16 @@ def prepare_autograding_and_submission_zip(
     )
 
     if not os.path.exists(form_json_config):
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            message=f"ERROR: the form json file does not exist {form_json_config}"
+        config.logger.log_message(
+            f"ERROR: the form json file does not exist: {form_json_config}",
+            job_id=job_id
         )
-        raise RuntimeError(f"ERROR: the form json file does not exist {form_json_config}")
+        raise RuntimeError(f"ERROR: the form json file does not exist: {form_json_config}")
 
     if not os.path.exists(complete_config):
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            message=f"ERROR: the complete config file does not exist {complete_config}"
+        config.logger.log_message(
+            f"ERROR: the complete config file does not exist {complete_config}",
+            job_id=job_id
         )
         raise RuntimeError(f"ERROR: the complete config file does not exist {complete_config}")
 
@@ -286,10 +280,9 @@ def prepare_autograding_and_submission_zip(
             if os.path.isfile(vcs_checkout_logfile):
                 shutil.move(vcs_checkout_logfile, tmp_logs)
             else:
-                autograding_utils.log_message(
-                    config.log_path,
-                    job_id,
-                    message=f"ERROR: missing vcs_checkout.txt logfile {str(vcs_checkout_logfile)}"
+                config.logger.log_message(
+                    message=f"ERROR: missing vcs_checkout.txt logfile {str(vcs_checkout_logfile)}",
+                    job_id=job_id
                 )
 
     if "generate_output" not in obj:
@@ -299,6 +292,7 @@ def prepare_autograding_and_submission_zip(
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
     obj["job_id"] = job_id
+    obj["which_machine"] = machine_name
 
     with open(os.path.join(tmp_submission, "queue_file.json"), 'w') as outfile:
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
@@ -392,16 +386,28 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
 
     if "generate_output" not in queue_obj:
         # add information to the database
-        insert_database_version_data.insert_into_database(
-            config,
-            queue_obj["semester"],
-            queue_obj["course"],
-            queue_obj["gradeable"],
-            queue_obj["user"],
-            queue_obj["team"],
-            queue_obj["who"],
-            True if queue_obj["is_team"] else False,
-            str(queue_obj["version"]))
+        try:
+            insert_database_version_data.insert_into_database(
+                config,
+                queue_obj["semester"],
+                queue_obj["course"],
+                queue_obj["gradeable"],
+                queue_obj["user"],
+                queue_obj["team"],
+                queue_obj["who"],
+                True if queue_obj["is_team"] else False,
+                str(queue_obj["version"])
+            )
+        except Exception:
+            config.logger.log_message(
+                message="ERROR: Could not score into database",
+                job_id=job_id,
+            )
+            config.logger.log_stack_trace(
+                trace=traceback.format_exc(),
+                job_id=job_id,
+            )
+            return False
 
     if "generate_output" not in queue_obj:
         is_batch_job = queue_obj["regrade"]
@@ -410,23 +416,20 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
 
         print(f'{which_machine} {which_untrusted} unzip {item_name} in {int(gradingtime)} seconds')
 
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            is_batch_job,
-            "unzip",
-            item_name,
-            "grade:",
-            gradingtime,
-            grade_result
+        config.logger.log_message(
+            grade_result,
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted="unzip",
+            jobname=item_name,
+            timelabel="grade:",
+            elapsed_time=gradingtime,
         )
     else:
         is_batch_job = queue_obj["regrade"]
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            is_batch_job,
-            message="Generated Output Successfully"
+        config.logger.log_message(
+            "Generated Output Successfully",
+            job_id=job_id, is_batch=is_batch_job,
         )
     return True
 
