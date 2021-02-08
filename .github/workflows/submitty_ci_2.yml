@@ -15,6 +15,37 @@ env:
 
 
 jobs:
+    testwebdriver:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v1
+          - uses: actions/setup-python@v2
+            with:
+              python-version: '3.6'
+          - name: setup python
+            run: |
+              python3 -m pip install --upgrade pip
+          - name: install 
+            run : |
+              pip3 install selenium
+              pip3 install websocket_client
+              pip3 install python-pam
+              pip3 install python-dateutil
+              pip3 install paramiko
+          - name: Install Submitty Python Utils
+            run: |
+              pushd python_submitty_utils
+              pip3 install .
+              pip3 show submitty_utils
+              popd
+          - uses: nanasess/setup-chromedriver@master
+            name: Run tests
+          - run: |
+              export DISPLAY=:99
+              chromedriver --url-base=/wd/hub &
+              sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+
     e2e:
         runs-on: ubuntu-latest
         services:
@@ -173,12 +204,11 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
           - uses: nanasess/setup-chromedriver@master
+            name: Run tests
           - run: |
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
               sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-          - name: Run tests
-            run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}
