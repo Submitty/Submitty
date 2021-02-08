@@ -1589,10 +1589,11 @@ class Gradeable(object):
                     temp = []
                     for j in range(1, len(n_array_peers)):
                         temp.append(n_array_peers[j][i])
-                    final_grading_info.append([n_array_peers[0][i],temp])    
+                    final_grading_info.append([n_array_peers[0][i],temp])
                 for i in range(len(final_grading_info)):
                     for j in range(len(final_grading_info[0][1])):
-                        conn.execute(peer_assign.insert(), g_id=self.id, grader_id=final_grading_info[i][0], user_id=final_grading_info[i][1][j])
+                        for k in range(len(final_grading_info[i][1][j])):
+                            conn.execute(peer_assign.insert(), g_id=self.id, grader_id=final_grading_info[i][0][j], user_id=final_grading_info[i][1][j][k])
             
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
