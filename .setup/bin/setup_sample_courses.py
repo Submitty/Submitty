@@ -1561,7 +1561,7 @@ class Gradeable(object):
         for rotate in self.grading_rotating:
             conn.execute(reg_table.insert(), g_id=self.id, user_id=rotate['user_id'],
                          sections_rotating=rotate['section_rotating_id'])
-            
+
         if self.peer_grading == True:
             with open(os.path.join(SETUP_DATA_PATH, 'random_users.txt')) as students:
                 students = students.read().strip().split()
