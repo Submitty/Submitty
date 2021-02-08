@@ -45,6 +45,8 @@ class PamAuthentication extends AbstractAuthentication {
             );
 
             $output_after = json_decode($output, true);
+            var_dump($output_after);
+            echo "^^^";
             if ($output_after === null) {
                 throw new AuthenticationException("Error JSON response for PAM: " . json_last_error_msg());
             }
