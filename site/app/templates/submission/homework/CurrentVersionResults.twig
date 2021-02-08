@@ -54,11 +54,12 @@
                     <span>{{ grade_time }} seconds</span>
                 </span>
                 <span class="flex-row">
-                    <span>Graded on machine:</span>
-                    {% if autograder_machine is not null %}
-                        <span>{{ autograder_machine }}</span>
+                    {% if autograder_machine is null %}
+                       {# unknown machine -- backwards compatible #}
+                    {% elseif autograder_machine == '(short-circuited)' %}
+                       {# short-circuited -- simple grading w/o worker machine #}
                     {% else %}
-                        <span>(unknown)</span>
+                       <span>Graded on machine:</span><span>{{ autograder_machine }}</span>
                     {% endif %}
                 </span>
                 {% if num_autogrades == 1 %}
