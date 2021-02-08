@@ -1581,9 +1581,10 @@ class Gradeable(object):
                     temp_offset.remove(random_offset)
                 for i in range(len(offset_array)):
                     temp_arr=[]
-                    temp_arr=[0 for j in range(len(students))]
                     for x in range(len(students)):
-                        temp_arr[x] = students[(x+offset_array[i])%(len(students)-1)]
+                        to_add = students[(x+offset_array[i])%(len(students)-1)]
+                        if(to_add not in temp_arr):
+                            temp_arr.append(to_add)
                     n_array_peers.append([temp_arr])
                 for i in range(len(n_array_peers[0])):
                     temp = []
