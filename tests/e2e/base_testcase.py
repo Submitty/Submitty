@@ -57,7 +57,7 @@ class BaseTestCase(unittest.TestCase):
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-proxy-server')
-        self.options.add_argument("--allow-insecure-localhost");
+        # self.options.add_argument("--allow-insecure-localhost");
 
         self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
         # https://stackoverflow.com/a/26916386/214063
@@ -124,9 +124,6 @@ class BaseTestCase(unittest.TestCase):
         print("getting ",  self.test_url + url )
         html = self.driver.execute_script("return document.body.innerHTML;")
         print(self.driver.page_source)
-        print("innerHTML: ", html)
-        innerHTML = self.driver.execute_script("return document.body")
-        print("doc body ", self.driver.page_source)
         # Frog robot
         self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
 

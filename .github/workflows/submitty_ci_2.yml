@@ -87,10 +87,6 @@ jobs:
               key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
-          - name: Install python apt packages
-            run: |
-              sudo apt-get upgrade
-              sudo apt-get install build-essential libssl-dev libffi-dev
           - name: Install Python dependencies
             run: |
               python3 -m pip install --upgrade pip setuptools wheel  
