@@ -35,6 +35,7 @@ const taLayoutDet = {
   dividedColName: "LEFT",
   leftPanelWidth: "50%",
   bottomPanelHeight: "50%",
+  bottomFourPanelRightHeight: "50%",
 };
 
 // Grading Panel header width
@@ -245,11 +246,25 @@ function saveResizedColsDimensions(updateValue, isHorizontalResize) {
   saveTaLayoutDetails();
 }
 
+function saveRightResizedColsDimensions(updateValue, isHorizontalResize) {
+  if (isHorizontalResize) {
+    taLayoutDet.bottomFourPanelRightHeight = updateValue;
+  }
+  else {
+    taLayoutDet.leftPanelWidth = updateValue;
+  }
+  saveTaLayoutDetails();
+}
+
 function initializeHorizontalTwoPanelDrag () {
   if (taLayoutDet.dividedColName === "RIGHT") {
     initializeResizablePanels(panelsBucket.rightBottomSelector, rightHorizDragBarSelector, true, saveResizedColsDimensions)
-  } else {
-    initializeResizablePanels(panelsBucket.leftBottomSelector, leftHorizDragBarSelector, true, saveResizedColsDimensions)
+  }
+  if (taLayoutDet.dividedColName === "LEFT") {
+    if(taLayoutDet.numOfPanelsEnabled === 4) {
+      initializeResizablePanels(panelsBucket.rightBottomSelector, rightHorizDragBarSelector, true, saveRightResizedColsDimensions);
+    }
+    initializeResizablePanels(panelsBucket.leftBottomSelector, leftHorizDragBarSelector, true, saveResizedColsDimensions);
   }
 }
 
@@ -286,6 +301,12 @@ function updateLayoutDimensions() {
   bottomRow.css({
     height: taLayoutDet.bottomPanelHeight ? taLayoutDet.bottomPanelHeight : "50%"
   });
+
+  if (taLayoutDet.numOfPanelsEnabled === 4) {
+    $(".panel-item-section.right-bottom").css({
+      height: taLayoutDet.bottomFourPanelRightHeight ? taLayoutDet.bottomFourPanelRightHeight : "50%"
+    });
+  }
 }
 
 function updatePanelOptions() {
@@ -808,6 +829,17 @@ function togglePanelLayoutModes(forceVal = false) {
 
     initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
+  } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
+    twoPanelCont.addClass("active");
+    $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+
+    $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
+    $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
+
+    //TODO: check behavior for this
+
+    initializeHorizontalTwoPanelDrag();
+    updatePanelLayoutModes();
   }
   else {
     resetSinglePanelLayout();
@@ -862,7 +894,7 @@ function exchangeTwoPanels () {
     };
     updatePanelLayoutModes();
   }
-  else if (+taLayoutDet.numOfPanelsEnabled === 3) {
+  else if (+taLayoutDet.numOfPanelsEnabled === 3 || +taLayoutDet.numOfPanelsEnabled === 4) {
     taLayoutDet.currentTwoPanels = {
       leftTop: taLayoutDet.currentTwoPanels.rightTop,
       leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
