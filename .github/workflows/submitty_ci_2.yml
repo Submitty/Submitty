@@ -56,11 +56,17 @@ jobs:
               key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
-          - uses: nanasess/setup-chromedriver@master
+          - name: Install python apt packages
+            run: |
+              sudo apt-get upgrade
+              sudo apt-get install build-essential libssl-dev libffi-dev
           - name: Install Python dependencies
             run: |
-              python3 -m pip install --upgrade pip setuptools wheel   
-              sudo python3 -m pip install --upgrade pip setuptools wheel   
+              python3 -m pip install --upgrade pip setuptools wheel  
+              sudo python3 -m pip install --upgrade pip setuptools wheel
+              pip3 -V
+              sudo pip3 -V
+              pip3 install cryptography
               pip3 install python-pam
               pip3 install sqlalchemy
               pip3 install selenium
@@ -100,6 +106,18 @@ jobs:
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               composer install --prefer-dist
               popd
+          - name: Install Submitty Python Utils
+            run: |
+              export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
+              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+              pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+              pip3 install .
+              pip3 show submitty_utils
+              sudo apt-get install python3-setuptools
+              umask 022
+              sudo -H pip3 install .
+              sudo pip3 show submitty_utils
+              popd
           - name: Setup Submitty
             run: |
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
@@ -119,18 +137,6 @@ jobs:
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-              popd
-          - name: Install Submitty Python Utils
-            run: |
-              export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              pip3 install .
-              pip3 show submitty_utils
-              sudo apt-get install python3-setuptools
-              umask 022
-              sudo -H pip3 install .
-              sudo pip3 show submitty_utils
               popd
           - name: Setup website
             run: |
@@ -166,37 +172,11 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
-          - name: Debug
-            continue-on-error: true
-            run: |
-              sudo service apache2 restart
-              curl -v http://localhost/index.php?semester=s21&course=sample
-          - name: Debug
-            run: |
-              curl -v http://localhost/authentication/login
-          - name: cat
-            run : |
-              sudo cat /var/log/php7.2-fpm.log 
-              sudo cat /var/log/apache2/*
-          - name: Debug
-            continue-on-error: true
-            run: |
-              sudo ls -lah /var/local/submitty/
-              sudo ls -lah /var/local/submitty/logs/site_errors/
-              sudo cat /var/local/submitty/logs/site_errors/*.log
-          - name: debug
-            run: |
-              sudo chmod -R a+rw  /var/local/submitty
-              sudo chmod -R a+rw /usr/local/submitty
-          - name: debug3
-            run: |
-              curl -v http://localhost/home
-          - name: debug4
-            continue-on-error: true
-            run: |
-              sudo ls -lah /usr/local/submitty/
-              sudo ls -lah /usr/local/submitty/site/public
-              sudo ls -lah /var/local/submitty/courses/s21/
+          - uses: nanasess/setup-chromedriver@master
+            with:
+              export DISPLAY=:99
+              chromedriver --url-base=/wd/hub &
+              sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
           - name: Run tests
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 

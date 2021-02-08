@@ -203,11 +203,38 @@
       window.socketClient.open('office_hours_queue');
   }
 
+  window.isAudibleAlertEnabled = false;
+
+  try {
+      window.notificationSound = new NotificationSound();
+      document.querySelector('.disable-audible').style.display = 'none';
+      document.querySelector('.enable-audible').style.display = 'inline-block';
+  } catch (e) {
+      console.error(e);
+  }
+
+  function toggleAudibleAlert() {
+      if (window.isAudibleAlertEnabled) {
+          document.querySelector('.disable-audible').style.display = 'none';
+          document.querySelector('.enable-audible').style.display = 'inline-block';
+          window.isAudibleAlertEnabled = false;
+      }
+      else {
+          document.querySelector('.disable-audible').style.display = 'inline-block';
+          document.querySelector('.enable-audible').style.display = 'none';
+          window.isAudibleAlertEnabled = true;
+      }
+  }
+
   function updateCurrentQueue() {
       $.get("{{base_url}}/current_queue", function(newQueue) {
           $("#current_queue").replaceWith(newQueue);
           filterQueues();
       });
+
+      if (window.isAudibleAlertEnabled) {
+          window.notificationSound.play();
+      }
   }
 
   function updateQueueStatus() {

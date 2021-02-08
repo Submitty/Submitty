@@ -277,6 +277,7 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor   $ta_www_group   $course_dir/repor
 create_and_set  u=rwx,g=rwxs,o=  $instructor   $ta_www_group   $course_dir/reports/summary_html
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/all_grades
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/seating
+create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/polls
 
 
 ########################################################################################################################
