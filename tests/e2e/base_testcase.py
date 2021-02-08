@@ -145,6 +145,8 @@ class BaseTestCase(unittest.TestCase):
 
         self.get(url)
         self.assertIn(title, self.driver.title)
+
+        print("logging in as ", user_id, user_password )
         self.driver.find_element(By.NAME, 'user_id').send_keys(user_id)
         self.driver.find_element(By.NAME, 'password').send_keys(user_password)
         self.driver.find_element(By.NAME, 'login').click()
@@ -155,8 +157,8 @@ class BaseTestCase(unittest.TestCase):
         # self.assertEqual("Logout "+user_name, self.driver.find_element(By.ID, "logout").get_attribute('innerText').strip(' \t\r\n'))
 
         # instead, just make sure this element exists
-        self.driver.find_element(By.ID, "logout")
         print(self.driver.page_source)
+        self.driver.find_element(By.ID, "logout")
 
         self.logged_in = True
 
