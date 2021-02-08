@@ -110,6 +110,7 @@ def unzip_queue_file(zipfilename):
 # ==================================================================================
 def prepare_autograding_and_submission_zip(
     config,
+    machine_name: str,
     which_machine,
     which_untrusted,
     next_directory,
@@ -291,6 +292,7 @@ def prepare_autograding_and_submission_zip(
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
     obj["job_id"] = job_id
+    obj["which_machine"] = machine_name
 
     with open(os.path.join(tmp_submission, "queue_file.json"), 'w') as outfile:
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))

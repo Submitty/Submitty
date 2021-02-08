@@ -360,8 +360,10 @@ def prepare_job(
 
     # prepare the zip files
     try:
+        machine_name = my_name[:my_name.rfind('_')]
         zips = packer_unpacker.prepare_autograding_and_submission_zip(
             config,
+            machine_name,
             which_machine,
             which_untrusted,
             next_directory,
@@ -1359,6 +1361,7 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     queue_obj['gradingtime'] = grading_time
     queue_obj['grade_result'] = autograde_result_msg
     queue_obj['which_untrusted'] = '(short-circuited)'
+    queue_obj['which_machine'] = '(short-circuited)'
 
     # Save the augmented queue object
     with open(queue_file_json_path, 'w') as fd:
