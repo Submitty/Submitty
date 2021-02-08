@@ -231,8 +231,8 @@ def setup_for_validation(config, working_directory, complete_config, is_vcs, tes
 
     # Copy required submission/checkout files
     pattern_copy("submission_to_validation", patterns['submission_to_validation'], submission_path, tmp_work, tmp_logs)
-    if is_vcs:
-        checkout_subdir_path = os.path.join(tmp_submission, 'checkout', checkout_subdirectory)
+    checkout_subdir_path = os.path.join(tmp_submission, 'checkout', checkout_subdirectory)
+    if os.path.exists(checkout_subdir_path):
         pattern_copy("checkout_to_validation", patterns['submission_to_validation'],checkout_subdir_path,tmp_work,tmp_logs)
 
     for c in testcases:
