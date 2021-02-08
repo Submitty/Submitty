@@ -224,14 +224,13 @@ def main():
                 history_file=os.path.join(data_dir, my_semester, my_course,
                                           "results", my_gradeable, my_who,
                                           my_version, "history.json")
+                is_vcs_checkout = False
                 if os.path.exists(history_file):
                     with open(history_file) as hf:
                         obj = json.load(hf)
                         if len(obj) > 0 and 'revision' in obj[0]:
                             is_vcs_checkout = True
                             revision = obj[0]['revision']
-                else:
-                    is_vcs_checkout = False
 
                 obj = {"semester": my_semester,
                        "course": my_course,
