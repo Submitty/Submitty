@@ -14,19 +14,10 @@ fi
 
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 
-echo "CONF_DIR : >> " $CONF_DIR
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+SUBMITTY_REPOSITORY_DIR=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${CONF_DIR}/submitty.json)
 
-if [ -z $SUBMITTY_INSTALL_DIR ]; then
-    SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-fi
-
-if [ -z $SUBMITTY_REPOSITORY_DIR ]; then
-    SUBMITTY_REPOSITORY_DIR=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-fi
-
-if [ -z $SUBMITTY_DATA_DIR ]; then
-    SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${CONF_DIR}/submitty.json)
-fi
 
 SUBMISSION_URL=$(jq -r '.submission_url' ${CONF_DIR}/submitty.json)
 

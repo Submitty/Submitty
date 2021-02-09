@@ -15,6 +15,14 @@ env:
 
 
 jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+          - name: test
+            run : |
+              sudo apt-get update
+              sudo apt-get install
+              sudo systemctl status submitty_daemon_jobs_handler
     e2e:
         runs-on: ubuntu-latest
         services:
@@ -49,14 +57,14 @@ jobs:
             with:
               extensions: imagick
               php-version: $PHP_VER
-          - name: Cache Pip
+          - name: Cache pip
             uses: actions/cache@v2
             with:
               path: path ~/.cache/pip
               key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
-          - name: Install Python dependencies
+          - name: Install python dependencies
             run: |
               python3 -m pip install --upgrade pip setuptools wheel  
               sudo python3 -m pip install --upgrade pip setuptools wheel
@@ -84,13 +92,13 @@ jobs:
               sudo pip3 install tzlocal
               sudo pip3 install sqlalchemy
               sudo pip3 install jsonref
-          - name: Get compose cache dir
+          - name: Get composer cache dir
             id: composer-cache
             run: |
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               echo "::set-output name=dir::$(composer config cache-files-dir)"
               popd
-          - name: Install Composer Cache
+          - name: Install composer Cache
             uses: actions/cache@v2
             with:
               path: ${{ steps.composer-cache.outputs.dir }}
@@ -102,7 +110,7 @@ jobs:
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               composer install --prefer-dist
               popd
-          - name: Install Submitty Python Utils
+          - name: Install Submitty python utils
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
@@ -119,27 +127,27 @@ jobs:
               wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
               unzip vnu.jar_20.3.16.zip
               sudo mv dist/vnu.jar /usr/bin/
-          - name: Setup Submitty
+          - name: Install Submitty and populate database
             run: |
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
               sudo apt-get update
-              sudo apt install libseccomp-dev
-              sudo apt install libboost-all-dev
-              sudo apt install apache2
-              sudo apt install apache2-suexec-custom
-              sudo apt install libapache2-mod-authnz-external
-              sudo apt install libapache2-mod-authz-unixgroup
-              sudo apt install libapache2-mod-wsgi-py3
-              sudo apt install nginx
-              sudo apt install php${PHP_VER}-fpm
+              sudo apt-get install libseccomp-dev
+              sudo apt-get install libboost-all-dev
+              sudo apt-get install apache2
+              sudo apt-get install apache2-suexec-custom
+              sudo apt-get install libapache2-mod-authnz-external
+              sudo apt-get install libapache2-mod-authz-unixgroup
+              sudo apt-get install libapache2-mod-wsgi-py3
+              sudo apt-get install nginx
+              sudo apt-get install php${PHP_VER}-fpm
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
               popd
-          - name: Setup website
+          - name: Install, configure and serve Submitty site
             run: |
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
@@ -173,6 +181,7 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
+              sudo systemctl restart submitty_daemon_jobs_handler
           - uses: nanasess/setup-chromedriver@master
           - name: Run tests
             continue-on-error : true
@@ -191,7 +200,7 @@ jobs:
             run: |
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
               sudo python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py ${SEMESTER} sample open_homework
-              sudo bash ${SUBMITTY_REPOSITORY}/tests/git_test.sh
+              sudo bash ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/tests/git_test.sh
 
 
 

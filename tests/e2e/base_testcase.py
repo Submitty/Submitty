@@ -16,8 +16,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from time import sleep
-
 import sys
 # explicitly add this import path, so we can run it on a local host
 sys.path.append('../python_submitty_utils/')
@@ -57,7 +55,6 @@ class BaseTestCase(unittest.TestCase):
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-proxy-server')
-        # self.options.add_argument("--allow-insecure-localhost");
 
         self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
         # https://stackoverflow.com/a/26916386/214063
@@ -114,8 +111,6 @@ class BaseTestCase(unittest.TestCase):
         if url[0] != "/":
             url = "/" + url
         self.driver.get(self.test_url + url)
-        html = self.driver.execute_script("return document.body.innerHTML;")
-        print("getting ", url)
         # Frog robot
         self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
 
@@ -136,8 +131,8 @@ class BaseTestCase(unittest.TestCase):
             user_name = self.user_name
 
         self.get(url)
+        # print(self.driver.page_source)
         self.assertIn(title, self.driver.title)
-
         self.driver.find_element(By.NAME, 'user_id').send_keys(user_id)
         self.driver.find_element(By.NAME, 'password').send_keys(user_password)
         self.driver.find_element(By.NAME, 'login').click()

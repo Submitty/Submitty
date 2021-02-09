@@ -132,9 +132,6 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    print(DB_USER)
-    print(DB_PASS)
-    print(DB_HOST)
     submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)

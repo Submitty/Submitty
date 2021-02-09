@@ -2,7 +2,6 @@
 
 set -ev
 
-echo 'SUBMITTY_INSTALL_DIR : ' $SUBMITTY_INSTALL_DIR
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}
@@ -99,8 +98,6 @@ popd
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-echo ">>> ${SUBMITTY_REPOSITORY}"
-ls $SUBMITTY_REPOSITORY
 /bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then

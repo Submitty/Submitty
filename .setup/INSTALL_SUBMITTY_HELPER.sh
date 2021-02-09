@@ -32,10 +32,6 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
     VAGRANT=1
 fi
 
-echo -e $CONF_DIR
-
-echo -e "SUBMITTY_INSTALL_DIR"
-echo -e $SUBMITTY_INSTALL_DIR
 
 source ${THIS_DIR}/bin/versions.sh
 
@@ -143,9 +139,6 @@ CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 
-echo "SUBMITTY DATA_DIR"
-echo $SUBMITTY_DATA_DIR
-echo $PHP_USER
 
 ########################################################################################################################
 ########################################################################################################################
@@ -492,9 +485,6 @@ fi
 echo -e "Compile and install analysis tools"
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-pwd
-ls
-echo ${SUBMITTY_INSTALL_DIR}
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
@@ -608,14 +598,14 @@ echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\
 
 ################################################################################################################
 ################################################################################################################
-echo -e "INSTALL SUBMITTY CRONTAB"
+# INSTALL SUBMITTY CRONTAB
 #############################################################
 
 cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
 
 ################################################################################################################
 ################################################################################################################
-echo -e "Allow course creation by daemon"
+# Allow course creation by daemon
 #############################################################
 
 cat ${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers | envsubst | cat - > /etc/sudoers.d/submitty
