@@ -139,7 +139,6 @@ CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 
-
 ########################################################################################################################
 ########################################################################################################################
 
@@ -614,7 +613,7 @@ chown root:root /etc/sudoers.d/submitty
 
 ################################################################################################################
 ################################################################################################################
-echo -e "INSTALL & START GRADING SCHEDULER DAEMON"
+# INSTALL & START GRADING SCHEDULER DAEMON"
 #############################################################
 # stop the submitty daemons (if they're running)
 for i in "${ALL_DAEMONS[@]}"; do

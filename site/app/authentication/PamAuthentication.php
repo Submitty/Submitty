@@ -31,7 +31,6 @@ class PamAuthentication extends AbstractAuthentication {
         try {
             // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
             // as that would require some hacky path handling specific to PAM authentication
-
             $output = $this->core->curlRequest(
                 $this->core->getConfig()->getCgiUrl() . "pam_check.cgi",
                 [

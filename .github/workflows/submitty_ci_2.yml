@@ -15,15 +15,8 @@ env:
 
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-          - name: test
-            run : |
-              sudo apt-get update
-              sudo apt-get install
-              sudo systemctl status submitty_daemon_jobs_handler
     e2e:
+        timeout-minutes: 40
         runs-on: ubuntu-latest
         services:
           postgres:
@@ -182,6 +175,7 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
               sudo systemctl restart submitty_daemon_jobs_handler
+              sudo systemctl status submitty_daemon_jobs_handler
           - uses: nanasess/setup-chromedriver@master
           - name: Run tests
             continue-on-error : true

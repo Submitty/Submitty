@@ -111,6 +111,7 @@ class BaseTestCase(unittest.TestCase):
         if url[0] != "/":
             url = "/" + url
         self.driver.get(self.test_url + url)
+        
         # Frog robot
         self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
 
