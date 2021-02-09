@@ -115,7 +115,7 @@ class BaseTestCase(unittest.TestCase):
             url = "/" + url
         self.driver.get(self.test_url + url)
         html = self.driver.execute_script("return document.body.innerHTML;")
-        
+        print("getting ", url)
         # Frog robot
         self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
 
