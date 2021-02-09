@@ -186,12 +186,12 @@ jobs:
               sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+              sudo bash tests/test_site_error_log.sh
           - name: Run git tests
             run: |
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
               sudo python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py ${SEMESTER} sample open_homework
-              sudo bash tests/git_test.sh
-              sudo bash tests/test_site_error_log.sh
+              sudo bash ${SUBMITTY_REPOSITORY}/tests/git_test.sh
 
 
 

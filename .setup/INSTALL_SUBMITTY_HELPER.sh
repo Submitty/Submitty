@@ -32,16 +32,7 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
     VAGRANT=1
 fi
 
-if [ -z $SUBMITTY_REPOSITORY ]; then
-    SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-fi
-
-if [ -z $SUBMITTY_INSTALL_DIR ]; then
-    SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-fi
-
-echo -e "THIS DIR:"
-echo -e $THIS_DIR
+echo -e $CONF_DIR
 
 echo -e "SUBMITTY_INSTALL_DIR"
 echo -e $SUBMITTY_INSTALL_DIR
