@@ -6,7 +6,7 @@ on:
   
 jobs:
     eslint:
-        uns-on: ubuntu-18.04
+        runs-on: ubuntu-18.04
         defaults:
             run:
                 working-directory: site
