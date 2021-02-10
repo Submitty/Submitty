@@ -194,6 +194,7 @@ jobs:
               sudo ls /var/local/submitty/daemon_job_queue/
               sudo sudo cat /var/local/submitty/logs/autograding/*.txt
           - name: debug2
+            run: |
               sudo systemctl status submitty_daemon_jobs_handler
 
 
