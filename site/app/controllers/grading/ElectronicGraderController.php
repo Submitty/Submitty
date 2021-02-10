@@ -1228,7 +1228,6 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    //‘hw01’, ‘’, ‘’, NULL, NULL, ‘id’, ‘ASC’, NULL, ‘-1’, true
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;

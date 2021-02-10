@@ -836,8 +836,6 @@ function togglePanelLayoutModes(forceVal = false) {
     $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
 
-    //TODO: check behavior for this
-
     initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
   }
