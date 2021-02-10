@@ -176,7 +176,7 @@ jobs:
               sudo service nginx restart
           - uses: nanasess/setup-chromedriver@master
           - name: Run tests
-            continue-on-failure: true
+            continue-on-error: true
             run: |
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
@@ -189,7 +189,7 @@ jobs:
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
           - name: Debug
-            continue-on-failure: true
+            continue-on-error: true
             run: |
               sudo ls /var/local/submitty/daemon_job_queue/
               sudo systemctl status submitty_daemon_jobs_handler
