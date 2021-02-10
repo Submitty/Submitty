@@ -379,7 +379,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $image_path = $this->core->getQueries()->getPoll($_POST["poll_id"])->getImagePath();
-        if ($image_path != null) {
+        if ($image_path !== null) {
             unlink($image_path);
         }
         $this->core->getQueries()->deletePoll($_POST["poll_id"]);
