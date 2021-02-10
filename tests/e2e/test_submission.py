@@ -95,7 +95,7 @@ class TestSubmission(BaseTestCase):
         # wait for the autograding results to finish. Refresh the page intermittently to (hopefully) load autograding results
         if autograding:
             autograding_done = False
-            for i in range(10):
+            for i in range(8):
                 try:
                     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[div/@id='tc_0']")))
                     autograding_done = True

@@ -16,7 +16,7 @@ env:
 
 jobs:
     e2e:
-        timeout-minutes: 40
+        timeout-minutes: 60
         runs-on: ubuntu-latest
         services:
           postgres:
@@ -174,11 +174,8 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
-              sudo systemctl restart submitty_daemon_jobs_handler
-              sudo systemctl status submitty_daemon_jobs_handler
           - uses: nanasess/setup-chromedriver@master
           - name: Run tests
-            continue-on-error : true
             run: |
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
@@ -190,7 +187,6 @@ jobs:
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
-              sudo systemctl status submitty_daemon_jobs_handler
           - name: Run git tests
             run: |
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
