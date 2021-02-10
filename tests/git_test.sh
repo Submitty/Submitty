@@ -29,14 +29,15 @@ err_message() {
 }
 
 # Display our error message if something fails below
-trap 'err_message' ERR
+# trap 'err_message' ERR
 
-set -ev
+# set -ev
 
 mkdir /tmp/submitty_git
 pushd /tmp/submitty_git
 
-
+echo $SEMESTER
+git clone --progress --verbose http://instructor:$instructor@localhost/git/${SEMESTER}/sample/open_homework/$2 open_homework
 test_git instructor instructor
 test_git instructor student
 test_git student student
