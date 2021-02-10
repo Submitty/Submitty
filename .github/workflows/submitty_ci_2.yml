@@ -192,13 +192,9 @@ jobs:
             continue-on-error: true
             run: |
               sudo ls /var/local/submitty/daemon_job_queue/
-              sudo systemctl status submitty_daemon_jobs_handler
               sudo sudo cat /var/local/submitty/logs/autograding/*.txt
-          - name: Run git tests
-            run: |
-              SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-              sudo python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py ${SEMESTER} sample open_homework
-              sudo bash ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/tests/git_test.sh
+          - name: debug2
+              sudo systemctl status submitty_daemon_jobs_handler
 
 
 
