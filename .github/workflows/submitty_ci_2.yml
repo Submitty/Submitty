@@ -17,7 +17,7 @@ env:
 jobs:
     e2e:
         timeout-minutes: 60
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
         services:
           postgres:
             image: postgres
