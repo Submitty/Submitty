@@ -60,7 +60,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $image_path = $poll->getImagePath();
         $file_data = null;
-        if ($image_path != null) {
+        if ($image_path !== null) {
             $file_data = base64_encode(file_get_contents($image_path));
             $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
         }
