@@ -63,29 +63,30 @@ jobs:
               sudo python3 -m pip install --upgrade pip setuptools wheel
               pip3 -V
               sudo pip3 -V
-              sudo pip3 install cryptography
-              sudo pip3 install python-pam
-              sudo pip3 install sqlalchemy
-              sudo pip3 install selenium
-              sudo pip3 install tzlocal
-              sudo pip3 install jsonschema
-              sudo pip3 install jsonref
-              sudo pip3 install websocket_client
-              sudo pip3 install psycopg2
-              sudo pip3 install docker
-              sudo pip3 install pyyaml
-              sudo pip3 install selenium
-              sudo pip3 install websocket_client
-              sudo pip3 install python-pam
-              sudo pip3 install python-dateutil
-              sudo pip3 install paramiko
-              sudo pip3 install watchdog
+              pip3 install cryptography
+              pip3 install python-pam
+              pip3 install sqlalchemy
+              pip3 install selenium
+              pip3 install tzlocal
+              pip3 install jsonschema
+              pip3 install jsonref
+              pip3 install websocket_client
+              pip3 install psycopg2
+              pip3 install docker
+              pip3 install pyyaml
+              pip3 install selenium
+              pip3 install websocket_client
+              pip3 install python-pam
+              pip3 install python-dateutil
+              pip3 install paramiko
+              pip3 install pyzbar
+              pip3 install watchdog
               #needs to be globally available for all users
-              # sudo pip3 install docker
-              # sudo pip3 install paramiko
-              # sudo pip3 install tzlocal
-              # sudo pip3 install sqlalchemy
-              # sudo pip3 install jsonref
+              sudo pip3 install docker
+              sudo pip3 install paramiko
+              sudo pip3 install tzlocal
+              sudo pip3 install sqlalchemy
+              sudo pip3 install jsonref
               sudo pip3 install numpy
               sudo pip3 install opencv-python
               sudo pip3 install pyPdf
@@ -94,8 +95,8 @@ jobs:
               sudo pip3 install PyPDF2
               sudo pip3 install pdf2image
               sudo pip3 install onnxruntime
-              # sudo pip3 install watchdog
-              # sudo pip3 install python-dateutil
+              sudo pip3 install watchdog
+              sudo pip3 install python-dateutil
 
           - name: Get composer cache dir
             id: composer-cache
@@ -120,8 +121,8 @@ jobs:
               export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              # pip3 install .
-              # pip3 show submitty_utils
+              pip3 install .
+              pip3 show submitty_utils
               sudo apt-get install python3-setuptools
               umask 022
               sudo -H pip3 install .
