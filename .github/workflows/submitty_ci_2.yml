@@ -86,6 +86,8 @@ jobs:
               sudo pip3 install sqlalchemy
               sudo pip3 install jsonref
               sudo pip3 install numpy
+              sudo pip3 install opencv-python
+              sudo pip install pyPdf
 
           - name: Get composer cache dir
             id: composer-cache
@@ -282,6 +284,9 @@ jobs:
             run: |
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo apt-key fingerprint 0EBFCD88
+              sudo add-apt-repository https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable
               sudo apt-get update
               sudo apt-get install build-essential
               sudo apt-get install docker-ce docker-ce-cli
