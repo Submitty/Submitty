@@ -138,6 +138,11 @@ class GradeInquiryController extends AbstractController {
      * @return MultiResponse
      */
     public function getSingleGradeInquiryPost($gradeable_id) {
+        //TODO: look into why these aren't getting sent by websockets
+        if (!isset($_POST['submitter_id']) || !isset($_POST['post_id'])) {
+            return "";
+        }
+
         $submitter_id = $_POST['submitter_id'];
         $post_id = $_POST['post_id'];
 
