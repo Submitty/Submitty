@@ -79,6 +79,7 @@ jobs:
               pip3 install python-pam
               pip3 install python-dateutil
               pip3 install paramiko
+              pip3 install pyzbar
               #needs to be globally available for all users
               sudo pip3 install docker
               sudo pip3 install paramiko
@@ -211,100 +212,6 @@ jobs:
             run: |
               sudo journalctl -u submitty_daemon_jobs_handler
               sudo systemctl status submitty_daemon_jobs_handler
-
-
-    integration-tests:
-        runs-on: ubuntu-18.04
-        services:
-          postgres:
-            image: postgres
-            env: 
-              POSTGRES_PASSWORD: submitty_dbuser
-              POSTGRES_USER: postgres
-            options: >-
-              --health-cmd pg_isready
-              --health-interval 10s
-              --health-timeout 5s
-              --health-retries 5
-            ports:
-              - 5432:5432
-
-        steps:
-          - uses: actions/checkout@v2
-            with:
-              path: SUBMITTY_CPY/
-          - name: Copy Repo
-            run: |
-              # have to copy first, absolute paths not supported by actions/checkout@v2
-                sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-                sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-                sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
-          - uses: actions/setup-python@v2
-            with:
-              python-version: '3.6'
-          - name: Cache pip
-            uses: actions/cache@v2
-            with:
-              path: path ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
-              restore-keys: |
-                ${{ runner.os }}-py-pip
-          - name: Install python dependencies
-            run: |
-              python3 -m pip install --upgrade pip setuptools wheel  
-              sudo python3 -m pip install --upgrade pip setuptools wheel
-              pip3 -V
-              sudo pip3 -V
-              pip3 install cryptography
-              pip3 install sqlalchemy
-              pip3 install selenium
-              pip3 install tzlocal
-              pip3 install jsonschema
-              pip3 install jsonref
-              pip3 install psycopg2
-              pip3 install docker
-              pip3 install pyyaml
-              pip3 install python-pam
-              pip3 install python-dateutil
-              pip3 install paramiko
-              #needs to be globally available for all users
-              sudo pip3 install docker
-              sudo pip3 install paramiko
-              sudo pip3 install tzlocal
-              sudo pip3 install sqlalchemy
-              sudo pip3 install jsonref
-          - name: Install Submitty python utils
-            run: |
-              export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-              pip3 install .
-              pip3 show submitty_utils
-              sudo apt-get install python3-setuptools
-              umask 022
-              sudo -H pip3 install .
-              sudo pip3 show submitty_utils
-              popd
-          - name: Install and Setup Submitty
-            run: |
-              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-              APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-              sudo apt-get update
-              sudo apt-get install build-essential
-              sudo apt-get install docker-ce docker-ce-cli
-              sudo apt-get install libseccomp-dev
-              sudo apt-get install libboost-all-dev
-              export SUBMITTY_INSTALL_DIR=/usr/local/submitty #need to export otherwise shell scripts don't have access
-              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-              popd
-          - name: Run tests
-            run : |
-              sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
 
       
