@@ -80,6 +80,7 @@ jobs:
               pip3 install python-dateutil
               pip3 install paramiko
               pip3 install pyzbar
+              pip3 install watchdog
               #needs to be globally available for all users
               sudo pip3 install docker
               sudo pip3 install paramiko
@@ -94,6 +95,7 @@ jobs:
               sudo pip3 install PyPDF2
               sudo pip3 install pdf2image
               sudo pip3 install onnxruntime
+              sudo pip3 install watchdog
 
           - name: Get composer cache dir
             id: composer-cache
