@@ -2,6 +2,7 @@ import contextlib
 import json
 import os
 import shutil
+import time
 import unittest
 
 from typing import List
@@ -153,17 +154,153 @@ class TestScheduler(unittest.TestCase):
         # Instantiate the shipper's config object
         CONFIG = config.Config.path_constructor(CONFIG_DIR, 'TEST')
 
+    def tearDown(self):
+        """Clear out all of the queues between test invocations."""
+        for queue_file in os.listdir(TO_BE_GRADED):
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(os.path.join(TO_BE_GRADED, queue_file))
+        for worker_queue in WORKER_DIRECTORIES:
+            if os.path.exists(worker_queue) and os.path.isdir(worker_queue):
+                for entry in os.listdir(worker_queue):
+                    with contextlib.suppress(FileNotFoundError):
+                        os.remove(os.path.join(worker_queue, entry))
+
     @mock.patch('multiprocessing.Process')
     def test_fcfs_simple(self, MockProcess: mock.Mock):
+        """Test the most barebones scheduling setup: one job, one worker."""
+
+        # Make our workers
         worker_proc = MockProcess()
         worker_proc.is_alive = mock.MagicMock(return_value=True)
+
         worker = Worker(CONFIG, 'worker_0', WORKER_PROPERTIES['worker_0'], worker_proc)
 
+        # Make our scheduler
         scheduler = FCFSScheduler(CONFIG, [worker])
+
+        # Place a dummy queue file in the queue
+        generate_queue_file("test", required_capabilities=['default'])
+
+        # Invoke the scheduler's update mechanism
+        scheduler.update_and_schedule()
+
+        # Check the worker's directory for the queue file
+        worker_files = os.listdir(worker.folder)
+        self.assertIn("test", worker_files)
+
+    @mock.patch('multiprocessing.Process')
+    def test_fcfs_multiworker(self, MockProcess: mock.Mock):
+        """Test a scheduling setup with two workers."""
+
+        worker_names = ['worker_0', 'worker_1']
+
+        worker_procs = [MockProcess() for _ in worker_names]
+        for proc in worker_procs:
+            proc.is_alive = mock.MagicMock(return_value=True)
+
+        workers = [
+            Worker(CONFIG, name, WORKER_PROPERTIES[name], proc)
+            for name, proc in zip(worker_names, worker_procs)
+        ]
+
+        scheduler = FCFSScheduler(CONFIG, workers)
 
         generate_queue_file("test", required_capabilities=['default'])
 
         scheduler.update_and_schedule()
 
+        # Quick way to get all of the files in all of the worker queues
+        all_worker_files = sum([os.listdir(worker.folder) for worker in workers], [])
+        self.assertIn("test", all_worker_files)
+        # Make sure we don't double-copy files
+        self.assertEqual(all_worker_files.count("test"), 1)
+
+    @mock.patch('multiprocessing.Process')
+    def test_fcfs_capacity(self, MockProcess: mock.Mock):
+        """Test that the scheduling behavior respects the one-job-per-worker rule.
+
+        This test also helps verify that the scheduler follows proper first come, first serve
+        behavior.
+        """
+
+        worker_proc = MockProcess()
+        worker_proc.is_alive = mock.MagicMock(return_value=True)
+
+        worker = Worker(CONFIG, 'worker_0', WORKER_PROPERTIES['worker_0'], worker_proc)
+
+        scheduler = FCFSScheduler(CONFIG, [worker])
+
+        generate_queue_file("first", required_capabilities=['default'])
+        time.sleep(0.1)  # Kinda ugly, but helps avoid temporal aliasing by the OS
+        generate_queue_file("second", required_capabilities=['default'])
+
+        scheduler.update_and_schedule()
+
         worker_files = os.listdir(worker.folder)
-        self.assertIn("test", worker_files)
+        self.assertIn("first", worker_files)
+        self.assertNotIn("second", worker_files)
+
+    @mock.patch('multiprocessing.Process')
+    def test_fcfs_capacity_multi(self, MockProcess: mock.Mock):
+        """Test that the one-job-per-worker rule is still applied with multiple workers."""
+
+        worker_names = ['worker_0', 'worker_1']
+
+        worker_procs = [MockProcess() for _ in worker_names]
+        for proc in worker_procs:
+            proc.is_alive = mock.MagicMock(return_value=True)
+
+        workers = [
+            Worker(CONFIG, name, WORKER_PROPERTIES[name], proc)
+            for name, proc in zip(worker_names, worker_procs)
+        ]
+
+        scheduler = FCFSScheduler(CONFIG, workers)
+
+        generate_queue_file("first", required_capabilities=['default'])
+        time.sleep(0.1)
+        generate_queue_file("second", required_capabilities=['default'])
+        time.sleep(0.1)
+        generate_queue_file("third", required_capabilities=['default'])
+
+        scheduler.update_and_schedule()
+
+        all_worker_files = sum([os.listdir(worker.folder) for worker in workers], [])
+        self.assertIn("first", all_worker_files)
+        self.assertIn("second", all_worker_files)
+        self.assertNotIn("third", all_worker_files)
+
+        self.assertEqual(all_worker_files.count("first"), 1)
+        self.assertEqual(all_worker_files.count("second"), 1)
+
+    @mock.patch('multiprocessing.Process')
+    def test_constraints(self, MockProcess: mock.Mock):
+        """Test that job constraints are respected."""
+
+        worker_names = ['worker_0', 'worker_1', 'worker_2']
+
+        worker_procs = [MockProcess() for _ in worker_names]
+        for proc in worker_procs:
+            proc.is_alive = mock.MagicMock(return_value=True)
+
+        workers = [
+            Worker(CONFIG, name, WORKER_PROPERTIES[name], proc)
+            for name, proc in zip(worker_names, worker_procs)
+        ]
+
+        scheduler = FCFSScheduler(CONFIG, workers)
+
+        generate_queue_file("first", required_capabilities=['zero'])
+        generate_queue_file("second", required_capabilities=['one'])
+        generate_queue_file("third", required_capabilities=['two'])
+        time.sleep(0.1)
+        generate_queue_file("fourth", required_capabilities=['zero'])
+
+        scheduler.update_and_schedule()
+
+        self.assertIn("first", os.listdir(workers[0].folder))
+        self.assertIn("second", os.listdir(workers[1].folder))
+        self.assertIn("third", os.listdir(workers[2].folder))
+
+        all_worker_files = sum([os.listdir(worker.folder) for worker in workers], [])
+        self.assertNotIn("fourth", all_worker_files)
