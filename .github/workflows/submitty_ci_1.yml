@@ -3,6 +3,16 @@ name: Submitty CI-1
 #run php lint, phpstan, eslint, and pylint on any push
 on:
     push:
+
+env:
+  PGPASSWORD: submitty_dbuser
+  PHP_USER: submitty_php
+  PHP_GROUP: submitty_php
+  CGI_USER: submitty_cgi
+  SUBMITTY_DATA_DIR: /var/local/submitty
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
+  POSTGRES_HOST: localhost
+  PHP_VER: 7.2
   
 jobs:
     eslint:
@@ -35,6 +45,8 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - uses: shivammathur/setup-php@2.7.0
+              with:
+                php-version: $PHP_VER
             - name: Cache Composer
               id: composer-cache
               run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -66,6 +78,7 @@ jobs:
           - uses: shivammathur/setup-php@2.7.0
             with:
               extensions: imagick
+              php-version: $PHP_VER
               coverage: pcov
           - name: Cache Composer
             id: composer-cache
