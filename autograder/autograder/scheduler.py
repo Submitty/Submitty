@@ -80,14 +80,18 @@ class Worker:
         return len(os.listdir(self.folder)) == 0
 
     def can_run(self, job: Job) -> bool:
-        """Check whether this worker can run the given job."""
+        """Check whether this worker can run the given job.
+
+        A worker can run a job if and only if its `capabilities` dictionary contains all of the
+        capabilities in the job's `required_capabilities` dictionary.
+        """
         if 'required_capabilities' not in job.queue_obj:
             self.config.logger.log_message(
                 f"ERROR: Queue file at {job.path} missing `required_capabilities` key"
             )
             return False
         requirements = job.queue_obj['required_capabilities']
-        return requirements in self.properties['capabilities']
+        return all(req in self.properties['capabilities'] for req in requirements)
 
 
 class BaseScheduler(ABC):
