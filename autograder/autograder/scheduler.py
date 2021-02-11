@@ -132,7 +132,7 @@ class BaseScheduler(ABC):
                 self.config.logger.log_message(
                     f"WARNING: Worker process {worker.name} is not alive!"
                 )
-        self._assign_jobs(self._list_jobs)
+        self._assign_jobs(self._list_jobs())
 
     @abstractmethod
     def _assign_jobs(self, jobs: List[Job]):
@@ -153,7 +153,7 @@ class FCFSScheduler(BaseScheduler):
     def _assign_jobs(self, jobs: List[Job]):
         idle_workers = [worker for worker in self.workers if worker.is_idle()]
 
-        jobs.sort(key=lambda f: os.stat(f).st_ctime_ns)
+        jobs.sort(key=lambda j: os.stat(j.path).st_ctime_ns)
 
         for job in jobs:
             if len(idle_workers) == 0:
