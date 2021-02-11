@@ -214,6 +214,12 @@ jobs:
             run: |
               sudo journalctl -u submitty_daemon_jobs_handler
               sudo systemctl status submitty_daemon_jobs_handler
+              sudo systemctl status submitty_autograding_shipper
+              sudo journalctl -u submitty_autograding_shipper
+              sudo systemctl status submitty_autograding_worker
+              sudo journalctl -u submitty_autograding_worker
+          - name: Integration Tests
+               sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
 
       
