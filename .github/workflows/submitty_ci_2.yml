@@ -203,23 +203,14 @@ jobs:
           - name: Debug
             continue-on-error: true
             run: |
-              sudo ls -lah /var/local/submitty/daemon_job_queue/
-              sudo ls -lah /var/local/submitty/logs/autograding/
-              sudo ls -lah /var/local/submitty/logs/autograding/
-              sudo ls -lah /var/local/submitty/daemon_job_queue/
-              sudo ls -lah ls /var/local/submitty/logs/autograding_stack_traces/
-              sudo cat /var/local/submitty/logs/autograding_stack_traces/*
           - name: debug2
             continue-on-error: true
             run: |
-              sudo journalctl -u submitty_daemon_jobs_handler
-              sudo systemctl status submitty_daemon_jobs_handler
-              sudo systemctl status submitty_autograding_shipper
               sudo journalctl -u submitty_autograding_shipper
-              sudo systemctl status submitty_autograding_worker
               sudo journalctl -u submitty_autograding_worker
           - name: Integration Tests
             run : |
+               sudo apt-get install valgrind
                sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
 
