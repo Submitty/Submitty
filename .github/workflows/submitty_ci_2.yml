@@ -121,7 +121,7 @@ jobs:
               export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               # pip3 install .
-              pip3 show submitty_utils
+              # pip3 show submitty_utils
               sudo apt-get install python3-setuptools
               umask 022
               sudo -H pip3 install .
