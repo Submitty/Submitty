@@ -79,6 +79,7 @@ jobs:
               pip3 install python-pam
               pip3 install python-dateutil
               pip3 install paramiko
+              pip3 install numpy
               #needs to be globally available to daemon user created later
               sudo pip3 install docker
               sudo pip3 install paramiko
