@@ -1,5 +1,5 @@
 {
-    "assignment_message": "You are allowed 3 no penalty submissions.  You will lose 1 point for each 2 submissions beyond these non-penalty submissions.  The maximum penalty is -5 points.",
+    "auto_pts": 16,
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -7,8 +7,28 @@
             "test01/a.out"
         ],
         "compilation_to_validation": [
-            "test*/STDOUT*.txt",
-            "test*/STDERR*.txt",
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "test02/STDOUT*.txt",
+            "test02/STDERR*.txt",
+            "test03/STDOUT*.txt",
+            "test03/STDERR*.txt",
+            "test04/STDOUT*.txt",
+            "test04/STDERR*.txt",
+            "test05/STDOUT*.txt",
+            "test05/STDERR*.txt",
+            "test06/STDOUT*.txt",
+            "test06/STDERR*.txt",
+            "test07/STDOUT*.txt",
+            "test07/STDERR*.txt",
+            "test08/STDOUT*.txt",
+            "test08/STDERR*.txt",
+            "test09/STDOUT*.txt",
+            "test09/STDERR*.txt",
+            "test10/STDOUT*.txt",
+            "test10/STDERR*.txt",
+            "test11/STDOUT*.txt",
+            "test11/STDERR*.txt",
             "test01/a.out"
         ],
         "submission_to_compilation": [
@@ -26,16 +46,35 @@
         ],
         "submission_to_validation": [
             "**/README.txt",
-            "input_*.txt",
-            "**/*.pdf"
+            "**/*.pdf",
+            ".user_assigment_access.json"
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "test*/*.txt",
-            "test*/*_diff.json",
+            "test01/*.txt",
+            "test01/*_diff.json",
+            "test02/*.txt",
+            "test02/*_diff.json",
+            "test03/*.txt",
+            "test03/*_diff.json",
+            "test04/*.txt",
+            "test04/*_diff.json",
+            "test05/*.txt",
+            "test05/*_diff.json",
+            "test06/*.txt",
+            "test06/*_diff.json",
+            "test07/*.txt",
+            "test07/*_diff.json",
+            "test08/*.txt",
+            "test08/*_diff.json",
+            "test09/*.txt",
+            "test09/*_diff.json",
+            "test10/*.txt",
+            "test10/*_diff.json",
+            "test11/*.txt",
+            "test11/*_diff.json",
             "**/README.txt",
             "input_*.txt",
-            "test*/input_*.txt",
             "**/dispatched_actions.txt",
             "test01/STDERR.txt",
             "test01/STDOUT.txt",
@@ -54,7 +93,9 @@
             "test08/STDOUT.txt",
             "test08/STDERR.txt",
             "test09/STDOUT.txt",
-            "test09/STDERR.txt"
+            "test09/STDERR.txt",
+            "test10/STDOUT.txt",
+            "test10/STDERR.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -64,11 +105,33 @@
         "single_port_per_container": false,
         "use_router": false
     },
-    "grading_parameters": {
-        "AUTO_POINTS": 14,
-        "EXTRA_CREDIT_POINTS": 4
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
     },
+    "gradeable_message": "You are allowed 3 no penalty submissions.  You will lose 1 point for each 2 submissions beyond these non-penalty submissions.  The maximum penalty is -5 points.",
+    "grading_parameters": {
+        "AUTO_POINTS": 16,
+        "EXTRA_CREDIT_POINTS": 4,
+        "PENALTY_POINTS": 0
+    },
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
+    "id": "cpp_hidden_tests",
+    "item_pool": [],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 100000,
+    "max_submissions": 3,
+    "points_visible": 12,
     "publish_actions": false,
+    "required_capabilities": "default",
+    "ta_pts": 0,
     "testcases": [
         {
             "containers": [
@@ -83,11 +146,15 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
             "executable_name": "a.out",
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -99,6 +166,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test01",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Compilation",
             "type": "Compilation",
@@ -128,7 +197,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -143,10 +213,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -158,6 +232,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test02",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Frame Size 1",
             "use_router": false,
@@ -179,7 +255,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -194,10 +271,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -209,6 +290,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test03",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Frame Size 5",
             "use_router": false,
@@ -230,7 +313,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -245,10 +329,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -260,6 +348,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test04",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Frame Size 10",
             "use_router": false,
@@ -281,7 +371,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -296,11 +387,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
             "hidden": true,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": true,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -312,6 +406,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test05",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Frame Size 13",
             "use_router": false,
@@ -333,7 +429,66 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out 15"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "",
+            "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": true,
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "release_hidden_details": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "testcase_id": "test06",
+            "testcase_label": "",
+            "timestamped_stdout": false,
+            "title": "Frame Size 15",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 1.0,
+                    "expected_file": "frame_15.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -348,10 +503,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -363,6 +522,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test07",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Error Checking: Frame Size 0",
             "use_router": false,
@@ -383,7 +544,8 @@
                     "show_expected": "always",
                     "show_message": "always"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -398,11 +560,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
             "hidden": true,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -414,6 +579,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test08",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Error Checking: Frame Size Negative",
             "use_router": false,
@@ -434,7 +601,8 @@
                     "show_expected": "always",
                     "show_message": "always"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -449,11 +617,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
             "extra_credit": true,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -465,6 +636,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test09",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Error Checking: No Arguments",
             "use_router": false,
@@ -485,7 +658,8 @@
                     "show_expected": "always",
                     "show_message": "always"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -500,12 +674,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
             "extra_credit": true,
             "hidden": true,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -517,6 +693,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test10",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Error Checking: Too Many Arguments",
             "use_router": false,
@@ -537,7 +715,8 @@
                     "show_expected": "always",
                     "show_message": "always"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -550,12 +729,16 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "max_submissions": 3,
             "penalty": -0.5,
             "points": -5,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -567,11 +750,15 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test11",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Submission Limit",
             "type": "FileCheck",
-            "use_router": false
+            "use_router": false,
+            "view_testcase_message": true
         }
     ],
-    "timestamped_stdout": false
+    "timestamped_stdout": false,
+    "total_pts": 16
 }

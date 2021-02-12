@@ -10,12 +10,10 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\routers\FeatureFlag;
+use app\libraries\PollUtils;
 
-/**
- * @FeatureFlag("polls")
- */
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -60,17 +58,17 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/viewPoll", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return MultiResponse
      */
-    public function showPoll() {
-        if (!isset($_POST["poll_id"])) {
+    public function showPoll($poll_id) {
+        if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+        $poll = $this->core->getQueries()->getPoll($poll_id);
         if ($poll == null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(
@@ -153,6 +151,10 @@ class PollController extends AbstractController {
             if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
                 $answers[] = $_POST["option_id_" . $i];
             }
+        }
+        if (count($answers) == 0) {
+            $this->core->addErrorMessage("Polls must have at least one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
 
@@ -271,18 +273,18 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/editPoll", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
-    public function editPoll() {
-        if (!isset($_POST["poll_id"])) {
+    public function editPoll($poll_id) {
+        if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+        $poll = $this->core->getQueries()->getPoll($poll_id);
 
         if ($poll == null) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -348,6 +350,10 @@ class PollController extends AbstractController {
                 $answers[] = $_POST["option_id_" . $i];
             }
         }
+        if (count($answers) == 0) {
+            $this->core->addErrorMessage("Polls must have at least one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
         $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
 
         return MultiResponse::RedirectOnlyResponse(
@@ -358,42 +364,36 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     public function deletePoll() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $this->core->getQueries()->deletePoll($_POST["poll_id"]);
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['polls']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/viewResults", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
-    public function viewResults() {
-        if (!isset($_POST["poll_id"])) {
+    public function viewResults($poll_id) {
+        if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
-        $results = $this->core->getQueries()->getResults($_POST["poll_id"]);
+        $poll = $this->core->getQueries()->getPoll($poll_id);
+        $results = $this->core->getQueries()->getResults($poll_id);
         if ($poll == null) {
-            if (!isset($_POST["poll_id"])) {
-                $this->core->addErrorMessage("Invalid Poll ID");
-                return MultiResponse::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['polls']))
-                );
-            }
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
         }
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -403,5 +403,74 @@ class PollController extends AbstractController {
                 $results
             )
         );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/export", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function getPollExportData() {
+        $polls = PollUtils::getPollExportData($this->core->getQueries()->getPolls());
+        $file_name = date("Y-m-d") . "_" . $this->core->getConfig()->getSemester() . "_" . $this->core->getConfig()->getCourse() . "_" . "poll_questions" . ".json";
+        $data = FileUtils::encodeJson($polls);
+        if ($data === false) {
+            $this->core->addErrorMessage("Failed to export poll data. Please try again");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        header("Content-type: " . "application/json");
+        header('Content-Disposition: attachment; filename="' . $file_name . '"');
+        $this->core->getOutput()->renderString($data);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/import", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return RedirectResponse
+     */
+    public function importPollsFromJSON(): RedirectResponse {
+        $filename = $_FILES["polls_file"]["tmp_name"];
+        $polls = FileUtils::readJsonFile($filename);
+        if ($polls === false) {
+            $this->core->addErrorMessage("Failed to read file. Make sure the file is the right format");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $num_imported = 0;
+        $num_errors = 0;
+        foreach ($polls as $poll) {
+            if (
+                !array_key_exists("name", $poll)
+                || !array_key_exists("question", $poll)
+                || !array_key_exists("responses", $poll)
+                || !array_key_exists("correct_responses", $poll)
+                || !array_key_exists("release_date", $poll)
+            ) {
+                $num_errors = $num_errors + 1;
+                continue;
+            }
+            $name = $poll["name"];
+            $question = $poll["question"];
+            $responses = [];
+            $orders = [];
+            $i = 0;
+            foreach ($poll["responses"] as $id => $response) {
+                $response_id = intval($id);
+                $responses[$response_id] = $response;
+                $orders[$response_id] = $i;
+                $i = $i + 1;
+            }
+            $answers = $poll["correct_responses"];
+            $release_date = $poll["release_date"];
+            $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
+            $num_imported = $num_imported + 1;
+        }
+        if ($num_errors === 0) {
+            $this->core->addSuccessMessage("Successfully imported " . $num_imported . " polls");
+        }
+        else {
+            $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
+        }
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 }

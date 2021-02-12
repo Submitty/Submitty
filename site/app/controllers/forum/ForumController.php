@@ -486,7 +486,7 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/announcements", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
-    public function alterAnnouncement($type) {
+    public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
 
@@ -494,12 +494,12 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/pin", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/bookmark", methods={"POST"})
      */
-    public function pinThread($type) {
+    public function bookmarkThread(bool $type) {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
-        $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
+        $this->core->getQueries()->addBookmarkedThread($current_user, $thread_id, $type);
         $response = ['user' => $current_user, 'thread' => $thread_id, 'type' => $type];
         return $this->core->getOutput()->renderJsonSuccess($response);
     }
