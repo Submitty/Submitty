@@ -102,8 +102,6 @@ class TestSubmission(BaseTestCase):
                 except TimeoutException as ex:
                     self.driver.refresh()
 
-            if autograding_done == False:
-                print(self.driver.page_source)
             self.assertTrue(autograding_done)
 
     def change_submission_version(self):
