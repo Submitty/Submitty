@@ -116,8 +116,8 @@ class LateController extends AbstractController {
                 JsonResponse::getFailResponse($error)
             );
         }
-        if ((!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp']))) {
-            $error = "Datestamp must be mm/dd/yy";
+        if (!isset($_POST['datestamp'])) {
+            $error = "Deleting late days requires a valid date (mm/dd/yy)";
             $this->core->addErrorMessage($error);
 
             return MultiResponse::JsonOnlyResponse(

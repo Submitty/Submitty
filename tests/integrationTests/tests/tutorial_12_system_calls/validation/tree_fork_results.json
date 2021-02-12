@@ -1,8 +1,10 @@
 {
+    "automatic_grading_total": 2,
+    "nonhidden_automatic_grading_total": 2,
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -12,7 +14,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 ./a.out 10"
+            "test_name": "./a.out 10"
         },
         {
             "autochecks": [
@@ -22,11 +24,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 3 ./a.out 30"
+            "test_name": "./a.out 30"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 4 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

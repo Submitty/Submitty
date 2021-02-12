@@ -586,18 +586,30 @@ TestResults* dispatch::DrMemoryGrader_doit (const TestCase &tc, const nlohmann::
     }
   }
 
+  float result = 1.0;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
+
+
   int num_errors = 0;
   bool errors_message = false;
   bool no_errors_message = false;
   int zero_unique_errors = 0;
   bool non_zero_unique_errors = false;
+  int num_possible_leaks = 0;
+  bool errors_ignored = false;
 
   for (int i = 0; i < file_contents.size(); i++) {
     if (file_contents[i].size() >= 3 &&
         file_contents[i][0] == "~~Dr.M~~" &&
         file_contents[i][1] == "Error" &&
         file_contents[i][2][0] == '#') {
-      num_errors++;
+      if (file_contents[i].size() >= 5 &&
+          file_contents[i][3] == "POSSIBLE" &&
+          file_contents[i][4] == "LEAK") {
+        num_possible_leaks++;
+      } else {
+        num_errors++;
+      }
     }
     if (file_contents[i].size() == 4 &&
         file_contents[i][0] == "~~Dr.M~~" &&
@@ -613,10 +625,20 @@ TestResults* dispatch::DrMemoryGrader_doit (const TestCase &tc, const nlohmann::
       no_errors_message = true;
     }
 
+    if (file_contents[i].size() == 3 &&
+        file_contents[i][0] == "~~Dr.M~~" &&
+        file_contents[i][1] == "ERRORS" &&
+        file_contents[i][2] == "IGNORED:") {
+      errors_ignored = true;
+      messages.push_back(std::make_pair(MESSAGE_INFORMATION,"Note: Dr. Memory IGNORED ERRORS do not affect autograding"));
+    }
+
     if (file_contents[i].size() >= 3 &&
         file_contents[i][0] == "~~Dr.M~~" &&
         file_contents[i][2] == "unique,") {
-      if (file_contents[i][1] == "0") {
+      if (errors_ignored) {
+        // don't count these lines...
+      } else if (file_contents[i][1] == "0") {
         zero_unique_errors++;
       } else {
         non_zero_unique_errors = true;
@@ -624,13 +646,15 @@ TestResults* dispatch::DrMemoryGrader_doit (const TestCase &tc, const nlohmann::
     }
   }
 
-  float result = 1.0;
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-
   if (num_errors > 0) {
-    messages.push_back(std::make_pair(MESSAGE_FAILURE,std::to_string(num_errors) + " DrMemory Errors"));
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,std::to_string(num_errors) + " Dr. Memory Errors"));
     result = 0;
   }
+  if (num_possible_leaks > 0) {
+    messages.push_back(std::make_pair(MESSAGE_INFORMATION,std::to_string(num_possible_leaks) + " Possible Leaks -- we'll ignore these"));
+    result = 0;
+  }
+
   if (result > 0.01 &&
       (no_errors_message == false ||
        non_zero_unique_errors == true ||
@@ -1064,9 +1088,9 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   std::string validator_error_filename = "validation_stderr.txt";
   std::string validator_log_filename    = "validation_logfile.txt";
   std::string validator_json_filename   = "validation_results.json";
-  std::string final_validator_log_filename    = "validation_logfile_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
-  std::string final_validator_error_filename    = "validation_stderr_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
-  std::string final_validator_json_filename   = "validation_results_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".json";
+  std::string final_validator_log_filename    = "validation_logfile_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_error_filename    = "validation_stderr_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_json_filename   = "validation_results_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".json";
   std::string input_file_name           = "custom_validator_input.json";
 
 

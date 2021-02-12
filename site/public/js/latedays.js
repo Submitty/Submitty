@@ -12,7 +12,7 @@ function calculateLateDays(inputDate){
         delta = 0;
     }
     var diff = Math.floor(delta);
-    document.getElementById("late_days").value = diff;    
+    document.getElementById("late_days").value = diff;
 }
 
 $(document).ready(function() {
@@ -22,7 +22,7 @@ $(document).ready(function() {
                     button: [
                         {
                             label: "Now"
-                        }, 
+                        },
                         {
                             label: "End of time"
                         }
@@ -31,10 +31,10 @@ $(document).ready(function() {
                     onClick: (index, fp) => {
                         let date;
                         switch (index) {
-                            case 0: 
+                            case 0:
                                 date = new Date();
                                 break;
-                            case 1: 
+                            case 1:
                                 date = new Date("9998-01-01");
                                 break;
                         }
@@ -75,7 +75,7 @@ function updateLateDays(data) {
 
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
-    datestamp_mmddyy = datestamp.split(" ")[0];
+    //datestamp_mmddyy = datestamp.split(" ")[0];
     var url = buildCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
@@ -85,7 +85,7 @@ function deleteLateDays(user_id, datestamp) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
-                datestamp: datestamp_mmddyy
+                datestamp: datestamp
             },
             success: function() {
                 window.location.reload();

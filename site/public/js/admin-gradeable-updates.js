@@ -129,7 +129,12 @@ $(document).ready(function () {
         }
 
         let data = {'csrf_token': csrfToken};
-        data[this.name] = $(this).val();
+        if (this.name == 'hidden_files') {
+            data[this.name] = $(this).val().replace(/\s*,\s*/, ",");
+        }
+        else {
+            data[this.name] = $(this).val();
+        }
         let addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -293,6 +298,9 @@ function ajaxCheckBuildStatus() {
                 $('#rebuild-log-button').css('display','none');
                 $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
+            }
+            else if (response['data'] == 'warnings') {
+                $('#rebuild-status').html('Gradeable built with warnings');
             }
             else if (response['data'] == true) {
                 $('#rebuild-status').html('Gradeable build complete');

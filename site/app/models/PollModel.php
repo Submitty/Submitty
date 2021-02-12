@@ -44,6 +44,10 @@ class PollModel extends AbstractModel {
         return array_keys($this->responses);
     }
 
+    public function getResponsesWithKeys() {
+        return $this->responses;
+    }
+
     public function getAnswers() {
         return $this->answers;
     }
@@ -84,13 +88,6 @@ class PollModel extends AbstractModel {
 
     public function isCorrect($response) {
         return in_array($response, $this->getResponses()) && in_array($response, $this->answers);
-    }
-
-    public function getScore($user_id) {
-        if (!isset($this->user_responses[$user_id])) {
-            return 0.0;
-        }
-        return $this->isCorrect($this->user_responses[$user_id]) ? (float) $this->core->getConfig()->getPollsPtsForCorrect() : (float) $this->core->getConfig()->getPollsPtsForIncorrect();
     }
 
     public function isInPast() {

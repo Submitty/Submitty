@@ -186,6 +186,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
             $autograding_details = [
+                'id' => 'test',
                 'max_submission_size' => $max_size,
                 'part_names' => array_fill(0, $num_parts, "")
             ];
@@ -366,7 +367,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $entry->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
         $touch_file = implode("__", [$this->config['semester'], $this->config['course'], "test", "testUser", "1"]);
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", $touch_file));
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
@@ -417,7 +418,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 continue;
             }
             elseif ($iter->isFile()) {
-                $this->assertEquals(".submit.timestamp", $iter->getFilename());
+                $this->assertContains($iter->getFilename(), [".user_assignment_access.json", ".submit.timestamp"]);
             }
             elseif ($iter->isDir()) {
                 $this->assertTrue(in_array($iter->getFilename(), ['part1', 'part2']));
@@ -513,7 +514,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $iter->next();
         }
         sort($filenames);
-        $this->assertEquals([".submit.timestamp", "test2.txt"], $filenames);
+        $this->assertEquals([".submit.timestamp", ".user_assignment_access.json", "test2.txt"], $filenames);
     }
 
     /**
@@ -541,7 +542,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $file->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
 
         $this->addUploadFile('test2.txt');
 
@@ -563,7 +564,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $file->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test2.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test2.txt'], $files);
 
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
 
@@ -651,7 +652,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $file->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
 
         $this->addUploadFile('test2.txt');
         $_POST['previous_files'] = json_encode([['test1.txt']]);
@@ -675,7 +676,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $file->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt', 'test2.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt', 'test2.txt'], $files);
     }
 
     /**
@@ -707,7 +708,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
 
         $this->addUploadFile('test1.txt', 'new_file');
         $_POST['previous_files'] = json_encode([['test1.txt']]);
@@ -733,7 +734,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
     }
 
     /**
@@ -765,7 +766,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
 
         $this->addUploadZip('overlap', ['test1.txt' => 'new_file']);
         $_POST['previous_files'] = json_encode([['test1.txt']]);
@@ -791,7 +792,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test1.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
     }
 
     /**
@@ -834,7 +835,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $iter->next();
         }
         sort($files);
-        $this->assertEquals([".submit.timestamp", "basic_zip.zip", "test1.txt"], $files);
+        $this->assertEquals([".submit.timestamp", ".user_assignment_access.json", "basic_zip.zip", "test1.txt"], $files);
     }
 
     /**
@@ -891,7 +892,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $iter->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'test.txt', 'test2.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test.txt', 'test2.txt'], $files);
     }
 
     /**
@@ -917,7 +918,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $iter->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'filename with spaces.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'filename with spaces.txt'], $files);
     }
 
     /**
@@ -964,7 +965,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
 
         sort($files);
-        $this->assertEquals(['.submit.timestamp', 'filename with spaces.txt'], $files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json',  'filename with spaces.txt'], $files);
     }
 
     public function testVcsUpload() {
@@ -984,7 +985,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $iter->getFilename();
         }
         sort($files);
-        $this->assertEquals(['.submit.VCS_CHECKOUT', '.submit.timestamp'], $files);
+        $this->assertEquals(['.submit.VCS_CHECKOUT', '.submit.timestamp', '.user_assignment_access.json'], $files);
         $touch_file = implode("__", [$this->config['semester'], $this->config['course'], "test", "testUser", "1"]);
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__" . $touch_file));
     }

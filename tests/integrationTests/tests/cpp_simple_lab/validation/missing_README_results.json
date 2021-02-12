@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 20,
+    "nonhidden_automatic_grading_total": 20,
     "testcases": [
         {
             "autochecks": [
@@ -13,16 +15,16 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 README",
+            "test_name": "README",
             "testcase_message": "README missing."
         },
         {
             "points_awarded": 3,
-            "test_name": "Test 2 Compilation"
+            "test_name": "Compilation"
         },
         {
             "points_awarded": 2,
-            "test_name": "Test 3 Dummy Compilation testing view_testcase_message"
+            "test_name": "Dummy Compilation testing view_testcase_message"
         },
         {
             "autochecks": [
@@ -34,7 +36,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 4 non leap year"
+            "test_name": "non leap year"
         },
         {
             "autochecks": [
@@ -46,7 +48,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 5 leap year"
+            "test_name": "leap year"
         },
         {
             "autochecks": [
@@ -58,7 +60,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 6 corner case A"
+            "test_name": "corner case A"
         },
         {
             "autochecks": [
@@ -70,7 +72,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 7 corner case B"
+            "test_name": "corner case B"
         },
         {
             "autochecks": [
@@ -82,7 +84,7 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 8 corner case C"
+            "test_name": "corner case C"
         },
         {
             "autochecks": [
@@ -100,7 +102,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 9 error case A"
+            "test_name": "error case A"
         },
         {
             "autochecks": [
@@ -118,11 +120,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 10 error case B"
+            "test_name": "error case B"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 11 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

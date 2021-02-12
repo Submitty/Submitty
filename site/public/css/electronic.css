@@ -13,9 +13,12 @@ main#main {
 
 main#main.full-screen-mode {
     z-index: 10;
-    animation-duration: 0.8s;
-    animation-name: scaleUp;
-    animation-fill-mode: forwards;
+    transform: scale(1, 1);
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
 }
 
 main#main.full-screen-mode .content {
@@ -1372,6 +1375,12 @@ tr.is_publish {
     margin-bottom: 10px;
     resize: none;
 }
+
+/* Notebook panel */
+#notebook-view {
+    padding: 10px;
+}
+
 
 /* Media queries */
 @media (max-width: 540px) {

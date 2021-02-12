@@ -1,8 +1,10 @@
 {
+    "automatic_grading_total": 20,
+    "nonhidden_automatic_grading_total": 12,
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -14,7 +16,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 2 Frame Size 1"
+            "test_name": "Frame Size 1"
         },
         {
             "autochecks": [
@@ -26,7 +28,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 3 Frame Size 5"
+            "test_name": "Frame Size 5"
         },
         {
             "autochecks": [
@@ -38,7 +40,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 4 Frame Size 10"
+            "test_name": "Frame Size 10"
         },
         {
             "autochecks": [
@@ -50,23 +52,19 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 5 Frame Size 13"
+            "test_name": "Frame Size 13"
         },
         {
             "autochecks": [
                 {
-                    "actual_file": "test06/execute_logfile.txt",
-                    "description": "Execution Logfile"
-                },
-                {
-                    "actual_file": "test06/STDERR.txt",
-                    "description": "STDERR.txt",
-                    "difference_file": "test06/1_diff.json",
-                    "expected_file": "test_output/testassignment/error_nonpositive.txt"
+                    "actual_file": "test06/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test06/0_diff.json",
+                    "expected_file": "test_output/testassignment/frame_15.txt"
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 6 Error Checking: Frame Size 0"
+            "test_name": "Frame Size 15"
         },
         {
             "autochecks": [
@@ -82,7 +80,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 7 Error Checking: Frame Size Negative"
+            "test_name": "Error Checking: Frame Size 0"
         },
         {
             "autochecks": [
@@ -94,11 +92,11 @@
                     "actual_file": "test08/STDERR.txt",
                     "description": "STDERR.txt",
                     "difference_file": "test08/1_diff.json",
-                    "expected_file": "test_output/testassignment/error_arguments.txt"
+                    "expected_file": "test_output/testassignment/error_nonpositive.txt"
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 8 Error Checking: No Arguments"
+            "test_name": "Error Checking: Frame Size Negative"
         },
         {
             "autochecks": [
@@ -114,12 +112,28 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 9 Error Checking: Too Many Arguments"
+            "test_name": "Error Checking: No Arguments"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test10/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                },
+                {
+                    "actual_file": "test10/STDERR.txt",
+                    "description": "STDERR.txt",
+                    "difference_file": "test10/1_diff.json",
+                    "expected_file": "test_output/testassignment/error_arguments.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Error Checking: Too Many Arguments"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 10 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
-       }
+        }
     ]
 }

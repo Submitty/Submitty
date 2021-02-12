@@ -1,23 +1,27 @@
 {
-"testcases": [
-		{
-			"test_name": "Test 1 Lab 1 Checkpoint 1",
-			"autochecks": [
-			    {
-                                "actual_file": "test01/execute_logfile.txt",                                "description": "Execution Logfile"
-                            },
-				{					"actual_file":"test01/STDOUT.txt",
-					"expected_file":"test_output/testassignment/hw01part1_sol.txt",
-					"difference_file":"test01/0_diff.json",
-					"description": "Program Output"
-				}
-			],
-			"points_awarded": 0
-		},
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
+    "testcases": [
+        {
+            "test_name": "Lab 1 Checkpoint 1",
+            "autochecks": [
                 {
-                        "points_awarded": 0,
-                        "test_name": "Test 2 Submission Limit",
-                        "view_testcase": false
-		}
-	]
+                    "actual_file": "test01/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                },
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "expected_file": "test_output/testassignment/hw01part1_sol.txt",
+                    "difference_file": "test01/0_diff.json",
+                    "description": "Program Output"
+                }
+            ],
+            "points_awarded": 0
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
 }

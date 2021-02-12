@@ -792,6 +792,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             self.log_stack_trace(traceback.format_exc())
             self.log_message("ERROR: Could not verify execution mode status.")
             return
+        finally:
+            autograding_utils.cleanup_stale_containers(self.untrusted_user)
 
         try:
             self.create_containers(containers, script, arguments)
