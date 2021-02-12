@@ -23,7 +23,7 @@ class PollUtils {
                 $responses[$response] = $poll->getResponseString($response);
             }
             $data[] = [
-                "id" => $poll->getID(),
+                "id" => $poll->getId(),
                 "name" => $poll->getName(),
                 "question" => $poll->getQuestion(),
                 "responses" => $responses,

@@ -57,7 +57,7 @@
 
         <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+            <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
             <label for="poll-name">

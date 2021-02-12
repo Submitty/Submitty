@@ -339,7 +339,7 @@ class PollController extends AbstractController {
             );
         }
         $file_path = null;
-        if (array_key_exists("image_file", $_FILES) && $_FILES["image_file"]["name"] != "") {
+        if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
             copy($file["tmp_name"], $file_path);
             $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["name"]);

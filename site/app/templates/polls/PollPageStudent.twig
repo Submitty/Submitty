@@ -7,7 +7,7 @@
     <br/>
     <form method="post" action="{{ base_url }}/submitResponse">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
         <fieldset>
             <legend>
                 <h2> Possible responses: </h2>
