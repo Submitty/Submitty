@@ -135,7 +135,6 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
-     * @return MultiResponse
      */
     public function getSingleGradeInquiryPost($gradeable_id) {
         //TODO: look into why these aren't getting sent by websockets
