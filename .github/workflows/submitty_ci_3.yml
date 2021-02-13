@@ -186,3 +186,17 @@ jobs:
             run : |
               sudo apt-get install valgrind
               sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+          - name: debug
+            run: |
+              sudo journalctl -u submitty_daemon_jobs_handler
+          - name: debug2
+            run: |
+              sudo journalctl -u submitty_autograding_shipper
+          - name: debug3
+            run: |
+              sudo journalctl -u submitty_autograding_worker
+
+
+
+
+

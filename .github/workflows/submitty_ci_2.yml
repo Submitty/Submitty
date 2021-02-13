@@ -41,6 +41,7 @@ jobs:
                 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+                sudo chmod -R a+rwx /tmp/
 
           - uses: actions/setup-python@v2
             with:
@@ -200,16 +201,15 @@ jobs:
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
+          - name: debug
+            run: |
+              sudo journalctl -u submitty_daemon_jobs_handler
           - name: debug2
-            continue-on-error: true
             run: |
               sudo journalctl -u submitty_autograding_shipper
-              sudo journalctl -u submitty_autograding_worker
           - name: debug3
-            continue-on-error: true
             run: |
-              ls -lah /usr/local/submitty/config/
-              sudo cat /usr/local/submitty/config/autograding_workers.json
+              sudo journalctl -u submitty_autograding_worker
          
 
       
