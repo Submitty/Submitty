@@ -207,6 +207,7 @@ jobs:
               sudo journalctl -u submitty_autograding_worker
           - name: debug3
             continue-on-error: true
+            run: |
               ls -lah /usr/local/submitty/config/
               sudo cat /usr/local/submitty/config/autograding_workers.json
          
