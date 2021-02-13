@@ -9,7 +9,7 @@ namespace app\libraries;
  * to the user so they don't have to try and look up these codes in the PHP manual
  */
 class ErrorMessages {
-    
+
     /**
      * Given error code from the $_FILES['file']['error'] array, will return a human string for the error
      *
@@ -47,7 +47,7 @@ class ErrorMessages {
       * @return string Message for what went wront with upload
       */
     public static function getZipErrorMessage($res) {
-       
+
         if ($res === true) {
             return "No error.";
         }

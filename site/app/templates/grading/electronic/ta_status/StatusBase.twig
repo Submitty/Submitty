@@ -1,0 +1,412 @@
+<script>
+    function tracing(xBuckets,yValue) {
+        var trace1 = {
+            x: xBuckets,
+            y: yValue,
+            mode: 'markers',
+            name: 'Students with Each Score',
+            type: 'bar',
+            text: yValue,
+            textposition: 'auto',
+            hoverinfo: 'none',
+            marker: {
+                color: 'rgb(48,99,152)',
+                opacity: 1.0,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 1.5
+                }
+            }
+        };
+        var data = [trace1];
+        return data;
+    }
+
+    function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
+        let loop = Math.ceil(range/increment);
+        let tracking = min;
+        for(i = 0;i<loop;i++){
+            betterBuckets.set(tracking,0);
+            tracking = +parseFloat(tracking+increment).toPrecision(4);
+            if(i===(loop-1)){
+                xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <="+max);
+            }
+            else{
+               xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <"+tracking);
+            }
+        }
+        var maxMin = tracking-increment;
+        var ct = 0;
+        for(i = 0;i<xValue.length;i++){
+           ct++;
+           for(var [key,value] of betterBuckets){
+                if(key===maxMin){
+                    if(xValue[i]>=key&&xValue[i]<=max){
+                       betterBuckets.set(key,value+1);
+                   }
+                }
+               else{
+                    if(xValue[i]>=key && xValue[i]<(key+increment)){
+                        betterBuckets.set(key,value+1);
+                    }
+                }
+           }
+        }
+        for(var[key,value]of betterBuckets){
+            if(value>modeCount){
+                modeCount=value;
+                mode = key+" to <"+(key+increment);
+            }
+            yValue.push(value);
+        }
+        return mode;
+    }
+
+
+    function fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
+        let bucketSize = Math.floor(range / 10);
+        if (bucketSize === 0) {
+            bucketSize = range / 10;
+        }
+
+        return fillBuckets(range,bucketSize,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+    }
+
+
+    function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
+        var bucketInputTotal = document.getElementById("bucket-size-total");
+        var bucketInputAuto = document.getElementById("bucket-size-auto");
+
+        xBuckets = [];
+        yValue=[];
+        betterBuckets=new Map();
+        mode=0;
+        modeCount=0;
+        {% if overall_average.getAverageScore() != "" %}
+            if( bucketInputTotal.value !=''){
+                let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
+                if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return;
+                }
+                mode=fillBuckets(rangeT,bucketInputTotalValue,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
+                var dataTotal=tracing(xBuckets,yValue);
+                Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
+                bucketInputTotal.value='';
+                document.getElementById("mySmallDiv").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
+                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT;
+                return mode;
+            }
+        {% endif %}
+        {% if autograded_average != null or autograded_average.getCount() != 0  %}
+            let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
+            if(bucketInputAuto.value!=''){
+                if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return ;
+                }
+                mode=fillBuckets(range,bucketInputAutoValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+                var dataAuto = tracing(xBuckets,yValue);
+                Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
+                bucketInputAuto.value='';
+                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+                return mode;
+            }
+        {% endif %}
+        mode=fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+        return  mode;
+    }
+</script>
+<body>
+
+
+<!-- If grader is limited access or full access grader -->
+{% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Grader</h1>
+    <p>
+        You will be reviewing materials submitted by students and these materials are considered confidential.<br>
+        The author of this material is entitled to copyright protection. As such,
+    <ul>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material.<br>
+            You must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+{% if blind_status == 3 %}            
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be <em>blinded</em>.<br>
+            You should not attempt to discover the identities of the students.<br>
+            However, their identities may be unintentionally or unavoidably revealed.<br>
+            Please respect the students' privacy.</li>
+{% endif %}
+    </ul>
+    </p><p>
+        Please communicate with the instructor if you realize you have a conflict of interest with a student that you have been assigned to grade.
+    </p>
+</div>
+<!-- Else if grader is a student peer grader -->
+{% elseif core.getUser().getGroup() == 4 %}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Peer Grader</h1>
+    <p>
+        You will be reviewing materials submitted by your classmates and these materials are considered confidential.<br>
+        Your classmate, the author of this material, is entitled to copyright protection. As such,
+    <ul>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+{% if blind_status == 3 %}            
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be double-blind.<br>
+            You should not attempt to discover the identities of your classmates.<br>
+            However, the identities of the classmates may be unintentionally or unavoidably revealed.<br>
+            Please respect your classmates' privacy.</li>
+{% elseif blind_status == 2 %}
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be single-blind.</li>
+{% else %}
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be unblinded.</li>
+{% endif %}
+    </ul>
+    </p><p>
+        Please communicate with your instructor if you realize you have a conflict of interest with a peer that you have been assigned to grade.
+    </p>
+</div>
+{% endif %}
+
+<div class = "content">
+    <h1>Status of {{ gradeable_title }}</h1>
+
+    {% if rotating_sections_error %}
+        <div name="grader-warning-popup status">
+            <p> WARNING: This page may be inaccurate.  <br />
+                This gradeable assigns graders by Rotating Section, but Rotating Sections are not set up properly. <br />
+                To fix Rotating Sections, go to the Manage Sections page. <br />
+            </p>
+        </div>
+    {% endif %}
+
+    {# Top buttons #}
+    <div style="margin-top: 20px; vertical-align:bottom;">
+        {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
+            <a class="btn btn-primary" style="float: left"
+                {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
+                    href="{{ details_view_all_url }}">
+                {% else %}
+                    href="{{ details_url }}">
+                {% endif %}
+
+                Grading Index
+            </a>
+            <ul style="margin-left: 25px; margin-top: -5px; float: left">
+                <li>View Submissions</li>
+                {%  if team_assignment %}
+                    <li>Manage Teams</li>
+                {% endif %}
+                {% if component_averages|length != 0 %}
+                    <li>Manual Grading</li>
+                    <li>Grade Inquiries</li>
+                {% endif %}
+            </ul>
+            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+                {% if overall_average == null or overall_average.getCount() == 0 %}
+                    {% if team_assignment %}
+                        <a class="btn btn-primary"
+                           href="{{ grade_url }}" style="float: right;">
+                            My Next Ungraded Team
+                        </a>
+                    {% else %}
+                        <a class="btn btn-primary"
+                           href="{{ grade_url }}" style="float: right;">
+                            My Next Ungraded Student
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+    {# /Top Button #}
+</div>
+
+<div id="container-rubric" class = "content">
+    {% if graded_percentage == -1 %}
+        <div class="sub">
+            No Grading To Be Done! :)
+        </div>
+    {% elseif core.getUser().getGroup() < 4 %}
+        <form id="gradeable-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
+        <div class="tab-bar-wrapper">
+            <a class="nav-bar key_to_click" id="page_0_nav" onclick="onChangeNavTab(0);">Data</a>
+            <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Manual Grading Component Averages</a>
+            <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Autograding Histogram</a>
+            <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Overall Histogram</a>
+        </div>
+        <br/>
+        <div class="modal-body">
+            <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
+            
+            {# Only create div if we can create the stats #}
+            {% if component_averages|length != 0 %}
+                <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
+            {% endif %}
+
+            {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
+                <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusAutogradingHistogram.twig')  }}</div>
+            {% endif %}
+
+            {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
+                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/StatusOverallHistogram.twig')  }}</div>
+            {% endif %}
+        </div>
+        <br/>
+        </form>
+    {% else %}
+        {# This needs to be updated after randomization works correctly for Teams #}
+        {% if team_assignment %}
+            {# Update this after Teams work fine with Randomized Peer Assignments <br>
+            <b>Total Teams assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+            #}
+        {% else %}
+            <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {% endif %}
+    {% endif %}
+    <div style="margin-top: 20px;">
+        {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
+            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+                {%  if team_assignment %}
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Teams
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
+                {% else %}
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"  
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Students
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
+                {% endif %}
+
+            {% endif %}
+            {% if core.getUser().accessFullGrading() and submitted_total %}
+                <details class="btn btn-default" id="details_button">
+                    <summary float="left">
+                        <a id="zip_link_full"
+                            href="{{ download_zip_url }}?type=all">
+                            Download Zip of All Students
+                        </a>
+                    </summary>
+                   
+                    <div>
+                        <form class="dropdown">
+                            <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="results_folder"> Include Results Folder</label><br>
+                            <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="active_version"> Only Current Active Version</label><br>
+                        </form>
+                    </div>
+                </details>
+            {% endif %}
+            {% if core.getUser().accessFullGrading() %}
+                <a class="btn btn-default"
+                   href="{{ bulk_stats_url }}"style="float: right">
+                    Bulk Upload Forensics
+                </a>
+            {% endif %}
+        {% endif %}
+    </div> 
+</div>
+</body>
+
+<script>
+    let adminGradeableNavTab = 0;
+
+    function onChangeNavTab(tab) {
+        if (tab > 3 || tab < 0) {
+            alert('Invalid Navigation');
+            return;
+        }
+
+        // change the url so if the user refreshes the page, they stay on the same tab
+        window.history.replaceState("", "", buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'status']) + `?nav_tab=${tab}`);
+        adminGradeableNavTab = tab;
+
+        //$('.page-content').hide();
+        
+        for (var i =0 ; i<4 ;i++) {
+            $('#page_' + i + '_nav').removeClass('active-btn');
+            $('#page_' + i + '_content').hide();
+        }
+        $('#page_' + tab + '_nav').addClass('active-btn');
+        $('#page_' + tab + '_content').show();
+    }
+
+    $(document).ready(function() {
+        // Disable any nav-bar buttons with no content
+        $('.nav-bar').each(function () {
+            if ($('#page_' + this.id.split('_')[1] + '_content').length == 0) {
+                $('#page_' + this.id.split('_')[1] + '_nav').hide();
+            }
+            $(this).addClass("normal-btn");
+        });
+
+        // Click on tab 0
+        onChangeNavTab(adminGradeableNavTab);
+    });
+
+    function editZipDownload(download_zip_url, limited) {
+        var results = document.getElementById("results_folder");
+        var active = document.getElementById("active_version");
+
+        if (results.checked == true && active.checked == true){
+            download_option = "both";
+        }
+        else if (results.checked == true) {
+            download_option = "results";
+        }
+        else if (active.checked == true) {
+            download_option = "active";
+        }
+        else {
+            download_option = "all";
+        }
+
+        if (limited) {
+            if (download_option == "all") {
+                $("#zip_link").attr("href", download_zip_url);
+            }
+            else {
+                $("#zip_link").attr("href", download_zip_url + "?type=limited_" + download_option);
+            }
+        }
+        else {
+            $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
+        }
+    }
+</script>

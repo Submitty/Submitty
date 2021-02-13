@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 5,
+    "nonhidden_automatic_grading_total": 5,
     "testcases": [
         {
             "autochecks": [
@@ -24,7 +26,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Python 2 Testing"
+            "test_name": "Python 2 Testing"
         },
         {
             "autochecks": [
@@ -50,7 +52,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Python 3 Testing"
+            "test_name": "Python 3 Testing"
         },
         {
             "autochecks": [
@@ -79,7 +81,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 3 C Compilation",
+            "test_name": "C Compilation",
             "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
@@ -108,11 +110,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 4 C Testing"
+            "test_name": "C Testing"
         },
         {
             "points_awarded": 2,
-            "test_name": "Test 5 C++ Compilation"
+            "test_name": "C++ Compilation"
         },
         {
             "autochecks": [
@@ -124,11 +126,11 @@
                 }
             ],
             "points_awarded": 3,
-            "test_name": "Test 6 C++ Testing"
+            "test_name": "C++ Testing"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 7 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

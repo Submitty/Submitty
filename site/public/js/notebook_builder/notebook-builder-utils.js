@@ -25,8 +25,12 @@ async function uploadFile(file, g_id, directory) {
         console.log(`Successfully uploaded ${file.name}.`);
     }
     else {
-        displayErrorMessage(`An error occurred uploading ${file.name}.`);
+        displayErrorMessage(`An error occurred uploading ${file.name}.  Check browser developer console for details.`);
         console.error(result.message);
+
+        if (result.data && Array.isArray(result.data)) {
+            result.data.forEach(msg => console.error(msg));
+        }
     }
 }
 

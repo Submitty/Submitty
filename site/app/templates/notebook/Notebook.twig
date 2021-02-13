@@ -1,11 +1,15 @@
 <div class="notebook">
+    <script>
+        const USER_ID = "{{student_id}}";
+    </script>
 
     {# Render content #}
     {% set num_codeboxes = 0 %}
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
+    {% set data_non_item_ref = 0 %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}">
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
@@ -38,7 +42,7 @@
             {# Handle if cell is short_answer #}
             {% elseif cell.type == "short_answer" %}
 
-                <div>
+                <div class="markdown">
                     {% if cell.label %}
                         {{ cell.label | markdown }}
                     {% else %}
@@ -69,6 +73,10 @@
                     if ('{{ cell.programming_language }}') {
                         config_{{ num_codeboxes }}.lineNumbers = true;
                         config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    }
+
+                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                        config_{{ num_codeboxes }}.lineWrapping = true;
                     }
 
                     if ({{ cell.rows }} > 0) {
@@ -104,7 +112,7 @@
                           class="mc"
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
-                        <legend>
+                        <legend class="markdown">
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
@@ -115,7 +123,7 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
 
                                 <input type="checkbox" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
@@ -127,7 +135,7 @@
                             </label>
                         {% endfor %}
                     {% else %}
-                        <legend>
+                        <legend class="markdown">
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
@@ -138,7 +146,7 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
                                 <input type="radio" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
@@ -240,6 +248,7 @@
 
             tgts = nb.querySelectorAll('.CodeMirror');
             for(let x of tgts){
+                x.CodeMirror.setOption("readOnly", true);
                 x.CodeMirror.refresh();
             }
 

@@ -1,0 +1,493 @@
+{
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class",
+            "test02/a.out"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt",
+            "test02/a.out"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
+            "**/dispatched_actions.txt",
+            "test01/README.txt",
+            "test02/STDERR.txt",
+            "test02/STDOUT.txt",
+            "test03/output.txt",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt",
+            "test04/output.txt",
+            "test04/STDOUT.txt",
+            "test04/STDERR.txt",
+            "test05/output.txt",
+            "test05/STDOUT.txt",
+            "test05/STDERR.txt",
+            "test06/output.txt",
+            "test06/STDOUT.txt",
+            "test06/STDERR.txt",
+            "test07/output.txt",
+            "test07/STDOUT.txt",
+            "test07/STDERR.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest",
+        "number_of_ports": 1,
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "grading_parameters": {
+        "AUTO_POINTS": 25,
+        "EXTRA_CREDIT_POINTS": 0,
+        "TA_POINTS": 0,
+        "TOTAL_POINTS": 25
+    },
+    "publish_actions": false,
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "README",
+            "type": "FileCheck",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "README.txt",
+                    "deduction": 1.0,
+                    "description": "README.txt",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "clang++ -Wall -o a.out -- *.cpp"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "a.out",
+            "points": 3,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "a.out",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out CatBreeds.txt output.txt"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./byChar.exe input.txt output.txt",
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Regular char by char comparision",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "output.txt",
+                    "comparison": "byLinebyChar",
+                    "deduction": 1.0,
+                    "expected_file": "inst_output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out CatBreeds.txt output.txt"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./byWord.exe input.txt output.txt",
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Test of by word comparison",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "output.txt",
+                    "comparison": "byLinebyChar",
+                    "deduction": 1.0,
+                    "expected_file": "inst_output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out CatBreeds.txt output.txt"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./byLine.exe input.txt output.txt",
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Test of by line comparison",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "output.txt",
+                    "comparison": "byLine",
+                    "deduction": 1.0,
+                    "expected_file": "inst_output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out CatBreeds.txt output.txt"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./byLineNoWhite.exe input.txt output.txt",
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Test of by line without whitespace comparison",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "output.txt",
+                    "comparison": "byLine",
+                    "deduction": 1.0,
+                    "expected_file": "inst_output.txt",
+                    "ignoreWhitespace": true,
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out CatBreeds.txt output.txt"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./byChar.exe input.txt output.txt",
+            "dispatcher_actions": [],
+            "partial_credit": false,
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Regular char by char comparision NO PARTIAL CREDIT",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "output.txt",
+                    "comparison": "byLinebyChar",
+                    "deduction": 1.0,
+                    "expected_file": "inst_output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "publish_actions": false,
+            "timestamped_stdout": false,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ],
+    "timestamped_stdout": false
+}

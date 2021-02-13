@@ -15,6 +15,11 @@ th{
   margin-bottom: .5rem;
 }
 
+.enable-audible,
+.disable-audible {
+    display: none;
+}
+
 /*
   This will hide elements on phones. This is useful for extra content that
   is not normally needed such as a user id
@@ -61,4 +66,18 @@ th{
 #announcement {
   background: var(--standard-light-gray);
   padding: .75rem;
+}
+
+#contact_info {
+    width: 620px;
+}
+
+.fully-transparent {
+    background:transparent!important;
+    color:white;
+}
+
+.filter-buttons:hover, .filter-buttons:focus{
+    opacity: 0.8;
+    filter: alpha(opacity=80);
 }

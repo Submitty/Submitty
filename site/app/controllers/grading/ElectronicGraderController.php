@@ -50,6 +50,155 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
+
+    /**
+     * Gnenerates histogram data needed for the TA stats page
+     * @param GradedGradeable[] $overall_scores
+     * @return array of histogram data
+     */
+    public function generateHistogramData($overall_scores) {
+        $histogram = [
+            "bTA" => [],
+            "tTA" => [],
+            "bAuto" => [],
+            "VerConf" => 0,
+            "noSub" => 0,
+            "noActive" => 0,
+            "GradeInq" => 0,
+            "IncompGrading" => 0,
+            "cancelledSub" => 0
+        ];
+
+        // Iterate through all the Scores
+        foreach ($overall_scores as $ov) {
+            if ($ov->getTaGradedGradeable() == null) {
+                continue;
+            }
+
+            // If Autograded, add the points to the array of autograded scores
+            if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0 && $ov->getTaGradedGradeable() != null) {
+                if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                    if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
+                        if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
+                            $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                        }
+                        else {
+                            $histogram["cancelledSub"] += 1;
+                        }
+                    }
+                }
+            }
+
+            if (!$ov->getAutoGradedGradeable()->hasSubmission()) {
+                // if no submission and not in Null section add to count
+                if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                    $histogram["noSub"] += 1;
+                }
+            }
+            elseif ($ov->getAutoGradedGradeable()->getActiveVersion() == 0) {
+                // if no active version and not in Null section add to count
+                if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                    $histogram["noActive"] += 1;
+                }
+            }
+            elseif ($ov->getGradeable()->isTaGrading()) {
+                if ($ov->getOrCreateTaGradedGradeable()->anyGrades()) {
+                    // if grade inquiry and not in Null section add to count
+                    if ($ov->hasActiveRegradeRequest()) {
+                        if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                            $histogram["noActive"] += 1;
+                        }
+                    }
+                    elseif ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->hasVersionConflict()) {
+                        // if version conflict and not in Null section add to count
+                        if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                            $histogram["VerConf"] += 1;
+                        }
+                    }
+                    elseif (!$ov->isTaGradingComplete()) {
+                        // if assignment incomplete and not in Null section add to count
+                        $histogram["IncompGrading"] += 1;
+                    }
+                    elseif ($ov->isTaGradingComplete()) {
+                        // otherwise add the overall grade to array and total score possible to array (possible future use)
+                        if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+                            $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore()]);
+                            $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getGradeable()->getManualGradingPoints()]);
+                        }
+                    }
+                }
+            }
+        }
+        return $histogram;
+    }
+
+    /**
+     * Helper function for Randomization
+     * @param Array $student_array
+     * @param int $number_to_grade
+     * @return Array $final_grading_info
+     */
+    private function setRandomizedGraders(array $student_array, int $number_to_grade) {
+        $final_grading_info = [];
+        $graded_array = $student_array;
+        /*n_array_peers : An Array of arrays that holds information on to be graded peers
+        [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
+        A grades C and E and is graded by C and E.
+        */
+        $n_array_peers = [];
+        shuffle($student_array);
+        array_push($n_array_peers, $student_array);
+        /*final_grading_info : An Array with clear structure of grading rules for peer grading
+        [ [A,[C,E]],[B,[F,D]], ...]
+        A grades C and E, B grades F and D ..and so on!
+        */
+            $max_offset = count($student_array);
+            $offset_array = [];
+            $temp_offset = [];
+        for ($i = 1; $i < $max_offset; ++$i) {
+            array_push($temp_offset, $i);
+        }
+        /* $offset_array contains randomly chosen offsets.
+        $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
+        Upon every random choice of an offset from $temp_offset, the value is removed from it.
+        */
+        for ($i = 0; $i < $number_to_grade; ++$i) {
+            $random_offset = array_rand($temp_offset, 1);
+            array_push($offset_array, $temp_offset[$random_offset]);
+            unset($temp_offset[$random_offset]);
+        }
+        foreach ($offset_array as $element) {
+            $temp_array = $student_array;
+            for ($i = 0; $i < $element; $i++) {
+                array_push($temp_array, array_shift($temp_array));
+            }
+            array_push($n_array_peers, $temp_array);
+        }
+        for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
+            $temp = [];
+            for ($j = 1; $j < count($n_array_peers); ++$j) {
+                array_push($temp, $n_array_peers[$j][$i]);
+            }
+            array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
+        }
+            return $final_grading_info;
+    }
+
+    /**
+     * Helper function for all grade all in randomized peer assignments
+     * @param Array $student_array
+     * @return Array $final_grading_info
+     */
+    private function setAllGradAllGrading($student_array) {
+        $final_grading_info = [];
+        for ($grader = 0; $grader < count($student_array); ++$grader) {
+            $peer_array = $student_array;
+            unset($peer_array[$grader]);
+            $peer_array = array_values($peer_array);
+            array_push($final_grading_info, [$student_array[$grader],$peer_array]);
+        }
+        return $final_grading_info;
+    }
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
@@ -114,51 +263,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
                 else {
-                    $graded_array = $student_array;
-                /*n_array_peers : An Array of arrays that holds information on to be graded peers
-                [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
-                A grades C and E and is graded by C and E.
-                */
-                    $n_array_peers = [];
-                    shuffle($student_array);
-                    array_push($n_array_peers, $student_array);
-                /*final_grading_info : An Array with clear structure of grading rules for peer grading
-                [ [A,[C,E]],[B,[F,D]], ...]
-                A grades C and E, B grades F and D ..and so on!
-                */
-                    $max_offset = count($student_array);
-                    $offset_array = [];
-                    $temp_offset = [];
-                    for ($i = 1; $i < $max_offset; ++$i) {
-                        array_push($temp_offset, $i);
-                    }
-                /* $offset_array contains randomly chosen offsets.
-                $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
-                Upon every random choice of an offset from $temp_offset, the value is removed from it.
-                */
-                    for ($i = 0; $i < $number_to_grade; ++$i) {
-                        $random_offset = array_rand($temp_offset, 1);
-                        array_push($offset_array, $temp_offset[$random_offset]);
-                        unset($temp_offset[$random_offset]);
-                    }
-                    foreach ($offset_array as $element) {
-                        $temp_array = $student_array;
-                        for ($i = 0; $i < $element; $i++) {
-                            array_push($temp_array, array_shift($temp_array));
-                        }
-                        array_push($n_array_peers, $temp_array);
-                    }
-                    for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
-                        $temp = [];
-                        for ($j = 1; $j < count($n_array_peers); ++$j) {
-                            array_push($temp, $n_array_peers[$j][$i]);
-                        }
-                        array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
-                    }
-                    if ($number_to_grade < 1) {
-                        $gradeable->setRandomPeerGradersList($final_grading_info);
-                        return JsonResponse::getSuccessResponse("Clear Peer Matrix");
-                    }
+                    $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
                 }
             }
             $gradeable->setRandomPeerGradersList($final_grading_info);
@@ -194,62 +299,11 @@ class ElectronicGraderController extends AbstractController {
             $all_grade_all = true;
         }
         if ($all_grade_all) {
-            $final_grading_info = [];
-            for ($grader = 0; $grader < count($student_array); ++$grader) {
-                $peer_array = $student_array;
-                unset($peer_array[$grader]);
-                $peer_array = array_values($peer_array);
-                array_push($final_grading_info, [$student_array[$grader],$peer_array]);
-            }
+            $final_grading_info = $this->setAllGradAllGrading($student_array);
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse($final_grading_info);
         }
-        $graded_array = $student_array;
-          /*n_array_peers : An Array of arrays that holds information on to be graded peers
-          [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
-          A grades C and E and is graded by C and E.
-          */
-        $n_array_peers = [];
-        shuffle($student_array);
-        array_push($n_array_peers, $student_array);
-          /*final_grading_info : An Array with clear structure of grading rules for peer grading
-          [ [A,[C,E]],[B,[F,D]], ...]
-          A grades C and E, B grades F and D ..and so on!
-          */
-        $final_grading_info = [];
-        $max_offset = count($student_array);
-        $offset_array = [];
-        $temp_offset = [];
-        for ($i = 1; $i < $max_offset; ++$i) {
-            array_push($temp_offset, $i);
-        }
-        /* $offset_array contains randomly chosen offsets.
-            $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
-            Upon every random choice of an offset from $temp_offset, the value is removed from it.
-        */
-        if (count($temp_offset) == 0) {
-            $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
-            return JsonResponse::getFailResponse("Not Enough Submissions");
-        }
-        for ($i = 0; $i < $number_to_grade; ++$i) {
-            $random_offset = array_rand($temp_offset, 1);
-            array_push($offset_array, $temp_offset[$random_offset]);
-            unset($temp_offset[$random_offset]);
-        }
-        foreach ($offset_array as $element) {
-            $temp_array = $student_array;
-            for ($i = 0; $i < $element; $i++) {
-                array_push($temp_array, array_shift($temp_array));
-            }
-            array_push($n_array_peers, $temp_array);
-        }
-        for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
-            $temp = [];
-            for ($j = 1; $j < count($n_array_peers); ++$j) {
-                array_push($temp, $n_array_peers[$j][$i]);
-            }
-            array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
-        }
+        $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
         if ($number_to_grade < 1) {
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
@@ -292,7 +346,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return;
         }
- 
+
         // get the requested version
         $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
         if ($version_instance === false) {
@@ -450,6 +504,7 @@ class ElectronicGraderController extends AbstractController {
         $sections = [];
         $total_users = [];
         $component_averages = [];
+        $histogram_data = [];
         $autograded_average = null;
         $overall_average = null;
         $overall_scores = null;
@@ -560,6 +615,7 @@ class ElectronicGraderController extends AbstractController {
             $overall_scores = $order->getSortedGradedGradeables();
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections);
+            $histogram_data = $this->generateHistogramData($overall_scores);
         }
         $sections = [];
         //Either # of teams or # of students (for non-team assignments). Either case
@@ -711,6 +767,7 @@ class ElectronicGraderController extends AbstractController {
             $autograded_average,
             $overall_scores,
             $overall_average,
+            $histogram_data,
             $total_submissions,
             $individual_viewed_grade ?? 0,
             $total_students_submitted,
@@ -727,7 +784,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
+    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC", $anon_mode = false) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -824,7 +881,7 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -1143,6 +1200,23 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Given a gradeable, the logged in user, and if the logged in user is a peer
+     * determine if the user should be single, double, or unblind grading
+     */
+
+    private function amIBlindGrading($gradeable, $user, $peer) {
+        if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+            return "double";
+        }
+
+        if (($peer && $gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
+            return "single";
+        }
+
+        return "unblind";
+    }
+
+    /**
      * Display the electronic grading page
      *
      * @param $who_id This is the user we wish to view, this field will only be passed on when the request originates
@@ -1153,12 +1227,11 @@ class ElectronicGraderController extends AbstractController {
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $version = null) {
-        // If the version is set, user is requesting for new TA grading interface
-        $showNewInterface = isset($version);
-
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
+        if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
+            $anon_mode = true;
+        }
         /** @var Gradeable $gradeable */
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -1168,6 +1241,12 @@ class ElectronicGraderController extends AbstractController {
         }
         $peer = $gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            $peer = true;
+        }
+
+        $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
+
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         $order_all_sections = null;
@@ -1185,7 +1264,7 @@ class ElectronicGraderController extends AbstractController {
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = false;
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from);
-            if ($id_from_anon !== null) {
+            if ($blind_grading !== "unblind" || $anon_mode) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
             else {
@@ -1230,21 +1309,19 @@ class ElectronicGraderController extends AbstractController {
 
             // Reassign who_id
             if (!is_null($goToStudent)) {
-                $who_id = $peer ? $goToStudent->getAnonId() :   $goToStudent->getId();
+                $who_id = $goToStudent->getId();
+                if ($blind_grading || $anon_mode) {
+                    $who_id = $goToStudent->getAnonId();
+                }
             }
-            else {
-                // There is no next/prev student found
-                // Either the grading is completed or current user has no ungraded assigned student left to grade
-                $error_msg = "No " . $to . " assigned " . ($to_ungraded ? "ungraded" : "") . " student found!";
-                $this->core->addErrorMessage($error_msg);
-                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
+            if (is_null($who_id) || $who_id == '') {
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             }
         }
-
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
         $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
-        if ($id_from_anon !== null) {
+        if ($blind_grading !== "unblind" || $anon_mode) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
         else {
@@ -1400,18 +1477,14 @@ class ElectronicGraderController extends AbstractController {
         $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
 
         $this->core->getOutput()->addInternalCss('forum.css');
-        if ($showNewInterface) {
-            $this->core->getOutput()->addInternalCss('electronic.css');
-        }
-        else {
-            $this->core->getOutput()->addInternalCss('ta-grading.css');
-        }
+        $this->core->getOutput()->addInternalCss('electronic.css');
+
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $showNewInterface);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -1577,9 +1650,19 @@ class ElectronicGraderController extends AbstractController {
 
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
+        $submitter = $graded_gradeable->getSubmitter()->getId();
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
-        if ($gradeable->getAutogradingConfig()->anyPoints()) {
+        if (count($gradeable->getAutogradingConfig()->getPersonalizedTestcases($submitter)) > 1) {
+            // NOTE/REDESIGN FIXME: We might have autograding that is
+            // penalty only.  The available positive autograding
+            // points might be zero.  Testing for autograding > 1 is
+            // ignoring the submission limit test case... but this is
+            // also imperfect.  We want to render the column if any
+            // student has received the penalty.  But if no one has
+            // received the penalty maybe we omit it?  (expensive?/confusing?)
+            // See also note in ElectronicGraderView.php
+            // if ($gradeable->getAutogradingConfig()->anyPoints()) {
             $response_data['auto_grading_total'] = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
 
             // Furthermore, if the user has a grade, send that information
@@ -1856,7 +1939,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $is_notebook_gradeable = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+        $is_notebook_gradeable = ($gradeable->getAutogradingConfig() !== null) && $gradeable->getAutogradingConfig()->isNotebookGradeable();
 
         if ($is_notebook_gradeable) {
             if ($is_itempool_linked === 'true') {
@@ -2006,7 +2089,7 @@ class ElectronicGraderController extends AbstractController {
 
     public function saveComponentPages(Gradeable $gradeable, array $pages) {
         foreach ($gradeable->getComponents() as $component) {
-            if (!isset($orders[$component->getId()])) {
+            if (!isset($pages[$component->getId()])) {
                 throw new \InvalidArgumentException('Missing component id in pages array');
             }
             $page = $pages[$component->getId()];
@@ -2260,6 +2343,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get the graded gradeable
+        $who_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id);
         if ($graded_gradeable === false) {
             return;
@@ -2718,10 +2802,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_config = $gradeable->getAutogradingConfig();
 
         $notebook_config = $gradeable_config->getNotebookConfig();
-        $hashes = $gradeable_config->getUserSpecificNotebook(
-            $who_id,
-            $gradeable->getId()
-        )->getHashes();
+        $hashes = $gradeable_config->getUserSpecificNotebook($who_id)->getHashes();
         $que_idx = 0;
         // loop through the notebook key, and find from_pool key in each object (or question)
         foreach ($notebook_config as $key => $item) {
@@ -2833,7 +2914,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        $gradeable->setPeerFeedback($grader_id, $user_id, $feedback);
+        $gradeable->setPeerFeedback($this->core->getQueries()->getAnonId($grader_id), $user_id, $feedback);
         $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
         return true;
     }

@@ -11,10 +11,6 @@
     margin-right: 0;
 }
 
-.notebook ul {
-    padding-left: 3rem;
-}
-
 /* Push recent and clear buttons down a little bit and shrink them slightly */
 .notebook .sa-clear-reset,
 .notebook .codebox-clear-reset,
@@ -86,7 +82,6 @@ textarea.sa-box {
 }
 
 /* Add some margin for informational content that is inside <p> tags */
-.notebook li,
 .notebook p {
     margin-top: 12px;
     margin-bottom: 12px;

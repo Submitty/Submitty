@@ -1,12 +1,14 @@
 {
+    "automatic_grading_total": 20,
+    "nonhidden_automatic_grading_total": 20,
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Java - Compilation"
+            "test_name": "Java - Compilation"
         },
         {
             "points_awarded": 2,
-            "test_name": "Test 2 Java - Instructor JUnit Test Compilation"
+            "test_name": "Java - Instructor JUnit Test Compilation"
         },
         {
             "autochecks": [
@@ -16,11 +18,11 @@
                 }
             ],
             "points_awarded": 16,
-            "test_name": "Test 3 Java - JUnit Test"
+            "test_name": "Java - JUnit Test"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 4 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
