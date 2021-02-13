@@ -195,6 +195,9 @@ jobs:
           - name: debug3
             run: |
               sudo journalctl -u submitty_autograding_worker
+          - name: auto-config
+            run: |
+              sudo cat /usr/local/submitty/config/autograding_workers.json
 
 
 
