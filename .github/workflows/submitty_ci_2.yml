@@ -215,8 +215,16 @@ jobs:
               sudo cat /usr/local/submitty/config/autograding_workers.json
           - name: debug4
             run: |
-              ls -lah /usr/local/submitty/config
-              ls -lah /usr/local/submitty
-         
+              sudo ls -lah /usr/local/submitty/config
+              sudo ls -lah /usr/local/submitty
+          - name: debug5
+            run: |
+              sudo ls -lah /usr/local/submitty/autograder/
+              sudo ls -lah /usr/local/submitty/autograder/../config
+          - name: debug6
+            continue-on-error: true
+            run: |
+              sudo ls -lah /var/local/submitty/
+              sudo ls -lah /var/local/submitty/autograding_TODO 
 
       

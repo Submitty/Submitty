@@ -238,6 +238,9 @@ def launch_workers(config, my_name, my_stats):
 # ==================================================================================
 def read_autograding_worker_json(config: submitty_config.Config, worker_json_path: os.PathLike):
     try:
+
+        print(' attempting to open  ', worker_json_path )
+
         with open(worker_json_path, 'r') as infile:
             name_and_stats = json.load(infile)
             # grab the key and the value. NOTE: For now there should only ever be one pair.
