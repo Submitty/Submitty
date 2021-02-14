@@ -183,6 +183,7 @@ jobs:
               sudo service nginx restart
               sudo bash tests/test_site_error_log.sh
           - name: Integration Tests
+            continue-on-error: true
             run : |
               sudo apt-get install valgrind
               sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py

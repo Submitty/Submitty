@@ -247,6 +247,7 @@ def read_autograding_worker_json(config: submitty_config.Config, worker_json_pat
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
     except FileNotFoundError as e:
+        print(e)
         raise SystemExit(
             "autograding_worker.json not found. Have you registered this worker with a "
             "Submitty host yet?"
