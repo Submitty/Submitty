@@ -213,6 +213,10 @@ jobs:
           - name: auto-config
             run: |
               sudo cat /usr/local/submitty/config/autograding_workers.json
+          - name: debug4
+            run: |
+              ls -lah /usr/local/submitty/config
+              ls -lah /usr/local/submitty
          
 
       

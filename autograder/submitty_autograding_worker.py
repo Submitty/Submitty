@@ -63,6 +63,10 @@ def worker_process(
         "tmp"
     )
 
+    print("wokring dir ", working_directory)
+    print("todo_queue_file ", todo_queue_file)
+    print("submission_zip ", submission_zip)
+
     while True:
         if os.path.exists(todo_queue_file):
             try:
@@ -267,6 +271,9 @@ def cleanup_old_jobs(config: submitty_config.Config):
 if __name__ == "__main__":
     config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
     config = submitty_config.Config.path_constructor(config_dir, JOB_ID, capture_traces=True)
+
+    print('config_dir ', config_dir)
+    print('submitty data dir ', config.submitty['submitty_data_dir'] )
 
     cleanup_old_jobs(config)
     print('cleaned up old jobs')
