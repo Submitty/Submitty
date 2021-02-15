@@ -228,7 +228,9 @@ jobs:
           - name: debug6
             continue-on-error: true
             run: |
-              sudo ls -lah /var/local/submitty/
+              sudo ls -lah /var/local/submitty/autograding_DONE
               sudo ls -lah /var/local/submitty/autograding_TODO 
+              sudo ls -lah /var/local/submitty/autograding_tmp 
+
 
       

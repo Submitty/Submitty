@@ -175,6 +175,7 @@ def launch_workers(config, my_name, my_stats):
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
         )
 
+    print("schedual launched")
     config.logger.log_message("grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
@@ -185,7 +186,6 @@ def launch_workers(config, my_name, my_stats):
     # launch the worker threads
     address = my_stats['address']
     print('launching ', address)
-    print(config)
     if address != 'localhost':
         which_machine = f"{my_stats['username']}@{address}"
     else:
@@ -194,11 +194,15 @@ def launch_workers(config, my_name, my_stats):
     processes = list()
     for i in range(0, num_workers):
         u = "untrusted" + str(i).zfill(2)
+        print(u)
         p = multiprocessing.Process(
             target=try_run_worker, args=(config, which_machine, address, u, my_server)
         )
         p.start()
         processes.append(p)
+
+
+    print("monitoring loop")
 
     # main monitoring loop
     try:
@@ -208,8 +212,10 @@ def launch_workers(config, my_name, my_stats):
                 if processes[i].is_alive():
                     alive = alive+1
                 else:
+                    print("process " , i, "died")
                     config.logger.log_message(f"ERROR: process {i} is not alive")
             if alive != num_workers:
+                print("#worker=", num_workers, " != #alive", alive  )
                 config.logger.log_message(f"ERROR: #workers={num_workers} != #alive={alive}")
             time.sleep(60)
 
@@ -233,8 +239,11 @@ def launch_workers(config, my_name, my_stats):
         # wait for them to join
         for i in range(0, num_workers):
             processes[i].join()
+    except Exception as e:
+        print(e)
 
     config.logger.log_message("grade_scheduler.py terminated")
+    print("schedual end")
 
 
 # ==================================================================================
