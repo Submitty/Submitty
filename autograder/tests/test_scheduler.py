@@ -5,7 +5,6 @@ import shutil
 import time
 import unittest
 
-from typing import List
 from unittest import mock
 
 from autograder import config
