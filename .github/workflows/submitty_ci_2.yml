@@ -230,7 +230,16 @@ jobs:
             run: |
               sudo ls -lah /var/local/submitty/autograding_DONE
               sudo ls -lah /var/local/submitty/autograding_TODO 
-              sudo ls -lah /var/local/submitty/autograding_tmp 
+              sudo ls -lah /var/local/submitty/autograding_tmp
+          - name: debug7
+            continue-on-error: true
+            run: |
+              sudo ls -lah /var/local/submitty/logs/autograding_stack_traces
+          - name: debug8
+            continue-on-error: true
+            run: |
+              sudo ls -lah /var/local/submitty/logs/autograding
+              sudo cat /var/local/submitty/logs/autograding/*
 
 
       
