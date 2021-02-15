@@ -240,6 +240,22 @@ class TestScheduler(unittest.TestCase):
         self.assertIn("first", worker_files)
         self.assertNotIn("second", worker_files)
 
+        # Still no space, so `second` should still not be queued yet
+        scheduler.update_and_schedule()
+
+        worker_files = os.listdir(worker.folder)
+        self.assertIn("first", worker_files)
+        self.assertNotIn("second", worker_files)
+
+        # Remove the existing queue file, then issue another scheduling run.
+        # `second` should be scheduled now.
+        os.remove(os.path.join(worker.folder, "first"))
+        scheduler.update_and_schedule()
+
+        worker_files = os.listdir(worker.folder)
+        self.assertNotIn("first", worker_files)
+        self.assertIn("second", worker_files)
+
     @mock.patch('multiprocessing.Process')
     def test_fcfs_capacity_multi(self, MockProcess: mock.Mock):
         """Test that the one-job-per-worker rule is still applied with multiple workers."""
@@ -274,7 +290,7 @@ class TestScheduler(unittest.TestCase):
         self.assertEqual(all_worker_files.count("second"), 1)
 
     @mock.patch('multiprocessing.Process')
-    def test_constraints(self, MockProcess: mock.Mock):
+    def test_fcfs_constraints(self, MockProcess: mock.Mock):
         """Test that job constraints are respected."""
 
         worker_names = ['worker_0', 'worker_1', 'worker_2']
