@@ -91,7 +91,7 @@ class Worker:
             )
             return False
         requirements = job.queue_obj['required_capabilities']
-        return all(req in self.properties['capabilities'] for req in requirements)
+        return requirements in self.properties['capabilities']
 
 
 class BaseScheduler(ABC):

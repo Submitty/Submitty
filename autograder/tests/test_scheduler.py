@@ -71,7 +71,7 @@ AUTOGRADING_LOGS = os.path.join(LOG_PATH, 'autograding')
 CONFIG = None
 
 
-def generate_queue_file(name: str, *, required_capabilities: List[str]):
+def generate_queue_file(name: str, *, required_capabilities: str):
     queue_obj = {
         'required_capabilities': required_capabilities,
     }
@@ -179,7 +179,7 @@ class TestScheduler(unittest.TestCase):
         scheduler = FCFSScheduler(CONFIG, [worker])
 
         # Place a dummy queue file in the queue
-        generate_queue_file("test", required_capabilities=['default'])
+        generate_queue_file("test", required_capabilities='default')
 
         # Invoke the scheduler's update mechanism
         scheduler.update_and_schedule()
@@ -205,7 +205,7 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("test", required_capabilities=['default'])
+        generate_queue_file("test", required_capabilities='default')
 
         scheduler.update_and_schedule()
 
@@ -230,9 +230,9 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, [worker])
 
-        generate_queue_file("first", required_capabilities=['default'])
+        generate_queue_file("first", required_capabilities='default')
         time.sleep(0.1)  # Kinda ugly, but helps avoid temporal aliasing by the OS
-        generate_queue_file("second", required_capabilities=['default'])
+        generate_queue_file("second", required_capabilities='default')
 
         scheduler.update_and_schedule()
 
@@ -273,11 +273,11 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("first", required_capabilities=['default'])
+        generate_queue_file("first", required_capabilities='default')
         time.sleep(0.1)
-        generate_queue_file("second", required_capabilities=['default'])
+        generate_queue_file("second", required_capabilities='default')
         time.sleep(0.1)
-        generate_queue_file("third", required_capabilities=['default'])
+        generate_queue_file("third", required_capabilities='default')
 
         scheduler.update_and_schedule()
 
@@ -306,11 +306,11 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("first", required_capabilities=['zero'])
-        generate_queue_file("second", required_capabilities=['one'])
-        generate_queue_file("third", required_capabilities=['two'])
+        generate_queue_file("first", required_capabilities='zero')
+        generate_queue_file("second", required_capabilities='one')
+        generate_queue_file("third", required_capabilities='two')
         time.sleep(0.1)
-        generate_queue_file("fourth", required_capabilities=['zero'])
+        generate_queue_file("fourth", required_capabilities='zero')
 
         scheduler.update_and_schedule()
 
