@@ -191,6 +191,10 @@ jobs:
           - name: Run tests
             continue-on-error: true
             run: |
+              sudo journalctl --rotate
+              sudo journalctl --vacuum-time=1s
+              sudo systemctl restart submitty_autograding_worker
+              sudo systemctl restart submitty_autograding_shipper
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
               sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
