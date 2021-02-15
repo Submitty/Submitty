@@ -152,6 +152,7 @@ def try_run_worker(
     try:
         worker_process(config, which_machine, address, which_untrusted, my_server)
     except Exception as e:
+        print('which_untrusted= ', which_untrusted)
         config.logger.log_message(
             f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
             which_untrusted=which_untrusted,
@@ -160,6 +161,7 @@ def try_run_worker(
             traceback.format_exc(),
             which_untrusted=which_untrusted,
         )
+        print(e)
         # Re-raise the exception so the process doesn't look like it exited OK
         raise e
 
@@ -192,6 +194,7 @@ def launch_workers(config, my_name, my_stats):
         which_machine = address
     my_server = my_stats['server_name']
     processes = list()
+    print("going up to ", num_workers)
     for i in range(0, num_workers):
         u = "untrusted" + str(i).zfill(2)
         print(u)
