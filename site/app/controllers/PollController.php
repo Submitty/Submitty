@@ -168,7 +168,7 @@ class PollController extends AbstractController {
             copy($file["tmp_name"], $file_path);
         }
         $this->core->getQueries()->setPollImage($poll_id, $file_path);
-        
+
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
         );
