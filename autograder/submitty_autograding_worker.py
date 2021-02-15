@@ -29,6 +29,7 @@ def worker_process(
     which_untrusted: str,
     my_server: str
 ):
+    print("starting worker process")
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
@@ -43,6 +44,7 @@ def worker_process(
 
     # The full name of this worker
     worker_name = f"{my_server}_{address}_{which_untrusted}"
+    print("my name is ", worker_name)
 
     # Set up key autograding_DONE directories
     done_dir = os.path.join(config.submitty['submitty_data_dir'], "autograding_DONE")
@@ -86,7 +88,8 @@ def worker_process(
                         'status': 'success',
                         'message': 'Grading completed successfully'
                     }
-            except Exception:
+            except Exception as e:
+                print(e)
                 # If we threw an error while grading, log it.
                 config.logger.log_message(
                     f"ERROR attempting to unzip graded item: {which_machine} "
@@ -145,6 +148,7 @@ def try_run_worker(
     which_untrusted: str,
     my_server: str
 ):
+    print("try_run_worker")
     """Try and run `worker_process`.
 
     If `worker_process` fails, print a message to the log before letting the thread die.
@@ -164,6 +168,8 @@ def try_run_worker(
         print(e)
         # Re-raise the exception so the process doesn't look like it exited OK
         raise e
+
+    print("finished!")
 
 
 # ==================================================================================
