@@ -2443,7 +2443,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
         $row_type = ($anon && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
         //TODO: anon teams?
-        if($anon && $type != 'team') {
+        if ($anon && $type != 'team') {
             $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
             $this->course_db->query(
                 "
@@ -2458,7 +2458,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
                 WHERE gcmd.gcm_id = ?",
                 [$mark->getId()]
             );
-        } else {
+        }
+        else {
             $this->course_db->query(
                 "
                 SELECT gd.gd_{$type}_id
