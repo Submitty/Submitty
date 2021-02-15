@@ -6,9 +6,9 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 
 /**
- * 
+ *
  * Class PollModel
- * 
+ *
  * @method int getId()
  * @method string getName()
  * @method string getQuestion()

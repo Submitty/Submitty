@@ -2,7 +2,9 @@
     <h1> {{ poll.getName() }} </h1>
     {{ poll.getQuestion() | markdown}}
     {% if file_data is not null %}
+        <br/>
         <img src="{{ file_data }}">
+        <br/>
     {% endif %}
     <br/>
     <form method="post" action="{{ base_url }}/submitResponse">
