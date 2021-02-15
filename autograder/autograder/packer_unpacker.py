@@ -418,7 +418,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
                 trace=traceback.format_exc(),
                 job_id=job_id,
             )
-             config.logger.log_stack_trace(
+            config.logger.log_stack_trace(
                 message=str(e),
                 job_id=job_id,
             )
