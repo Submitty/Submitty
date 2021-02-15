@@ -235,6 +235,7 @@ jobs:
             continue-on-error: true
             run: |
               sudo ls -lah /var/local/submitty/logs/autograding_stack_traces
+              sudo cat /var/local/submitty/logs/autograding_stack_traces/*
           - name: debug8
             continue-on-error: true
             run: |
