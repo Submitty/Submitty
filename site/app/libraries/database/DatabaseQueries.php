@@ -6402,7 +6402,8 @@ AND gc_id IN (
               u.last_updated,
               u.grading_registration_sections,
               u.registration_section, u.rotating_section,
-              ldeu.late_day_exceptions';
+              ldeu.late_day_exceptions,
+              u.registration_subsection';
             $submitter_inject = '
             JOIN (
                 SELECT u.*, sr.grading_registration_sections
