@@ -98,6 +98,9 @@ jobs:
               sudo pip3 install watchdog
               sudo pip3 install python-dateutil
               sudo pip3 install psutil
+              sudo pip3 install psycopg2
+              sudo pip3 install python-pam
+              sudo pip3 install sqlalchemy
           - name: Get composer cache dir
             id: composer-cache
             run: |
