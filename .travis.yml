@@ -204,81 +204,80 @@ jobs:
         - sudo rm -rf ${HOME}/.composer/cache
         - sudo mv /home/submitty_php/.composer/cache ${HOME}/.composer
         - sudo chown -R ${USER}:${USER} ${HOME}/.composer/cache
-    - <<: *01-e2e
+    - <<: *03-e2e
       php: 7.3
       if: branch = master OR type = pull_request
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
     # it
     - &02-integration
-    stage: Integration test
-    language: cpp
-    addons:
-      postgresql: "10"
-      apt:
-        sources:
-          - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
-          - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
-        packages:
-          - build-essential
-          - automake
-          - cmake
-          - g++-multilib
-          - libseccomp2
-          - seccomp
-          - libseccomp-dev
-          - valgrind
-          - pkg-config
-          - flex
-          - bison
-          - poppler-utils
-          - libpcre3
-          - libpcre3-dev
-          - unzip
-          - libboost-all-dev
-          - openjdk-8-jdk
-    env: CLANG_VER="5.0.2"
-    before_install:
-      - sudo update-java-alternatives --jre-headless --set java-1.8.0-openjdk-amd64
-      - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-      - sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac 1
-      - sudo update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac
-      - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-    install:
-      - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
-      - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
-      - mkdir ${HOME}/clang+llvm
-      - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
-      - export PATH=${HOME}/clang+llvm/bin:${PATH}
-      # Create symlink so that it's in expected location for safelist
-      - sudo ln -s $(which clang) /usr/bin/clang
-      - sudo ln -s $(which clang++) /usr/bin/clang++
-      - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-      - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-      - sudo apt-get install docker-ce docker-ce-cli
-      - pip3 install -U pip
-      - pip3 install PyYAML
-      - pip3 install python-dateutil
-      - pip3 install jsonschema
-      - pip3 install jsonref
-      - pip3 install paramiko
-      - pip3 install psycopg2-binary
-      - pip3 install sqlalchemy
-      - pip3 install docker
-      - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
-      - pip3 install .
-      - popd
-      - sudo bash .setup/travis/autograder.sh
-      - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-      - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-      - sudo bash .setup/travis/setup.sh
-      - sudo bash .setup/travis/setup_test_suite.sh
-    script:
-      - travis_wait 45 sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
-  #- <<: *04-integration
-  #  env: CLANG_VER="6.0.0"
-  #  if: branch = master OR type = pull_request
-
+      stage: Integration test
+      language: cpp
+      addons:
+        postgresql: "10"
+        apt:
+          sources:
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
+          packages:
+            - build-essential
+            - automake
+            - cmake
+            - g++-multilib
+            - libseccomp2
+            - seccomp
+            - libseccomp-dev
+            - valgrind
+            - pkg-config
+            - flex
+            - bison
+            - poppler-utils
+            - libpcre3
+            - libpcre3-dev
+            - unzip
+            - libboost-all-dev
+            - openjdk-8-jdk
+      env: CLANG_VER="5.0.2"
+      before_install:
+        - sudo update-java-alternatives --jre-headless --set java-1.8.0-openjdk-amd64
+        - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        - sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac 1
+        - sudo update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
+        - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
+        - mkdir ${HOME}/clang+llvm
+        - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
+        - export PATH=${HOME}/clang+llvm/bin:${PATH}
+        # Create symlink so that it's in expected location for safelist
+        - sudo ln -s $(which clang) /usr/bin/clang
+        - sudo ln -s $(which clang++) /usr/bin/clang++
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get install docker-ce docker-ce-cli
+        - pip3 install -U pip
+        - pip3 install PyYAML
+        - pip3 install python-dateutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
+        - pip3 install paramiko
+        - pip3 install psycopg2-binary
+        - pip3 install sqlalchemy
+        - pip3 install docker
+        - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
+        - pip3 install .
+        - popd
+        - sudo bash .setup/travis/autograder.sh
+        - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+        - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+        - sudo bash .setup/travis/setup.sh
+        - sudo bash .setup/travis/setup_test_suite.sh
+      script:
+        - travis_wait 45 sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
+    #- <<: *04-integration
+    #  env: CLANG_VER="6.0.0"
+    #  if: branch = master OR type = pull_request
 
 notifications:
   email: false
