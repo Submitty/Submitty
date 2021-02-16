@@ -25,7 +25,7 @@ jobs:
         - pip3 install requests
       script:
         - echo "Checking title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
-        - python3 ${TRAVIS_BUILD_DIR}/.setup/travis/check_wip.py ${TRAVIS_REPO_SLUG} ${TRAVIS_PULL_REQUEST}
+        - python3 ${TRAVIS_BUILD_DIR}/.setup/testing/check_wip.py ${TRAVIS_REPO_SLUG} ${TRAVIS_PULL_REQUEST}
 
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache
@@ -107,7 +107,7 @@ jobs:
             - libboost-all-dev
             - jq
       before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/testing/before_install.sh
         - phpenv config-rm xdebug.ini
       install:
         - pecl install ds
@@ -155,10 +155,10 @@ jobs:
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-        - sudo bash .setup/travis/autograder.sh
-        - sudo bash .setup/travis/setup.sh
+        - sudo bash .setup/testing/autograder.sh
+        - sudo bash .setup/testing/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
-        - sudo bash .setup/travis/setup_test_suite.sh
+        - sudo bash .setup/testing/setup_test_suite.sh
         - sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
         - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -243,7 +243,7 @@ jobs:
         - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         - sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac 1
         - sudo update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/testing/before_install.sh
       install:
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
         - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
@@ -268,11 +268,11 @@ jobs:
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - pip3 install .
         - popd
-        - sudo bash .setup/travis/autograder.sh
+        - sudo bash .setup/testing/autograder.sh
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-        - sudo bash .setup/travis/setup.sh
-        - sudo bash .setup/travis/setup_test_suite.sh
+        - sudo bash .setup/testing/setup.sh
+        - sudo bash .setup/testing/setup_test_suite.sh
       script:
         - travis_wait 45 sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
     #- <<: *04-integration
