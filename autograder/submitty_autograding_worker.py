@@ -228,7 +228,6 @@ def launch_workers(config, my_name, my_stats):
         for i in range(0, num_workers):
             processes[i].join()
 
-
     config.logger.log_message("grade_scheduler.py terminated")
 
 
