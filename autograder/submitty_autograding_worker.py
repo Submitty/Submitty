@@ -29,7 +29,6 @@ def worker_process(
     which_untrusted: str,
     my_server: str
 ):
-    print("starting worker process")
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
@@ -44,7 +43,6 @@ def worker_process(
 
     # The full name of this worker
     worker_name = f"{my_server}_{address}_{which_untrusted}"
-    print("my name is ", worker_name)
 
     # Set up key autograding_DONE directories
     done_dir = os.path.join(config.submitty['submitty_data_dir'], "autograding_DONE")
@@ -65,10 +63,6 @@ def worker_process(
         "tmp"
     )
 
-    print("wokring dir ", working_directory)
-    print("todo_queue_file ", todo_queue_file)
-    print("submission_zip ", submission_zip)
-
     while True:
         if os.path.exists(todo_queue_file):
             try:
@@ -88,8 +82,7 @@ def worker_process(
                         'status': 'success',
                         'message': 'Grading completed successfully'
                     }
-            except Exception as e:
-                print(e)
+            except Exception:
                 # If we threw an error while grading, log it.
                 config.logger.log_message(
                     f"ERROR attempting to unzip graded item: {which_machine} "
@@ -148,7 +141,6 @@ def try_run_worker(
     which_untrusted: str,
     my_server: str
 ):
-    print("try_run_worker")
     """Try and run `worker_process`.
 
     If `worker_process` fails, print a message to the log before letting the thread die.
@@ -156,7 +148,6 @@ def try_run_worker(
     try:
         worker_process(config, which_machine, address, which_untrusted, my_server)
     except Exception as e:
-        print('which_untrusted= ', which_untrusted)
         config.logger.log_message(
             f"FATAL: {which_untrusted} crashed! See traces entry for more details.",
             which_untrusted=which_untrusted,
@@ -165,11 +156,8 @@ def try_run_worker(
             traceback.format_exc(),
             which_untrusted=which_untrusted,
         )
-        print(e)
         # Re-raise the exception so the process doesn't look like it exited OK
         raise e
-
-    print("finished!")
 
 
 # ==================================================================================
@@ -183,7 +171,6 @@ def launch_workers(config, my_name, my_stats):
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
         )
 
-    print("schedual launched")
     config.logger.log_message("grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
@@ -193,25 +180,19 @@ def launch_workers(config, my_name, my_stats):
 
     # launch the worker threads
     address = my_stats['address']
-    print('launching ', address)
     if address != 'localhost':
         which_machine = f"{my_stats['username']}@{address}"
     else:
         which_machine = address
     my_server = my_stats['server_name']
     processes = list()
-    print("going up to ", num_workers)
     for i in range(0, num_workers):
         u = "untrusted" + str(i).zfill(2)
-        print(u)
         p = multiprocessing.Process(
             target=try_run_worker, args=(config, which_machine, address, u, my_server)
         )
         p.start()
         processes.append(p)
-
-
-    print("monitoring loop")
 
     # main monitoring loop
     try:
@@ -221,10 +202,8 @@ def launch_workers(config, my_name, my_stats):
                 if processes[i].is_alive():
                     alive = alive+1
                 else:
-                    print("process " , i, "died")
                     config.logger.log_message(f"ERROR: process {i} is not alive")
             if alive != num_workers:
-                print("#worker=", num_workers, " != #alive", alive  )
                 config.logger.log_message(f"ERROR: #workers={num_workers} != #alive={alive}")
             time.sleep(60)
 
@@ -248,26 +227,20 @@ def launch_workers(config, my_name, my_stats):
         # wait for them to join
         for i in range(0, num_workers):
             processes[i].join()
-    except Exception as e:
-        print(e)
+
 
     config.logger.log_message("grade_scheduler.py terminated")
-    print("schedual end")
 
 
 # ==================================================================================
 def read_autograding_worker_json(config: submitty_config.Config, worker_json_path: os.PathLike):
     try:
-
-        print(' attempting to open  ', worker_json_path )
-
         with open(worker_json_path, 'r') as infile:
             name_and_stats = json.load(infile)
             # grab the key and the value. NOTE: For now there should only ever be one pair.
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
     except FileNotFoundError as e:
-        print(e)
         raise SystemExit(
             "autograding_worker.json not found. Have you registered this worker with a "
             "Submitty host yet?"
@@ -295,9 +268,6 @@ def cleanup_old_jobs(config: submitty_config.Config):
 if __name__ == "__main__":
     config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
     config = submitty_config.Config.path_constructor(config_dir, JOB_ID, capture_traces=True)
-
-    print('config_dir ', config_dir)
-    print('submitty data dir ', config.submitty['submitty_data_dir'] )
 
     cleanup_old_jobs(config)
     print('cleaned up old jobs')

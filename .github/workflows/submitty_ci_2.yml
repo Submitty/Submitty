@@ -192,7 +192,6 @@ jobs:
               sudo service nginx restart
           - uses: nanasess/setup-chromedriver@master
           - name: Run tests
-            continue-on-error: true
             run: |
               sudo journalctl --rotate
               sudo journalctl --vacuum-time=1s
@@ -208,42 +207,6 @@ jobs:
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
-          - name: debug
-            run: |
-              sudo journalctl -u submitty_daemon_jobs_handler
-          - name: debug2
-            run: |
-              sudo journalctl -u submitty_autograding_shipper
-          - name: debug3
-            run: |
-              sudo journalctl -u submitty_autograding_worker
-          - name: auto-config
-            run: |
-              sudo cat /usr/local/submitty/config/autograding_workers.json
-          - name: debug4
-            run: |
-              sudo ls -lah /usr/local/submitty/config
-              sudo ls -lah /usr/local/submitty
-          - name: debug5
-            run: |
-              sudo ls -lah /usr/local/submitty/autograder/
-              sudo ls -lah /usr/local/submitty/autograder/../config
-          - name: debug6
-            continue-on-error: true
-            run: |
-              sudo ls -lah /var/local/submitty/autograding_DONE
-              sudo ls -lah /var/local/submitty/autograding_TODO 
-              sudo ls -lah /var/local/submitty/autograding_tmp
-          - name: debug7
-            continue-on-error: true
-            run: |
-              sudo ls -lah /var/local/submitty/logs/autograding_stack_traces
-              sudo cat /var/local/submitty/logs/autograding_stack_traces/*
-          - name: debug8
-            continue-on-error: true
-            run: |
-              sudo ls -lah /var/local/submitty/logs/autograding
-              sudo cat /var/local/submitty/logs/autograding/*
 
 
       

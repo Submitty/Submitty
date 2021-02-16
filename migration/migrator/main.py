@@ -207,8 +207,7 @@ def handle_migration(args):
             loop_args.config.database['dbname'] = 'submitty'
             try:
                 database = db.Database(loop_args.config.database, environment)
-            except OperationalError as e:
-                print(e)
+            except OperationalError:
                 raise SystemExit(
                     'Submitty Database Migration Error:  '
                     'Database does not exist for {}'.format(environment)

@@ -110,6 +110,7 @@ def unzip_queue_file(zipfilename):
 # ==================================================================================
 def prepare_autograding_and_submission_zip(
     config,
+    machine_name: str,
     which_machine,
     which_untrusted,
     next_directory,
@@ -291,6 +292,7 @@ def prepare_autograding_and_submission_zip(
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
     obj["job_id"] = job_id
+    obj["which_machine"] = machine_name
 
     with open(os.path.join(tmp_submission, "queue_file.json"), 'w') as outfile:
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
@@ -382,18 +384,6 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
 
     os.remove(my_results_zip_file)
 
-    db_user = config.database['database_user']
-    db_host = config.database['database_host']
-    db_pass = config.database['database_password']
-    data_dir = config.submitty['submitty_data_dir']
-
-    foo = "db user " + str(db_user) + " db host " + str(db_host) + "db pass " + str(db_pass) + " data dir " + str(data_dir)
-    config.logger.log_message(
-        message=foo,
-        job_id=job_id,
-    )
-    bar =  queue_obj["semester"] +  queue_obj["course"] + queue_obj["gradeable"] + queue_obj["user"] + queue_obj["team"] + queue_obj["who"],
-
     if "generate_output" not in queue_obj:
         # add information to the database
         try:
@@ -408,18 +398,13 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
                 True if queue_obj["is_team"] else False,
                 str(queue_obj["version"])
             )
-        except Exception as e:
-            print(e)
+        except Exception:
             config.logger.log_message(
                 message="ERROR: Could not score into database",
                 job_id=job_id,
             )
             config.logger.log_stack_trace(
                 trace=traceback.format_exc(),
-                job_id=job_id,
-            )
-            config.logger.log_stack_trace(
-                message=str(e),
                 job_id=job_id,
             )
             return False

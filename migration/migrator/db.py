@@ -70,8 +70,6 @@ class Database:
             if Path(host).exists():
                 connection_string += '?host={}'.format(host)
 
-            print("trying to connect to ", connection_string)
-
         return connection_string
 
     def execute(self, query):
