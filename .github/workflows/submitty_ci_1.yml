@@ -129,7 +129,8 @@ jobs:
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install SQLAlchemy jsonschema jsonref pytz tzlocal
             python3 -m pip install coverage
-            python3 -m pip install paramiko
+            python3 -m pip install paramiko 
+            python3 -m pip install docker 
         - name: Run migrator python unit tests
           run : |
             pushd migration
