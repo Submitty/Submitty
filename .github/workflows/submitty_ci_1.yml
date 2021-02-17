@@ -126,9 +126,10 @@ jobs:
                 ${{ runner.os }}-pip-
         - name: Install python libraries
           run : |
-            python3 -m pip install --upgrade pip
+            python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install SQLAlchemy jsonschema jsonref pytz tzlocal
             python3 -m pip install coverage
+            python3 -m pip install paramiko
         - name: Run migrator python unit tests
           run : |
             pushd migration
@@ -138,10 +139,9 @@ jobs:
         - name: Run python_submitty_utils python unit tests
           run : |
             pushd python_submitty_utils
+            pip3 install .
             coverage run -m unittest discover
             coverage xml
-            pip3 install .
-            sudo -H pip3 install .
             popd
         - name: Run autograder python unit tests
           run : |
