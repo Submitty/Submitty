@@ -142,12 +142,13 @@ jobs:
             coverage xml
             popd
         - name: Run autograder python unit tests
+          run : |
             pushd autograder
             coverage run -m unittest discover
             coverage xml
         - name: Upload Coverage
           uses: codecov/codecov-action@v1
           with:
-            files: "autograder/coverage.xml,python_submitty_utils/coverage.xml,migration/coverage.xml"
-            flags: "autograder,python_submitty_utils,migrator"
+            files: autograder/coverage.xml,python_submitty_utils/coverage.xml,migration/coverage.xml
+            flags: autograder,python_submitty_utils,migrator
 
