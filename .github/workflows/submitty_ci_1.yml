@@ -140,6 +140,8 @@ jobs:
             pushd python_submitty_utils
             coverage run -m unittest discover
             coverage xml
+            pip3 install .
+            sudo -H pip3 install .
             popd
         - name: Run autograder python unit tests
           run : |
