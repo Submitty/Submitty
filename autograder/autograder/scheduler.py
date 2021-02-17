@@ -5,9 +5,10 @@ import multiprocessing
 import os
 import random
 import shutil
+import traceback
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from .config import Config
 
@@ -20,18 +21,47 @@ class Job:
 
     Parameters
     ----------
+    config: Config
+        Submitty configuration object.
     path : str
         Path to this job's queue file.
     """
-    def __init__(self, path: str):
+    def __init__(self, config: Config, path: str):
+        self.config = config
         self.path = path
         self._queue_obj = None
 
-    @property
-    def queue_obj(self) -> dict:
+    def _try_load_queue_object(self) -> bool:
+        """Try to load the queue object from its path.
+
+        This function is a no-op if the queue object has already been loaded.
+
+        If the file has already been loaded, or if the file was loaded successfully, this function
+        returns True. If an error occurs when loading the file, then this function logs the error
+        and returns False.
+        """
         if self._queue_obj is None:
-            with open(self.path) as f:
-                self._queue_obj = json.load(f)
+            # Queue object isn't loaded yet, load it.
+            try:
+                with open(self.path) as f:
+                    self._queue_obj = json.load(f)
+            except Exception as e:
+                self.config.logger.log_message(
+                    f"ERROR: Could not load queue file {self.path}: {e}. "
+                    "See stack traces for more details.",
+                )
+                self.config.logger.log_stack_trace(
+                    traceback.format_exc(),
+                )
+                return False
+        # The queue object was either already loaded or was successfully loaded, so return True.
+        return True
+
+    @property
+    def queue_obj(self) -> Optional[dict]:
+        """Get the queue object for the job, returning None if it could not be loaded."""
+        if not self._try_load_queue_object():
+            return None
         return self._queue_obj
 
 
@@ -85,6 +115,11 @@ class Worker:
         A worker can run a job if and only if its `capabilities` dictionary contains all of the
         capabilities in the job's `required_capabilities` dictionary.
         """
+        if job.queue_obj is None:
+            self.config.logger.log_message(
+                f"NOTE: Skipping over {job.path}."
+            )
+            return False
         if 'required_capabilities' not in job.queue_obj:
             self.config.logger.log_message(
                 f"ERROR: Queue file at {job.path} missing `required_capabilities` key"
@@ -123,7 +158,7 @@ class BaseScheduler(ABC):
         Note that these paths have no intrinsic order to them.
         """
         jobs = [
-            Job(os.path.join(self.queue_folder, file))
+            Job(self.config, os.path.join(self.queue_folder, file))
             for file in os.listdir(self.queue_folder)
             if os.path.isfile(os.path.join(self.queue_folder, file))
         ]
