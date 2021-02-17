@@ -204,7 +204,7 @@ jobs:
         - sudo rm -rf ${HOME}/.composer/cache
         - sudo mv /home/submitty_php/.composer/cache ${HOME}/.composer
         - sudo chown -R ${USER}:${USER} ${HOME}/.composer/cache
-    - <<: *03-e2e
+    - <<: *01-e2e
       php: 7.3
       if: branch = master OR type = pull_request
 
