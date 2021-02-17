@@ -131,6 +131,7 @@ jobs:
             python3 -m pip install coverage
             python3 -m pip install paramiko 
             python3 -m pip install docker 
+            python3 -m pip install pip3 install python-dateutil 
         - name: Run migrator python unit tests
           run : |
             pushd migration
