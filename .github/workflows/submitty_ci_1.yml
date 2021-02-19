@@ -177,7 +177,7 @@ jobs:
 
 
     e2e:
-      # needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
         runs-on: ubuntu-18.04
         services:
           postgres:
