@@ -324,8 +324,8 @@ jobs:
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
 
-          - name: 
-            run: 
+          - name: Configure Test suite
+            run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
@@ -333,7 +333,9 @@ jobs:
             run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
 
           - name: Set up test suite
-            run: sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+            run: |
+              cd $SUBMITTY_REPOSITORY 
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
           - name: Set up apache
             run: |
