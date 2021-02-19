@@ -74,6 +74,7 @@ function onGradeInquirySubmitClicked(button) {
 
   // prevent double submission
   form.data("submitted",true);
+  let gc_id = form.children('#gc_id').val();
   $.ajax({
     type: "POST",
     url: button_clicked.attr("formaction"),
@@ -87,7 +88,7 @@ function onGradeInquirySubmitClicked(button) {
           // inform other open websocket clients
           let submitter_id = form.children('#submitter_id').val();
           if (data.type === 'new_post') {
-            let gc_id = form.children('#gc_id').val();
+            
             newPostRender(gc_id, data.post_id, data.new_post);
             text_area.val("");
             window.socketClient.send({
@@ -138,7 +139,12 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
   $.ajax({
     type: "POST",
     url: buildCourseUrl(['gradeable', window.location.pathname.split("gradeable/")[1].split('/')[0], 'grade_inquiry', 'single']),
-    data: {submitter_id: submitter_id, post_id: post_id, csrf_token: window.csrfToken},
+    data: {
+      submitter_id: submitter_id, 
+      post_id: post_id, 
+      csrf_token: window.csrfToken,
+      gc_id : gc_id
+    },
     success: function(new_post){
       newPostRender(gc_id, post_id, new_post);
     }
