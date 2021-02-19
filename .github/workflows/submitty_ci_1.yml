@@ -339,6 +339,7 @@ jobs:
 
           - name: Set up apache
             run: |
+              cd $SUBMITTY_REPOSITORY
               sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
               sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
               sudo mkdir -p /run/php
@@ -359,6 +360,7 @@ jobs:
 
           - name: Set up nginx
             run: |
+              cd $SUBMITTY_REPOSITORY
               sudo mkdir /etc/systemd/system/nginx.service.d
               sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
               sudo systemctl daemon-reload
@@ -374,8 +376,6 @@ jobs:
               sudo systemctl restart submitty_autograding_worker
               sudo systemctl restart submitty_autograding_shipper
               chromedriver --url-base=/wd/hub &
-              export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
               pushd ${SUBMITTY_REPOSITORY}
               sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
