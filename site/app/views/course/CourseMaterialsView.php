@@ -133,6 +133,9 @@ class CourseMaterialsView extends AbstractView {
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
+                if ($releaseData === null) {
+                    $releaseData = '9998-01-01 00:00:00-000';
+                }
                 $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             }
 
