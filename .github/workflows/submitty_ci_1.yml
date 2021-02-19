@@ -194,10 +194,10 @@ jobs:
               - 5432:5432
 
         steps:
-          # - name: Cancel Previous Runs
-          #   uses: styfle/cancel-workflow-action@0.8.0
-          #   with:
-          #     access_token: ${{ github.token }}
+          - name: Cancel Previous Runs
+            uses: styfle/cancel-workflow-action@0.8.0
+            with:
+              access_token: ${{ github.token }}
           - uses: actions/checkout@v2
             with:
               path: SUBMITTY_CPY/
@@ -271,7 +271,7 @@ jobs:
           - name: Get composer cache dir
             id: composer-cache
             run: |
-              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+              cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               echo "::set-output name=dir::$(composer config cache-files-dir)"
           - name: Install composer Cache
             uses: actions/cache@v2
@@ -282,13 +282,13 @@ jobs:
                 ${{ runner.os }}-php-composer-
 
           - name: Install PHP dependencies
-            working-directory: ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
             run: |
+              cd  ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
               composer install --prefer-dist
 
           - name: Install Submitty python utils
-            working-directory: ${SUBMITTY_REPOSITORY}/python_submitty_utils
             run: |
+              cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
               pip3 install .
               pip3 show submitty_utils
               umask 022
@@ -320,19 +320,15 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
 
           - name: Install third party dependencies
-            working-directory: $SUBMITTY_REPOSITORY
-            run: sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
 
           - name: 
-            working-directory: $SUBMITTY_REPOSITORY
-            run: sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+            run: 
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
-          - name: Install, configure and serve Submitty site
-            run: |
-              export SUBMITTY_INSTALL_DIR=/usr/local/submitty 
-              export SUBMITTY_REPOSITORY=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
-              sudo chmod -R a+rwx ${SUBMITTY_DATA_DIR}
-              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           - name: Set up sample course
             run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
 
