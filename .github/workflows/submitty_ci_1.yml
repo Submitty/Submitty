@@ -177,7 +177,7 @@ jobs:
 
 
     e2e:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+      # needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
         runs-on: ubuntu-18.04
         services:
           postgres:
@@ -194,10 +194,10 @@ jobs:
               - 5432:5432
 
         steps:
-          - name: Cancel Previous Runs
-            uses: styfle/cancel-workflow-action@0.8.0
-            with:
-              access_token: ${{ github.token }}
+          # - name: Cancel Previous Runs
+          #   uses: styfle/cancel-workflow-action@0.8.0
+          #   with:
+          #     access_token: ${{ github.token }}
           - uses: actions/checkout@v2
             with:
               path: SUBMITTY_CPY/
@@ -270,8 +270,9 @@ jobs:
 
           - name: Get composer cache dir
             id: composer-cache
-            working-directory: ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-            run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            run: |
+              pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+              echo "::set-output name=dir::$(composer config cache-files-dir)"
           - name: Install composer Cache
             uses: actions/cache@v2
             with:
