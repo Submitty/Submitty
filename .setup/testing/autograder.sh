@@ -2,6 +2,9 @@
 
 
 # This function is from https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/bash/travis_retry.bash
+ANSI_RED="\033[31;1m"
+ANSI_RESET="\033[0m"
+
 wget_retry() {
     local result=0
     local count=1
