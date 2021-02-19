@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1b02b4056ee504ff5476262c882fd0c3",
+    "content-hash": "59b78cc854f303d34f1ae670360c930e",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -989,6 +989,53 @@
                 "source": "https://github.com/php-fig/http-message/tree/master"
             },
             "time": "2016-08-06T14:39:51+00:00"
+        },
+        {
+            "name": "psr/log",
+            "version": "1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "0f73288fd15629204f9d42b7055f72dacbe811fc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/0f73288fd15629204f9d42b7055f72dacbe811fc",
+                "reference": "0f73288fd15629204f9d42b7055f72dacbe811fc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "Psr/Log/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2020-03-23T09:12:05+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -2562,24 +2609,25 @@
         },
         {
             "name": "textalk/websocket",
-            "version": "1.3.1",
+            "version": "1.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Textalk/websocket-php.git",
-                "reference": "fe348408a43cc646d08a3ae73e7877370441c7ee"
+                "reference": "b93249453806a2dd46495de46d76fcbcb0d8dee8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/fe348408a43cc646d08a3ae73e7877370441c7ee",
-                "reference": "fe348408a43cc646d08a3ae73e7877370441c7ee",
+                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/b93249453806a2dd46495de46d76fcbcb0d8dee8",
+                "reference": "b93249453806a2dd46495de46d76fcbcb0d8dee8",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.4|^7.0"
+                "php": "^7.2 | ^8.0",
+                "psr/log": "^1.0"
             },
             "require-dev": {
-                "php-coveralls/php-coveralls": "^0.7",
-                "phpunit/phpunit": "^4.1",
+                "php-coveralls/php-coveralls": "^2.0",
+                "phpunit/phpunit": "^8.0|^9.0",
                 "squizlabs/php_codesniffer": "^3.5"
             },
             "type": "library",
@@ -2594,8 +2642,7 @@
             ],
             "authors": [
                 {
-                    "name": "Fredrik Liljegren",
-                    "email": "fredrik.liljegren@textalk.se"
+                    "name": "Fredrik Liljegren"
                 },
                 {
                     "name": "Sören Jensen",
@@ -2603,11 +2650,15 @@
                 }
             ],
             "description": "WebSocket client and server",
+<<<<<<< HEAD
             "support": {
                 "issues": "https://github.com/Textalk/websocket-php/issues",
                 "source": "https://github.com/Textalk/websocket-php/tree/1.3.1"
             },
             "time": "2020-06-07T12:11:38+00:00"
+=======
+            "time": "2021-02-12T15:39:23+00:00"
+>>>>>>> 18ea5c5de57c594ebc73e5fd11f47d6c4aaca706
         },
         {
             "name": "twig/twig",
@@ -3458,16 +3509,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.75",
+            "version": "0.12.77",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "2e4738cd67e0163861a065180eff7eb5c8417d6e"
+                "reference": "1f10b8c8d118d01e7b492f9707999d456be5812c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/2e4738cd67e0163861a065180eff7eb5c8417d6e",
-                "reference": "2e4738cd67e0163861a065180eff7eb5c8417d6e",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1f10b8c8d118d01e7b492f9707999d456be5812c",
+                "reference": "1f10b8c8d118d01e7b492f9707999d456be5812c",
                 "shasum": ""
             },
             "require": {
@@ -3514,7 +3565,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-11T13:58:47+00:00"
+            "time": "2021-02-17T16:22:19+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
