@@ -494,7 +494,7 @@ def create_user(user_id):
         os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
                   "-M --shell /bin/false {}".format(user_id))
         print("Setting password for user {}...".format(user_id))
-        os.system("echo {}:{} | sudo chpasswd".format(user_id, user_id))
+        os.system("echo {}:{} | chpasswd".format(user_id, user_id))
 
 
 def create_gradeable_submission(src, dst):
@@ -637,7 +637,7 @@ class User(object):
 
     def set_password(self):
         print("Setting password for user {}...".format(self.id))
-        os.system("echo {}:{} | sudo chpasswd".format(self.id, self.password))
+        os.system("echo {}:{} | chpasswd".format(self.id, self.password))
 
     def get_detail(self, course, detail):
         if self.courses is not None and course in self.courses:

@@ -25,7 +25,6 @@ class TestSubmittySchemaValidator(TestCase):
 
     def test_valid_schemas(self):
         for entry in CONFIGS_DIR.iterdir():
-            print('testing ', entry)
             with self.subTest(f'Validating {entry.name}'):
                 validator.validate_complete_config_schema_using_filenames(
                     str(entry),
