@@ -1,7 +1,7 @@
 name: Submitty CI
 
-on:
-    push:
+on: [push, pull_request_target]:
+  
 
 env:
   PGPASSWORD: submitty_dbuser
