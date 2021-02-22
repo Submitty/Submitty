@@ -38,19 +38,22 @@ jobs:
 
 
     php-lint-static:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
         defaults:
             run:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
             - uses: shivammathur/setup-php@2.7.0
+              with:
+                php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
               id: composer-cache
               run: echo "::set-output name=dir::$(composer config cache-files-dir)"
             - name: Install Composer
               uses: actions/cache@v2
               with:
+                  php-version: ${{ env.PHP_VER }}
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
@@ -67,7 +70,7 @@ jobs:
 
 
     php-unit:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-18.04
       defaults:
           run:
               working-directory: site
@@ -75,6 +78,7 @@ jobs:
           - uses: actions/checkout@v2
           - uses: shivammathur/setup-php@2.7.0
             with:
+              php-version: ${{ env.PHP_VER }}
               extensions: imagick
               coverage: pcov
           - name: Cache Composer
@@ -99,7 +103,7 @@ jobs:
 
 
     python-lint:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-18.04
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
@@ -121,7 +125,7 @@ jobs:
 
 
     python-unit:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-18.04
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
@@ -214,8 +218,8 @@ jobs:
               python-version: '3.6'
           - uses: shivammathur/setup-php@2.7.0
             with:
+              php-version: ${{ env.PHP_VER }}
               extensions: imagick
-              php-version: $PHP_VER
           - name: Cache pip
             uses: actions/cache@v2
             with:
