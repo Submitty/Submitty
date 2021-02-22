@@ -70,7 +70,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
-     * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
@@ -112,11 +112,7 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content, $gc_id);
-            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id, $grade_inquiry_id);
-            if ($regrade_post === null) {
-                return JsonResponse::getFailResponse('Cannot get latest grade inquiry post');
-            }
-
+            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
             $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
@@ -180,8 +176,8 @@ class GradeInquiryController extends AbstractController {
             return "";
         }
 
-        $new_post = $this->core->getQueries()->getRegradePost($post_id, $grade_inquiry->getId());
-        if ($new_post === null) {
+        $new_post = $this->core->getQueries()->getRegradePost($post_id);
+        if ($new_post === null || $new_post['regrade_id'] !== $grade_inquiry->getId()) {
             return "";
         }
 

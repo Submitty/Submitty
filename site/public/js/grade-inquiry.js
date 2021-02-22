@@ -74,7 +74,7 @@ function onGradeInquirySubmitClicked(button) {
 
   // prevent double submission
   form.data("submitted",true);
-  let gc_id = form.children('#gc_id').val();
+  const gc_id = form.children('#gc_id').val();
   $.ajax({
     type: "POST",
     url: button_clicked.attr("formaction"),

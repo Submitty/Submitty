@@ -4301,17 +4301,10 @@ AND gc_id IN (
         return $this->course_db->getLastInsertId();
     }
 
-    public function getRegradePost($post_id, $grade_inquiry_id) {
+    public function getRegradePost($post_id) {
         $this->course_db->query(
-            "SELECT * FROM regrade_discussion WHERE id = ? and regrade_id = ?",
-            [$post_id, $grade_inquiry_id]
-        );
-
-        $row = $this->course_db->row();
-        if (count($row) <= 1) {
-            return null;
-        }
-        return $row;
+            "SELECT * FROM regrade_discussion WHERE id = ?", [$post_id]);
+        return $this->course_db->row();
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
