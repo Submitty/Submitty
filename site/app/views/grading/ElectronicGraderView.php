@@ -966,7 +966,7 @@ HTML;
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $highest_version,
+                $display_version,
                 $notebook,
                 $graded_gradeable->getSubmitter()->getId()
             );
