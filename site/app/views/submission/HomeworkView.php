@@ -301,10 +301,7 @@ class HomeworkView extends AbstractView {
         $notebook_file_submissions = [];
         $notebook_model = null;
         if ($config->isNotebookGradeable()) {
-            $notebook_model = $config->getUserSpecificNotebook(
-                $this->core->getUser()->getId(),
-                $gradeable->getId()
-            );
+            $notebook_model = $config->getUserSpecificNotebook($this->core->getUser()->getId());
 
             $notebook = $notebook_model->getNotebook();
             $num_parts = $notebook_model->getNumParts();
@@ -328,6 +325,10 @@ class HomeworkView extends AbstractView {
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
+
+            $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
+            $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
         }
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
@@ -420,9 +421,6 @@ class HomeworkView extends AbstractView {
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
-        $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
-        $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
-        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalCss('submitbox.css');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
@@ -947,6 +945,7 @@ class HomeworkView extends AbstractView {
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
+                'autograder_machine' => $version_instance->getAutograderMachine(),
             ]);
 
             if ($history !== null) {

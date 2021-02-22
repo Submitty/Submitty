@@ -58,9 +58,7 @@ class ConfigurationController extends AbstractController {
             'seek_message_enabled'           => $this->core->getConfig()->isSeekMessageEnabled(),
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
-            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
-            'polls_pts_for_correct'          => $this->core->getConfig()->getPollsPtsForCorrect(),
-            'polls_pts_for_incorrect'        => $this->core->getConfig()->getPollsPtsForIncorrect(),
+            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled()
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;

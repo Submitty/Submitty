@@ -116,3 +116,13 @@ apt-get install -qqy docker-ce docker-ce-cli
 systemctl status docker | head -n 100
 
 apt-get -qqy autoremove
+
+
+# ------------------------------------------------------------------
+# upgrade git to 2.28.0 or greater
+# https://git-scm.com/docs/git-init/2.28.0
+# need the --initial-branch option
+# for creating student submission vcs git repositories
+add-apt-repository ppa:git-core/ppa -y
+apt-get install git -y
+# ------------------------------------------------------------------

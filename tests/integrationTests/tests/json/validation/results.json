@@ -31,7 +31,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 dummy compilation",
+            "test_name": "dummy compilation",
             "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
@@ -44,11 +44,11 @@
                 }
             ],
             "points_awarded": 10,
-            "test_name": "Test 2 hello world"
+            "test_name": "hello world"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 3 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

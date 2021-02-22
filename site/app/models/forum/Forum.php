@@ -50,7 +50,7 @@ class Forum extends AbstractModel {
     }
 
 
-    public function pinThread($thread_id, $toggle) {
+    public function bookmarkThread(int $thread_id, bool $toggle) {
         $user = $this->core->getUser()->getId();
 
         if (!$this->core->getQueries()->threadExists($thread_id)) {
@@ -58,7 +58,7 @@ class Forum extends AbstractModel {
         }
 
         //Will use forum queries
-        return $this->core->getQueries()->addPinnedThread($user, $thread_id, $toggle);
+        return $this->core->getQueries()->addBookmarkedThread($user, $thread_id, $toggle);
     }
 
     public function getEditContent($post_id) {

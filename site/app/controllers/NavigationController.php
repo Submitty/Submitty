@@ -61,7 +61,9 @@ class NavigationController extends AbstractController {
 
         //Remove gradeables we are not allowed to view
         foreach ($sections_to_lists as $key => $value) {
-            $sections_to_lists[$key] = array_filter($value, [$this, "filterCanView"]);
+            $sections_to_lists[$key] = array_filter($value, function (\app\models\gradeable\Gradeable $gradeable) use ($user) {
+                return $gradeable->canView($user);
+            });
         }
 
         //Clear empty sections
@@ -96,46 +98,5 @@ class NavigationController extends AbstractController {
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone, $gradeable_ids_and_titles);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
         $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
-    }
-
-    /**
-     * Test if the current user is allowed to view this gradeable
-     * @param Gradeable $gradeable
-     * @return bool True if they are
-     */
-    private function filterCanView(Gradeable $gradeable) {
-        $user = $this->core->getUser();
-
-        //Remove incomplete gradeables for non-instructors
-        if (
-            !$user->accessAdmin()
-            && $gradeable->getType() == GradeableType::ELECTRONIC_FILE
-            && !$gradeable->hasAutogradingConfig()
-        ) {
-            return false;
-        }
-
-        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
-        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
-            return false;
-        }
-
-        // if student view false, never show
-        if (!$gradeable->isStudentView() && !$user->accessGrading()) {
-            return false;
-        }
-
-        // if student view is true and they can only view after grades are released, filter appropriately
-        if ($gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$user->accessGrading()) {
-            return $gradeable->isTaGradeReleased();
-        }
-
-        //If we're not instructor and this is not open to TAs
-        $date = $this->core->getDateTimeNow();
-        if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
-            return false;
-        }
-
-        return true;
     }
 }

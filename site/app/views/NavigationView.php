@@ -407,7 +407,7 @@ class NavigationView extends AbstractView {
 
         $points_percent = NAN;
 
-        if ($gradeable->hasAutogradingConfig() && $gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($gradeable->getId(), $this->core->getUser()->getId())) {
+        if ($gradeable->hasAutogradingConfig() && $gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($this->core->getUser()->getId())) {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'load_gradeable_message']);
         }
         else {

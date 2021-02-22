@@ -3,13 +3,13 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\ErrorMessages;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\CourseMaterial;
 
 class CourseMaterialsController extends AbstractController {
     /**
@@ -108,6 +108,9 @@ class CourseMaterialsController extends AbstractController {
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         // replacing any whitespace with underscore char.
         $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
+        // Always delete the zip file after script execution
+        register_shutdown_function('unlink', $zip_name);
+
         // getting the meta-data of the course-material in '$json' variable
         $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($file_data);
@@ -126,7 +129,7 @@ class CourseMaterialsController extends AbstractController {
 
                 if (!$this->core->getUser()->accessGrading()) {
                     // only add the file if the section of student is allowed and course material is released!
-                    if (CourseMaterial::isSectionAllowed($this->core, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                    if (CourseMaterialsUtils::isSectionAllowed($json, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
                         $relativePath = substr($file_path, strlen($root_path) + 1);
                         $isFolderEmptyForMe = false;
                         $zip->addFile($file_path, $relativePath);
@@ -153,7 +156,6 @@ class CourseMaterialsController extends AbstractController {
         header("Pragma: no-cache");
         header("Expires: 0");
         readfile("$zip_name");
-        unlink($zip_name); //deletes the random zip file
     }
 
     /**

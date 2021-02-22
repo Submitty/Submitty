@@ -3,8 +3,8 @@
 namespace app\views\course;
 
 use app\libraries\Core;
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
-use app\models\CourseMaterial;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -68,7 +68,7 @@ class CourseMaterialsView extends AbstractView {
                         }
 
                         // Determine file authorization based on this file 'user_allow_list'
-                        $authorized_by_allow_list[$expected_file_path] = CourseMaterial::isUserAllowedByAllowList($this->core->getUser()->getId(), $json, $expected_file_path);
+                        $authorized_by_allow_list[$expected_file_path] = CourseMaterialsUtils::isUserAllowedByAllowList($json, $this->core->getUser()->getId(), $expected_file_path);
 
                         if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
                             $contents = json_decode(file_get_contents($expected_file_path));
@@ -132,6 +132,9 @@ class CourseMaterialsView extends AbstractView {
                     //for uploaded files that have had no manually set date to be set to never and maintained as never
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
+                }
+                if ($releaseData === null) {
+                    $releaseData = '9998-01-01 00:00:00-000';
                 }
                 $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             }

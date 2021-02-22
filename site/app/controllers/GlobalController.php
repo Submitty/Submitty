@@ -35,6 +35,7 @@ class GlobalController extends AbstractController {
         }
 
         $sidebar_buttons = [];
+
         $this->prep_sidebar($sidebar_buttons, $unread_notifications_count);
 
         $current_route = $_SERVER["REQUEST_URI"];
@@ -110,7 +111,7 @@ class GlobalController extends AbstractController {
             "title" => "Gradeables",
             "class" => "nav-row",
             "id" => "nav-sidebar-submitty",
-            "icon" => "fa-star"
+            "icon" => "fas fa-star"
          ]);
 
         if ($unread_notifications_count !== null) {
@@ -165,7 +166,7 @@ class GlobalController extends AbstractController {
         if ($this->core->getConfig()->isPollsEnabled()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['polls']),
-                "title" => "Polls",
+                "title" => "Submini Polls",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-polls",
                 "icon" => "fa-question-circle"
@@ -413,6 +414,14 @@ class GlobalController extends AbstractController {
         // --------------------------------------------------------------------------
         // SUPERUSERS ONLY
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'gradeables']),
+                "title" => "Pending Gradeables",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-submitty",
+                "icon" => "fas fa-clock"
+            ]);
+
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(['update']),
                 "title" => "System Update",

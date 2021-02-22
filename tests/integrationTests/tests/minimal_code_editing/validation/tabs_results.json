@@ -12,11 +12,11 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 1 Reasonable Code Changes"
+            "test_name": "Reasonable Code Changes"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 2 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]
