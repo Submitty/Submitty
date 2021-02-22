@@ -50,8 +50,8 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element(By.ID, "nav-sidebar-submitty").click()
 
     # TA GRADING INTERFACE TESTS
-    # travis should not run this
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    # github should not run this
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_normal_submission_grade_inquiry_panel(self):
         # makes sure that default ta grading panel is correct
         # user bauchg should have a submission and no grade inquiries
@@ -74,7 +74,7 @@ class TestGradeInquiry(BaseTestCase):
         assert len(buttons) == 1
         assert buttons[0].text == "Submit Grade Inquiry"
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_no_submission_grade_inquiry_panel(self):
         # makes sure that it is made clear to the use that there is no submission
         # and no grade inquiry can be made
@@ -100,7 +100,7 @@ class TestGradeInquiry(BaseTestCase):
         buttons = self.driver.find_elements(By.XPATH, "//button[contains(@class,'gi-submit')]")
         assert len(buttons) == 0
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_after_grade_inquiry_deadline_no_previous_inquiry(self):
         # This test makes sure that a gradeable with no grade inquiry has no
         # buttons or forms when it is currently past the grade inquiry deadline
@@ -126,7 +126,7 @@ class TestGradeInquiry(BaseTestCase):
 
 
     # STUDENT SUBMISSION TESTS
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_normal_submission_student_grade_inquiry_box(self):
         # makes sure default student view is correct
         # user bauchg should have a submission and no grade inquiries

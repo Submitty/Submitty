@@ -65,111 +65,8 @@ jobs:
       python: 3.7
       if: branch = master OR type = pull_request
 
-    # Lint the codebase to ensure that the code is compliant to our system
-    - &01-php-lint
-      stage: 01 lint
-      php: 7.2
-      install:
-        - pushd site
-        - composer install --prefer-dist --no-interaction
-        - popd
-      script:
-        - pushd site
-        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-        - vendor/bin/phpcs --version
-        - vendor/bin/phpcs --standard=tests/ruleset.xml
-        - vendor/bin/phpstan  --version
-        - vendor/bin/phpstan analyze app
-        - popd
-    - <<: *01-php-lint
-      php: 7.3
-      if: branch = master OR type = pull_request
-
-    - &01-python-lint
-      language: python
-      python: 3.6
-      install:
-        - pip3 install flake8 flake8-bugbear
-      script:
-        - flake8
-    - <<: *01-python-lint
-      python: 3.7
-      if: branch = master OR type = pull_request
-
-    - &01-js-lint
-      language: node
-      node_js: 12
-      install:
-        - pushd site
-        - npm ci
-        - popd
-      script:
-        - pushd site
-        - npm run lint
-        - popd
-
-    - &02-php-unit
-      stage: 02 unit test
-      php: 7.2
-      before_install:
-        - phpenv config-rm xdebug.ini
-      install:
-        - pecl install ds
-        - pecl install pcov
-        - yes | pecl install imagick
-        - pushd site
-        - travis_retry composer install --prefer-dist --no-interaction
-        - popd
-      script:
-        - pushd site
-        - vendor/bin/phpunit --version
-        - vendor/bin/phpunit -c tests/phpunit.xml
-        - popd
-      after_success:
-        # must run from root folder or else coveralls.io shows messed up paths for files
-        #- travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
-        - bash <(curl -s https://codecov.io/bash) -cF php -f site/tests/report/clover.xml
-    - <<: *02-php-unit
-      php: 7.3
-      if: branch = master OR type = pull_request
-
-    - &02-python-unit
-      language: python
-      python: 3.6
-      install:
-        - pip3 install -U pip
-        - pip3 install tzlocal
-        - pip3 install sqlalchemy
-        - pip3 install jsonschema
-        - pip3 install jsonref
-        - pip3 install docker
-        - pip3 install coverage
-        - pip3 install paramiko
-        - pip3 install python-dateutil
-      script:
-        - pushd python_submitty_utils
-        - coverage run -m unittest discover
-        - coverage xml
-        - python3 setup.py install
-        - popd
-        - pushd migration
-        - coverage run -m unittest discover
-        - coverage xml
-        - popd
-        - pushd autograder
-        - coverage run -m unittest discover
-        - coverage xml
-        - popd
-      after_success:
-        - bash <(curl -s https://codecov.io/bash) -cF autograder -f autograder/coverage.xml
-        - bash <(curl -s https://codecov.io/bash) -cF python_submitty_utils -f python_submitty_utils/coverage.xml
-        - bash <(curl -s https://codecov.io/bash) -cF migrator -f migration/coverage.xml
-    - <<: *02-python-unit
-      python: 3.7
-      if: branch = master OR type = pull_request
-
-    - &03-e2e
-      stage: 03 e2e test
+    - &01-e2e
+      stage: 01 e2e test
       php: 7.2
       env: AUTH_METHOD=1
       services:
@@ -293,9 +190,9 @@ jobs:
         - sudo service nginx restart
       script:
         - echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-        - TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
-        - sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
-        - echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+       # - TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+       # - sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
+       # - echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
         - pushd tests
         - TEST_URL="http://localhost" python3 -m unittest e2e.test_login
         - popd
@@ -307,13 +204,13 @@ jobs:
         - sudo rm -rf ${HOME}/.composer/cache
         - sudo mv /home/submitty_php/.composer/cache ${HOME}/.composer
         - sudo chown -R ${USER}:${USER} ${HOME}/.composer/cache
-    - <<: *03-e2e
+    - <<: *01-e2e
       php: 7.3
       if: branch = master OR type = pull_request
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
     # it
-    - &04-integration
+    - &02-integration
       stage: Integration test
       language: cpp
       addons:
