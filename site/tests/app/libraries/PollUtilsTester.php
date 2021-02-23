@@ -40,7 +40,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [0, 2],
                 "release_date" => "2020-01-11",
                 "status" => "closed",
-                "image_file" => null
+                "image_path" => null
             ],
             [
                 "id" => 1,
@@ -50,7 +50,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [0],
                 "release_date" => "2020-01-12",
                 "status" => "open",
-                "image_file" => null
+                "image_path" => null
             ],
             [
                 "id" => 2,
@@ -60,7 +60,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [1],
                 "release_date" => "2020-01-13",
                 "status" => "ended",
-                "image_file" => null
+                "image_path" => null
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);

@@ -30,7 +30,7 @@ class PollUtils {
                 "correct_responses" => $poll->getAnswers(),
                 "release_date" => $poll->getReleaseDate(),
                 "status" => $poll->getStatus(),
-                "image_file" => $poll->getImagePath()
+                "image_path" => $poll->getImagePath()
             ];
         }
         return $data;
