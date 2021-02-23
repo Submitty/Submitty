@@ -352,7 +352,7 @@ class PollController extends AbstractController {
                 unlink($current_file_path);
             }
             $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
-            copy($file["tmp_name"], $file_path);
+            move_uploaded_file($file["tmp_name"], $file_path);
         }
         $response_count = $_POST["response_count"];
         $responses = [];
