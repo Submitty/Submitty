@@ -165,9 +165,9 @@ class PollController extends AbstractController {
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
             $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
-            copy($file["tmp_name"], $file_path);
+            move_uploaded_file($file["tmp_name"], $file_path);
+            $this->core->getQueries()->setPollImage($poll_id, $file_path);
         }
-        $this->core->getQueries()->setPollImage($poll_id, $file_path);
 
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -348,11 +348,11 @@ class PollController extends AbstractController {
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
             $current_file_path = $this->core->getQueries()->getPoll($_POST["poll_id"])->getImagePath();
-            if ($current_file_path != null) {
+            if ($current_file_path !== null) {
                 unlink($current_file_path);
             }
             $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
-            copy($file["tmp_name"], $file_path);
+            move_uploaded_file($file["tmp_name"], $file_path);
         }
         $response_count = $_POST["response_count"];
         $responses = [];
