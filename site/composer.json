@@ -16,7 +16,7 @@
     }
   },
   "require": {
-    "twig/twig": "2.12.5",
+    "twig/twig": "2.13.1",
     "ramsey/uuid": "4.1.1",
     "aptoma/twig-markdown": "3.4.0",
     "erusev/parsedown": "1.7.4",
@@ -28,7 +28,7 @@
     "doctrine/cache": "1.10.2",
     "php-ds/php-ds": "1.3.0",
     "cboden/ratchet": "0.4.3",
-    "textalk/websocket": "1.3.1",
+    "textalk/websocket": "1.5.2",
     "egulias/email-validator": "3.0.0",
     "maennchen/zipstream-php": "^2.1"
   },
@@ -37,7 +37,7 @@
     "submitty/php-codesniffer": "2.3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "0.12.76"
+    "phpstan/phpstan": "0.12.77"
   },
   "scripts": {
     "test": "phpunit -c tests/phpunit.xml",

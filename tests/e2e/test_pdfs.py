@@ -7,26 +7,26 @@ import time
 class TestPDFs(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_pdf_basic_access(self):
         self.switch_settings("Limited Access Grader")
         self.pdf_access("instructor", "3", "8" ,"grading_homework_pdf", "words_1463.pdf", "2")
         self.pdf_access("ta", "3", "8", "grading_homework_pdf", "words_1463.pdf", "2")
         self.pdf_access("grader", "2", "8", "grading_homework_pdf", "words_249.pdf", "1")
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_pdf_team_access(self):
         self.switch_settings("Limited Access Grader")
         self.pdf_access("instructor", "1", "8", "grading_homework_team_pdf", "words_881.pdf", "1")
         self.pdf_access("ta", "1", "6", "grading_homework_team_pdf", "words_881.pdf", "1")
         self.pdf_access("grader","1", "6", "grading_homework_team_pdf", "words_881.pdf", "1")
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")    
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")    
     def test_pdf_peer_access(self):
         self.switch_settings("Limited Access Grader")
         self.pdf_access("instructor", "3", "8", "grading_pdf_peer_homework", "words_1463.pdf", "1")
         self.pdf_access("ta", "3", "8", "grading_pdf_peer_homework", "words_1463.pdf", "1")
         self.pdf_access("grader","2", "8", "grading_pdf_peer_homework", "words_249.pdf", "1")
         self.pdf_access("student","2", "5", "grading_pdf_peer_homework", "words_249.pdf", "1")
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")    
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")    
     def test_pdf_peer_team_access(self):
         self.switch_settings("Limited Access Grader")
         self.pdf_access("instructor", "2", "8", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
