@@ -208,10 +208,15 @@ class FCFSScheduler(BaseScheduler):
                 # TODO: This should dump an error message to the `results` directory that
                 #       exposes the error message in the UI, but that's for a future PR.
                 if not any(worker.can_run(job) for worker in self.workers):
-                    self.config.logger.log_message(
-                        f"ERROR: no worker compatible with job {job.path}: no worker has "
-                        f"capability {job.queue_obj['required_capabilities']}. Removing."
-                    )
+                    if job.queue_obj is not None:
+                        self.config.logger.log_message(
+                            f"ERROR: no worker compatible with job {job.path}: no worker has "
+                            f"capability {job.queue_obj['required_capabilities']}. Removing."
+                        )
+                    else:
+                        self.config.logger.log_message(
+                            f"ERROR: could not load queue object for job {job.path}. Removing."
+                        )
                     with contextlib.suppress(FileNotFoundError):
                         os.remove(job.path)
                 continue
