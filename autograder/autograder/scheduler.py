@@ -1,5 +1,6 @@
 """The shipper scheduler."""
 
+import contextlib
 import json
 import multiprocessing
 import os
@@ -200,6 +201,19 @@ class FCFSScheduler(BaseScheduler):
 
             matching_workers = [worker for worker in idle_workers if worker.can_run(job)]
             if len(matching_workers) == 0:
+                # If no registered worker can handle this job, then print a message to the log
+                # and remove the queue entry. This will trigger the "Something has gone wrong"
+                # message on the student's side.
+                #
+                # TODO: This should dump an error message to the `results` directory that
+                #       exposes the error message in the UI, but that's for a future PR.
+                if not any(worker.can_run(job) for worker in self.workers):
+                    self.config.logger.log_message(
+                        f"ERROR: no worker compatible with job {job.path}: no worker has "
+                        f"capability {job.queue_obj['required_capabilities']}. Removing."
+                    )
+                    with contextlib.suppress(FileNotFoundError):
+                        os.remove(job.path)
                 continue
 
             dest = random.choice(matching_workers)
