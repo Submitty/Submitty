@@ -108,6 +108,9 @@ class CourseMaterialsController extends AbstractController {
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         // replacing any whitespace with underscore char.
         $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
+        // Always delete the zip file after script execution
+        register_shutdown_function('unlink', $zip_name);
+
         // getting the meta-data of the course-material in '$json' variable
         $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($file_data);
@@ -153,7 +156,6 @@ class CourseMaterialsController extends AbstractController {
         header("Pragma: no-cache");
         header("Expires: 0");
         readfile("$zip_name");
-        unlink($zip_name); //deletes the random zip file
     }
 
     /**
