@@ -2,7 +2,7 @@
   <img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" width="500px"/>
 </p>
 
-[![Build Status](https://travis-ci.com/Submitty/Submitty.svg?branch=master)](https://travis-ci.com/Submitty/Submitty)
+[[![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
 
 # Usage
 
