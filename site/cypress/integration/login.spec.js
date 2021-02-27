@@ -33,6 +33,9 @@ describe('Test cases revolving around the logging in functionality of the site',
 		cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
 
 		cy.login();
+		cy.get('#logout .icon-title').should((val) => {
+			expect( val.text().trim() ).to.equal('Logout Quinn');
+		});
 	});
 
 
@@ -75,7 +78,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 		cy.get('input[name=password]').type(user);
 		cy.get('input[name=login]').click();
 
-		cy.url().should('eq', `${Cypress.config('baseUrl')}/url`);
+		cy.url().should('eq', full_url);
 	});
 
 

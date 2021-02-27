@@ -70,12 +70,5 @@ Cypress.Commands.add("login", (username="instructor") => {
 	cy.get('input[name=user_id]').type(username);
 	cy.get('input[name=password]').type(username);
 	cy.get('input[name=login]').click();
-
-	//basic check to see if we're logged in
-	cy.get('#nav-Wsidebar-my-courses .icon-title').should((val) => {
-		const text = val.text().trim();
-
-		expect(text).to.equal('My Courses');
-	});
 });
 
