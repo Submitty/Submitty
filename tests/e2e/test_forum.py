@@ -325,6 +325,7 @@ class TestForum(BaseTestCase):
         self.delete_thread(title2)
         assert not self.thread_exists(title3)
 
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_infinite_scroll(self):
         self.init_and_enable_discussion()
         list_title = []
