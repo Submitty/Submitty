@@ -389,6 +389,7 @@ jobs:
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
           - name: Run login tests with database auth
+            run: |
               pushd ${SUBMITTY_REPOSITORY}
               sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
