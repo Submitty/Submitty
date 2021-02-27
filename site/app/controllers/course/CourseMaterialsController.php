@@ -47,7 +47,7 @@ class CourseMaterialsController extends AbstractController {
     public function deleteCourseMaterial($path) {
         // security check
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
 
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
@@ -94,7 +94,7 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
      */
     public function downloadCourseMaterialZip($dir_name, $path) {
-        $root_path = realpath(htmlspecialchars_decode(urldecode($path)));
+        $root_path = realpath(htmlspecialchars_decode(rawurldecode($path)));
 
         // check if the user has access to course materials
         if (!$this->core->getAccess()->canI("path.read", ["dir" => 'course_materials', "path" => $root_path])) {

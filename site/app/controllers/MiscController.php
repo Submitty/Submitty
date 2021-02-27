@@ -192,7 +192,7 @@ class MiscController extends AbstractController {
      */
     public function downloadCourseFile($dir, $path) {
         // security check
-        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path))));
+        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
