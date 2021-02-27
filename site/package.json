@@ -28,6 +28,7 @@
     "twig": "1.15.4"
   },
   "devDependencies": {
+    "cypress": "^6.5.0",
     "eslint": "^7.20.0"
   },
   "scripts": {
