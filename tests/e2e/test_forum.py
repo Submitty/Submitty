@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
+import unittest
 
 
 class TestForum(BaseTestCase):
