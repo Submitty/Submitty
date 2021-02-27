@@ -463,7 +463,7 @@ class TestcaseWrapper:
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
 
-    # Helpful for debugging make errors on travis
+    # Helpful for debugging make errors on CI
     def debug_print(self,f):
         filename=os.path.join(self.testcase_path,f)
         print ("\nDEBUG_PRINT: ",filename)
