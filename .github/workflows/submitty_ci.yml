@@ -30,7 +30,10 @@ jobs:
       - name: install
         run : |
           cd ${{ env.SUBMITTY_REPOSITORY }}/site
+          npm install file-saver --save
           npm install --production=false
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+
       - name: cypress
         uses: cypress-io/github-action@v2
         with: 
@@ -357,6 +360,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
           - name: Install third party dependencies
             run: |
@@ -432,7 +436,9 @@ jobs:
               restore-keys: |
                  ${{ runner.os }}-cache-node-modules-dev
           - name: Install Cypress
-            run: npm install --production=false
+            run: |
+              npm install file-saver --save
+              npm install --production=false
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
