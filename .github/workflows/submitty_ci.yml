@@ -42,10 +42,10 @@ jobs:
           name: cypress-screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
       - uses: actions/upload-artifact@v1
-          if: failure()
-          with:
-            name: cypress-videos
-            path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
         
 
     eslint:
