@@ -27,12 +27,26 @@ jobs:
             sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
             sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
             sudo chmod -R a+rwx /tmp/
+      - name: install
+        run : |
+          cd ${{ env.SUBMITTY_REPOSITORY }}/site
+          npm install --production=false
       - name: cypress
         uses: cypress-io/github-action@v2
-        with:
-          config: baseUrl=http://localhost
-          spec: integration/login.spec.js
+        with: 
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          record: true
+      - uses: actions/upload-artifact@v1
+          if: failure()
+          with:
+            name: cypress-screenshots
+            path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v1
+          if: failure()
+          with:
+            name: cypress-videos
+            path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+        
 
     eslint:
         runs-on: ubuntu-18.04
@@ -411,11 +425,21 @@ jobs:
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
 
+          - name: Cache Node Modules
+            run: |
+              path ~/.npm
+              key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
+              restore-keys: |
+                 ${{ runner.os }}-cache-node-modules-dev
+          - name: Install Cypress
+            run: npm install --production=false
+
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              record : true
 
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
@@ -426,6 +450,7 @@ jobs:
               config: baseUrl=http://localhost
               spec: integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              record : true
 
           - uses: actions/upload-artifact@v1
             if: failure()
