@@ -375,19 +375,55 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
+
           - uses: nanasess/setup-chromedriver@master
-          - name: Run e2e tests
+          - name: Setup chromedriver
             run: |
               sudo systemctl restart submitty_autograding_worker
               sudo systemctl restart submitty_autograding_shipper
+              export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
+              sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1
+
+          - name: Run selenium e2e tests with pam auth
+            run: |
               pushd ${SUBMITTY_REPOSITORY}
-              sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
+
+          - name: Run cypress e2e tests with pam auth
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              working-directory: env.SUBMITTY_REPOSITORY/site/cypress
+
+          - name: Switch to database auth
+            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
+
+          - name: Run cypress e2e login tests with databse auth
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              spec: integration/login.spec.js
+              working-directory: env.SUBMITTY_REPOSITORY/site/cypress
+
+          - uses: actions/upload-artifact@v1
+            if: failure()
+            with:
+              name: cypress-screenshots
+              path: ${SUBMITTY_REPOSITORY}/site/cypress/screenshots
+          - uses: actions/upload-artifact@v1
+            if: failure()
+            with:
+              name: cypress-videos
+              path: ${SUBMITTY_REPOSITORY}/site/cypress/videos
+
+          - name: Check for site errors
+            working-directory: env.SUBMITTY_REPOSITORY
+            run: sudo bash tests/test_site_error_log.sh
+
           - name: Run integration tests
-            run: |
-              sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+            run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
 
