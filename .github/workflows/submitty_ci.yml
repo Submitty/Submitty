@@ -37,10 +37,10 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           record: true
       - uses: actions/upload-artifact@v1
-          if: failure()
-          with:
-            name: cypress-screenshots
-            path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
       - uses: actions/upload-artifact@v1
           if: failure()
           with:
