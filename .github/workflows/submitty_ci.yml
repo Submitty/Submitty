@@ -393,8 +393,9 @@ jobs:
               sudo bash tests/test_site_error_log.sh
 
           - name: Cache Node Modules
-            run: |
-              path ~/.npm
+            uses: actions/cache@v2
+            with:
+              path: ~/.npm
               key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
               restore-keys: |
                  ${{ runner.os }}-cache-node-modules-dev
