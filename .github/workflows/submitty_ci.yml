@@ -14,6 +14,26 @@ env:
   PHP_VER: 7.2
   
 jobs:
+    test:
+      runs-on: ubuntu-18.04
+      steps:
+      - uses: actions/checkout@v2
+        with:
+          path: SUBMITTY_CPY/
+      - name: Copy Repo
+        run: |
+          # have to copy first, absolute paths not supported by actions/checkout@v2
+            sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+            sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+            sudo chmod -R a+rwx /tmp/
+      - name: cypress
+        uses: cypress-io/github-action@v2
+        with:
+          config: baseUrl=http://localhost
+          spec: integration/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+
     eslint:
         runs-on: ubuntu-18.04
         defaults:
