@@ -400,8 +400,7 @@ jobs:
               restore-keys: |
                  ${{ runner.os }}-cache-node-modules-dev
           - name: Install Cypress
-            with:
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: |
               npm install file-saver --save
               npm install --production=false
