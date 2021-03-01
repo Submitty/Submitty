@@ -52,7 +52,6 @@ jobs:
             - name: Install Composer
               uses: actions/cache@v2
               with:
-                  php-version: ${{ env.PHP_VER }}
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
@@ -418,15 +417,15 @@ jobs:
             uses: cypress-io/github-action@v2
             with:
               config: baseUrl=http://localhost
-              spec: integration/login.spec.js
+              spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
 
-          - uses: actions/upload-artifact@v1
+          - uses: actions/upload-artifact@v2
             if: failure()
             with:
               name: cypress-screenshots
               path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-          - uses: actions/upload-artifact@v1
+          - uses: actions/upload-artifact@v2
             if: failure()
             with:
               name: cypress-videos
