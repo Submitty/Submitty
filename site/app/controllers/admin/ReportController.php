@@ -390,7 +390,7 @@ class ReportController extends AbstractController {
         $polls_data = [];
         foreach ($polls as $poll) {
             $polls_data[] = [
-                "id" => $poll->getID(),
+                "id" => $poll->getId(),
                 "responses" => $poll->getUserResponses()
             ];
         }
