@@ -410,7 +410,6 @@ jobs:
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              record : true
 
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
@@ -421,7 +420,6 @@ jobs:
               config: baseUrl=http://localhost
               spec: integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              record : true
 
           - uses: actions/upload-artifact@v1
             if: failure()
