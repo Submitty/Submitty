@@ -47,6 +47,7 @@ export function getCurrentSemester(){
 * 
 * @param {String[]} [parts=[]] array of parts to string together
 * @param {Boolean} [include_base=false] weather to include the url base (http://localhost:1501/) or not
+* @returns {String}
 */
 export function buildUrl(parts = [], include_base = false){
 	let url = "";
@@ -54,7 +55,7 @@ export function buildUrl(parts = [], include_base = false){
 		url = Cypress.config('baseUrl') + '/';
 	}
 
-	return `${url}courses/${getCurrentSemester()}/${ parts.join('/') }`
+	return `${url}courses/${getCurrentSemester()}/${parts.join('/')}`
 }
 
 
