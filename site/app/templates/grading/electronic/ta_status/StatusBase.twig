@@ -208,7 +208,7 @@
                     <li>Grade Inquiries</li>
                 {% endif %}
             </ul>
-            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+            {# {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 {% if overall_average == null or overall_average.getCount() == 0 %}
                     {% if team_assignment %}
                         <a class="btn btn-primary"
@@ -222,7 +222,7 @@
                         </a>
                     {% endif %}
                 {% endif %}
-            {% endif %}
+            {% endif %} #}
         {% endif %}
     </div>
     {# /Top Button #}
