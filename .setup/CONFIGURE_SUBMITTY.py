@@ -47,6 +47,9 @@ parser = argparse.ArgumentParser(description='Submitty configuration script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty to be in debug mode. '
                                                                         'This should not be used in production!')
+parser.add_argument('--setup-for-sample-courses', action='store_true', default=False,
+                    help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
+                         "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
@@ -459,6 +462,16 @@ if not args.worker:
                 "enabled" : True
             }
         }
+
+        if args.setup_for_sample_courses:
+            worker_dict['primary']['capabilities'].extend([
+                'c++',
+                'python',
+                'matlab',
+                'pdf-word-count',
+                'upload',
+                'etcetera',
+            ])
 
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
