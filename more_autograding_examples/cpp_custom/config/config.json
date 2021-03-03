@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "c/c++",
+
     "grading_parameters" : {
         "AUTO_POINTS" : 20
     },

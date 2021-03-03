@@ -465,12 +465,12 @@ if not args.worker:
 
         if args.setup_for_sample_courses:
             worker_dict['primary']['capabilities'].extend([
-                'c++',
+                'c/c++',
                 'python',
                 'matlab',
                 'pdf-word-count',
-                'upload',
-                'etcetera',
+                'et-cetera',
+                'notebook',
             ])
 
         with open(WORKERS_JSON, 'w') as workers_file:

@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "et-cetera",
+
     "hide_submitted_files" : true,
     "hide_version_and_test_details" : true,
 

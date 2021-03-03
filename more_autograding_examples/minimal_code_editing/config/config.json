@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "c/c++",
+
     "autograding" : {
         "submission_to_runner" : [ "*.cpp" ]
     },

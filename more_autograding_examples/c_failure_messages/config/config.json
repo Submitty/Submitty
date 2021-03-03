@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "c/c++",
+
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },

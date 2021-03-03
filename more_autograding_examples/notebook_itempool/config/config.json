@@ -1,4 +1,5 @@
 {
+	"required_capabilities": "notebook",
 
     "hide_submitted_files" : true,
 //    "hide_version_and_test_details" : true,

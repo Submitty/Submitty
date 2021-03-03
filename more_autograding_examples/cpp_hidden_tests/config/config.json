@@ -7,7 +7,7 @@
 
     "assignment_message" : "You are allowed 3 no penalty submissions.  You will lose 1 point for each 2 submissions beyond these non-penalty submissions.  The maximum penalty is -5 points.",
 
-    "required_capabilities" : "default",
+    "required_capabilities" : "c/c++",
 
     "testcases" : [
 
