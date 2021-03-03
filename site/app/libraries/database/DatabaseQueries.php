@@ -4302,7 +4302,10 @@ AND gc_id IN (
     }
 
     public function getRegradePost($post_id) {
-        $this->course_db->query("SELECT * FROM regrade_discussion WHERE id = ?", [$post_id]);
+        $this->course_db->query(
+            "SELECT * FROM regrade_discussion WHERE id = ?",
+            [$post_id]
+        );
         return $this->course_db->row();
     }
 
