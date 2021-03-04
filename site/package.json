@@ -13,7 +13,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.2",
     "@submitty/pdf-annotate.js": "2.2.2",
-    "bootstrap": "4.3.1",
+    "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
     "codemirror": "5.59.4",
     "flatpickr": "4.6.6",
