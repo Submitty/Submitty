@@ -2,6 +2,11 @@ import {buildUrl} from '../support/commands.js';
 
 
 describe('Test cases revolving around the logging in functionality of the site', () => {
+
+	describe('foo', () => {
+		cy.visit('/');
+	});
+
 	it('should log in through root endpoint', () => {
 		const user = 'instructor';
 
