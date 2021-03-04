@@ -1,17 +1,12 @@
-import {buildUrl} from '../support/commands.js';
+import {buildUrl} from '../support/utils.js';
 
 
 describe('Test cases revolving around the logging in functionality of the site', () => {
-
-	describe('foo', () => {
-		cy.visit('/');
-	});
-
 	it('should log in through root endpoint', () => {
 		const user = 'instructor';
 
 		//should hit the login form
-		cy.visit('/');
+		cy.visit([]);
 		cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
 
 		//fill out the login form and hit submit
@@ -32,12 +27,14 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
 	it('should login through login endpoint', () => {
-		const url = '/authentication/login';
+		const user = 'instructor';
 
-		cy.visit(url);
+		cy.visit(['authentication', 'login']);
 		cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
+		cy.get('input[name=user_id]').type(user);
+		cy.get('input[name=password]').type(user);
+		cy.get('input[name=login]').click();
 
-		cy.login();
 		cy.get('#logout .icon-title').should((val) => {
 			expect( val.text().trim() ).to.equal('Logout Quinn');
 		});
@@ -45,7 +42,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
 	it('should reject bad passwords', () => {
-		cy.visit('/')
+		cy.visit([]);
 
 		cy.get('input[name=user_id]').type('instructor');
 		cy.get('input[name=password]').type('bad-password');
@@ -58,7 +55,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
 	it('should reject bad usernames', () => {
-		cy.visit('/')
+		cy.visit([]);
 
 		cy.get('input[name=user_id]').type('bad-username');
 		cy.get('input[name=password]').type('instructor');
@@ -72,11 +69,10 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 	it('should redirect after logging in', () => {
 		//try to visit a page not logged in, then log in and see where we are
-		const url = buildUrl(['sample', 'gradeable', 'open_homework']); 
 		const full_url = buildUrl(['sample', 'gradeable', 'open_homework'], true);
 		const user = 'instructor';
 
-		cy.visit(url);
+		cy.visit(['sample', 'gradeable', 'open_homework']);
 		cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login?old=${encodeURIComponent(full_url)}`);
 
 		cy.get('input[name=user_id]').type(user);
@@ -88,10 +84,8 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
 	it('should check if you can access a course', () => {
-		const url = buildUrl(['sample']);
-
 		cy.login('pearsr');
-		cy.visit(url);
+		cy.visit(['sample']);
 
 		cy.get('.content').should('have.text', "\n    You don't have access to this course. \n    This is sample for Spring 2021. \n    If you think this is a mistake, please contact your instructor to gain access. \n    click  here  to back to homepage and see your courses list.\n");
 	})
