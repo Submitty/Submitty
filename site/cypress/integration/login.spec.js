@@ -29,7 +29,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 	it('should login through login endpoint', () => {
 		const user = 'instructor';
 
-		cy.visit(['authentication', 'login']);
+		cy.visit('authentication/login');
 		cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
 		cy.get('input[name=user_id]').type(user);
 		cy.get('input[name=password]').type(user);

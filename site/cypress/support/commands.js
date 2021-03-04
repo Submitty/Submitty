@@ -39,6 +39,15 @@ Cypress.Commands.add("login", (username="instructor") => {
 });
 
 
+/**
+* Visit a url either by an array of parts or a completed url E.g:
+* cy.vist(['sample', 'gradeables']) -> visit 'courses/s21/sample/gradeables'
+* cy.vist('authentication/login') visit 'authentication/login'
+*
+* base url of localhost:1501 is used by default, see baseUrl in Cypress.json
+*
+* @param {String|String[]}
+*/
 Cypress.Commands.overwrite("visit", (originalFn, options) => { 
 	let url = '';
 
