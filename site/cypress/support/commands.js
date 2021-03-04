@@ -46,7 +46,7 @@ export function getCurrentSemester(){
 * Build a courseURL based on an array of 'parts', e.g [foo, bar] -> courses/s21/foo/bar
 * 
 * @param {String[]} [parts=[]] array of parts to string together
-* @param {Boolean} [include_base=false] weather to include the url base (http://localhost:1501/) or not
+* @param {Boolean} [include_base=false] whether to include the url base (e.g. http://localhost:1501/) or not
 * @returns {String}
 */
 export function buildUrl(parts = [], include_base = false){
@@ -72,4 +72,3 @@ Cypress.Commands.add("login", (username="instructor") => {
 	cy.get('input[name=password]').type(username);
 	cy.get('input[name=login]').click();
 });
-
