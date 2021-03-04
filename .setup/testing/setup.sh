@@ -53,7 +53,7 @@ http://localhost
 
 sysadmin@example.com
 https://example.com
-${AUTH_METHOD}
+1
 
 
 y
