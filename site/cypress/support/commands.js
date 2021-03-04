@@ -32,7 +32,7 @@ import {buildUrl} from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add("login", (username="instructor") => { 
-	cy.visit([]);
+	cy.visit('/');
 	cy.get('input[name=user_id]').type(username);
 	cy.get('input[name=password]').type(username);
 	cy.get('input[name=login]').click();
@@ -54,7 +54,7 @@ Cypress.Commands.overwrite("visit", (originalFn, options) => {
 	if(Array.isArray(options)){
 		url = buildUrl(options);
 	}else if((typeof options) === 'string'){
-		url = buildUrl([]) + options;
+		url = options;
 	}else{
 		url = buildUrl([]);
 	}
