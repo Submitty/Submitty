@@ -1,10 +1,5 @@
-{% if showNewInterface %}
 <div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}">
     <div>
-{% else %}
-<div id="grading_rubric" class="draggable rubric_panel {{ is_ta_grading ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
-    <div class="draggable_content">
-{% endif %}
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
                 <div class="row row-wrap vertical-center">

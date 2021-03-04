@@ -484,7 +484,7 @@ EOF
         fi
     fi
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
+    cp -n ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
@@ -494,7 +494,7 @@ EOF
     #################
     # remove default site which would cause server to mess up
     rm -f /etc/nginx/sites*/default
-    cp ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+    cp -n ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
     chmod 644 /etc/nginx/sites-available/submitty.conf
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
@@ -609,10 +609,12 @@ if [ ! -d "${clangsrc}" ]; then
 
     mkdir -p ${clangsrc}
 
-    # checkout the clang sources
-    git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
-    git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
-    git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
+    # clone the clang sources, circa Nov. 2018
+    git clone --depth 1 --branch llvmorg-7.1.0 https://github.com/llvm/llvm-project.git ${clangsrc}/source
+    cp -R ${clangsrc}/source/llvm ${clangsrc}/llvm
+    cp -R ${clangsrc}/source/clang ${clangsrc}/llvm/tools
+    cp -R ${clangsrc}/source/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/
+    mv ${clangsrc}/llvm/tools/clang/tools/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/extra
 
     # initial cmake for llvm tools (might take a bit of time)
     mkdir -p ${clangbuild}
