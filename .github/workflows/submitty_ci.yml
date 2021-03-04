@@ -390,6 +390,7 @@ jobs:
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
 
+          # TODO: Remove this block after upgrading jsPDF
           - name: Cache Node Modules
             uses: actions/cache@v2
             with:
