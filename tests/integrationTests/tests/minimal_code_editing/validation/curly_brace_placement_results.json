@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 1,
+    "nonhidden_automatic_grading_total": 1,
     "testcases": [
         {
             "autochecks": [
@@ -16,11 +18,11 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 1 Reasonable Code Changes"
+            "test_name": "Reasonable Code Changes"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 2 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

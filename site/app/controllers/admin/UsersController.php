@@ -310,6 +310,13 @@ class UsersController extends AbstractController {
             $user->setRegistrationSection($_POST['registered_section']);
         }
 
+        if ($_POST['registration_subsection'] === "null") {
+            $user->setRegistrationSubsection(null);
+        }
+        else {
+            $user->setRegistrationSubsection($_POST['registration_subsection']);
+        }
+
         if ($_POST['rotating_section'] == "null") {
             $user->setRotatingSection(null);
         }

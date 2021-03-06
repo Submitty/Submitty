@@ -26,7 +26,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 1 Ping Pong"
+            "test_name": "Ping Pong"
         },
         {
             "autochecks": [
@@ -54,7 +54,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 2 Ping Pong, Ping Pong"
+            "test_name": "Ping Pong, Ping Pong"
         },
         {
             "autochecks": [
@@ -82,7 +82,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 3 Not Ping"
+            "test_name": "Not Ping"
         },
         {
             "autochecks": [
@@ -110,7 +110,7 @@
                 }
             ],
             "points_awarded": 5,
-            "test_name": "Test 4 Not Ping, Ping, Ping"
+            "test_name": "Not Ping, Ping, Ping"
         },
         {
             "autochecks": [
@@ -148,11 +148,11 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 5 UDP Test"
+            "test_name": "UDP Test"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 6 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

@@ -100,6 +100,8 @@ class User extends AbstractModel {
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
+    /** @prop @var string What is the registration subsection that the user was assigned to for the course */
+    protected $registration_subsection = null;
 
     /**
      * @prop
@@ -198,6 +200,26 @@ class User extends AbstractModel {
         }
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
+
+        if (isset($details['registration_subsection'])) {
+            $this->setRegistrationSubsection($details['registration_subsection']);
+        }
+    }
+
+    /**
+     * Gets the message the user sets when seeking a team or a parter
+     * @param string $g_id the gradeable where the user is seeking for a team
+     * @return string, message if it exists or N/A if it doesnt
+     */
+    public function getSeekMessage($g_id): string {
+        $ret = $this->core->getQueries()->getSeekMessageByUserId($g_id, $this->id);
+
+        if (is_null($ret)) {
+            return "N/A";
+        }
+        else {
+            return $ret;
+        }
     }
 
     /**
@@ -332,6 +354,10 @@ class User extends AbstractModel {
      */
     public function accessFaculty() {
         return $this->access_level < 3;
+    }
+
+    public function isSuperUser() {
+        return $this->access_level === self::LEVEL_SUPERUSER;
     }
 
     public function setPassword($password) {
@@ -506,5 +532,12 @@ class User extends AbstractModel {
     public function onTeam(string $gradeable_id): bool {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
         return $team !== null;
+    }
+
+    /**
+     * Checks if the user has invites to multiple teams for the given assignment
+     */
+    public function hasMultipleTeamInvites(string $gradeable_id): bool {
+        return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
     }
 }

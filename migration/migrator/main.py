@@ -274,11 +274,17 @@ def handle_migration(args):
                         )
                         database.close()
                     except OperationalError:
-                        raise SystemExit(
-                            "Submitty Database Migration Error:  "
+                        # NOTE: Do not fail on missing database.
+                        # Older archived courses may not have a valid
+                        # or active database associated with their
+                        # filesystem.  (Old course submission files
+                        # are useful for plagiarism detection.)
+                        print(
+                            "Submitty Database Migration WARNING:  "
                             "Database does not exist for "
                             "semester={} course={}".format(semester, course)
                         )
+                        continue
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()

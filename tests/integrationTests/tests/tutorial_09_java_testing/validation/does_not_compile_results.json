@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 1,
+    "nonhidden_automatic_grading_total": 1,
     "testcases": [
         {
             "autochecks": [
@@ -27,7 +29,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Java - Compilation",
+            "test_name": "Java - Compilation",
             "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
@@ -57,7 +59,7 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 2 Java - Instructor JUnit Test Compilation",
+            "test_name": "Java - Instructor JUnit Test Compilation",
             "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
@@ -78,11 +80,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 3 Java - JUnit Test"
+            "test_name": "Java - JUnit Test"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 4 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

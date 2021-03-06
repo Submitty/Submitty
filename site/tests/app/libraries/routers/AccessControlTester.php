@@ -125,14 +125,14 @@ class AccessControlTester extends BaseUnitTest {
 
     public function testInvalidRoleConstructor() {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('');
+        $this->expectExceptionMessage('Invalid role: INVALID_ROLE');
         new AccessControl(['role' => 'INVALID_ROLE']);
     }
 
     public function testInvalidRoleMethod() {
         $access = new AccessControl([]);
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('');
+        $this->expectExceptionMessage('Invalid role: INVALID_ROLE');
         $access->setRole('INVALID_ROLE');
     }
 

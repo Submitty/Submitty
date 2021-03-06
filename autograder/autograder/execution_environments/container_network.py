@@ -65,7 +65,7 @@ class Container():
         container_create_time = timer()
         self.log_meta('CREATE BEGIN', self.full_name)
 
-        client = docker.from_env()
+        client = docker.from_env(timeout=60)
 
         mount = {
             self.directory: {
@@ -112,6 +112,10 @@ class Container():
                 )
         except docker.errors.ImageNotFound:
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
+            client.close()
+            raise
+        except Exception:
+            self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
 
@@ -346,7 +350,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         """ Given a set of containers, network them per their specifications. """
         if len(containers) <= 1:
             return
-        client = docker.from_env()
+        client = docker.from_env(timeout=60)
         none_network = client.networks.get('none')
         client.close()
 
@@ -365,7 +369,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     def network_containers_routerless(self, containers):
         """ If there is no router, all containers are added to the same network. """
-        client = docker.from_env()
+        client = docker.from_env(timeout=60)
         network_name = f'{self.untrusted_user}_routerless_network'
 
         # Assumes untrustedXX naming scheme, where XX is a number
@@ -402,7 +406,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         other endpoint is the router, which has been aliased to impersonate all other reachable
         endpoints.
         """
-        client = docker.from_env()
+        client = docker.from_env(timeout=60)
         router = self.get_container_with_name('router', containers)
         router_connections = {}
         network_num = 10
@@ -792,6 +796,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             self.log_stack_trace(traceback.format_exc())
             self.log_message("ERROR: Could not verify execution mode status.")
             return
+        finally:
+            autograding_utils.cleanup_stale_containers(self.untrusted_user)
 
         try:
             self.create_containers(containers, script, arguments)

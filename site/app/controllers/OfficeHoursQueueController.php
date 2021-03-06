@@ -10,6 +10,9 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
+use app\libraries\socket\Client;
+use app\libraries\Logger;
+use WebSocket;
 
 /**
  * Class OfficeHoursQueueController
@@ -77,6 +80,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         if ($this->core->getQueries()->openQueue($queue_code, $token)) {
             $this->core->addSuccessMessage("New queue added");
+            Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
         }
         else {
             $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue name");
@@ -146,6 +150,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info);
+        $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -186,7 +191,28 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $remove_type, $queue_code);
+        $this->sendSocketMessage(['type' => 'full_update']);
         $this->core->addSuccessMessage("Removed from queue");
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/togglePause", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function setQueuePauseState() {
+        if (empty($_POST['pause_state'])) {
+            $this->core->addErrorMessage("Missing queue position pause state");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->setQueuePauseState($_POST['pause_state'] === 'true');
+        $this->core->addSuccessMessage($_POST['pause_state'] === 'true' ? "Position in queue paused" : "Position in queue unpaused");
+        $this->sendSocketMessage(['type' => 'queue_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -213,6 +239,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->restoreUserToQueue($_POST['entry_id']);
+        $this->sendSocketMessage(['type' => 'queue_status_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -239,6 +266,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->startHelpUser($_POST['user_id'], $queue_code);
+        $this->sendSocketMessage(['type' => 'queue_status_update']);
         $this->core->addSuccessMessage("Started helping student");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -278,6 +306,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->finishHelpUser($_POST['user_id'], $queue_code, $remove_type);
+        $this->sendSocketMessage(['type' => 'full_update']);
         $this->core->addSuccessMessage("Finished helping student");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -297,8 +326,10 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "EMPTIED");
         $this->core->getQueries()->emptyQueue($queue_code);
         $this->core->addSuccessMessage("Queue emptied");
+        $this->sendSocketMessage(['type' => 'full_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -322,9 +353,10 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-
+        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, $_POST['queue_state'] === "1" ? 'CLOSED' : 'OPENED');
         $this->core->getQueries()->toggleQueue($queue_code, $_POST['queue_state']);
         $this->core->addSuccessMessage(($_POST['queue_state'] === "1" ? 'Closed' : 'Opened') . ' queue: "' . $queue_code . '"');
+        $this->sendSocketMessage(['type' => 'toggle_queue']);
 
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -346,20 +378,12 @@ class OfficeHoursQueueController extends AbstractController {
 
         $this->core->getQueries()->deleteQueue($queue_code);
         $this->core->addSuccessMessage("Queue deleted");
+        $this->sendSocketMessage(['type' => 'full_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/check_updates", methods={"GET"})
-     * @return MultiResponse
-     */
-    public function checkUpdates() {
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($this->core->getQueries()->getLastQueueUpdate())
-        );
-    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods={"POST"})
@@ -481,8 +505,87 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
         $this->core->addSuccessMessage("Updated announcement");
+        $this->sendSocketMessage(['type' => 'announcement_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
+    }
+
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
+     */
+    public function showQueueStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            $this->core->addErrorMessage("Office hours queue disabled");
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
+        }
+
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStats',
+            $viewer->getQueueDataOverall(),
+            $viewer->getQueueDataToday(),
+            $viewer->getQueueDataByWeekDayThisWeek(),
+            $viewer->getQueueDataByWeekDay(),
+            $viewer->getQueueDataByQueue(),
+            $viewer->getQueueDataByWeekNumber()
+        );
+    }
+
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods={"GET"})
+     */
+    public function showNewAnnouncement() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'renderNewAnnouncement',
+                new OfficeHoursQueueModel($this->core)
+            )
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function showQueueStudentStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
+        }
+
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStudentStats',
+            $viewer->getQueueDataStudent()
+        );
+    }
+
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
+        try {
+            $client = new Client($this->core);
+            $client->send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }

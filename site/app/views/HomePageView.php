@@ -30,14 +30,15 @@ class HomePageView extends AbstractView {
 
             //Create rank lists
             for ($i = 1; $i < 5; $i++) {
-                $ranks[$i] = [];
-                $ranks[$i]["title"] = $rank_titles[$i];
-                $ranks[$i]["courses"] = [];
+                $ranks[$i] = [
+                    'title' => $rank_titles[$i],
+                    'courses' => [],
+                ];
             }
 
             //Assemble courses into rank lists
             foreach ($course_type as $course) {
-                array_push($ranks[$course['user_group']]["courses"], $course);
+                $ranks[$course['user_group']]['courses'][] = $course;
             }
 
             //Filter any ranks with no courses

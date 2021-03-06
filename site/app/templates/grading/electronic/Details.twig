@@ -47,6 +47,12 @@
                    href="{{ order_toggle_url }}">
                     {{ sort == 'random' ? "Default Order" : "Random Order" }}
                 </a>
+                {% if toggle_anon_button %}
+                <a class="btn btn-default"
+                   href="{{ toggle_anon_mode_url }}">
+                    {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -210,16 +216,16 @@
                 {{ self.render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
                 {{ self.render_column_grading(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "grading_peer" %}
-                {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "grading_peer" %}
+            {% elseif column.function == "grading_blind" %}
+                {{ self.render_column_grading_blind(self, context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "grading_blind" %}
                 {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ self.render_column_index(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "section" %}
                 {{ self.render_column_section(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, context, section, graded_gradeable, index, info.team_edit_onclick, column) }}
+                {{ self.render_column_team_edit(self, context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 {{ self.render_column_team_id(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
@@ -269,7 +275,7 @@
             {% elseif column.function == "section" %}
                 {{ self.render_column_section(self, context, section, null, index, null, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, context, section, null, index, new_team_onclick, column) }}
+                {{ self.render_column_team_edit(self, context, section, null, index, new_team_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 <td></td>
             {% elseif column.function == "team_members" %}
@@ -345,7 +351,7 @@
                             {# Indicates Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] == 4   %}
-                            {# Indicates Graded Peer Component #}   
+                            {# Indicates Graded Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
@@ -353,7 +359,7 @@
                         {% endif %}
                     {% endif %}
             {% endif %}
-            {# Peer View for Stoplights #} 
+            {# Peer View for Stoplights #}
             {% if core.getUser().getGroup() == 4 %}
                     {# If no submission has been made, non peer should not be visible to peer grader #}
                     {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
@@ -371,13 +377,13 @@
                             {# Indicates Submitted but Ungraded Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Non-Peer Component (Hidden) #}   
+                            {# Indicates Non-Peer Component (Hidden) #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] < 4   %}
-                            {# Indicates Non-Peer Component (Hidden) #} 
+                            {# Indicates Non-Peer Component (Hidden) #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
                         {% else %}
-                            {# Indicates Submitted and Graded Peer Component #} 
+                            {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
                         {% endif %}
                     {% endif %}
@@ -421,8 +427,8 @@
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
-            
-            
+
+
             {% endif %}
         {% endif %}
         {% if graded_gradeable.hasActiveRegradeRequest() %}
@@ -445,7 +451,7 @@
 {% endmacro %}
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
-{% macro render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_grading_blind(self, context, section, graded_gradeable, index, info, column) %}
     {% if  graded_gradeable.hasOverriddenGrades() %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
@@ -508,9 +514,14 @@
 {% endmacro %}
 
 {# Edit Team #}
-{% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column) %}
+{% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column, edited_past_lock_date) %}
     <td>
-        <a onclick="{{ team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
+        <div>
+            <a onclick="{{ team_edit_onclick }}" title="Edit Team" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
+            {% if edited_past_lock_date %}
+                <div style="display:inline-block;" title="Edited Past Lock Date" aria-label="Edited Past Lock Date"><i class="fas fa-exclamation red-message"></i></div>
+            {% endif %}
+        </div>
     </td>
 {% endmacro %}
 
@@ -536,13 +547,16 @@
                 {{ member.getDisplayedLastName() -}}
             {%- endfor -%}
         {% endif %}
-    <div style="font-style: italic; display: inline; color: grey;">
+    <div style="font-style: italic; display: inline; color: var(--standard-medium-dark-gray);">
         {% if graded_gradeable.getGradeable().isTeamAssignment() %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
                 {%- if loop.index == 1 -%}Pending: {% endif -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}
+                {%- if member.hasMultipleTeamInvites(graded_gradeable.getGradeableId()) -%}
+                    <div style="display:inline-block;" title="Multiple Pending Invites" aria-label="Multiple Pending Invites">(<i class="fas fa-exclamation-triangle" style="color: var(--standard-medium-dark-gray);"></i>)</div>
+                {%- endif -%}
             {%- endfor -%}
         {% endif %}
     </div>
@@ -602,7 +616,7 @@
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter.getId() }}
         {% endif %}
-        
+
     </td>
 {% endmacro %}
 
@@ -651,7 +665,7 @@
                 <td class="viewed-red-x" title="">&#10008;</td>
             {% else %}
                 <td class="td-viewed-grade" id="team-check-marks" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
-                    {% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'hover_string' %}
+                    {% for user_id, time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]|filter((time, user_id) => user_id != 'hover_string') %}
 				        {% if time == null %}
                             <i class="viewed-white-check">&#x2714;</i>
                         {% else %}

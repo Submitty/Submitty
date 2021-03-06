@@ -7,24 +7,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
-from websocket import create_connection
-import json
+import unittest
 
 
 class TestForum(BaseTestCase):
     def __init__(self, testname):
-        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn")
+        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True, socket_page='discussion_forum')
 
-    def setUp(self):
-        super().setUp()
-        submitty_session_cookie = self.driver.get_cookie('submitty_session')
-        self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
-        new_connection_msg = json.dumps({'type': 'new_connection', 'course': 'sample'})
-        self.ws.send(new_connection_msg)
-
-    def tearDown(self):
-        self.ws.close()
-        super().tearDown()
 
     def init_and_enable_discussion(self):
         self.click_class('sample')
@@ -47,11 +36,11 @@ class TestForum(BaseTestCase):
     def switch_to_page_view_thread(self):
         if '/threads/new' in self.driver.current_url:
             self.driver.find_element(By.XPATH, "//a[contains(text(),'Back to Threads')]").click()
-        elif '/threads' in self.driver.current_url:
+        elif '/forum' in self.driver.current_url:
             pass
         else:
             assert False
-        assert '/threads' in self.driver.current_url
+        assert '/forum' in self.driver.current_url
 
     def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
@@ -87,10 +76,7 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
             return None
         self.wait_after_ajax()
-
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'new_thread')
+        self.check_socket_message('new_thread')
 
         assert '/threads' in self.driver.current_url
         return attachment_file
@@ -123,7 +109,7 @@ class TestForum(BaseTestCase):
         return len(icons) > 0
 
     def view_thread(self, title, return_info=False):
-        assert '/threads' in self.driver.current_url
+        assert '/forum' in self.driver.current_url
         assert self.thread_exists(title)
         div = self.driver.find_element(By.XPATH,
             "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
@@ -184,9 +170,7 @@ class TestForum(BaseTestCase):
         hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'new_post')
+        self.check_socket_message('new_post')
         # Test existence only
         self.find_posts(newcontent, must_exists=True, check_attachment=attachment_file)
         return attachment_file
@@ -196,10 +180,7 @@ class TestForum(BaseTestCase):
         self.driver.find_elements(By.XPATH, "//a[@title='Remove post']")[0].click()
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
-
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'delete_thread')
+        self.check_socket_message('delete_thread')
 
 
     def resolve_thread(self, title):
@@ -208,10 +189,7 @@ class TestForum(BaseTestCase):
         self.driver.find_element(By.XPATH, "//a[@title='Mark thread as resolved']").click()
         self.wait_after_ajax()
         assert self.icon_exists(title, "fa-check")
-
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'resolve_thread')
+        self.check_socket_message('resolve_thread')
 
     def announce_thread(self, title):
         assert not self.icon_exists(title, "thread-announcement")
@@ -220,10 +198,7 @@ class TestForum(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
         assert self.icon_exists(title, "thread-announcement")
-
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'announce_thread')
+        self.check_socket_message('announce_thread')
 
     def create_dummy_file(self):
         # Download image to create dummy image file
@@ -250,9 +225,7 @@ class TestForum(BaseTestCase):
                 cancel_button.click()
             else:
                 submit_button.click()
-                ws_msg = json.loads(self.ws.recv())
-                self.assertIn('type', ws_msg.keys())
-                self.assertEqual(ws_msg['type'], 'merge_thread')
+                self.check_socket_message('merge_thread')
             assert self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display") == "none"
 
     def test_basic_operations_thread(self):
@@ -353,6 +326,7 @@ class TestForum(BaseTestCase):
         self.delete_thread(title2)
         assert not self.thread_exists(title3)
 
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_infinite_scroll(self):
         self.init_and_enable_discussion()
         list_title = []

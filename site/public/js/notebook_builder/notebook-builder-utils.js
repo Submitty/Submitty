@@ -3,7 +3,7 @@
  * These would typically be files that go in the 'test_input' or 'test_output' directory
  *
  * @param {File} file The file to be uploaded.
- * @param {string} g_id Gradealbe ID
+ * @param {string} g_id Gradeable ID
  * @param {string} directory The directory the file should be uploaded into.  Example would be 'test_input' or
  *                           'test_output'.
  * @returns {Promise}
@@ -25,8 +25,12 @@ async function uploadFile(file, g_id, directory) {
         console.log(`Successfully uploaded ${file.name}.`);
     }
     else {
-        displayErrorMessage(`An error occurred uploading ${file.name}.`);
+        displayErrorMessage(`An error occurred uploading ${file.name}.  Check browser developer console for details.`);
         console.error(result.message);
+
+        if (result.data && Array.isArray(result.data)) {
+            result.data.forEach(msg => console.error(msg));
+        }
     }
 }
 
@@ -46,4 +50,25 @@ async function uploadFiles(file_selectors, g_id, directory) {
             await uploadFile(file_input.files[0], g_id, directory);
         }
     }
+}
+
+/**
+ * Determine if all itempool item widgets contain a non-blank and unique 'item_name'.
+ *
+ * @returns {String[]} Return an array containing invalid item names, or an empty array of none were found.
+ */
+function getBadItemNames() {
+    const used_item_names = new Set();
+    const bad_item_names = new Set();
+
+    const item_name_inputs = document.querySelectorAll('.item-name-input');
+    item_name_inputs.forEach(item_name_input => {
+        if (item_name_input.value === '' || used_item_names.has(item_name_input.value)) {
+            bad_item_names.add(item_name_input.value);
+        }
+
+        used_item_names.add(item_name_input.value);
+    });
+
+    return Array.from(bad_item_names);
 }
