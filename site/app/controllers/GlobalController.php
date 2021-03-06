@@ -166,7 +166,7 @@ class GlobalController extends AbstractController {
         if ($this->core->getConfig()->isPollsEnabled()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['polls']),
-                "title" => "Polls",
+                "title" => "Submini Polls",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-polls",
                 "icon" => "fa-question-circle"

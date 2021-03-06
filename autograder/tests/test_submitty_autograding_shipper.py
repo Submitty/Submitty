@@ -115,7 +115,7 @@ class TestAutogradingShipper(unittest.TestCase):
                 json.dump(json_file, outfile, indent=4)
 
         # Instantiate the shipper's config object
-        CONFIG = config.Config.path_constructor(CONFIG_DIR)
+        CONFIG = config.Config.path_constructor(CONFIG_DIR, 'TEST')
         shipper.instantiate_global_variables(CONFIG)
 
     def test_can_short_no_testcases(self):
