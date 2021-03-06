@@ -11,21 +11,28 @@
   },
   "homepage": "https://github.com/Submitty/Submitty#readme",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "5.13.1",
+    "@fortawesome/fontawesome-free": "5.15.2",
     "@submitty/pdf-annotate.js": "2.2.2",
     "bootstrap": "4.3.1",
     "chosen-js": "1.8.7",
-    "codemirror": "5.55.0",
-    "flatpickr": "4.6.3",
-    "jquery": "3.5.1",
+    "codemirror": "5.59.4",
+    "flatpickr": "4.6.6",
+    "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
     "jspdf": "^1.5.3",
-    "mermaid": "8.5.2",
+    "mermaid": "8.9.1",
     "pdfjs-dist": "2.2.228",
-    "plotly.js-dist": "1.54.5",
-    "shortcut-buttons-flatpickr": "0.3.0",
-    "twig": "1.15.1"
+    "plotly.js-dist": "1.56.0",
+    "shortcut-buttons-flatpickr": "0.3.1",
+    "twig": "1.15.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "cypress": "^6.6.0",
+    "eslint": "^7.21.0"
+  },
+  "scripts": {
+    "lint": "eslint \"public/js/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" --fix"
+  }
 }

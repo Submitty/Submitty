@@ -12,6 +12,39 @@ class ForumThreadView extends AbstractView {
         return $this->core->getConfig()->isForumEnabled();
     }
 
+    private function getSavedForumCategories($current_course, $categories) {
+        $category_ids_array = array_column($categories, 'category_id');
+        $cookieSelectedCategories = [];
+        if (!empty($_COOKIE[$current_course . '_forum_categories'])) {
+            foreach (explode('|', $_COOKIE[$current_course . '_forum_categories']) as $selectedId) {
+                if (in_array((int) $selectedId, $category_ids_array)) {
+                    $cookieSelectedCategories[] = $selectedId;
+                }
+            }
+        }
+        return $cookieSelectedCategories;
+    }
+
+    private function getSavedThreadStatuses() {
+        $cookieSelectedThreadStatus = [];
+        if (!empty($_COOKIE['forum_thread_status'])) {
+            foreach (explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
+                if (in_array((int) $selectedStatus, [-1,0,1])) {
+                    $cookieSelectedThreadStatus[] = $selectedStatus;
+                }
+            }
+        }
+        return $cookieSelectedThreadStatus;
+    }
+
+    private function getUnreadThreadStatus() {
+        $cookieSelectedUnread = false;
+        if (!empty($_COOKIE['unread_select_value'])) {
+            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
+        }
+        return $cookieSelectedUnread;
+    }
+
     public function searchResult($threads) {
 
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
@@ -31,7 +64,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;float:right;top:3px;margin-right:102px;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]
@@ -134,6 +167,7 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
             $this->core->getOutput()->addInternalJs('websocket.js');
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
@@ -149,94 +183,11 @@ class ForumThreadView extends AbstractView {
             return ($ar['id'] == $currentThread);
         });
 
-        if ($show_merged_thread) {
-            $show_merged_thread_class = "active";
-            $show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
-            $show_merged_thread_title = "Hide Merged Threads";
-        }
-        else {
-            $show_merged_thread_class = "";
-            $show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
-            $show_merged_thread_title = "Show Merged Threads";
-        }
-
-        $show_deleted_class = '';
-        $show_deleted_action = '';
-        $show_deleted_thread_title = '';
-
-        if ($this->core->getUser()->accessGrading()) {
-            if ($show_deleted) {
-                $show_deleted_class = "active";
-                $show_deleted_action = "alterShowDeletedStatus(0);";
-                $show_deleted_thread_title = "Hide Deleted Threads";
-            }
-            else {
-                $show_deleted_class = "";
-                $show_deleted_action = "alterShowDeletedStatus(1);";
-                $show_deleted_thread_title = "Show Deleted Threads";
-            }
-        }
-
         $categories = $this->core->getQueries()->getCategories();
 
-        $cookieSelectedCategories = [];
-        $cookieSelectedThreadStatus = [];
-        $cookieSelectedUnread = false;
-        $category_ids_array = array_column($categories, 'category_id');
-
-        if (!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
-            foreach (explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
-                if (in_array((int) $selectedId, $category_ids_array)) {
-                    $cookieSelectedCategories[] = $selectedId;
-                }
-            }
-        }
-
-        if (!empty($_COOKIE['forum_thread_status'])) {
-            foreach (explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
-                if (in_array((int) $selectedStatus, [-1,0,1])) {
-                    $cookieSelectedThreadStatus[] = $selectedStatus;
-                }
-            }
-        }
-
-        if (!empty($_COOKIE['unread_select_value'])) {
-            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
-        }
-
-        $default_button = [
-            [
-                "required_rank" => 4,
-                "display_text" => 'Create Thread',
-                "style" => 'position:absolute;top:3px;right:0px',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])],
-                "optional_class" => '',
-                "title" => 'Create Thread',
-                "onclick" => [false]
-            ]
-        ];
-
-        $button_params = [
-            "current_thread" => $currentThread,
-            "forum_bar_buttons_right" => $default_button,
-            "forum_bar_buttons_left" => [],
-            "show_threads" => true,
-            "thread_exists" => true,
-            "show_more" => true
-        ];
-
-        if ($this->core->getUser()->accessGrading()) {
-            if ($show_deleted) {
-                $show_deleted_class = "active";
-                $show_deleted_action = "alterShowDeletedStatus(0);";
-                $show_deleted_thread_title = "Hide Deleted Threads";
-            }
-            else {
-                $show_deleted_class = "";
-                $show_deleted_action = "alterShowDeletedStatus(1);";
-                $show_deleted_thread_title = "Show Deleted Threads";
-            }
-        }
+        $cookieSelectedCategories = $this->getSavedForumCategories($currentCourse, $categories);
+        $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
+        $cookieSelectedUnread = $this->getUnreadThreadStatus();
 
         $filterFormData = [
             "categories" => $categories,
@@ -256,58 +207,7 @@ class ForumThreadView extends AbstractView {
         $displayThreadContent = "";
         $generatePostContent = "";
 
-        if (!$threadExists) {
-            $button_params["show_threads"] = false;
-            $button_params["thread_exists"] = false;
-            $button_params["show_more"] =  $this->core->getUser()->accessGrading();
-        }
-        else {
-            $more_data = [
-                [
-                    "filter_option" => $display_option
-                ],
-                [
-                    "display_text" => $show_merged_thread_title,
-                    "id" => 'merge_thread',
-                    "optional_class" => [!empty($show_merged_thread_class), $show_merged_thread_class],
-                    "title" => $show_merged_thread_title . " on Forum",
-                    "onclick" => [true, $show_merged_thread_action],
-                    "link" => '#',
-                    "required_rank" => 4
-                ],
-                [
-                    "display_text" => $show_deleted_thread_title,
-                    "optional_class" => [!empty($show_deleted_class), $show_deleted_class],
-                    "id" => 'delete',
-                    "title" => $show_deleted_thread_title . " on Forum",
-                    "link" => '#',
-                    "onclick" => [true, $show_deleted_action],
-                    "required_rank" => 3
-                ],
-                [
-                    "display_text" => 'Stats',
-                    "id" => 'forum_stats',
-                    "optional_class" => [false, ''],
-                    "title" => 'Forum Statistics',
-                    "onclick" => [false, ''],
-                    "link" => $this->core->buildCourseUrl(['forum', 'stats']),
-                    "required_rank" => 2
-                ]
-            ];
-            $other_buttons = [
-                [
-                    "required_rank" => 4,
-                    "display_text" => 'Filter (<span id="num_filtered">0</span>)',
-                    "style" => 'display:inline-block;',
-                    "link" => [false],
-                    "optional_class" => '',
-                    "title" => 'Filter Threads based on Categories',
-                    "onclick" => [true, "forumFilterBar()"]
-                ]
-            ];
-
-            $button_params["more_data"] = $more_data;
-            $button_params["forum_bar_buttons_left"] = $other_buttons;
+        if ($threadExists) {
             $next_page = $initialPageNumber + 1;
             $prev_page = ($initialPageNumber == 1) ? 0 : ($initialPageNumber - 1);
             $arrowup_visibility = ($initialPageNumber == 1) ? "display:none;" : "";
@@ -336,7 +236,18 @@ class ForumThreadView extends AbstractView {
             $markdown_enabled = $_COOKIE['markdown_enabled'];
         }
 
+        $button_params = $this->getAllForumButtons($threadExists, $currentThread, $display_option, $show_deleted, $show_merged_thread);
+
         if (!$ajax) {
+            // Add breadcrumb for the current thread
+            $currentThreadArrValues = array_values($currentThreadArr);
+            if ($currentThreadArrValues) {
+                $max_length = 25;
+                $fullTitle = $currentThreadArrValues[0]["title"];
+                $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0, $max_length - 3) . "..." : $fullTitle;
+                $this->core->getOutput()->addBreadcrumb("(" . $currentThreadArrValues[0]["id"] . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
+            }
+
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
                 "categories" => $categories,
                 "filterFormData" => $filterFormData,
@@ -393,6 +304,114 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
+    // Returns the set of buttons with the corresponding attributes
+    public function getAllForumButtons($thread_exists, $thread_id, $display_option, $show_deleted, $show_merged_thread) {
+        $show_deleted_class = "";
+        $show_deleted_action = "";
+        $show_deleted_thread_title = "";
+
+        $currentCourse = $this->core->getConfig()->getCourse();
+
+        $default_button = [
+            [
+                "required_rank" => 4,
+                "display_text" => 'Create Thread',
+                "style" => 'position:absolute;top:3px;right:0px',
+                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])],
+                "optional_class" => '',
+                "title" => 'Create Thread',
+                "onclick" => [false]
+            ]
+        ];
+        $button_params = [
+            "current_thread" => $thread_id,
+            "forum_bar_buttons_right" => $default_button,
+            "forum_bar_buttons_left" => [],
+            "show_threads" => true,
+            "thread_exists" => true,
+            "show_more" => true
+        ];
+        if ($this->core->getUser()->accessGrading()) {
+            if ($show_deleted) {
+                $show_deleted_class = "active";
+                $show_deleted_action = "alterShowDeletedStatus(0);";
+                $show_deleted_thread_title = "Hide Deleted Threads";
+            }
+            else {
+                $show_deleted_class = "";
+                $show_deleted_action = "alterShowDeletedStatus(1);";
+                $show_deleted_thread_title = "Show Deleted Threads";
+            }
+        }
+
+        if ($show_merged_thread) {
+            $show_merged_thread_class = "active";
+            $show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
+            $show_merged_thread_title = "Hide Merged Threads";
+        }
+        else {
+            $show_merged_thread_class = "";
+            $show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
+            $show_merged_thread_title = "Show Merged Threads";
+        }
+
+        if (!$thread_exists) {
+            $button_params["show_threads"] = false;
+            $button_params["thread_exists"] = false;
+            $button_params["show_more"] =  $this->core->getUser()->accessGrading();
+        }
+        else {
+            $more_data = [
+                [
+                    "filter_option" => $display_option
+                ],
+                [
+                    "display_text" => $show_merged_thread_title,
+                    "id" => 'merge_thread',
+                    "optional_class" => [!empty($show_merged_thread_class), $show_merged_thread_class],
+                    "title" => $show_merged_thread_title . " on Forum",
+                    "onclick" => [true, $show_merged_thread_action],
+                    "link" => '#',
+                    "required_rank" => 4
+                ],
+                [
+                    "display_text" => $show_deleted_thread_title,
+                    "optional_class" => [!empty($show_deleted_class), $show_deleted_class],
+                    "id" => 'delete',
+                    "title" => $show_deleted_thread_title . " on Forum",
+                    "link" => '#',
+                    "onclick" => [true, $show_deleted_action],
+                    "required_rank" => 3
+                ],
+                [
+                    "display_text" => 'Stats',
+                    "id" => 'forum_stats',
+                    "optional_class" => [false, ''],
+                    "title" => 'Forum Statistics',
+                    "onclick" => [false, ''],
+                    "link" => $this->core->buildCourseUrl(['forum', 'stats']),
+                    "required_rank" => 2
+                ]
+            ];
+            $other_buttons = [
+                [
+                    "required_rank" => 4,
+                    "display_text" => 'Filter (<span id="num_filtered">0</span>)',
+                    "style" => 'display:inline-block;',
+                    "link" => [false],
+                    "optional_class" => '',
+                    "title" => 'Filter Threads based on Categories',
+                    "onclick" => [true, "forumFilterBar()"]
+                ]
+            ];
+
+            $button_params["more_data"] = $more_data;
+            $button_params["forum_bar_buttons_left"] = $other_buttons;
+        }
+        return $button_params;
+    }
+
+
     public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false, $render = true) {
 
         $activeThread = $this->core->getQueries()->getThread($currentThread);
@@ -410,6 +429,7 @@ class ForumThreadView extends AbstractView {
         $csrf_token = $this->core->getCsrfToken();
 
         $totalAttachments = 0;
+        $GLOBALS['totalAttachments'] = 0;
 
         if ($display_option == "tree") {
             $order_array = [];
@@ -450,7 +470,7 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $totalAttachments);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply);
 
                         break;
                     }
@@ -469,7 +489,7 @@ class ForumThreadView extends AbstractView {
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, $totalAttachments);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply);
 
                 if ($first) {
                     $first = false;
@@ -497,12 +517,13 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
             $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addInternalCss('forum.css');
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-            
+
             // Get first post of each thread. To be used later
             // to obtain the content of the post to be displayed
             // in the modal.
@@ -538,7 +559,7 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "total_attachments" => $totalAttachments,
+                "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
             ]);
@@ -561,7 +582,7 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "total_attachments" => $totalAttachments
+                "total_attachments" => $GLOBALS['totalAttachments']
             ];
         }
 
@@ -592,7 +613,91 @@ class ForumThreadView extends AbstractView {
         return $str;
     }
 
-    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render) {
+    public function showFullThreadsPage($threads, $category_ids, $show_deleted, $show_merged_threads, $page_number) {
+        $activeThreadAnnouncements = [];
+        $activeThreadTitle = "";
+        $activeThread = [];
+        $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
+        $categories = $this->core->getQueries()->getCategories();
+        $current_course = $this->core->getConfig()->getCourse();
+        $cookieSelectedCategories = $this->getSavedForumCategories($current_course, $categories);
+        $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
+        $cookieSelectedUnread = $this->getUnreadThreadStatus();
+        $next_page = 0;
+        $prev_page = 0;
+        // getting the forum page buttons
+        $thread_id = -1;
+        $thread_exists = $this->core->getQueries()->threadExists();
+        $button_params = $this->getAllForumButtons($thread_exists, $thread_id, null, $show_deleted, $show_merged_threads);
+
+        // add css and js files
+        $this->core->getOutput()->addInternalCss("forum.css");
+        $this->core->getOutput()->addInternalJs("forum.js");
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+
+        if ($thread_exists) {
+            $next_page = $page_number + 1;
+            $prev_page = $page_number - 1;
+        }
+
+        $filterFormData = [
+            "categories" => $categories,
+            "current_thread" => $thread_id,
+            "current_category_ids" => [],
+            "current_course" => $current_course,
+            "cookie_selected_categories" => $cookieSelectedCategories,
+            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+            "cookie_selected_unread_value" => $cookieSelectedUnread,
+            "thread_exists" => $thread_exists
+        ];
+
+
+        return $this->core->getOutput()->renderTwigTemplate("forum/showFullThreadsPage.twig", [
+            "thread_content" => $thread_content["thread_content"],
+            "button_params" => $button_params,
+            "filterFormData" => $filterFormData,
+            "next_page" => $next_page,
+            "prev_page" => $prev_page,
+            "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
+            "csrf_token" => $this->core->getCsrfToken(),
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+            "edit_url" => $this->core->buildCourseUrl(['forum']),
+            "current_user" => $this->core->getUser()->getId(),
+            "user_group" => $this->core->getUser()->getGroup(),
+            "thread_exists" => $thread_exists
+        ]);
+    }
+
+    public function sizeTitle($titleDisplay, $title, $titleLength, $length = 40) {
+        $titleDisplay = substr($titleDisplay, 0, ($titleLength < $length) ? $titleLength : strrpos(substr($titleDisplay, 0, $length), " "));
+
+        if ($titleLength > $length) {
+            //Fix ... appearing
+            if (empty($titleDisplay)) {
+                $titleDisplay .= substr($title, 0, $length - 10);
+            }
+            $titleDisplay .= "...";
+        }
+        return $titleDisplay;
+    }
+
+    public function sizeContent($sizeOfContent, $first_post_content, $length = 80) {
+        $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < $length) ? $sizeOfContent : strrpos(substr($first_post_content, 0, $length), " "));
+        if ($sizeOfContent > $length) {
+            $contentDisplay .= "...";
+        }
+        return $contentDisplay;
+    }
+
+    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $is_full_page = false) {
         $used_active = false; //used for the first one if there is not thread_id set
         $current_user = $this->core->getUser()->getId();
         $display_thread_ids = $this->core->getUser()->getGroup() <= 2;
@@ -618,7 +723,7 @@ class ForumThreadView extends AbstractView {
                 $thread['status'] = 0;
             }
 
-            $class = "thread_box";
+            $class = $is_full_page ? "thread_box thread-box-full" : "thread_box";
             // $current_categories_ids should be subset of $thread["categories_ids"]
             $issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
             if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
@@ -633,7 +738,7 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"])) {
+            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by']) {
                 $class .= " new_thread";
             }
             if ($thread["deleted"]) {
@@ -660,21 +765,17 @@ class ForumThreadView extends AbstractView {
             }
 
             $sizeOfContent = strlen($first_post_content);
-            $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
             $titleLength = strlen($thread['title']);
 
-            $titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
+            if ($is_full_page) {
+                $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength, 140);
+                $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content, 500);
+            }
+            else {
+                $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength);
+                $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content);
+            }
 
-            if (strlen($first_post["content"]) > 80) {
-                $contentDisplay .= "...";
-            }
-            if (strlen($thread["title"]) > 40) {
-                //Fix ... appearing
-                if (empty($titleDisplay)) {
-                    $titleDisplay .= substr($thread['title'], 0, 30);
-                }
-                $titleDisplay .= "...";
-            }
             $titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
 
             $link = $this->core->buildCourseUrl(['forum', 'threads', $thread['id']]);
@@ -710,7 +811,7 @@ class ForumThreadView extends AbstractView {
                 $date_content["formatted"] = $date;
             }
 
-            $thread_content[] = [
+            $thread_info = [
                 'thread_id' => $thread['id'],
                 "title" => $titleDisplay,
                 "content" => $contentDisplay,
@@ -728,6 +829,32 @@ class ForumThreadView extends AbstractView {
                 "date" => $date_content,
                 "current_user_posted" => $thread["current_user_posted"]
             ];
+
+            if ($is_full_page) {
+                $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
+                $email = trim($user_info['user_email']);
+                $first_name = trim($user_info["first_name"]);
+                $last_name = trim($user_info["last_name"]);
+
+                $author_info = [
+                    "user_id" => $first_post['author_user_id'],
+                    "name" => $first_post['anonymous'] ? "Anonymous" : $first_name . " " . substr($last_name, 0, 1) . ".",
+                    "email" => $email,
+                    "full_name" => $first_name . " " . $last_name . " (" . $first_post['author_user_id'] . ")",
+                ];
+                $thread_info = array_merge($thread_info, [
+                    "post_id" => $first_post["id"],
+                    "is_thread_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
+                    "thread_resolve_state" => $this->core->getQueries()->getResolveState($thread['id'])[0]['status'],
+                    "is_anon" => $first_post["anonymous"],
+                    "render_markdown" => $first_post["render_markdown"],
+                    "author_info" => $author_info,
+                    "deleted" => $first_post['deleted']
+                ]);
+            }
+//            var_dump($first_post);
+
+            $thread_content[] = $thread_info;
         }
 
         $return = "";
@@ -787,16 +914,17 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, &$totalAttachments) {
+    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false) {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
+        $parent_id = $post["parent_id"];
 
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), $post['timestamp'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
-        if (!is_null($post["edit_timestamp"])) {
+        if (isset($post["edit_timestamp"])) {
             $edit_date = DateUtils::convertTimeStamp($this->core->getUser(), $post["edit_timestamp"], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
         }
         else {
@@ -944,7 +1072,7 @@ class ForumThreadView extends AbstractView {
                 $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
 
                 $attachment_file_count++;
-                $totalAttachments++;
+                $GLOBALS['totalAttachments']++;
             }
 
             $attachment_encoded_data[] = $attachment_id;
@@ -964,7 +1092,7 @@ class ForumThreadView extends AbstractView {
 
         $has_history = $this->core->getQueries()->postHasHistory($post_id);
 
-        return [
+        $created_post = [
             "classes" => $classes,
             "post_id" => $post_id,
             "reply_level" => $reply_level,
@@ -989,11 +1117,24 @@ class ForumThreadView extends AbstractView {
             "form_post_url" => $this->core->buildCourseUrl(['forum', 'posts', 'new']),
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
-            "parent_id" => $post_id,
+            "parent_id" => $parent_id,
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread
         ];
+
+        if ($render) {
+            if ($first) {
+                $thread_title = $this->core->getQueries()->getThreadTitle($thread_id);
+                $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$thread_id}) " : '') . $thread_title;
+                $created_post['activeThreadTitle'] = $activeThreadTitle;
+            }
+            $created_post['csrf_token'] = $this->core->getCsrfToken();
+            return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
+        }
+        else {
+            return $created_post;
+        }
     }
 
     public function createThread($category_colors) {
@@ -1012,6 +1153,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
 
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
@@ -1028,7 +1170,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;top:3px;float:right;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]
@@ -1063,6 +1205,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildCourseUrl(['forum', 'categories']));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
@@ -1082,7 +1225,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;float:right;top:3px;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]
@@ -1116,10 +1259,11 @@ class ForumThreadView extends AbstractView {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
-
+        $this->core->getOutput()->addInternalJs('stat-page.js');
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 
@@ -1128,7 +1272,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;float:right;top:3px;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]

@@ -233,6 +233,9 @@ function completeUserFormInformation(user) {
     $('[name="user_preferred_lastname"]').change();
     $('[name="user_email"]', form).val(user['user_email']);
     $('[name="user_email"]').change();
+    $('[name="registration_subsection"]', form).val(user['registration_subsection']);
+    $('[name="registration_subsection"]').change();
+
     var registration_section;
     if (user['registration_section'] === null) {
         registration_section = "null";
@@ -320,6 +323,7 @@ function isUserFormEdited() {
     $('[name="manual_registration"]', form).prop('checked') !==  user['manual_registration'] ||
     ! $('[name="registered_section"] option[value="' + registration_section + '"]').prop('selected') ||
     ! $('[name="rotating_section"] option[value="' + rotating_section + '"]').prop('selected') ||
+    $('[name="registration_subsection"]', form).val() !== user['registration_subsection'] ||
     grading_sections_edited
   )
 }

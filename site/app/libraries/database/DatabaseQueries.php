@@ -168,7 +168,7 @@ class DatabaseQueries {
      */
     public function getSimilarNumericIdMatches(string $id_string): array {
         $this->course_db->query("
-            SELECT user_numeric_id from users where 
+            SELECT user_numeric_id from users where
             cast(user_numeric_id as text)
             like ?
         ", [$id_string]);
@@ -317,6 +317,49 @@ WHERE status = 1"
     }
 
     /**
+     * @return \Iterator<Course>
+     */
+    public function getAllUnarchivedCourses(): \Iterator {
+        $sql = <<<SQL
+SELECT t.name AS term_name, c.semester, c.course
+FROM courses AS c
+INNER JOIN terms AS t ON c.semester=t.term_id
+WHERE c.status = 1
+ORDER BY t.start_date DESC, c.course ASC
+SQL;
+        return $this->submitty_db->queryIterator($sql, [], function ($row) {
+            return new Course($this->core, $row);
+        });
+    }
+
+    /*
+     * @return string[]
+     */
+    public function getAllTerms() {
+        $this->submitty_db->query(
+            "SELECT term_id FROM terms ORDER BY start_date DESC"
+        );
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['term_id'];
+        }
+        return $return;
+    }
+
+    /**
+     * @param string $term_id
+     * @param string $term_name
+     * @param \DateTime $start_date
+     * @param \DateTime $end_date
+     */
+    public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
+        $this->submitty_db->query(
+            "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
+            [$term_id, $term_name, $start_date, $end_date]
+        );
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {
@@ -446,11 +489,11 @@ WHERE status = 1"
      * Order: Favourite and Announcements => Announcements only => Favourite only => Others
      *
      * @param  int[]    $categories_ids     Filter threads having atleast provided categories
-     * @param  int[]    $thread_status      Filter threads having thread status among            $thread_status
+     * @param  int[]    $thread_status      Filter threads having thread status among $thread_status
      * @param  bool     $unread_threads     Filter threads to show only unread threads
      * @param  bool     $show_deleted       Consider deleted threads
      * @param  bool     $show_merged_thread Consider merged threads
-     * @param  string   $current_user       user_id of currrent user
+     * @param  string   $current_user       user_id of current user
      * @param  int      $blockNumber        Index of window of thread list(-1 for last)
      * @param  int      $thread_id          If blockNumber is not known, find it using thread_id
      * @return array    Ordered filtered threads - array('block_number' => int, 'threads' => array(threads))
@@ -680,7 +723,7 @@ WHERE status = 1"
 
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row();
     }
 
     public function removeNotificationsPost($post_id) {
@@ -756,21 +799,21 @@ WHERE status = 1"
         return $this->course_db->rows();
     }
 
-    public function getThread($thread_id) {
+    public function getThread(int $thread_id) {
         $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
         return $this->course_db->row();
     }
 
-    public function getThreadTitle($thread_id) {
+    public function getThreadTitle(int $thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row()['title'];
     }
 
-    public function setAnnouncement($thread_id, $onOff) {
+    public function setAnnouncement(int $thread_id, bool $onOff) {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", [$onOff, $thread_id]);
     }
 
-    public function addPinnedThread($user_id, $thread_id, $added) {
+    public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
         if ($added) {
             $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
         }
@@ -779,7 +822,7 @@ WHERE status = 1"
         }
     }
 
-    public function loadPinnedThreads($user_id) {
+    public function loadBookmarkedThreads(string $user_id) {
         $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", [$user_id]);
         $rows = $this->course_db->rows();
         $favorite_threads = [];
@@ -907,8 +950,8 @@ VALUES (?,?,?,?,?,?)",
             $params
         );
 
-        $params = [$user->getRotatingSection(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
+        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
@@ -957,8 +1000,8 @@ WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=? WHERE user_id=?", $params);
+            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -1024,6 +1067,63 @@ WHERE semester=? AND course=? AND user_id=?",
 
     protected function createParamaterList($len) {
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
+    }
+
+    public function componentItempoolInfo($g_id, $component_id) {
+        $this->course_db->query(
+            "SELECT gc_is_itempool_linked as is_linked, gc_itempool as name FROM gradeable_component WHERE g_id = ? AND gc_id = ?",
+            [$g_id, $component_id]
+        );
+        return $this->course_db->row();
+    }
+
+    public function addSolutionForComponentId($g_id, $component_id, $itempool_item, $solution_text, $author_id) {
+        $this->course_db->query(
+            "INSERT INTO solution_ta_notes (g_id, component_id, itempool_item, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, ?, current_timestamp)",
+            [$g_id, $component_id, $itempool_item, $solution_text, $author_id]
+        );
+    }
+
+    public function getSolutionForComponentItempoolItem($g_id, $component_id, $itempool_item) {
+        $this->course_db->query(
+            "SELECT * FROM solution_ta_notes WHERE g_id = ? AND component_id = ? AND itempool_item = ? ORDER BY edited_at DESC LIMIT 1",
+            [$g_id, $component_id, $itempool_item]
+        );
+        return $this->course_db->row();
+    }
+
+    public function getSolutionForComponentId($g_id, $component_id) {
+        // check if the itempool is linked
+        $itempool = $this->componentItempoolInfo($g_id, $component_id);
+        $itempool_items = [
+            ["itempool_item" => ""],
+        ];
+        $result_rows = [];
+
+        if ($itempool['is_linked']) {
+            $this->course_db->query(
+                "SELECT DISTINCT itempool_item FROM solution_ta_notes WHERE g_id = ? AND component_id = ?",
+                [$g_id, $component_id]
+            );
+            $itempool_items = $this->course_db->rows();
+        }
+
+        foreach ($itempool_items as $itempool_item) {
+            $values = $this->getSolutionForComponentItempoolItem($g_id, $component_id, $itempool_item['itempool_item']);
+            $result_rows[] = array_merge(['itempool_name' => $itempool['name']], $values);
+        }
+
+        return $result_rows;
+    }
+
+    public function getSolutionForAllComponentIds($g_id) {
+        $solution_array = [];
+        $this->course_db->query("SELECT DISTINCT component_id FROM solution_ta_notes WHERE g_id=?", [$g_id]);
+        $component_ids = $this->course_db->rows();
+        foreach ($component_ids as $row) {
+            $solution_array[$row['component_id']] = $this->getSolutionForComponentId($g_id, $row['component_id']);
+        }
+        return $solution_array;
     }
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
@@ -1364,7 +1464,7 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE active_version > 0 AND {$section_key} IN " . $this->createParamaterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -1373,6 +1473,7 @@ SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
 FROM {$users_or_teams} AS {$u_or_t}
 INNER JOIN (
   SELECT * FROM gradeable_data AS gd
+  INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
   LEFT JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
@@ -1447,10 +1548,69 @@ GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_gra
 ORDER BY gc_order
         ", [$g_id, $g_id, $g_id, $g_id]);
         foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleStat($this->core, $row);
+            $info = ['g_id' => $g_id, 'section_key' => $section_key, 'team' => $is_team];
+            $return[] = new SimpleStat($this->core, array_merge($row, $info));
         }
         return $return;
     }
+
+    public function getAverageGraderScores($g_id, $gc_id, $section_key, $is_team) {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        $return = [];
+        $this->course_db->query("
+SELECT gcd_grader_id, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
+  SELECT gcd_grader_id, gc_order,
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
+  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+    SELECT gcd_grader_id, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
+    FROM gradeable_component_data AS gcd
+    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=? AND gcd.gc_id=gc.gc_id
+    LEFT JOIN(
+      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
+      FROM gradeable_component_mark_data AS gcmd
+      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+      GROUP BY gcmd.gc_id, gcmd.gd_id
+      )AS marks
+    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+    LEFT JOIN(
+      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
+      FROM gradeable_data AS gd
+      WHERE gd.g_id=?
+    ) AS gd ON gcd.gd_id=gd.gd_id
+    INNER JOIN(
+      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
+      FROM {$users_or_teams} AS {$u_or_t}
+      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+    INNER JOIN(
+      SELECT egv.{$user_or_team_id}, egv.active_version
+      FROM electronic_gradeable_version AS egv
+      WHERE egv.g_id=? AND egv.active_version>0
+    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+    WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+  )AS parts_of_comp
+)AS comp
+GROUP BY gcd_grader_id, gc_order
+ORDER BY gc_order
+        ", [$gc_id, $g_id, $g_id, $g_id]);
+
+        foreach ($this->course_db->rows() as $row) {
+            // add grader average
+            $return = array_merge($return, [$row['gcd_grader_id'] => ['avg' => $row['avg_comp_score'], 'count' => $row['count'], 'std_dev' => $row['std_dev']]]);
+        }
+        //var_dump($return);
+        return $return;
+    }
+
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2535,7 +2695,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function updateTeamRegistrationSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET registration_section=? WHERE team_id=?", [$section, $team_id]);
     }
-    
+
     /**
      * Set team $team_id's anon_id
      *
@@ -2543,7 +2703,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $anon_id
      */
     public function updateTeamAnonId($team_id, $anon_id) {
-        $this->course_db->query("UPDATE teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
+        $this->course_db->query("UPDATE gradeable_teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
     }
 
     public function updateTeamRotatingSection($team_id, $section) {
@@ -2679,6 +2839,26 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Returns a boolean for whether the given user has multiple pending team invites for the given gradeable
+     *
+     * @param string $user_id
+     * @param string $g_id
+     * @return bool
+     */
+    public function getUserMultipleTeamInvites(string $g_id, string $user_id): bool {
+        $this->course_db->query(
+            "
+            SELECT gtm.*, tm.*
+            FROM gradeable_teams gtm
+            INNER JOIN teams tm
+            ON gtm.team_id = tm.team_id
+            WHERE gtm.g_id = ? AND tm.user_id = ?",
+            [$g_id,$user_id]
+        );
+        return count($this->course_db->rows()) > 1;
+    }
+
+    /**
      * Return an array of Team objects for all teams on given gradeable
      *
      * @param  string $g_id
@@ -2736,13 +2916,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
 
     /**
-     * Add ($g_id,$user_id) pair to table seeking_team
+     * Add ($g_id,$user_id, $message) to table seeking_team
      *
      * @param string $g_id
      * @param string $user_id
+     * @param string $message
      */
-    public function addToSeekingTeam($g_id, $user_id) {
-        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id) VALUES (?,?)", [$g_id, $user_id]);
+    public function addToSeekingTeam($g_id, $user_id, $message) {
+        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id, message) VALUES (?,?,?)", [$g_id, $user_id, $message]);
     }
 
     /**
@@ -2753,6 +2934,35 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function removeFromSeekingTeam($g_id, $user_id) {
         $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", [$g_id, $user_id]);
+    }
+
+    /**
+     * Edit the user's message from table seeking_team
+     *
+     * @param string $g_id
+     * @param string $user_id
+     * @param string $message
+     */
+    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+        $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
+    }
+
+    /**
+     * Get the user's message from table seeking_team
+     *
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function getSeekMessageByUserId($g_id, $user_id) {
+        $this->course_db->query(
+            "SELECT message
+          FROM seeking_team
+          WHERE g_id=?
+          AND user_id=?",
+            [$g_id, $user_id]
+        );
+
+        return $this->course_db->rows()[0]['message'];
     }
 
     /**
@@ -3247,16 +3457,34 @@ SQL;
     public function removePeerAssignmentsForGrader($gradeable_id, $grader_id) {
         $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ?", [$gradeable_id, $grader_id]);
     }
-    
+
     /**
-     * Bulk Uploads Peer Grading Assignments
+     * Adds an assignment for someone to grade another person for peer grading
      *
-     * @param string $values
+     * @param string $grader
+     * @param string $student
+     * @param string $gradeable_id
+     * @param string $feedback
      */
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
+        if (count($this->course_db->rows()) > 0) {
+            $this->course_db->query("UPDATE peer_feedback SET feedback = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback, $grader, $student, $gradeable_id]);
+        }
+        else {
+            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
+        }
+    }
+
+  /**
+   * Bulk Uploads Peer Grading Assignments
+   *
+   * @param string $values
+   */
     public function insertBulkPeerGradingAssignment($values) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
     }
-    
+
 
     /**
      * Removes all peer grading pairs from a given assignment
@@ -3280,6 +3508,42 @@ SQL;
                 $return[$id['grader_id']] = [];
             }
             array_push($return[$id['grader_id']], $id['user_id']);
+        }
+        return $return;
+    }
+
+    /**
+     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getAllPeerFeedback($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[$id['grader_id']][$id['user_id']]['feedback'] = $id['feedback'];
+        }
+        return $return;
+    }
+
+    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
+        $results = $this->course_db->rows();
+        if (count($results) > 0) {
+            return $results[0]['feedback'];
+        }
+        return null;
+    }
+    /**
+     * Get all peers assigned to grade a specific student
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerGradingAssignmentForSubmitter($gradeable_id, $submitter_id) {
+        $this->course_db->query("SELECT grader_id FROM peer_assign WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $submitter_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[] = $id['grader_id'];
         }
         return $return;
     }
@@ -3355,11 +3619,6 @@ SQL;
             $return[] = $id['user_id'];
         }
         return $return;
-    }
-
-    public function getPeerGradingAssignNumber($g_id) {
-        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", [$g_id]);
-        return $this->course_db->rows()[0]['eg_peer_grade_set'];
     }
 
     public function getNumPeerComponents($g_id) {
@@ -3647,12 +3906,12 @@ AND gc_id IN (
         }
         return $return;
     }
-    
+
     public function getTeamAnonId($team_id) {
         $params = (is_array($team_id)) ? $team_id : [$team_id];
 
         $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT team_id, anon_id FROM teams WHERE team_id IN {$question_marks}", $params);
+        $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE team_id IN {$question_marks}", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
             $return[$id_map['team_id']] = $id_map['anon_id'];
@@ -3671,12 +3930,12 @@ AND gc_id IN (
         }
         return $return;
     }
-    
+
     public function getTeamIdFromAnonId($anon_id) {
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
 
         $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT anon_id, team_id FROM teams WHERE anon_id IN {$question_marks}", $params);
+        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$question_marks}", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
             $return[$id_map['anon_id']] = $id_map['team_id'];
@@ -3691,7 +3950,8 @@ AND gc_id IN (
 
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id] ??
+                null;
     }
 
     // NOTIFICATION/EMAIL QUERIES
@@ -3975,7 +4235,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return $this->submitty_db->row()['is_instructor'];
+        return count($this->submitty_db->rows()) >= 1 &&
+            $this->submitty_db->row()['is_instructor'];
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
@@ -3983,13 +4244,18 @@ AND gc_id IN (
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
     }
 
-    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id) {
+
+    /**
+     * insert a new grade inquiry for a submitter
+     * @return string the id of the first new post inserted of the new grade inquiry
+     */
+    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id): string {
         $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE, $gc_id];
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
+            return $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
@@ -4029,9 +4295,18 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradePost($regrade_id, $user_id, $content) {
-        $params = [$regrade_id, $user_id, $content];
-        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
+    public function insertNewRegradePost($regrade_id, $user_id, $content, $gc_id) {
+        $params = [$regrade_id, $user_id, $content, $gc_id];
+        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
+        return $this->course_db->getLastInsertId();
+    }
+
+    public function getRegradePost($post_id) {
+        $this->course_db->query(
+            "SELECT * FROM regrade_discussion WHERE id = ?",
+            [$post_id]
+        );
+        return $this->course_db->row();
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
@@ -4068,7 +4343,7 @@ AND gc_id IN (
      *
      * @param  string[]|null        $ids       ids of the gradeables to retrieve
      * @param  string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
-     * @return \Iterator Iterates across array of Gradeables retrieved
+     * @return \Iterator<Gradeable>  Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
@@ -4119,7 +4394,8 @@ AND gc_id IN (
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,
-                  eg_regrade_request_date AS regrade_request_date,
+                  eg_grade_inquiry_start_date AS grade_inquiry_start_date,
+                  eg_grade_inquiry_due_date AS grade_inquiry_due_date,
                   eg_regrade_allowed AS regrade_allowed,
                   eg_grade_inquiry_per_component_allowed AS grade_inquiry_per_component_allowed,
                   eg_thread_ids AS discussion_thread_ids,
@@ -4129,14 +4405,15 @@ AND gc_id IN (
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
-                  eg_peer_grading AS peer_grading,
-                  eg_peer_grade_set AS peer_grade_set,
+                  eg_limited_access_blind AS limited_access_blind,
+                  eg_peer_blind AS peer_blind,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
-                  eg_precision AS precision
+                  eg_precision AS precision,
+                  eg_hidden_files as hidden_files
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
               LEFT JOIN (
@@ -4154,6 +4431,8 @@ AND gc_id IN (
                   json_agg(gc_is_peer) AS array_peer,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
+                  json_agg(gc_is_itempool_linked) AS array_is_itempool_linked,
+                  json_agg(gc_itempool) AS array_itempool,
                     json_agg(EXISTS(
                       SELECT gc_id
                       FROM gradeable_component_data
@@ -4207,6 +4486,8 @@ AND gc_id IN (
                 'peer',
                 'order',
                 'page',
+                'is_itempool_linked',
+                'itempool',
                 'any_grades'
             ];
             $mark_properties = [
@@ -4329,7 +4610,7 @@ AND gc_id IN (
 
         return $users;
     }
-    
+
     public function getUsersOrTeamsById(array $ids) {
         $users = $this->getUsersById($ids);
         if (empty($users)) {
@@ -4575,7 +4856,9 @@ AND gc_id IN (
             $component->isText(),
             $component->getOrder(),
             $component->isPeer(),
-            $component->getPage()
+            $component->getPage(),
+            $component->getIsItempoolLinked(),
+            $component->getItempool()
         ];
         $this->course_db->query(
             "
@@ -4591,8 +4874,10 @@ AND gc_id IN (
               gc_is_text,
               gc_order,
               gc_is_peer,
-              gc_page)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              gc_page,
+              gc_is_itempool_linked,
+              gc_itempool)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
 
@@ -4658,6 +4943,8 @@ AND gc_id IN (
                 $component->getOrder(),
                 $component->isPeer(),
                 $component->getPage(),
+                $component->getIsItempoolLinked(),
+                $component->getItempool(),
                 $component->getId()
             ];
             $this->course_db->query(
@@ -4673,7 +4960,9 @@ AND gc_id IN (
                   gc_is_text=?,
                   gc_order=?,
                   gc_is_peer=?,
-                  gc_page=?
+                  gc_page=?,
+                  gc_is_itempool_linked=?,
+                  gc_itempool=?
                 WHERE gc_id=?",
                 $params
             );
@@ -4786,13 +5075,15 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
-                $gradeable->isPeerGrading(),
-                $gradeable->getPeerGradeSet(),
-                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                $gradeable->getLimitedAccessBlind(),
+                $gradeable->getPeerBlind(),
+                DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isRegradeAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
-                $gradeable->isDiscussionBased()
+                $gradeable->isDiscussionBased(),
+                $gradeable->getHiddenFiles()
             ];
             $this->course_db->query(
                 "
@@ -4816,15 +5107,17 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
-                  eg_peer_grading,
-                  eg_peer_grade_set,
-                  eg_regrade_request_date,
+                  eg_limited_access_blind,
+                  eg_peer_blind,
+                  eg_grade_inquiry_start_date,
+                  eg_grade_inquiry_due_date,
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
-                  eg_has_discussion
+                  eg_has_discussion,
+                  eg_hidden_files
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -4934,13 +5227,15 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    $gradeable->isPeerGrading(),
-                    $gradeable->getPeerGradeSet(),
-                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    $gradeable->getLimitedAccessBlind(),
+                    $gradeable->getPeerBlind(),
+                    DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
+                    DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isRegradeAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
                     $gradeable->isDiscussionBased(),
+                    $gradeable->getHiddenFiles(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -4964,13 +5259,15 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
-                      eg_peer_grading=?,
-                      eg_peer_grade_set=?,
-                      eg_regrade_request_date=?,
+                      eg_limited_access_blind=?,
+                      eg_peer_blind=?,
+                      eg_grade_inquiry_start_date=?,
+                      eg_grade_inquiry_due_date=?,
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
-                      eg_has_discussion=?
+                      eg_has_discussion=?,
+                      eg_hidden_files=?
                     WHERE g_id=?",
                     $params
                 );
@@ -5182,6 +5479,16 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
+    public function deleteOverallComment($gradeable_id, $grader_id, $is_team) {
+        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+        if ($is_team) {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_team_id=?", [$gradeable_id, $grader_id]);
+        }
+        else {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_user_id=?", [$gradeable_id, $grader_id]);
+        }
+    }
+
     /**
      * Update/create the components/marks for a gradeable.
      *
@@ -5326,6 +5633,20 @@ AND gc_id IN (
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]
         );
         return $this->course_db->row()['exists'] ?? false;
+    }
+     /**
+      * Gets if the provied submitter has a submission for a particular gradeable
+      *
+      * @param  \app\models\gradeable\Gradeable $gradeable
+      * @param  String                     $userid
+      * @return bool
+      */
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
+
+        return $this->course_db->query(
+            'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
+            [$gradeable->getId(), $userid]
+        );
     }
 
     /**
@@ -5482,7 +5803,7 @@ AND gc_id IN (
     }
 
     public function getPastQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > CURRENT_DATE AND current_state IN ('done') order by ROW_NUMBER");
+        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 
@@ -5546,6 +5867,11 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    public function getQueueId($queue_code) {
+        $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
+        return $this->course_db->rows()[0]['id'];
+    }
+
     public function addToQueue($queue_code, $user_id, $name, $contact_info) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $this->course_db->query("INSERT INTO queue
@@ -5569,7 +5895,7 @@ AND gc_id IN (
                 TRIM(?),
                 ?,
                 ?,
-                current_timestamp,
+                ?,
                 NULL,
                 NULL,
                 ?,
@@ -5577,7 +5903,7 @@ AND gc_id IN (
                 NULL,
                 ?,
                 ?
-            )", [$queue_code,$user_id,$name,$user_id,$contact_info,$last_time_in_queue]);
+            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -5601,7 +5927,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND current_state IN ('waiting','being_helped')", [$remove_type,$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND current_state IN ('waiting','being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
     }
 
     public function startHelpUser($user_id, $queue_code) {
@@ -5610,7 +5936,7 @@ AND gc_id IN (
             $this->core->addErrorMessage("User not in queue");
             return false;
         }
-        $this->course_db->query("UPDATE queue SET current_state = 'being_helped', time_help_start = current_timestamp, help_started_by = ? WHERE user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $this->course_db->query("UPDATE queue SET current_state = 'being_helped', time_help_start = ?, help_started_by = ? WHERE user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$this->core->getDateTimeNow(), $this->core->getUser()->getId(), $user_id, $queue_code]);
     }
 
     public function finishHelpUser($user_id, $queue_code, $remove_type) {
@@ -5620,11 +5946,15 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+    }
+
+    public function setQueuePauseState($new_state) {
+        $this->course_db->query("UPDATE queue SET paused = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $this->core->getUser()->getId()]);
     }
 
     public function emptyQueue($queue_code) {
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = 'emptied', removed_by = ?, time_out = current_timestamp where current_state IN ('waiting','being_helped') and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", [$this->core->getUser()->getId(), $queue_code]);
+        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = 'emptied', removed_by = ?, time_out = ? where current_state IN ('waiting','being_helped') and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", [$this->core->getUser()->getId(),$this->core->getDateTimeNow(), $queue_code]);
     }
 
     public function getQueueFromEntryId($entry_id) {
@@ -5696,19 +6026,232 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", [$token, $queue_code]);
     }
 
-    public function getLastQueueUpdate() {
-        $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
-        return $this->course_db->rows()[0]['change_count'];
-    }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
-        $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$queue_code, $time_in]);
+        $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
+        $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$day_threshold, $queue_code, $time_in]);
         return $this->course_db->rows()[0]['count'];
     }
 
     public function getNumberAheadInQueueToday($queue_code, $time_in) {
-        $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE AND last_time_in_queue > CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$queue_code, $time_in]);
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
+        $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND last_time_in_queue > ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$current_date, $day_threshold, $queue_code, $time_in]);
         return $this->course_db->rows()[0]['count'];
+    }
+
+    public function getAllQueuesEver() {
+        $this->course_db->query("SELECT DISTINCT queue_code FROM queue
+                                UNION
+                                SELECT DISTINCT code as queue_code FROM queue_settings");
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataStudent() {
+        $this->course_db->query("SELECT
+                *
+              FROM (SELECT
+                user_id AS id,
+                CASE
+                  WHEN user_preferred_firstname IS NULL THEN user_firstname
+                  ELSE user_preferred_firstname
+                END AS first_name,
+                CASE
+                  WHEN user_preferred_lastname IS NULL THEN user_lastname
+                  ELSE user_preferred_lastname
+                END AS lastname
+              FROM users
+              WHERE user_group = 4) AS user_data
+              LEFT JOIN (SELECT
+                user_id,
+                COUNT(*) AS queue_interactions,
+                COUNT(DISTINCT name) AS number_names_used,
+                AVG(time_out - time_help_start) AS avg_help_time,
+                MIN(time_out - time_help_start) AS min_help_time,
+                MAX(time_out - time_help_start) AS max_help_time,
+                AVG(time_help_start - time_in) AS avg_wait_time,
+                MIN(time_help_start - time_in) AS min_wait_time,
+                MAX(time_help_start - time_in) AS max_wait_time,
+                SUM(CASE
+                  WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                  ELSE 0
+                END) AS help_count,
+                SUM(CASE
+                  WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                  ELSE 0
+                END) AS not_helped_count
+              FROM queue
+              GROUP BY user_id) AS queue_data
+                ON queue_data.user_id = user_data.id
+              ORDER BY queue_data.user_id");
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataOverall() {
+        $this->course_db->query("SELECT
+                 COUNT(*) AS queue_interactions,
+                 COUNT(DISTINCT user_id) AS number_distinct_students,
+                 AVG(time_out - time_help_start) AS avg_help_time,
+                 MIN(time_out - time_help_start) AS min_help_time,
+                 MAX(time_out - time_help_start) AS max_help_time,
+                 AVG(time_help_start - time_in) AS avg_wait_time,
+                 MIN(time_help_start - time_in) AS min_wait_time,
+                 MAX(time_help_start - time_in) AS max_wait_time,
+                 SUM(CASE
+                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                   ELSE 0
+                 END) AS help_count,
+                 SUM(CASE
+                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                   ELSE 0
+                 END) AS not_helped_count
+               FROM queue");
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataToday() {
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $this->course_db->query(
+            "SELECT
+                 COUNT(*) AS queue_interactions,
+                 COUNT(DISTINCT user_id) AS number_distinct_students,
+                 AVG(time_out - time_help_start) AS avg_help_time,
+                 MIN(time_out - time_help_start) AS min_help_time,
+                 MAX(time_out - time_help_start) AS max_help_time,
+                 AVG(time_help_start - time_in) AS avg_wait_time,
+                 MIN(time_help_start - time_in) AS min_wait_time,
+                 MAX(time_help_start - time_in) AS max_wait_time,
+                 SUM(CASE
+                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                   ELSE 0
+                 END) AS help_count,
+                 SUM(CASE
+                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                   ELSE 0
+                 END) AS not_helped_count
+               FROM queue
+               WHERE time_in > ?",
+            [$current_date]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByQueue() {
+        $this->course_db->query("SELECT
+                 queue_code,
+                 COUNT(*) AS queue_interactions,
+                 COUNT(DISTINCT user_id) AS number_distinct_students,
+                 AVG(time_out - time_help_start) AS avg_help_time,
+                 MIN(time_out - time_help_start) AS min_help_time,
+                 MAX(time_out - time_help_start) AS max_help_time,
+                 AVG(time_help_start - time_in) AS avg_wait_time,
+                 MIN(time_help_start - time_in) AS min_wait_time,
+                 MAX(time_help_start - time_in) AS max_wait_time,
+                 SUM(CASE
+                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                   ELSE 0
+                 END) AS help_count,
+                 SUM(CASE
+                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                   ELSE 0
+                 END) AS not_helped_count
+               FROM queue
+               GROUP BY queue_code
+               ORDER BY queue_code");
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByWeekDay() {
+        $this->course_db->query("SELECT
+              dow,
+              COUNT(*) AS queue_interactions,
+              COUNT(DISTINCT user_id) AS number_distinct_students,
+              AVG(time_out - time_help_start) AS avg_help_time,
+              MIN(time_out - time_help_start) AS min_help_time,
+              MAX(time_out - time_help_start) AS max_help_time,
+              AVG(time_help_start - time_in) AS avg_wait_time,
+              MIN(time_help_start - time_in) AS min_wait_time,
+              MAX(time_help_start - time_in) AS max_wait_time,
+              SUM(CASE
+                WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                ELSE 0
+              END) AS help_count,
+              SUM(CASE
+                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                ELSE 0
+              END) AS not_helped_count
+            FROM (SELECT
+              *,
+              extract(dow from time_in) AS dow
+            FROM queue) AS dow_queue
+            GROUP BY dow
+            ORDER BY dow");
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByWeekDayThisWeek() {
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $this->course_db->query(
+            "SELECT
+              dow,
+              COUNT(*) AS queue_interactions,
+              COUNT(DISTINCT user_id) AS number_distinct_students,
+              AVG(time_out - time_help_start) AS avg_help_time,
+              MIN(time_out - time_help_start) AS min_help_time,
+              MAX(time_out - time_help_start) AS max_help_time,
+              AVG(time_help_start - time_in) AS avg_wait_time,
+              MIN(time_help_start - time_in) AS min_wait_time,
+              MAX(time_help_start - time_in) AS max_wait_time,
+              SUM(CASE
+                WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                ELSE 0
+              END) AS help_count,
+              SUM(CASE
+                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                ELSE 0
+              END) AS not_helped_count
+            FROM (SELECT
+                *,
+                extract(dow from time_in) AS dow
+                FROM queue
+                WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE)
+            )
+            AS dow_queue
+            GROUP BY dow
+            ORDER BY dow",
+            [$current_date]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByWeekNumber() {
+        $this->course_db->query("SELECT
+              weeknum,
+      			  min(yearnum) as yearnum,
+              COUNT(*) AS queue_interactions,
+              COUNT(DISTINCT user_id) AS number_distinct_students,
+              AVG(time_out - time_help_start) AS avg_help_time,
+              MIN(time_out - time_help_start) AS min_help_time,
+              MAX(time_out - time_help_start) AS max_help_time,
+              AVG(time_help_start - time_in) AS avg_wait_time,
+              MIN(time_help_start - time_in) AS min_wait_time,
+              MAX(time_help_start - time_in) AS max_wait_time,
+              SUM(CASE
+                WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                ELSE 0
+              END) AS help_count,
+              SUM(CASE
+                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                ELSE 0
+              END) AS not_helped_count
+            FROM (SELECT
+              *,
+              extract(WEEK from time_in) AS weeknum,
+			        extract(YEAR from time_in) AS yearnum
+            FROM queue) AS weeknum_queue
+            GROUP BY weeknum
+            ORDER BY weeknum");
+        return $this->course_db->rows();
     }
 
 
@@ -5862,7 +6405,8 @@ AND gc_id IN (
               u.last_updated,
               u.grading_registration_sections,
               u.registration_section, u.rotating_section,
-              ldeu.late_day_exceptions';
+              ldeu.late_day_exceptions,
+              u.registration_subsection';
             $submitter_inject = '
             JOIN (
                 SELECT u.*, sr.grading_registration_sections
@@ -6368,6 +6912,16 @@ AND gc_id IN (
     ];
 
     /**
+     * Gets Total Number of Submissions on a Gradeable
+     *
+     * @param string $g_id the gradeable id to check for
+     */
+    public function getTotalSubmissions($g_id) {
+        $this->course_db->query('SELECT * FROM electronic_gradeable_data WHERE g_id= ?', [$g_id]);
+        return count($this->course_db->rows());
+    }
+
+    /**
      * Generates the ORDER BY clause with the provided sorting keys.
      *
      * For every element in $sort_keys, checks if the first word is in $key_map,
@@ -6429,7 +6983,7 @@ AND gc_id IN (
     //// BEGIN ONLINE POLLING QUERIES ////
 
     public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
-        $this->course_db->query("INSERT INTO polls(name, question, status, release_date) VALUES (?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date]);
+        $this->course_db->query("INSERT INTO polls(name, question, status, release_date, image_path) VALUES (?, ?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date, null]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -6438,6 +6992,7 @@ AND gc_id IN (
         foreach ($answers as $answer) {
             $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
         }
+        return $poll_id;
     }
 
     public function endPoll($poll_id) {
@@ -6454,7 +7009,7 @@ AND gc_id IN (
 
     public function getPolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls order by poll_id DESC");
+        $this->course_db->query("SELECT * from polls order by poll_id ASC");
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -6467,7 +7022,7 @@ AND gc_id IN (
 
     public function getTodaysPolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date = ? or status='open' order by poll_id DESC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date = ? order by name", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -6480,7 +7035,7 @@ AND gc_id IN (
 
     public function getOlderPolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date < ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date < ? order by release_date DESC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -6493,7 +7048,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date DESC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -6513,7 +7068,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -6557,18 +7112,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function getTotalPollsScore($user_id) {
-        $polls = $this->getPolls();
-        $total = 0.0;
-        foreach ($polls as $poll) {
-            $total = $total + $poll->getScore($user_id);
-        }
-        return $total;
-    }
-
-    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders, $image_path) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ? where poll_id = ?", [$poll_name, $question, $release_date, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $release_date, $image_path, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -6597,6 +7143,10 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
     }
 
+    public function setPollImage($poll_id, $image_path) {
+        $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
+    }
+
     //// END ONLINE POLLING QUERIES ////
 
     /**
@@ -6618,5 +7168,43 @@ AND gc_id IN (
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
         $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Insert access attempt to a given gradeable by a user.
+     */
+    public function insertGradeableAccess(
+        string $g_id,
+        ?string $user_id,
+        ?string $team_id,
+        ?string $accessor_id
+    ): void {
+        $query = <<<SQL
+INSERT INTO gradeable_access (g_id, user_id, team_id, accessor_id, "timestamp")
+VALUES (?, ?, ?, ?, ?)
+SQL;
+        $this->course_db->query($query, [$g_id, $user_id, $team_id, $accessor_id, $this->core->getDateTimeNow()]);
+    }
+
+    public function getGradeableAccessUser(
+        string $g_id,
+        string $user_id
+    ): array {
+        $this->course_db->query(
+            'SELECT * FROM gradeable_access WHERE g_id=? AND user_id=? ORDER BY "timestamp"',
+            [$g_id, $user_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getGradeableAccessTeam(
+        string $g_id,
+        string $team_id
+    ): array {
+        $this->course_db->query(
+            'SELECT * FROM gradeable_access WHERE g_id=? AND team_id=? ORDER BY "timestamp"',
+            [$g_id, $team_id]
+        );
+        return $this->course_db->rows();
     }
 }

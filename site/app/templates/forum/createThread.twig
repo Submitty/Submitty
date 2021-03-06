@@ -44,8 +44,24 @@
 <script>
     $( document ).ready(function() {
         enableTabsInTextArea("[name=thread_post_content]");
+        $("#thread_form").submit(() => {
+            cancelDeferredSave(CREATE_THREAD_DEFER_KEY);
+            clearCreateThreadAutosave();
+        });
         $("#thread_form").submit(createThread);
         $("form").areYouSure();
+        
+        cleanupAutosaveHistory('-create-autosave');
+        restoreCreateThreadFromLocal();
+        $("#title").on("input", () => deferredSave(CREATE_THREAD_DEFER_KEY, saveCreateThreadToLocal, 1));
+        $("input.thread-anon-checkbox").change(saveCreateThreadToLocal);
+        $("div.cat-buttons").click(saveCreateThreadToLocal);
+        $("#thread_status").change(saveCreateThreadToLocal);
+        // Optional fields
+        $("#pinThread").change(saveCreateThreadToLocal);
+        $("#Announcement").change(saveCreateThreadToLocal);
+        $("#lock_thread_date").change(saveCreateThreadToLocal);
+        
         initSocketClient();
     });
 </script>

@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\models\User;
 
 class WebRouter {
     /** @var Core  */
@@ -53,7 +54,7 @@ class WebRouter {
 
 
     /**
-     * If a request is a post request check too see if its less than the post_max_size or if its empty
+     * If a request is a post request check to see if its less than the post_max_size or if its empty
      * @return MultiResponse|bool
      */
     private function checkPostMaxSize(Request $request) {
@@ -284,14 +285,19 @@ class WebRouter {
                 new RedirectResponse($this->core->buildCourseUrl(['no_access']))
             );
         }
+        elseif (
+            $logged_in
+            && Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && $this->parameters['_method'] !== 'logout'
+        ) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['home']))
+            );
+        }
 
         if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
             if ($logged_in) {
-                if (
-                    $this->parameters['_method'] !== 'logout'
-                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
-                    && !Utils::endsWith($this->parameters['_controller'], 'DockerInterfaceController')
-                ) {
+                if (isset($this->parameters['_semester']) && isset($this->parameters['_course'])) {
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );
@@ -376,8 +382,24 @@ class WebRouter {
             }
         }
 
+        if ($access_control->getLevel()) {
+            $access_test = false;
+            switch ($access_control->getLevel()) {
+                case 'SUPERUSER':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_SUPERUSER;
+                    break;
+                case 'FACULTY':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_FACULTY;
+                    break;
+                case 'USER':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_USER;
+                    break;
+            }
+            $access = $access && $access_test;
+        }
+
         if ($access_control->getPermission()) {
-            $access = $this->core->getAccess()->canI($access_control->getPermission());
+            $access = $access && $this->core->getAccess()->canI($access_control->getPermission());
         }
 
         return $access;

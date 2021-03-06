@@ -7,6 +7,9 @@
 
 #include "default_config.h"
 #include "execute.h"
+#include "TestCase.h"
+#include "load_config_json.h"
+
 
 #include <limits>
 #include <tclap/CmdLine.h>
@@ -46,21 +49,21 @@ std::string addRedirectsToCommand(std::string this_command, std::string which){
   return this_command;
 }
 
-void executeSetOfCommands(std::vector<std::string> setOfCommands,  
-                          std::vector<nlohmann::json> actions, 
+void executeSetOfCommands(std::vector<std::string> setOfCommands,
+                          std::vector<nlohmann::json> actions,
                           std::vector<nlohmann::json> dispatcher_actions,
                           bool windowed,
-                          std::string display_variable, 
+                          std::string display_variable,
                           TestCase testcase,
-                          std::string logfile,  
+                          std::string logfile,
                           nlohmann::json config_json,
-                          int test_number){
+                          std::string testcase_to_run){
 
   if ( setOfCommands.size() > 0 ) {
-            
+
     std::cout << "========================================================" << std::endl;
 
-    std::cout << "TEST #" << test_number << std::endl;
+    std::cout << "TEST " << testcase_to_run << std::endl;
     std::cout << "TITLE " << testcase.getTitle() << std::endl;
 
     for (int command_number = 0; command_number < setOfCommands.size();  command_number++){
@@ -68,7 +71,7 @@ void executeSetOfCommands(std::vector<std::string> setOfCommands,
 
       assert (command != "MISSING COMMAND");
       assert (command != "");
-        
+
       std::string which = "";
       if (setOfCommands.size() > 1) {
         which = "_" + std::to_string(command_number);
@@ -88,7 +91,7 @@ void executeSetOfCommands(std::vector<std::string> setOfCommands,
                             testcase.has_timestamped_stdout());
     }
     std::cout << "========================================================" << std::endl;
-    std::cout << "FINISHED TEST #" << test_number << std::endl;
+    std::cout << "FINISHED TEST " << testcase_to_run << std::endl;
   }
 }
 
@@ -99,8 +102,7 @@ int main(int argc, char *argv[]) {
   int subnum = -1;
   std::string time_of_submission = "";
   std::string docker_name = "";
-  //If test_case_to_run isn't passed in as a parameter, all testcases are run.
-  int test_case_to_run = -1;
+  std::string testcase_to_run = "";
   std::string display_variable = "";
   std::string generation_type = "";
 
@@ -108,13 +110,13 @@ int main(int argc, char *argv[]) {
   TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
-  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
-  TCLAP::ValueArg<int> testcase_to_run_argument("t", "testcase", "The testcase to run. Pass -1 to run all testcases.", false, -1, "int", cmd);
+  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submission as made", true, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> testcase_to_run_argument("testcase", "The id of the testcase to run.", true, "", "string", cmd);
   TCLAP::ValueArg<std::string> docker_name_argument("c", "container_name", "The name of the container this attempt is being run in.", false, "", "string", cmd);
   TCLAP::ValueArg<std::string> display_variable_argument("d", "display", "The display to be used for this testcase.", false, "NO_DISPLAY_SET", "string", cmd);
   TCLAP::ValueArg<std::string> generation_type_argument("g", "generation_type", "The type of generation", false, "", "string", cmd);
-  
-  
+
+
 
   //parse arguments.
   try {
@@ -124,19 +126,19 @@ int main(int argc, char *argv[]) {
     subnum = submission_number_argument.getValue();
     time_of_submission = submission_time_argument.getValue();
     docker_name = docker_name_argument.getValue();
-    test_case_to_run = testcase_to_run_argument.getValue();
+    testcase_to_run = testcase_to_run_argument.getValue();
     display_variable = display_variable_argument.getValue();
     generation_type = generation_type_argument.getValue();
   }
   catch (TCLAP::ArgException &e)  // catch any exceptions
-  { 
+  {
     std::cerr << "INCORRECT ARGUMENTS TO RUNNER" << std::endl;
-    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
+    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
     return 1;
   }
 
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
+  nlohmann::json config_json = LoadAndCustomizeConfigJson(rcsid);
 
   // nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   // int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
@@ -159,45 +161,37 @@ int main(int argc, char *argv[]) {
 
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
+  assert (testcase_to_run != "");
 
-  if(test_case_to_run != -1){
-    //testcases begin counting at 1 and end at tc->size()
-    assert (test_case_to_run <= tc->size());
-  }else{
-    std::cout << "Running all testcases in a single run." << std::endl;
+
+  nlohmann::json testcase_config;
+  try {
+    testcase_config = find_testcase_by_id(config_json, testcase_to_run);
+  } catch(char* c) {
+    std::cerr << "ERROR: " << c << std::endl;
+    return 1;
+  }
+  TestCase my_testcase(testcase_config, testcase_to_run, docker_name);
+
+
+  if (my_testcase.isFileCheck() || my_testcase.isCompilation()){
+    return 0;
   }
 
-  for (unsigned int which_testcase = 1; which_testcase <= tc->size(); which_testcase++) {
+  std::vector<std::string> commands;
+  std::vector<nlohmann::json> actions;
+  std::vector<nlohmann::json> dispatcher_actions;
 
-    TestCase my_testcase(config_json, which_testcase-1, docker_name);
-    std::vector<std::string> commands;
-    std::vector<nlohmann::json> actions;
-    std::vector<nlohmann::json> dispatcher_actions;
-    
-    if (my_testcase.isFileCheck() || my_testcase.isCompilation()){
-      continue;
-    }
-
-    if(test_case_to_run != -1 &&  test_case_to_run != which_testcase){
-      continue;
-    }
-
-    if ( generation_type == "input" ) {
-      commands = my_testcase.getInputGeneratorCommands();
-    } else {
-      commands = (generation_type == "output" ? my_testcase.getSolutionCommands() : my_testcase.getCommands());
-
-      actions  = mapOrArrayOfMaps((*tc)[which_testcase-1],"actions");
-      dispatcher_actions = mapOrArrayOfMaps((*tc)[which_testcase-1],"dispatcher_actions");
-
-      if(generation_type != "output"){
-        assert (commands.size() > 0);
-      }
-    }
-
-    executeSetOfCommands(commands, actions, dispatcher_actions, windowed, display_variable, my_testcase, "execute_logfile.txt", config_json, which_testcase);
-
+  if ( generation_type == "input" ) {
+    commands = my_testcase.getInputGeneratorCommands();
+  } else {
+    commands = (generation_type == "output" ? my_testcase.getSolutionCommands() : my_testcase.getCommands());
+    actions  = mapOrArrayOfMaps(testcase_config, "actions");
+    dispatcher_actions = mapOrArrayOfMaps(testcase_config, "dispatcher_actions");
   }
+
+  executeSetOfCommands(commands, actions, dispatcher_actions, windowed, display_variable, my_testcase, "execute_logfile.txt", config_json, testcase_to_run);
+
   return 0;
 }
 

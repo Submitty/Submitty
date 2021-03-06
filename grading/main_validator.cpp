@@ -20,27 +20,29 @@
 
 #include "TestCase.h"
 #include "default_config.h"
+#include "load_config_json.h"
 #include "execute.h"
 #include "json.hpp"
 
 // =====================================================================
 // =====================================================================
 
-int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime);
+int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime, const bool generate_all_output);
 
 int main(int argc, char *argv[]) {
-
   std::string hw_id;
   std::string rcsid;
   int subnum;
   std::string time_of_submission;
+  bool generate_all_output = false;
 
 
   TCLAP::CmdLine cmd("Submitty's assignment validation program.", ' ', "0.9");
   TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
-  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submission as made", true, "", "string" , cmd);
+  TCLAP::SwitchArg generate_output_argument("g", "generate_all_output", "Run global and all itempool testcases", cmd, false);
 
   //parse arguments.
   try {
@@ -49,6 +51,7 @@ int main(int argc, char *argv[]) {
     rcsid = student_id_argument.getValue();
     subnum = submission_number_argument.getValue();
     time_of_submission = submission_time_argument.getValue();
+    generate_all_output = generate_output_argument.getValue();
 
     std::cout << "hw_id " << hw_id << std::endl;
     std::cout << "rcsid " << rcsid << std::endl;
@@ -56,13 +59,13 @@ int main(int argc, char *argv[]) {
     std::cout << "time_of_submission " << time_of_submission << std::endl;
   }
   catch (TCLAP::ArgException &e)  // catch any exceptions
-  { 
+  {
     std::cerr << "INCORRECT ARGUMENTS TO Validator" << std::endl;
-    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
+    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
     return 1;
   }
 
-  int rc = validateTestCases(hw_id,rcsid,subnum,time_of_submission);
+  int rc = validateTestCases(hw_id,rcsid,subnum,time_of_submission,generate_all_output);
   if (rc > 0) {
     std::cerr << "Validator terminated" << std::endl;
     return 1;
@@ -167,7 +170,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             // PREPARE THE JSON DIFF FILE
             std::stringstream diff_path;
             diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
-            std::ofstream diff_stream(diff_path.str().c_str()); 
+            std::ofstream diff_stream(diff_path.str().c_str());
             result.printJSON(diff_stream);
             std::stringstream expected_path;
             std::string id = hw_id;
@@ -270,9 +273,8 @@ void WriteToResultsJSON(const TestCase &my_testcase,
 }
 
 
-void WriteToGradefile(int which_testcase,const TestCase &my_testcase,std::ofstream& gradefile,int testcase_pts) {
-    gradefile << "Testcase"
-              << std::setw(3) << std::right << which_testcase+1 << ": "
+void WriteToGradefile(const TestCase &my_testcase,std::ofstream& gradefile,int testcase_pts) {
+    gradefile << my_testcase.getID() << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
     if (my_testcase.getExtraCredit()) {
       if (testcase_pts > 0) {
@@ -298,19 +300,19 @@ void WriteToGradefile(int which_testcase,const TestCase &my_testcase,std::ofstre
 }
 
 
-void ValidateATestCase(nlohmann::json config_json, int which_testcase,
+void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
                        int subnum, const std::string &hw_id,
                        int &automated_points_awarded,
                        int &automated_points_possible,
                        int &nonhidden_automated_points_awarded,
                        int &nonhidden_automated_points_possible,
+                       int &max_penalty_possible,
                        nlohmann::json &all_testcases,
                        std::ofstream& gradefile,
                        const std::string& username) {
     //This input to the testcase constructor does nothing unless we attempt to access the 'commands' object.
     std::string container_name = "";
-    TestCase my_testcase(config_json,which_testcase,container_name);
-    std::string title = "Test " + std::to_string(which_testcase+1) + " " + my_testcase.getTitle();
+    std::string title = my_testcase.getTitle();
     int possible_points = my_testcase.getPoints();
     bool allow_partial_credit = my_testcase.allowPartialCredit();
     std::cout << title << " - points: " << possible_points << std::endl;
@@ -324,7 +326,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       //
       // NOTE: Editing this? Make sure this branch stays in-sync with the
       //       check_submission_limit_penalty_inline() function in
-      //       sbin/submitty_autograding_shipper.py
+      //       autograder/submitty_autograding_shipper.py
       //
       /////////////////////////////////////////////////////////////////////////
       int max = my_testcase.getMaxSubmissions();
@@ -382,6 +384,9 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
         nonhidden_automated_points_possible += possible_points;
       }
     }
+    if (possible_points < 0) {
+      max_penalty_possible += possible_points;
+    }
 
     // EXPORT TO results.json and grade.txt
     WriteToResultsJSON(
@@ -393,25 +398,134 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
     testcase_message,
     testcase_pts,
     all_testcases);
+    WriteToGradefile(my_testcase,gradefile,testcase_pts);
+}
 
-    WriteToGradefile(which_testcase,my_testcase,gradefile,testcase_pts);
+/**
+* Get all testcase objects associated with an assignment.
+*/
+std::vector<TestCase> getAllTestcases(nlohmann::json config_json) {
+  std::vector<TestCase> testcase_array;
+  nlohmann::json::const_iterator testcases = config_json.find("testcases");
+  assert (testcases != config_json.end());
+  for (nlohmann::json::const_iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    nlohmann::json testcase_config = *tc;
+    TestCase my_testcase(testcase_config, testcase_id, "");
+    testcase_array.push_back(my_testcase);
+  }
+
+  nlohmann::json::const_iterator item_pool = config_json.find("item_pool");
+  if (item_pool != config_json.end()){
+    for(nlohmann::json::const_iterator item_itr = item_pool->begin(); item_itr != item_pool->end(); item_itr++) {
+      nlohmann::json item_testcases = item_itr->value("testcases", nlohmann::json::array());
+      for(nlohmann::json::const_iterator it_itr = item_testcases.begin(); it_itr != item_testcases.end(); it_itr++) {
+        std::string testcase_id = it_itr->value("testcase_id", "");
+        assert(testcase_id != "");
+        nlohmann::json testcase_config = *it_itr;
+        TestCase my_testcase(testcase_config, testcase_id, "");
+        testcase_array.push_back(my_testcase);
+      }
+    }
+  }
+
+  return testcase_array;
+}
+
+nlohmann::json getItemWithName(std::string item_name, const nlohmann::json& config_json) {
+
+    nlohmann::json::const_iterator itempool = config_json.find("item_pool");
+    for (nlohmann::json::const_iterator item = itempool->begin(); item != itempool->end(); item++) {
+        if((*item)["item_name"] == item_name) {
+          return *item;
+        }
+    }
+    throw "ERROR: Could not find an item with item_name " + item_name;
+}
+
+
+/**
+* Get all global testcase objects for an assignment + all testcases specified in .submit.notebook
+*/
+std::vector<TestCase> getTestcasesForSubmission(nlohmann::json& config_json) {
+
+  std::vector<TestCase> testcase_array;
+  nlohmann::json::iterator testcases = config_json.find("testcases");
+  assert (testcases != config_json.end());
+  for (nlohmann::json::iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    nlohmann::json testcase_config = *tc;
+    TestCase my_testcase(testcase_config, testcase_id, "");
+    testcase_array.push_back(my_testcase);
+  }
+
+  std::ifstream ifs(".submit.notebook");
+  if(ifs.is_open()) {
+    nlohmann::json notebook_data = nlohmann::json::parse(ifs);
+    nlohmann::json item_selections = notebook_data.value("item_pools_selected", nlohmann::json::array());
+    int current_item = 0;
+    nlohmann::json::iterator notebook = config_json.find("notebook");
+
+    for (nlohmann::json::iterator part = notebook->begin(); part != notebook->end(); part++) {
+      std::string type = part->value("type", "");
+      std::cout << "type was " << type << std::endl;
+      if (type != "item") {
+        continue;
+      }
+
+      nlohmann::json item_config;
+      int points = part->value("points", 0);
+
+      // If this is an "item," find out what we selected for it using the item_selections iterator
+      assert(current_item < item_selections.size());
+      assert(item_selections[current_item].is_string());
+      std::string item_selected = item_selections[current_item];
+      current_item++;
+
+      try {
+        item_config = getItemWithName(item_selected, config_json);
+      } catch(char* c) {
+        std::cout << c << std::endl;
+        continue;
+      }
+
+      nlohmann::json::iterator item_testcases = item_config.find("testcases");
+
+      if(item_testcases == item_config.end() || item_config["testcases"].size() == 0) {
+        continue;
+      }
+
+      if(item_testcases->find("points") == item_testcases->end()) {
+        (*item_testcases)[0]["points"] = points;
+      }
+
+      for(nlohmann::json::iterator item_testcase = item_testcases->begin(); item_testcase != item_testcases->end(); item_testcase++) {
+        TestCase my_testcase(*item_testcase, (*item_testcase)["testcase_id"], "");
+        testcase_array.push_back(my_testcase);
+      }
+    }
+  }
+
+  return testcase_array;
 }
 
 
 /* Runs through each test case, pulls in the correct files, validates, and outputs the results */
-int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime) {
+int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime, const bool generate_all_output) {
 
   ///////////////////////////////////////////////////////////////////////////////
   //
   // NOTE: Editing this file? Make sure that the parts of this function that
   //       write to the output files stay in-sync with the write_grading_outputs
-  //       function in sbin/submitty_autograding_shipper.py
+  //       function in autograder/submitty_autograding_shipper.py
   //
   ///////////////////////////////////////////////////////////////////////////////
 
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
+  nlohmann::json config_json = LoadAndCustomizeConfigJson(rcsid);
   // PREPARE GRADE.TXT FILE
   std::string grade_path = "grade.txt";
   std::ofstream gradefile(grade_path.c_str());
@@ -420,6 +534,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int automated_points_possible = 0;
   int nonhidden_automated_points_awarded = 0;
   int nonhidden_automated_points_possible = 0;
+  int max_penalty_possible = 0;
 
   std::stringstream testcase_json;
   nlohmann::json all_testcases;
@@ -430,17 +545,23 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 
   // =======================================
-  // LOOP OVER ALL TEST CASES
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
+  // Loop over all global testcases
+  std::vector<TestCase> testcases;
+  if (generate_all_output) {
+    testcases = getAllTestcases(config_json);
+  } else {
+    testcases = getTestcasesForSubmission(config_json);
+  }
+
+  for (std::vector<TestCase>::iterator tc = testcases.begin(); tc != testcases.end(); tc++) {
     std::cout << "------------------------------------------\n";
-    ValidateATestCase(config_json, i, 
+    ValidateATestCase(config_json, *tc,
                       subnum,hw_id,
                       automated_points_awarded,
                       automated_points_possible,
                       nonhidden_automated_points_awarded,
                       nonhidden_automated_points_possible,
+                      max_penalty_possible,
                       all_testcases,
                       gradefile,
                       rcsid);
@@ -450,16 +571,19 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
   assert (AUTO_POINTS == automated_points_possible);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int PENALTY_POINTS = grading_parameters.value("PENALTY_POINTS",max_penalty_possible);
+
+  // clamp total to zero (no negative total!)
+  automated_points_awarded = std::max(PENALTY_POINTS,automated_points_awarded);
+  nonhidden_automated_points_awarded = std::max(PENALTY_POINTS,nonhidden_automated_points_awarded);
 
   // Generate results.json
   nlohmann::json sj;
   sj["testcases"] = all_testcases;
+  sj["automatic_grading_total"] = automated_points_awarded;
+  sj["nonhidden_automatic_grading_total"] = nonhidden_automated_points_awarded;
   std::ofstream json_file("results.json");
   json_file << sj.dump(4);
-
-  // clamp total to zero (no negative total!)
-  automated_points_awarded = std::max(0,automated_points_awarded);
-  nonhidden_automated_points_awarded = std::max(0,nonhidden_automated_points_awarded);
 
   // final line of results_grade.txt
   gradefile << std::setw(64) << std::left << "Automatic grading total:"

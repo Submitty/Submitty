@@ -2,8 +2,8 @@
     <div class="sub">
 
         {# Actual results #}
-        {% if in_queue or grading %}
-            {% if grading %}
+        {% if in_queue or in_progress_grading %}
+            {% if in_progress_grading %}
                 <p class="red-message">
                     This submission is currently being graded.
                 </p>
@@ -17,14 +17,24 @@
             </script>
         {% elseif results is not defined %}
             <p class="red-message">
-                Something has gone wrong with grading this submission. Please contact your instructor about this.
+                Something went wrong when grading this submission. Please contact your instructor about this.
             </p>
+            <script>
+                (() => {
+                    const params = new URLSearchParams(window.location.search);
+                    const loadAttempt = Number(params.get('loadAttempt') ?? '0');
+                    if (loadAttempt < 3) {
+                        params.set('loadAttempt', loadAttempt + 1);
+                        window.location.search = params.toString();
+                    }
+                })();
+            </script>
         {% else %}
             {# Has results! #}
             {% if show_incentive_message %}
                 <script>
                     (function() {
-                        ('#incentive_message').show();
+                        $('#incentive_message').show();
                     })();
                 </script>
             {% endif %}

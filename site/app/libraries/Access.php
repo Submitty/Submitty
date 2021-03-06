@@ -112,8 +112,8 @@ class Access {
 
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
-        
-        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
+
+        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.status.warnings"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.peer_panel"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
@@ -143,7 +143,7 @@ class Access {
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this
-        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
+        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
         $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
@@ -414,7 +414,7 @@ class Access {
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
+                        !((($group === User::GROUP_STUDENT && $gradeable->isPeerGrading()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
@@ -589,21 +589,19 @@ class Access {
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
-        if ($gradeable->getGradeStartDate() <= $now) {
-            //Check to see if the requested user is assigned to this grader.
-            $sections = $gradeable->getGradingSectionsForUser($user);
+        //Check to see if the requested user is assigned to this grader.
+        $sections = $gradeable->getGradingSectionsForUser($user);
 
-            foreach ($sections as $section) {
-                /** @var GradingSection $section */
-                if ($gradeable->isTeamAssignment()) {
-                    if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
-                        return true;
-                    }
+        foreach ($sections as $section) {
+            /** @var GradingSection $section */
+            if ($gradeable->isTeamAssignment()) {
+                if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
+                    return true;
                 }
-                else {
-                    if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
-                        return true;
-                    }
+            }
+            else {
+                if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
+                    return true;
                 }
             }
         }
@@ -765,6 +763,12 @@ class Access {
                     }
                     else {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
+                    }
+                    $hidden_files = $args["gradeable"]->getHiddenFiles();
+                    foreach (explode(",", $hidden_files) as $file_regex) {
+                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
+                            return false;
+                        }
                     }
                     break;
                 case "submitter":

@@ -65,79 +65,29 @@ function setCodeBox(codebox_id, state)
     }
 }
 
-const AUTOSAVE_KEY = `${window.location.pathname}-notebook-autosave`;
+const NOTEBOOK_DEFER_KEY = 'notebook-autosave';
+
+const NOTEBOOK_AUTOSAVE_KEY_SUFFIX = `${window.location.pathname}-notebook-autosave`;
 
 /**
- * This value will be true if autosave is enabled for this session.
+ * Get the autosave key for the notebook.
  * 
- * Specifically, we try to set a test value in localStorage and immediately 
- * remove the test value. If all goes well, then localStorage is available and
- * we can auto-save to there. Otherwise, we simply disable auto-saving.
- * 
- * In particular, setting an item can fail in one of two scenarios:
- * * The local storage quota is full
- * * The `localStorage` variable simply doesn't exist and therefore the browser doesn't support it.
- * 
- * The first point isn't too relevant as we don't expect to be storing a ton of
- * data; however, Safari on iOS in Private Mode sets the quota to zero, meaning 
- * that every attempt to write to localStorage will throw an exception. 
- * Throwing an exception every keypress isn't great, hence the primary 
- * motivation for this block here.
- * 
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#Feature-detecting_localStorage|MDN} on detecting localStorage.
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Storage/setItem|Storage.setItem()} documentation.
+ * This is a function because USER_ID is defined *after* this script is
+ * loaded -- thus, simply defining the constant w/ USER_ID results in an
+ * error since USER_ID is not yet defined.
  */
-const autosaveEnabled = (() => {
-    try {
-        localStorage.setItem('TEST', 'TEST');
-        localStorage.removeItem('TEST');
-        return true;
-    } catch (e) {
-        return false;
-    }
-})();
-
-function msToDays(ms) {
-    return ms / (1000 * 60 * 60 * 24);
-}
-
-/**
- * Scans all autosaved data and deletes any entries older than thirty days.
- */
-function cleanupAutosaveHistory() {
-    if (autosaveEnabled) {
-        const toDelete = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (!key.endsWith("-notebook-autosave")) {
-                continue;
-            }
-
-            try {
-                const { timestamp } = JSON.parse(localStorage.getItem(key));
-                
-                if (msToDays(Date.now() - timestamp) > 30) {
-                    toDelete.push(key);
-                }
-            } catch (e) {
-                // This item has gotten corrupted somehow; let's delete it 
-                // instead of letting it linger around and taking up space.
-                toDelete.push(key);
-            }
-        }
-        toDelete.forEach(localStorage.removeItem, localStorage);
-    }
+function notebookAutosaveKey() {
+    return `${USER_ID}-${NOTEBOOK_AUTOSAVE_KEY_SUFFIX}`;
 }
 
 /**
  * Saves the current state of the notebook gradeable to localstorage.
  */
-function saveToLocal() {
-    if (autosaveEnabled) {
-        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+function saveNotebookToLocal() {
+    if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
+        localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
             timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
-            short_answer: gatherInputAnswersByType("short_answer"),
             codebox: gatherInputAnswersByType("codebox")
         }));
     }
@@ -147,9 +97,9 @@ function saveToLocal() {
  * Restores the state of the notebook gradeable from localstorage. If no
  * autosave data exists yet, then this function does nothing.
  */
-function restoreFromLocal() {
-    if (autosaveEnabled) {
-        const state = JSON.parse(localStorage.getItem(AUTOSAVE_KEY));
+function restoreNotebookFromLocal() {
+    if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
+        const state = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
         
         if (state === null) {
             return;
@@ -158,7 +108,9 @@ function restoreFromLocal() {
         // First, we restore multiple choice answers
         for (const id in state.multiple_choice) {
             const values = state.multiple_choice[id];
-            const index = /multiple_choice_([0-9])+/.exec(id)[1];
+            // Extract the index from the ID generated from gatherInputAnswersByType()
+            // Index is stored after multiple_choice_, so substring it out
+            const index = id.substring("multiple_choice_".length);
             $(`#mc_field_${index} :input`).each((_index, element) => {
                 $(element).prop('checked', values.includes(element.value)).change();
             });
@@ -188,37 +140,6 @@ function restoreFromLocal() {
     }
 }
 
-let isSaveScheduled = false;
-/**
- * Schedules a save action for ten seconds from now if no save has been 
- * scheduled yet. This way we don't re-write minor changes when modifying a
- * text box answer.
- */
-function deferredSave() {
-    if (autosaveEnabled && !isSaveScheduled) {
-        setTimeout(() => {
-            saveToLocal();
-            isSaveScheduled = false;
-        }, 10 * 1000);
-        isSaveScheduled = true;
-    }
-}
-
-/**
- * Event handler for the `onbeforeunload` event; saves unsaved changes to 
- * localStorage (if enabled) and prompts the "Are you sure you want to exit?" 
- * dialog box.
- * @param {Event} e Event object for this event
- */
-function saveAndWarnUnsubmitted(e) {
-    saveToLocal();
-    // For Firefox
-    e.preventDefault();
-    // For Chrome
-    e.returnValue = '';
-    return true;
-}
-
 $(document).ready(function () {
 
     // If any button inside the notebook has been clicked then enable the submission button
@@ -233,7 +154,7 @@ $(document).ready(function () {
     });
 
     $("#submit").click(() => {
-        localStorage.removeItem(AUTOSAVE_KEY);
+        localStorage.removeItem(notebookAutosaveKey());
         // Changes have been submitted; we don't need to warn the user anymore
         window.onbeforeunload = null;
     });
@@ -260,7 +181,7 @@ $(document).ready(function () {
             $(button_selector + "recent_button").attr("disabled", true);
         }
 
-        saveToLocal();
+        saveNotebookToLocal();
     });
 
     // Register handler to detect changes inside codeboxes and then enable buttons
@@ -297,7 +218,7 @@ $(document).ready(function () {
         }
     }));
 
-    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", deferredSave));
+    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal)));
 
     // Register click handler for multiple choice buttons
     $(".mc-clear, .mc-recent").click(function() {
@@ -321,7 +242,7 @@ $(document).ready(function () {
             $("#mc_" + index + "_recent_button").attr("disabled", true);
         }
 
-        saveToLocal();
+        saveNotebookToLocal();
     });
 
     // Register change handler to enable buttons when multiple choice inputs change
@@ -342,7 +263,7 @@ $(document).ready(function () {
             $("#mc_" + index + "_recent_button").attr("disabled", true);
         }
 
-        saveToLocal();
+        saveNotebookToLocal();
     });
 
     // Setup click events for short answer buttons
@@ -375,7 +296,7 @@ $(document).ready(function () {
         // Set the data into the textbox
         $(field_id).val(data_to_set);
 
-        saveToLocal();
+        saveNotebookToLocal();
     });
 
     // Setup keyup event for short answer boxes
@@ -411,9 +332,11 @@ $(document).ready(function () {
         }
     });
 
-    $(".sa-box").on('input', deferredSave);
+    $(".sa-box").on('input', () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal));
 
-    restoreFromLocal();
+    restoreNotebookFromLocal();
 
-    cleanupAutosaveHistory();
+    if(typeof cleanupAutosaveHistory === "function"){
+        cleanupAutosaveHistory("-notebook-autosave");
+    }
 });

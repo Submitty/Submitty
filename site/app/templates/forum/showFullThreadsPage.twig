@@ -1,0 +1,70 @@
+<div class="content">
+    {% if not thread_exists %}
+        {%  include "forum/ForumBar.twig" with {
+            "current_thread" : button_params.current_thread,
+            "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
+            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
+            "show_threads" : button_params.show_threads,
+            "thread_exists" : button_params.thread_exists,
+            "categories" : filterFormData.categories,
+            "current_thread" : filterFormData.current_thread,
+            "current_category_ids" : filterFormData.current_category_ids,
+            "current_course" : filterFormData.current_course,
+            "cookie_selected_categories" : filterFormData.cookie_selected_categories,
+            "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
+            "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
+            "display_option" : filterFormData.display_option,
+            "thread_exists" : filterFormData.thread_exists,
+            "attachment_all_button" : generate_post_content.attachment_all_button,
+            "total_attachments" : generate_post_content.total_attachments,
+            "show_filter": true,
+            "is_full_threads_page": true,
+        } %}
+        <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
+    {% else %}
+        {%  include "forum/ForumBar.twig" with {
+            "current_thread" : button_params.current_thread,
+            "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
+            "show_more" : button_params.show_more,
+            "show_threads" : button_params.show_threads,
+            "thread_exists" : button_params.thread_exists,
+            "more_data" : button_params.more_data,
+            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
+            "categories" : filterFormData.categories,
+            "current_thread" : filterFormData.current_thread,
+            "current_category_ids" : filterFormData.current_category_ids,
+            "current_course" : filterFormData.current_course,
+            "cookie_selected_categories" : filterFormData.cookie_selected_categories,
+            "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
+            "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
+            "show_filter": true,
+            "is_full_threads_page": true,
+        } %}
+        <div id="thread_list" data-prev_page="{{ prev_page }}" data-next_page="{{ next_page }}">
+            <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+            <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; display: none" aria-hidden="true"></i>
+
+            {% include 'forum/displayThreadList.twig' with {
+                "is_full_page" : true,
+            }%}
+
+            <i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray; display: none;" aria-hidden="true"></i>
+            <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+        </div>
+        <script>
+            $(function(){
+                dynamicScrollContentOnDemand($('#thread_list'), buildCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ button_params.current_thread }}, '', '{{ filterFormData.current_course }}');
+                let active_thread = $('#thread_list .active');
+                if(active_thread.length > 0) {
+                    active_thread[0].scrollIntoView(true);
+                }
+                initSocketClient();
+            });
+        </script>
+    {% endif %}
+
+</div>
+
+{%  include "forum/EditPostForm.twig" with {
+    "categories" : filterFormData.categories,
+} %}

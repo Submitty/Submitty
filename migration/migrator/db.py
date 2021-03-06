@@ -63,7 +63,7 @@ class Database:
             connection_string += '{}:{}@{}/{}'.format(
                 params['database_user'],
                 params['database_password'],
-                host if not Path(host).exists() else '',
+                f"{host}:{params.get('database_port', 5432)}" if not Path(host).exists() else '',
                 params['dbname']
             )
 

@@ -1,5 +1,5 @@
-<div id="grading_rubric" class="draggable rubric_panel {{ is_ta_grading ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
-    <div class="draggable_content">
+<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}">
+    <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
                 <div class="row row-wrap vertical-center">
@@ -54,6 +54,13 @@
                         <h4>No Submission</h4>
                     {% endif %}
                 </div>
+                {% for student_anon_id in student_anon_ids %}
+                    {% if gradeable.getPeerFeedback(grader_id, student_anon_id) != 'No response' %}
+                        <div class="box component peer-border">
+                            Peer Feedback: {{gradeable.getPeerFeedback(grader_id, student_anon_id)}}
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
         {% else %}
             <div id="no-manual-grading-container">

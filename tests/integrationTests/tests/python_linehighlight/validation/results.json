@@ -16,7 +16,7 @@
                 }
             ],
             "points_awarded": 10,
-            "test_name": "Test 1 CORRECT SOLUTION"
+            "test_name": "CORRECT SOLUTION"
         },
         {
             "autochecks": [
@@ -28,7 +28,7 @@
                 }
             ],
             "points_awarded": 8,
-            "test_name": "Test 2 DUPLICATE LINES - Required Order"
+            "test_name": "DUPLICATE LINES - Required Order"
         },
         {
             "autochecks": [
@@ -46,7 +46,7 @@
                 }
             ],
             "points_awarded": 8,
-            "test_name": "Test 3 DUPLICATE LINES - Re-Ordering OK"
+            "test_name": "DUPLICATE LINES - Re-Ordering OK"
         },
         {
             "autochecks": [
@@ -58,7 +58,7 @@
                 }
             ],
             "points_awarded": 8,
-            "test_name": "Test 4 EXTRA LINES - Required Order"
+            "test_name": "EXTRA LINES - Required Order"
         },
         {
             "autochecks": [
@@ -76,7 +76,7 @@
                 }
             ],
             "points_awarded": 7,
-            "test_name": "Test 5 EXTRA LINES - Re-Ordering OK"
+            "test_name": "EXTRA LINES - Re-Ordering OK"
         },
         {
             "autochecks": [
@@ -88,7 +88,7 @@
                 }
             ],
             "points_awarded": 7,
-            "test_name": "Test 6 MISSING LINES - Required Order"
+            "test_name": "MISSING LINES - Required Order"
         },
         {
             "autochecks": [
@@ -106,7 +106,7 @@
                 }
             ],
             "points_awarded": 7,
-            "test_name": "Test 7 MISSING LINES - Re-Ordering OK"
+            "test_name": "MISSING LINES - Re-Ordering OK"
         },
         {
             "autochecks": [
@@ -118,7 +118,7 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 8 OUT OF ORDER - Required Order"
+            "test_name": "OUT OF ORDER - Required Order"
         },
         {
             "autochecks": [
@@ -136,11 +136,11 @@
                 }
             ],
             "points_awarded": 9,
-            "test_name": "Test 9 OUT OF ORDER - Re-Ordering OK"
+            "test_name": "OUT OF ORDER - Re-Ordering OK"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 10 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

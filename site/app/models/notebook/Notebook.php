@@ -2,8 +2,8 @@
 
 namespace app\models\notebook;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\AbstractModel;
 use app\exceptions\NotImplementedException;
@@ -16,6 +16,7 @@ use app\exceptions\IOException;
  * @method array getNotebook()
  * @method array getImagePaths()
  * @method array getFileSubmissions()
+ * @method array getItemPool()
  */
 
 class Notebook extends AbstractModel {
@@ -29,6 +30,8 @@ class Notebook extends AbstractModel {
     protected $image_paths;
     /** @prop @var array of file_submission notebook cells */
     protected $file_submissions = [];
+    /** @prop @var array of items. **/
+    protected $item_pool = [];
 
 
     public function __construct(Core $core, array $details, string $gradeable_id) {
@@ -43,6 +46,7 @@ class Notebook extends AbstractModel {
          // Setup $this->notebook
         $actual_input = [];
         $this->notebook = [];
+        $this->item_pool = $details["item_pool"] ?? [];
 
         // For each item in the notebook array inside the $details collect data and assign to variables in
         // $this->notebook
@@ -79,11 +83,10 @@ class Notebook extends AbstractModel {
                 }
             }
             elseif (
-                $notebook_cell['type'] === 'short_answer'
-                && !empty($notebook_cell['programming_language'])
-                && empty($notebook_cell['codemirror_mode'])
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'short_answer'
             ) {
-                $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language'] ?? null);
             }
 
             // Add this cell $this->notebook
@@ -92,7 +95,7 @@ class Notebook extends AbstractModel {
             }
 
             // If cell is a type of input add it to the $actual_inputs array
-            if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
+            if (isset($notebook_cell['type']) && in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
             }
 
@@ -105,19 +108,13 @@ class Notebook extends AbstractModel {
                 $this->file_submissions[] = $notebook_cell;
             }
         }
-        
+
         $this->image_paths = $this->getNotebookImagePaths();
 
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-                // If programming language is set then this is a codebox, else regular textbox
-                if (isset($actual_input[$i]['programming_language'])) {
                     $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-                }
-                else {
-                    $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-                }
             }
             elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $actual_input[$i]['allow_multiple'] = $actual_input[$i]['allow_multiple'] ?? false;
@@ -150,15 +147,15 @@ class Notebook extends AbstractModel {
     }
 
 
-      /**
-       * Gets a new 'notebook' which contains information about most recent submissions
-       *
-       * @return array An updated 'notebook' which has the most recent submission data entered into the
-       * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
-       * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
-       * blank.
-       */
-    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook): array {
+   /**
+    * Gets a new 'notebook' which contains information about most recent submissions
+    *
+    * @return array An updated 'notebook' which has the most recent submission data entered into the
+    * @param array $new_notebook a notebook config to parse
+    * @param int $version which version to get notebook submission values from
+    * @param string $student_id which student's notebook to pull data from
+    */
+    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
@@ -170,7 +167,7 @@ class Notebook extends AbstractModel {
                         // Else there has been a previous submission try to get it
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
@@ -189,7 +186,7 @@ class Notebook extends AbstractModel {
                     else {
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
 
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
@@ -212,17 +209,18 @@ class Notebook extends AbstractModel {
      * Get the data from the student's most recent submission
      *
      * @param string $filename Name of the file to collect the data out of
+     * @param string $version which version to get from
+     * @param string $student_id id of which user to collect data from
      * @throws AuthorizationException if the user lacks permissions to read the submissions file
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
      * @return string if successful returns the contents of a students most recent submission
      */
-    private function getRecentSubmissionContents($filename, $version) {
+    private function getRecentSubmissionContents(string $filename, string $version, string $student_id): string {
 
         // Get items in path to student's submission folder
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradable_dir = $this->getGradeableId();
-        $student_id = $this->core->getUser()->getId();
 
         // Join path items
         $complete_file_path = FileUtils::joinPaths(
@@ -290,5 +288,15 @@ class Notebook extends AbstractModel {
 
     public function getNumParts(): int {
         return count($this->file_submissions);
+    }
+
+    public function getTestCases(): array {
+        $ret = [];
+        foreach ($this->item_pool as $item) {
+            if ($item["testcases"]) {
+                $ret += $item["testcases"];
+            }
+        }
+        return $ret;
     }
 }

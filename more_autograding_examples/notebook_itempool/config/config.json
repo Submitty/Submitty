@@ -2,7 +2,7 @@
 
     "hide_submitted_files" : true,
 //    "hide_version_and_test_details" : true,
-    
+
     "assignment_message" : "#Welcome To My Favorite Notebook Gradeable\n  \
 \n  \
 This message will appear in a blue box at the top of the page.",
@@ -214,7 +214,7 @@ This message will appear in a blue box at the top of the page.",
                                  "show_expected":"never","show_actual":"never",
                                  "failure_message":"Incorrect Answer (note: make sure your answer is lowercase)" } ] }
           ]
-        },    
+        },
         // ===================================================
         { "item_name" : "author",
           "notebook" : [
@@ -246,7 +246,7 @@ Wikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
           ],
           "testcases" : [
           ]
-        },   
+        },
         // ===================================================
         { "item_name" : "cpp_code",
           "notebook" : [
@@ -304,6 +304,7 @@ int main() {\n\
               {
                   "testcase_ref" : "python_prime",
                   "type": "short_answer",
+                  "rows": 10,
                   "programming_language": "python",
                   "filename": "python_codebox.py",
                   "initial_value": "\
@@ -329,9 +330,9 @@ for i in range(2, 100):\n\
           ]
         }
 
-        
+
     ],
-    // ===================================================              
+    // ===================================================
     "notebook" : [
         {
             "type": "markdown",
@@ -351,6 +352,10 @@ Here's a short list of instructions:\n  \
             "item_label" : "Math Problem",
             "from_pool" : ["math_1"],
             "points" : 3
+            // "non_hidden_non_extra_credit_points" : 3,
+            // "non_hidden_extra_credit_points": 0,
+            // "hidden_non_extra_credit_points": 0,
+            // "hidden_extra_credit_points": 0
         },
         {
             "type" : "item",
@@ -418,6 +423,6 @@ Here's a short list of instructions:\n  \
         }
         // ===================================================
     ],
-    "testcases" : [ 
+    "testcases" : [
     ]
 }

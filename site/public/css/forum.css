@@ -80,6 +80,7 @@
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
+    align-items: stretch;
 }
 
 .thread_box h5{
@@ -204,7 +205,6 @@
 .post-email-toggle, .post-user-info{
     margin-right: 2px;
     display: inline-block;
-    color: black;
 }
 
 .delete-post-button, .edit-post-button{
@@ -214,10 +214,6 @@
 
 .delete-post-button{
     bottom: 1px;
-}
-
-.edit-post-button{
-    color: black;
 }
 
 .last-edit{
@@ -291,7 +287,7 @@
     display: inline-block;
 }
 
-.post_reply_from{
+.post_reply_form{
     margin-right: 17px;
 }
 
@@ -596,4 +592,33 @@
 [data-theme="dark"] .create_thread_button,
 [data-theme="dark"] .well {
   box-shadow: none;
+}
+
+.thread-box-full {
+    padding: 10px 20px;
+    margin: 5px auto;
+    box-shadow: 4px 7px 5px #ccc;
+}
+
+.thread_box .flex-row,
+.thread-box-full .flex-row {
+    align-items: stretch;
+    justify-content: flex-end;
+}
+
+.content .thread_box_link {
+    text-decoration: none;
+    color: var(--text-black);
+}
+
+.thread-right-cont {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.thread-left-cont {
+    flex: 3;
 }

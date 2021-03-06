@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 2,
+    "nonhidden_automatic_grading_total": 2,
     "testcases": [
         {
             "autochecks": [
@@ -9,7 +11,7 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 1 Submitted a .pdf file"
+            "test_name": "Submitted a .pdf file"
         },
         {
             "autochecks": [
@@ -19,11 +21,11 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 2 Required 500-1000 Words"
+            "test_name": "Required 500-1000 Words"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 3 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

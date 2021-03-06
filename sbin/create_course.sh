@@ -26,14 +26,20 @@ CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
 
 DATABASE_HOST=$(jq -r '.database_host' ${CONF_DIR}/database.json)
+DATABASE_PORT=$(jq -r '.database_port' ${CONF_DIR}/database.json)
 DATABASE_USER=$(jq -r '.database_user' ${CONF_DIR}/database.json)
 DATABASE_PASS=$(jq -r '.database_password' ${CONF_DIR}/database.json)
 
 ########################################################################################################################
 ########################################################################################################################
 
+CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER}"
+if [ -d ${DATABASE_HOST} ]; then
+    CONN_EXTRA="${CONN_STRING} -p ${DATABASE_PORT}"
+fi
+
 # Check that Submitty Master DB exists.
-PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -lqt | cut -d \| -f 1 | grep -qw submitty
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Submitty master database doesn't exist."
     exit
@@ -41,7 +47,7 @@ fi
 
 #Ensure that tables exist within Submitty Master DB.
 sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms','courses','courses_users','sessions','users');"
-table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "${sql}"`
+table_count=`PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -tAc "${sql}"`
 if [[ $table_count -ne "5" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit
@@ -260,6 +266,7 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor   $ta_www_group   $course_dir/repor
 create_and_set  u=rwx,g=rwxs,o=  $instructor   $ta_www_group   $course_dir/reports/summary_html
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/all_grades
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/seating
+create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/polls
 
 
 ########################################################################################################################
@@ -280,7 +287,7 @@ replace_fillin_variables ${course_dir}/config/config.json
 
 
 echo -e "Creating database ${DATABASE_NAME}\n"
-PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create database ${DATABASE_NAME}"
     exit
@@ -291,7 +298,7 @@ if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit
 fi
-PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -c "INSERT INTO courses (semester, course) VALUES ('${semester}', '${course}');"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (semester, course) VALUES ('${semester}', '${course}');"
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to add this course to the master Submitty database."
     echo "HINT:  'insert or update on table \"courses\" violates foreign key constraint...'"

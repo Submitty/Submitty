@@ -2,7 +2,7 @@
 
 namespace app\views;
 
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
@@ -48,6 +48,7 @@ class AutoGradingView extends AbstractView {
             return [
                 'name' => $testcase_config->getName(),
                 'hidden' => $testcase_config->isHidden(),
+                'release_hidden_details' => $testcase_config->isReleaseHiddenDetails(),
                 'details' => $testcase_config->getDetails(),
                 'has_points' => $testcase_config->getPoints() !== 0,
                 'extra_credit' => $testcase_config->isExtraCredit(),
@@ -95,7 +96,7 @@ class AutoGradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
             'gradeable_id' => $gradeable->getId(),
-            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId(),
             "num_visible_testcases" => $num_visible_testcases,
             "incomplete_autograding" => $incomplete_autograding,
             "show_hidden_breakdown" => $show_hidden_breakdown,
@@ -281,6 +282,26 @@ class AutoGradingView extends AbstractView {
     }
 
     /**
+     * @param string $file_path
+     * @return string
+     */
+    private function convertToAnonPath($file_path) {
+        $file_path_parts = explode("/", $file_path);
+        $anon_path = "";
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index == 9) {
+                $user_id = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getAnonId($user_id)[$user_id];
+                $anon_path = $anon_path . "/" . $anon_id;
+            }
+            else {
+                $anon_path = $anon_path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $anon_path;
+    }
+
+    /**
      * @param TaGradedGradeable $ta_graded_gradeable
      * @param bool $regrade_available
      * @param array $uploaded_files
@@ -363,11 +384,15 @@ class AutoGradingView extends AbstractView {
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -396,29 +421,21 @@ class AutoGradingView extends AbstractView {
         $annotated_pdf_paths = [];
         $annotated_file_names = [];
         $annotation_paths = [];
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
-                            $annotated_file_names[] = $pdf_id;
-                            if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-                                $target_file = scandir($annotation_path)[2];
-                                $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
-                            }
-                            if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
-                                $target_file = scandir($pdfs_path)[2];
-                                $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
-                                $annotated_pdf_paths[$pdf_id] = $pdf_path;
-                            }
-                        }
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \FilesystemIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                $pdf_id = explode("_", $file_info->getFilename())[0];
+                if (file_get_contents($file_info->getPathname()) !== "") {
+                    $annotated_file_names[] = $pdf_id;
+                    $pdf_id = $pdf_id . '.pdf';
+                    if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                        $target_file = scandir($annotation_path)[2];
+                        $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                    }
+                    if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                        $target_file = scandir($pdfs_path)[2];
+                        $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                        $annotated_pdf_paths[$pdf_id] = $pdf_path;
                     }
                 }
             }
@@ -447,12 +464,15 @@ class AutoGradingView extends AbstractView {
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'overall_comments' => $overall_comments,
             'ta_components' => $ta_component_data,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
+            'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate(),
+            'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'ta_score' => $ta_grading_earned,
             'ta_max' => $ta_max,
             'active_same_as_graded' => $active_same_as_graded,
+            'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
+            'is_grade_inquiry_ended' => $gradeable->isGradeInquiryEnded(),
             'regrade_available' => $regrade_available,
             'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
             'num_decimals' => $num_decimals,
@@ -557,9 +577,17 @@ class AutoGradingView extends AbstractView {
                 'marks' => $component_marks,
             ];
         }, $peer_graded_components);
-
+        /*$peer_anon_component_data = $peer_component_data;
+        for ($i = 1; $i < count($peer_anon_component_data)+1; $i++)  {
+            for ($j = 0; $j < count($peer_anon_component_data[$i]['peer_ids']); $j++)  {
+                $peer_id = $peer_anon_component_data[$i]['peer_ids'][$j];
+                $anon_id = $this->core->getQueries()->getAnonId($peer_id)[$peer_id];
+                $peer_anon_component_data[$i]['peer_ids'][$j] = $anon_id;
+            }
+        }*/
         $unique_graders = array_unique($graders_found);
         $peer_aliases = [];
+        $anon_grader_id_mapping = [];
         $num_peers = 0;
         // Sort the graders ids so that peer alias assignment stays mostly consistent.
         // TODO: Eventually we want to move to having a students anonid be displayable
@@ -569,11 +597,20 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
-            $peer_aliases[$grader_id] = $alias;
+            $anon_id = $this->core->getQueries()->getAnonId($grader_id)[$grader_id];
+            if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
+                $peer_aliases[$grader_id] = $grader_id;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
+            }
+            else {
+                $peer_aliases[$grader_id] = $alias;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $alias;
+            }
+            $anon_grader_id_mapping[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
             // Effectively sorts peers by $num_peers.
-            array_push($ordered_graders, $grader_id);
+            array_push($ordered_graders, $anon_id);
         }
-        
+
         $id = $this->core->getUser()->getId();
 
         $uploaded_pdfs = [];
@@ -625,21 +662,26 @@ class AutoGradingView extends AbstractView {
         }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
+        $annotated_pdf_paths = [];
         $annotated_file_names = [];
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
-                            $annotated_file_names[] = $pdf_id;
-                        }
+        $annotation_paths = [];
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \FilesystemIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                $file_contents = file_get_contents($file_info->getPathname());
+                $annotation_decoded = json_decode($file_contents, true);
+                if ($annotation_decoded != null) {
+                    $pdf_id = $annotation_decoded["file_path"];
+                    $annotated_file_names[] = $pdf_id;
+                    if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                        $target_file = scandir($annotation_path)[2];
+                        $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                    }
+                    if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                        $target_file = scandir($pdfs_path)[2];
+                        $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                        $annotated_pdf_paths[$pdf_id] = $pdf_path;
                     }
                 }
             }
@@ -658,10 +700,11 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$user_id] = $comment;
             }
         }
-        
+
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
-        
+        $this->core->getOutput()->addInternalCss('electronic.css');
+        $gradeable_id = $gradeable->getId();
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -671,10 +714,11 @@ class AutoGradingView extends AbstractView {
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,
             'ordered_graders' => $ordered_graders,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,
+            #'peer_anon_component_data' => $peer_anon_component_data,
+            'anon_grader_id_mapping' => $anon_grader_id_mapping,
             'peer_max' => $peer_max,
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
@@ -682,12 +726,13 @@ class AutoGradingView extends AbstractView {
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
-            'gradeable_id' => $gradeable->getId(),
+            'gradeable_id' => $gradeable_id,
             'can_download' => !$gradeable->isVcs(),
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            "annotated_file_names" =>  $annotated_file_names,
+            "peer_feedback" => $this->core->getQueries()->getAllPeerFeedback($gradeable_id),
             'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
-            "annotated_file_names" =>  $annotated_file_names
         ]);
     }
 }

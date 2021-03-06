@@ -141,27 +141,29 @@ EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 
 ##############################################################################
 
-defaults = {'database_host': 'localhost',
-            'database_user': 'submitty_dbuser',
-            'submission_url': '',
-            'supervisor_user': 'submitty',
-            'vcs_url': '',
-            'authentication_method': 1,
-            'institution_name' : '',
-            'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
-            'institution_homepage' : '',
-            'timezone' : tzlocal.get_localzone().zone,
-            'submitty_admin_username': '',
-            'submitty_admin_password': '',
-            'email_user': '',
-            'email_password': '',
-            'email_sender': 'submitty@myuniversity.edu',
-            'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
-            'email_server_hostname': 'mail.myuniversity.edu',
-            'email_server_port': 25,
-            'course_code_requirements': "Please follow your school's convention for course code.",
-            'sys_admin_email': '',
-            'sys_admin_url': ''
+defaults = {
+    'database_host': 'localhost',
+    'database_port': 5432,
+    'database_user': 'submitty_dbuser',
+    'submission_url': '',
+    'supervisor_user': 'submitty',
+    'vcs_url': '',
+    'authentication_method': 1,
+    'institution_name' : '',
+    'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
+    'institution_homepage' : '',
+    'timezone' : tzlocal.get_localzone().zone,
+    'submitty_admin_username': '',
+    'submitty_admin_password': '',
+    'email_user': '',
+    'email_password': '',
+    'email_sender': 'submitty@myuniversity.edu',
+    'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
+    'email_server_hostname': 'mail.myuniversity.edu',
+    'email_server_port': 25,
+    'course_code_requirements': "Please follow your school's convention for course code.",
+    'sys_admin_email': '',
+    'sys_admin_url': ''
 }
 
 loaded_defaults = {}
@@ -208,6 +210,12 @@ if args.worker:
 else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
+
+    if not os.path.isdir(DATABASE_HOST):
+        DATABASE_PORT = int(get_input('What is the database port?', defaults['database_port']))
+        print()
+    else:
+        DATABASE_PORT = defaults['database_port']
 
     DATABASE_USER = get_input('What is the database user/role?', defaults['database_user'])
     print()
@@ -344,6 +352,7 @@ else:
     config['php_gid'] = PHP_GID
 
     config['database_host'] = DATABASE_HOST
+    config['database_port'] = DATABASE_PORT
     config['database_user'] = DATABASE_USER
     config['database_password'] = DATABASE_PASS
     config['timezone'] = TIMEZONE
@@ -410,7 +419,7 @@ SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 
 #Rescue the autograding_workers and _containers files if they exist.
 rescued = list()
-tmp_folder = tempfile.mkdtemp() 
+tmp_folder = tempfile.mkdtemp()
 if not args.worker:
     for full_file_name, file_name in [(WORKERS_JSON, 'autograding_workers.json'), (CONTAINERS_JSON, 'autograding_containers.json')]:
         if os.path.isfile(full_file_name):
@@ -461,13 +470,14 @@ if not args.worker:
                           "submitty/autograding-default:latest",
                           "submitty/java:8",
                           "submitty/java:11",
-                          "submitty/python:3.6"
+                          "submitty/python:3.6",
+                          "submittyrpi/csci1200:default"
                        ]
         }
 
         with open(CONTAINERS_JSON, 'w') as container_file:
             json.dump(container_dict, container_file, indent=4)
-    
+
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
       shutil.chown(file, 'root',DAEMON_GID)
       os.chmod(file, 0o460)
@@ -481,6 +491,7 @@ if not args.worker:
     config = OrderedDict()
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['database_host'] = DATABASE_HOST
+    config['database_port'] = DATABASE_PORT
     config['database_user'] = DATABASE_USER
     config['database_password'] = DATABASE_PASS
     config['debugging_enabled'] = DEBUGGING_ENABLED

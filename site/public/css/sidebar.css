@@ -10,10 +10,7 @@ aside {
         width: 250px;
         min-width: 250px;
         z-index: 1;
-    }
-
-    aside{
-      transition: all 0.3s ease-out;
+        transition: all 0.3s ease-out;
     }
 
     aside hr {
@@ -26,10 +23,7 @@ aside {
         min-width: 30px;
         text-align: center;
         margin: 0 0 0 15px;
-    }
-
-    aside i{
-      transition: margin 0.3s ease-out;
+        transition: margin 0.3s ease-out;
     }
 
     aside li {

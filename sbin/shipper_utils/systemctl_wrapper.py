@@ -6,6 +6,8 @@ from os import path
 import sys
 import json
 import paramiko
+from submitty_utils import ssh_proxy_jump
+
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
 SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
@@ -60,12 +62,17 @@ def perform_systemctl_command_on_all_workers(daemon, mode):
   for target in WORKERS.keys():
     # Don't run on local machines
     if target == 'primary' or WORKERS[target]['address'] == 'localhost':
-      continue
+        continue
+    if WORKERS[target]['enabled'] == False:
+        print (f"skip {target}")
+        continue
+    print (f"perform {daemon} {mode} on worker machine {target}")
     status = perform_systemctl_command_on_worker(daemon, mode, target)
     print_status_message(status, mode, daemon, target)
     verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=True)
     greatest_status = max(greatest_status, status)
   return greatest_status
+
 
 # This function performs a systemctl command (mode) on a given daemon on a given machine
 def perform_systemctl_command_on_worker(daemon, mode, target):
@@ -87,21 +94,21 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
   script_directory = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'systemctl_wrapper.py')
   command = "sudo {0} {1} --daemon {2}".format(script_directory, mode, daemon)
   try:
-      ssh = paramiko.SSHClient()
-      ssh.get_host_keys()
-      ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(hostname = host, username = user, timeout=60)
+      (target_connection,
+       intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
   try:
-      (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
+      (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=5)
       status = int(stdout.channel.recv_exit_status())
   except Exception as e:
       print("ERROR: Command did not properly execute: ".format(host, str(e)))
       status = EXIT_CODES['failure']
   finally:
-      ssh.close()
+      target_connection.close()
+      if intermediate_connection:
+          intermediate_connection.close()
       return status
 
 def disable_machine(target):
@@ -161,9 +168,9 @@ def main(daemon, target, mode):
 
   command = 'sudo systemctl {0} submitty_autograding_{1}'.format(mode, daemon)
   status_command = 'sudo systemctl is-active submitty_autograding_{0}'.format(daemon)
-  
+
   if local:
-    # If running locally, verify we are running usin sudo.
+    # If running locally, verify we are running using sudo.
     if not int(os.getuid()) == 0:
       print("ERROR: If running locally, this script must be run using sudo")
       sys.exit(EXIT_CODES['failure'])
@@ -183,7 +190,7 @@ def main(daemon, target, mode):
       print("ERROR: the autograding_workers.json was not found on your machine. Please make sure you are installed\
               as a primary machine.")
       system.exit(EXIT_CODES['failure'])
-    # if we are checking the status of a daeomon on another machine, make sure we are running
+    # if we are checking the status of a daemon on another machine, make sure we are running
     #    as DAEMON_USER, who has the ssh keys.
     if not int(os.getuid()) == DAEMON_UID:
       print("ERROR: if running on another machine, this script must be run as DAEMON_USER, "+DAEMON_USER)

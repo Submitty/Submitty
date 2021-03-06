@@ -8,25 +8,10 @@ import dateutil.parser
 import string
 import random
 import zipfile
+import traceback
 
 from submitty_utils import dateutils
-
-
-from . import insert_database_version_data, autograding_utils, CONFIG_PATH
-
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-SUBMISSION_URL = OPEN_JSON['submission_url']
-AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
-VCS_URL = OPEN_JSON['vcs_url']
-if VCS_URL is None or len(VCS_URL) == 0:
-    VCS_URL = SUBMISSION_URL.rstrip('/') + '/{$vcs_type}'
-SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
-SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
-
-with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DAEMON_UID = OPEN_JSON['daemon_uid']
+from . import insert_database_version_data, autograding_utils
 
 
 # ==================================================================================
@@ -37,21 +22,17 @@ def get_queue_time(next_directory, next_to_grade):
     return t
 
 
-def load_queue_file_obj(job_id, next_directory, next_to_grade):
+def load_queue_file_obj(config, job_id, next_directory, next_to_grade):
     queue_file = os.path.join(next_directory, next_to_grade)
     if not os.path.isfile(queue_file):
-        autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
-            job_id,
-            message=f"ERROR: the file does not exist {queue_file}"
-        )
+        config.logger.log_message(f"ERROR: the file does not exist {queue_file}", job_id=job_id)
         raise RuntimeError("ERROR: the file does not exist", queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
     return obj
 
 
-def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
+def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
     # Top level directory for this course
     course_dir = os.path.join(top_dir, 'courses', semester, course)
     form_json_file = os.path.join(course_dir, 'config', 'form', f'form_{gradeable}.json')
@@ -65,9 +46,17 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
     # so we have to strip out the " in python
     vcs_type = course_json['course_details']['vcs_type']
     vcs_base_url = course_json['course_details']['vcs_base_url']
+
+    vcs_url = config.submitty['vcs_url']
+    if vcs_url is None or len(vcs_url) == 0:
+        vcs_url = config.submitty['submission_url'].rstrip('/') + '/{$vcs_type}'
+
     if len(vcs_base_url) == 0:
-        vcs_base_url = "/".join([VCS_URL, semester, course]).rstrip('/') + "/"
-    vcs_base_url = vcs_base_url.replace(SUBMISSION_URL, os.path.join(SUBMITTY_DATA_DIR, 'vcs'))
+        vcs_base_url = "/".join([vcs_url, semester, course]).rstrip('/') + "/"
+    vcs_base_url = vcs_base_url.replace(
+        config.submitty['submission_url'],
+        os.path.join(config.submitty['submitty_data_dir'], 'vcs')
+    )
     vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
     vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
@@ -93,18 +82,19 @@ def unzip_queue_file(zipfilename):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist", zipfilename)
     zip_ref = zipfile.ZipFile(zipfilename, 'r')
+    queue_file_name = "queue_file.json"
     names = zip_ref.namelist()
-    if 'failure.txt' in names:
-        return None
-    if 'queue_file.json' not in names:
+
+    # Verify that the queue file is in the zip file
+    if queue_file_name not in names:
         raise RuntimeError("ERROR: zip file does not contain queue file", zipfilename)
+
     # remember the current directory
     cur_dir = os.getcwd()
     # create a temporary directory and go to it
     tmp_dir = tempfile.mkdtemp()
     os.chdir(tmp_dir)
     # extract the queue file
-    queue_file_name = "queue_file.json"
     zip_ref.extract(queue_file_name)
     # read it into a json object
     with open(queue_file_name) as f:
@@ -119,35 +109,42 @@ def unzip_queue_file(zipfilename):
 # ==================================================================================
 # ==================================================================================
 def prepare_autograding_and_submission_zip(
+    config,
+    machine_name: str,
     which_machine,
     which_untrusted,
     next_directory,
     next_to_grade
 ):
-    os.chdir(SUBMITTY_DATA_DIR)
+    os.chdir(config.submitty['submitty_data_dir'])
 
     # generate a random id to be used to track this job in the autograding logs
     job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
 
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
-    obj = load_queue_file_obj(job_id, next_directory, next_to_grade)
+    obj = load_queue_file_obj(config, job_id, next_directory, next_to_grade)
     # The top level course directory for this class
-    course_dir = os.path.join(SUBMITTY_DATA_DIR, 'courses', obj["semester"], obj["course"])
+    course_dir = os.path.join(
+        config.submitty['submitty_data_dir'],
+        'courses',
+        obj["semester"],
+        obj["course"]
+    )
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
         item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
-        submission_path = os.path.join(SUBMITTY_DATA_DIR, "courses", item_name)
+        submission_path = os.path.join(config.submitty['submitty_data_dir'], "courses", item_name)
         if not os.path.isdir(submission_path):
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH,
-                job_id,
-                message=f"ERROR: the submission directory does not exist {submission_path}"
+            config.logger.log_message(
+                f"ERROR: the submission directory does not exist: {submission_path}",
+                job_id=job_id
             )
             raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
         print(which_machine, which_untrusted, "prepare zip", submission_path)
         is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = get_vcs_info(
-            SUBMITTY_DATA_DIR,
+            config,
+            config.submitty['submitty_data_dir'],
             obj["semester"],
             obj["course"],
             obj["gradeable"],
@@ -168,15 +165,14 @@ def prepare_autograding_and_submission_zip(
     queue_time = get_queue_time(next_directory, next_to_grade)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-    autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH,
-        job_id,
-        is_batch_job,
-        "zip",
-        item_name,
-        "wait:",
-        waittime,
-        ""
+    config.logger.log_message(
+        "",
+        job_id=job_id,
+        is_batch=is_batch_job,
+        which_untrusted="zip",
+        jobname=item_name,
+        timelabel="wait:",
+        elapsed_time=waittime,
     )
 
     # --------------------------------------------------------
@@ -207,18 +203,16 @@ def prepare_autograding_and_submission_zip(
     )
 
     if not os.path.exists(form_json_config):
-        autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
-            job_id,
-            message=f"ERROR: the form json file does not exist {form_json_config}"
+        config.logger.log_message(
+            f"ERROR: the form json file does not exist: {form_json_config}",
+            job_id=job_id
         )
-        raise RuntimeError(f"ERROR: the form json file does not exist {form_json_config}")
+        raise RuntimeError(f"ERROR: the form json file does not exist: {form_json_config}")
 
     if not os.path.exists(complete_config):
-        autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
-            job_id,
-            message=f"ERROR: the complete config file does not exist {complete_config}"
+        config.logger.log_message(
+            f"ERROR: the complete config file does not exist {complete_config}",
+            job_id=job_id
         )
         raise RuntimeError(f"ERROR: the complete config file does not exist {complete_config}")
 
@@ -246,7 +240,7 @@ def prepare_autograding_and_submission_zip(
 
     # Copy the default submitty_router into bin.
     router_path = os.path.join(
-        SUBMITTY_INSTALL_DIR,
+        config.submitty['submitty_install_dir'],
         'src',
         'grading',
         'python',
@@ -286,10 +280,9 @@ def prepare_autograding_and_submission_zip(
             if os.path.isfile(vcs_checkout_logfile):
                 shutil.move(vcs_checkout_logfile, tmp_logs)
             else:
-                autograding_utils.log_message(
-                    AUTOGRADING_LOG_PATH,
-                    job_id,
-                    message=f"ERROR: missing vcs_checkout.txt logfile {str(vcs_checkout_logfile)}"
+                config.logger.log_message(
+                    message=f"ERROR: missing vcs_checkout.txt logfile {str(vcs_checkout_logfile)}",
+                    job_id=job_id
                 )
 
     if "generate_output" not in obj:
@@ -299,22 +292,15 @@ def prepare_autograding_and_submission_zip(
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
     obj["job_id"] = job_id
+    obj["which_machine"] = machine_name
 
     with open(os.path.join(tmp_submission, "queue_file.json"), 'w') as outfile:
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
-    user_assignment_access_json = os.path.join(
-        SUBMITTY_DATA_DIR, "courses", obj["semester"], obj["course"],
-        "submissions", obj["gradeable"], obj["who"], "user_assignment_access.json")
     user_assignment_settings_json = os.path.join(
-        SUBMITTY_DATA_DIR, "courses", obj["semester"], obj["course"],
+        config.submitty['submitty_data_dir'], "courses", obj["semester"], obj["course"],
         "submissions", obj["gradeable"], obj["who"], "user_assignment_settings.json")
 
-    if os.path.exists(user_assignment_access_json):
-        shutil.copy(
-            user_assignment_access_json,
-            os.path.join(tmp_submission, "user_assignment_access.json")
-        )
     if os.path.exists(user_assignment_settings_json):
         shutil.copy(
             user_assignment_settings_json,
@@ -342,8 +328,8 @@ def prepare_autograding_and_submission_zip(
 
 # ==================================================================================
 # ==================================================================================
-def unpack_grading_results_zip(which_machine, which_untrusted, my_results_zip_file):
-    os.chdir(SUBMITTY_DATA_DIR)
+def unpack_grading_results_zip(config, which_machine, which_untrusted, my_results_zip_file):
+    os.chdir(config.submitty['submitty_data_dir'])
 
     queue_obj = unzip_queue_file(my_results_zip_file)
 
@@ -352,7 +338,7 @@ def unpack_grading_results_zip(which_machine, which_untrusted, my_results_zip_fi
 
     job_id = queue_obj["job_id"]
     course_dir = os.path.join(
-        SUBMITTY_DATA_DIR,
+        config.submitty['submitty_data_dir'],
         "courses",
         queue_obj["semester"],
         queue_obj["course"]
@@ -400,15 +386,28 @@ def unpack_grading_results_zip(which_machine, which_untrusted, my_results_zip_fi
 
     if "generate_output" not in queue_obj:
         # add information to the database
-        insert_database_version_data.insert_to_database(
-            queue_obj["semester"],
-            queue_obj["course"],
-            queue_obj["gradeable"],
-            queue_obj["user"],
-            queue_obj["team"],
-            queue_obj["who"],
-            True if queue_obj["is_team"] else False,
-            str(queue_obj["version"]))
+        try:
+            insert_database_version_data.insert_into_database(
+                config,
+                queue_obj["semester"],
+                queue_obj["course"],
+                queue_obj["gradeable"],
+                queue_obj["user"],
+                queue_obj["team"],
+                queue_obj["who"],
+                True if queue_obj["is_team"] else False,
+                str(queue_obj["version"])
+            )
+        except Exception:
+            config.logger.log_message(
+                message="ERROR: Could not score into database",
+                job_id=job_id,
+            )
+            config.logger.log_stack_trace(
+                trace=traceback.format_exc(),
+                job_id=job_id,
+            )
+            return False
 
     if "generate_output" not in queue_obj:
         is_batch_job = queue_obj["regrade"]
@@ -417,23 +416,20 @@ def unpack_grading_results_zip(which_machine, which_untrusted, my_results_zip_fi
 
         print(f'{which_machine} {which_untrusted} unzip {item_name} in {int(gradingtime)} seconds')
 
-        autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
-            job_id,
-            is_batch_job,
-            "unzip",
-            item_name,
-            "grade:",
-            gradingtime,
-            grade_result
+        config.logger.log_message(
+            grade_result,
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted="unzip",
+            jobname=item_name,
+            timelabel="grade:",
+            elapsed_time=gradingtime,
         )
     else:
         is_batch_job = queue_obj["regrade"]
-        autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
-            job_id,
-            is_batch_job,
-            message="Generated Output Successfully"
+        config.logger.log_message(
+            "Generated Output Successfully",
+            job_id=job_id, is_batch=is_batch_job,
         )
     return True
 

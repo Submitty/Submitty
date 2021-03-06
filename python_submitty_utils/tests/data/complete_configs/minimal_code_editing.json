@@ -1,12 +1,15 @@
 {
+    "auto_pts": 5,
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
             "**/*.class"
         ],
         "compilation_to_validation": [
-            "test*/STDOUT*.txt",
-            "test*/STDERR*.txt"
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "SubmissionLimit/STDOUT*.txt",
+            "SubmissionLimit/STDERR*.txt"
         ],
         "submission_to_compilation": [
             "**/*.cpp",
@@ -22,16 +25,17 @@
         ],
         "submission_to_validation": [
             "**/README.txt",
-            "input_*.txt",
-            "**/*.pdf"
+            "**/*.pdf",
+            ".user_assigment_access.json"
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "test*/*.txt",
-            "test*/*_diff.json",
+            "test01/*.txt",
+            "test01/*_diff.json",
+            "SubmissionLimit/*.txt",
+            "SubmissionLimit/*_diff.json",
             "**/README.txt",
             "input_*.txt",
-            "test*/input_*.txt",
             "**/dispatched_actions.txt",
             "test01/STDOUT.txt",
             "test01/STDERR.txt"
@@ -44,7 +48,28 @@
         "single_port_per_container": false,
         "use_router": false
     },
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
+    },
+    "gradeable_message": "",
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
+    "id": "minimal_code_editing",
+    "item_pool": [],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 100000,
+    "max_submissions": 20,
+    "points_visible": 5,
     "publish_actions": false,
+    "required_capabilities": "default",
+    "ta_pts": 0,
     "testcases": [
         {
             "containers": [
@@ -59,10 +84,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 5,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -74,6 +103,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test01",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Reasonable Code Changes",
             "use_router": false,
@@ -98,17 +129,18 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "max_submissions": 20,
             "penalty": -0.1,
             "points": -5,
-            "publish_actions": false,
-            "timestamped_stdout": false,
+            "testcase_id": "SubmissionLimit",
             "title": "Submission Limit",
             "type": "FileCheck"
         }
     ],
-    "timestamped_stdout": false
+    "timestamped_stdout": false,
+    "total_pts": 5
 }

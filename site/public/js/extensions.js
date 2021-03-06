@@ -19,7 +19,6 @@ function updateHomeworkExtension() {
         cache: false,
         contentType: false,
         success: function(data) {
-            console.log(data)
             try {
                 var json = JSON.parse(data);
             } catch(err) {

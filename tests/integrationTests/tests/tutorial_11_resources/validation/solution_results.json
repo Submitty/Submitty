@@ -1,8 +1,10 @@
 {
+    "automatic_grading_total": 9,
+    "nonhidden_automatic_grading_total": 9,
     "testcases": [
         {
             "points_awarded": 5,
-            "test_name": "Test 1 C++ - Compilation"
+            "test_name": "C++ - Compilation"
         },
         {
             "autochecks": [
@@ -14,11 +16,11 @@
                 }
             ],
             "points_awarded": 4,
-            "test_name": "Test 2 C++ - Execution"
+            "test_name": "C++ - Execution"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 3 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

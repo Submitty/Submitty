@@ -6,7 +6,7 @@ body {
     display: flex;
     background: var(--background-blue);
     color: var(--text-black);
-    overflow-x: hidden;
+    /*overflow-x: hidden;*/
 }
 
 #submitty-body {
@@ -47,7 +47,7 @@ nav a > i.f {
 }
 
 #home-button {
-    margin-right: 0px;
+    margin-right: 0;
 }
 
 #breadcrumbs {
@@ -60,8 +60,8 @@ nav a > i.f {
 }
 @media (max-width: 541px) {
     #breadcrumbs {
-        padding-left: 80px;
-        padding-right: 0px;
+        padding-left: 0;
+        padding-right: 0;
     }
 }
 
@@ -110,6 +110,7 @@ nav a > i.f {
 
 main {
     width: 100%;
+    min-width: 0;
     position: relative;
     min-width: 0;
 }
@@ -126,6 +127,10 @@ footer a {
 
 footer .footer-separator {
     padding: 0 8px;
+}
+
+#moorthy-duck{
+    display: block;
 }
 
 @media (max-width: 541px) {
