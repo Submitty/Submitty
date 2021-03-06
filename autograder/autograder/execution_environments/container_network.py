@@ -116,6 +116,7 @@ class Container():
             raise
         except Exception:
             self.log_function(f'ERROR: could not create container {self.full_name}')
+            client.close()
             raise
 
         self.log_meta(
