@@ -132,7 +132,6 @@ class BaseTestCase(unittest.TestCase):
 
         self.get(url)
         # print(self.driver.page_source)
-        self.assertIn(title, self.driver.title)
         self.driver.find_element(By.NAME, 'user_id').send_keys(user_id)
         self.driver.find_element(By.NAME, 'password').send_keys(user_password)
         self.driver.find_element(By.NAME, 'login').click()
