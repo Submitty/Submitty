@@ -2727,8 +2727,10 @@ class ElectronicGraderController extends AbstractController {
     private function getMarkStats(Mark $mark, User $grader) {
         $gradeable = $mark->getComponent()->getGradeable();
 
-        $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable);
-        $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark);
+        $anon = $this->amIBlindGrading($gradeable, $grader, false);
+
+        $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon);
+        $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark, $anon);
 
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
