@@ -43,19 +43,19 @@ class DatabaseRowIterator implements \Iterator {
 
     public function next() {
         if (!$this->valid()) {
-            return null;
+            return;
         }
         $this->key++;
         $this->result = $this->statement->fetch(\PDO::FETCH_ASSOC);
         if ($this->result === false) {
             $this->valid = false;
-            return null;
+            return;
         }
         $this->result = $this->database->transformResult($this->result, $this->columns);
         if ($this->callback !== null) {
+            /** @var mixed $this->result */
             $this->result = call_user_func($this->callback, $this->result);
         }
-        return $this->result;
     }
 
     public function key() {

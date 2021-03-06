@@ -13,7 +13,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 
   // ================================================================================
 
-  // WHITELIST : PROCESS_CONTROL
+  // SAFELIST : PROCESS_CONTROL
   ALLOW_SYSCALL(arch_prctl);
   ALLOW_SYSCALL(modify_ldt);
   ALLOW_SYSCALL(exit);
@@ -28,7 +28,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   ALLOW_SYSCALL(rt_sigprocmask);
   ALLOW_SYSCALL(getrlimit);
 
-  // WHITELIST : PROCESS_CONTROL_MEMORY
+  // SAFELIST : PROCESS_CONTROL_MEMORY
   ALLOW_SYSCALL(brk);
   ALLOW_SYSCALL(get_thread_area);
   ALLOW_SYSCALL(gettid);
@@ -67,7 +67,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(vfork);
   }
 
-  // WHITELIST : PROCESS_CONTROL_WAITING
+  // SAFELIST : PROCESS_CONTROL_WAITING
   ALLOW_SYSCALL(epoll_create);
   ALLOW_SYSCALL(epoll_create1);
   ALLOW_SYSCALL(epoll_ctl);
@@ -172,7 +172,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 
   // ================================================================================
 
-  // WHITELIST : FILE_MANAGEMENT
+  // SAFELIST : FILE_MANAGEMENT
   ALLOW_SYSCALL(access);
   ALLOW_SYSCALL(_llseek);
   ALLOW_SYSCALL(close);
@@ -300,7 +300,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 
   // ================================================================================
 
-  // WHITELIST : DEVICE_MANAGEMENT
+  // SAFELIST : DEVICE_MANAGEMENT
   ALLOW_SYSCALL(ioctl);
 
   // RESTRICTED : DEVICE_MANAGEMENT_ADVANCED
@@ -325,7 +325,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 
   // ================================================================================
 
-  // WHITELIST : INFORMATION_MAINTENANCE
+  // SAFELIST : INFORMATION_MAINTENANCE
   ALLOW_SYSCALL(clock_getres);
   ALLOW_SYSCALL(clock_gettime);
   ALLOW_SYSCALL(clock_nanosleep);
@@ -418,6 +418,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(sigpending);
     ALLOW_SYSCALL(sigreturn);
     ALLOW_SYSCALL(sigsuspend);
+    ALLOW_SYSCALL(rseq);
   }
 
   // RESTRICTED : COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION

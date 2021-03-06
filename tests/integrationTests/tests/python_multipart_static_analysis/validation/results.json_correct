@@ -1,5 +1,7 @@
 {
-   "testcases": [
+    "automatic_grading_total": 9,
+    "nonhidden_automatic_grading_total": 9,
+    "testcases": [
         {
             "autochecks": [
                 {
@@ -10,17 +12,17 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 1 Convert Temperature"
+            "test_name": "Convert Temperature"
         },
         {
             "points_awarded": 1,
-            "test_name": "Test 2 Legal Variable Names",
+            "test_name": "Legal Variable Names",
             "autochecks": [
-                 {
-                     "description": "Program Output",
-                     "difference_file": "test02/0_diff.json",
-                     "actual_file": "test02/part2/p2_sol.txt"
-                 }
+                {
+                    "description": "Program Output",
+                    "difference_file": "test02/0_diff.json",
+                    "actual_file": "test02/part2/p2_sol.txt"
+                }
             ]
         },
         {
@@ -33,7 +35,7 @@
                 }
             ],
             "points_awarded": 4,
-            "test_name": "Test 3 Volume and Area"
+            "test_name": "Volume and Area"
         },
         {
             "autochecks": [
@@ -45,12 +47,12 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 4 Count Odd"
-         },
-         {
-             "points_awarded": 0,
-             "test_name": "Test 5 Submission Limit",
-             "view_testcase": false
+            "test_name": "Count Odd"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
         }
     ]
 }

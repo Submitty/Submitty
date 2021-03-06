@@ -7,7 +7,6 @@ exclude=
     .setup/update_database.py,
     bin/extract_notes_page.py,
     bin/generate_repos.py,
-    bin/grading_done.py,
     bin/left_right_parse.py,
     bin/make_assignments_txt_file.py,
     bin/make_generated_output.py,
@@ -32,3 +31,6 @@ exclude=
     sbin/run_lichen_plagiarism.py,
     sbin/untrusted_canary.py,
     tests
+
+per-file-ignores =
+    .github/workflows/pr_title_tester.py:E501,W605

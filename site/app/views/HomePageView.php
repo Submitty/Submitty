@@ -30,14 +30,15 @@ class HomePageView extends AbstractView {
 
             //Create rank lists
             for ($i = 1; $i < 5; $i++) {
-                $ranks[$i] = [];
-                $ranks[$i]["title"] = $rank_titles[$i];
-                $ranks[$i]["courses"] = [];
+                $ranks[$i] = [
+                    'title' => $rank_titles[$i],
+                    'courses' => [],
+                ];
             }
 
             //Assemble courses into rank lists
             foreach ($course_type as $course) {
-                array_push($ranks[$course['user_group']]["courses"], $course);
+                $ranks[$course['user_group']]['courses'][] = $course;
             }
 
             //Filter any ranks with no courses
@@ -65,7 +66,16 @@ class HomePageView extends AbstractView {
             "is_superuser" => $is_superuser,
             "semesters" => $semesters,
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
-            "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements()
+            "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
+            "add_term_url" => $this->output->buildUrl(['term', 'new'])
+        ]);
+    }
+
+    public function showSystemUpdatePage(string $csrf_token): string {
+        $this->output->addBreadcrumb("System Update");
+        return $this->output->renderTwigTemplate('admin/SystemUpdate.twig', [
+            "csrf_token" => $csrf_token,
+            "latest_tag" => $this->core->getConfig()->getLatestTag()
         ]);
     }
 }

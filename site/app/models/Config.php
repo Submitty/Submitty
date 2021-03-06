@@ -37,6 +37,7 @@ use app\libraries\FileUtils;
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
  * @method string getCourseJsonPath()
+ * @method void setCourseLoaded(bool $loaded)
  * @method bool isCourseLoaded()
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
@@ -63,18 +64,19 @@ use app\libraries\FileUtils;
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
  * @method bool getQueueContactInfo()
+ * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
- * @method float getPollsPtsForCorrect()
- * @method float getPollsPtsForIncorrect()
  * @method void setSemester(string $semester)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
+ * @method string getSeekMessageInstructions()
  * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
+ * @method string getPhpUser()
  */
 
 class Config extends AbstractModel {
@@ -245,9 +247,13 @@ class Config extends AbstractModel {
     /** @prop @var bool */
     protected $queue_enabled;
     /** @prop @var bool */
+    protected $seek_message_enabled;
+    /** @prop @var bool */
     protected $queue_contact_info;
     /** @prop @var string */
     protected $queue_message;
+    /** @prop @var string */
+    protected $seek_message_instructions;
     /** @prop @var string */
     protected $queue_announcement_message;
     /** @prop @var string */
@@ -256,10 +262,6 @@ class Config extends AbstractModel {
     protected $duck_banner_enabled;
     /** @prop @var bool */
     protected $polls_enabled;
-    /** @prop @var float */
-    protected $polls_pts_for_correct;
-    /** @prop @var float */
-    protected $polls_pts_for_incorrect;
 
 
     /** @prop-read @var array */
@@ -267,6 +269,9 @@ class Config extends AbstractModel {
 
     /** @prop @var DateTimeFormat */
     protected $date_time_format;
+
+    /** @prop @var string */
+    protected $php_user;
 
     /**
      * Config constructor.
@@ -424,8 +429,12 @@ class Config extends AbstractModel {
         $this->latest_commit = $version_json['short_installed_commit'];
 
         $users_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty_users.json'));
-        if ($users_json !== false && isset($users_json['verified_submitty_admin_user'])) {
-            $this->verified_submitty_admin_user = $users_json['verified_submitty_admin_user'];
+        if ($users_json !== false) {
+            if (isset($users_json['verified_submitty_admin_user'])) {
+                $this->verified_submitty_admin_user = $users_json['verified_submitty_admin_user'];
+            }
+
+            $this->php_user = $users_json['php_user'];
         }
     }
 
@@ -454,8 +463,7 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'polls_enabled', 'polls_pts_for_correct',
-            'polls_pts_for_incorrect', 'queue_announcement_message'
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -480,11 +488,13 @@ class Config extends AbstractModel {
             'zero_rubric_grades',
             'display_rainbow_grades_summary',
             'display_custom_message',
-            'forum_enabled', 'regrade_enabled',
+            'forum_enabled',
+            'regrade_enabled',
             'seating_only_for_instructor',
             'queue_enabled',
             'queue_contact_info',
-            'polls_enabled'
+            'polls_enabled',
+            'seek_message_enabled',
         ];
         foreach ($array as $key) {
             $this->$key = (bool) $this->$key;

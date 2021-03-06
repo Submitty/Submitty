@@ -3,16 +3,22 @@
 <br>
 <div>
   <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()">
-    Filter Settings
+    Queue Settings
   </button>
   <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
     Edit Announcement
   </button>
-  <button id="auto_refresh_btn" class="btn btn-default filter_btn" type="button" onclick="toggleAutoRefresh()">
-    Turn On Auto Refresh
-  </button>
   <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
     Enable Notifications
+  </button>
+  <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
+    View Queue Stats
+  </a>
+  <button class="btn btn-default filter_btn enable-audible" title="Enable audible alert when queue changes" onclick="toggleAudibleAlert()">
+    <i class="fas fa-bell" ></i>
+  </button>
+  <button class="btn btn-default filter_btn disable-audible" title="Disable audible alert when queue changes" onclick="toggleAudibleAlert()">
+    <i class="fas fa-bell-slash"></i>
   </button>
 </div>
 
