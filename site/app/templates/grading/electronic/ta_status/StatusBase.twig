@@ -208,21 +208,6 @@
                     <li>Grade Inquiries</li>
                 {% endif %}
             </ul>
-            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
-                {% if overall_average == null or overall_average.getCount() == 0 %}
-                    {% if team_assignment %}
-                        <a class="btn btn-primary"
-                           href="{{ grade_url }}" style="float: right;">
-                            My Next Ungraded Team
-                        </a>
-                    {% else %}
-                        <a class="btn btn-primary"
-                           href="{{ grade_url }}" style="float: right;">
-                            My Next Ungraded Student
-                        </a>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
         {% endif %}
     </div>
     {# /Top Button #}

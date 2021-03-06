@@ -967,7 +967,7 @@ HTML;
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $highest_version,
+                $display_version,
                 $notebook,
                 $graded_gradeable->getSubmitter()->getId()
             );
@@ -1302,8 +1302,11 @@ HTML;
      */
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
+        $query = [];
+        parse_str(parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY), $query);
+        unset($query["gradeable_version"]);
         $version_change_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
-            . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getId()]) . '&gradeable_version=';
+            . http_build_query($query) . '&gradeable_version=';
         $onChange = "versionChange('{$version_change_url}', this)";
 
         $tables = [];

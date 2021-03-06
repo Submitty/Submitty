@@ -13,6 +13,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\PollUtils;
+use app\models\PollModel;
 
 class PollController extends AbstractController {
     public function __construct(Core $core) {
@@ -135,6 +136,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
@@ -152,7 +154,20 @@ class PollController extends AbstractController {
                 $answers[] = $_POST["option_id_" . $i];
             }
         }
-        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
+
+        if (count($answers) == 0) {
+            $this->core->addErrorMessage("Polls must have at least one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
+        $file_path = null;
+        if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
+            $file = $_FILES["image_file"];
+            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
+            move_uploaded_file($file["tmp_name"], $file_path);
+            $this->core->getQueries()->setPollImage($poll_id, $file_path);
+        }
 
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -329,6 +344,16 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+        $file_path = null;
+        if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
+            $file = $_FILES["image_file"];
+            $current_file_path = $this->core->getQueries()->getPoll($_POST["poll_id"])->getImagePath();
+            if ($current_file_path !== null) {
+                unlink($current_file_path);
+            }
+            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
+            move_uploaded_file($file["tmp_name"], $file_path);
+        }
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
@@ -346,8 +371,11 @@ class PollController extends AbstractController {
                 $answers[] = $_POST["option_id_" . $i];
             }
         }
-        $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
-
+        if (count($answers) == 0) {
+            $this->core->addErrorMessage("Polls must have at least one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders, $file_path);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
         );
@@ -362,6 +390,10 @@ class PollController extends AbstractController {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $image_path = $this->core->getQueries()->getPoll($_POST["poll_id"])->getImagePath();
+        if ($image_path !== null) {
+            unlink($image_path);
         }
         $this->core->getQueries()->deletePoll($_POST["poll_id"]);
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
