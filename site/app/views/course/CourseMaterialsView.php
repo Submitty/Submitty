@@ -3,6 +3,7 @@
 namespace app\views\course;
 
 use app\libraries\Core;
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\models\User;
 use app\views\AbstractView;
@@ -23,7 +24,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $folders, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link) {
+        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $folders, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link, &$authorized_by_allow_list) {
             $files[$start_dir_name] = [];
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
@@ -65,6 +66,10 @@ class CourseMaterialsView extends AbstractView {
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
+
+                        // Determine file authorization based on this file 'user_allow_list'
+                        $authorized_by_allow_list[$expected_file_path] = CourseMaterialsUtils::isUserAllowedByAllowList($json, $this->core->getUser()->getId(), $expected_file_path);
+
                         if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
                             $contents = json_decode(file_get_contents($expected_file_path));
                             $external_link[$expected_file_path] = [$contents->url, $contents->name];
@@ -128,6 +133,9 @@ class CourseMaterialsView extends AbstractView {
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
+                if ($releaseData === null) {
+                    $releaseData = '9998-01-01 00:00:00-000';
+                }
                 $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             }
 
@@ -148,6 +156,7 @@ class CourseMaterialsView extends AbstractView {
         $external_link = [];
         $priorities = [];
         $folders = [];
+        $authorized_by_allow_list = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
@@ -207,8 +216,8 @@ class CourseMaterialsView extends AbstractView {
             $restored["/course_materials/" . $key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
         }
         $priorities = $restored;
-        
-        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
+
+        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
@@ -240,7 +249,8 @@ class CourseMaterialsView extends AbstractView {
             "reg_sections" => $reg_sections,
             "file_sections" => $file_sections,
             "hide_from_students" => $hide_from_students,
-            "external_link" => $external_link
+            "external_link" => $external_link,
+            "authorized_by_allow_list" => $authorized_by_allow_list
         ]);
     }
 }

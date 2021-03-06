@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
+import unittest
 
 
 class TestForum(BaseTestCase):
@@ -35,11 +36,11 @@ class TestForum(BaseTestCase):
     def switch_to_page_view_thread(self):
         if '/threads/new' in self.driver.current_url:
             self.driver.find_element(By.XPATH, "//a[contains(text(),'Back to Threads')]").click()
-        elif '/threads' in self.driver.current_url:
+        elif '/forum' in self.driver.current_url:
             pass
         else:
             assert False
-        assert '/threads' in self.driver.current_url
+        assert '/forum' in self.driver.current_url
 
     def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
@@ -108,7 +109,7 @@ class TestForum(BaseTestCase):
         return len(icons) > 0
 
     def view_thread(self, title, return_info=False):
-        assert '/threads' in self.driver.current_url
+        assert '/forum' in self.driver.current_url
         assert self.thread_exists(title)
         div = self.driver.find_element(By.XPATH,
             "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
@@ -325,6 +326,7 @@ class TestForum(BaseTestCase):
         self.delete_thread(title2)
         assert not self.thread_exists(title3)
 
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_infinite_scroll(self):
         self.init_and_enable_discussion()
         list_title = []
