@@ -299,7 +299,7 @@ class NavigationView extends AbstractView {
      */
     private function hasGradeButton(Gradeable $gradeable): bool {
         $now = $this->core->getDateTimeNow();
-        $date_limitation = $gradeable->getGradeStartDate() <= $now || $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER;
+        $date_limitation = $gradeable->getGradeStartDate() <= $now || $this->core->getUser()->getGroup() <= User::GROUP_LIMITED_ACCESS_GRADER;
         // full access graders & instructors are allowed to view submissions of assignments with no manual grading
         $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->accessFullGrading();
 
