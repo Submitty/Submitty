@@ -68,6 +68,9 @@ class SecureExecutionEnvironment():
         if is_test_environment is False:
             self.SUBMITTY_INSTALL_DIR = config.submitty['submitty_install_dir']
 
+        self.config = config
+        self.logger = config.logger
+
     def _run_pre_commands(self, target_directory):
         """
         Run pre commands for a given directory. Currently only cp is supported.
@@ -81,14 +84,13 @@ class SecureExecutionEnvironment():
             if command == 'cp':
                 try:
                     autograding_utils.pre_command_copy_file(
+                        self.config,
                         source_testcase,
                         source_directory,
                         target_directory,
                         destination,
                         self.job_id,
                         self.tmp_logs,
-                        self.log_path,
-                        self.stack_trace_log_path
                     )
                 except Exception:
                     self.log_message(
@@ -138,12 +140,11 @@ class SecureExecutionEnvironment():
 
         if os.path.exists(provided_code_path):
             autograding_utils.copy_contents_into(
+                self.config,
                 self.job_id,
                 provided_code_path,
                 directory,
                 self.tmp_logs,
-                self.log_path,
-                self.stack_trace_log_path
             )
 
         # Copy compile.out to the current directory.
@@ -242,12 +243,11 @@ class SecureExecutionEnvironment():
         # Copy in test input files.
         test_input_path = os.path.join(self.tmp_work, 'test_input')
         autograding_utils.copy_contents_into(
+            self.config,
             self.job_id,
             test_input_path,
             directory,
             self.tmp_logs,
-            self.log_path,
-            self.stack_trace_log_path
         )
 
         if os.path.exists(self.random_input_directory):
@@ -256,7 +256,7 @@ class SecureExecutionEnvironment():
                 ["*.txt", ],
                 self.random_input_directory,
                 directory,
-                self.tmp_logs
+                self.tmp_logs,
             )
 
         # Copy runner.out to the current directory.
@@ -291,12 +291,11 @@ class SecureExecutionEnvironment():
 
         # Copy any instructor provided solution to the testcase folder
         autograding_utils.copy_contents_into(
+            self.config,
             self.job_id,
             self.instructor_solution_path,
             directory,
             self.tmp_logs,
-            self.log_path,
-            self.stack_trace_log_path
         )
 
         # Fix permissions on the solution code.
@@ -318,12 +317,11 @@ class SecureExecutionEnvironment():
         # generation code lives right now)
         # TODO: Should we separate out input from the instructor_solution directory?
         autograding_utils.copy_contents_into(
+            self.config,
             self.job_id,
             self.instructor_solution_path,
             self.random_input_directory,
             self.tmp_logs,
-            self.log_path,
-            self.stack_trace_log_path
         )
 
         # copy run.out to the current directory
@@ -473,8 +471,7 @@ class SecureExecutionEnvironment():
 
     def log_message(self, message):
         """ A useful wrapper for the atuograding_utils.log_message function. """
-        autograding_utils.log_message(
-            self.log_path,
+        self.logger.log_message(
             job_id=self.job_id,
             is_batch=self.is_batch,
             which_untrusted=self.untrusted_user,
@@ -483,8 +480,7 @@ class SecureExecutionEnvironment():
 
     def log_stack_trace(self, trace):
         """ A useful wrapper for the atuograding_utils.log_message function. """
-        autograding_utils.log_stack_trace(
-            self.stack_trace_log_path,
+        self.logger.log_stack_trace(
             job_id=self.job_id,
             is_batch=self.is_batch,
             which_untrusted=self.untrusted_user,

@@ -5,18 +5,35 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 
+/**
+ *
+ * Class PollModel
+ *
+ * @method int getId()
+ * @method string getName()
+ * @method string getQuestion()
+ * @method array getAnswers()
+ * @method array getUserResponses()
+ * @method string|null getImagePath()
+ */
 class PollModel extends AbstractModel {
+    /** @prop-read int */
     protected $id;
+    /** @prop-read string */
     protected $name;
+    /** @prop-read string */
     protected $question;
     protected $responses;
+    /** @prop-read array */
     protected $answers;
-    protected $open;
+    /** @prop-read array */
     protected $user_responses;
     protected $release_date;
     protected $status;
+    /** @prop-read string|null */
+    protected $image_path;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date) {
+    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
@@ -26,18 +43,7 @@ class PollModel extends AbstractModel {
         $this->status = $status;
         $this->user_responses = $user_responses;
         $this->release_date = $release_date;
-    }
-
-    public function getID() {
-        return $this->id;
-    }
-
-    public function getName() {
-        return $this->name;
-    }
-
-    public function getQuestion() {
-        return $this->question;
+        $this->image_path = $image_path;
     }
 
     public function getResponses() {
@@ -64,10 +70,6 @@ class PollModel extends AbstractModel {
         return $this->status == "ended";
     }
 
-    public function getUserResponses() {
-        return $this->user_responses;
-    }
-
     public function getUserResponse($user_id) {
         if (!isset($this->user_responses[$user_id])) {
             return null;
@@ -88,13 +90,6 @@ class PollModel extends AbstractModel {
 
     public function isCorrect($response) {
         return in_array($response, $this->getResponses()) && in_array($response, $this->answers);
-    }
-
-    public function getScore($user_id) {
-        if (!isset($this->user_responses[$user_id])) {
-            return 0.0;
-        }
-        return $this->isCorrect($this->user_responses[$user_id]) ? (float) $this->core->getConfig()->getPollsPtsForCorrect() : (float) $this->core->getConfig()->getPollsPtsForIncorrect();
     }
 
     public function isInPast() {
