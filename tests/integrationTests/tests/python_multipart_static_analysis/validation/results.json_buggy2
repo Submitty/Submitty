@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 3,
+    "nonhidden_automatic_grading_total": 3,
     "testcases": [
         {
             "autochecks": [
@@ -19,7 +21,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Convert Temperature"
+            "test_name": "Convert Temperature"
         },
         {
             "autochecks": [
@@ -36,7 +38,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Legal Variable Names"
+            "test_name": "Legal Variable Names"
         },
         {
             "autochecks": [
@@ -66,7 +68,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 3 Volume and Area"
+            "test_name": "Volume and Area"
         },
         {
             "autochecks": [
@@ -87,11 +89,11 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 4 Count Odd"
+            "test_name": "Count Odd"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 5 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

@@ -4,6 +4,8 @@ import os
 import tempfile
 import subprocess
 
+from .test_office_hours_queue import enableQueue
+
 
 class TestAccessibility(BaseTestCase):
     """
@@ -78,6 +80,10 @@ class TestAccessibility(BaseTestCase):
         self.log_out()
         self.log_in(user_id='instructor')
         self.click_class('sample')
+
+        # Enables the office hours queue
+        enableQueue(self)
+
         with open(self.baseline_path, encoding="utf8") as f:
             baseline = json.load(f)
 
@@ -97,9 +103,17 @@ class TestAccessibility(BaseTestCase):
                     for error in json.loads(error_json)['messages']:
                         # For some reason the test fails to detect this even though when you actually look at the rendered
                         # pages this error is not there. So therefore the test is set to just ignore this error.
-                        if error['message'].startswith("Start tag seen without seeing a doctype first"):
-                            continue
-                        if error['message'].startswith("Possible misuse of “aria-label”"):
+                        skip_messages = [
+                        "Start tag seen without seeding a doctype first",
+                        "Possible misuse of “aria-label”",
+                        "The “date” input type is not supported in all browsers."
+                        ]
+                        skip_error = False
+                        for skip_msg in skip_messages:
+                            if error['message'].startswith(skip_msg):
+                                skip_error = True
+                                break
+                        if skip_error:
                             continue
 
                         if error['message'] not in baseline[self.urls[url_index]] and error['message'] not in foundErrorMessages:

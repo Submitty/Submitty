@@ -25,8 +25,12 @@
         "queue_enabled": false,
         "queue_contact_info": false,
         "queue_message": "",
+        "queue_announcement_message": "",
         "polls_enabled": false,
         "polls_pts_for_correct": 1.0,
-        "polls_pts_for_incorrect": 0.0
+        "polls_pts_for_incorrect": 0.0,
+        "seek_message_enabled": false,
+        "seek_message_instructions": "Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.",
+        "git_autograding_branch": "main"
     }
 }

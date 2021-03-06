@@ -1,0 +1,31 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-profile-photo-form{% endblock %}
+{% block title %}Edit Profile Photo{% endblock %}
+{% block body %}
+    <p class="std-margin">
+    You may upload a passport-style photograph of yourself for display to course teaching staff.
+    This is helpful for learning the names of students in large courses and improving your
+    educational experience.
+    </p>
+    <p class="std-margin">
+    NOTE: This feature is NOT for avatars, memes, etc.  Your instructors and the system
+    administrators reserve the right to remove profile photos that do not meet
+    educational purposes.
+    </p>
+    <div class="flex-col" id="user_settings_modal">
+        <input type="hidden" name="csrf_token" id="user-profile-photo-csrf" value="{{ csrf_token }}" />
+        <label for="user-image-button">
+        <h2>My Profile Photo</h2>
+        </label>
+        <input type="file" name="user_image" id="user-image-button" accept="image/*">
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" enctype="multipart/form-data" onsubmit="return updateUserProfilePhoto();" >
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

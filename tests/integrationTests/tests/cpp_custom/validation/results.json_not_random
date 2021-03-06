@@ -1,8 +1,10 @@
 {
+    "automatic_grading_total": 18,
+    "nonhidden_automatic_grading_total": 18,
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Compilation"
+            "test_name": "Compilation"
         },
         {
             "autochecks": [
@@ -12,7 +14,7 @@
                 }
             ],
             "points_awarded": 8,
-            "test_name": "Test 2 Sum of 5 random numbers"
+            "test_name": "Sum of 5 random numbers"
         },
         {
             "autochecks": [
@@ -22,7 +24,7 @@
                 }
             ],
             "points_awarded": 6,
-            "test_name": "Test 3 Sum of 10 random numbers"
+            "test_name": "Sum of 10 random numbers"
         },
         {
             "autochecks": [
@@ -42,11 +44,11 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+            "test_name": "Is it random?  (Is it different on each run?)"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 5 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

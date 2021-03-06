@@ -8,13 +8,13 @@ use app\models\Notification;
 use app\models\Email;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
-     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
@@ -25,7 +25,7 @@ class GradeInquiryController extends AbstractController {
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
-            return null;
+            return JsonResponse::getFailResponse("Could not find gradeable associated with " . $gradeable_id);
         }
 
         if (!$gradeable->isRegradeOpen()) {
@@ -36,7 +36,7 @@ class GradeInquiryController extends AbstractController {
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
-            return null;
+            return JsonResponse::getFailResponse("No graded gradeable found for submitter");
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
@@ -49,8 +49,10 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -109,10 +111,13 @@ class GradeInquiryController extends AbstractController {
         $grade_inquiry_id = $grade_inquiry->getId();
 
         try {
-            $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
+            $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content, $gc_id);
+            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
+            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
+
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id, 'new_post' => $new_post])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -125,6 +130,63 @@ class GradeInquiryController extends AbstractController {
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }
+    }
+
+    /**
+     * @param $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
+     */
+    public function getSingleGradeInquiryPost($gradeable_id) {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        //TODO: look into why these aren't getting sent by websockets
+        if (!isset($_POST['submitter_id']) || !isset($_POST['post_id']) || !isset($_POST['gc_id'])) {
+            return "";
+        }
+
+        $gc_id = intval($_POST['gc_id']);
+        $submitter_id = $_POST['submitter_id'];
+        $post_id = $_POST['post_id'];
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if (!$gradeable) {
+            return "";
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if (!$graded_gradeable) {
+            return "";
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            return "";
+        }
+
+        $user = $this->core->getUser();
+        $can_inquiry = $this->core->getAccess()->canI(
+            "grading.electronic.grade_inquiry",
+            ['graded_gradeable' => $graded_gradeable]
+        );
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
+            return "";
+        }
+
+        $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
+        if (is_null($grade_inquiry)) {
+            return "";
+        }
+
+        $new_post = $this->core->getQueries()->getRegradePost($post_id);
+        if ($new_post === null || $new_post['regrade_id'] !== $grade_inquiry->getId()) {
+            return "";
+        }
+
+        return new WebResponse(
+            ['submission', 'Homework'],
+            'renderSingleGradeInquiryPost',
+            $new_post,
+            $graded_gradeable
+        );
     }
 
     /**
@@ -183,11 +245,13 @@ class GradeInquiryController extends AbstractController {
             $grade_inquiry->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
             if ($content != "") {
-                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
+                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'toggle_status', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -203,6 +267,29 @@ class GradeInquiryController extends AbstractController {
     }
 
     /**
+     * @param $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function getGradeInquiryDiscussion($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'];
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['submission', 'Homework'],
+                'showRegradeDiscussion',
+                $graded_gradeable,
+                true
+            )
+        );
+    }
+
+    /**
      * Helper function to create notification/email content and aggregate recipients
      * @param GradedGradeable $graded_gradeable
      * @param int $gradeable_id
@@ -211,13 +298,15 @@ class GradeInquiryController extends AbstractController {
      * @param int|null $gc_id
      */
     private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id) {
+        $component = "";
+        $component_title = "";
+        $component_string = "";
         if ($graded_gradeable->hasTaGradingInfo()) {
             $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
             $graders = $ta_graded_gradeable->getVisibleGraders();
             $submitter = $graded_gradeable->getSubmitter();
             $user_id = $this->core->getUser()->getId();
             $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
-
             $graders = [];
             if (!is_null($gc_id)) {
                 $component = $graded_gradeable->getGradeable()->getComponent($gc_id);

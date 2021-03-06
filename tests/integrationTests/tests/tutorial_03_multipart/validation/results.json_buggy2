@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
     "testcases": [
         {
             "autochecks": [
@@ -24,7 +26,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Part 1 Compute square root"
+            "test_name": "Part 1 Compute square root"
         },
         {
             "autochecks": [
@@ -50,7 +52,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Part 2 Solve for x^2 + 5x + 6 = 0"
+            "test_name": "Part 2 Solve for x^2 + 5x + 6 = 0"
         },
         {
             "autochecks": [
@@ -76,11 +78,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 3 Part 3 Count from 1 to 10"
+            "test_name": "Part 3 Count from 1 to 10"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 4 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

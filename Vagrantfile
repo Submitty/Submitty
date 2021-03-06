@@ -34,13 +34,12 @@ end
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
-mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
-bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
+VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
-  raise 'vagrant-vbguest is not installed!'
+  raise 'vagrant-vbguest is not installed! To install, run: vagrant plugin install vagrant-vbguest'
 end
 
 Vagrant.configure(2) do |config|
@@ -52,12 +51,9 @@ Vagrant.configure(2) do |config|
   # Our primary development target, this is what RPI uses as of Fall 2018
   config.vm.define 'ubuntu-18.04', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
-    # TODO: remove the private_network after some time and everyone has
-    # safely transitioned to the new forwarded port
-    ubuntu.vm.network 'private_network', ip: '192.168.56.111'
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
-
   end
 
   config.vm.provider 'virtualbox' do |vb|
@@ -78,7 +74,7 @@ Vagrant.configure(2) do |config|
     # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
-    
+
   config.vm.provider "vmware_desktop" do |vm|
     vm.vmx["memsize"] = "2048"
     vm.vmx["numvcpus"] = "2"

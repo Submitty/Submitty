@@ -9,6 +9,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -78,15 +79,7 @@ class AutogradingConfigController extends AbstractController {
             );
         }
 
-        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
-        $counter = count(scandir($target_dir)) - 1;
-        $try_dir = FileUtils::joinPaths($target_dir, $counter);
-        while (is_dir($try_dir)) {
-            $counter++;
-            $try_dir = FileUtils::joinPaths($target_dir, $counter);
-        }
-        $target_dir = $try_dir;
-        FileUtils::createDir($target_dir);
+        $target_dir = $this->createConfigDirectory();
 
         if (mime_content_type($upload["tmp_name"]) == "application/zip") {
             $zip = new \ZipArchive();
@@ -123,12 +116,30 @@ class AutogradingConfigController extends AbstractController {
         $this->core->addSuccessMessage($msg);
         return new MultiResponse(
             JsonResponse::getSuccessResponse([
-                'config_name' => $counter,
                 'config_path' => $target_dir
             ]),
             null,
             new RedirectResponse($redirect_url)
         );
+    }
+
+    /**
+     * Generates a new configuration directory in the course's 'config_upload' directory.  The name for the new
+     * directory starts at '1' with additional created directories being named incrementally.
+     *
+     * @return string The absolute path to/including the new directory
+     */
+    public function createConfigDirectory(): string {
+        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+        $counter = count(scandir($target_dir)) - 1;
+        $try_dir = FileUtils::joinPaths($target_dir, $counter);
+        while (is_dir($try_dir)) {
+            $counter++;
+            $try_dir = FileUtils::joinPaths($target_dir, $counter);
+        }
+        $target_dir = $try_dir;
+        FileUtils::createDir($target_dir);
+        return $target_dir;
     }
 
     /**
@@ -229,51 +240,5 @@ class AutogradingConfigController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getFailResponse("Config path can't be empty.")
         );
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}", methods={"GET"})
-     * @param string $g_id Gradeable ID
-     * @AccessControl(role="INSTRUCTOR")
-     */
-    public function notebookBuilder(string $g_id) {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-
-        // Load JS and CSS dependencies
-        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/form-options-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
-        $this->core->getOutput()->addInternalCss('notebook-builder.css');
-
-        $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
-            'gradeable' => $gradeable
-        ]);
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/save", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
-     */
-    public function notebookBuilderSave(): JsonResponse {
-        $result = $this->uploadConfig();
-
-        if ($result->json_response->json['status'] === 'success') {
-            $config_path = $result->json_response->json['data']['config_path'];
-
-            // Update current gradeable to use this new configuration
-            $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
-            $gradeable->setAutogradingConfigPath($config_path);
-            $this->core->getQueries()->updateGradeable($gradeable);
-
-            // Rebuild
-            $admin_gradeable_controller = new AdminGradeableController($this->core);
-            $admin_gradeable_controller->enqueueBuild($gradeable);
-        }
-
-        return $result->json_response;
     }
 }

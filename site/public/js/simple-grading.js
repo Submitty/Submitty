@@ -196,6 +196,9 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
             else elem.css("background-color", "");
 
+            //set new grader data
+            elem.data("grader", $('#data-table').data('current-grader'));
+
             // create border we can animate to reflect ajax status
             elem.css("border-right", "60px solid #ddd");
         }
@@ -228,7 +231,10 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem = $(elem);
                     elem.animate({"border-right-width": "0px"}, 400); // animate the box
                     elem.attr("data-score", elem.data("score"));      // update the score
+                    elem.attr("data-grader", elem.data("grader"));    // update new grader
+                    elem.find('.simple-grade-grader').text(elem.data("grader"));
                 });
+                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id"), 'score':elems.data('score'), 'grader': elems.data('grader')});
             } else {
                 console.log("Save error: returned data:", returned_vals, "does not match expected new data:", expected_vals);
                 elems.each(function(idx, elem) {
@@ -430,11 +436,10 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-        row_el.find(".cell-total").each(function() {
-            this.value = total;
-        });
+      let id = this.id;
+      let value = this.value;
 
-        submitAJAX(
+      submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
@@ -443,13 +448,10 @@ function setupNumericTextCells() {
                 'scores': scores
             },
             function() {
-                elem.css("background-color", "#ffffff");                                     // change the color
-                elem.attr("value", this.value);                                              // Stores the new input value
-                row_el.children("td.option-small-output").each(function() {
-                    $(this).children(".option-small-box").each(function() {
-                        $(this).attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
-                    });
-                });
+              // Finds the element that stores the total and updates it to reflect increase
+              if (row_el.find(".cell-total").text() != total)
+                row_el.find(".cell-total").text(total).hide().fadeIn("slow");
+              window.socketClient.send({'type': "update_numeric", 'elem': id, 'value': value, 'total': total});
             },
             function() {
                 elem.css("background-color", "#ff7777");
@@ -623,7 +625,7 @@ function setupSimpleGrading(action) {
 
     // refocus on the input field by pressing enter
     $(document).on("keyup", function(event) {
-        if(event.keyCode == 13 && !dont_hotkey_focus) {
+        if(event.code === "Enter" && !dont_hotkey_focus) {
             $("#student-search-input").focus();
         }
     });
@@ -663,24 +665,24 @@ function setupSimpleGrading(action) {
         var input_cell = $("input.cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
-        if(event.keyCode == 37 && (!input_cell.length || (
+        if(event.code === "ArrowLeft" && (!input_cell.length || (
                 input_cell[0].selectionStart == 0 &&
                 input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
             event.preventDefault();
             movement("left");
         }
-        else if(event.keyCode == 38) {
+        else if(event.code === "ArrowUp") {
             event.preventDefault();
             movement("up");
         }
         // if there is no selection OR there is a selection to the far right with 0 length
-        else if(event.keyCode == 39 && (!input_cell.length || (
+        else if(event.code === "ArrowRight" && (!input_cell.length || (
                 input_cell[0].selectionEnd == input_cell[0].value.length &&
                 input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
             event.preventDefault();
             movement("right");
         }
-        else if(event.keyCode == 40) {
+        else if(event.code === "ArrowDown") {
             event.preventDefault();
             movement("down");
         }
@@ -745,7 +747,7 @@ function setupSimpleGrading(action) {
 
     // when pressing enter in the search bar, go to the corresponding element
     $("#student-search-input").on("keyup", function(event) {
-        if(event.keyCode == 13) { // Enter
+        if(event.code == "Enter") { // Enter
             this.blur();
             var value = $(this).val();
             if(value != "") {
@@ -827,6 +829,61 @@ function setupSimpleGrading(action) {
             sticky.addClass("sticky-top");
         }
     });
-
     // search bar code ends here
+  initSocketClient();
+}
+
+function initSocketClient() {
+  window.socketClient = new WebSocketClient();
+  window.socketClient.onmessage = (msg) => {
+    switch (msg.type) {
+      case "update_checkpoint":
+        checkpointSocketHandler(msg.elem, msg.score, msg.grader);
+        break;
+      case "update_numeric":
+        numericSocketHandler(msg.elem, msg.value, msg.total)
+        break;
+      default:
+        console.log('Undefined message received');
+    }
+  };
+  let gradeable_id = window.location.pathname.split("gradeable/")[1].split('/')[0];
+  window.socketClient.open(gradeable_id);
+}
+
+function checkpointSocketHandler(elem_id, score, grader) {
+  let elem = $('#' + elem_id);
+  elem.data('score', score);
+  elem.attr("data-score", score);
+  elem.data('grader', grader);
+  elem.attr("data-grader", grader);
+  elem.find('.simple-grade-grader').text(grader);
+  switch (score) {
+    case 1.0:
+      elem.css("background-color", "#149bdf");
+      break;
+    case 0.5:
+      elem.css("background-color", "#88d0f4")
+      break;
+    default:
+      elem.css("background-color", "")
+  }
+  elem.css("border-right", "60px solid #ddd");
+  elem.animate({"border-right-width": "0px"}, 400);
+}
+
+function numericSocketHandler(elem_id, value, total) {
+  let elem = $('#' + elem_id);
+  elem.data('origval', value);
+  elem.attr('data-origval', value);
+  elem.val(value);
+  elem.css("background-color", "white");
+  if(value == 0) {
+    elem.css("color", "#bbbbbb");
+  }
+  else{
+    elem.css("color", "");
+  }
+  if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
+    elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
 }

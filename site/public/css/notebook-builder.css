@@ -15,11 +15,7 @@
 
 .heading-container {
     display: flex;
-    align-items: center;
-}
-
-.heading-container h3 {
-    margin-right: 5px;
+    justify-content: space-between;
 }
 
 .widget-main {
@@ -70,19 +66,52 @@
 .markdown-widget textarea {
     width: 100%;
     margin-right: 10px;
-    height: 100px;
+    min-height: 75px;
 }
 
 /**
  * Short answer widget styles
  */
 .short-answer-widget .interactive-container {
-    align-items: center;
+    flex-direction: column;
 }
 
-.short-answer-widget .rows-input {
-    width: 60px;
-    text-align: right;
+.short-answer-widget .basic-options {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.short-answer-widget .type-options {
+    display:flex;
+}
+
+.short-answer-widget .type-options :first-child {
+    margin-right: 15px;
+}
+
+.short-answer-widget .initial-value-div {
+    max-width: 1000px;
+}
+
+.short-answer-widget .initial-value-msg {
+    margin-bottom: 10px;
+}
+
+.short-answer-widget hr {
+    width: 90%;
+    align-self: center;
+}
+
+.short-answer-widget i {
+    font-size: 80%;
+}
+
+.CodeMirror {
+    background-color: var(--standard-input-background) !important;
+    border: 1px solid var(--standard-light-gray) !important;
+    border-radius: 4px !important;
+    vertical-align: middle !important;
 }
 
 /**
@@ -138,8 +167,49 @@
 }
 
 /**
+ * Image widget styles
+ */
+.image-widget .interactive-container {
+    flex-direction: column;
+}
+
+.image-widget .image-container {
+    text-align: center;
+}
+
+.image-widget img {
+    max-width: 50%;
+}
+
+.image-widget .image-options {
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.image-widget .image-col-small {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.image-widget .image-col-large {
+    flex: 7
+}
+
+.image-widget .image-options input,
+.image-widget .image-options textarea {
+    display: block;
+    width: 100%;
+}
+
+/**
  * Form options widget styles
  */
+.form-options-widget {
+    border: 3px solid #F7D8BA;
+    background-color: #F7D8BA;
+}
+
 .form-options-widget,
 .form-options-widget .interactive-container {
     flex-direction: column;
@@ -148,4 +218,64 @@
 .form-options-widget .buttons {
     display: flex;
     margin-bottom: 15px;
+}
+
+/**
+ * Itempool item widget styles
+ */
+.itempool-widget,
+.itempool-selector {
+    border: 3px solid #CAF1DE;
+    background-color: #CAF1DE;
+}
+
+.itempool-widget .selector-widget,
+.itempool-widget .multiple-choice-widget,
+.itempool-widget .image-widget,
+.itempool-widget .markdown-widget,
+.itempool-widget .short-answer-widget {
+    border: 3px solid #CAF1DE;
+    background-color: #CAF1DE;
+}
+
+.itempool-widget .group-buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.itempool-widget .interactive-container {
+    flex-direction: column;
+}
+
+.itempool-widget .selector-widget {
+    padding: 5px 20px;
+}
+
+.itempool-widget .selector-widget .interactive-container {
+    flex-direction: row;
+}
+
+.itempool-widget .multiple-choice-widget .interactive-container {
+    flex-direction: row;
+}
+
+/**
+ * Notebook item widget styles
+ */
+.item-widget .interactive-container {
+    flex-direction: column;
+}
+
+.item-widget .item-options {
+    display: flex;
+    justify-content: space-between;
+}
+
+.item-widget p {
+    margin: 10px 0;
+}
+
+.item-widget .from-pool-div label {
+    float: left;
+    clear: both;
 }

@@ -1,0 +1,31 @@
+{% include('officeHoursQueue/QueueFilter.twig') %}
+{% include('officeHoursQueue/QueueAnnouncement.twig') %}
+<br>
+<div>
+  <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()">
+    Queue Settings
+  </button>
+  <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
+    Edit Announcement
+  </button>
+  <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
+    Enable Notifications
+  </button>
+  <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/stats">
+    View Queue Stats
+  </a>
+  <button class="btn btn-default filter_btn enable-audible" title="Enable audible alert when queue changes" onclick="toggleAudibleAlert()">
+    <i class="fas fa-bell" ></i>
+  </button>
+  <button class="btn btn-default filter_btn disable-audible" title="Disable audible alert when queue changes" onclick="toggleAudibleAlert()">
+    <i class="fas fa-bell-slash"></i>
+  </button>
+</div>
+
+<style>
+  {% for color in viewer.getColors() %}
+    .row_color_{{loop.index0}}{
+      background: {{color}}!important;
+    }
+  {% endfor %}
+</style>

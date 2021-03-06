@@ -298,14 +298,16 @@ class NavigationView extends AbstractView {
      * @return bool
      */
     private function hasGradeButton(Gradeable $gradeable): bool {
+        $now = $this->core->getDateTimeNow();
+        $date_limitation = $gradeable->getGradeStartDate() <= $now || $this->core->getUser()->getGroup() <= User::GROUP_LIMITED_ACCESS_GRADER;
         // full access graders & instructors are allowed to view submissions of assignments with no manual grading
         $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->accessFullGrading();
 
         // limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
-        $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
+        $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup() && $date_limitation;
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $date_limitation && $gradeable->isPeerGrading() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;
@@ -405,7 +407,12 @@ class NavigationView extends AbstractView {
 
         $points_percent = NAN;
 
-        $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        if ($gradeable->hasAutogradingConfig() && $gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($this->core->getUser()->getId())) {
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'load_gradeable_message']);
+        }
+        else {
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        }
         $progress = null;
         $disabled = false;
 
@@ -729,11 +736,12 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getDeleteButton(Gradeable $gradeable) {
+        $name = addslashes($gradeable->getTitle());
         return new Button($this->core, [
             "title" => "Delete Gradeable",
             "href" => "javascript:newDeleteGradeableForm('" .
                 $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
-                . "', '{$gradeable->getTitle()}');",
+                . "', '{$name}');",
             "class" => "fas fa-trash fa-fw black-btn",
             "title_on_hover" => true,
             "aria_label" => "Delete {$gradeable->getTitle()}"
@@ -786,13 +794,24 @@ class NavigationView extends AbstractView {
             }
         }
         elseif ($list_section === GradeableList::CLOSED) {
-            $button = new Button($this->core, [
-                "subtitle" => "OPEN TO GRADING NOW",
-                "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
-                    . http_build_query(['action' => 'open_grading_now']),
-                "class" => "btn btn-primary btn-nav btn-nav-open",
-                "name" => "quick-link-btn"
-            ]);
+            if ($gradeable->isTaGrading()) {
+                $button = new Button($this->core, [
+                    "subtitle" => "OPEN TO GRADING NOW",
+                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                        . http_build_query(['action' => 'open_grading_now']),
+                    "class" => "btn btn-primary btn-nav btn-nav-open",
+                    "name" => "quick-link-btn"
+                ]);
+            }
+            else {
+                $button = new Button($this->core, [
+                    "subtitle" => "RELEASE GRADES NOW",
+                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                        . http_build_query(['action' => 'release_grades_now']),
+                    "class" => "btn btn-primary btn-nav btn-nav-open",
+                    "name" => "quick-link-btn"
+                ]);
+            }
         }
         elseif ($list_section === GradeableList::OPEN) {
             $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'

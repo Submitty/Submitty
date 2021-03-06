@@ -74,15 +74,16 @@ use Doctrine\Common\Annotations\Annotation;
  */
 class AccessControl {
     /**
-     * @var string "INSTRUCTOR", "FULL_ACCESS_GRADER", "LIMITED_
+     * @var string|null "INSTRUCTOR", "FULL_ACCESS_GRADER", "LIMITED_
      * ACCESS_GRADER" or "STUDENT".
      */
-    private $role = null;
+    private $role;
 
-    /**
-     * @var string
-     */
-    private $permission = null;
+    /** @var string|null "SUPERUSER"|"FACULTY"|"USER" */
+    private $level;
+
+    /** @var string|null */
+    private $permission;
 
     /**
      * AccessControl constructor.
@@ -100,10 +101,9 @@ class AccessControl {
     }
 
     /**
-     * @param string $role
      * @throws \InvalidArgumentException
      */
-    public function setRole($role) {
+    public function setRole(string $role): void {
         $role = strtoupper($role);
         if (
             in_array(
@@ -119,28 +119,45 @@ class AccessControl {
             $this->role = $role;
         }
         else {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException("Invalid role: ${role}");
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getRole() {
+    public function getRole(): ?string {
         return $this->role;
     }
 
     /**
-     * @param string $permission
+     * @throws \InvalidArgumentException
      */
-    public function setPermission($permission) {
+    public function setLevel(string $level): void {
+        $level = strtoupper($level);
+        if (
+            in_array(
+                $level,
+                [
+                    "SUPERUSER",
+                    "FACULTY",
+                    "USER"
+                ]
+            )
+        ) {
+            $this->level = $level;
+        }
+        else {
+            throw new \InvalidArgumentException("Invalid level: ${level}");
+        }
+    }
+
+    public function getLevel(): ?string {
+        return $this->level;
+    }
+
+    public function setPermission(string $permission): void {
         $this->permission = $permission;
     }
 
-    /**
-     * @return string
-     */
-    public function getPermission() {
+    public function getPermission(): ?string {
         return $this->permission;
     }
 }

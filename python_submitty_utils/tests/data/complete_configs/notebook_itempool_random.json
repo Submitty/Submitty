@@ -1,15 +1,35 @@
 {
-    "assignment_message": "#Welcome To My Favorite Notebook Gradeable\n  \n  This message will appear in a blue box at the top of the page.",
+    "auto_pts": 0,
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
             "**/*.class",
-            "test01/cpp_prime.out"
+            "test08/cpp_prime.out"
         ],
         "compilation_to_validation": [
-            "test*/STDOUT*.txt",
-            "test*/STDERR*.txt",
-            "test01/cpp_prime.out"
+            "SubmissionLimit/STDOUT*.txt",
+            "SubmissionLimit/STDERR*.txt",
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "test02/STDOUT*.txt",
+            "test02/STDERR*.txt",
+            "test03/STDOUT*.txt",
+            "test03/STDERR*.txt",
+            "test04/STDOUT*.txt",
+            "test04/STDERR*.txt",
+            "test05/STDOUT*.txt",
+            "test05/STDERR*.txt",
+            "test06/STDOUT*.txt",
+            "test06/STDERR*.txt",
+            "test07/STDOUT*.txt",
+            "test07/STDERR*.txt",
+            "test08/STDOUT*.txt",
+            "test08/STDERR*.txt",
+            "test09/STDOUT*.txt",
+            "test09/STDERR*.txt",
+            "test10/STDOUT*.txt",
+            "test10/STDERR*.txt",
+            "test08/cpp_prime.out"
         ],
         "submission_to_compilation": [
             "*.txt",
@@ -32,18 +52,18 @@
             "test*/*.txt",
             "test*/*_diff.json",
             "test01/math_1.txt",
-            "test01/math_2.txt",
-            "test01/math_3.txt",
-            "test01/math_4.txt",
-            "test01/animal_1.txt",
-            "test01/animal_2.txt",
-            "test01/animal_3.txt",
-            "test01/STDERR.txt",
-            "test01/STDOUT.txt",
-            "test02/STDOUT.txt",
-            "test02/STDERR.txt",
-            "test01/STDOUT.txt",
-            "test01/STDERR.txt"
+            "test02/math_2.txt",
+            "test03/math_3.txt",
+            "test04/math_4.txt",
+            "test05/animal_1.txt",
+            "test06/animal_2.txt",
+            "test07/animal_3.txt",
+            "test08/STDERR.txt",
+            "test08/STDOUT.txt",
+            "test09/STDOUT.txt",
+            "test09/STDERR.txt",
+            "test10/STDOUT.txt",
+            "test10/STDERR.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -53,7 +73,16 @@
         "single_port_per_container": false,
         "use_router": false
     },
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
+    },
+    "gradeable_message": "#Welcome To My Favorite Notebook Gradeable\n  \n  This message will appear in a blue box at the top of the page.",
     "hide_submitted_files": true,
+    "hide_version_and_test_details": false,
+    "id": "notebook_itempool_random",
     "item_pool": [
         {
             "item_name": "math_1",
@@ -63,6 +92,7 @@
                     "type": "markdown"
                 },
                 {
+                    "allow_multiple": false,
                     "choices": [
                         {
                             "description": "`2`",
@@ -86,6 +116,7 @@
                         }
                     ],
                     "filename": "math_1.txt",
+                    "randomize_order": false,
                     "testcase_ref": "math_1",
                     "type": "multiple_choice"
                 }
@@ -102,9 +133,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -116,6 +151,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test01",
                     "testcase_label": "math_1",
                     "timestamped_stdout": false,
                     "title": "Math 1",
@@ -131,7 +167,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -143,6 +180,7 @@
                     "type": "markdown"
                 },
                 {
+                    "allow_multiple": false,
                     "choices": [
                         {
                             "description": "`3`",
@@ -166,6 +204,7 @@
                         }
                     ],
                     "filename": "math_2.txt",
+                    "randomize_order": false,
                     "testcase_ref": "math_2",
                     "type": "multiple_choice"
                 }
@@ -182,9 +221,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -196,6 +239,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test02",
                     "testcase_label": "math_2",
                     "timestamped_stdout": false,
                     "title": "Math 2",
@@ -211,7 +255,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -243,6 +288,7 @@
                         }
                     ],
                     "filename": "math_3.txt",
+                    "randomize_order": false,
                     "testcase_ref": "math_3",
                     "type": "multiple_choice"
                 }
@@ -259,9 +305,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -273,6 +323,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test03",
                     "testcase_label": "math_3",
                     "timestamped_stdout": false,
                     "title": "Math 3",
@@ -288,7 +339,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -345,9 +397,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -359,6 +415,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test04",
                     "testcase_label": "math_4",
                     "timestamped_stdout": false,
                     "title": "Math 4",
@@ -375,7 +432,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -395,6 +453,8 @@
                 },
                 {
                     "filename": "animal_1.txt",
+                    "initial_value": "",
+                    "rows": 0,
                     "testcase_ref": "animal_1",
                     "type": "short_answer"
                 }
@@ -411,9 +471,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -425,6 +489,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test05",
                     "testcase_label": "animal_1",
                     "timestamped_stdout": false,
                     "title": "Animal 1",
@@ -440,7 +505,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -461,6 +527,7 @@
                 {
                     "filename": "animal_2.txt",
                     "initial_value": "hint, I say OINK",
+                    "rows": 0,
                     "testcase_ref": "animal_2",
                     "type": "short_answer"
                 }
@@ -477,9 +544,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -491,6 +562,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test06",
                     "testcase_label": "animal_2",
                     "timestamped_stdout": false,
                     "title": "Animal 2",
@@ -506,7 +578,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -526,6 +599,8 @@
                 },
                 {
                     "filename": "animal_3.txt",
+                    "initial_value": "",
+                    "rows": 0,
                     "testcase_ref": "animal_3",
                     "type": "short_answer"
                 }
@@ -542,9 +617,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -556,6 +635,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test07",
                     "testcase_label": "animal_3",
                     "timestamped_stdout": false,
                     "title": "Animal 3",
@@ -571,7 +651,8 @@
                             "show_expected": "never",
                             "show_message": "always"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -584,6 +665,8 @@
                 },
                 {
                     "filename": "author.txt",
+                    "initial_value": "",
+                    "rows": 0,
                     "type": "short_answer"
                 }
             ],
@@ -636,11 +719,15 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
                     "executable_name": "cpp_prime.out",
+                    "extra_credit": false,
+                    "hidden": false,
                     "points": 1,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -652,6 +739,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test08",
                     "testcase_label": "prime_cpp_compilation",
                     "timestamped_stdout": false,
                     "title": "C++ Code for Primes -- Compilation",
@@ -682,7 +770,8 @@
                             "show_actual": "on_failure",
                             "show_message": "on_failure"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 },
                 {
                     "containers": [
@@ -697,10 +786,14 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "points": 4,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -712,6 +805,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test09",
                     "testcase_label": "prime_cpp_testing",
                     "timestamped_stdout": false,
                     "title": "C++ Code for Primes -- Testing",
@@ -735,7 +829,8 @@
                             "show_actual": "on_failure",
                             "show_message": "on_failure"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         },
@@ -750,6 +845,7 @@
                     "filename": "python_codebox.py",
                     "initial_value": "for i in range(2, 100):\n\n\n\n    print(i)",
                     "programming_language": "python",
+                    "rows": 10,
                     "testcase_ref": "python_prime",
                     "type": "short_answer"
                 }
@@ -768,9 +864,13 @@
                             "server": false
                         }
                     ],
+                    "details": "",
                     "dispatcher_actions": [],
+                    "extra_credit": false,
+                    "hidden": false,
                     "pre_commands": [],
                     "publish_actions": false,
+                    "release_hidden_details": false,
                     "single_port_per_container": false,
                     "solution_containers": [
                         {
@@ -782,6 +882,7 @@
                             "server": false
                         }
                     ],
+                    "testcase_id": "test10",
                     "testcase_label": "prime_python",
                     "timestamped_stdout": false,
                     "title": "Python Code for Primes",
@@ -805,11 +906,19 @@
                             "show_actual": "on_failure",
                             "show_message": "on_failure"
                         }
-                    ]
+                    ],
+                    "view_testcase_message": true
                 }
             ]
         }
     ],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 100000,
+    "max_submissions": 20,
     "notebook": [
         {
             "markdown_string": "#Instructions\n  \n  Here's a short list of instructions:\n  * This is an open-book quiz.\n  * You have 20 minutes to submit your answers.\n",
@@ -826,15 +935,24 @@
                 "math_3"
             ],
             "item_label": "Math Problem",
+            "non_hidden_non_extra_credit_points": 3,
             "points": 3,
-            "type": "item"
+            "type": "item",
+            "user_item_map": {
+                "aphacker": 2,
+                "instructor": 0,
+                "student": 1
+            }
         },
         {
             "from_pool": [
                 "math_4"
             ],
+            "item_label": "",
+            "non_hidden_non_extra_credit_points": 5,
             "points": 5,
-            "type": "item"
+            "type": "item",
+            "user_item_map": {}
         },
         {
             "markdown_string": "#At the Zoo!",
@@ -847,8 +965,14 @@
                 "animal_3"
             ],
             "item_label": "Animal FIRST",
+            "non_hidden_non_extra_credit_points": 2,
             "points": 2,
-            "type": "item"
+            "type": "item",
+            "user_item_map": {
+                "aphacker": 2,
+                "instructor": 0,
+                "student": 1
+            }
         },
         {
             "from_pool": [
@@ -857,8 +981,10 @@
                 "animal_3"
             ],
             "item_label": "Animal SECOND",
+            "non_hidden_non_extra_credit_points": 2,
             "points": 2,
-            "type": "item"
+            "type": "item",
+            "user_item_map": {}
         },
         {
             "markdown_string": "#Story Time!\n  *Note: the problems in this section will not be auto-graded*",
@@ -868,13 +994,21 @@
             "from_pool": [
                 "author"
             ],
-            "type": "item"
+            "item_label": "",
+            "non_hidden_non_extra_credit_points": 0,
+            "points": 0,
+            "type": "item",
+            "user_item_map": {}
         },
         {
             "from_pool": [
                 "haiku"
             ],
-            "type": "item"
+            "item_label": "",
+            "non_hidden_non_extra_credit_points": 0,
+            "points": 0,
+            "type": "item",
+            "user_item_map": {}
         },
         {
             "markdown_string": "#Hour of Code!",
@@ -886,19 +1020,31 @@
                 "python_code"
             ],
             "item_label": "JUST CODE",
+            "non_hidden_non_extra_credit_points": 5,
             "points": 5,
-            "type": "item"
+            "type": "item",
+            "user_item_map": {
+                "aphacker": 0,
+                "instructor": 0,
+                "student": 1
+            }
         }
     ],
+    "part_names": [],
+    "points_visible": 0,
     "publish_actions": false,
+    "required_capabilities": "default",
+    "ta_pts": 0,
     "testcases": [
         {
             "max_submissions": 20,
             "penalty": 0,
             "points": 0,
+            "testcase_id": "SubmissionLimit",
             "title": "Submission Limit",
             "type": "FileCheck"
         }
     ],
-    "timestamped_stdout": false
+    "timestamped_stdout": false,
+    "total_pts": 0
 }

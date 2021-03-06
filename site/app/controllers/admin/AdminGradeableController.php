@@ -10,6 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -123,32 +124,8 @@ class AdminGradeableController extends AbstractController {
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
 
-        $saved_config_path = $gradeable->getAutogradingConfigPath();
-
         // These are hard coded default config options.
-        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
-        $default_config_paths = [
-            ['PROVIDED: upload_only (1 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
-            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
-            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
-            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
-            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
-            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
-            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
-            ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
-            ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload/config')],
-            ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload_3page/config')]
-        ];
+        $default_config_paths = $gradeable->getDefaultConfigPaths();
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
@@ -207,6 +184,29 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // Get the list of itempool questions in this gradeable which are multi-valued (and hence randomized)
+        $itempool_options = [];
+        // read config file
+
+        if ($gradeable->hasAutogradingConfig()) {
+            $gradeable_config = $gradeable->getAutogradingConfig();
+            $notebook_config = $gradeable_config->getNotebookConfig();
+
+
+            // loop through the notebook key, and find from_pool key in each object (or question)
+            foreach ($notebook_config as $key => $item) {
+                // store those question which are having count(from_pool array) > 1
+                if (isset($item['from_pool']) && count($item['from_pool']) > 1) {
+                    $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
+                    if (!isset($itempool_options[$item_id])) {
+                        $itempool_options[$item_id] = $item['from_pool'];
+                    }
+                    else {
+                        $itempool_options[$item_id . '_' . $key] = $item['from_pool'];
+                    }
+                }
+            }
+        }
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -214,7 +214,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
-            $this->core->getOutput()->addInternalCss('ta-grading.css');
+            $this->core->getOutput()->addInternalCss('electronic.css');
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
@@ -245,6 +245,8 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
+            'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
+            'itempool_options' => json_encode($itempool_options),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
             'type_string' => $type_string,
@@ -263,18 +265,23 @@ class AdminGradeableController extends AbstractController {
             'csrf_token' => $this->core->getCsrfToken(),
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
-            'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()])
+            'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
+            'hidden_files' => $gradeable->getHiddenFiles()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
-        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableEditPeersForm', $gradeable);
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableAddPeersForm', $gradeable);
     }
 
     /**
+     * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with
+     *  the grader's new students.
+     * @param String $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function adminGradeablePeerSubmit($gradeable_id) {
+    public function editGraderPeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
         //if entire grader row is removed, just remove grader and their students
         if (!empty($_POST['remove_grader'])) {
@@ -286,29 +293,35 @@ class AdminGradeableController extends AbstractController {
             $grading_assignment_for_grader = $tmp[$gradeable_id];
             foreach ($grading_assignment_for_grader as $i => $student_id) {
                 if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
-                    if ($this->core->getQueries()->getUserById($student_id) == null) {
-                        $this->core->addErrorMessage("{$student_id} is not a valid student");
-                    }
-                    else {
-                        $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
-                    }
+                    $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                 }
             }
-            //then, add new students
+            // then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
-                if (in_array($student_id, $grading_assignment_for_grader)) {
-                    $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
-                }
-                elseif ($this->core->getQueries()->getUserById($student_id) == null) {
-                    $this->core->addErrorMessage("{$student_id} is not a valid student");
-                }
-                else {
-                    $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
-                }
+                $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
         }
+        // return new peer assignments to AJAX success
         $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
-        $this->core->getOutput()->renderJsonSuccess($new_peers);
+        return JsonResponse::getSuccessResponse($new_peers);
+    }
+
+    /**
+     * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the
+     * database with the grader's new students.
+     * @param String $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function newGraderPeerSubmit($gradeable_id) {
+        $new_grader_id = $_POST['new_grader_id'];
+        // add the new grader and all their students
+        foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+            $this->core->getQueries()->insertPeerGradingAssignment($new_grader_id, $student_id, $gradeable_id);
+        }
+        // return new peer assignments to AJAX success
+        $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+        return JsonResponse::getSuccessResponse($new_peers);
     }
 
     /* Http request methods (i.e. ajax) */
@@ -318,40 +331,40 @@ class AdminGradeableController extends AbstractController {
      */
     private function shufflePeerGrading(Gradeable $gradeable) {
         if ($gradeable->isPeerGrading()) {
-            $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
-            $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
-            if ($make_peer_assignments) {
-                $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
+            //$old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
+            //$make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
+            //if ($make_peer_assignments) {
+            $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
 
-                $users = $this->core->getQueries()->getAllUsers();
-                $user_ids = [];
-                $grading = [];
-                $peer_grade_set = $gradeable->getPeerGradeSet();
-                foreach ($users as $key => $user) {
-                    // Need to remove non-student users, or users in the NULL section
-                    if ($user->getRegistrationSection() == null) {
-                        unset($users[$key]);
-                    }
-                    else {
-                        $user_ids[] = $user->getId();
-                        $grading[$user->getId()] = [];
-                    }
+            $users = $this->core->getQueries()->getAllUsers();
+            $user_ids = [];
+            $grading = [];
+            $peer_grade_set = $gradeable->getPeerGradeSet();
+            foreach ($users as $key => $user) {
+                // Need to remove non-student users, or users in the NULL section
+                if ($user->getRegistrationSection() == null) {
+                    unset($users[$key]);
                 }
-                $user_number = count($user_ids);
-                shuffle($user_ids);
-                for ($i = 0; $i < $user_number; $i++) {
-                    for ($j = 1; $j <= $peer_grade_set; $j++) {
-                        $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
-                    }
+                else {
+                    $user_ids[] = $user->getId();
+                    $grading[$user->getId()] = [];
                 }
+            }
+            $user_number = count($user_ids);
+            shuffle($user_ids);
+            for ($i = 0; $i < $user_number; $i++) {
+                for ($j = 1; $j <= $peer_grade_set; $j++) {
+                    $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
+                }
+            }
 
-                foreach ($grading as $grader => $assignment) {
-                    foreach ($assignment as $student) {
-                        $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
-                    }
+            foreach ($grading as $grader => $assignment) {
+                foreach ($assignment as $student) {
+                    $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
                 }
             }
         }
+        //}
     }
 
     private function newComponent(Gradeable $gradeable) {
@@ -367,7 +380,9 @@ class AdminGradeableController extends AbstractController {
             'text' => false,
             'peer' => false,
             'order' => -1,
-            'page' => Component::PDF_PAGE_NONE
+            'page' => Component::PDF_PAGE_NONE,
+            'is_itempool_linked' => false,
+            'itempool' => ""
         ]);
     }
 
@@ -818,17 +833,24 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        $repo_name = '';
+
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
+            $subdir = '';
 
-            // Find which radio button is pressed and what host type to use
             $host_type = -1;
+            // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
+                $repo_name = $details['id'];
+                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
+                $repo_name = $details['vcs_url'];
+                $subdir = $details['vcs_url'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -837,15 +859,6 @@ class AdminGradeableController extends AbstractController {
                 $host_type = 3;
             }
 
-            $subdir = '';
-            // Submitty hosted -> this gradeable subdirectory
-            if ($host_type === 0) {
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
-            }
-            // Submitty hosted -> custom url
-            if ($host_type === 1) {
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
-            }
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
@@ -898,7 +911,10 @@ class AdminGradeableController extends AbstractController {
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true
+                'late_submission_allowed' => true,
+                'hidden_files' => "",
+                'limited_access_blind' => 1,
+                'peer_blind' => 3
             ]);
         }
         else {
@@ -914,6 +930,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
                 'has_due_date' => false,
+                'hidden_files' => ""
             ]);
         }
 
@@ -928,7 +945,8 @@ class AdminGradeableController extends AbstractController {
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
             'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
+            'grade_inquiry_start_date' => (clone $tonight)->add(new \DateInterval('P15D')),
+            'grade_inquiry_due_date' => (clone $tonight)->add(new \DateInterval('P21D'))
         ]);
 
         // Finally, construct the gradeable
@@ -954,9 +972,17 @@ class AdminGradeableController extends AbstractController {
         // start the build
         $build_status = $this->enqueueBuild($gradeable);
 
-        $config = $this->core->getConfig();
-        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+        if (
+            $build_status == null
+            && $gradeable->isVcs()
+            && ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1)
+            && !$gradeable->isTeamAssignment()
+        ) {
+            $this->enqueueGenerateRepos(
+                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getCourse(),
+                $repo_name
+            );
         }
 
         return $build_status;
@@ -1113,7 +1139,6 @@ class AdminGradeableController extends AbstractController {
             throw new ValidationException('', $errors);
         }
         $this->core->getQueries()->updateGradeable($gradeable);
-
         // Only return updated properties if the changes were applied
         return $updated_properties;
     }
@@ -1237,7 +1262,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
-    public function ajaxGetBuildLogs($gradeable_id) {
+    public function getBuildLogs(string $gradeable_id): JsonResponse {
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
@@ -1245,13 +1270,13 @@ class AdminGradeableController extends AbstractController {
         $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
         $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
 
-        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
+        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output,$make_output]);
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
-    public function getBuildStatusOfGradeable($gradeable_id) {
+    public function getBuildStatusOfGradeable(string $gradeable_id): void {
         $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
@@ -1266,6 +1291,18 @@ class AdminGradeableController extends AbstractController {
         else {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
             $status = $gradeable->hasAutogradingConfig();
+
+            // Check for schema validation errors and return a different status if needed.
+            if ($status) {
+                $logs = $this->getBuildLogs($gradeable_id);
+
+                $needle = 'The submitty configuration validator detected the above error in your config.';
+                $haystack = $logs->json['data'][0];
+
+                if (strpos($haystack, $needle) !== false) {
+                    $status = 'warnings';
+                }
+            }
         }
         clearstatcache();
         $this->core->getOutput()->renderJsonSuccess($status);

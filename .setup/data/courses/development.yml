@@ -20,7 +20,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: choice_of_language
@@ -41,7 +42,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_buggy_custom
@@ -62,7 +64,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_cats
@@ -83,7 +86,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: cpp_custom
@@ -104,7 +108,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_hidden_tests
@@ -125,7 +130,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_provided_code
@@ -146,7 +152,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_simple_lab
@@ -167,7 +174,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_random_input_output
@@ -188,7 +196,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: early_submission_incentive
@@ -209,7 +218,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: iclicker_upload
@@ -230,7 +240,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: image_diff_mirror
@@ -251,7 +262,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: input_output_subdirectories
@@ -272,7 +284,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: left_right_exam_seating
@@ -293,7 +306,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: matlab
@@ -314,7 +328,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: minimal_code_editing
@@ -335,7 +350,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_basic
@@ -356,7 +372,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_custom_file
@@ -419,7 +436,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1012 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_itempool
@@ -440,7 +458,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1012 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_itempool_random
@@ -461,7 +480,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1012 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_time_limit
@@ -482,7 +502,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: pdf_exam
@@ -503,7 +524,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: pdf_word_count
@@ -524,7 +546,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: python_linehighlight
@@ -545,7 +568,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: python_multipart_static_analysis
@@ -566,7 +590,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: python_simple_homework
@@ -587,7 +612,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: python_random_input_output
@@ -608,7 +634,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: test_notes_upload
@@ -629,7 +656,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: test_notes_upload_3page
@@ -650,7 +678,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: upload_only
@@ -671,7 +700,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: python_custom_validation
@@ -692,5 +722,6 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0

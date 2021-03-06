@@ -186,21 +186,24 @@ CREATE TABLE public.electronic_gradeable (
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
     eg_student_submit boolean NOT NULL,
-    eg_peer_grading boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
     eg_has_due_date boolean DEFAULT true NOT NULL,
     eg_late_days integer DEFAULT '-1'::integer NOT NULL,
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
-    eg_peer_grade_set integer DEFAULT 0 NOT NULL,
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
-    eg_regrade_request_date timestamp(6) with time zone NOT NULL,
+    eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
+    eg_limited_access_blind integer DEFAULT 1,
+    eg_peer_blind integer DEFAULT 3,
+    eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
+    eg_hidden_files character varying(1024),
+    CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
+    CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
-    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone))
@@ -290,6 +293,41 @@ CREATE TABLE public.gradeable (
 
 
 --
+-- Name: gradeable_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_access (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    accessor_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT access_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: gradeable_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.gradeable_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gradeable_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.gradeable_access_id_seq OWNED BY public.gradeable_access.id;
+
+
+--
 -- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -306,7 +344,9 @@ CREATE TABLE public.gradeable_component (
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
-    gc_page integer NOT NULL
+    gc_page integer NOT NULL,
+    gc_is_itempool_linked boolean DEFAULT false NOT NULL,
+    gc_itempool character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -465,6 +505,7 @@ ALTER SEQUENCE public.gradeable_data_overall_comment_goc_id_seq OWNED BY public.
 CREATE TABLE public.gradeable_teams (
     team_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
+    anon_id character varying(255),
     registration_section character varying(255),
     rotating_section integer
 );
@@ -599,6 +640,18 @@ CREATE TABLE public.peer_assign (
 
 
 --
+-- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_feedback (
+    grader_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    feedback character varying(255)
+);
+
+
+--
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -706,14 +759,15 @@ CREATE TABLE public.queue (
     queue_code text NOT NULL,
     user_id text NOT NULL,
     name text NOT NULL,
-    time_in timestamp without time zone NOT NULL,
-    time_help_start timestamp without time zone,
-    time_out timestamp without time zone,
+    time_in timestamp with time zone NOT NULL,
+    time_out timestamp with time zone,
     added_by text NOT NULL,
     help_started_by text,
     removed_by text,
     contact_info text,
-    last_time_in_queue timestamp with time zone
+    last_time_in_queue timestamp with time zone,
+    time_help_start timestamp with time zone,
+    paused boolean DEFAULT false NOT NULL
 );
 
 
@@ -863,7 +917,8 @@ CREATE TABLE public.sections_rotating (
 
 CREATE TABLE public.seeking_team (
     g_id character varying(255) NOT NULL,
-    user_id character varying NOT NULL
+    user_id character varying NOT NULL,
+    message character varying
 );
 
 
@@ -876,6 +931,20 @@ CREATE TABLE public.sessions (
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
     session_expires timestamp(6) with time zone NOT NULL
+);
+
+
+--
+-- Name: solution_ta_notes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.solution_ta_notes (
+    g_id character varying(255) NOT NULL,
+    component_id integer NOT NULL,
+    solution_notes text NOT NULL,
+    author character varying NOT NULL,
+    edited_at timestamp with time zone NOT NULL,
+    itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -993,6 +1062,7 @@ CREATE TABLE public.users (
     last_updated timestamp(6) with time zone,
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
+    registration_subsection character varying(255),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1013,6 +1083,13 @@ CREATE TABLE public.viewed_responses (
 --
 
 ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nextval('public.categories_list_category_id_seq'::regclass);
+
+
+--
+-- Name: gradeable_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access ALTER COLUMN id SET DEFAULT nextval('public.gradeable_access_id_seq'::regclass);
 
 
 --
@@ -1152,6 +1229,14 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 ALTER TABLE ONLY public.grade_override
     ADD CONSTRAINT grade_override_pkey PRIMARY KEY (user_id, g_id);
+
+
+--
+-- Name: gradeable_access gradeable_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
 
 
 --
@@ -1320,6 +1405,14 @@ ALTER TABLE ONLY public.notifications
 
 ALTER TABLE ONLY public.peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: peer_feedback peer_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
 
 
 --
@@ -1597,6 +1690,38 @@ ALTER TABLE ONLY public.grade_override
 
 
 --
+-- Name: gradeable_access gradeable_access_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_access gradeable_access_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
+
+
+--
+-- Name: gradeable_access gradeable_access_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: gradeable_component_data gradeable_component_data_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1853,6 +1978,30 @@ ALTER TABLE ONLY public.peer_assign
 
 
 --
+-- Name: peer_feedback peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_feedback peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_feedback peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: poll_options poll_options_poll_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1994,6 +2143,22 @@ ALTER TABLE ONLY public.seeking_team
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_author_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_author_fk FOREIGN KEY (author) REFERENCES public.users(user_id);
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_g_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_g_id_fk FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
 
 
 --

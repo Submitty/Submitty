@@ -2,6 +2,7 @@
 
 namespace app\models\notebook;
 
+use app\exceptions\NotebookException;
 use app\models\notebook\Notebook;
 use app\libraries\Core;
 use app\libraries\Utils;
@@ -38,13 +39,20 @@ class UserSpecificNotebook extends Notebook {
         $json = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $core->getConfig()->getCoursePath(),
-                "config/complete_config",
-                "complete_config_" . $gradeable_id . ".json"
+                "config/build",
+                "build_" . $gradeable_id . ".json"
             )
         );
 
         if ($json !== false && isset($json['item_pool'])) {
             $this->item_pool = $json['item_pool'];
+
+            // Verify that all items in the item pool have defined an 'item_name'
+            foreach ($this->item_pool as $item) {
+                if (!isset($item['item_name'])) {
+                    throw new NotebookException('An item pool item was found to be missing the required "item_name" field.  Please rebuild the gradeable.');
+                }
+            }
         }
 
         $this->gradeable_id = $gradeable_id;
@@ -66,15 +74,28 @@ class UserSpecificNotebook extends Notebook {
         $seen_items = [];
         $tests = [];
 
+        $item_ref = 0;
+
         foreach ($raw_notebook as $notebook_cell) {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
                 //see if theres a target item pool and replace this with the actual notebook
                 $tgt_item = $this->getItemFromPool($notebook_cell);
+                $points = $notebook_cell["points"] ?? 0;
 
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {
+                    for ($i = 0; $i < count($item_data['notebook']); $i++) {
+                        $item_data['notebook'][$i]["item_ref"] = $item_ref;
+                    }
+                    $item_ref++;
                     $new_notebook = array_merge($new_notebook, $item_data['notebook']);
                     $test_cases = $item_data['testcases'] ?? [];
+                    // TODO: This method of checking should be replaced once we have a more strict
+                    //  definition of how points are defined.
+                    if (count($test_cases) > 0 && isset($test_cases[0]["points"]) === false) {
+                        $test_cases[0]["points"] = $points;
+                    }
+
                     $tests = array_merge($tests, $test_cases);
                 }
 
@@ -109,7 +130,11 @@ class UserSpecificNotebook extends Notebook {
      */
     private function getItemFromPool(array $item): string {
         $item_label = $item['item_label'];
-        $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
+        //if user-mapping is available use the mentioned index
+        $selected = $item["user_item_map"][$this->user_id] ?? null;
+        // else get the index by hashing
+        $selected = $selected ?? $this->getNotebookHash($item_label, count($item['from_pool']));
+
         $item_from_pool = $item['from_pool'][$selected];
         $this->selected_questions[] = $item_from_pool;
 
@@ -124,13 +149,13 @@ class UserSpecificNotebook extends Notebook {
      * @return int the index of the question to select
      */
     private function getNotebookHash(string $item_label, int $from_pool_count): int {
-    
+
         $gid = $this->gradeable_id;
         $uid = $this->user_id;
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
+
         $hash = hexdec(substr(md5("{$item_label}|{$gid}|{$uid}|{$semester}|{$course}"), 24, 8));
 
         $selected = $hash % $from_pool_count;
@@ -142,6 +167,7 @@ class UserSpecificNotebook extends Notebook {
     /**
      * Given an item_pool name return all associated notebook values and their testcases
      * @param string $tgt_name the name of the item_pool to search for
+     * @return array
      */
     private function searchForItemPool(string $tgt_name): array {
         $ret = ["notebook" => [], "testcases" => []];
@@ -154,5 +180,9 @@ class UserSpecificNotebook extends Notebook {
         }
 
         return $ret;
+    }
+
+    public function getTestCases(): array {
+        return $this->test_cases;
     }
 }

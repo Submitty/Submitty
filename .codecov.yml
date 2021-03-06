@@ -10,8 +10,9 @@ coverage:
     project:
       default: false
       migrator:
-        flags: migrator
-        target: 100%
+        flags:
+          - migrator
+        target: 99%
     patch: false
     changes: false
 

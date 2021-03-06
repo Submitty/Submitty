@@ -83,7 +83,7 @@ class Team extends AbstractModel {
      * @return string
      */
     public function getAnonId() {
-        if (empty($this->core->getQueries()->getTeamAnonId($this->getId()))) {
+        if (empty($this->core->getQueries()->getTeamAnonId($this->getId())) || $this->core->getQueries()->getTeamAnonId($this->getId())[$this->getId()] === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $anon_ids = $this->core->getQueries()->getAllAnonIds();
             $alpha_length = strlen($alpha) - 1;

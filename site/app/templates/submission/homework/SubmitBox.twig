@@ -1,10 +1,8 @@
 {% import _self as self %}
 
-{% from 'notebook/Notebook.twig' import renderNotebook as renderNotebook %}
-
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
+    <div class='content gradeable_message markdown'>{{ gradeable_message | markdown }}</div>
 {% endif %}
 
 {% if has_overridden_grades %}
@@ -22,7 +20,20 @@
             {% endif %}
         </h1>
         {% if has_due_date %}
-            <h2>Due: {{ due_date|date(date_time_format) }}</h2>
+            {% set diff_time_zone = server_time_zone_string != user_time_zone_string %}
+
+            <div id="gradeable-info-due-dates">
+                <h2>
+                    Due: {{ due_date|date(date_time_format) }}
+                    {% if diff_time_zone %}
+                        <i>(Local Time)</i>
+                    {% endif %}
+                </h2>
+
+                {% if diff_time_zone %}
+                    <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
+                {% endif %}
+            </div>
         {% endif %}
         <div class="loading-bar-wrapper">
             <span>Upload progress: <span id="loading-bar-percentage"></span></span>
@@ -255,7 +266,17 @@
     {% else %}
 
     {% if is_notebook %}
-        {{ renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version,max_file_uploads, old_files) }}
+        {% include 'notebook/Notebook.twig' with {
+            "notebook": notebook,
+            "testcase_messages" : testcase_messages,
+            "image_data" : image_data,
+            "numberUtils" : numberUtils,
+            "student_id" : student_id,
+            "gradeable_id" : gradeable_id,
+            "highest_version" : highest_version,
+            "max_file_uploads" : max_file_uploads,
+            "old_files" : old_files
+        } %}
     {% endif %}
 
         {# File upload boxes #}
@@ -342,16 +363,6 @@
             var highest_version = {{ highest_version }};
             for (var i = 1; i <= num_parts; i++ ){
                 initializeDropZone("upload" + String(i));
-            }
-
-
-            function initializeDropZone(id){
-                var dropzone = document.getElementById(id);
-                dropzone.addEventListener("click", clicked_on_box, false);
-                dropzone.addEventListener("dragenter", draghandle, false);
-                dropzone.addEventListener("dragover", draghandle, false);
-                dropzone.addEventListener("dragleave", draghandle, false);
-                dropzone.addEventListener("drop", drop, false);
             }
 
 

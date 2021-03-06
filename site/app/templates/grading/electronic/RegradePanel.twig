@@ -1,12 +1,10 @@
-{% if showNewInterface %}
 <div id="regrade_info" class="rubric_panel">
     <div id="regrade_inner_info" class="{{ graded_gradeable.hasActiveRegradeRequest() ? 'inquiry_alert' }}">
-{% else %}
-<div id="regrade_info" class="draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%; display: block">
-    <div id="regrade_inner_info" class="draggable_content {{ graded_gradeable.hasActiveRegradeRequest() ? 'inquiry_alert' }}">
-{% endif %}
 <div class="inner-container" style="padding:20px;">
             {{ render_template(['submission', 'Homework'], 'showRegradeDiscussion', graded_gradeable, can_inquiry) }}
         </div>
     </div>
 </div>
+<script>
+    $(initGradingInquirySocketClient);
+</script>
