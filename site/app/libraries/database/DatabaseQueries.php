@@ -6082,7 +6082,8 @@ AND gc_id IN (
 
     public function getQueueDataToday() {
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
-        $this->course_db->query("SELECT"
+        $this->course_db->query(
+            "SELECT"
                  . $this->getInnerQueueSelect() .
                 "FROM queue
                  WHERE time_in > ?",
@@ -6116,10 +6117,11 @@ AND gc_id IN (
 
     public function getQueueDataByWeekDayThisWeek() {
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
-        $this->course_db->query("SELECT
+        $this->course_db->query(
+            "SELECT
               dow,"
               . $this->getInnerQueueSelect() .
-           "FROM (SELECT
+            "FROM (SELECT
                 *,
                 extract(dow from time_in) AS dow
                 FROM queue
@@ -7107,7 +7109,7 @@ SQL;
     }
 
     private function getInnerQueueSelect(): string {
-      return <<<SQL
+        return <<<SQL
 
       COUNT(*) AS queue_interactions,
       COUNT(DISTINCT user_id) AS number_distinct_students,
