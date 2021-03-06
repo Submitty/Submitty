@@ -18,6 +18,7 @@ import subprocess
 import shutil
 import codecs
 import glob
+import docker
 
 from typing import Optional
 
@@ -41,7 +42,7 @@ class Logger:
 
     def _log_filename(self) -> str:
         """Get the name of the file that should be logged into.
-        
+
         Currently, this is in the format YYYYMMDD.txt.
         """
         now = dateutils.get_current_time()
@@ -297,18 +298,29 @@ def lock_down_folder_permissions(top_dir):
 
 def cleanup_stale_containers(user_id_of_runner):
     # Remove any docker containers left over from past runs.
-    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', f'name={user_id_of_runner}']).split()
+    client = docker.from_env(timeout=60)
+
+    old_containers = []
+    for c in client.containers.list(all=True):
+        if user_id_of_runner in c.name:
+            old_containers.append(c)
+
     if len(old_containers) > 0:
         print('REMOVING STALE CONTAINERS')
-    for old_container in old_containers:
-        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
 
-    # Remove any docker networks left over from past runs.
-    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', f'name={user_id_of_runner}']).split()
-    if len(old_containers) > 0:
+    for old_container in old_containers:
+        old_container.remove(force=True)
+
+    old_networks = []
+    for n in client.networks.list():
+        if user_id_of_runner in n.name:
+            old_networks.append(n)
+
+    if len(old_networks) > 0:
         print('REMOVING STALE NETWORKS')
+
     for old_network in old_networks:
-        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+        old_network.remove()
 
 
 def prepare_directory_for_autograding(config, working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
