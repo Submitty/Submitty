@@ -158,7 +158,7 @@ class BaseTestCase(unittest.TestCase):
         course_name = course_name.title()
         self.driver.find_element(By.ID, dateutils.get_current_semester() + '_' + course).click()
         # print(self.driver.page_source)
-        WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is('Submitty ' + course_name + ' Gradeables'))
+        WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is('Gradeables - ' + course_name))
 
     # see Navigation.twig for html attributes to use as arguments
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
