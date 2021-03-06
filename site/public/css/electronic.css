@@ -1376,6 +1376,12 @@ tr.is_publish {
     resize: none;
 }
 
+/* Notebook panel */
+#notebook-view {
+    padding: 10px;
+}
+
+
 /* Media queries */
 @media (max-width: 540px) {
     #electronic-gradeable-container {

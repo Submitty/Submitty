@@ -1,10 +1,15 @@
 <div class="content">
     <h1> {{ poll.getName() }} </h1>
-    <p> {{ poll.getQuestion() | markdown}} </p>
+    {{ poll.getQuestion() | markdown}}
+    {% if file_data is not null %}
+        <br/>
+        <img src="{{ file_data }}">
+        <br/>
+    {% endif %}
     <br/>
     <form method="post" action="{{ base_url }}/submitResponse">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
         <fieldset>
             <legend>
                 <h2> Possible responses: </h2>

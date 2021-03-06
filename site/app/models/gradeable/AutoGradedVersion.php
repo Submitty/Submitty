@@ -22,6 +22,7 @@ use app\models\AbstractModel;
  * @method float getHiddenExtraCredit()
  * @method \DateTime getSubmissionTime()
  * @method bool isAutogradingComplete()
+ * @method string getAutograderMachine()
  */
 class AutoGradedVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
@@ -40,6 +41,8 @@ class AutoGradedVersion extends AbstractModel {
     protected $submission_time = null;
     /** @prop @var bool If the autograding has complete for this version */
     protected $autograding_complete = false;
+    /** @prop @var string The name of the worker machine that graded this version. */
+    protected $autograder_machine = null;
 
     /** @prop @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
     private $graded_testcases = null;
@@ -229,6 +232,11 @@ class AutoGradedVersion extends AbstractModel {
             // Couldn't find the file, so grading hasn't happened yet...
             $this->graded_testcases = [];
             return;
+        }
+
+        $queue_file = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'queue_file.json'));
+        if ($queue_file !== false && array_key_exists('which_machine', $queue_file)) {
+            $this->autograder_machine = $queue_file['which_machine'];
         }
 
         // Load the historical results (for early submission incentive)

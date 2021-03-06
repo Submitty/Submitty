@@ -945,6 +945,7 @@ class HomeworkView extends AbstractView {
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
+                'autograder_machine' => $version_instance->getAutograderMachine(),
             ]);
 
             if ($history !== null) {
