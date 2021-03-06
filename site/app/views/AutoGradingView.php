@@ -2,7 +2,7 @@
 
 namespace app\views;
 
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
@@ -96,7 +96,7 @@ class AutoGradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
             'gradeable_id' => $gradeable->getId(),
-            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId(),
             "num_visible_testcases" => $num_visible_testcases,
             "incomplete_autograding" => $incomplete_autograding,
             "show_hidden_breakdown" => $show_hidden_breakdown,
@@ -577,9 +577,17 @@ class AutoGradingView extends AbstractView {
                 'marks' => $component_marks,
             ];
         }, $peer_graded_components);
-
+        /*$peer_anon_component_data = $peer_component_data;
+        for ($i = 1; $i < count($peer_anon_component_data)+1; $i++)  {
+            for ($j = 0; $j < count($peer_anon_component_data[$i]['peer_ids']); $j++)  {
+                $peer_id = $peer_anon_component_data[$i]['peer_ids'][$j];
+                $anon_id = $this->core->getQueries()->getAnonId($peer_id)[$peer_id];
+                $peer_anon_component_data[$i]['peer_ids'][$j] = $anon_id;
+            }
+        }*/
         $unique_graders = array_unique($graders_found);
         $peer_aliases = [];
+        $anon_grader_id_mapping = [];
         $num_peers = 0;
         // Sort the graders ids so that peer alias assignment stays mostly consistent.
         // TODO: Eventually we want to move to having a students anonid be displayable
@@ -589,9 +597,18 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
-            $peer_aliases[$grader_id] = $alias;
+            $anon_id = $this->core->getQueries()->getAnonId($grader_id)[$grader_id];
+            if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
+                $peer_aliases[$grader_id] = $grader_id;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
+            }
+            else {
+                $peer_aliases[$grader_id] = $alias;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $alias;
+            }
+            $anon_grader_id_mapping[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
             // Effectively sorts peers by $num_peers.
-            array_push($ordered_graders, $grader_id);
+            array_push($ordered_graders, $anon_id);
         }
 
         $id = $this->core->getUser()->getId();
@@ -685,8 +702,7 @@ class AutoGradingView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
-
+        $this->core->getOutput()->addInternalCss('electronic.css');
         $gradeable_id = $gradeable->getId();
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
@@ -701,6 +717,8 @@ class AutoGradingView extends AbstractView {
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,
+            #'peer_anon_component_data' => $peer_anon_component_data,
+            'anon_grader_id_mapping' => $anon_grader_id_mapping,
             'peer_max' => $peer_max,
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,

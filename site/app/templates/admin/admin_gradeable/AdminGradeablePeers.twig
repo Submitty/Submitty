@@ -3,7 +3,7 @@
         <div class="row">
             <div class="card col-md-6" style="margin:0px">
                 <div class="content" style="margin:0px">Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column: <BR><hr>
-                    <input class="custom-file-input" type="file" name="peer_graders_list" id="peer_graders_list"> 
+                    <input class="custom-file-input" type="file" name="peer_graders_list" id="peer_graders_list">
                 </div>
             </div>
             <div class="card col-md-6" style="margin:0px">
@@ -32,7 +32,14 @@
                     <br>
                 </div>
             </div>
-        </div> 
+        </div>
+        <div class="row">
+            <div class="card col-md-12" style="margin:0px">
+                <div class="content"style="margin:0px">
+                    Enter any file wildcards that should not be viewable by students. Seperate wildcards with commas <br>
+                    <input type="text" id="hidden_files" name = "hidden_files" class="auto_save" placeholder="" value = {{hidden_files}}>
+            </div>
+        </div>
 </div>
     <div id="peer_loader" class="loader hide"></div>
         <div class="table-wrapper">
@@ -60,10 +67,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
         <div id="add-grader-btn-container" class="btn-container">
             <input type="button" name="add-peer-grader" class="btn btn-primary key_to_click" id="add-peer-grader" tabindex="0" value="Add New Grader to Matrix"></input>
         </div>
-        </div>
+    </div>
 <script>
     function removeGraderAlert($grader_to_edit) {
         $('#students-to-edit').empty();
@@ -75,10 +83,10 @@
         var form = $("#admin-gradeable-edit-peers-form");
         $('#edit_user_id_'+i+'', form).remove();
     }
-    
+
 
     /**
-    * Add new autofill text input area for new student when the user presses 
+    * Add new autofill text input area for new student when the user presses
     * the '+Add More Users' button on a peer matrix popup
     *
     * @param {String} form_name the ID of form on which to add text input area
@@ -102,7 +110,7 @@
     * Creates the popup for editing student's peer assignments when user clicks
     * on the edit student pencil icon from peer matrix.
     *
-    * @param {Object} icon_clicked the <i> element in peer matrix table 
+    * @param {Object} icon_clicked the <i> element in peer matrix table
     *     containing the clicked pencil icon
     */
     function editGraderPeerForm(icon_clicked) {
@@ -141,7 +149,7 @@
             source: student_autofill
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
-        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-edit-peers-form\',\'#students-to-add\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');  
+        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-edit-peers-form\',\'#students-to-add\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
     }
 
     function checkNewStudentsValid(grader_id, user_input, valid_students, new_grader) {
@@ -225,7 +233,7 @@
         $('[name="new_peer_grader"]', form).autocomplete({
             source: student_autofill
         });
-        $('[name="new_peer_grader"]').autocomplete( "option", "appendTo", form ); 
+        $('[name="new_peer_grader"]').autocomplete( "option", "appendTo", form );
         // set the right panel to allow adding students for the new grader
         let grader_students_div = $("#new-grader-students");
         grader_students_div.empty();

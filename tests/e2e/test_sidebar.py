@@ -71,13 +71,13 @@ class TestSidebar(BaseTestCase):
             self.assertIn(expected_text, heading_text)
             current_idx += 1
 
-
     def test_click_sidebar_links_superuser(self):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
@@ -97,8 +97,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'instructor', 'Quinn')
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
-                         "cannot run in Travis-CI, blank course does not exist")
+    @unittest.skipUnless(os.environ.get('CI') is None,
+                         "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_instructor_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -168,8 +168,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'ta', 'Jill')
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
-                         "cannot run in Travis-CI, blank course does not exist")
+    @unittest.skipUnless(os.environ.get('CI') is None,
+                         "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_ta_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -215,8 +215,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'student', 'Joe')
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
-                         "cannot run in Travis-CI, blank course does not exist")
+    @unittest.skipUnless(os.environ.get('CI') is None,
+                         "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_student_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [

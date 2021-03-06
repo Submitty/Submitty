@@ -35,6 +35,7 @@ class GlobalController extends AbstractController {
         }
 
         $sidebar_buttons = [];
+
         $this->prep_sidebar($sidebar_buttons, $unread_notifications_count);
 
         $current_route = $_SERVER["REQUEST_URI"];
@@ -110,7 +111,7 @@ class GlobalController extends AbstractController {
             "title" => "Gradeables",
             "class" => "nav-row",
             "id" => "nav-sidebar-submitty",
-            "icon" => "fa-star"
+            "icon" => "fas fa-star"
          ]);
 
         if ($unread_notifications_count !== null) {
@@ -165,7 +166,7 @@ class GlobalController extends AbstractController {
         if ($this->core->getConfig()->isPollsEnabled()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['polls']),
-                "title" => "Polls",
+                "title" => "Submini Polls",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-polls",
                 "icon" => "fa-question-circle"
@@ -414,6 +415,14 @@ class GlobalController extends AbstractController {
         // SUPERUSERS ONLY
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'gradeables']),
+                "title" => "Pending Gradeables",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-submitty",
+                "icon" => "fas fa-clock"
+            ]);
+
+            $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(['update']),
                 "title" => "System Update",
                 "class" => "nav-row",
@@ -432,11 +441,18 @@ class GlobalController extends AbstractController {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
         $month = (int) $now->format('n');
+        $year = $now->format('Y');
 
         switch ($month) {
             case 12:
                 break;
             case 11:
+                //November (Thanksgiving)
+                //last week of Novemeber
+                $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
+                if ($tgt_date === $now->format('Y-W-n')) {
+                    $duck_img = 'moorthy_duck/11-november.svg';
+                }
                 break;
             case 10:
                 //October (Halloween)

@@ -1,5 +1,5 @@
 {
-    "assignment_message": "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
+    "auto_pts": 20,
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -8,8 +8,20 @@
             "test05/p4.out"
         ],
         "compilation_to_validation": [
-            "test*/STDOUT*.txt",
-            "test*/STDERR*.txt",
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "test02/STDOUT*.txt",
+            "test02/STDERR*.txt",
+            "test03/STDOUT*.txt",
+            "test03/STDERR*.txt",
+            "test04/STDOUT*.txt",
+            "test04/STDERR*.txt",
+            "test05/STDOUT*.txt",
+            "test05/STDERR*.txt",
+            "test06/STDOUT*.txt",
+            "test06/STDERR*.txt",
+            "SubmissionLimit/STDOUT*.txt",
+            "SubmissionLimit/STDERR*.txt",
             "test03/p3.out",
             "test05/p4.out"
         ],
@@ -28,16 +40,27 @@
         ],
         "submission_to_validation": [
             "**/README.txt",
-            "input_*.txt",
-            "**/*.pdf"
+            "**/*.pdf",
+            ".user_assigment_access.json"
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "test*/*.txt",
-            "test*/*_diff.json",
+            "test01/*.txt",
+            "test01/*_diff.json",
+            "test02/*.txt",
+            "test02/*_diff.json",
+            "test03/*.txt",
+            "test03/*_diff.json",
+            "test04/*.txt",
+            "test04/*_diff.json",
+            "test05/*.txt",
+            "test05/*_diff.json",
+            "test06/*.txt",
+            "test06/*_diff.json",
+            "SubmissionLimit/*.txt",
+            "SubmissionLimit/*_diff.json",
             "**/README.txt",
             "input_*.txt",
-            "test*/input_*.txt",
             "**/dispatched_actions.txt",
             "test01/STDOUT.txt",
             "test01/STDERR.txt",
@@ -60,6 +83,24 @@
         "single_port_per_container": false,
         "use_router": false
     },
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
+    },
+    "gradeable_message": "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
+    "id": "choice_of_language",
+    "item_pool": [],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 100000,
+    "max_submissions": 20,
     "one_part_only": true,
     "part_names": [
         "Python 2",
@@ -67,7 +108,10 @@
         "C",
         "C++"
     ],
+    "points_visible": 20,
     "publish_actions": false,
+    "required_capabilities": "default",
+    "ta_pts": 0,
     "testcases": [
         {
             "containers": [
@@ -82,10 +126,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 5,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -97,6 +145,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test01",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Python 2 Testing",
             "use_router": false,
@@ -118,7 +168,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -133,10 +184,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 5,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -148,6 +203,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test02",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "Python 3 Testing",
             "use_router": false,
@@ -169,7 +226,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -184,11 +242,15 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
             "executable_name": "p3.out",
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -200,6 +262,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test03",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "C Compilation",
             "type": "Compilation",
@@ -229,7 +293,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -244,10 +309,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 3,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -259,6 +328,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test04",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "C Testing",
             "use_router": false,
@@ -280,7 +351,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -295,11 +367,15 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
             "executable_name": "p4.out",
+            "extra_credit": false,
+            "hidden": false,
             "points": 2,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -311,6 +387,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test05",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "C++ Compilation",
             "type": "Compilation",
@@ -340,7 +418,8 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "containers": [
@@ -355,10 +434,14 @@
                     "server": false
                 }
             ],
+            "details": "",
             "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
             "points": 3,
             "pre_commands": [],
             "publish_actions": false,
+            "release_hidden_details": false,
             "single_port_per_container": false,
             "solution_containers": [
                 {
@@ -370,6 +453,8 @@
                     "server": false
                 }
             ],
+            "testcase_id": "test06",
+            "testcase_label": "",
             "timestamped_stdout": false,
             "title": "C++ Testing",
             "use_router": false,
@@ -391,17 +476,18 @@
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 }
-            ]
+            ],
+            "view_testcase_message": true
         },
         {
             "max_submissions": 20,
             "penalty": -0.1,
             "points": -5,
-            "publish_actions": false,
-            "timestamped_stdout": false,
+            "testcase_id": "SubmissionLimit",
             "title": "Submission Limit",
             "type": "FileCheck"
         }
     ],
-    "timestamped_stdout": false
+    "timestamped_stdout": false,
+    "total_pts": 20
 }

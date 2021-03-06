@@ -15,6 +15,11 @@ SUBMITTY_INSTALL_DIR = os.path.realpath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
 )
 
+BUILD_MAIN_CONFIGUE_PATH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'build_main_configure.sh'
+)
+
 # Verify that this has been installed by just checking that this file is located in
 # a directory next to the config directory which has submitty.json in it
 if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
@@ -225,6 +230,16 @@ class TestcaseWrapper:
         subprocess.call(["cp",
             os.path.join(GRADING_SOURCE_DIR, "Sample_CMakeLists.txt"),
             os.path.join(self.testcase_path, "build", "CMakeLists.txt")])
+
+        shutil.copy(BUILD_MAIN_CONFIGUE_PATH, os.path.join(self.testcase_path, "build"))
+
+        # First, we need to compile and run configure.out
+        with open(os.path.join(self.testcase_path, "log", "main_configure_build.txt"), "w") as configure_output:
+            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR],
+                    cwd=os.path.join(self.testcase_path, "build"), stdout=configure_output, stderr=configure_output)
+            if return_code != 0:
+                raise RuntimeError("Failed to generate main configure: " + str(return_code))
+
         with open(os.path.join(self.testcase_path, "log", "cmake_output.txt"), "w") as cmake_output:
             return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=cmake_output, stderr=cmake_output)
@@ -240,7 +255,7 @@ class TestcaseWrapper:
 
     # Run compile.out using some sane arguments.
     def run_compile(self):
-        config_path = os.path.join(self.testcase_path, 'assignment_config', 'config_no_comments.json')
+        config_path = os.path.join(self.testcase_path, 'assignment_config', 'complete_config.json')
         with open(config_path, 'r') as infile:
             config = json.load(infile)
             my_testcases = config['testcases']
@@ -269,15 +284,16 @@ class TestcaseWrapper:
         with open (os.path.join(self.testcase_path, "log", "compile_output.txt"), "w") as log:
             # we start counting from one.
             for testcase_num in range(1, len(my_testcases)+1):
-                testcase_folder = os.path.join(tmp_comp_folder, "test{:02}".format(testcase_num))
+                my_testcase = my_testcases[testcase_num-1]
+                testcase_folder = os.path.join(tmp_comp_folder,  my_testcase['testcase_id'])
 
-                if 'type' in my_testcases[testcase_num-1]:
-                    if my_testcases[testcase_num-1]['type'] != 'FileCheck' and my_testcases[testcase_num-1]['type'] != 'Compilation':
+                if 'type' in my_testcase:
+                    if my_testcase['type'] != 'FileCheck' and my_testcase['type'] != 'Compilation':
                         continue
 
-                    if my_testcases[testcase_num-1]['type'] == 'Compilation':
-                        if 'executable_name' in my_testcases[testcase_num-1]:
-                            provided_executable_list = my_testcases[testcase_num-1]['executable_name']
+                    if my_testcase['type'] == 'Compilation':
+                        if 'executable_name' in my_testcase:
+                            provided_executable_list = my_testcase['executable_name']
                             if not isinstance(provided_executable_list, (list,)):
                                 provided_executable_list = list([provided_executable_list])
                             for exe in provided_executable_list:
@@ -296,14 +312,16 @@ class TestcaseWrapper:
                 copy_contents_into(tmp_data_folder, testcase_folder)
 
                 return_code = subprocess.call(
-                    [os.path.join(self.testcase_path, "bin", "compile.out"),
-                    "testassignment", 
-                    "testuser", 
-                    "1", 
-                    "0", 
-                    '--testcase', str(testcase_num)],
+                    [
+                        os.path.join(self.testcase_path, "bin", "compile.out"),
+                        "testassignment",
+                        "testuser",
+                        "1",
+                        "0",
+                        my_testcase['testcase_id']
+                    ],
                     cwd=testcase_folder, stdout=log, stderr=log)
-                
+
                 if return_code != 0:
                     raise RuntimeError("Compile exited with exit code " + str(return_code))
 
@@ -336,7 +354,7 @@ class TestcaseWrapper:
 
     # Run run.out using some sane arguments.
     def run_run(self):
-        config_path = os.path.join(self.testcase_path, 'assignment_config', 'config_no_comments.json')
+        config_path = os.path.join(self.testcase_path, 'assignment_config', 'complete_config.json')
 
         with open(config_path, 'r') as infile:
             config = json.load(infile)
@@ -356,11 +374,13 @@ class TestcaseWrapper:
         with open (os.path.join(self.testcase_path, "log", "run_output.txt"), "w") as log:
             # we start counting from one.
             for testcase_num in range(1, len(my_testcases)+1):
+                my_testcase = my_testcases[testcase_num-1]
+
                 if 'type' in my_testcases[testcase_num-1]:
-                    if my_testcases[testcase_num-1]['type'] == 'FileCheck' or my_testcases[testcase_num-1]['type'] == 'Compilation':
+                    if my_testcase['type'] == 'FileCheck' or my_testcase['type'] == 'Compilation':
                         continue
                 #make the tmp folder for this testcase.
-                testcase_folder = os.path.join(work_folder, "test{:02}".format(testcase_num))
+                testcase_folder = os.path.join(work_folder,  my_testcase['testcase_id'])
 
                 #don't trust that the developer properly cleaned up after themselves.
                 if os.path.isdir(testcase_folder):
@@ -369,13 +389,16 @@ class TestcaseWrapper:
                 copy_contents_into(tmp_data_folder, testcase_folder)
                 copy_contents_into(compiled_files_directory, testcase_folder)
 
-                return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"),
-                                            "testassignment", 
-                                            "testuser", 
-                                            "1", 
-                                            "0",
-                                            '--testcase', str(testcase_num)],
-                                             cwd=testcase_folder, stdout=log, stderr=log)
+                return_code = subprocess.call(
+                    [
+                        os.path.join(self.testcase_path, "bin", "run.out"),
+                        "testassignment",
+                        "testuser",
+                        "1",
+                        "0",
+                        my_testcase['testcase_id']
+                    ],
+                    cwd=testcase_folder, stdout=log, stderr=log)
                 if return_code != 0:
                     raise RuntimeError("run.out exited with exit code " + str(return_code))
 
@@ -440,7 +463,7 @@ class TestcaseWrapper:
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
 
-    # Helpful for debugging make errors on travis
+    # Helpful for debugging make errors on CI
     def debug_print(self,f):
         filename=os.path.join(self.testcase_path,f)
         print ("\nDEBUG_PRINT: ",filename)
@@ -450,7 +473,7 @@ class TestcaseWrapper:
         else:
             print ("  < file does not exist >")
 
-            
+
     # Loads 2 files, truncates them after specified number of lines,
     # and then checks to see if they match
     def diff_truncate(self, num_lines_to_compare, f1, f2=""):
@@ -474,7 +497,7 @@ class TestcaseWrapper:
             contents1 = file1.readlines()
         with open(filename2) as file2:
             contents2 = file2.readlines()
-            
+
         # delete/truncate the file
         del contents1[num_lines_to_compare:]
         del contents2[num_lines_to_compare:]
