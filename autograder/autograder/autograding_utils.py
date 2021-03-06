@@ -324,6 +324,8 @@ def cleanup_stale_containers(user_id_of_runner, my_log_function):
     for old_network in old_networks:
         old_network.remove()
 
+    client.close()
+
 
 def prepare_directory_for_autograding(config, working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
     """
