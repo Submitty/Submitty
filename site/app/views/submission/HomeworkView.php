@@ -301,10 +301,7 @@ class HomeworkView extends AbstractView {
         $notebook_file_submissions = [];
         $notebook_model = null;
         if ($config->isNotebookGradeable()) {
-            $notebook_model = $config->getUserSpecificNotebook(
-                $this->core->getUser()->getId(),
-                $gradeable->getId()
-            );
+            $notebook_model = $config->getUserSpecificNotebook($this->core->getUser()->getId());
 
             $notebook = $notebook_model->getNotebook();
             $num_parts = $notebook_model->getNumParts();
@@ -948,6 +945,7 @@ class HomeworkView extends AbstractView {
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
+                'autograder_machine' => $version_instance->getAutograderMachine(),
             ]);
 
             if ($history !== null) {

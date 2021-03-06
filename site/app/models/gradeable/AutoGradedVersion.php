@@ -22,6 +22,7 @@ use app\models\AbstractModel;
  * @method float getHiddenExtraCredit()
  * @method \DateTime getSubmissionTime()
  * @method bool isAutogradingComplete()
+ * @method string getAutograderMachine()
  */
 class AutoGradedVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
@@ -40,6 +41,8 @@ class AutoGradedVersion extends AbstractModel {
     protected $submission_time = null;
     /** @prop @var bool If the autograding has complete for this version */
     protected $autograding_complete = false;
+    /** @prop @var string The name of the worker machine that graded this version. */
+    protected $autograder_machine = null;
 
     /** @prop @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
     private $graded_testcases = null;
@@ -144,10 +147,7 @@ class AutoGradedVersion extends AbstractModel {
             $part_names = $config->getPartNames();
             $notebook_model = null;
             if ($config->isNotebookGradeable()) {
-                $notebook_model = $config->getUserSpecificNotebook(
-                    $submitter_id,
-                    $gradeable->getId()
-                );
+                $notebook_model = $config->getUserSpecificNotebook($submitter_id);
 
                 $part_names = range(1, $notebook_model->getNumParts());
             }
@@ -234,6 +234,11 @@ class AutoGradedVersion extends AbstractModel {
             return;
         }
 
+        $queue_file = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'queue_file.json'));
+        if ($queue_file !== false && array_key_exists('which_machine', $queue_file)) {
+            $this->autograder_machine = $queue_file['which_machine'];
+        }
+
         // Load the historical results (for early submission incentive)
         $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'history.json'));
         if ($history !== false) {
@@ -242,9 +247,10 @@ class AutoGradedVersion extends AbstractModel {
             }, $history);
         }
 
+
         // Load the testcase results (and calculate early incentive points)
         if (!is_null($config)) {
-            foreach ($config->getTestcases() as $testcase) {
+            foreach ($config->getPersonalizedTestcases($submitter_id) as $testcase) {
                 if (!isset($result_details['testcases'][$testcase->getIndex()])) {
                     // TODO: Autograding results file was incomplete.  This is a big problem, but how should
                     // TODO:   we handle this error
