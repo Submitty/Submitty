@@ -1,14 +1,15 @@
 <div id="data_dump">
-    {{data_dump}}
+    {{data}}
 </div>
 <div>
-    This is a div with some words for testing purposes!
-</div>
+    This is a div with some words for testing purposes!</div>
 
 {# This is a data table #}
 
+
+
 <table id="data-table" class="table table-striped mobile-table directory-table">
-    <caption>Student Activity Dashboard</caption>
+    <caption>Student Activity Dashboard{{data_dump[0]}}</caption>
     <thead>
         <tr>
             <th>Registration Section</th>
@@ -23,6 +24,23 @@
             <th>Office Hours Queue</th>
         </tr>
     </thead>
+    {#
+    <tbody id="table-body">
+        {% for student in data_dump %}
+        <tr>
+            <td>
+                N/A
+            </td>
+            <td>
+                {{student.user_id}}
+            </td>
+
+        </tr>
+
+    </tbody>
+    #}
 
 </table>
+
+
 
