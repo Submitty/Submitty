@@ -18,6 +18,7 @@ import subprocess
 import shutil
 import codecs
 import glob
+import docker
 
 from typing import Optional
 
@@ -41,7 +42,7 @@ class Logger:
 
     def _log_filename(self) -> str:
         """Get the name of the file that should be logged into.
-        
+
         Currently, this is in the format YYYYMMDD.txt.
         """
         now = dateutils.get_current_time()
@@ -295,20 +296,36 @@ def lock_down_folder_permissions(top_dir):
     # Chmod a directory to take away group and other rwx.
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
 
-def cleanup_stale_containers(user_id_of_runner):
+def cleanup_stale_containers(user_id_of_runner, my_log_function):
     # Remove any docker containers left over from past runs.
-    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', f'name={user_id_of_runner}']).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE CONTAINERS')
-    for old_container in old_containers:
-        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
+    client = docker.from_env(timeout=60)
+    try:
 
-    # Remove any docker networks left over from past runs.
-    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', f'name={user_id_of_runner}']).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE NETWORKS')
-    for old_network in old_networks:
-        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+        old_containers = []
+        for c in client.containers.list(all=True):
+            if user_id_of_runner in c.name:
+                my_log_function(f'Removing stale container {c.name}')
+                old_containers.append(c)
+
+        if len(old_containers) > 0:
+            print('REMOVING STALE CONTAINERS')
+
+        for old_container in old_containers:
+            old_container.remove(force=True)
+
+        old_networks = []
+        for n in client.networks.list():
+            if user_id_of_runner in n.name:
+                my_log_function(f'Removing stale network {n.name}')
+                old_networks.append(n)
+
+        if len(old_networks) > 0:
+            print('REMOVING STALE NETWORKS')
+
+        for old_network in old_networks:
+            old_network.remove()
+    finally:
+        client.close()
 
 
 def prepare_directory_for_autograding(config, working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
@@ -340,8 +357,6 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
 
     os.mkdir(tmp_work)
     os.mkdir(tmp_work_test_input)
-
-    cleanup_stale_containers(user_id_of_runner)
 
     # Unzip the autograding and submission folders
     unzip_this_file(autograding_zip_file,tmp_autograding)

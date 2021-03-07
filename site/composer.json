@@ -21,9 +21,9 @@
     "aptoma/twig-markdown": "3.4.0",
     "erusev/parsedown": "1.7.4",
     "lcobucci/jwt": "3.3.2",
-    "symfony/routing": "4.4.19",
-    "symfony/config": "4.4.19",
-    "symfony/http-foundation": "4.4.19",
+    "symfony/routing": "4.4.20",
+    "symfony/config": "4.4.20",
+    "symfony/http-foundation": "4.4.20",
     "doctrine/annotations": "1.12.1",
     "doctrine/cache": "1.10.2",
     "php-ds/php-ds": "1.3.0",
@@ -37,7 +37,7 @@
     "submitty/php-codesniffer": "2.3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "0.12.79"
+    "phpstan/phpstan": "0.12.80"
   },
   "scripts": {
     "test": "phpunit -c tests/phpunit.xml",
