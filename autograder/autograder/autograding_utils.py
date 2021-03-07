@@ -299,32 +299,33 @@ def lock_down_folder_permissions(top_dir):
 def cleanup_stale_containers(user_id_of_runner, my_log_function):
     # Remove any docker containers left over from past runs.
     client = docker.from_env(timeout=60)
+    try:
 
-    old_containers = []
-    for c in client.containers.list(all=True):
-        if user_id_of_runner in c.name:
-            my_log_function(f'Removing stale container {c.name}')
-            old_containers.append(c)
+        old_containers = []
+        for c in client.containers.list(all=True):
+            if user_id_of_runner in c.name:
+                my_log_function(f'Removing stale container {c.name}')
+                old_containers.append(c)
 
-    if len(old_containers) > 0:
-        print('REMOVING STALE CONTAINERS')
+        if len(old_containers) > 0:
+            print('REMOVING STALE CONTAINERS')
 
-    for old_container in old_containers:
-        old_container.remove(force=True)
+        for old_container in old_containers:
+            old_container.remove(force=True)
 
-    old_networks = []
-    for n in client.networks.list():
-        if user_id_of_runner in n.name:
-            my_log_function(f'Removing stale network {n.name}')
-            old_networks.append(n)
+        old_networks = []
+        for n in client.networks.list():
+            if user_id_of_runner in n.name:
+                my_log_function(f'Removing stale network {n.name}')
+                old_networks.append(n)
 
-    if len(old_networks) > 0:
-        print('REMOVING STALE NETWORKS')
+        if len(old_networks) > 0:
+            print('REMOVING STALE NETWORKS')
 
-    for old_network in old_networks:
-        old_network.remove()
-
-    client.close()
+        for old_network in old_networks:
+            old_network.remove()
+    finally:
+        client.close()
 
 
 def prepare_directory_for_autograding(config, working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
