@@ -214,8 +214,8 @@ class DatabaseQueries {
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
         ORDER BY A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
-        
         ");
+        var_dump($this->course_db->rows());
         return $this->course_db->rows();
      }
 

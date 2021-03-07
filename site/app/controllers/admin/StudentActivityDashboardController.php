@@ -15,14 +15,15 @@ use app\libraries\response\WebResponse;
 
 class StudentActivityDashboardController extends AbstractController {
   /**
-   * @Route("/courses/{_semester}/{_courses}/sad", methods={"GET"})
+   * @Route("/courses/{_semester}/{_course}/sad", methods={"GET"})
    * @AccessControl(role="INSTRUCTOR")
    */
    public function getStudents(){
-        $students = $this->core->getQueries()->getAttendanceInfo();
+        $data_dump = $this->core->getQueries()->getAttendanceInfo();
+        //var_dump($data_dump);
         return new WebResponse([
              'admin',
              'StudentActivityDashboard'
-        ], 'createTable', $students);
+        ], 'createTable', $data_dump);
    }
 }
