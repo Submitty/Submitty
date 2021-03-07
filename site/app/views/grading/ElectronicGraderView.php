@@ -887,6 +887,7 @@ HTML;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
+            $isStudentInfoPanel = false;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
         $this->core->getOutput()->enableMobileViewport();
@@ -966,7 +967,7 @@ HTML;
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $highest_version,
+                $display_version,
                 $notebook,
                 $graded_gradeable->getSubmitter()->getId()
             );
@@ -999,7 +1000,7 @@ HTML;
 
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        if ($this->core->getUser()->getGroup() !== User::GROUP_STUDENT && $gradeable->getLimitedAccessBlind() !== 2) {
+        if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {
