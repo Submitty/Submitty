@@ -64,7 +64,7 @@ $(() => {
     equalTwoInRightPanelCanvasCTX.fillRect(153, 20, 140, 58);
     equalTwoInRightPanelCanvasCTX.fillRect(153, 82, 140, 58);
 
-    // Three Panels with Equal heights and two in left side
+    // Three Panels with taller Left panel and two in left side
     const tallLeftTwoInLeftPanelCanvas = document.querySelector('#layout-option-3 #tall-left-two-in-left');
     const tallLeftTwoInLeftPanelCanvasCTX = tallLeftTwoInLeftPanelCanvas.getContext('2d');
 
@@ -77,7 +77,7 @@ $(() => {
     tallLeftTwoInLeftPanelCanvasCTX.fillRect(0, 77, 145, 73);
     tallLeftTwoInLeftPanelCanvasCTX.fillRect(153, 20, 140, 120);
 
-    // Three Panels with Equal heights and two in right side
+    // Three Panels with taller Left panel and two in right side
     const tallLeftTwoInRightPanelCanvas = document.querySelector('#layout-option-3 #tall-left-two-in-right');
     const tallLeftTwoInRightPanelCanvasCTX = tallLeftTwoInRightPanelCanvas.getContext('2d');
 
@@ -89,6 +89,38 @@ $(() => {
     tallLeftTwoInRightPanelCanvasCTX.fillRect(0, 0, 145, 150);
     tallLeftTwoInRightPanelCanvasCTX.fillRect(153, 20, 140, 58);
     tallLeftTwoInRightPanelCanvasCTX.fillRect(153, 82, 140, 58);
+
+    // Four Panels with equal heights
+    const equalFourPanelCanvas = document.querySelector('#layout-option-4 #equal-four-panel');
+    const equalFourPanelCanvasCTX = equalFourPanelCanvas.getContext('2d');
+
+    equalFourPanelCanvasCTX.fillStyle = 'aliceblue';
+    equalFourPanelCanvasCTX.fillRect(0, 0, 350, 200);
+
+    equalFourPanelCanvasCTX.fillStyle = '#6d91b5';
+    equalFourPanelCanvasCTX.fillRect(5, 2, 288, 15);
+
+    equalFourPanelCanvasCTX.fillRect(5, 20, 145, 58);
+    equalFourPanelCanvasCTX.fillRect(5, 82, 145, 58);
+
+    equalFourPanelCanvasCTX.fillRect(153, 20, 140, 58);
+    equalFourPanelCanvasCTX.fillRect(153, 82, 140, 58);
+
+    // Four Panels with taller left panel
+    const tallLeftFourPanelCanvas = document.querySelector('#layout-option-4 #tall-left-four-panel');
+    const tallLeftFourPanelCanvasCTX = tallLeftFourPanelCanvas.getContext('2d');
+
+    tallLeftFourPanelCanvasCTX.fillStyle = 'aliceblue';
+    tallLeftFourPanelCanvasCTX.fillRect(0, 0, 350, 200);
+
+    tallLeftFourPanelCanvasCTX.fillStyle = '#6d91b5';
+    tallLeftFourPanelCanvasCTX.fillRect(153, 2, 140, 15);
+
+    tallLeftFourPanelCanvasCTX.fillRect(0, 0, 145, 73);
+    tallLeftFourPanelCanvasCTX.fillRect(0, 77, 145, 73);
+
+    tallLeftFourPanelCanvasCTX.fillRect(153, 20, 140, 58);
+    tallLeftFourPanelCanvasCTX.fillRect(153, 82, 140, 58);
 
 });
 

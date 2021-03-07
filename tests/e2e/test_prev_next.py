@@ -6,7 +6,7 @@ class TestGradingNextPrev(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
     
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_instructor(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
@@ -23,7 +23,7 @@ class TestGradingNextPrev(BaseTestCase):
         self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-ungraded-student').click()
         self.assertIn("Reece Johnson", self.driver.find_element_by_id("student_info").text)
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_ta(self):
         self.log_in(user_id="ta", user_name="Jill")
         self.click_class('sample')
@@ -40,7 +40,7 @@ class TestGradingNextPrev(BaseTestCase):
         self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-ungraded-student').click()
         self.assertIn("Reece Johnson", self.driver.find_element_by_id("student_info").text)
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_instructor_team(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
@@ -55,7 +55,7 @@ class TestGradingNextPrev(BaseTestCase):
         self.assertIn("Alyssa P Hacker", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-ungraded-student').click()
         self.assertIn("Alex Brown", self.driver.find_element_by_id("student_info").text)
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_ta_team(self):
         self.log_in(user_id="ta", user_name="Jill")
         self.click_class('sample')
@@ -70,7 +70,7 @@ class TestGradingNextPrev(BaseTestCase):
         self.assertIn("Alyssa P Hacker", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-ungraded-student').click()
         self.assertIn("Alex Brown", self.driver.find_element_by_id("student_info").text)
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_instructor_navigate_away(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
