@@ -801,7 +801,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 autograding_utils.cleanup_stale_containers(self.untrusted_user, self.log_message)
             except Exception:
                 self.log_stack_trace(traceback.format_exc())
-                return -1
+                # Linter hates this line (return in a finally), but the workaround just adds noise
+                return -1  # noqa: B012
 
         try:
             self.create_containers(containers, script, arguments)
