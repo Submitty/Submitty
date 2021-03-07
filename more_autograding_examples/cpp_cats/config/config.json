@@ -1,5 +1,5 @@
 {
-	"required_capabilities": "c/c++",
+	"required_capabilities": "cpp",
 
     "grading_parameters" : {
         "TOTAL_POINTS" : 25,

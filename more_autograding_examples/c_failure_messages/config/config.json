@@ -1,5 +1,5 @@
 {
-	"required_capabilities": "c/c++",
+	"required_capabilities": "cpp",
 
     "resource_limits" : {
         "RLIMIT_NPROC" : 10

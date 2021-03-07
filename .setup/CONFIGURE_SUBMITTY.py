@@ -465,7 +465,7 @@ if not args.worker:
 
         if args.setup_for_sample_courses:
             worker_dict['primary']['capabilities'].extend([
-                'c/c++',
+                'cpp',
                 'python',
                 'matlab',
                 'pdf-word-count',
