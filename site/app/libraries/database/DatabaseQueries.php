@@ -1691,7 +1691,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         );
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
-    public function getAverageForGradeable($g_id, $section_key, $is_team) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team, $override) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -1700,13 +1700,38 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
+
+        // Get count
         $this->course_db->query(
-            "
-SELECT COUNT(*) as cnt from gradeable_component where g_id=?
-          ",
+            "SELECT COUNT(*) as cnt from gradeable_component where g_id=?",
             [$g_id]
         );
         $count = $this->course_db->row()['cnt'];
+
+        $exclude = '';
+        $include = '';
+        $params = [$g_id, $count];
+
+        // Check if we want to exlcude grade overridden gradeables
+        if (!$is_team && $override == 'include') {
+            $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
+                        WHERE u.user_id = grade_override.user_id 
+                        AND grade_override.g_id=gc.g_id)";
+        }
+
+        // Check if we want to combine grade overridden marks within averages
+        if (!$is_team && $override == 'include') {
+            $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
+                FROM grade_override
+                INNER JOIN users as u ON u.user_id = grade_override.user_id
+                AND u.user_id IS NOT NULL
+                LEFT JOIN gradeable_data as gd ON u.user_id = gd.gd_user_id
+                AND grade_override.g_id = gd.g_id
+                WHERE grade_override.g_id=?
+                GROUP BY gd.gd_id, marks";
+            $params[] = $g_id;
+        }
+
         $this->course_db->query(
             "
 SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
@@ -1736,13 +1761,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
         INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
         WHERE gc.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+        " . $exclude . "
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
-  )g WHERE count=?
-)AS individual
-          ",
-            [$g_id, $count]
+  )g WHERE count=?" . $include . ")AS individual",
+            $params
         );
         if (count($this->course_db->rows()) == 0) {
             return;
@@ -2395,12 +2419,15 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  Mark      $mark
      * @param  User      $grader
      * @param  Gradeable $gradeable
+     * @param  bool      $anon
      * @return string[]
      */
-    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable) {
+    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = false) {
          // Switch the column based on gradeable team-ness
          $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-         $row_type = $type . "_id";
+         // TODO: anon teams?
+         $user_type = ($type == 'user' && $anon) ? 'anon' : $type;
+         $row_type = $user_type . "_id";
 
          $params = [$grader->getId(), $mark->getId()];
          $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
@@ -2408,7 +2435,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
         $this->course_db->query(
             "
-             SELECT u.{$type}_id
+             SELECT u.{$user_type}_id
              FROM {$table} u
                  JOIN (
                      SELECT gr.sections_{$grade_type}_id
@@ -2435,18 +2462,38 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
     }
 
-    public function getAllSubmittersWhoGotMark($mark) {
+    public function getAllSubmittersWhoGotMark($mark, $anon = false) {
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-        $row_type = "gd_" . $type . "_id";
-        $this->course_db->query(
-            "
-            SELECT gd.gd_{$type}_id
-            FROM gradeable_component_mark_data gcmd
-              JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
-            WHERE gcm_id = ?",
-            [$mark->getId()]
-        );
+        $row_type = ($anon && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
+        //TODO: anon teams?
+        if ($anon && $type != 'team') {
+            $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
+            $this->course_db->query(
+                "
+                SELECT u.anon_id
+                FROM {$table} u
+                    JOIN (
+                        SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                        FROM gradeable_component_mark_data AS gcmd
+                            JOIN gradeable_data AS gd ON gd.gd_id=gcmd.gd_id
+                    ) as gcmd
+                    ON gcmd.gd_{$type}_id=u.{$type}_id
+                WHERE gcmd.gcm_id = ?",
+                [$mark->getId()]
+            );
+        }
+        else {
+            $this->course_db->query(
+                "
+                SELECT gd.gd_{$type}_id
+                FROM gradeable_component_mark_data gcmd
+                  JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                WHERE gcm_id = ?",
+                [$mark->getId()]
+            );
+        }
+
 
         // Map the results into a non-associative array of team/user ids
         return array_map(
@@ -4302,7 +4349,10 @@ AND gc_id IN (
     }
 
     public function getRegradePost($post_id) {
-        $this->course_db->query("SELECT * FROM regrade_discussion WHERE id = ?", [$post_id]);
+        $this->course_db->query(
+            "SELECT * FROM regrade_discussion WHERE id = ?",
+            [$post_id]
+        );
         return $this->course_db->row();
     }
 
@@ -6980,7 +7030,7 @@ AND gc_id IN (
     //// BEGIN ONLINE POLLING QUERIES ////
 
     public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
-        $this->course_db->query("INSERT INTO polls(name, question, status, release_date) VALUES (?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date]);
+        $this->course_db->query("INSERT INTO polls(name, question, status, release_date, image_path) VALUES (?, ?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date, null]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -6989,6 +7039,7 @@ AND gc_id IN (
         foreach ($answers as $answer) {
             $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
         }
+        return $poll_id;
     }
 
     public function endPoll($poll_id) {
@@ -7064,7 +7115,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7108,18 +7159,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function getTotalPollsScore($user_id) {
-        $polls = $this->getPolls();
-        $total = 0.0;
-        foreach ($polls as $poll) {
-            $total = $total + $poll->getScore($user_id);
-        }
-        return $total;
-    }
-
-    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders, $image_path) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ? where poll_id = ?", [$poll_name, $question, $release_date, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $release_date, $image_path, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -7146,6 +7188,10 @@ AND gc_id IN (
     public function deleteUserResponseIfExists($poll_id) {
         $user = $this->core->getUser()->getId();
         $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+    }
+
+    public function setPollImage($poll_id, $image_path) {
+        $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
     }
 
     //// END ONLINE POLLING QUERIES ////
