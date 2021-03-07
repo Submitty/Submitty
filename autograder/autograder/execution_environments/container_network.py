@@ -797,7 +797,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             self.log_message("ERROR: Could not verify execution mode status.")
             return
         finally:
-            autograding_utils.cleanup_stale_containers(self.untrusted_user)
+            try:
+                autograding_utils.cleanup_stale_containers(self.untrusted_user, self.log_message)
+            except Exception:
+                self.log_stack_trace(traceback.format_exc())
+                # Linter hates this line (return in a finally), but the workaround just adds noise
+                return -1  # noqa: B012
 
         try:
             self.create_containers(containers, script, arguments)
