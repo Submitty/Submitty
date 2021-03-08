@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e6fd928936be4804b7b285164d1abb1",
+    "content-hash": "9c1c18324e4dae827b07f26fc16bc675",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -414,16 +414,16 @@
         },
         {
             "name": "egulias/email-validator",
-            "version": "3.0.0",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egulias/EmailValidator.git",
-                "reference": "e5df72f45f0ba585a278ce02607b8b542aabfec7"
+                "reference": "62c3b73c581c834885acf6e120b412b76acc495a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/e5df72f45f0ba585a278ce02607b8b542aabfec7",
-                "reference": "e5df72f45f0ba585a278ce02607b8b542aabfec7",
+                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/62c3b73c581c834885acf6e120b412b76acc495a",
+                "reference": "62c3b73c581c834885acf6e120b412b76acc495a",
                 "shasum": ""
             },
             "require": {
@@ -474,7 +474,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-12-29T15:04:19+00:00"
+            "time": "2021-03-07T14:33:28+00:00"
         },
         {
             "name": "erusev/parsedown",
