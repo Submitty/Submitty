@@ -313,7 +313,7 @@ def cleanup_stale_containers(user_id_of_runner, my_log_function):
         old_networks = client.networks.list(filters={"name":user_id_of_runner})
         for old_network in old_networks:
             try:
-                my_log_function(f'Removing stale network {n.name}')
+                my_log_function(f'Removing stale network {old_network.name}')
                 old_network.remove()
             except Exception:
                 my_log_function("ERROR: Could not remove docker network")
