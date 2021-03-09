@@ -238,7 +238,6 @@ def handle_migration(args):
                 )
 
             courses = {}
-            # status > 1 is considered archived, and so skip it
             for course in database.execute(
                 'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course'
             ):
