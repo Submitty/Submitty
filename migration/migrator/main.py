@@ -81,9 +81,12 @@ def status(args):
                     continue
                 print_status(database, environment, loop_args)
                 database.close()
-            except OperationalError:
+            except OperationalError as exc:
                 print(
-                    'Could not get database for migrations for {}'.format(environment)
+                    'Could not get database for migrations for {}:\n  {}'.format(
+                        environment,
+                        str(exc).split("\n")[0]
+                    )
                 )
         else:
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
@@ -204,13 +207,15 @@ def handle_migration(args):
     for environment in get_environments(args.environments):
         if environment in ['master', 'system']:
             loop_args = deepcopy(args)
-            loop_args.config.database['dbname'] = 'submitty'
+            loop_args.config.database['dbname'] = 'submitty1'
             try:
                 database = db.Database(loop_args.config.database, environment)
-            except OperationalError:
+            except OperationalError as exc:
                 raise SystemExit(
-                    'Submitty Database Migration Error:  '
-                    'Database does not exist for {}'.format(environment)
+                    'Submitty Database Migration Error for {}:\n  {}'.format(
+                        environment,
+                        str(exc).split("\n")[0]
+                    )
                 )
             migrate_environment(
                 database,
