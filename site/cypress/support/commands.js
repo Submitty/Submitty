@@ -27,12 +27,11 @@ import {buildUrl} from './utils.js';
 //These functions can be called like "cy.login(...)" and will yeild a result
 
 /**
-* Log into Submitty, assumes no one is logged in already
+* Log into Submitty, assumes no one is logged in already and at login page
 *
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add("login", (username="instructor") => { 
-	cy.visit('/');
 	cy.get('input[name=user_id]').type(username);
 	cy.get('input[name=password]').type(username);
 	cy.get('input[name=login]').click();
