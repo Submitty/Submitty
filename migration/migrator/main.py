@@ -207,7 +207,7 @@ def handle_migration(args):
     for environment in get_environments(args.environments):
         if environment in ['master', 'system']:
             loop_args = deepcopy(args)
-            loop_args.config.database['dbname'] = 'submitty1'
+            loop_args.config.database['dbname'] = 'submitty'
             try:
                 database = db.Database(loop_args.config.database, environment)
             except OperationalError as exc:
