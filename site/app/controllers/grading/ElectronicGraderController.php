@@ -609,7 +609,8 @@ class ElectronicGraderController extends AbstractController {
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
+            $override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit';
+            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
@@ -2727,8 +2728,10 @@ class ElectronicGraderController extends AbstractController {
     private function getMarkStats(Mark $mark, User $grader) {
         $gradeable = $mark->getComponent()->getGradeable();
 
-        $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable);
-        $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark);
+        $anon = $this->amIBlindGrading($gradeable, $grader, false);
+
+        $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon);
+        $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark, $anon);
 
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
