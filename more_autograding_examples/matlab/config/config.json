@@ -1,6 +1,4 @@
 {
-  "required_capabilities": "matlab",
-
   "resource_limits" : {
       "RLIMIT_NOFILE" :     1000000, //number of file descriptors
       "RLIMIT_LOCKS" :      1000000,  //number of files open

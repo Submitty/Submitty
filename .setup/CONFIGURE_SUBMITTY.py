@@ -467,8 +467,6 @@ if not args.worker:
             worker_dict['primary']['capabilities'].extend([
                 'cpp',
                 'python',
-                'matlab',
-                'pdf-word-count',
                 'et-cetera',
                 'notebook',
             ])
