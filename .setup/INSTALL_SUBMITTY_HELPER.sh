@@ -383,32 +383,34 @@ if [ "${WORKER}" == 0 ]; then
 fi
 ########################################################################################################################
 ########################################################################################################################
-# BUILD JUNIT TEST RUNNER (.java file)
+# BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-echo -e "Build the junit test runner"
+if [ -x "$(command -v javac)" ]; then
+    echo -e "Build the junit test runner"
 
-# copy the file from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
+    # copy the file from the repo
+    rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
 
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-# root will be owner & group of the source file
-chown  root:root  TestRunner.java
-# everyone can read this file
-chmod  444 TestRunner.java
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+    # root will be owner & group of the source file
+    chown  root:root  TestRunner.java
+    # everyone can read this file
+    chmod  444 TestRunner.java
 
-# compile the executable using the javac we use in the execute.cpp safelist
-/usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
+    # compile the executable using the javac we use in the execute.cpp safelist
+    /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
-# everyone can read the compiled file
-chown root:root TestRunner.class
-chmod 444 TestRunner.class
+    # everyone can read the compiled file
+    chown root:root TestRunner.class
+    chmod 444 TestRunner.class
 
-popd > /dev/null
+    popd > /dev/null
 
 
-# fix all java_tools permissions
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+    # fix all java_tools permissions
+    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+fi
 
 
 ########################################################################################################################
