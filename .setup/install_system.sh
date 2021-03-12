@@ -457,7 +457,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-    	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
         # Enable xdebug support for debugging
         phpenmod xdebug
