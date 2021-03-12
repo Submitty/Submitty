@@ -438,8 +438,8 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
-            echo "Listen 1501" >> /etc/apache2/ports.conf
+        if ! grep -E -q "Listen ${SUBMISSION_PORT}" /etc/apache2/ports.conf; then
+            echo "Listen ${SUBMISSION_PORT}" >> /etc/apache2/ports.conf
         fi
 
         # remove default sites which would cause server to mess up
