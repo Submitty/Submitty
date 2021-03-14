@@ -34,3 +34,4 @@ public/js/ta-grading-rubric.js
 public/js/ta-grading.js
 public/js/user-profile.js
 public/js/userform.js
+cypress/plugins/index.js

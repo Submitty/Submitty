@@ -1,0 +1,39 @@
+{
+    "env": {
+        "cypress/globals": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2017,
+        "sourceType": "module"
+    },
+    "plugins" : [
+        "cypress"
+    ],
+    "rules": {
+        "arrow-spacing": ["error"],
+        "block-spacing": ["error"],
+        "brace-style": ["error", "stroustrup"],
+        "comma-dangle": ["error", "always-multiline"],
+        "curly" : ["error"],
+        "default-param-last": ["error"],
+        "eol-last": ["error"],
+        "indent": ["error", 4, {"SwitchCase": 1}],
+        "keyword-spacing": ["error", {"before": true, "after": true}],
+        "linebreak-style": ["error", "unix"],
+        "no-trailing-spaces": ["error"],
+        "no-var": ["error"],
+        "prefer-arrow-callback": ["error"],
+        "prefer-const": ["error"],
+        "prefer-template": ["error"],
+        "quotes": ["error", "single"],
+        "semi": ["error", "always"],
+        "semi-style": ["error", "last"],
+        "template-curly-spacing": ["error", "never"]
+    }
+}

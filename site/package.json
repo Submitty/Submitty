@@ -29,10 +29,11 @@
   },
   "devDependencies": {
     "cypress": "^6.6.0",
-    "eslint": "^7.21.0"
+    "eslint": "^7.21.0",
+    "eslint-plugin-cypress": "^2.11.2"
   },
   "scripts": {
-    "lint": "eslint \"public/js/**/*.js\"",
-    "lint:fix": "eslint \"public/js/**/*.js\" --fix"
+    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" --fix"
   }
 }
