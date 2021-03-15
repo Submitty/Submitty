@@ -967,9 +967,11 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
     // Last component is open, scroll to general comment for easier access
-    //TODO: Add "Overall Comment" focusing, control
     closeComponent(openComponentId, true).then(function () {
-      scrollToOverallComment();
+      let componentId = getComponentIdByOrder(0);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
     });
   }
   else {
@@ -995,8 +997,13 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
       scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
-    // First component is open, so close it
-    closeAllComponents(true);
+    // First component is open, so open the last one
+    closeComponent(openComponentId, true).then(function () {
+      let componentId = getComponentIdByOrder(numComponents - 1);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
+    });
   }
   else {
     // Any other case, open the previous one
