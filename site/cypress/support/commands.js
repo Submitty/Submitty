@@ -31,17 +31,24 @@ import {buildUrl} from './utils.js';
 *
 * @param {String} [username=instructor] - username & password of who to log in as
 */
-Cypress.Commands.add("login", (username="instructor") => { 
-	cy.get('input[name=user_id]').type(username);
-	cy.get('input[name=password]').type(username);
-	cy.get('input[name=login]').click();
+Cypress.Commands.add('login', (username='instructor') => {
+    cy.get('input[name=user_id]').type(username);
+    cy.get('input[name=password]').type(username);
+    cy.get('input[name=login]').click();
 });
 
 /**
 * Log out of Submitty, assumes a user is already logged in
 */
-Cypress.Commands.add("logout", () => {
-	cy.get('#logout > .flex-line > .icon-title').click();
+Cypress.Commands.add('logout', () => {
+    cy.get('#logout > .flex-line > .icon-title').click();
+});
+
+/**
+* Log out of Submitty, assumes a user is already logged in
+*/
+Cypress.Commands.add('logout', () => {
+    cy.get('#logout > .flex-line > .icon-title').click();
 });
 
 
@@ -54,16 +61,18 @@ Cypress.Commands.add("logout", () => {
 *
 * @param {String|String[]}
 */
-Cypress.Commands.overwrite("visit", (originalFn, options) => { 
-	let url = '';
+Cypress.Commands.overwrite('visit', (originalFn, options) => {
+    let url = '';
 
-	if(Array.isArray(options)){
-		url = buildUrl(options);
-	}else if((typeof options) === 'string'){
-		url = options;
-	}else{
-		url = buildUrl([]);
-	}
+    if (Array.isArray(options)){
+        url = buildUrl(options);
+    }
+    else if ((typeof options) === 'string'){
+        url = options;
+    }
+    else {
+        url = buildUrl([]);
+    }
 
-	originalFn(url);
+    originalFn(url);
 });
