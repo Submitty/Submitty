@@ -68,7 +68,7 @@ class GradeableList extends AbstractModel {
      *
      * @param Core $core
      * @param ?User $user The user to filter gradeables by (null if current user)
-     * @param ?array<string, \app\models\gradeable\Gradeable> $gradeables
+     * @param ?array<string, array<\app\models\gradeable\Gradeable> $gradeables
      * @throws \Exception if a Gradeable failed to load from the database
      */
     public function __construct(Core $core, User $user = null, ?array $gradeables = null) {

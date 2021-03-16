@@ -41,10 +41,8 @@ function nextMonth(month, year) {
  */
 function displayDayCell(year, month, day, curr_view_month) {
     const cell_date_str = `${year.toString()}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    let content = `
-    <td class="cal-day-cell" id=${cell_date_str}>
-    <div>
-    `;
+    let content = `<td class="cal-day-cell" id=${cell_date_str}>
+    <div>`;
     // Title of the day cell
     content += '<div>';
     if (month === curr_view_month) {
@@ -75,7 +73,7 @@ function displayDayCell(year, month, day, curr_view_month) {
         const due_time = gradeable['submission'] !== '' ? new Date(gradeable['submission']['date']) : '';
         let due_string = '';
         if (due_time !== '') {
-            due_string = `Due ${(due_time.getMonth() + 1)}/${(due_time.getDate() + 1)}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
+            due_string = `Due ${(due_time.getMonth() + 1)}/${(due_time.getDate())}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
         }
         content += `
       <a class="cal-gradeable-item cal-gradeable-status-${gradeable['status']}"
@@ -111,13 +109,13 @@ function showCalendar(view_year, view_month) {
         
         <tr class="navigation">
             <th style='text-align: center'>
-                <a class="prev" onclick="loadCalendar(prevMonth(${view_month}, ${view_year}))">&#60;</a>
+                <a class="prev" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
             </th>
             <th colspan="5" class="cal-month-title">
                 <div class="title" >${monthNames[view_month]}, ${view_year}</div>
             </th>
             <th style='text-align: center'>
-                <a class="next" onclick="loadCalendar(nextMonth(${view_month}, ${view_year}))">&#62;</a>
+                <a class="next" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
             </th>
         </tr>
         <tr class='cal-week-title-row'>
@@ -185,6 +183,6 @@ function showCalendar(view_year, view_month) {
  * @param year_ : int year that the calendar will show
  */
 // eslint-disable-next-line no-unused-vars
-function loadCalendar([month_, year_]) {
+function loadCalendar(month_, year_) {
     $('#full_calendar').html(showCalendar(year_, month_));
 }

@@ -10,18 +10,31 @@
    @param gradeables_by_date : an array of "YYYY-mm-dd" -> array(Gradeables)
 #}
 {% macro displayDayCell(self, year, month, day, curr_view_month, gradeables_by_date) %}
-    {% set cell_date = year ~ "-" ~ "%02d"|format(month) ~ "-" ~ "%02d"|format(day) %}
-    <td class="cal-day-cell" id={{ cell_date }}>
+    {% set cell_date_str = year ~ "-" ~ "%02d"|format(month) ~ "-" ~ "%02d"|format(day) %}
+    <td class="cal-day-cell" id={{ cell_date_str }}>
         <div>
-            {% if month == curr_view_month %}
-                <div class="cal-curr-month-date cal-day-title">{{ day }}</div>
-            {% else %}
-                <div class="cal-next-month-date cal-day-title">{{ day }}</div>
-            {% endif %}
+            {# Title of the day cell #}
+            <div>
+                {% if month == curr_view_month %}
+                    {% if year == 'now'|date("Y") and month == 'now'|date('m') and day == 'now'|date('d') %}
+                        <span class="cal-curr-month-date cal-day-title cal-today-title">{{ day }}</span>
+                    {% else %}
+                        <span class="cal-curr-month-date cal-day-title">{{ day }}</span>
+                    {% endif %}
+                {% else %}
+                    {% if month > 12 %}
+                        {% set month = month % 12 %}
+                    {% elseif month <= 0 %}
+                        {% set month = 12 + month %}
+                    {% endif %}
+                    <span class="cal-next-month-date cal-day-title">{{ month }}/{{ day }}</span>
+                {% endif %}
+            </div>
+            {# List all gradeables of other items #}
             <div class="cal-cell-items-panel">
                 {# day content here #}
-                <!-- {{ cell_date }} -->
-                {% for gradeable in gradeables_by_date[cell_date] %}
+                {#<!-- {{ cell_date_str }} -->#}
+                {% for gradeable in gradeables_by_date[cell_date_str] %}
                     {% set due_time = (gradeable.submission != '') ? "Due:" ~ gradeable.submission|date('m/d/Y @ h:i A T') : '' %}
                     <a class="cal-gradeable-item cal-gradeable-status-{{ gradeable.status }}"
                        title="Course: {{ gradeable.course }}&#10;{{ gradeable.title }}&#10;{{ due_time }}"
@@ -128,3 +141,6 @@
         </tbody>
     </table>
 {% endmacro %}
+
+{% set monthNames = ["December", "January", "February", "March", "April", "May", "June", "July", "Auguest", "September", "October", "November", "December"] %}
+{# {{ self.displayCalendar(self, view_year, view_month, curr_year, curr_month, curr_day, gradeables_by_date, monthNames) }} #}

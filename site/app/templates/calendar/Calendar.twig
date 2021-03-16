@@ -1,207 +1,70 @@
 {% import _self as self %}
 
-
-{# This macro creates a cell in the table that should represent a day. It shows the date on the top left corner,
-   and then shows the gradeables on the current date as buttons.
-   @param year : the current year of the date of the cell
-   @param month : the current month of the date of the cell
-   @param day : the current day of the date of the cell
-   @param curr_view_month : the current month that the calendar is showing
-   @param gradeables_by_date : an array of "YYYY-mm-dd" -> array(Gradeables)
-#}
-{% macro displayDayCell(self, year, month, day, curr_view_month, gradeables_by_date) %}
-    {% set cell_date_str = year ~ "-" ~ "%02d"|format(month) ~ "-" ~ "%02d"|format(day) %}
-    <td class="cal-day-cell" id={{ cell_date_str }}>
-        <div>
-            {# Title of the day cell #}
-            <div>
-            {% if month == curr_view_month %}
-                {% if year == 'now'|date("Y") and month == 'now'|date('m') and day == 'now'|date('d') %}
-                    <span class="cal-curr-month-date cal-day-title cal-today-title">{{ day }}</span>
-                {% else %}
-                    <span class="cal-curr-month-date cal-day-title">{{ day }}</span>
-                {% endif %}
-            {% else %}
-                {% if month > 12 %}
-                    {% set month = month % 12 %}
-                {% elseif month <= 0 %}
-                    {% set month = 12 + month %}
-                {% endif %}
-                <span class="cal-next-month-date cal-day-title">{{ month }}/{{ day }}</span>
-            {% endif %}
-            </div>
-            {# List all gradeables of other items #}
-            <div class="cal-cell-items-panel">
-                {# day content here #}
-                {#<!-- {{ cell_date_str }} -->#}
-                {% for gradeable in gradeables_by_date[cell_date_str] %}
-                    {% set due_time = (gradeable.submission != '') ? "Due:" ~ gradeable.submission|date('m/d/Y @ h:i A T') : '' %}
-                    <a class="cal-gradeable-item cal-gradeable-status-{{ gradeable.status }}"
-                       title="Course: {{ gradeable.course }}&#10;{{ gradeable.title }}&#10;{{ due_time }}"
-                       href="{{ gradeable.url }}">
-                        {{ gradeable.title }}
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
-    </td>
-{% endmacro %}
-
-{# This macro creates a table that shows the calendar.
-   This calendar can be used to show different items (not only gradeables, as long as the data passed in statisfied the
-   key-value pairs described below.
-
-   @param view_year : the year that the calendar is viewing
-   @param view_month : the month that the calendar is viewing
-   @param curr_year : the year of current time
-   @param curr_month : the month of current time
-   @param curr_day : the day of current time
-   @param gradeables_by_date : an array of "YYYY-mm-dd" -> array(Gradeable), and Gradeable is an array/key-value pairs
-                               that has the structure of
-                    'gradeable_id' => string (the id of the item, reserved row and useless for now)
-                    'title' => string (the title of the item which will be shown on each clickable button)
-                    'semester' => string (the semester of which the item belongs)
-                    'course' => string (the title of the course of which the item belongs)
-                    'url' => string (the url of the clickable button)
-                    'submission' => DateTime (the timestamp of the item, shown in the popup tooltip)
-                    'status' => int (the status of the gradeable, open/closed/grading..., is used to show different
-                                     colors of item, relation between color and integer are recoreded in css)
-                    'grading_open' => DateTime (reserved, usesless for now. Can be empty)
-                    'grading_due' => DateTime (reserved, usesless for now. Can be empty)
-   @param monthNames : an array contains the English representation of months
-#}
-{% macro displayCalendar(self, view_year, view_month, curr_year, curr_month, curr_day, gradeables_by_date, monthNames) %}
-    {% set currDate = date(curr_year ~ "-" ~ curr_month ~ "-" ~ curr_day) %}
-    {% set viewDate = date(view_year ~ "-" ~ view_month ~ "-" ~ curr_day) %}
-
-    <table class='table table-striped table-bordered persist-area table-calendar'>
-        <thead>
-        {# Header area: two buttons to move, and month #}
-        <tr class="navigation">
-            <th style='text-align: center'>
-                <a class="prev" onclick="loadCalendar(prevMonth({{ view_month }}, {{ view_year }}))">&#60;</a>
-            </th>
-            <th colspan="5" class="cal-month-title">
-                <div class="title" >{{ monthNames[view_month] }}, {{ view_year }}</div>
-            </th>
-            <th style='text-align: center'>
-                <a class="next" onclick="loadCalendar(nextMonth({{ view_month }}, {{ view_year }}))">&#62;</a>
-            </th>
-        </tr>
-        <tr class='cal-week-title-row'>
-            <th width="12%">Sunday</th>
-            <th width="15%">Monday</th>
-            <th width="15%">Tuesday</th>
-            <th width="16%">Wednesday</th>
-            <th width="15%">Thursday</th>
-            <th width="15%">Friday</th>
-            <th width="12%">Saturday</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            {% set startWeekday = viewDate|date('F 1\\s\\t Y')|date('w') %}
-
-            {# Show days at the end of last month that belongs to the first week of current month #}
-            {% if startWeekday != 0 %}
-                {% set lastMonthEnd = viewDate|date_modify("-1 month")|date('t') %}
-                {% set lastMonthStart = lastMonthEnd + 1 - startWeekday %}
-                {% for day in range(lastMonthStart,lastMonthEnd) %}
-                    {{ self.displayDayCell(self, view_year, view_month - 1, day, view_month, gradeables_by_date) }}
-                {% endfor %}
-            {% endif %}
-
-            {# Shows each day of current month #}
-            {% set daysInMonth = viewDate|date('t') %}
-            {% set weekday = startWeekday %}
-
-            {% for day in range(1,daysInMonth) %}
-            {{  self.displayDayCell(self, view_year, view_month, day, view_month, gradeables_by_date) }}
-            {% if weekday == 6 %}
-            {% set weekday = 0 %}
-        </tr> {# Next week should show on next line #}
-        <tr>
-            {% else %}
-                {% set weekday = weekday + 1 %}
-            {% endif %}
-            {% endfor %}
-
-            {# Show the start of next month that belongs to the last week of current month #}
-            {% if weekday != 0 %}
-                {% for day in range(1, 7-weekday) %}
-                    {{ self.displayDayCell(self, view_year, view_month+1, day, view_month, gradeables_by_date) }}
-                    {% if weekday == 6 %}
-                        {% set weekday = 0 %}
-                    {% else %}
-                        {% set weekday = weekday + 1 %}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        </tr>
-        </tbody>
-    </table>
-{% endmacro %}
-
-
 <script>
     let gradeables_by_date = {{ gradeables_by_date|json_encode|raw }};
     let curr_year = {{ curr_year }};
     let curr_month = {{ curr_month }};
     let curr_day = {{ curr_day }};
+
+    window.onload = function () {
+        loadCalendar({{ view_month }}, {{ view_year }});
+    }
 </script>
 
+{# Begin Calendar #}
 <div class="content">
     <h1>Calendar</h1>
+    <div class="cal-content">
+        <div class="cal-toolbar">
+            {# Replace by js function call #}
+        </div>
 
-    {# Begin Calendar #}
-    <div class="cal-toolbar">
+        <div class="calendar" style='margin-bottom: 20px' id="full_calendar">
+        </div>
     </div>
 
-    <div class="calendar" style='margin-bottom: 20px' id="full_calendar">
-        {% set monthNames = ["December", "January", "February", "March", "April", "May", "June", "July", "Auguest", "September", "October", "November", "December"] %}
-        {{ self.displayCalendar(self, view_year, view_month, curr_year, curr_month, curr_day, gradeables_by_date, monthNames) }}
-    </div>
-    {# End Calendar #}
-
-    {% if show_only_calendar == 0 %}
-        {% if gradeable_sections|length > 0 %}
-            <div id="gradeables">
-            {% for list_section, info in gradeable_sections %}
-                <div style='margin-bottom: 20px'>
-                    <div id="{{ info.section_id }}" class="course-section-heading">
-                        <div class="course-section-title">
-                            {{ info.title }}
-                            {% if info.subtitle != "" %}
-                                &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
-                            {% endif %}
+    {# List items in table #}
+    <div class="content">
+        {% if show_only_calendar == 0 %}
+            {% if gradeables_by_section|length > 0 %}
+                <div id="gradeables">
+                {% for section_num, info in gradeables_by_section %}
+                    <div style='margin-bottom: 20px'>
+                        <div id="{{ info.section_id }}" class="course-section-heading">
+                            <div class="course-section-title">
+                                {{ info.title }}
+                                {% if info.subtitle != "" %}
+                                    &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
 
-                    <table class='table table-striped table-bordered persist-area' style='text-align: left'>
-                        <thead>
-                            <tr>
-                                <th>Course</th>
-                                <th>Gradeable</th>
-                                <th>Submission Closes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for id, gradeable in info.gradeables %}
-                            <tr>
-                                <td>{{ gradeable.course }}</td>
-                                <td><a href="{{ gradeable.url }}">{{ gradeable.title }}</a></td>
-                                <td>{{ (gradeable.submission != '') ? gradeable.submission|date('m/d/Y @ h:i A T') : '' }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                        <table class='table table-striped table-bordered persist-area' style='text-align: left'>
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Gradeable</th>
+                                    <th>Submission Closes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for id, gradeable in info.gradeables %}
+                                <tr>
+                                    <td>{{ gradeable.course }}</td>
+                                    <td><a href="{{ gradeable.url }}">{{ gradeable.title }}</a></td>
+                                    <td>{{ (gradeable.submission != '') ? gradeable.submission|date('m/d/Y @ h:i A T') : '' }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
                 </div>
-            {% endfor %}
-            </div>
-        {% else %}
-            <div class="container">
-                <p>There are currently no assignments posted.  Please check back later.</p>
-            </div>
+            {% else %}
+                <div class="container">
+                    <p>{{ empty_message }}</p>
+                </div>
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </div>
 </div>

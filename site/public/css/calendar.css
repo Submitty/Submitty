@@ -29,6 +29,7 @@
 .cal-today-title
 {
     background: #2f99d8;
+    color: var(--btn-text-white);
     border-radius: 50%;
     padding-left: 3px;
     padding-right: 3px;
