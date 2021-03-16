@@ -12,7 +12,7 @@ use app\views\NavigationView;
 
 class CalendarView extends AbstractView {
 
-    public function showCalendar(GradeableList $gradeable_list, bool $showOnlyCalendar=false) {
+    public function showCalendar(GradeableList $gradeable_list, bool $showOnlyCalendar = false) {
         $gradeables_by_date = [];
         $render_sections = [];
         $gradeable_list_sections = [
@@ -22,10 +22,12 @@ class CalendarView extends AbstractView {
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
         ];
 
-        foreach ($gradeable_list_sections as $section => $gradeables) {
+        foreach ($gradeable_list_sections as $section => $gradeables)
+        {
             $render_section = NavigationView::gradeableSections[$section];
             $render_section['gradeables'] = [];
-            foreach (array_reverse($gradeables, true) as $id => $gradeable) {
+            foreach (array_reverse($gradeables, true) as $id => $gradeable)
+            {
                 [$semester, $course_title, $gradeable_id] = explode("||", $id);
                 /** @var Gradeable $gradeable */
                 $currGradeable = [
@@ -48,17 +50,19 @@ class CalendarView extends AbstractView {
             $render_sections[] = $render_section;
         }
 
-        $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  $_GET['year']  : (int)date("Y");
-        $month = (isset($_GET['month']) && $_GET['month'] != "") ?  $_GET['month'] : (int)date("n");
+        $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  $_GET['year']  : (int) date("Y");
+        $month = (isset($_GET['month']) && $_GET['month'] != "") ?  $_GET['month'] : (int) date("n");
 
         // Error checking
         if ($month < 0 || $month > 12) {
-            $month = (int)date("n");
-        } else {
-            $month = (int)sprintf("%08d", $month); // remove leading zero
+            $month = (int) date("n");
+        }
+        else
+        {
+            $month = (int) sprintf("%08d", $month); // remove leading zero
         }
         if ($year < 1970 || $year > 2100) {
-            $year = (int)date("Y");
+            $year = (int) date("Y");
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");

@@ -43,7 +43,8 @@ class CalendarController extends AbstractController {
                     $this->gradeables["{$course->getSemester()}||{$course->getTitle()}||{$gradeable->getId()}"] = $gradeable;
                 }
                 $this->core->getCourseDB()->disconnect();
-            } catch (\Exception $e) {
+            } catch (\Exception $e)
+            {
             }
         }
         $this->core->getConfig()->setCourseLoaded(false);
