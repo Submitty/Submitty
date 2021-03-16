@@ -1,0 +1,167 @@
+ /* the entire table of calendar */
+.table-calendar
+{
+    text-align: left;
+    border:1px solid #000
+}
+
+/* the title at the top of the calendar table, showing month, year */
+.cal-month-title
+{
+    font-size: 18px;
+    text-align: center;
+}
+
+/* the row of Monday, Tuesday, ... */
+.cal-week-title-row
+{
+    margin-bottom: 20px
+}
+
+/* the day number in each cell */
+.cal-day-title
+{
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* the day number in each cell if the day is the current date */
+.cal-today-title
+{
+    background: #2f99d8;
+    border-radius: 50%;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+/* the day number in each cell if the day belongs to prev/next month of the month the calendar is viewing */
+.cal-next-month-date
+{
+    color:#bfbfbf;
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* the cell of each table in the calendar, representing a date */
+.cal-day-cell {
+    min-height: 100px;
+}
+
+/* area in each day cell that lists the items (gradeables, etc) */
+.cal-cell-items-panel {
+    max-height:160px;
+    width:100%;
+    display:block;
+    overflow-y:auto;
+    overflow-x: hidden;
+}
+
+ /* each item in the day cell */
+.cal-gradeable-item {
+    color: var(--btn-text-white);
+    margin:1px;
+    text-decoration: none;
+    white-space: normal;
+    font-size: 100%;
+    font-weight: normal;
+    line-height: normal;
+    text-align: left;
+    vertical-align: baseline;
+    padding: 0 0 0 5px;
+    display: block;
+    width: 100%;
+    user-select: none;
+    background-image: none;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px 0 var(--box-shadow-very-transparent), 0 2px 1px -1px var(--box-shadow-very-transparent), 0 1px 3px 0 var(--box-shadow-slightly-transparent);
+}
+
+ /* each item in the day cell as a button */
+a.cal-gradeable-item {
+    color: var(--btn-text-white);
+}
+
+a.cal-gradeable-item:hover {
+    color: var(--btn-text-white);
+    cursor:pointer;
+}
+
+/* Item colors */
+/* Future homework */
+.cal-gradeable-status-0
+{
+}
+
+/* Reserved: Beta homework */
+.cal-gradeable-status-1
+{
+}
+
+/* OPEN TO SUBMIT */
+.cal-gradeable-status-2
+{
+    background-color: var(--actionable-blue);
+}
+
+.cal-gradeable-status-2:hover
+{
+    background-color: var(--hover-actionable-blue);
+}
+
+.cal-gradeable-status-2:focus
+{
+    background-color: var(--focus-actionable-blue);
+}
+
+/* PAST DUE / LATE SUBMIT */
+.cal-gradeable-status-3
+{
+    background-color: var(--danger-red);
+}
+
+.cal-gradeable-status-3:hover
+{
+    background-color: var(--hover-active-danger-red);
+    border: var(--hover-active-danger-red);
+}
+.cal-gradeable-status-3:focus
+{
+    background-color: var(--focus-danger-red);
+    border: var(--focus-danger-red);
+}
+
+/* CLOSED  being graded by TA/Instructor */
+.cal-gradeable-status-4
+{
+    background-color: #a07436;
+}
+
+.cal-gradeable-status-4:hover
+{
+    background-color: #834609;
+    border: #834609;
+}
+
+.cal-gradeable-status-4:focus
+{
+    background-color: #cab99d;
+    border: #cab99d;
+}
+
+/* GRADES AVAILABLE */
+.cal-gradeable-status-5
+{
+    background-color: var(--good-green);
+}
+
+.cal-gradeable-status-5:hover
+{
+    background-color: var(--hover-good-green);
+    border: var(--hover-good-green);
+}
+
+.cal-gradeable-status-5:focus
+{
+    background-color: var(--disabled-good-green);
+    border: var(--disabled-good-green);
+}
