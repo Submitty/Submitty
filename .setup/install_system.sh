@@ -438,8 +438,8 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
-            echo "Listen 1501" >> /etc/apache2/ports.conf
+        if ! grep -E -q "Listen ${SUBMISSION_PORT}" /etc/apache2/ports.conf; then
+            echo "Listen ${SUBMISSION_PORT}" >> /etc/apache2/ports.conf
         fi
 
         # remove default sites which would cause server to mess up
@@ -457,7 +457,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-    	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
         # Enable xdebug support for debugging
         phpenmod xdebug
@@ -663,7 +663,7 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi

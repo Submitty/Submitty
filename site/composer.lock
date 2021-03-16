@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "200eccdadd47f3175028417a16e1b7b1",
+    "content-hash": "0dc1d3ba9b6a5928863843d12aa2cd67",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -4505,16 +4505,16 @@
         },
         {
             "name": "submitty/php-codesniffer",
-            "version": "2.3.0",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/submitty-php-codesniffer.git",
-                "reference": "a0400fd098b8d9ecfd773961925de13761f0e339"
+                "reference": "9153e2ee82cbcaa16ac42f8e19166617498686d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/a0400fd098b8d9ecfd773961925de13761f0e339",
-                "reference": "a0400fd098b8d9ecfd773961925de13761f0e339",
+                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/9153e2ee82cbcaa16ac42f8e19166617498686d9",
+                "reference": "9153e2ee82cbcaa16ac42f8e19166617498686d9",
                 "shasum": ""
             },
             "require": {
@@ -4523,12 +4523,12 @@
                 "squizlabs/php_codesniffer": "^3.5.4"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
                 "pcov/clobber": "^2.0",
                 "phpunit/phpunit": "^7.5.12"
             },
             "suggest": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2 || This Composer plugin will sort out the PHPCS 'installed_paths' automatically."
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0 || This Composer plugin will sort out the PHPCS 'installed_paths' automatically."
             },
             "type": "phpcodesniffer-standard",
             "autoload": {
@@ -4547,7 +4547,7 @@
                 }
             ],
             "description": "Submitty PHP CodeSniffer Standard",
-            "time": "2020-01-31T16:37:53+00:00"
+            "time": "2021-03-12T02:41:12+00:00"
         },
         {
             "name": "theseer/tokenizer",

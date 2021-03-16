@@ -44,6 +44,13 @@ Cypress.Commands.add('logout', () => {
     cy.get('#logout > .flex-line > .icon-title').click();
 });
 
+/**
+* Log out of Submitty, assumes a user is already logged in
+*/
+Cypress.Commands.add('logout', () => {
+    cy.get('#logout > .flex-line > .icon-title').click();
+});
+
 
 /**
 * Visit a url either by an array of parts or a completed url E.g:
