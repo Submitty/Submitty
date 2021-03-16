@@ -73,7 +73,7 @@ class CalendarView extends AbstractView {
      * This function shows a calendar with arbitrary items. It first shows a calendar view that list all items on
      * calendar by their given date. Then it shows a series of tables to list all items.
      *
-     * @param $items_by_date array of "YYYY-mm-dd" -> array(ELEMENT),
+     * @param array $items_by_date array of "YYYY-mm-dd" -> array(ELEMENT),
      *              the calendar can accept anything as long as ELEMENT maintains a structure of
      *              'gradeable_id' => string (the id of the item, reserved row and useless for now)
      *              'title' => string (the title of the item which will be shown on each clickable button)
@@ -85,13 +85,13 @@ class CalendarView extends AbstractView {
      *                               colors of item, relation between color and integer are recorded in css)
      *              'grading_open' => DateTime (reserved, useless for now. Can be empty)
      *              'grading_due' => DateTime (reserved, useless for now. Can be empty)
-     * @param $item_by_sections array of id (int) -> array(ELEMENTS).
+     * @param array $item_by_sections array of id (int) -> array(ELEMENTS).
      *              the calendar can accept anything as long as $item_by_sections maintains a structure of
      *              "title" => string (title shown at the top of the table),
      *              "subtitle" =>  string (title shown at the top of the table, if any. Can be empty),
      *              "section_id" => string (the id of the section. Will be used as the HTML id)
      *              "gradeables" => array of ELEMENT. The structure of ELEMENT is described above
-     * @param $empty_message string that will shown at the table of list section when no items are listed
+     * @param string $empty_message string that will shown at the table of list section when no items are listed
      * @return string
      * @see NavigationView::gradeableSections
      */
