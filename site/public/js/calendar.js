@@ -113,7 +113,7 @@ function showCalendar(view_year, view_month) {
                     <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
                 </div>            
             </th>
-            <th colspan="1" style="width=100%">
+            <th colspan="1">
                 <div class="cal-title">
                     <p class="cal-month-title" >${monthNames[view_month]}</p>
                     <p class="cal-year-title" >${view_year}</p>
