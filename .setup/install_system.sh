@@ -182,7 +182,7 @@ pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
 pip3 install psycopg2-binary
-pip3 install sqlalchemy
+pip3 install "sqlalchemy<1.4.0"
 pip3 install pylint
 pip3 install psutil
 pip3 install python-dateutil
@@ -438,8 +438,8 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
-            echo "Listen 1501" >> /etc/apache2/ports.conf
+        if ! grep -E -q "Listen ${SUBMISSION_PORT}" /etc/apache2/ports.conf; then
+            echo "Listen ${SUBMISSION_PORT}" >> /etc/apache2/ports.conf
         fi
 
         # remove default sites which would cause server to mess up
@@ -457,7 +457,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-    	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
         # Enable xdebug support for debugging
         phpenmod xdebug
