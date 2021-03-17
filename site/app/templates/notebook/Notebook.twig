@@ -184,6 +184,14 @@
             {% elseif cell.type == "file_submission" %}
                 {% set num_file_submissions = num_file_submissions + 1 %}
 
+                {% for file in old_files %}
+                    {% if file.name ends with '.jpg' or file.name ends with '.png' %}
+                        
+                    {% elseif file.name ends with '.pdf' %}
+
+                    {% endif %}
+                {% endfor %}
+
                 {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
 
                 <button type="button" class="btn btn-primary 

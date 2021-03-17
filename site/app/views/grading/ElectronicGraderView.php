@@ -978,7 +978,8 @@ HTML;
                         $old_files[] = [
                             'name' => str_replace('\'', '\\\'', $file['name']),
                             'size' => number_format($file['size'] / 1024, 2),
-                            'part' => $i
+                            'part' => $i,
+                            'path' => $file['path']
                         ];
                     }
                 }
