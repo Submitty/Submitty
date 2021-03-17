@@ -11,7 +11,6 @@ use app\views\AbstractView;
 use app\views\NavigationView;
 
 class CalendarView extends AbstractView {
-
     /**
      * Shows a list of Gradeable objects on a calendar.
      *

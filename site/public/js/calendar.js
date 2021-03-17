@@ -107,25 +107,32 @@ function showCalendar(view_year, view_month) {
     <table class='table table-striped table-bordered persist-area table-calendar'>
         <thead>
         
-        <tr class="navigation">
-            <th style='text-align: center'>
-                <a class="prev" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
+        <tr class="cal-navigation">
+            <th colspan="3">
+                <div class="cal-switch" id="prev-month-switch">
+                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
+                </div>            
             </th>
-            <th colspan="5" class="cal-month-title">
-                <div class="title" >${monthNames[view_month]}, ${view_year}</div>
+            <th colspan="1" style="width=100%">
+                <div class="cal-title">
+                    <p class="cal-month-title" >${monthNames[view_month]}</p>
+                    <p class="cal-year-title" >${view_year}</p>
+                </div>
             </th>
-            <th style='text-align: center'>
-                <a class="next" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
+            <th colspan="3">
+                <div class="cal-switch" id="next-month-switch">
+                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
+                </div>            
             </th>
         </tr>
         <tr class='cal-week-title-row'>
-            <th width="12%">Sunday</th>
-            <th width="15%">Monday</th>
-            <th width="15%">Tuesday</th>
-            <th width="16%">Wednesday</th>
-            <th width="15%">Thursday</th>
-            <th width="15%">Friday</th>
-            <th width="12%">Saturday</th>
+            <th class="cal-week-title cal-week-title-sun">Sunday</th>
+            <th class="cal-week-title cal-week-title-mon">Monday</th>
+            <th class="cal-week-title cal-week-title-tue">Tuesday</th>
+            <th class="cal-week-title cal-week-title-wed">Wednesday</th>
+            <th class="cal-week-title cal-week-title-thr">Thursday</th>
+            <th class="cal-week-title cal-week-title-fri">Friday</th>
+            <th class="cal-week-title cal-week-title-sat">Saturday</th>
         </tr>
         </thead>
         <tbody>

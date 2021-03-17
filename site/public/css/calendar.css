@@ -6,16 +6,120 @@
 }
 
 /* the title at the top of the calendar table, showing month, year */
+.cal-navigation
+{
+    margin-bottom: 0;
+    margin-top: 3px;
+}
+
+.cal-title
+{
+    text-align: center;
+}
+
+.cal-btn {
+    font-size: 28px;
+    padding-left:10px;
+    padding-right:10px;
+    vertical-align: middle;
+}
+
+a.cal-btn {
+    color: var(--btn-text-white);
+}
+
+a.cal-btn:hover {
+    color: var(--btn-text-white);
+    background: rgb(83, 83, 83);
+    border-radius: 20%;
+}
+
+a.cal-btn:visited {
+    color: var(--btn-text-white);
+}
+
+a.cal-btn:focus {
+    color: var(--btn-text-white);
+}
+
+.cal-next-btn {
+    margin-left: 20px;
+}
+
+.cal-prev-btn {
+    margin-right: 20px;
+}
+
+
+#prev-month-switch
+{
+    text-align: right;
+}
+
+#next-month-switch
+{
+    text-align: left;
+}
+
 .cal-month-title
 {
+    font-size: 26px;
+    font-family: 'Source Sans Pro', sans-serif;
+    text-transform:uppercase;
+    margin:-7px;
+    border:0;
+}
+
+.cal-year-title
+{
     font-size: 18px;
-    text-align: center;
+    margin:0;
 }
 
 /* the row of Monday, Tuesday, ... */
 .cal-week-title-row
 {
     margin-bottom: 20px
+}
+
+.cal-week-title
+{
+    padding-left: 3px;
+}
+
+.cal-week-title-sun
+{
+    width: 12%
+}
+
+.cal-week-title-mon
+{
+    width: 15%
+}
+
+.cal-week-title-tue
+{
+    width: 15%
+}
+
+.cal-week-title-wed
+{
+    width: 16%
+}
+
+.cal-week-title-thu
+{
+    width: 15%
+}
+
+.cal-week-title-fri
+{
+    width: 15%
+}
+
+.cal-week-title-sat
+{
+    width: 12%
 }
 
 /* the day number in each cell */
@@ -30,6 +134,7 @@
 {
     background: #2f99d8;
     color: var(--btn-text-white);
+    font-style: normal;
     border-radius: 50%;
     padding-left: 3px;
     padding-right: 3px;
