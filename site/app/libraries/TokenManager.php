@@ -73,9 +73,9 @@ class TokenManager {
     public static function parseSessionToken(string $token): Token {
         $token = self::parseToken($token);
         if (
-            !$token->claims()->has('session_id') ||
-            !$token->claims()->has('expire_time') ||
-            !$token->claims()->has('sub')
+            !$token->claims()->has('session_id')
+            || !$token->claims()->has('expire_time')
+            || !$token->claims()->has('sub')
         ) {
             throw new \InvalidArgumentException('Missing claims in session token');
         }
