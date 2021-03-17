@@ -59,11 +59,9 @@ class Server implements MessageComponentInterface {
         try {
             $token = TokenManager::parseSessionToken(
                 $sessid,
-                $this->core->getConfig()->getBaseUrl(),
-                $this->core->getConfig()->getSecretSession()
             );
-            $session_id = $token->getClaim('session_id');
-            $user_id = $token->getClaim('sub');
+            $session_id = $token->claims()->get('session_id');
+            $user_id = $token->claims()->get('sub');
             $logged_in = $this->core->getSession($session_id, $user_id);
             if (!$logged_in) {
                 return false;
