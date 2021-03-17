@@ -67,10 +67,10 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testMissingSessionId() {
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyX2lkIiwiaXNzIjoiaHR0cHM6Ly9zdWJtaXR0eS5vcmciLCJleHBpcmVfdGltZSI6MH0.SDjPG61GUYWf5agRWJVZAd_iuiHHlQceuKeGgCsc1dY';
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyX2lkIiwiaXNzIjoiaHR0cHM6Ly9zdWJtaXR0eS5vcmciLCJleHBpcmVfdGltZSI6MH0.nEHLivbiQR3WSOpD92bxmWi-K-XiUrBugea7xKKBTiU';
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing claims in session token');
-        TokenManager::parseSessionToken($token, 'https://submitty.org', '');
+        TokenManager::parseSessionToken($token);
     }
 
     public function testCreateApiToken() {

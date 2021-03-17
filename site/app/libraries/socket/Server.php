@@ -58,7 +58,7 @@ class Server implements MessageComponentInterface {
 
         try {
             $token = TokenManager::parseSessionToken(
-                $sessid,
+                $sessid
             );
             $session_id = $token->claims()->get('session_id');
             $user_id = $token->claims()->get('sub');

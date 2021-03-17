@@ -23,12 +23,15 @@ use Lcobucci\JWT\Validation\Constraint\SignedWith;
 class TokenManager {
     /** @var Configuration */
     private static $configuration;
+    /** @var string */
+    private static $issuer;
 
     public static function initialize(string $secret, string $issuer): void {
         self::$configuration = Configuration::forSymmetricSigner(
             new Sha256(),
             InMemory::plainText($secret)
         );
+        self::$issuer = $issuer;
         self::$configuration->setValidationConstraints(
             new IssuedBy($issuer),
             new SignedWith(
@@ -46,6 +49,7 @@ class TokenManager {
         $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
+            ->issuedBy(self::$issuer)
             ->relatedTo($user_id)
             ->withClaim('session_id', $session_id)
             ->withClaim('expire_time', $expire_time)
@@ -58,6 +62,7 @@ class TokenManager {
     public static function generateApiToken(string $api_key): Token {
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
+            ->issuedBy(self::$issuer)
             ->withClaim('api_key', $api_key)
             ->getToken(
                 self::$configuration->signer(),
