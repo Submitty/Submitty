@@ -26,31 +26,21 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('https://submitty.org', $token->claims()->get('iss'));
     }
 
-    /*
     public function testWrongSessionTokenSecret() {
-        $token = TokenManager::generateSessionToken(
-            'session_id',
-            'user_id',
-        );
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6InVzZXJfaWQiLCJleHBpcmVfdGltZSI6IjAiLCJzZXNzaW9uX2lkIjoic2Vzc2lvbl9pZCJ9.kw9cXcl-4DtBhad6FyH-k8IJREcSjwJKUXM3HvsUwo0';
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
-        TokenManager::parseSessionToken((string) $token, 'https://submitty.org', '');
+        TokenManager::parseSessionToken($token);
     }
 
     public function testWrongSessionTokenIssuer() {
-        $token = TokenManager::generateSessionToken(
-            'session_id',
-            'user_id',
-            'https://submitty.org',
-            'secret'
-        );
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dyb25nLmNvbSIsInN1YiI6InVzZXJfaWQiLCJleHBpcmVfdGltZSI6IjAiLCJzZXNzaW9uX2lkIjoic2Vzc2lvbl9pZCJ9.qmbDz7SMvlPZtNz2_bQAchHwblCrI_MWczI6FuqRnWM';
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid claims in token');
-        TokenManager::parseSessionToken((string) $token, 'https://wrong.org', 'secret');
+        $this->expectExceptionMessage('Invalid signature for token');
+        TokenManager::parseSessionToken($token);
     }
-    */
 
     public function testWrongSessionTokenType() {
         // Generated at https://jwt.io/ with typ AAA
@@ -87,29 +77,21 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('https://submitty.org', $token->claims()->get('iss'));
     }
 
-    /*
     public function testWrongApiTokenSecret() {
-        $token = TokenManager::generateApiToken(
-            'api_key',
-        );
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsImFwaV9rZXkiOiJteV9hcGlfa2V5In0.24RtKw-_0wITbSYPMJfTCmfPHzsc2mPFG-z_5IXqOBs';
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
-        TokenManager::parseApiToken((string) $token, 'https://submitty.org', '');
+        TokenManager::parseApiToken($token, 'https://submitty.org', '');
     }
 
     public function testWrongApiTokenIssuer() {
-        $token = TokenManager::generateApiToken(
-            'api_key',
-            'https://submitty.org',
-            'secret'
-        );
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3dyb25nLm9yZyIsImFwaV9rZXkiOiJteV9hcGlfa2V5In0.EgCTxwY3LDoGeWY8ftrkhYTW1-MNnRyzMVV6nfBpZFI';
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid claims in token');
-        TokenManager::parseApiToken((string) $token, 'https://wrong.org', 'secret');
+        $this->expectExceptionMessage('Invalid signature for token');
+        TokenManager::parseApiToken($token, 'https://wrong.org', 'secret');
     }
-    */
 
     public function testMissingApiKey() {
         $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyJ9.J9gYCSxsWhDg2SQ0ZU1-8vSBagRqfujj1zh3CJ7JGgM';
