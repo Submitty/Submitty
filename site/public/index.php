@@ -75,6 +75,7 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
+$core->initializeTokenManager();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
