@@ -62,10 +62,10 @@ class TestHandleMigration(unittest.TestCase):
 
         with self.assertRaises(SystemExit) as context, \
                 patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError('test', None, None)
+            mock_class.side_effect = OperationalError('test', None, "No Database")
             main.handle_migration(args)
         self.assertEqual(
-            "Submitty Database Migration Error:  Database does not exist for master",
+            "Submitty Database Migration Error for master:\n  (builtins.str) No Database",
             str(context.exception)
         )
 
@@ -77,10 +77,10 @@ class TestHandleMigration(unittest.TestCase):
 
         with self.assertRaises(SystemExit) as context, \
                 patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError('test', None, None)
+            mock_class.side_effect = OperationalError('test', None, "No Database")
             main.handle_migration(args)
         self.assertEqual(
-            "Submitty Database Migration Error:  Database does not exist for system",
+            "Submitty Database Migration Error for system:\n  (builtins.str) No Database",
             str(context.exception)
         )
 
@@ -119,11 +119,11 @@ class TestHandleMigration(unittest.TestCase):
 
         with self.assertRaises(SystemExit) as context, \
                 patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError('test', None, None)
+            mock_class.side_effect = OperationalError('test', None, "No Database")
             main.handle_migration(args)
 
         self.assertEqual(
-            "Submitty Database Migration Error:  Database does not exist for master",
+            "Submitty Database Migration Error for master:\n  (builtins.str) No Database",
             str(context.exception)
         )
 
