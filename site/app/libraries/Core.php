@@ -387,6 +387,16 @@ class Core {
     }
 
     /**
+     * Initializes the token manager to be used. This should be called
+     * after the config has been loaded.
+     *
+     * @return void
+     */
+    public function initializeTokenManager(): void {
+        TokenManager::initialize($this->config->getSecretSession(), $this->config->getBaseUrl());
+    }
+
+    /**
      * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
      * within the app/authentication folder. The username and password for the user being authenticated are passed
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
@@ -405,11 +415,9 @@ class Core {
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),
                     $user_id,
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession(),
                     $persistent_cookie
                 );
-                return Utils::setCookie('submitty_session', (string) $token, $token->getClaim('expire_time'));
+                return Utils::setCookie('submitty_session', (string) $token, $token->claims()->get('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -436,9 +444,7 @@ class Core {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
                 return (string) TokenManager::generateApiToken(
-                    $this->database_queries->getSubmittyUserApiKey($user_id),
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession()
+                    $this->database_queries->getSubmittyUserApiKey($user_id)
                 );
             }
         }
@@ -694,13 +700,11 @@ class Core {
         if (isset($_COOKIE[$cookie_key])) {
             try {
                 $token = TokenManager::parseSessionToken(
-                    $_COOKIE[$cookie_key],
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession()
+                    $_COOKIE[$cookie_key]
                 );
-                $session_id = $token->getClaim('session_id');
-                $expire_time = $token->getClaim('expire_time');
-                $logged_in = $this->getSession($session_id, $token->getClaim('sub'));
+                $session_id = $token->claims()->get('session_id');
+                $expire_time = $token->claims()->get('expire_time');
+                $logged_in = $this->getSession($session_id, $token->claims()->get('sub'));
                 // make sure that the session exists and it's for the user they're claiming
                 // to be
                 if (!$logged_in) {
@@ -713,9 +717,7 @@ class Core {
                             $cookie_key,
                             (string) TokenManager::generateSessionToken(
                                 $session_id,
-                                $token->getClaim('sub'),
-                                $this->getConfig()->getBaseUrl(),
-                                $this->getConfig()->getSecretSession()
+                                $token->claims()->get('sub')
                             ),
                             $expire_time
                         );
@@ -742,11 +744,9 @@ class Core {
         if (!empty($jwt)) {
             try {
                 $token = TokenManager::parseApiToken(
-                    $request->headers->get("authorization"),
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession()
+                    $request->headers->get("authorization")
                 );
-                $api_key = $token->getClaim('api_key');
+                $api_key = $token->claims()->get('api_key');
                 $logged_in = $this->loadApiUser($api_key);
             }
             catch (\InvalidArgumentException $exc) {
