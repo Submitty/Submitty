@@ -1,4 +1,4 @@
-name: 'PR Title Check'
+name: 'Submitty PR Title Check'
 on:
   pull_request:
     # check when PR
