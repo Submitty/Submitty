@@ -11,4 +11,10 @@ jobs:
   title-check:
     runs-on: ubuntu-latest
     steps:
+      #
+      # pull request titles format rules here:
+      # https://submitty.org/developer/how_to_contribute#how-to-make-a-pull-request-pr-to-submitty
+      #
+      # [<TYPE>:<MODULE>] <SUBJECT>
+      #
       - uses: submitty/action-pr-title@master
