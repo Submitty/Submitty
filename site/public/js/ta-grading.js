@@ -966,7 +966,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, scroll to general comment for easier access
+    // Last component is open, close it and then open and scroll to first component
     closeComponent(openComponentId, true).then(function () {
       let componentId = getComponentIdByOrder(0);
       toggleComponent(componentId, true).then(function () {
