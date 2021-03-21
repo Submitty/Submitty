@@ -997,7 +997,7 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
       scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
-    // First component is open, so open the last one
+    // First component is open, close it and then open and scroll to the last one
     closeComponent(openComponentId, true).then(function () {
       let componentId = getComponentIdByOrder(numComponents - 1);
       toggleComponent(componentId, true).then(function () {
