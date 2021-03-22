@@ -75,6 +75,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
