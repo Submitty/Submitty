@@ -451,7 +451,16 @@ def grade_from_zip(
 
     # Remove the tmp directory.
     shutil.rmtree(working_directory)
-    autograding_utils.cleanup_stale_containers(which_untrusted)
+    try:
+        autograding_utils.cleanup_stale_containers(which_untrusted, config.logger.log_message)
+    except Exception:
+        config.logger.log_stack_trace(
+            traceback.format_exc(),
+            job_id=queue_obj['job_id'],
+            is_batch=queue_obj["regrade"],
+            which_untrusted=which_untrusted,
+            jobname=item_name
+        )
     return my_results_zip_file
 
 

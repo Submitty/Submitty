@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "python",
+
     "assignment_message" : "Submit each part of your homework to the right bucket or you will not receive credit.",
     "part_names" : [ "Problem 1: Temperature", "Problem 2: Variables", "Problem 3: Area & Volume", "Problem 4: Count Odd" ],
 

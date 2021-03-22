@@ -182,7 +182,7 @@ pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
 pip3 install psycopg2-binary
-pip3 install sqlalchemy
+pip3 install "sqlalchemy<1.4.0"
 pip3 install pylint
 pip3 install psutil
 pip3 install python-dateutil
@@ -327,52 +327,51 @@ usermod -a -G docker "${DAEMON_USER}"
 #################################################################
 # JAR SETUP
 #################
+if [ -x "$(command -v javac)" ]; then
 
-# -----------------------------------------
-echo "Getting JUnit & Hamcrest..."
+    # -----------------------------------------
+    echo "Getting JUnit & Hamcrest..."
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
-if [ ${WORKER} == 0 ]; then
+    if [ ${WORKER} == 0 ]; then
+        chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+    fi
+    chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
+
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+    rm -rf junit*jar
+    wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    popd > /dev/null
+
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
+    rm -rf hamcrest*.jar
+    wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    popd > /dev/null
+
+    # TODO:  Want to Install JUnit 5.0
+    # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
+
+    echo "Getting JaCoCo..."
+
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
+    wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
+    mkdir jacoco-${JACOCO_VERSION}
+    unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
+    mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
+    mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
+    rm -rf jacoco-${JACOCO_VERSION}
+    rm -f jacoco-${JACOCO_VERSION}.zip
+    chmod o+r . *.jar
+    popd > /dev/null
+
+
+    # fix all java_tools permissions
     chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 fi
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-rm -rf junit*jar
-wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
-popd > /dev/null
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
-rm -rf hamcrest*.jar
-wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
-popd > /dev/null
-
-# TODO:  Want to Install JUnit 5.0
-# And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-
-# JaCoCo is a replacement for EMMA
-
-echo "Getting JaCoCo..."
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
-wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
-mkdir jacoco-${JACOCO_VERSION}
-unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
-mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
-mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
-rm -rf jacoco-${JACOCO_VERSION}
-rm -f jacoco-${JACOCO_VERSION}.zip
-chmod o+r . *.jar
-popd > /dev/null
-
-
-# fix all java_tools permissions
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 #################################################################
@@ -438,8 +437,8 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
-            echo "Listen 1501" >> /etc/apache2/ports.conf
+        if ! grep -E -q "Listen ${SUBMISSION_PORT}" /etc/apache2/ports.conf; then
+            echo "Listen ${SUBMISSION_PORT}" >> /etc/apache2/ports.conf
         fi
 
         # remove default sites which would cause server to mess up
@@ -457,7 +456,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-    	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
         # Enable xdebug support for debugging
         phpenmod xdebug
@@ -663,7 +662,7 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi

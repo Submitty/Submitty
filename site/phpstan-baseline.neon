@@ -120,27 +120,32 @@ parameters:
 			count: 2
 			path: app/controllers/forum/ForumController.php
 
-		-	
-			message: "#^Variable \\$graded_component might not be defined\\.$#"	
-			count: 2	
-			path: app/controllers/grading/ElectronicGraderController.php			
-
-		-	
-			message: "#^Variable \\$team_users might not be defined\\.$#"	
-			count: 1	
-			path: app/controllers/grading/ElectronicGraderController.php	
-
-		-	
-			message: "#^Variable \\$all_teams might not be defined\\.$#"	
-			count: 2	
+		-
+			message: "#^Variable \\$graded_component might not be defined\\.$#"
+			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$team_users might not be defined\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$all_teams might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
 		-
 			message: "#^Offset 0 does not exist on array\\(\\)\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$from This is the user that was being viewed when a navigation button was clicked on the TA grading\ninterface\\.  Knowing who we were viewing allows us to decide who to view next\\.\\)\\: Unexpected token \"\\$from\", expected type at offset 236$#"
+			message:
+				"""
+					#^PHPDoc tag @param has invalid value \\(\\$from This is the user that was being viewed when a navigation button was clicked on the TA grading
+					                 interface\\.  Knowing who we were viewing allows us to decide who to view next\\.\\)\\: Unexpected token "\\$from", expected type at offset 236$#
+				"""
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
@@ -155,7 +160,11 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$who_id This is the user we wish to view, this field will only be passed on when the request originates\non the grading index page\\)\\: Unexpected token \"\\$who_id\", expected type at offset 68$#"
+			message:
+				"""
+					#^PHPDoc tag @param has invalid value \\(\\$who_id This is the user we wish to view, this field will only be passed on when the request originates
+					                 on the grading index page\\)\\: Unexpected token "\\$who_id", expected type at offset 68$#
+				"""
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
@@ -325,11 +334,6 @@ parameters:
 			path: app/libraries/Logger.php
 
 		-
-			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\Output\\:\\:renderTemplate\\(\\) should return string but returns null\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -362,6 +366,11 @@ parameters:
 		-
 			message: "#^PHPDoc tag @return with type array is incompatible with native type Ds\\\\Set\\.$#"
 			count: 2
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
+			count: 1
 			path: app/libraries/Output.php
 
 		-
@@ -603,3 +612,4 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
+
