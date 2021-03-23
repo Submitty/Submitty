@@ -17,4 +17,4 @@ jobs:
       #
       # [<TYPE>:<MODULE>] <SUBJECT>
       #
-      - uses: submitty/action-pr-title@master
+      - uses: submitty/action-pr-title@main
