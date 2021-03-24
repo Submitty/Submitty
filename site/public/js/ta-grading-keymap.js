@@ -82,6 +82,7 @@ function isSettingsVisible() {
 }
 
 function showSettings() {
+    generateNotebookList();
     generateHotkeysList();
     $("#settings-popup").show();
     captureTabInModal("settings-popup");
@@ -113,6 +114,26 @@ function generateHotkeysList() {
         keymap: keymap
     }));
 }
+
+Twig.twig({
+    id: "NotebookSettingList",
+    href: "/templates/grading/settings/NotebookSettingList.twig",
+    async: true
+})
+
+/**
+ * Generate list of notebook settings on the ui
+ */
+ function generateNotebookList() {
+    var parent = $("#notebook-setting-list");
+
+    parent.replaceWith(Twig.twig({
+        ref: "NotebookSettingList"
+    }).render()
+    );
+}
+
+//ta-grading-settings-
 
 /**
  * Start rebinding a hotkey
