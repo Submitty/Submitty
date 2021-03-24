@@ -911,9 +911,10 @@ WHERE status = 1"
     public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration) {
         try {
             $this->course_db->beginTransaction();
-            if($expiration == null){
+            if ($expiration == null) {
                 $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
-            } else {
+            }
+            else {
                 $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ?, pinned_expiration = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $expiration, $thread_id]);
             }
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", [$thread_id]);
