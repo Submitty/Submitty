@@ -400,7 +400,7 @@ WHERE status = 1"
         $query_favorite = "case when sf.user_id is NULL then false else true end";
 
         if ($want_order) {
-            $query_raw_select[]     = "row_number() over(ORDER BY pinned_expiration DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
+            $query_raw_select[]     = "row_number() over(ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
         }
         $query_raw_select[]     = "t.*";
         $query_raw_select[]     = "({$query_favorite}) as favorite";
@@ -729,7 +729,7 @@ WHERE status = 1"
 
     public function getUnviewedPosts($thread_id, $user_id) {
         if ($thread_id == -1) {
-            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned_expiration ORDER BY pinned_expiration DESC");
+            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC");
             $rows = $this->course_db->rows();
             if (!empty($rows)) {
                 $thread_id = $rows[0]["max"];
@@ -794,7 +794,12 @@ WHERE status = 1"
     }
 
     public function setAnnouncement($thread_id, $onOff) {
-        $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", [$onOff, $thread_id]);
+        if ($onOff) {
+            $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", [date("Y-m-d H:i:s", strtotime('+7 days')), $thread_id]);
+        }
+        else {
+            $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", ['1900-01-01 00:00:00', $thread_id]);
+        }
     }
 
     public function addPinnedThread($user_id, $thread_id, $added) {
@@ -903,10 +908,14 @@ WHERE status = 1"
         } return true;
     }
 
-    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date) {
+    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration) {
         try {
             $this->course_db->beginTransaction();
-            $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
+            if($expiration == null){
+                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
+            } else {
+                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ?, pinned_expiration = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $expiration, $thread_id]);
+            }
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", [$thread_id]);
             foreach ($categories_ids as $category_id) {
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$thread_id, $category_id]);
@@ -3718,7 +3727,7 @@ AND gc_id IN (
 
     public function existsAnnouncements($show_deleted = false) {
         $query_delete = $show_deleted ? "true" : "deleted = false";
-        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned_expiration >= ". date("Y-m-d H:i:s"));
+        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned_expiration >= current_timestamp");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
@@ -3794,7 +3803,7 @@ AND gc_id IN (
             $param_list[] = $filterOnUser;
         }
         if ($thread_id == -1) {
-            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned_expiration ORDER BY pinned_expiration ASC");
+            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC");
             $rows = $this->course_db->rows();
             if (!empty($rows)) {
                 $thread_id = $rows[0]["max"];

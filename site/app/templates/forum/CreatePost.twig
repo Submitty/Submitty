@@ -12,7 +12,7 @@
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
-                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Make Announcement"></i></a>
+                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top for seven days?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Make Announcement"></i></a>
 
             {% endif %}
 

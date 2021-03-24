@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    if not database.table_has_column('threads', 'pinned_expiration')::
+    if not database.table_has_column('threads', 'pinned_expiration'):
         database.execute("ALTER TABLE threads ADD IF NOT EXISTS pinned_expiration timestamp with time zone NOT null DEFAULT '1900-01-01 00:00:00'");
         database.execute("UPDATE threads SET pinned_expiration = CAST(CASE WHEN pinned = true THEN '9998-01-01 00:00:00' ELSE '1900-01-01 00:00:00' END AS timestamp with time zone)");
     pass

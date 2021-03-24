@@ -164,7 +164,9 @@
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
-            <div class = "expiration">
+        {% endif %}
+        {% if show_expiration and core.getUser().accessFullGrading() %}
+            <div class = "expiration inline-block" style="display: none;">
               <label class="inline-block" for="experationDate">{{ "Experation Date" }}</label>
               <input type="date" class="date_picker" name="expirationDate" id="expirationDate"/>
             </div>
@@ -197,13 +199,13 @@
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop('disabled', true);
-                $(".expiration").addClass("display-inline");
+                $(".expiration").show();
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop('disabled', false);
-                $(".expiration").removeClass("display-inline");
+                $(".expiration").hide();
             }
         });
 
@@ -211,11 +213,11 @@
             $(".expiration").toggleClass("display-inline");
             if($(".pinThread-checkbox").prop("checked")){
                 $(".pinThread-checkbox").prop("checked", true);
-                $(".expiration").addClass("display-inline");
+                $(".expiration").show();
                 $("#thread_status").val(0);
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
-                $(".expiration").removeClass("display-inline");
+                $(".expiration").hide();
             }
         });
     });

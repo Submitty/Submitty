@@ -308,9 +308,9 @@ class ForumController extends AbstractController {
 
         $pinned = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) || (isset($_POST["pinThread"]) && $_POST["pinThread"] == "pinThread" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
-        $expiration = $_POST["expirationDate"];
+        $expiration = (isset($_POST["expirationDate"]) && $this->core->getUser()->accessFullGrading()) ? $_POST["expirationDate"] : '1900-01-01 00:00:00';
 
-        if (empty($expiration) && $pinned) {
+        if (empty($expiration) && $pinned && $this->core->getUser()->accessAdmin()) {
           $expiration = date("Y-m-d", strtotime('+7 days'));
           $expiration .= " " . date("H:i:s");
         }
@@ -766,6 +766,12 @@ class ForumController extends AbstractController {
             else {
                 $lock_thread_date = null;
             }
+            if (!empty($_POST["expirationDate"]) && $this->core->getUser()->accessAdmin()) {
+                $expiration = $_POST["expirationDate"];
+            }
+            else {
+                $expiration = null;
+            }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
             $categories_ids  = [];
@@ -777,7 +783,7 @@ class ForumController extends AbstractController {
             if (!$this->isValidCategories($categories_ids)) {
                 return false;
             }
-            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date);
+            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration);
         }
         return null;
     }
@@ -1117,6 +1123,7 @@ class ForumController extends AbstractController {
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
+        $output['expiration'] = $result["pinned_expiration"];
     }
 
     /**
