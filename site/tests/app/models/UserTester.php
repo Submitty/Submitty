@@ -166,7 +166,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_joined_email' => true,
                 'team_member_submission_email' => true,
                 'self_notification_email' => false
-            ]
+            ],
+            'registration_subsection' => null
         ];
         $this->assertEquals($expected, $actual);
     }

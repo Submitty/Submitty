@@ -103,6 +103,18 @@
         </div>
         <div class = "box col-md-6">
             {# RIGHT CHUNK#}
+
+            {% if not peer %}
+                <a class="btn btn-default" style="float: right"
+                    onclick="changeOverride()">
+                    {% if include_overridden == 'omit' %}
+                        Include Grade Overrides
+                    {% else %}
+                        Omit Grade Overrides
+                    {% endif %}
+                </a>
+            {% endif %}
+                        
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                 <br>
                 <b>Statistics for Completely Graded Assignments: </b>
@@ -150,6 +162,14 @@
                                 <br/>
                                 Standard Deviation: {{ component.getStandardDeviation() }} <br/>
                                 Count: {{ component.getCount() }} <br/>
+                                {% for grader, data in component.getGraderInfo() %}
+		                            {% if loop.first == grader %}
+		                                <p> Graders: 
+		                            {% else %}
+		                                <p style="padding-left:3.7em">
+		                            {% endif %}
+		                            {{ grader }} (count {{ data['count'] }} - avg {{ data['avg'] }} - stddev {{ data['std_dev'] }}) </p>
+		                        {% endfor%}
                             </div>
                         {% endfor %}
                         <br/>

@@ -1003,7 +1003,7 @@ function check_lichen_jobs(url, semester, course) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
 function downloadStudentAnnotations(url, path, dir) {

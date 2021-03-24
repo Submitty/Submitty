@@ -1,7 +1,7 @@
-Testcase  1: Class Compilation                                    2 /  2  
-Testcase  2: Student and Instructor JUnit Test Compilation        2 /  2  
-Testcase  3: JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests   4 / 10  
-Testcase  4: JaCoCo - Instructor JUnit Tests                      1 /  6  
-Testcase  5: Submission Limit                                             
+test01: Class Compilation                                    2 /  2  
+test02: Student and Instructor JUnit Test Compilation        2 /  2  
+test03: JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests   4 / 10  
+test04: JaCoCo - Instructor JUnit Tests                      1 /  6  
+SubmissionLimit: Submission Limit                                             
 Automatic grading total:                                          9 / 20
 Non-hidden automatic grading total:                               9 / 20

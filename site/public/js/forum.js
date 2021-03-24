@@ -1588,8 +1588,8 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
     }
 }
 
-function pinThread(thread_id, type){
-    var url = buildCourseUrl(['forum', 'threads', 'pin']) + `?type=${type}`;
+function bookmarkThread(thread_id, type){
+    var url = buildCourseUrl(['forum', 'threads', 'bookmark']) + `?type=${type}`;
     $.ajax({
         url: url,
         type: "POST",
@@ -1601,7 +1601,7 @@ function pinThread(thread_id, type){
             window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
         },
         error: function(){
-            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+            window.alert("Something went wrong while trying to update the bookmark. Please try again.");
         }
     });
 }
@@ -1661,7 +1661,7 @@ function sortTable(sort_element_index, reverse=false){
     }
 
     var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
-    var headers = row0.getElementsByTagName("TD");
+    var headers = row0.getElementsByTagName("TH");
 
     for(var i = 0;i<headers.length;i++){
         var index = headers[i].innerHTML.indexOf(' ↓');
