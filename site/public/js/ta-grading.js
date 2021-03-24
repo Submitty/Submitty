@@ -954,7 +954,7 @@ registerKeyHandler({name: "Toggle Solution/TA-Notes Panel", code: "KeyT"}, funct
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -986,7 +986,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
