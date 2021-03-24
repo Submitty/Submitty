@@ -1150,7 +1150,7 @@ def is_testcase_submission_limit(testcase: dict) -> bool:
     )
 
 
-def can_short_circuit(config_obj: str) -> bool:
+def can_short_circuit(config_obj: dict) -> bool:
     """Check if a job can be short-circuited.
 
     Currently, a job can be short-circuited if either:
