@@ -299,7 +299,7 @@ class NavigationView extends AbstractView {
      */
     private function hasGradeButton(Gradeable $gradeable): bool {
         $now = $this->core->getDateTimeNow();
-        $date_limitation = $gradeable->getGradeStartDate() <= $now || $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER;
+        $date_limitation = $gradeable->getGradeStartDate() <= $now || $this->core->getUser()->getGroup() <= User::GROUP_LIMITED_ACCESS_GRADER;
         // full access graders & instructors are allowed to view submissions of assignments with no manual grading
         $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->accessFullGrading();
 
@@ -736,11 +736,12 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getDeleteButton(Gradeable $gradeable) {
+        $name = addslashes($gradeable->getTitle());
         return new Button($this->core, [
             "title" => "Delete Gradeable",
             "href" => "javascript:newDeleteGradeableForm('" .
                 $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
-                . "', '{$gradeable->getTitle()}');",
+                . "', '{$name}');",
             "class" => "fas fa-trash fa-fw black-btn",
             "title_on_hover" => true,
             "aria_label" => "Delete {$gradeable->getTitle()}"

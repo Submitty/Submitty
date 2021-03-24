@@ -18,6 +18,7 @@ import subprocess
 import shutil
 import codecs
 import glob
+import docker
 
 from typing import Optional
 
@@ -41,7 +42,7 @@ class Logger:
 
     def _log_filename(self) -> str:
         """Get the name of the file that should be logged into.
-        
+
         Currently, this is in the format YYYYMMDD.txt.
         """
         now = dateutils.get_current_time()
@@ -295,20 +296,29 @@ def lock_down_folder_permissions(top_dir):
     # Chmod a directory to take away group and other rwx.
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
 
-def cleanup_stale_containers(user_id_of_runner):
+def cleanup_stale_containers(user_id_of_runner, my_log_function):
     # Remove any docker containers left over from past runs.
-    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', f'name={user_id_of_runner}']).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE CONTAINERS')
-    for old_container in old_containers:
-        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
+    client = docker.from_env(timeout=60)
+    try:
+        # Get all containers (running or not) with user_id_of_runner in their name
+        old_containers = client.containers.list(all=True, filters={"name":user_id_of_runner})
+        for old_container in old_containers:
+            try:
+                my_log_function(f'Removing stale container {old_container.name}')
+                old_container.remove(force=True)
+            except Exception:
+                my_log_function("ERROR: Could not remove docker container")
 
-    # Remove any docker networks left over from past runs.
-    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', f'name={user_id_of_runner}']).split()
-    if len(old_containers) > 0:
-        print('REMOVING STALE NETWORKS')
-    for old_network in old_networks:
-        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
+        # Get all networks with user_id_of_runner in their name
+        old_networks = client.networks.list(filters={"name":user_id_of_runner})
+        for old_network in old_networks:
+            try:
+                my_log_function(f'Removing stale network {old_network.name}')
+                old_network.remove()
+            except Exception:
+                my_log_function("ERROR: Could not remove docker network")
+    finally:
+        client.close()
 
 
 def prepare_directory_for_autograding(config, working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
@@ -340,8 +350,6 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
 
     os.mkdir(tmp_work)
     os.mkdir(tmp_work_test_input)
-
-    cleanup_stale_containers(user_id_of_runner)
 
     # Unzip the autograding and submission folders
     unzip_this_file(autograding_zip_file,tmp_autograding)
