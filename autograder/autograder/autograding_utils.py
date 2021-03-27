@@ -301,7 +301,7 @@ def cleanup_stale_containers(user_id_of_runner, my_log_function):
     client = docker.from_env(timeout=60)
     try:
         # Get all containers (running or not) with user_id_of_runner in their name
-        old_containers = client.containers.list(all=True, filters={"name":user_id_of_runner})
+        old_containers = client.containers.list(all=True, filters={"name":user_id_of_runner}, sparse=True)
         for old_container in old_containers:
             try:
                 my_log_function(f'Removing stale container {old_container.name}')
