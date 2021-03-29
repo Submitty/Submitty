@@ -4,6 +4,7 @@ namespace app\views;
 
 use app\models\User;
 use app\libraries\FileUtils;
+use app\models\PollModel;
 
 class PollView extends AbstractView {
 
@@ -73,7 +74,7 @@ class PollView extends AbstractView {
           ]);
     }
 
-    public function editPoll($poll) {
+    public function editPoll(PollModel $poll) {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("Edit Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
