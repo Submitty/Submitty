@@ -1321,10 +1321,10 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
             config_obj = json.load(fd)
         with open(gradeable_config_path) as fd:
             gradeable_config_obj = json.load(fd)
-    except Exception as e:
+    except FileNotFoundError as e:
         config.logger.log_message(
-            f"Error when short-circuiting: could not load configs for {gradeable_id}: {e}. "
-            f"Attempting grade normally.",
+            f"Error when short-circuiting: could not find configs for {gradeable_id}: {e}. "
+            f"Attempting to grade normally.",
             jobname=gradeable_id,
         )
         return False
