@@ -1,3 +1,7 @@
+// List of names of months in English
+const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dev'];
+
 /**
  * Gets the previous month of a given month
  * @param month : int the current month (1 as January and 12 as December)
@@ -16,6 +20,7 @@ function prevMonth(month, year) {
 
 /**
  * Gets the next month of a given month
+ *
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
  * @returns {number[]} : array<int> {next_month, year_of_next_month}
@@ -30,6 +35,30 @@ function nextMonth(month, year) {
     return [month, year];
 }
 
+
+/**
+ * This function creates a Date object based on a string.
+ *
+ * @param datestr : string a string representing a date in the format of YYYY-mm-dd
+ * @returns {Date} a Date object containing the specified date
+ */
+function parseDate(datestr){
+    const temp = datestr.split('-');
+    return new Date(temp[0], temp[1]-1, temp[2]);
+}
+
+/**
+ * This function creates a string in the format of YYYY-mm-dd.
+ *
+ * @param year : int the year
+ * @param month : int the month
+ * @param day : int the date
+ * @returns {string}
+ */
+function dateToStr(year, month, day) {
+    return `${year.toString()}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
+
 /**
  * Creates a HTML table cell that contains a date.
  *
@@ -37,15 +66,25 @@ function nextMonth(month, year) {
  * @param month : int the month of the date (1 as January and 12 as December)
  * @param day : int the date of the date (1 - 31)
  * @param curr_view_month : int the current month that the calendar is viewing
+ * @param view_semester : if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
  * @returns {string} the HTML string containing the cell
  */
-function displayDayCell(year, month, day, curr_view_month) {
-    const cell_date_str = `${year.toString()}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    let content = `<td class="cal-day-cell" id=${cell_date_str}>
-    <div>`;
+function getDayCell(year, month, day, curr_view_month, view_semester=false) {
+    const cell_date_str = dateToStr(year, month ,day);
+    let content;
+    if (view_semester) {
+        content = `<td class="cal-day-cell cal-cell-expand" id=${cell_date_str}>`;
+    }
+    else {
+        content = `<td class="cal-day-cell" id=${cell_date_str}>`;
+    }
+    content += '<div>';
     // Title of the day cell
     content += '<div>';
-    if (month === curr_view_month) {
+    if (view_semester) {
+        content += `<span class="cal-curr-month-date cal-day-title">${monthNamesShort[month]} ${day},</span>`;
+    }
+    else if (month === curr_view_month) {
         // eslint-disable-next-line no-undef
         if (day === curr_day && month === curr_month && year === curr_year) {
             content += `<span class="cal-curr-month-date cal-day-title cal-today-title">${day}</span>`;
@@ -64,10 +103,12 @@ function displayDayCell(year, month, day, curr_view_month) {
         content += `<span class="cal-next-month-date cal-day-title">${month}/${day}</span>`;
     }
     content += '</div>';
+
     // List all gradeables of other items
     content += '<div class="cal-cell-items-panel">';
     // eslint-disable-next-line no-undef
     for (const i in gradeables_by_date[cell_date_str]) {
+        // When hovering over an item, shows the name and due date
         // eslint-disable-next-line no-undef
         const gradeable = gradeables_by_date[cell_date_str][i];
         const due_time = gradeable['submission'] !== '' ? new Date(gradeable['submission']['date']) : '';
@@ -75,12 +116,13 @@ function displayDayCell(year, month, day, curr_view_month) {
         if (due_time !== '') {
             due_string = `Due ${(due_time.getMonth() + 1)}/${(due_time.getDate())}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
         }
+        // Put the item in the day cell
         content += `
-      <a class="cal-gradeable-item cal-gradeable-status-${gradeable['status']}"
-         title="Course: ${gradeable['course']}&#10;${gradeable['title']}&#10;${due_string}"
-         href="${gradeable['url']}">
-        ${gradeable['title']}
-      </a>`;
+        <a class="cal-gradeable-status-${gradeable['status']} cal-gradeable-item"
+           title="Course: ${gradeable['course']}&#10;${gradeable['title']}&#10;${due_string}"
+           href="${gradeable['url']}">
+          ${gradeable['title']}
+        </a>`;
     }
     content += `
     </div>
@@ -90,40 +132,18 @@ function displayDayCell(year, month, day, curr_view_month) {
     return content;
 }
 
-// List of names of months in English
-const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
 /**
- * This function creates a table that shows the calendar.
+ * Generates the title area for the calendar.
  *
- * @param view_year : int year that the calendar is viewing
- * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
- * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
+ * @param title_area the title of the calendar (month+year/semester/...)
+ * @returns {string} the HTML code for the title area
  */
-function showCalendar(view_year, view_month) {
-    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
-    // Header area: two buttons to move, and month
-    let content = `  
-    <table class='table table-striped table-bordered persist-area table-calendar'>
+function getCalendarHeader(title_area) {
+    return `<table class='table table-striped table-bordered persist-area table-calendar'>
         <thead>
         
         <tr class="cal-navigation">
-            <th colspan="3">
-                <div class="cal-switch" id="prev-month-switch">
-                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
-                </div>            
-            </th>
-            <th colspan="1">
-                <div class="cal-title">
-                    <p class="cal-month-title" >${monthNames[view_month]}</p>
-                    <p class="cal-year-title" >${view_year}</p>
-                </div>
-            </th>
-            <th colspan="3">
-                <div class="cal-switch" id="next-month-switch">
-                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
-                </div>            
-            </th>
+            ${title_area}
         </tr>
         <tr class='cal-week-title-row'>
             <th class="cal-week-title cal-week-title-sun">Sunday</th>
@@ -137,13 +157,42 @@ function showCalendar(view_year, view_month) {
         </thead>
         <tbody>
         <tr>`;
+}
+
+/**
+ * This function creates a table that shows the calendar.
+ *
+ * @param view_year : int year that the calendar is viewing
+ * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
+ * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
+ */
+function getCalendarOfMonth(view_year, view_month) {
+    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
+    // Header area: two buttons to move, and month
+    let content = getCalendarHeader(
+        `<th colspan="3">
+                <div class="cal-switch" id="prev-month-switch">
+                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
+                </div>            
+            </th>
+            <th colspan="1">
+                <div class="cal-title">
+                    <h2 class="cal-month-title" >${monthNames[view_month]}</h2>
+                    <h3 class="cal-year-title" >${view_year}</h3>
+                </div>
+            </th>
+            <th colspan="3">
+                <div class="cal-switch" id="next-month-switch">
+                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
+                </div>            
+            </th>`);
 
     // Show days at the end of last month that belongs to the first week of current month
     if (startWeekday !== 0) {
         const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
         const lastMonthStart = lastMonthEnd + 1 - startWeekday;
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            content += displayDayCell(view_year, view_month - 1, day, view_month);
+            content += getDayCell(view_year, view_month - 1, day, view_month);
         }
     }
 
@@ -151,7 +200,7 @@ function showCalendar(view_year, view_month) {
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let weekday = startWeekday;
     for (let day = 1; day <= daysInMonth; day++) {
-        content += displayDayCell(view_year, view_month, day, view_month);
+        content += getDayCell(view_year, view_month, day, view_month);
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
@@ -166,7 +215,7 @@ function showCalendar(view_year, view_month) {
     if (weekday !== 0) {
         const remain = 7 - weekday;
         for (let day = 1; day <= remain; day++) {
-            content += displayDayCell(view_year, view_month + 1, day, view_month);
+            content += getDayCell(view_year, view_month + 1, day, view_month);
             if (weekday === 6) {
                 weekday = 0;
             }
@@ -184,6 +233,67 @@ function showCalendar(view_year, view_month) {
 }
 
 /**
+ * Creates a calendar of the entire semester.
+ *
+ * @param start the start date of the semester in the format of YYYY-mm-dd
+ * @param end the end date of the semester in the format of YYYY-mm-dd
+ * @param semester_name the name of the semester
+ * @returns {string} the HTML string containing the cell
+ */
+function getFullCalendar(start, end, semester_name) {
+    // Header area: two buttons to move, and month
+    let content = getCalendarHeader(
+        `<th colspan="3">    
+            </th>
+            <th colspan="1">
+                <div class="cal-title">
+                    <p class="cal-month-title" >${semester_name}</p>
+                </div>
+            </th>
+            <th colspan="3">          
+            </th>`);
+
+    const startDate = parseDate(start);
+    const endDate = parseDate(end);
+    const currDate = startDate;
+
+
+    const startWeekday = startDate.getDay();
+    // Skip days at the end of last month that belongs to the first week of current month
+    if (startWeekday !== 0) {
+        content += `<td class="cal-day-cell" colspan="${startWeekday}"></td>`;
+    }
+
+    let weekday = startWeekday;
+    while ((endDate.getTime() - startDate.getTime()) >= 0) {
+        // Shows each day of current month
+        content += getDayCell(currDate.getFullYear(), currDate.getMonth()+1, currDate.getDate(), 0, true);
+        if (weekday === 6) {
+            weekday = 0;
+            // Next week should show on next line
+            content += '</tr><tr>';
+        }
+        else {
+            weekday = weekday + 1;
+        }
+
+        currDate.setDate(currDate.getDate() + 1);
+    }
+
+    if (weekday !== 0) {
+        const remain = 7 - weekday;
+        content += `<td class="cal-day-cell" colspan="${remain}"></td>`;
+    }
+
+    content += `
+        </tr>
+        </tbody>
+    </table> 
+    `;
+    return content;
+}
+
+/**
  * Changes the calendar div to the required month and year.
  *
  * @param month_ : int month that the calendar will show (1 as January and 12 as December)
@@ -191,5 +301,17 @@ function showCalendar(view_year, view_month) {
  */
 // eslint-disable-next-line no-unused-vars
 function loadCalendar(month_, year_) {
-    $('#full_calendar').html(showCalendar(year_, month_));
+    $('#full-calendar').html(getCalendarOfMonth(year_, month_));
+}
+
+/**
+ * Changes the calendar div to the required semester.
+ *
+ * @param start the start date of the semester in the format of YYYY-mm-dd
+ * @param end the end date of the semester in the format of YYYY-mm-dd
+ * @param semester_name the name of the semester
+ */
+// eslint-disable-next-line no-unused-vars
+function loadFullCalendar(start, end, semester_name) {
+    $('#full-calendar').html(getFullCalendar(start, end, semester_name));
 }

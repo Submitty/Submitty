@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\GradeableType;
 use app\models\AbstractModel;
 use app\models\User;
+use app\views\NavigationView;
 
 /**
  * Class GradeableList
@@ -251,4 +252,39 @@ class GradeableList extends AbstractModel {
             self::GRADED => $this->getGradedGradeables()
         ];
     }
+
+    /**
+     * A static factory method to create a new GradeableList object that contains
+     * all gradeables in all courses of a single user.
+     * The method loads from the database of all courses and get all gradeables information.
+     * Only load once unless the user refreshes the page.
+     *
+     * @param Core $core
+     * @param User $user The user to filter gradeables by
+     * @return GradeableList
+     * @throws \Exception if a Gradeable failed to load from the database
+     */
+    public static function getAllGradeableListFromUserId(Core $core, User $user): GradeableList
+    {
+        $gradeables = [];
+        // Load the gradeable information for each course
+        $courses = $core->getQueries()->getCourseForUserId($user->getId());
+        foreach ($courses as $course) {
+            /** @var \app\models\Course $course */
+            $core->loadCourseConfig($course->getSemester(), $course->getTitle());
+            $core->loadCourseDatabase();
+            foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
+                /** @var Gradeable $gradeable */
+                $gradeables["{$course->getSemester()}||{$course->getTitle()}||{$gradeable->getId()}"] = $gradeable;
+            }
+            $core->getCourseDB()->disconnect();
+        }
+
+        $core->getConfig()->setCourseLoaded(false);
+        return new GradeableList($core, $user, $gradeables);
+    }
+
+
+
+
 }
