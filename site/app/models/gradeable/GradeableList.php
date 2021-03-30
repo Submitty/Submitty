@@ -264,8 +264,7 @@ class GradeableList extends AbstractModel {
      * @return GradeableList
      * @throws \Exception if a Gradeable failed to load from the database
      */
-    public static function getAllGradeableListFromUserId(Core $core, User $user): GradeableList
-    {
+    public static function getAllGradeableListFromUserId(Core $core, User $user): GradeableList {
         $gradeables = [];
         // Load the gradeable information for each course
         $courses = $core->getQueries()->getCourseForUserId($user->getId());
@@ -283,8 +282,4 @@ class GradeableList extends AbstractModel {
         $core->getConfig()->setCourseLoaded(false);
         return new GradeableList($core, $user, $gradeables);
     }
-
-
-
-
 }

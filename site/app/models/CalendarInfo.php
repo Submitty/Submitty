@@ -1,8 +1,6 @@
 <?php
 
-
 namespace app\models;
-
 
 use app\libraries\Core;
 use app\libraries\GradeableType;
@@ -67,7 +65,7 @@ class CalendarInfo extends AbstractModel {
      * @param GradeableList $gradeable_list container of gradeables in the system
      * @return CalendarInfo
      */
-    public static function loadGradeableCalendarInfo(Core $core, GradeableList $gradeable_list) : CalendarInfo {
+    public static function loadGradeableCalendarInfo(Core $core, GradeableList $gradeable_list): CalendarInfo {
         $info = new CalendarInfo($core);
 
         // get the gradeables from the GradeableList and group them by section
@@ -114,20 +112,20 @@ class CalendarInfo extends AbstractModel {
             $info->items_by_sections[] = $curr_section;
         }
 
-        $info->empty_message ="There are currently no assignments posted.  Please check back later.";
+        $info->empty_message = "There are currently no assignments posted.  Please check back later.";
 
         return $info;
     }
 
-    public function getInfoByDate() : array {
+    public function getInfoByDate(): array {
         return $this->items_by_date;
     }
 
-    public function getInfoBySections() : array {
+    public function getInfoBySections(): array {
         return $this->items_by_sections;
     }
 
-    public function getEmptyMessage() : string {
+    public function getEmptyMessage(): string {
         return $this->empty_message;
     }
 }

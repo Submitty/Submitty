@@ -29,7 +29,8 @@ class CalendarController extends AbstractController {
         $user = $this->core->getUser();
         try {
             $gradeable_list = GradeableList::getAllGradeableListFromUserId($this->core, $user);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             ExceptionHandler::handleException($e);
 
             $error_messages = ['A broken gradeable was detected when collecting gradeable information from the database.  Contact the system administrator for assistance.'];
