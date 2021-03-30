@@ -19,21 +19,6 @@ fi
 echo "Setting up distro: ${DISTRO} ${VERSION}"
 source ${CURRENT_DIR}/${DISTRO}/${VERSION}/setup_distro.sh
 
-# Install pip after we've installed python within the setup_distro.sh
-if [ ! -x "$(command -v pip3)" ]; then
-    wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-fi
-
-if [ ! -x "$(command -v pip3)" ]; then
-    python3 /tmp/get-pip.py
-else
-    pip3 install -U pip
-fi
-
-if [ -f /tmp/get-pip.py ]; then
-    rm -f /tmp/get-pip.py
-fi
-
 # Read through our arguments to get "extra" packages to install for our distro
 # ${@} are populated by whatever calls install_system.sh which then sources this
 # script.

@@ -178,7 +178,6 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 # PYTHON PACKAGE SETUP
 #########################
 
-pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
 pip3 install psycopg2-binary

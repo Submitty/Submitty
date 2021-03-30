@@ -83,7 +83,6 @@ wget_retry wget https://maven-central.storage-download.googleapis.com/repos/cent
 chmod o+r . *.jar
 popd
 
-# JaCoCo is a potential replacement for EMMA
 echo "Getting JaCoCo..."
 JACOCO_VER=0.8.0
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
