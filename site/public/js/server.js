@@ -1176,13 +1176,13 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
     return false;
 }
 
-function resizeFrame(id, force_height=-1) {
+function resizeFrame(id, max_height = 500, force_height=-1) {
+    $("iframe#" + id).contents().find("html").css("height", "inherit");
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
     if (force_height != -1) {
         document.getElementById(id).height = force_height + "px";
-
-    } else if (height > 500) {
-        document.getElementById(id).height= "500px";
+    } else if (height > max_height) {
+        document.getElementById(id).height= max_height + "px";
     }
     else {
         document.getElementById(id).height = (height+18) + "px";

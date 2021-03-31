@@ -1321,11 +1321,9 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
     }
     else {
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
-      if(iframe.hasClass("full_panel")){
-        forceFull = 1200;
-      }
+      let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ` + forceFull + `);" 
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});" 
                 src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
                 width="95%">
         </iframe>
