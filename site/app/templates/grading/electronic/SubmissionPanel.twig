@@ -45,24 +45,12 @@
             </div>
             {# /Files #}
         </div>
-        <div id="file-view" class="hide">
-            <div class="sticky-file-info">
-                <div class="flex-row">
-                    <span>
-                        <span class="grading_label">Submissions and Results Browser ></span>
-                        <span class="grading_label" id="grading_file_name"></span>
-                        <a onclick='collapseFile()'
-                           aria-label="Collapse File"
-                           class="key_to_click"
-                           tabindex="0"
-                        ><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
-                    </span>
-                    <strong id="save_status">No changes</strong>
-                </div>
-                {% include "grading/electronic/PDFAnnotationBar.twig" %}
-            </div>
-            <div id="file-content"></div>
-        </div>
+        {% include "grading/electronic/FileView.twig" with {
+            "file_view_id": "file-view",
+            "grading_file_name_id": "grading_file_name",
+            "save_status_id": "save_status",
+            "file_content_id": "file-content"
+        } %}
     </div>
 </div>
 

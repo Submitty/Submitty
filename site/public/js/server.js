@@ -1132,10 +1132,27 @@ function changeName(element, user, visible_username, anon){
     }
 }
 
-function openFrame(url, id, filename) {
+function openFrame(url, id, filename, ta_grading_interpret=false) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
         var iframeId = "file_viewer_" + id + "_iframe";
+        if(ta_grading_interpret) {
+            let display_file_url = buildCourseUrl(['display_file']);
+            let directory = "";
+            if (url.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url.includes("results_public")) {
+                directory = "results_public";
+            }
+            else if (url.includes("results")) {
+                directory = "results";
+            }
+            else if (url.includes("checkout")) {
+                directory = "checkout";
+            }
+            url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -1159,9 +1176,9 @@ function openFrame(url, id, filename) {
     return false;
 }
 
-function resizeFrame(id) {
+function resizeFrame(id, force_full=false) {
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-    if (height > 500) {
+    if (height > 500 || force_full) {
         document.getElementById(id).height= "500px";
     }
     else {

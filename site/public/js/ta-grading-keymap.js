@@ -12,6 +12,21 @@ var remapping = {
     index: 0
 };
 
+let settingsData = [{
+        id: "notebook-setting-list",
+        name: "Notebook",
+        values: [{
+                    name: "Expand files in notebook file submission on page load",
+                    storageCode: "notebook-setting-file-submission-expand",
+                    options: {
+                        "No": "false", 
+                        "Yes": "true"
+                    }, 
+                    default: "No"
+                }]
+        }
+];
+
 window.onkeyup = function(e) {
     if (remapping.active) {
         remapFinish(remapping.index, eventToKeyCode(e));
@@ -82,7 +97,7 @@ function isSettingsVisible() {
 }
 
 function showSettings() {
-    generateNotebookList();
+    generateSettingList();
     generateHotkeysList();
     $("#settings-popup").show();
     captureTabInModal("settings-popup");
@@ -116,24 +131,36 @@ function generateHotkeysList() {
 }
 
 Twig.twig({
-    id: "NotebookSettingList",
-    href: "/templates/grading/settings/NotebookSettingList.twig",
+    id: "GeneralSettingList",
+    href: "/templates/grading/settings/GeneralSettingList.twig",
     async: true
 })
 
 /**
- * Generate list of notebook settings on the ui
+ * Generate list of settings on the ui
  */
- function generateNotebookList() {
-    var parent = $("#notebook-setting-list");
+ function generateSettingList() {
+    var parent = $("#ta-grading-general-settings");
+    loadTAGradingSettingData();
 
     parent.replaceWith(Twig.twig({
-        ref: "NotebookSettingList"
-    }).render()
-    );
+        ref: "GeneralSettingList"
+    }).render({
+        settings: settingsData
+    }));
 }
 
-//ta-grading-settings-
+function loadTAGradingSettingData() {
+    for(var i = 0; i < settingsData.length; i++) {
+        for(var x = 0; x < settingsData[i].values.length; x++) {
+            settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
+            if(settingsData[i].values[x].currValue === null) {
+                localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
+                settingsData[i].values[x].currValue = settingsData[i].values[x].options[settingsData[i].values[x].default];
+            }
+        }
+    }
+}
 
 /**
  * Start rebinding a hotkey

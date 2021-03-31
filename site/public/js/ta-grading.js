@@ -79,6 +79,15 @@ $(function () {
     }
   });
 
+  loadTAGradingSettingData();
+
+  $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
+    var storageCode = $(this).attr('data-storage-code');
+    if(storageCode) {
+      localStorage.setItem(storageCode, this.value);
+    }
+  })
+
   // Progress bar value
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
@@ -124,6 +133,17 @@ $(function () {
   notebookScrollLoad();
 
   checkNotebookScroll();
+
+  if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
+    let notebookPanel = $('#notebook-view');
+    if(notebookPanel.length != 0) {
+      let notebookItems = notebookPanel.find('.openAllFilesubmissions'); 
+      for(var i = 0; i < notebookItems.length; i++) {
+        notebookItems[i].onclick();
+      }
+    }
+  }
+  
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -1274,7 +1294,7 @@ function newEditPeerComponentsForm() {
   captureTabInModal("edit-peer-components-form");
 }
 
-function openFrame(html_file, url_file, num) {
+function openFrame(html_file, url_file, num, pdf_full_panel=true) {
   let iframe = $('#file_viewer_' + num);
   let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
@@ -1294,14 +1314,15 @@ function openFrame(html_file, url_file, num) {
       directory = "checkout";
     }
     // handle pdf
-    if (url_file.substring(url_file.length - 3) === "pdf") {
+    if (pdf_full_panel && url_file.substring(url_file.length - 3) === "pdf") {
       viewFileFullPanel(html_file, url_file).then(function(){
         loadPDFToolbar();
       });
     }
     else {
+      let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? ", true" : "";
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}');" 
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}'` + forceFull + `);" 
                 src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
                 width="95%">
         </iframe>
@@ -1313,7 +1334,7 @@ function openFrame(html_file, url_file, num) {
       iframe.addClass('open');
     }
   }
-  if (!iframe.hasClass("full_panel") && url_file.substring(url_file.length - 3) !== "pdf") {
+  if (!iframe.hasClass("full_panel") && (!pdf_full_panel || url_file.substring(url_file.length - 3) !== "pdf")) {
     if (!iframe.hasClass('shown')) {
       iframe.show();
       iframe.addClass('shown');
@@ -1350,6 +1371,31 @@ function popOutSubmittedFile(html_file, url_file) {
   window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
   return false;
 }
+
+let fileFullPanelOptions = [
+  { //Main viewer (submission panel)
+    viewer: "#viewer",
+    fileView: "#file-view",
+    gradingFileName: "#grading_file_name",
+    panel: "#submission_browser",
+    precision: "#directory_view",
+    pdfAnnotationBar: "#pdf_annotation_bar",
+    saveStatus: "#save_status",
+    fileContent: "#file-content",
+    fileViewerFullPanel: "#file_viewer_full_panel"
+  },
+  { //Notebook panel
+    viewer: "#notebook-viewer",
+    fileView: "#notebook-file-view",
+    gradingFileName: "#notebook_grading_file_name",
+    panel: "#notebook_view",
+    precision: "#notebook_view",
+    pdfAnnotationBar: "#notebook_pdf_annotation_bar",
+    saveStatus: "#notebook_save_status",
+    fileContent: "#notebook-file-content",
+    fileViewerFullPanel: "#notebook_file_viewer_full_panel"
+  }
+]
 
 
 function viewFileFullPanel(name, path, page_num = 0) {
