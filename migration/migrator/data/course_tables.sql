@@ -684,7 +684,8 @@ CREATE TABLE public.polls (
     name text NOT NULL,
     question text NOT NULL,
     status text NOT NULL,
-    release_date date NOT NULL
+    release_date date NOT NULL,
+    image_path text
 );
 
 
