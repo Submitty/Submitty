@@ -1176,9 +1176,12 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
     return false;
 }
 
-function resizeFrame(id, force_full=false) {
+function resizeFrame(id, force_height=-1) {
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-    if (height > 500 || force_full) {
+    if (force_height != -1) {
+        document.getElementById(id).height = force_height + "px";
+
+    } else if (height > 500) {
         document.getElementById(id).height= "500px";
     }
     else {

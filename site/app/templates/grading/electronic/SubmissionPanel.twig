@@ -46,10 +46,13 @@
             {# /Files #}
         </div>
         {% include "grading/electronic/FileView.twig" with {
+            "panel": "submission",
+            "panelTitle": "Submissions and Results Browser",
             "file_view_id": "file-view",
             "grading_file_name_id": "grading_file_name",
             "save_status_id": "save_status",
-            "file_content_id": "file-content"
+            "file_content_id": "file-content",
+            "show_pdf_bar": true
         } %}
     </div>
 </div>
