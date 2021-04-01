@@ -53,70 +53,72 @@ Required inputs:
     {% endfor %}
 {% endblock %}
 
-{% block extra_mark_rows %}
-    {# Custom mark (only display in non-edit mode #}
-    {% set f_mark = component.marks|first %}
-    {% if not edit_marks_enabled %}
-        <div class="custom-mark-container mark-container row"
-             data-mark_id="0">
-            <span class="mark-selector-container">
-                <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters key_to_click" tabindex="0"
-                      data-mark_id="0"
-                      onclick="onToggleCustomMark(this)">
+{% if custom_mark_enabled %}
+    {% block extra_mark_rows %}
+        {# Custom mark (only display in non-edit mode #}
+        {% set f_mark = component.marks|first %}
+        {% if not edit_marks_enabled %}
+            <div class="custom-mark-container mark-container row"
+                data-mark_id="0">
+                <span class="mark-selector-container">
+                    <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters key_to_click" tabindex="0"
+                        data-mark_id="0"
+                        onclick="onToggleCustomMark(this)">
+                    </span>
                 </span>
-            </span>
-            <script>
-                function changeExtraColor(ref,me){
-                    if(ref == "Full Credit" && me.value > 0){
-                        me.style.backgroundColor = "var(--standard-vibrant-yellow)";
+                <script>
+                    function changeExtraColor(ref,me){
+                        if(ref == "Full Credit" && me.value > 0){
+                            me.style.backgroundColor = "var(--standard-vibrant-yellow)";
+                        }
+                        else if(ref == "No Credit" && me.value<0){
+                            me.style.backgroundColor = "var(--standard-vibrant-yellow)";
+                        }
+                        else{
+                            me.style.backgroundColor = "var(--default-white)";
+                        }
                     }
-                    else if(ref == "No Credit" && me.value<0){
-                        me.style.backgroundColor = "var(--standard-vibrant-yellow)";
-                    }
-                    else{
-                        me.style.backgroundColor = "var(--default-white)";
-                    }
-                }
-            </script>
-            <span class="col-no-gutters mark-points">
-                <input id = "extra-mark-{{ component.id }}"
-                       type="number"
-                       step="{{ precision }}"
-                       style="background-color:var(--default-white)"
-                       onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
-                       value="{{ graded_component.score | default('0')}}">
-                        <script>
-                            {% if f_mark.title == "Full Credit" %}
-                                if(document.getElementById("extra-mark-{{ component.id }}").value>0){
-                                    document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
-                                }
-                            {% elseif f_mark.title == "No Credit" %}
-                                if(document.getElementById("extra-mark-{{ component.id }}").value<0){
-                                    document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
-                                }
-                            {% endif %}
-                        </script>
+                </script>
+                <span class="col-no-gutters mark-points">
+                    <input id = "extra-mark-{{ component.id }}"
+                        type="number"
+                        step="{{ precision }}"
+                        style="background-color:var(--default-white)"
+                        onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
+                        value="{{ graded_component.score | default('0')}}">
+                            <script>
+                                {% if f_mark.title == "Full Credit" %}
+                                    if(document.getElementById("extra-mark-{{ component.id }}").value>0){
+                                        document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                                    }
+                                {% elseif f_mark.title == "No Credit" %}
+                                    if(document.getElementById("extra-mark-{{ component.id }}").value<0){
+                                        document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                                    }
+                                {% endif %}
+                            </script>
 
-            </span>
-            <span class="col-sm mark-title">
-                Custom:
-                <textarea onchange="onCustomMarkChange(this)"
-                          onkeyup="auto_grow(this)"
-                          rows="1"
-                          placeholder="Custom message for student..."
-                          class="mark-note-custom noscroll"
-                >{{ graded_component.comment|escape }}</textarea>
-            </span>
-        </div>
-    {% else %}
-        <div class="custom-mark-data"
-             data-selected="{{ graded_component.custom_mark_selected }}"
-             data-score="{{ graded_component.score }}"
-             data-comment="{{ graded_component.comment|escape }}"
-             hidden></div>
-    {% endif %}
-    {# /Custom mark #}
-{% endblock %}
+                </span>
+                <span class="col-sm mark-title">
+                    Custom:
+                    <textarea onchange="onCustomMarkChange(this)"
+                            onkeyup="auto_grow(this)"
+                            rows="1"
+                            placeholder="Custom message for student..."
+                            class="mark-note-custom noscroll"
+                    >{{ graded_component.comment|escape }}</textarea>
+                </span>
+            </div>
+        {% else %}
+            <div class="custom-mark-data"
+                data-selected="{{ graded_component.custom_mark_selected }}"
+                data-score="{{ graded_component.score }}"
+                data-comment="{{ graded_component.comment|escape }}"
+                hidden></div>
+        {% endif %}
+        {# /Custom mark #}
+    {% endblock %}
+{% endif %}
 
 {% block mark_list_footer %}
     {# Component is closed, so show just the received marks #}
