@@ -810,6 +810,14 @@ function canVerifyGraders() {
 }
 
 /**
+	 * Used to determine if the 'custom mark' option should be displayed
+	 * @returns {boolean}
+	 */
+ function canCustomMark() {
+    return $('#grader-info').attr('data-can_custom_mark');
+}
+
+/**
  * Gets if grading is disabled since the selected version isn't the same
  *  as the one chosen for grading
  * @return {boolean}
@@ -1267,7 +1275,8 @@ function getGradedComponentFromDOM(component_id) {
         graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
-        verifier_id: dataDOMElement.attr('data-verifier_id')
+        verifier_id: dataDOMElement.attr('data-verifier_id'),
+        custom_mark_visible: dataDOMElement.attr('data-can_custom_mark')
     };
 }
 
@@ -2236,7 +2245,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         })
         .then(function (graded_gradeable) {
             return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
-                isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
+                isGradingDisabled(), canVerifyGraders(), getDisplayVersion(), canCustomMark());
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2271,7 +2280,7 @@ function reloadPeerRubric(gradeable_id, anon_id) {
         })
         .then(function (graded_gradeable) {
             let elements = renderPeerGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
-                true, false, getDisplayVersion());
+                true, false, getDisplayVersion(), canCustomMark());
             let gradingBox = $("#peer-grading-box");
             gradingBox.html(elements);
         })
@@ -2929,7 +2938,7 @@ function saveComponent(component_id) {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         let gradedComponent = getGradedComponentFromDOM(component_id);
-        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+        if (gradedComponent.custom_mark_visible && gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
             if (!confirm("Are you sure you want to delete the custom mark?")) {
                 return Promise.reject();
             }
@@ -3125,7 +3134,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), canCustomMark(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
