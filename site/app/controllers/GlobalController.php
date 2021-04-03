@@ -140,6 +140,13 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-course-settings",
                 "icon" => "fa-cog"
             ]);
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['sql_toolbox']),
+                "title" => "SQL Toolbox",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-sql-toolbox",
+                "icon" => "fa-toolbox"
+            ]);
         }
 
         if ($this->core->getConfig()->isQueueEnabled()) {
