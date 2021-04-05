@@ -24,6 +24,7 @@ class CalendarController extends AbstractController {
      *
      * @return WebResponse
      * @see GlobalController::prep_user_sidebar
+     * @see CalendarView::showCalendar
      */
     public function viewCalendar(): WebResponse {
         $user = $this->core->getUser();

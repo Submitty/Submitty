@@ -65,19 +65,22 @@ a.cal-btn:focus {
     font-size: 26px;
     text-transform:uppercase;
     border:0;
-    margin-top:-7px;
-    margin-bottom:-7px;
+    margin-top:0;
+    margin-bottom:0;
+    line-height: 100%;
 }
 
 h2.cal-month-title {
-    margin-top:-7px;
-    margin-bottom:-7px;
+    margin-top:0;
+    margin-bottom:0;
+    line-height: 100%;
 }
 
 .cal-year-title {
     font-size: 18px;
     margin-top:0;
     margin-bottom:0;
+    line-height: 100%;
 }
 
 /* the row of Monday, Tuesday, ... */

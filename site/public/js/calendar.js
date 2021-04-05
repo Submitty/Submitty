@@ -247,7 +247,8 @@ function getFullCalendar(start, end, semester_name) {
             </th>
             <th colspan="1">
                 <div class="cal-title">
-                    <p class="cal-month-title" >${semester_name}</p>
+                    <h2 class="cal-month-title" >${semester_name.split(' ')[0]}</h2>
+                    <h3 class="cal-year-title" >${semester_name.split(' ')[1]}</h3>
                 </div>
             </th>
             <th colspan="3">          
@@ -307,7 +308,7 @@ function loadCalendar(month_, year_) {
 /**
  * Changes the calendar div to the required semester.
  *
- * @param start the start date of the semester in the format of YYYY-mm-dd
+ * @param start : string the start date of the semester in the format of YYYY-mm-dd
  * @param end the end date of the semester in the format of YYYY-mm-dd
  * @param semester_name the name of the semester
  */
