@@ -3,6 +3,8 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\DatabaseException;
+use app\libraries\database\QueryIdentifier;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
@@ -27,7 +29,26 @@ class SqlToolboxController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"POST"})
      */
     public function runQuery(): JsonResponse {
-        $this->core->getCourseDB()->query($_POST['sql']);
-        return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
+        $query = trim($_POST['sql']);
+
+        if (QueryIdentifier::identify($_POST['sql']) !== QueryIdentifier::SELECT) {
+            return JsonResponse::getFailResponse('Invalid query, can only run SELECT queries.');
+        }
+
+        if (substr_count($query, ';') > 1) {
+            return JsonResponse::getFailResponse('Detected multiple queries, not running.');
+        }
+
+        try {
+            $this->core->getCourseDB()->beginTransaction();
+            $this->core->getCourseDB()->query($_POST['sql']);
+            return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
+        }
+        catch (DatabaseException $exc) {
+            return JsonResponse::getFailResponse("Error running query: ". $exc->getMessage());
+        }
+        finally {
+            $this->core->getCourseDB()->rollback();
+        }
     }
 }

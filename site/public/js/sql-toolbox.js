@@ -19,16 +19,19 @@ async function runSqlQuery() {
 
         const json = await resp.json();
         console.log(json);
+        const error = document.getElementById('query-results-error');
+        const table = document.getElementById('query-results');
+        table.innerHTML = '';
 
         if (json.status !== 'success') {
-            console.error(json);
+            error.innerText = json.message;
+            error.style.display = 'block';
             return;
         }
 
-        const data = json.data;
+        error.style.display = 'none';
 
-        const table = document.getElementById('query-results');
-        table.innerHTML = '';
+        const data = json.data;
 
         const header = document.createElement('thead');
         const headerRow = document.createElement('tr');
