@@ -35,7 +35,8 @@ class SqlToolboxController extends AbstractController {
             return JsonResponse::getFailResponse('Invalid query, can only run SELECT queries.');
         }
 
-        if (substr_count($query, ';') > 1) {
+        $semiColonCount = substr_count($query, ';');
+        if ($semiColonCount > 1 || ($semiColonCount === 1 && substr($query, -1) !== ';')) {
             return JsonResponse::getFailResponse('Detected multiple queries, not running.');
         }
 
@@ -45,7 +46,7 @@ class SqlToolboxController extends AbstractController {
             return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
         }
         catch (DatabaseException $exc) {
-            return JsonResponse::getFailResponse("Error running query: ". $exc->getMessage());
+            return JsonResponse::getFailResponse("Error running query: " . $exc->getMessage());
         }
         finally {
             $this->core->getCourseDB()->rollback();
