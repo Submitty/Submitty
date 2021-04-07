@@ -5,11 +5,11 @@ namespace app\libraries\database;
 use app\libraries\Utils;
 
 class QueryIdentifier {
-  const SELECT = 'select';
-  const INSERT = 'insert';
-  const UPDATE = 'update';
-  const DELETE = 'delete';
-  const UNKNOWN = 'unknown';
+    const SELECT = 'select';
+    const INSERT = 'insert';
+    const UPDATE = 'update';
+    const DELETE = 'delete';
+    const UNKNOWN = 'unknown';
 
     public static function identify(string $query): string {
         $query = strtolower(trim($query));
@@ -52,7 +52,7 @@ class QueryIdentifier {
                     if ($paranthesis === 0 && $token === 'as') {
                         $afterColumnList = true;
                     }
-                    else if ($afterColumnList && $afterCte) {
+                    elseif ($afterColumnList && $afterCte) {
                         $pos -= strlen($token);
                         break;
                     }
@@ -73,8 +73,8 @@ class QueryIdentifier {
         elseif (Utils::startsWith($query, QueryIdentifier::INSERT)) {
             return QueryIdentifier::INSERT;
         }
-        else if (Utils::startsWith($query, QueryIdentifier::DELETE)) {
-        return QueryIdentifier::DELETE;
+        elseif (Utils::startsWith($query, QueryIdentifier::DELETE)) {
+            return QueryIdentifier::DELETE;
         }
         return QueryIdentifier::UNKNOWN;
     }
