@@ -27,7 +27,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     // Width of left side
     const mouseDownHandler = (e) => {
         // Get the current mouse position
-        if (e.type == "touchstart") {
+        if (e.type == 'touchstart') {
             e = e.touches[0];
         }
         xPos = e.clientX;
@@ -58,7 +58,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     };
 
     const mouseMoveHandler = (e) => {
-        if (e.type == "touchmove") {
+        if (e.type == 'touchmove') {
             e = e.touches[0];
         }
         let updateValue;
