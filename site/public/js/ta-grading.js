@@ -954,7 +954,7 @@ registerKeyHandler({name: "Toggle Solution/TA-Notes Panel", code: "KeyT"}, funct
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -966,10 +966,12 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, scroll to general comment for easier access
-    //TODO: Add "Overall Comment" focusing, control
+    // Last component is open, close it and then open and scroll to first component
     closeComponent(openComponentId, true).then(function () {
-      scrollToOverallComment();
+      let componentId = getComponentIdByOrder(0);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
     });
   }
   else {
@@ -984,7 +986,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -995,8 +997,13 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
       scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
-    // First component is open, so close it
-    closeAllComponents(true);
+    // First component is open, close it and then open and scroll to the last one
+    closeComponent(openComponentId, true).then(function () {
+      let componentId = getComponentIdByOrder(numComponents - 1);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
+    });
   }
   else {
     // Any other case, open the previous one
