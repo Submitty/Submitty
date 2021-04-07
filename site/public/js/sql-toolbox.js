@@ -18,7 +18,6 @@ async function runSqlQuery() {
         );
 
         const json = await resp.json();
-        console.log(json);
         const error = document.getElementById('query-results-error');
         const error_mesage = document.getElementById('query-results-error-message');
         const table = document.getElementById('query-results');
