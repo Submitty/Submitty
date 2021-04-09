@@ -75,8 +75,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
-            # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
@@ -91,8 +90,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
-            # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -124,7 +122,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -157,7 +155,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -171,7 +169,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -190,7 +188,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -212,7 +210,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -224,7 +222,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
@@ -242,7 +240,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
@@ -263,7 +261,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
             # calendar will show only in debug mode
-            # [self.test_url + '/calendar', 'Calendar'],
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
