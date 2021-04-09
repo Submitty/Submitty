@@ -39,7 +39,7 @@
                         <input id="edit-mode-enabled" class="key_to_click" tabindex="0" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
                     </div>
                 </div>
-                <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" data-can_custom_mark="{{ can_custom_mark }}" hidden></div>
+                <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div class="inner-container" id="grading-box">
                     {% if has_active_version %}
                         <script>

@@ -115,7 +115,7 @@ function prepGradedComponent(component, graded_component) {
  * @returns {Promise<string>} the html for the graded gradeable
  */
 
-function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion, canCustomMark) {
+function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
     if (graded_gradeable.graded_components === undefined || graded_gradeable.graded_components === null) {
         graded_gradeable.graded_components = {};
     }
@@ -134,7 +134,6 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
         'display_version': displayVersion,
-        'custom_mark_enabled': canCustomMark
     });
 }
 
@@ -150,7 +149,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
  * @returns {Promise<string>} the html for the peer gradeable
  */
 
-function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion, canCustomMark) {
+function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
     if (graded_gradeable.graded_components === undefined) {
         graded_gradeable.graded_components = {};
     }
@@ -180,7 +179,6 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         'grader_id': grader_id,
         'display_version': displayVersion,
         'peer_details' : peer_details,
-        'custom_mark_enabled': false
     });
 }
 
@@ -197,7 +195,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @param {boolean} componentVersionConflict
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, canCustomMark, precision, editable, showMarkList, componentVersionConflict) {
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -214,7 +212,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'grader_id': grader_id,
             'component_version_conflict': componentVersionConflict,
             'peer_component' : component.peer,
-            'custom_mark_enabled': canCustomMark && !component.peer,
+            'custom_mark_enabled': !component.peer,
         }));
     });
 }
