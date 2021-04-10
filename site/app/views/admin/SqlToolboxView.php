@@ -11,6 +11,8 @@ class SqlToolboxView extends AbstractView {
         $this->output->addInternalCss('sql-toolbox.css');
         $this->output->addInternalCss('table.css');
 
+        $this->output->addBreadcrumb('SQL Toolbox');
+
         return $this->output->renderTwigTemplate(
             "admin/SqlToolbox.twig"
         );
