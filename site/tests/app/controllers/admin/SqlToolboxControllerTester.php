@@ -9,13 +9,6 @@ use app\exceptions\DatabaseException;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\response\JsonResponse;
 use app\views\admin\SqlToolboxView;
-use PHPUnit\Framework\Exception;
-use InvalidArgumentException;
-use PHPUnit\Framework\MockObject\RuntimeException;
-use PHPUnit\Framework\MockObject\IncompatibleReturnValueException;
-use PDOException;
-use SebastianBergmann\RecursionContext\InvalidArgumentException as RecursionContextInvalidArgumentException;
-use PHPUnit\Framework\ExpectationFailedException;
 use tests\BaseUnitTest;
 
 class SqlToolboxControllerTester extends BaseUnitTest {
@@ -34,7 +27,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     private function setUpDatabase(): void {
-      /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
+        /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $database = $this->createMock(AbstractDatabase::class);
         $database->expects($this->once())->method('beginTransaction')->with();
         $database->expects($this->once())->method('rollback')->with();
@@ -57,8 +50,8 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->setUpDatabase();
 
         $testData = [
-        [1, 'Test Person', 'foo@example.com'],
-        [2, 'Bar Person', 'bar@example.com'],
+            [1, 'Test Person', 'foo@example.com'],
+            [2, 'Bar Person', 'bar@example.com'],
         ];
 
       /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
@@ -71,19 +64,19 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $response = $this->controller->runQuery();
         $this->assertInstanceOf(JsonResponse::class, $response);
         $expected = [
-        'status' => 'success',
-        'data' => $testData,
+            'status' => 'success',
+            'data' => $testData,
         ];
         $this->assertSame($expected, $response->json);
     }
 
     public function invalidQueryDataProvider() {
         return [
-        ['INSERT INTO foo VALUES (1)'],
-        ['UPDATE foo SET bar=1 WHERE baz=2'],
-        ['DELETE FROM foo WHERE baz=2'],
-        ['DROP TABLE foo'],
-        ['CREATE TABLE foo (id int)'],
+            ['INSERT INTO foo VALUES (1)'],
+            ['UPDATE foo SET bar=1 WHERE baz=2'],
+            ['DELETE FROM foo WHERE baz=2'],
+            ['DROP TABLE foo'],
+            ['CREATE TABLE foo (id int)'],
         ];
     }
 
@@ -93,8 +86,8 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function testInvalidQuery($query) {
         $_POST['sql'] = $query;
         $expected = [
-        'status' => 'fail',
-        'message' => 'Invalid query, can only run SELECT queries.'
+            'status' => 'fail',
+            'message' => 'Invalid query, can only run SELECT queries.'
         ];
 
         $response = $this->controller->runQuery();
@@ -105,8 +98,8 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function testMulitpleQueryError() {
         $_POST['sql'] = 'SELECT * FROM foo; SELECT * FROM bar';
         $expected = [
-        'status' => 'fail',
-        'message' => 'Detected multiple queries, not running.',
+            'status' => 'fail',
+            'message' => 'Detected multiple queries, not running.',
         ];
 
         $response = $this->controller->runQuery();
@@ -117,12 +110,12 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function testThrowDatabaseException() {
         $_POST['sql'] = 'SELECT * FROM INVALID';
         $expected = [
-        'status' => 'fail',
-        'message' => 'Error running query: foo',
+            'status' => 'fail',
+            'message' => 'Error running query: foo',
         ];
 
         $this->setUpDatabase();
-      /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
+        /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
         $courseDb->expects($this->once())->method('query')->with('SELECT * FROM INVALID')->willThrowException(new DatabaseException('foo'));
 

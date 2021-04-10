@@ -12,7 +12,7 @@ class SqlToolboxView extends AbstractView {
         $this->output->addInternalCss('table.css');
 
         return $this->output->renderTwigTemplate(
-            "admin/SqlToolbox.twig",
+            "admin/SqlToolbox.twig"
         );
     }
 }
