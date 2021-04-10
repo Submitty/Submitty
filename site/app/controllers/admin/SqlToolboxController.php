@@ -31,7 +31,7 @@ class SqlToolboxController extends AbstractController {
     public function runQuery(): JsonResponse {
         $query = trim($_POST['sql']);
 
-        if (QueryIdentifier::identify($_POST['sql']) !== QueryIdentifier::SELECT) {
+        if (QueryIdentifier::identify($query) !== QueryIdentifier::SELECT) {
             return JsonResponse::getFailResponse('Invalid query, can only run SELECT queries.');
         }
 
@@ -42,7 +42,7 @@ class SqlToolboxController extends AbstractController {
 
         try {
             $this->core->getCourseDB()->beginTransaction();
-            $this->core->getCourseDB()->query($_POST['sql']);
+            $this->core->getCourseDB()->query($query);
             return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
         }
         catch (DatabaseException $exc) {
