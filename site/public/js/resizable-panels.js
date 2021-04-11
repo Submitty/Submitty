@@ -22,6 +22,8 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     const panelCont = panelEle.parentElement;
     const dragbar = document.querySelector(dragBarSel);
 
+    $(dragbar).css('touch-action', 'none');
+
     let xPos = 0, yPos = 0, panelHeight = 0, panelWidth = 0;
 
     // Width of left side
