@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
@@ -38,7 +40,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         unset($_POST['sql']);
     }
 
-    public function testShowToolbox() {
+    public function testShowToolbox(): void {
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
@@ -46,7 +48,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertEmpty($response->parameters);
     }
 
-    public function testRunQuery() {
+    public function testRunQuery(): void {
         $this->setUpDatabase();
 
         $testData = [
@@ -54,7 +56,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
             [2, 'Bar Person', 'bar@example.com'],
         ];
 
-      /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
+        /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
         $courseDb->expects($this->once())->method('query')->with('SELECT * FROM foo;');
         $courseDb->expects($this->once())->method('rows')->with()->willReturn($testData);
@@ -70,7 +72,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame($expected, $response->json);
     }
 
-    public function invalidQueryDataProvider() {
+    public function invalidQueryDataProvider(): array {
         return [
             ['INSERT INTO foo VALUES (1)'],
             ['UPDATE foo SET bar=1 WHERE baz=2'],
@@ -83,7 +85,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     /**
      * @dataProvider invalidQueryDataProvider
      */
-    public function testInvalidQuery($query) {
+    public function testInvalidQuery(string $query): void {
         $_POST['sql'] = $query;
         $expected = [
             'status' => 'fail',
@@ -95,7 +97,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame($expected, $response->json);
     }
 
-    public function testMulitpleQueryError() {
+    public function testMulitpleQueryError(): void {
         $_POST['sql'] = 'SELECT * FROM foo; SELECT * FROM bar';
         $expected = [
             'status' => 'fail',
@@ -107,7 +109,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame($expected, $response->json);
     }
 
-    public function testThrowDatabaseException() {
+    public function testThrowDatabaseException(): void {
         $_POST['sql'] = 'SELECT * FROM INVALID';
         $expected = [
             'status' => 'fail',
