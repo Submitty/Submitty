@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace tests\app\libraries\database;
 
 use app\libraries\database\QueryIdentifier;
@@ -7,7 +9,7 @@ use SebastianBergmann\RecursionContext\InvalidArgumentException;
 use PHPUnit\Framework\ExpectationFailedException;
 
 class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
-    public function dataProvider() {
+    public function dataProvider(): array {
         return [
             ['SELECT * FROM foo', QueryIdentifier::SELECT],
             ['DELETE FROM thread_categories where thread_id=?', QueryIdentifier::DELETE],
@@ -20,11 +22,11 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider dataProvider
      */
-    public function testIdentify($query, $expected) {
+    public function testIdentify(string $query, string $expected): void {
          $this->assertEquals($expected, QueryIdentifier::identify($query));
     }
 
-    public function testCteSelectIdentify() {
+    public function testCteSelectIdentify(): void {
         $query = <<<SQL
             WITH
                 A AS
