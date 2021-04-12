@@ -15,8 +15,6 @@ class SqlToolboxView extends AbstractView {
 
         $this->output->addBreadcrumb('SQL Toolbox');
 
-        return $this->output->renderTwigTemplate(
-            "admin/SqlToolbox.twig"
-        );
+        return $this->output->renderTwigTemplate("admin/SqlToolbox.twig");
     }
 }
