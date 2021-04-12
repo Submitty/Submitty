@@ -213,16 +213,20 @@ class ElectronicGraderController extends AbstractController {
         4 - Randomly Select Y offsets
         5 - Shift the random order by the offsets to create the matrix, with no duplicates, and exactly Y assignments and & graders for each student.  no student grades self.
         */
-        $number_to_grade = $_POST['number_to_grade'];
-        $restrict_to_registration = $_POST['restrict_to_registration'];
-        $submit_before_grading = $_POST['submit_before_grading'];
+        $restrict_to_registration = ($_POST['restrict_to_registration'] ?? '') === "checked";
+        $submit_before_grading = ($_POST['submit_before_grading'] ?? '') === "checked";
+        $number_to_grade = $_POST['number_to_grade'] ?? '';
+        if (!is_numeric($number_to_grade)) {
+            $this->core->addErrorMessage("Peer assignment failed: An invalid number of students to grade was assigned");
+            return JsonResponse::getFailResponse("Number to grade wasn't an integer");
+        }
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
         /* If Restrict to Registration checkbox is checked, then the randomised peer assignments should be restricted to each registration section" */
-        if ($restrict_to_registration == "checked") {
+        if ($restrict_to_registration) {
             $sections = $this->core->getQueries()->getRegistrationSections();
             foreach ($sections as $i => $section) {
                 $sections[$i] = $section['sections_registration_id'];
@@ -236,7 +240,7 @@ class ElectronicGraderController extends AbstractController {
                 $students = $this->core->getQueries()->getUsersByRegistrationSections([$section]);
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
-                    if ($submit_before_grading == "checked") {
+                    if ($submit_before_grading) {
                         if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
                         }
                         else {
@@ -279,7 +283,7 @@ class ElectronicGraderController extends AbstractController {
              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
-            if ($submit_before_grading == "checked") {
+            if ($submit_before_grading) {
                 if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
                 }
                 else {
