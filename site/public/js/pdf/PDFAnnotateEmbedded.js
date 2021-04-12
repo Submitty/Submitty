@@ -1,4 +1,4 @@
-/* global PDFAnnotate, pdfjsLib, csrfToken, jsPDF */
+/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar */
 if (PDFAnnotate.default) {
     // eslint-disable-next-line no-global-assign
@@ -94,7 +94,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
                 }).promise.then((pdf) => {
-                    const doc = new jsPDF('p', 'mm');
+                    const doc = new jspdf.jsPDF('p', 'mm');
                     renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
                 });
             },
