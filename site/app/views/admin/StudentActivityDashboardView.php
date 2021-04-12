@@ -16,9 +16,16 @@ class StudentActivityDashboardView extends AbstractView{
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentActivityDashboard.twig", [
             "data" => $data_dump,
+            "download_link" => $this->core->buildCourseUrl(['activity', 'download'])
         ]);
 
         }
+
+        public function downloadFile($file_url){
+            readfile($file_url);
+        }
+
+
 
 
 

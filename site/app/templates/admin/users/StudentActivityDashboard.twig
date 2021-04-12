@@ -1,46 +1,156 @@
-<div id="data_dump">
-    {{data}}
-</div>
-<div>
-    This is a div with some words for testing purposes!</div>
-
 {# This is a data table #}
 
 
+<div class="content">
+    <header>
+        <h1>Student Activity Dashboard</h1>
+        {#
+        <div class="slidecontainer">
+            <label for="myRange" style="display:inline">Flag students with no attendance for <p><span id="value"></span></p> days</label>
+            <input type="range" min="1" max="30" value="15" style="width:50%" id="myRange">
+        </div>
+        <div id="enter-days">
+            <input id="manual-days" type="text" onchange="setSlider()">
+        <div>
+        #}
+        <div class="btn-wrapper">
+            {# <a href="{{download_link}}" class="btn btn-primary">Download as CSV</a> #}
+            {# <a href="javascript:newSettingsForm()" class="btn btn-primary">Settings</a> #}
+        </div>
+    </header>
+<table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" onclick="sortTable(0)" style="cursor: pointer">Registration Section</td>
+                <td id="1" onclick="sortTable(1)" style="cursor: pointer">User ID</td>
+                <td id="2" onclick="sortTable(2)" style="cursor: pointer">Last Name</td>
+                <td id="3" onclick="sortTable(3)" style="cursor: pointer">First Name</td>
+                <td id="4" onclick="sortTable(4)" style="cursor: pointer">Gradeable Access Date</td>
+                <td id="5" onclick="sortTable(5)" style="cursor: pointer">Gradeable Submission Date</td>
+                <td id="6" onclick="sortTable(6)" style="cursor: pointer">Forum View Date</td>
+                <td id="7" onclick="sortTable(7)" style="cursor: pointer">Forum Post Date</td>
+                <td id="8" onclick="sortTable(8)" style="cursor: pointer">Number of Poll Responses</td>
+                <td id="9" onclick="sortTable(9)" style="cursor: pointer">Office Hours Queue Date</td>
+            </tr>
+        </thead>
+    
+        <tbody>
+            {% for row in data %}
+            {# {% if row.registration_section == 4 %}
+            <tr style="background-color: red">
+            {% else %} #}
+            <tr>
+            {# {% endif %} #}
+                <td>{{row.registration_section}}</td>
+                <td class='align-left'>{{row.user_id}}</td>
+                <td class='align-left'>{{row.user_firstname}}</td>
+                <td class='align-left'>{{row.user_lastname}}</td>
+                <td>{{row.gradeable_access}}</td>
+                <td>{{row.gradeable_submission}}</td>
+                <td>{{row.forum_view}}</td>
+                <td>{{row.forum_post}}</td>
+                <td>{{row.num_poll_response}}</td>
+                <td>{{row.office_hours_queue}}</td>
 
-<table id="data-table" class="table table-striped mobile-table directory-table">
-    <caption>Student Activity Dashboard{{data_dump[0]}}</caption>
-    <thead>
-        <tr>
-            <th>Registration Section</th>
-            <th>User ID</th>
-            <th>User Firstname </th>
-            <th>User Lastname</th>
-            <th>Gradeable Access</th>
-            <th>Gradeable Submission</th>
-            <th>Forum View</th>
-            <th>Forum Post</th>
-            <th>Number of Poll Responses</th>
-            <th>Office Hours Queue</th>
-        </tr>
-    </thead>
-    {#
-    <tbody id="table-body">
-        {% for student in data_dump %}
-        <tr>
-            <td>
-                N/A
-            </td>
-            <td>
-                {{student.user_id}}
-            </td>
-
-        </tr>
-
-    </tbody>
-    #}
-
+            </tr>
+        </tbody>
+    {% endfor %}
 </table>
+</div>
 
+{% include('admin/users/DownloadForm.twig') with { 'code' : 'user' } %}
+
+
+<script>
+
+
+    var slider = document.getElementById("myRange");
+    var value = document.getElementById("value");
+    value.innerHTML = slider.value;
+
+    slider.oninput = function() {
+        value.innerHTML = this.value;
+    }
+</script>
+
+<script>
+function setSlider() {
+    var slider = document.getElementById("myRange");
+    var input = document.getElementById("manual-days");
+    var value = document.getElementById("value");
+    slider.value = input.value;
+    value.innerHTML = input.value;
+}
+
+function downloadData() {
+    console.log("{{data[0].user_id}}");
+}
+
+function sortTable(n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("data-table");
+  document.getElementById(0).style.color = 'white';
+  document.getElementById(1).style.color = 'white';
+  document.getElementById(2).style.color = 'white';
+  document.getElementById(3).style.color = 'white';
+  document.getElementById(4).style.color = 'white';
+  document.getElementById(5).style.color = 'white';
+  document.getElementById(6).style.color = 'white';
+  document.getElementById(7).style.color = 'white';
+  document.getElementById(8).style.color = 'white';
+  document.getElementById(9).style.color = 'white';
+  document.getElementById(n).style.color = 'blue';
+  switching = true;
+  // Set the sorting direction to ascending:
+  dir = "asc";
+  /* Make a loop that will continue until
+  no switching has been done: */
+  while (switching) {
+    // Start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /* Loop through all table rows (except the
+    first, which contains table headers): */
+    for (i = 1; i < (rows.length - 1); i++) {
+      // Start by saying there should be no switching:
+      shouldSwitch = false;
+      /* Get the two elements you want to compare,
+      one from current row and one from the next: */
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      /* Check if the two rows should switch place,
+      based on the direction, asc or desc: */
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          // If so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          // If so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      /* If a switch has been marked, make the switch
+      and mark that a switch has been done: */
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      // Each time a switch is done, increase this count by 1:
+      switchcount ++;
+    } else {
+      /* If no switching has been done AND the direction is "asc",
+      set the direction to "desc" and run the while loop again. */
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+</script>
 
 

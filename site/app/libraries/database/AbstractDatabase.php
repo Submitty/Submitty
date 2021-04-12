@@ -166,7 +166,7 @@ abstract class AbstractDatabase {
             ) {
                 $this->row_count = $statement->rowCount();
             }
-            elseif (Utils::startsWith($lower, 'select')) {
+            else {
                 $columns = $this->getColumnData($statement);
                 $this->results = $statement->fetchAll(\PDO::FETCH_ASSOC);
                 // Under normal circumstances, we don't really need to worry about $this->results being false.

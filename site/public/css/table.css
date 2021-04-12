@@ -1,3 +1,7 @@
+.flagged-row {
+    background-color: red;
+}
+
 #empty-table {
     margin: 10px auto;
     padding: 1.6em 1em;

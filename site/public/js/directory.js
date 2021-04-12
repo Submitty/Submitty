@@ -17,6 +17,23 @@ function newDownloadForm() {
     $("#registration_section_1").focus();
 }
 
+function newSettingsForm(){
+    $('.popup-form').css('display', 'none');
+    var form = $('#settings-form');
+    form.css('display', 'block');
+    captureTabInModal('settings-form');
+    form.find('.form-body').scrollTop(0);
+    $('#settings-form input:checkbox').each(function() {
+        if ($(this).val() == 'NULL') {
+            $(this).prop('checked', false);
+        }else{
+            $(this).prop('checked', true);
+        }
+    });
+    $('#registration_section_1').focus();
+
+}
+
 function newClassListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#class-list-form");
