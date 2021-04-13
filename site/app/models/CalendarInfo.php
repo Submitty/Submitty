@@ -79,7 +79,7 @@ class CalendarInfo extends AbstractModel {
             // Iterate over the Gradeable objects in current section and summarize data
             foreach ($gradeables as $id => $gradeable) {
                 /** @var Gradeable $gradeable */
-                [$semester, $course_title, $gradeable_id] = explode("||", $id);
+                [$semester, $course_title, $gradeable_id] = unserialize($id);
                 $currGradeable = [
                     'gradeable_id' => $gradeable_id,
                     'title' => $gradeable->getTitle(),

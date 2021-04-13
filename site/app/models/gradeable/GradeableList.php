@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\GradeableType;
 use app\models\AbstractModel;
 use app\models\User;
-use app\views\NavigationView;
 
 /**
  * Class GradeableList
@@ -274,7 +273,7 @@ class GradeableList extends AbstractModel {
             $core->loadCourseDatabase();
             foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
                 /** @var Gradeable $gradeable */
-                $gradeables["{$course->getSemester()}||{$course->getTitle()}||{$gradeable->getId()}"] = $gradeable;
+                $gradeables[serialize([$course->getSemester(), $course->getTitle(), $gradeable->getId()])] = $gradeable;
             }
             $core->getCourseDB()->disconnect();
         }
