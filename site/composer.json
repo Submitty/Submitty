@@ -29,7 +29,7 @@
     "php-ds/php-ds": "1.3.0",
     "cboden/ratchet": "0.4.3",
     "textalk/websocket": "1.5.2",
-    "egulias/email-validator": "3.1.0",
+    "egulias/email-validator": "3.1.1",
     "maennchen/zipstream-php": "^2.1"
   },
   "require-dev": {
@@ -37,7 +37,7 @@
     "submitty/php-codesniffer": "2.5.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "0.12.82"
+    "phpstan/phpstan": "0.12.83"
   },
   "scripts": {
     "test": "phpunit -c tests/phpunit.xml",
