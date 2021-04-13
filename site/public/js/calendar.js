@@ -2,6 +2,9 @@
 /* exported nextMonth */
 /* exported loadCalendar */
 /* exported loadFullCalendar */
+/* global curr_day */
+/* global curr_month */
+/* global curr_year */
 /* global gradeables_by_date */
 
 // List of names of months in English
@@ -89,7 +92,6 @@ function getDayCell(year, month, day, curr_view_month, view_semester=false) {
         content += `<span class="cal-curr-month-date cal-day-title">${monthNamesShort[month]} ${day},</span>`;
     }
     else if (month === curr_view_month) {
-        // eslint-disable-next-line no-undef
         if (day === curr_day && month === curr_month && year === curr_year) {
             content += `<span class="cal-curr-month-date cal-day-title cal-today-title">${day}</span>`;
         }
@@ -110,7 +112,6 @@ function getDayCell(year, month, day, curr_view_month, view_semester=false) {
 
     // List all gradeables of other items
     content += '<div class="cal-cell-items-panel">';
-    // eslint-disable-next-line no-undef
     for (const i in gradeables_by_date[cell_date_str]) {
         // When hovering over an item, shows the name and due date
         const gradeable = gradeables_by_date[cell_date_str][i];
