@@ -1,10 +1,10 @@
 {% import _self as self %}
 
 <script>
-    let gradeables_by_date = {{ gradeables_by_date|json_encode|raw }};
-    let curr_year = {{ curr_year }};
-    let curr_month = {{ curr_month }};
-    let curr_day = {{ curr_day }};
+    const gradeables_by_date = {{ gradeables_by_date|json_encode|raw }};
+    const curr_year = {{ curr_year }};
+    const curr_month = {{ curr_month }};
+    const curr_day = {{ curr_day }};
 
     window.onload = function () {
         loadCalendar({{ view_month }}, {{ view_year }});

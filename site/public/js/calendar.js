@@ -1,3 +1,9 @@
+/* exported prevMonth */
+/* exported nextMonth */
+/* exported loadCalendar */
+/* exported loadFullCalendar */
+/* global gradeables_by_date */
+
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dev'];
@@ -8,7 +14,6 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * @param year : int the current year
  * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
  */
-// eslint-disable-next-line no-unused-vars
 function prevMonth(month, year) {
     month = month - 1;
     if (month <= 0) {
@@ -25,7 +30,6 @@ function prevMonth(month, year) {
  * @param year : int the current year
  * @returns {number[]} : array<int> {next_month, year_of_next_month}
  */
-// eslint-disable-next-line no-unused-vars
 function nextMonth(month, year) {
     month = month + 1;
     if (month > 12) {
@@ -109,7 +113,6 @@ function getDayCell(year, month, day, curr_view_month, view_semester=false) {
     // eslint-disable-next-line no-undef
     for (const i in gradeables_by_date[cell_date_str]) {
         // When hovering over an item, shows the name and due date
-        // eslint-disable-next-line no-undef
         const gradeable = gradeables_by_date[cell_date_str][i];
         const due_time = gradeable['submission'] !== '' ? new Date(gradeable['submission']['date']) : '';
         let due_string = '';
@@ -300,7 +303,6 @@ function getFullCalendar(start, end, semester_name) {
  * @param month_ : int month that the calendar will show (1 as January and 12 as December)
  * @param year_ : int year that the calendar will show
  */
-// eslint-disable-next-line no-unused-vars
 function loadCalendar(month_, year_) {
     $('#full-calendar').html(getCalendarOfMonth(year_, month_));
 }
@@ -312,7 +314,6 @@ function loadCalendar(month_, year_) {
  * @param end the end date of the semester in the format of YYYY-mm-dd
  * @param semester_name the name of the semester
  */
-// eslint-disable-next-line no-unused-vars
 function loadFullCalendar(start, end, semester_name) {
     $('#full-calendar').html(getFullCalendar(start, end, semester_name));
 }
