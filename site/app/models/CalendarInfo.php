@@ -48,14 +48,6 @@ class CalendarInfo extends AbstractModel {
     /** @var string */
     private $empty_message = "";
 
-    /**
-     * CalendarInfo constructor.
-     *
-     * @param Core $core
-     */
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
 
     /**
      * A static factory method to create a CalendarInfo object using the information
