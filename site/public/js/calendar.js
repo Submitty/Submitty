@@ -76,7 +76,7 @@ function dateToStr(year, month, day) {
  * @param view_semester : if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
  * @returns {string} the HTML string containing the cell
  */
-function getDayCell(year, month, day, curr_view_month, view_semester=false) {
+function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
     const cell_date_str = dateToStr(year, month ,day);
     let content;
     if (view_semester) {
@@ -142,7 +142,7 @@ function getDayCell(year, month, day, curr_view_month, view_semester=false) {
  * @param title_area the title of the calendar (month+year/semester/...)
  * @returns {string} the HTML code for the title area
  */
-function getCalendarHeader(title_area) {
+function generateCalendarHeader(title_area) {
     return `<table class='table table-striped table-bordered persist-area table-calendar'>
         <thead>
         
@@ -170,10 +170,10 @@ function getCalendarHeader(title_area) {
  * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
  * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
  */
-function getCalendarOfMonth(view_year, view_month) {
+function generateCalendarOfMonth(view_year, view_month) {
     const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
     // Header area: two buttons to move, and month
-    let content = getCalendarHeader(
+    let content = generateCalendarHeader(
         `<th colspan="3">
                 <div class="cal-switch" id="prev-month-switch">
                     <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
@@ -196,7 +196,7 @@ function getCalendarOfMonth(view_year, view_month) {
         const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
         const lastMonthStart = lastMonthEnd + 1 - startWeekday;
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            content += getDayCell(view_year, view_month - 1, day, view_month);
+            content += generateDayCell(view_year, view_month - 1, day, view_month);
         }
     }
 
@@ -204,7 +204,7 @@ function getCalendarOfMonth(view_year, view_month) {
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let weekday = startWeekday;
     for (let day = 1; day <= daysInMonth; day++) {
-        content += getDayCell(view_year, view_month, day, view_month);
+        content += generateDayCell(view_year, view_month, day, view_month);
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
@@ -219,7 +219,7 @@ function getCalendarOfMonth(view_year, view_month) {
     if (weekday !== 0) {
         const remain = 7 - weekday;
         for (let day = 1; day <= remain; day++) {
-            content += getDayCell(view_year, view_month + 1, day, view_month);
+            content += generateDayCell(view_year, view_month + 1, day, view_month);
             if (weekday === 6) {
                 weekday = 0;
             }
@@ -244,9 +244,9 @@ function getCalendarOfMonth(view_year, view_month) {
  * @param semester_name the name of the semester
  * @returns {string} the HTML string containing the cell
  */
-function getFullCalendar(start, end, semester_name) {
+function generateFullCalendar(start, end, semester_name) {
     // Header area: two buttons to move, and month
-    let content = getCalendarHeader(
+    let content = generateCalendarHeader(
         `<th colspan="3">    
             </th>
             <th colspan="1">
@@ -272,7 +272,7 @@ function getFullCalendar(start, end, semester_name) {
     let weekday = startWeekday;
     while ((endDate.getTime() - startDate.getTime()) >= 0) {
         // Shows each day of current month
-        content += getDayCell(currDate.getFullYear(), currDate.getMonth()+1, currDate.getDate(), 0, true);
+        content += generateDayCell(currDate.getFullYear(), currDate.getMonth()+1, currDate.getDate(), 0, true);
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
@@ -305,7 +305,7 @@ function getFullCalendar(start, end, semester_name) {
  * @param year_ : int year that the calendar will show
  */
 function loadCalendar(month_, year_) {
-    $('#full-calendar').html(getCalendarOfMonth(year_, month_));
+    $('#full-calendar').html(generateCalendarOfMonth(year_, month_));
 }
 
 /**
@@ -316,5 +316,5 @@ function loadCalendar(month_, year_) {
  * @param semester_name the name of the semester
  */
 function loadFullCalendar(start, end, semester_name) {
-    $('#full-calendar').html(getFullCalendar(start, end, semester_name));
+    $('#full-calendar').html(generateFullCalendar(start, end, semester_name));
 }
