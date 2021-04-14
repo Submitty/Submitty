@@ -51,7 +51,7 @@ function nextMonth(month, year) {
  */
 function parseDate(datestr){
     const temp = datestr.split('-');
-    return new Date(temp[0], temp[1]-1, temp[2]);
+    return new Date(parseInt(temp[0]), parseInt(temp[1])-1, parseInt(temp[2]));
 }
 
 /**
@@ -73,7 +73,7 @@ function dateToStr(year, month, day) {
  * @param month : int the month of the date (1 as January and 12 as December)
  * @param day : int the date of the date (1 - 31)
  * @param curr_view_month : int the current month that the calendar is viewing
- * @param view_semester : if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
+ * @param view_semester : boolean if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
  * @returns {string} the HTML string containing the cell
  */
 function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
@@ -115,15 +115,21 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     for (const i in gradeables_by_date[cell_date_str]) {
         // When hovering over an item, shows the name and due date
         const gradeable = gradeables_by_date[cell_date_str][i];
-        const due_time = gradeable['submission'] !== '' ? new Date(gradeable['submission']['date']) : '';
+        // Due date information
         let due_string = '';
-        if (due_time !== '') {
+        if (gradeable['submission'] !== '') {
+            const due_time = new Date(gradeable['submission']['date']);
             due_string = `Due ${(due_time.getMonth() + 1)}/${(due_time.getDate())}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
         }
+        // Put detail in the tooltip
+        const tooltip = `Course: ${gradeable['course']}&#10;` +
+                        `Title: ${gradeable['title']}&#10;` +
+                        `Status: ${gradeable['status']}` +
+                        `${due_string}`;
         // Put the item in the day cell
         content += `
         <a class="cal-gradeable-status-${gradeable['status']} cal-gradeable-item"
-           title="Course: ${gradeable['course']}&#10;${gradeable['title']}&#10;${due_string}"
+           title="${tooltip}"
            href="${gradeable['url']}">
           ${gradeable['title']}
         </a>`;
