@@ -6,9 +6,9 @@
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
 
-    window.onload = function () {
+    window.addEventListener("load", function () {
         loadCalendar({{ view_month }}, {{ view_year }});
-    }
+    });
 </script>
 
 {# Begin Calendar #}
