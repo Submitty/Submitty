@@ -21,7 +21,7 @@ class CalendarView extends AbstractView {
 
         $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
         $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
-        $show_only_calendar = (isset($_GET['show_only_calendar'])) ? (int) $_GET['show_only_calendar'] : 1; // not showing the table by default
+        $show_table = (isset($_GET['show_table'])) ? (int) $_GET['show_table'] : 0; // not showing the table by default
 
         // Error checking
         $month = (int) sprintf("%08d", $month); // remove leading zero
@@ -41,7 +41,7 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Calendar");
 
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
-            "show_only_calendar" => $show_only_calendar,
+            "show_table" => $show_table,
             "view_year" => $year,          // the year that the calendar is viewing
             "view_month" => $month,        // the month that the calendar is viewing
             "curr_year" => date("Y"),  // the current year
