@@ -118,13 +118,12 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
         // Due date information
         let due_string = '';
         if (gradeable['submission'] !== '') {
-            const due_time = new Date(gradeable['submission']['date']);
+            const due_time = new Date(`${gradeable['submission']['date'].replace(/\s/, 'T')}Z`);
             due_string = `Due ${(due_time.getMonth() + 1)}/${(due_time.getDate())}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
         }
         // Put detail in the tooltip
         const tooltip = `Course: ${gradeable['course']}&#10;` +
                         `Title: ${gradeable['title']}&#10;` +
-                        `Status: ${gradeable['status']}` +
                         `${due_string}`;
         // Put the item in the day cell
         content += `
