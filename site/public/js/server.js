@@ -1708,6 +1708,29 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
     })
 }
 
+function popOutSubmittedFile(html_file, url_file) {
+    var directory = "";
+    let display_file_url = buildCourseUrl(['display_file']);
+    if (url_file.includes("submissions")) {
+      directory = "submissions";
+      url_file = url_file;
+    }
+    else if (url_file.includes("results_public")) {
+      directory = "results_public";
+    }
+    else if (url_file.includes("results")) {
+      directory = "results";
+    }
+    else if (url_file.includes("checkout")) {
+      directory = "checkout";
+    }
+    else if (url_file.includes("split_pdf")) {
+      directory = "split_pdf";
+    }
+    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    return false;
+  }
+
 /**
  * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
  *
