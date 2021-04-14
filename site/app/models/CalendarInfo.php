@@ -28,6 +28,7 @@ class CalendarInfo extends AbstractModel {
      * 'submission'   => DateTime (the timestamp of the item, shown in the popup tooltip)
      * 'status'       => string   (the status of the gradeable, open/closed/grading..., is used to show different
      *                             colors of item, relation between color and integer are recorded in css)
+     * 'status_note'  => string   (a string describing this status)
      * 'grading_open' => DateTime (reserved, useless for now. Can be empty)
      * 'grading_due'  => DateTime (reserved, useless for now. Can be empty)
      */
@@ -76,6 +77,10 @@ class CalendarInfo extends AbstractModel {
             $curr_section["section_id"] = NavigationView::gradeableSections[$section]["section_id"];
             $curr_section['gradeables'] = [];
 
+            $status_note = $curr_section["title"];
+            if ($curr_section["subtitle"] !== '') {
+                $status_note .= " ({$curr_section["subtitle"]})";
+            }
             // Iterate over the Gradeable objects in current section and summarize data
             foreach ($gradeables as $id => $gradeable) {
                 /** @var Gradeable $gradeable */
@@ -88,6 +93,7 @@ class CalendarInfo extends AbstractModel {
                     'url' => $info->core->buildUrl(['courses', $semester, $course_title, 'gradeable', $gradeable->getId()]),
                     'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate() : '',
                     'status' => (string) $section,
+                    'status_note' => $status_note,
                     'grading_open' => $gradeable->getGradeStartDate(),
                     'grading_due' => $gradeable->getGradeDueDate()
                 ];
