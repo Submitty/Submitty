@@ -311,8 +311,8 @@ class ForumController extends AbstractController {
         $expiration = (isset($_POST["expirationDate"]) && $this->core->getUser()->accessFullGrading()) ? $_POST["expirationDate"] : '1900-01-01 00:00:00';
 
         if (empty($expiration) && $pinned && $this->core->getUser()->accessAdmin()) {
-            $expiration = date("Y-m-d", strtotime('+7 days'));
-            $expiration .= " " . date("H:i:s");
+            $expiration = $this->core->getDateTimeNow();
+            $expiration = $expiration->add(new \DateInterval('P7D'));
         }
         elseif (!$pinned) {
             $expiration = '1900-01-01 00:00:00';

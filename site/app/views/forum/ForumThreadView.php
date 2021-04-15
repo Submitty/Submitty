@@ -1179,6 +1179,7 @@ class ForumThreadView extends AbstractView {
 
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
+        $expiration = $this->core->getDateTimeNow();
 
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
@@ -1190,7 +1191,8 @@ class ForumThreadView extends AbstractView {
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d')
         ]);
     }
 

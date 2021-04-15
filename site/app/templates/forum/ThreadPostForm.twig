@@ -168,7 +168,7 @@
         {% if show_expiration and core.getUser().accessFullGrading() %}
             <div class = "expiration inline-block" style="display: none;">
               <label class="inline-block" for="expirationDate">{{ "Expiration Date" }}</label>
-              <input type="date" class="date_picker" name="expirationDate" id="expirationDate"/>
+              <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder }}"/>
             </div>
         {% endif %}
         {% if show_cancel_edit_form %}

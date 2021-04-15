@@ -1904,7 +1904,6 @@ function updateThread(e) {
     data,
     success: function (response) {
       try {
-        alert(JSON.stringify(response));
         response = JSON.parse(response);
         if (response.status === 'success') {
           displaySuccessMessage("Thread post updated successfully!");
@@ -2098,14 +2097,15 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
+        $(".expiration").hide();
         if (data.hasOwnProperty('lockDate')) {
             $("#lock_thread_date").val(data.lockDate);
         }
-        if (data.hasOwnProperty('isAnnouncement')) {
+        if (data.isAnnouncement) {
             $("#Announcement").prop("checked", data.isAnnouncement);
             $(".expiration").show();
         }
-        if (data.hasOwnProperty('pinThread')) {
+        if (data.pinThread) {
             $("#pinThread").prop("checked", data.pinThread);
             $(".expiration").show();
         }
