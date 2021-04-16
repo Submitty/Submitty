@@ -113,13 +113,13 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     // List all gradeables of other items
     content += '<div class="cal-cell-items-panel">';
     for (const i in gradeables_by_date[cell_date_str]) {
-        // When hovering over an item, shows the name and due date
         const gradeable = gradeables_by_date[cell_date_str][i];
+        // When hovering over an item, shows the name and due date
         // Due date information
         let due_string = '';
         if (gradeable['submission'] !== '') {
             const due_time = new Date(`${gradeable['submission']['date'].replace(/\s/, 'T')}Z`);
-            due_string = `Due: ${(due_time.getMonth() + 1)}/${(due_time.getDate())}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
+            due_string = `Due: ${(due_time.getMonth() + 1).toString().padStart(2, '0')}/${(due_time.getDate()).toString().padStart(2, '0')}/${due_time.getFullYear()} @ ${due_time.getHours().toString().padStart(2, '0')}:${due_time.getMinutes().toString().padStart(2, '0')} ${gradeable['submission']['timezone']}`;
         }
         // Put detail in the tooltip
         const tooltip = `Course: ${gradeable['course']}&#10;` +
