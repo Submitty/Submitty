@@ -93,6 +93,9 @@ apt-get install -qqy imagemagick
 # miscellaneous usability
 apt-get install -qqy emacs
 
+# necessary for onnxruntime to install
+apt-get install -qqy protobuf-compiler libprotoc-dev
+
 # fix networking on vagrants
 # https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1768560
 # When the vagrant box comes with netplan.io 0.40+ we can remove this
@@ -126,3 +129,12 @@ apt-get -qqy autoremove
 add-apt-repository ppa:git-core/ppa -y
 apt-get install git -y
 # ------------------------------------------------------------------
+
+# necessary to install these to support the older version of pip
+# that Ubuntu-18.04
+# cryptography>=3.4 includes rust which requires additional stuff
+# to work on ubuntu-18.04, easier to pin to older version
+pip3 install cryptography==3.3.2
+# newer versions of opencv require a very length compile step
+# or newer version of pip, easier to install this older version
+pip3 install opencv-python==3.4.9.33
