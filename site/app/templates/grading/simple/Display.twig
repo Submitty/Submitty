@@ -72,6 +72,33 @@
         </div>
     </div>
 
+    <p>Sort By:</p>
+    <div style="margin: 1em 0;"> {# This is a drop down menu containing sorting options #}
+        <select id="subsection_sort" name="subsection_sorting" onChange="window.location.href=this.value" style="font-size:15px;">
+            <option value="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=section_subsection" aria-label="sort by Section then Subsection">Section then Subsection then User ID</option>
+            <option value="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=id" aria-label="sort by ID" >Section then User ID</option>
+            <option value="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by First Name">Section then First Name then User ID</option>
+            <option value="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Last Name">Section then Last Name then User ID</option>
+        </select>
+        {% if sort == "section_subsection" %}
+            <script>
+                $('select').val( "{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=section_subsection" )
+            </script>
+        {% elseif sort == "id"  %}
+            <script>
+                $('select').val( "{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=id" )
+            </script>
+        {% elseif sort == "first"  %}
+            <script>
+                $('select').val( "{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" )
+            </script>
+        {% elseif sort == "last"  %}
+            <script>
+                $('select').val( "{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" )
+            </script>
+        {% endif %}
+    </div>
+
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
         <div class="column-wrapper">
             <label for="csvUpload">Upload CSV
@@ -94,19 +121,13 @@
                 <th style="width:20px">#</th>
                 <th style="width:70px" scope="col">Section</th>
                 <th style="width:90px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=id" aria-label="sort by ID">
-                        <span class="tooltiptext" title="sort by User ID">User ID </span><i class="fas fa-sort"></i>
-                    </a>
+                    <span class="tooltiptext" title="sort by User ID">User ID </span>{# <i class="fas fa-sort"></i> #}
                 </th>
                 <th style="width:110px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by First Name">
-                        <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
-                    </a>
+                    <span class="tooltiptext" title="sort by First Name">First Name </span>{# <i class="fas fa-sort"></i> #}
                 </th>
                 <th style="width:110px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Last Name">
-                        <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
-                    </a>
+                    <span class="tooltiptext" title="sort by Last Name">Last Name </span>{# <i class="fas fa-sort"></i> #}
                 </th>
 
                 {% if action == 'lab' %}

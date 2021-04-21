@@ -6891,7 +6891,11 @@ AND gc_id IN (
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => []
+        'team_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection',
+            'u.user_id',
+        ]
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -6905,7 +6909,10 @@ AND gc_id IN (
         'team_id' => [
             'team.team_id'
         ],
-        'user_id' => []
+        'user_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection'
+        ]
     ];
 
     /**

@@ -99,7 +99,7 @@ class SimpleGraderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return MultiResponse
      */
-    public function gradePage($gradeable_id, $view = null, $sort = null) {
+    public function gradePage($gradeable_id, $view = null, $sort = "section_subsection") {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
@@ -123,6 +123,9 @@ class SimpleGraderController extends AbstractController {
         }
         elseif ($sort === "first") {
             $sort_key = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
+        }
+        elseif ($sort == "section_subsection") {
+            $sort_key = "u.registration_subsection";
         }
         else {
             $sort_key = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
@@ -172,7 +175,7 @@ class SimpleGraderController extends AbstractController {
             $graders[$section->getName()] = $section->getGraders();
         }
 
-        $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, "u.registration_subsection", $sort_key]);
+        $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key, "u.user_id"]);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['grading', 'SimpleGrader'],
