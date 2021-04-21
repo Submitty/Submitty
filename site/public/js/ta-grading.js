@@ -35,6 +35,7 @@ const taLayoutDet = {
   dividedColName: "LEFT",
   leftPanelWidth: "50%",
   bottomPanelHeight: "50%",
+  bottomFourPanelRightHeight: "50%",
 };
 
 // Grading Panel header width
@@ -117,8 +118,12 @@ $(function () {
       const panelId = panelSpanId.split(/(_|-)btn/)[0];
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
+      checkNotebookScroll();
     }
   });
+  notebookScrollLoad();
+
+  checkNotebookScroll();
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -146,6 +151,81 @@ $(function () {
 
 });
 
+function checkNotebookScroll() {
+  if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.leftBottom === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.rightTop === 'notebook-view'
+    || taLayoutDet.currentTwoPanels.rightBottom === 'notebook-view'
+    || taLayoutDet.currentOpenPanel === 'notebook-view'
+  ) {
+    $('#notebook-view').scroll(delayedNotebookSave());
+  } else {
+    $('#notebook-view').off('scroll');
+    localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+    localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+  }
+}
+
+function delayedNotebookSave() {
+  var timer;
+  return function() {
+    timer && clearTimeout(timer);
+    timer = setTimeout(notebookScrollSave, 250);
+  }
+}
+
+function notebookScrollLoad() {
+  var notebookView = $('#notebook-view');
+  if (notebookView !== 0 && notebookView.is(":visible")) {
+    var elementID = localStorage.getItem('ta-grading-notebook-view-scroll-id');
+    var element = null;
+    if (elementID === null) {
+      elementID = localStorage.getItem('ta-grading-notebook-view-scroll-item');
+      if (elementID !== null) {
+        element = $('[data-item-ref=' + elementID + ']');
+      }
+    } else {
+      element = $('[data-non-item-ref=' + elementID + ']');
+    }
+    if (element !== null) {
+      if (element.length !== 0) {
+        notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
+      } else {
+        localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+        localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+      }
+    }
+  }
+}
+
+function notebookScrollSave() {
+  var notebookView = $('#notebook-view');
+  if (notebookView.length !== 0 && notebookView.is(':visible')) {
+    var notebookTop = $('#notebook-view').offset().top;
+    var element = $('#content_0');
+    if(notebookView.scrollTop() + notebookView.innerHeight() + 1 > notebookView[0].scrollHeight) {
+      element = $('[id^=content_').last();
+    } else {
+      while (element.length !== 0) {
+        if (element.offset().top > notebookTop) {
+          break;
+        }
+        element = element.next();
+      }
+    }
+    
+    if (element.length !== 0) {
+      if (element.attr('data-item-ref') === undefined) {
+        localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
+        localStorage.removeItem('ta-grading-notebook-view-scroll-item');
+      } else {
+        localStorage.setItem('ta-grading-notebook-view-scroll-item', element.attr('data-item-ref'));
+        localStorage.removeItem('ta-grading-notebook-view-scroll-id');
+      }
+    }
+  }
+}
+
 // returns taLayoutDet object from LS, and if its not present returns empty object
 function getSavedTaLayoutDetails() {
   const savedData = localStorage.getItem('taLayoutDetails');
@@ -166,11 +246,25 @@ function saveResizedColsDimensions(updateValue, isHorizontalResize) {
   saveTaLayoutDetails();
 }
 
+function saveRightResizedColsDimensions(updateValue, isHorizontalResize) {
+  if (isHorizontalResize) {
+    taLayoutDet.bottomFourPanelRightHeight = updateValue;
+  }
+  else {
+    taLayoutDet.leftPanelWidth = updateValue;
+  }
+  saveTaLayoutDetails();
+}
+
 function initializeHorizontalTwoPanelDrag () {
   if (taLayoutDet.dividedColName === "RIGHT") {
     initializeResizablePanels(panelsBucket.rightBottomSelector, rightHorizDragBarSelector, true, saveResizedColsDimensions)
-  } else {
-    initializeResizablePanels(panelsBucket.leftBottomSelector, leftHorizDragBarSelector, true, saveResizedColsDimensions)
+  }
+  if (taLayoutDet.dividedColName === "LEFT") {
+    if(taLayoutDet.numOfPanelsEnabled === 4) {
+      initializeResizablePanels(panelsBucket.rightBottomSelector, rightHorizDragBarSelector, true, saveRightResizedColsDimensions);
+    }
+    initializeResizablePanels(panelsBucket.leftBottomSelector, leftHorizDragBarSelector, true, saveResizedColsDimensions);
   }
 }
 
@@ -207,6 +301,12 @@ function updateLayoutDimensions() {
   bottomRow.css({
     height: taLayoutDet.bottomPanelHeight ? taLayoutDet.bottomPanelHeight : "50%"
   });
+
+  if (taLayoutDet.numOfPanelsEnabled === 4) {
+    $(".panel-item-section.right-bottom").css({
+      height: taLayoutDet.bottomFourPanelRightHeight ? taLayoutDet.bottomFourPanelRightHeight : "50%"
+    });
+  }
 }
 
 function updatePanelOptions() {
@@ -563,6 +663,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $(id_str).toggleClass('active', eleVisibility);
+      $("#" + panel.str).find(".CodeMirror").each(function() {this.CodeMirror.refresh()});
 
       if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
@@ -711,20 +812,30 @@ function togglePanelLayoutModes(forceVal = false) {
         }
         return true;
       })
+      if (nextIdx === -1) {
+        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
+          leftTop: panelElements[0].str,
+          leftBottom: panelElements[1].str,
+          rightTop: panelElements[2].str,
+          rightBottom: null,
+        } : {
+          leftTop: panelElements[0].str,
+            leftBottom: null,
+            rightTop: panelElements[1].str,
+            rightBottom: panelElements[2].str,
+        };
+      }
     }
-    if (nextIdx === -1) {
-      taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-        leftTop: panelElements[0].str,
-        leftBottom: panelElements[1].str,
-        rightTop: panelElements[2].str,
-        rightBottom: null,
-      } : {
-        leftTop: panelElements[0].str,
-          leftBottom: null,
-          rightTop: panelElements[1].str,
-          rightBottom: panelElements[2].str,
-      };;
-    }
+
+    initializeHorizontalTwoPanelDrag();
+    updatePanelLayoutModes();
+  } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
+    twoPanelCont.addClass("active");
+    $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+
+    $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
+    $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
+
     initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
   }
@@ -781,7 +892,7 @@ function exchangeTwoPanels () {
     };
     updatePanelLayoutModes();
   }
-  else if (+taLayoutDet.numOfPanelsEnabled === 3) {
+  else if (+taLayoutDet.numOfPanelsEnabled === 3 || +taLayoutDet.numOfPanelsEnabled === 4) {
     taLayoutDet.currentTwoPanels = {
       leftTop: taLayoutDet.currentTwoPanels.rightTop,
       leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
@@ -843,15 +954,11 @@ registerKeyHandler({name: "Toggle Solution/TA-Notes Panel", code: "KeyT"}, funct
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
-  if (isOverallCommentOpen()) {
-    // Overall comment is open, so just close it
-    closeOverallComment(true);
-  }
-  else if (openComponentId === NO_COMPONENT_ID) {
+  if (openComponentId === NO_COMPONENT_ID) {
     // No component is open, so open the first one
     let componentId = getComponentIdByOrder(0);
     toggleComponent(componentId, true).then(function () {
@@ -859,9 +966,12 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, so open the general comment
-    toggleOverallComment(true).then(function () {
-      scrollToOverallComment();
+    // Last component is open, close it and then open and scroll to first component
+    closeComponent(openComponentId, true).then(function () {
+      let componentId = getComponentIdByOrder(0);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
     });
   }
   else {
@@ -876,26 +986,24 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
-  if (isOverallCommentOpen()) {
-    // Overall comment open, so open the last component
-    let componentId = getComponentIdByOrder(numComponents - 1);
-    toggleComponent(componentId, true).then(function () {
-      scrollToComponent(componentId);
-    });
-  }
-  else if (openComponentId === NO_COMPONENT_ID) {
+  if (openComponentId === NO_COMPONENT_ID) {
     // No Component is open, so open the overall comment
-    toggleOverallComment(true).then(function () {
+    // Targets the box outside of the container, can use tab to focus comment
+    //TODO: Add "Overall Comment" focusing, control
       scrollToOverallComment();
-    });
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
-    // First component is open, so close it
-    closeAllComponents(true);
+    // First component is open, close it and then open and scroll to the last one
+    closeComponent(openComponentId, true).then(function () {
+      let componentId = getComponentIdByOrder(numComponents - 1);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
+    });
   }
   else {
     // Any other case, open the previous one
@@ -1175,6 +1283,7 @@ function newEditPeerComponentsForm() {
 
 function openFrame(html_file, url_file, num) {
   let iframe = $('#file_viewer_' + num);
+  let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
     let iframeId = "file_viewer_" + num + "_iframe";
     let directory = "";
@@ -1193,12 +1302,18 @@ function openFrame(html_file, url_file, num) {
     }
     // handle pdf
     if (url_file.substring(url_file.length - 3) === "pdf") {
-      expandFile(html_file, url_file).then(function(){
+      viewFileFullPanel(html_file, url_file).then(function(){
         loadPDFToolbar();
       });
     }
     else {
-      iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+      let frameHtml = `
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}');" 
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
+                width="95%">
+        </iframe>
+      `;
+      iframe.html(frameHtml);
       if(iframe.hasClass("full_panel")){
         $('#'+iframeId).attr("height", "1200px");
       }
@@ -1220,8 +1335,9 @@ function openFrame(html_file, url_file, num) {
   return false;
 }
 
-function openFile(html_file, url_file) {
+function popOutSubmittedFile(html_file, url_file) {
   var directory = "";
+  let display_file_url = buildCourseUrl(['display_file']);
   if (url_file.includes("submissions")) {
     directory = "submissions";
     url_file = url_file;
@@ -1238,17 +1354,18 @@ function openFile(html_file, url_file) {
   else if (url_file.includes("split_pdf")) {
     directory = "split_pdf";
   }
-  window.open("{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+  window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
   return false;
 }
-//TODO: Name better
-function expandFile(name, path, page_num = 0) {
+
+
+function viewFileFullPanel(name, path, page_num = 0) {
   // debugger;
   if($('#viewer').length != 0){
     $('#viewer').remove();
   }
 
-  let promise = loadFile(name, path, page_num);
+  let promise = loadPDF(name, path, page_num);
   $('#file-view').show();
   $("#grading_file_name").html(name);
   let precision = $("#submission_browser").width()-$("#directory_view").width();
@@ -1259,16 +1376,18 @@ function expandFile(name, path, page_num = 0) {
   return promise;
 }
 
-function loadFile(name, path, page_num = 0) {
+function loadPDF(name, path, page_num) {
   let extension = name.split('.').pop();
+  let gradeable_id = document.getElementById('submission_browser').dataset.gradeableId;
+  let anon_submitter_id = document.getElementById('submission_browser').dataset.anonSubmitterId;
   if (extension == "pdf") {
     $('#pdf_annotation_bar').show();
     $('#save_status').show();
     return $.ajax({
       type: 'POST',
-      url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
+      url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'pdf']),
       data: {
-        'user_id': '{{ anon_submitter_id }}',
+        'user_id': anon_submitter_id,
         'filename': name,
         'file_path': path,
         'page_num': page_num,

@@ -316,6 +316,7 @@ class ElectronicGraderView extends AbstractView {
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
+            "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data
         ]);
     }
@@ -887,6 +888,7 @@ HTML;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
+            $isStudentInfoPanel = false;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
         $this->core->getOutput()->enableMobileViewport();
@@ -966,7 +968,7 @@ HTML;
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $highest_version,
+                $display_version,
                 $notebook,
                 $graded_gradeable->getSubmitter()->getId()
             );
@@ -999,7 +1001,7 @@ HTML;
 
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        if ($this->core->getUser()->getGroup() !== User::GROUP_STUDENT && $gradeable->getLimitedAccessBlind() !== 2) {
+        if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {
@@ -1301,8 +1303,11 @@ HTML;
      */
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
+        $query = [];
+        parse_str(parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY), $query);
+        unset($query["gradeable_version"]);
         $version_change_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
-            . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getId()]) . '&gradeable_version=';
+            . http_build_query($query) . '&gradeable_version=';
         $onChange = "versionChange('{$version_change_url}', this)";
 
         $tables = [];

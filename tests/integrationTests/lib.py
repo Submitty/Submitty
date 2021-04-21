@@ -463,7 +463,7 @@ class TestcaseWrapper:
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
 
-    # Helpful for debugging make errors on travis
+    # Helpful for debugging make errors on CI
     def debug_print(self,f):
         filename=os.path.join(self.testcase_path,f)
         print ("\nDEBUG_PRINT: ",filename)
@@ -617,40 +617,6 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if self.simplify_junit_output(filename1) != self.simplify_junit_output(filename2):
-            raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
-
-
-
-
-    ###################################################################################
-    # remove the timestamp on the emma coverage report
-    def simplify_emma_coverage(self,filename):
-        if not os.path.isfile(filename):
-            raise RuntimeError("File " + filename + " does not exist")
-        simplified = []
-        with open(filename,'r') as file:
-            for line in file:
-                if ' report, generated ' in line:
-                    continue
-                #sys.stdout.write("LINE: " + line)
-                simplified.append(line)
-        return simplified
-
-    # Compares two emma coverage report files, ignoring the timestamp on the report
-    def emma_coverage_diff(self, f1, f2=""):
-        # if only 1 filename provided...
-        if not f2:
-            f2 = f1
-        # if no directory provided...
-        if not os.path.dirname(f1):
-            f1 = os.path.join("data", f1)
-        if not os.path.dirname(f2):
-            f2 = os.path.join("validation", f2)
-
-        filename1 = os.path.join(self.testcase_path, f1)
-        filename2 = os.path.join(self.testcase_path, f2)
-
-        if self.simplify_emma_coverage(filename1) != self.simplify_emma_coverage(filename2):
             raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
 
     # Validate a configuration against the submitty complete_config_schema.json

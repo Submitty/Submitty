@@ -589,21 +589,19 @@ class Access {
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
-        if ($gradeable->getGradeStartDate() <= $now) {
-            //Check to see if the requested user is assigned to this grader.
-            $sections = $gradeable->getGradingSectionsForUser($user);
+        //Check to see if the requested user is assigned to this grader.
+        $sections = $gradeable->getGradingSectionsForUser($user);
 
-            foreach ($sections as $section) {
-                /** @var GradingSection $section */
-                if ($gradeable->isTeamAssignment()) {
-                    if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
-                        return true;
-                    }
+        foreach ($sections as $section) {
+            /** @var GradingSection $section */
+            if ($gradeable->isTeamAssignment()) {
+                if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
+                    return true;
                 }
-                else {
-                    if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
-                        return true;
-                    }
+            }
+            else {
+                if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
+                    return true;
                 }
             }
         }
