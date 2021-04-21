@@ -348,6 +348,16 @@ class GlobalController extends AbstractController {
             "icon" => "fa-user"
         ]);
 
+        if ($this->core->getConfig()->isDebug()) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['calendar']),
+                "title" => "Calendar",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-calendar",
+                "icon" => "fa-calendar"
+            ]);
+        }
+
         // --------------------------------------------------------------------------
         // FACULTY & SUPERUSERS ONLY
         if ($this->core->getUser()->accessFaculty()) {
