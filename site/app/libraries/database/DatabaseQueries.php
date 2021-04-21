@@ -6894,7 +6894,6 @@ AND gc_id IN (
         'team_id' => [],
         'section_subsection' => [
             'u.registration_subsection',
-            'u.user_id',
         ]
     ];
     const graded_gradeable_key_map_team = [
