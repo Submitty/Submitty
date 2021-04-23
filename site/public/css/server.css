@@ -85,6 +85,10 @@ a.btn, a.icon {
     text-decoration: none;
 }
 
+.width-full {
+    width: 100%;
+}
+
 /****************************
  * INPUT STYLES
  ***************************/
@@ -1602,9 +1606,9 @@ end of styles used in the admin gradeable page
 }
 
 .required::-webkit-input-placeholder { color: var(--error-alert-dark-red); }
-.required:-moz-placeholder { var(--error-alert-dark-red); }
-.required::-moz-placeholder { var(--error-alert-dark-red); }
-.required:-ms-input-placeholder { var(--error-alert-dark-red); }
+.required:-moz-placeholder { color: var(--error-alert-dark-red); }
+.required::-moz-placeholder { color: var(--error-alert-dark-red); }
+.required:-ms-input-placeholder { color: var(--error-alert-dark-red); }
 
 .required_type{
     color: var(--error-alert-dark-red);
