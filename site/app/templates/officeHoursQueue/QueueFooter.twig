@@ -13,7 +13,10 @@
   var timers = []; //keep track of the current running timers on the page
 
   //Runs the function that gets and fills in the old filter settings
-  filterQueues();
+  {% if viewer.isGrader() %}
+    filterQueues();
+  {% endif %}
+
   //Unide the checkboxes now that they have been set
   $(".page_loading").removeClass("page_loading");
 
@@ -203,15 +206,17 @@
       window.socketClient.open('office_hours_queue');
   }
 
-  window.isAudibleAlertEnabled = false;
+  {% if viewer.isGrader() %}
+    window.isAudibleAlertEnabled = false;
 
-  try {
-      window.notificationSound = new NotificationSound();
-      document.querySelector('.disable-audible').style.display = 'none';
-      document.querySelector('.enable-audible').style.display = 'inline-block';
-  } catch (e) {
-      console.error(e);
-  }
+    try {
+        window.notificationSound = new NotificationSound();
+        document.querySelector('.disable-audible').style.display = 'none';
+        document.querySelector('.enable-audible').style.display = 'inline-block';
+    } catch (e) {
+        console.error(e);
+    }
+  {% endif %}
 
   function toggleAudibleAlert() {
       if (window.isAudibleAlertEnabled) {
