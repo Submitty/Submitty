@@ -5953,16 +5953,16 @@ AND gc_id IN (
     public function setQueuePauseState($new_state) {
         $time_paused_start = $this->core->getQueries()->getCurrentQueueState()['time_paused_start'];
         $current_state = $time_paused_start != null;
-        // Checks if pause state is actually changing
         if ($new_state != $current_state) {
+            // The pause state is actually changing
             $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
             $time_paused_start = date_create($time_paused_start);
-            // Student is pausing
             if ($new_state) {
+                // The student is pausing
                 $time_paused_start = $this->core->getDateTimeNow();
             }
-            // Student is un-pausing
             else {
+                // The student is un-pausing
                 $time_paused_end = $this->core->getDateTimeNow();
                 $date_interval = date_diff($time_paused_start, $time_paused_end);
                 $time_paused = $time_paused + ($date_interval->h * 60 + $date_interval->i) * 60 + $date_interval->s;
