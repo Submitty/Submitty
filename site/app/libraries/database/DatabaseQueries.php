@@ -810,12 +810,8 @@ SQL;
     }
 
     public function setAnnouncement(int $thread_id, bool $onOff) {
-        if ($onOff) {
-            $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", [date("Y-m-d H:i:s", strtotime('+7 days')), $thread_id]);
-        }
-        else {
-            $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", ['1900-01-01 00:00:00', $thread_id]);
-        }
+        $expireTime = $onOff ? date("Y-m-d H:i:s", strtotime('+7 days')) : '1900-01-01 00:00:00';
+        $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", [$expireTime, $thread_id]);
     }
 
     public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
