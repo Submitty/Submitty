@@ -67,7 +67,7 @@
           {% if entry['time_paused_start'] == NULL %}
             <td>---</td>
           {% else %}
-            <td class="help_timer" help_time="{{ viewer.timePausedToISO(entry['time_paused'], entry['time_paused_start']) }}"></td>
+            <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_paused_start']) }}"></td>
           {% endif %}
 
           <td>{{ entry['queue_code'] }}</td>

@@ -5960,12 +5960,14 @@ AND gc_id IN (
             if ($new_state) {
                 // The student is pausing
                 $time_paused_start = $this->core->getDateTimeNow();
+                $date_interval = new \DateInterval("PT{$time_paused}S");
+                $time_paused_start = date_sub($time_paused_start, $date_interval);
             }
             else {
                 // The student is un-pausing
                 $time_paused_end = $this->core->getDateTimeNow();
                 $date_interval = date_diff($time_paused_start, $time_paused_end);
-                $time_paused = $time_paused + ($date_interval->h * 60 + $date_interval->i) * 60 + $date_interval->s;
+                $time_paused = ($date_interval->h * 60 + $date_interval->i) * 60 + $date_interval->s;
                 $time_paused_start = null;
             }
             $this->course_db->query("UPDATE queue SET paused = ?, time_paused = ?, time_paused_start = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $time_paused, $time_paused_start, $this->core->getUser()->getId()]);
