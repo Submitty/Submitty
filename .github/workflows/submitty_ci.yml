@@ -113,7 +113,7 @@ jobs:
             path: ~/.cache/pip
             key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip
@@ -135,7 +135,7 @@ jobs:
             path: ~/.cache/pip
             key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
@@ -224,7 +224,7 @@ jobs:
               path: path ~/.cache/pip
               key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
               restore-keys: |
-                ${{ runner.os }}-py-pip
+                ${{ runner.os }}-${{ github.job }}-pip-
           - name: Install python dependencies
             run: |
               python3 -m pip install --upgrade pip setuptools wheel  
