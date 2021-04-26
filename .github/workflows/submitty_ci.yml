@@ -111,7 +111,7 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-pip-${{ github.sha }}
             restore-keys: |
                 ${{ runner.os }}-pip-
         - name: Install python libraries
@@ -133,7 +133,7 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-pip-${{ github.sha }}
             restore-keys: |
                 ${{ runner.os }}-pip-
         - name: Install python libraries
