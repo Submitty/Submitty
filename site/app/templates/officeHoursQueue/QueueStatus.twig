@@ -94,12 +94,11 @@
       <p>Total time paused since you entered the queue:</p>
       {% if viewer.getCurrentTimePausedStart() == NULL %}
         <p>{{viewer.intTimePausedToStringTimePaused(viewer.getCurrentTimePaused())}}</p>
-      {% endif %}
-      <div class="queue_current_{{viewer.cleanForId(viewer.getCurrentQueueCode())}}">
-        {% if viewer.getCurrentTimePausedStart() != NULL %}
+      {% else %}
+        <div class="queue_current_{{viewer.cleanForId(viewer.getCurrentQueueCode())}}">
           <p class="help_timer" help_time="{{ viewer.timePausedToISO(viewer.getCurrentTimePaused(), viewer.getCurrentTimePausedStart()) }}"></p>
-        {% endif %}
-      </div>
+        </div>
+      {% endif %}
     </form>
   </div>
 {% else %}
