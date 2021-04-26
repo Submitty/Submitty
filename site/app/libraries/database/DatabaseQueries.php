@@ -3651,6 +3651,12 @@ SQL;
             $course->loadDisplayName();
             $return[] = $course;
         }
+
+        // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
+        $return = array_filter($return, function (Course $course) use ($user_id) {
+            return $this->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
+        });
+
         return $return;
     }
 

@@ -32,13 +32,9 @@ class HomePageController extends AbstractController {
      * @Route("/home/courses", methods={"GET"})
      *
      * @param string|null $user_id
-     * @param bool|string $as_instructor
      * @return MultiResponse
      */
-    public function getCourses($user_id = null, $as_instructor = false) {
-        if ($as_instructor === 'true') {
-            $as_instructor = true;
-        }
+    public function getCourses($user_id = null) {
 
         $user = $this->core->getUser();
         if (is_null($user_id) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
@@ -47,15 +43,6 @@ class HomePageController extends AbstractController {
 
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
-
-        // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
-        // Do not filter courses for non-students.
-        foreach (['archived_courses', 'unarchived_courses'] as $var) {
-            $$var = array_filter($$var, function (Course $course) use ($user_id, $as_instructor) {
-                $query = $as_instructor ? 'checkIsInstructorInCourse' : 'checkStudentActiveInCourse';
-                return $this->core->getQueries()->$query($user_id, $course->getTitle(), $course->getSemester());
-            });
-        }
 
         $callback = function (Course $course) {
             return $course->getCourseInfo();
