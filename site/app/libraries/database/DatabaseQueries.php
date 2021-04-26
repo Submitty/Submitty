@@ -5953,13 +5953,14 @@ AND gc_id IN (
     public function setQueuePauseState($new_state) {
         $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
         $time_paused_start = date_create($this->core->getQueries()->getCurrentQueueState()['time_paused_start']);
-        if($new_state) {
+        if ($new_state) {
             $time_paused_start = $this->core->getDateTimeNow();
-        } else {
+        }
+        else {
             $time_paused_end = $this->core->getDateTimeNow();
             $date_interval = date_diff($time_paused_start, $time_paused_end);
             $time_paused = $time_paused + ($date_interval->h * 60 + $date_interval->i) * 60 + $date_interval->s;
-            $time_paused_start = NULL;
+            $time_paused_start = null;
         }
         $this->course_db->query("UPDATE queue SET paused = ?, time_paused = ?, time_paused_start = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $time_paused, $time_paused_start, $this->core->getUser()->getId()]);
     }

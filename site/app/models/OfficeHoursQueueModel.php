@@ -138,16 +138,16 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function timePausedToISO($time_paused, $time_paused_start) {
-      $date_interval = new \DateInterval("PT{$time_paused}S");
-      $date_time = date_create($time_paused_start);
-      $date_time = date_sub($date_time, $date_interval);
-      return date_format($date_time, "c");
+        $date_interval = new \DateInterval("PT{$time_paused}S");
+        $date_time = date_create($time_paused_start);
+        $date_time = date_sub($date_time, $date_interval);
+        return date_format($date_time, "c");
     }
 
     public function intTimePausedToStringTimePaused($int) {
-      $m = $int / 60 % 60;
-      $s = $int % 60;
-      return $m . ":" . ($s < 10 ? "0" : ""). $s;
+        $m = $int / 60 % 60;
+        $s = $int % 60;
+        return $m . ":" . ($s < 10 ? "0" : "") . $s;
     }
 
     public function getTimeBeingHelped($time_out, $time_helped) {
