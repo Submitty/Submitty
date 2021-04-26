@@ -1,0 +1,20 @@
+<div id="{{ file_view_id|default('file-view') }}" class="hide">
+    <div class="sticky-file-info">
+        <div class="flex-row">
+            <span>
+                <span class="grading_label">{{ panelTitle|default('Submissions and Results Browser')}} ></span>
+                <span class="grading_label" id="{{ grading_file_name_id|default('grading_file_name') }}"></span>
+                <a onclick='collapseFile("{{ panel|default('"submission"') }}")'
+                    aria-label="Collapse File"
+                    class="key_to_click"
+                    tabindex="0"
+                ><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
+            </span>
+            <strong id="{{ save_status_id|default('save_status') }}">No changes</strong>
+        </div>
+        {% if show_pdf_bar|default(true) %}
+        {% include "grading/electronic/PDFAnnotationBar.twig" %}
+        {% endif %}
+    </div>
+    <div id="{{ file_content_id|default('file-content') }}"></div>
+</div>
