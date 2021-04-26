@@ -79,6 +79,15 @@ $(function () {
     }
   });
 
+  loadTAGradingSettingData();
+
+  $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
+    var storageCode = $(this).attr('data-storage-code');
+    if(storageCode) {
+      localStorage.setItem(storageCode, this.value);
+    }
+  })
+
   // Progress bar value
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
@@ -124,6 +133,17 @@ $(function () {
   notebookScrollLoad();
 
   checkNotebookScroll();
+
+  if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
+    let notebookPanel = $('#notebook-view');
+    if(notebookPanel.length != 0) {
+      let notebookItems = notebookPanel.find('.openAllFilesubmissions'); 
+      for(var i = 0; i < notebookItems.length; i++) {
+        notebookItems[i].onclick();
+      }
+    }
+  }
+  
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -954,7 +974,7 @@ registerKeyHandler({name: "Toggle Solution/TA-Notes Panel", code: "KeyT"}, funct
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -966,10 +986,12 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, scroll to general comment for easier access
-    //TODO: Add "Overall Comment" focusing, control
+    // Last component is open, close it and then open and scroll to first component
     closeComponent(openComponentId, true).then(function () {
-      scrollToOverallComment();
+      let componentId = getComponentIdByOrder(0);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
     });
   }
   else {
@@ -984,7 +1006,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -995,8 +1017,13 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
       scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
-    // First component is open, so close it
-    closeAllComponents(true);
+    // First component is open, close it and then open and scroll to the last one
+    closeComponent(openComponentId, true).then(function () {
+      let componentId = getComponentIdByOrder(numComponents - 1);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
+    });
   }
   else {
     // Any other case, open the previous one
@@ -1274,7 +1301,7 @@ function newEditPeerComponentsForm() {
   captureTabInModal("edit-peer-components-form");
 }
 
-function openFrame(html_file, url_file, num) {
+function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submission") {
   let iframe = $('#file_viewer_' + num);
   let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
@@ -1294,26 +1321,25 @@ function openFrame(html_file, url_file, num) {
       directory = "checkout";
     }
     // handle pdf
-    if (url_file.substring(url_file.length - 3) === "pdf") {
-      viewFileFullPanel(html_file, url_file).then(function(){
+    if (pdf_full_panel && url_file.substring(url_file.length - 3) === "pdf") {
+      viewFileFullPanel(html_file, url_file, 0, panel).then(function(){
         loadPDFToolbar();
       });
     }
     else {
+      let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
+      let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}');" 
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});" 
                 src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
                 width="95%">
         </iframe>
       `;
       iframe.html(frameHtml);
-      if(iframe.hasClass("full_panel")){
-        $('#'+iframeId).attr("height", "1200px");
-      }
       iframe.addClass('open');
     }
   }
-  if (!iframe.hasClass("full_panel") && url_file.substring(url_file.length - 3) !== "pdf") {
+  if (!iframe.hasClass("full_panel") && (!pdf_full_panel || url_file.substring(url_file.length - 3) !== "pdf")) {
     if (!iframe.hasClass('shown')) {
       iframe.show();
       iframe.addClass('shown');
@@ -1328,52 +1354,55 @@ function openFrame(html_file, url_file, num) {
   return false;
 }
 
-function popOutSubmittedFile(html_file, url_file) {
-  var directory = "";
-  let display_file_url = buildCourseUrl(['display_file']);
-  if (url_file.includes("submissions")) {
-    directory = "submissions";
-    url_file = url_file;
+let fileFullPanelOptions = {
+  submission: { //Main viewer (submission panel)
+    viewer: "#viewer",
+    fileView: "#file-view",
+    gradingFileName: "#grading_file_name",
+    panel: "#submission_browser",
+    innerPanel: "#directory_view",
+    pdfAnnotationBar: "#pdf_annotation_bar",
+    saveStatus: "#save_status",
+    fileContent: "#file-content",
+    fullPanel: "full_panel",
+    pdf: true
+  },
+  notebook: { //Notebook panel
+    viewer: "#notebook-viewer",
+    fileView: "#notebook-file-view",
+    gradingFileName: "#notebook_grading_file_name",
+    panel: "#notebook_view",
+    innerPanel: "#notebook-main-view",
+    pdfAnnotationBar: "#notebook_pdf_annotation_bar", //TODO
+    saveStatus: "#notebook_save_status", //TODO
+    fileContent: "#notebook-file-content",
+    fullPanel: "notebook_full_panel",
+    pdf: false
   }
-  else if (url_file.includes("results_public")) {
-    directory = "results_public";
-  }
-  else if (url_file.includes("results")) {
-    directory = "results";
-  }
-  else if (url_file.includes("checkout")) {
-    directory = "checkout";
-  }
-  else if (url_file.includes("split_pdf")) {
-    directory = "split_pdf";
-  }
-  window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-  return false;
 }
 
-
-function viewFileFullPanel(name, path, page_num = 0) {
+function viewFileFullPanel(name, path, page_num = 0, panel="submission") {
   // debugger;
-  if($('#viewer').length != 0){
-    $('#viewer').remove();
+  if($(fileFullPanelOptions[panel]["viewer"]).length != 0){
+    $(fileFullPanelOptions[panel]["viewer"]).remove();
   }
 
-  let promise = loadPDF(name, path, page_num);
-  $('#file-view').show();
-  $("#grading_file_name").html(name);
-  let precision = $("#submission_browser").width()-$("#directory_view").width();
-  let offset = $("#submission_browser").width()-precision;
-  $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
-  $("#directory_view").hide();
-  $("#file-view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
+  let promise = loadPDF(name, path, page_num, panel);
+  $(fileFullPanelOptions[panel]["fileView"]).show();
+  $(fileFullPanelOptions[panel]["gradingFileName"]).html(name);
+  let precision = $(fileFullPanelOptions[panel]["panel"]).width()-$(fileFullPanelOptions[panel]["innerPanel"]).width();
+  let offset = $(fileFullPanelOptions[panel]["panel"]).width()-precision;
+  $(fileFullPanelOptions[panel]["innerPanel"]).animate({'left': '+=' + -offset + 'px'}, 200);
+  $(fileFullPanelOptions[panel]["innerPanel"]).hide();
+  $(fileFullPanelOptions[panel]["fileView"]).animate({'left': '+=' + -offset + 'px'}, 200).promise();
   return promise;
 }
 
-function loadPDF(name, path, page_num) {
+function loadPDF(name, path, page_num, panel="submission") {
   let extension = name.split('.').pop();
-  let gradeable_id = document.getElementById('submission_browser').dataset.gradeableId;
-  let anon_submitter_id = document.getElementById('submission_browser').dataset.anonSubmitterId;
-  if (extension == "pdf") {
+  if (fileFullPanelOptions[panel]["pdf"] && extension == "pdf") {
+    let gradeable_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.gradeableId;
+    let anon_submitter_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.anonSubmitterId;
     $('#pdf_annotation_bar').show();
     $('#save_status').show();
     return $.ajax({
@@ -1393,31 +1422,34 @@ function loadPDF(name, path, page_num) {
     });
   }
   else {
-    $('#save_status').hide();
-    $('#file-content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
-    $("#file_viewer_full_panel").empty();
-    $("#file_viewer_full_panel").attr("data-file_name", "");
-    $("#file_viewer_full_panel").attr("data-file_url", "");
-    $("#file_viewer_full_panel").attr("data-file_name", name);
-    $("#file_viewer_full_panel").attr("data-file_url", path);
-    openFrame(name, path, "full_panel");
-    $("#file_viewer_full_panel_iframe").height("100%");
+    $(fileFullPanelOptions[panel]["saveStatus"]).hide();
+    $(fileFullPanelOptions[panel]["fileContent"]).append("<div id=\"file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).empty();
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_name", "");
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_url", "");
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_name", name);
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_url", path);
+    openFrame(name, path, fileFullPanelOptions[panel]["fullPanel"], false);
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").css("max-height", "1200px");
+    // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
   }
 }
 
-function collapseFile(){
+function collapseFile(panel = "submission"){
   //Removing these two to reset the full panel viewer.
-  $("#file_viewer_full_panel").remove();
-  $("#content-wrapper").remove();
-  if($("#pdf_annotation_bar").is(":visible")){
-    $("#pdf_annotation_bar").hide();
+  $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).remove();
+  if(fileFullPanelOptions[panel]["pdf"]) {
+    $("#content-wrapper").remove();
+    if($("#pdf_annotation_bar").is(":visible")){
+      $("#pdf_annotation_bar").hide();
+    }
   }
-  $("#directory_view").show();
-  var offset1 = $("#directory_view").css('left');
-  var offset2 = $("#directory_view").width();
-  $("#directory_view").animate({'left': '-=' + offset1}, 200);
-  $("#file-view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
-    $('#file-view').css('left', "");
-    $('#file-view').hide();
+  $(fileFullPanelOptions[panel]["innerPanel"]).show();
+  var offset1 = $(fileFullPanelOptions[panel]["innerPanel"]).css('left');
+  var offset2 = $(fileFullPanelOptions[panel]["innerPanel"]).width();
+  $(fileFullPanelOptions[panel]["innerPanel"]).animate({'left': '-=' + offset1}, 200);
+  $(fileFullPanelOptions[panel]["fileView"]).animate({'left': '+=' + offset2 + 'px'}, 200, function(){
+    $(fileFullPanelOptions[panel]["fileView"]).css('left', "");
+    $(fileFullPanelOptions[panel]["fileView"]).hide();
   });
 }

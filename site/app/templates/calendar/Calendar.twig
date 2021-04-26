@@ -1,0 +1,70 @@
+{% import _self as self %}
+
+<script>
+    const gradeables_by_date = {{ gradeables_by_date|json_encode|raw }};
+    const curr_year = {{ curr_year }};
+    const curr_month = {{ curr_month }};
+    const curr_day = {{ curr_day }};
+
+    window.addEventListener("load", function () {
+        loadCalendar({{ view_month }}, {{ view_year }});
+    });
+</script>
+
+{# Begin Calendar #}
+<div class="content">
+    <h1>Calendar</h1>
+    <div class="cal-content">
+        <div class="cal-toolbar">
+        </div>
+
+        <div class="calendar" style='margin-bottom: 20px' id="full-calendar">
+            {# Replace by js function call #}
+        </div>
+    </div>
+
+    {% if show_table == 1 %}
+    {# List items in table #}
+        <div class="lst-content">
+            {% if gradeables_by_section|length > 0 %}
+                <div id="gradeables">
+                {% for section_num, info in gradeables_by_section %}
+                    <div style="margin-bottom: 20px">
+                        <div id="{{ info.section_id }}" class="course-section-heading">
+                            <div class="course-section-title">
+                                {{ info.title }}
+                                {% if info.subtitle != "" %}
+                                    &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <table class="table table-striped table-bordered persist-area mobile-table" style="text-align: left" id="calendar-list">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Gradeable</th>
+                                    <th>Submission Closes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for id, gradeable in info.gradeables %}
+                                <tr>
+                                    <td>{{ gradeable.course }}</td>
+                                    <td><a href="{{ gradeable.url }}">{{ gradeable.title }}</a></td>
+                                    <td>{{ (gradeable.submission != '') ? gradeable.submission|date(date_format) : '' }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <div class="container">
+                    <p>{{ empty_message }}</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

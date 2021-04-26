@@ -15,21 +15,21 @@
     "@submitty/pdf-annotate.js": "2.2.2",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
-    "codemirror": "5.60.0",
+    "codemirror": "5.61.0",
     "flatpickr": "4.6.6",
     "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
-    "jspdf": "^1.5.3",
+    "jspdf": "^2.3.1",
     "mermaid": "8.9.2",
     "pdfjs-dist": "2.2.228",
-    "plotly.js-dist": "1.56.0",
+    "plotly.js-dist": "1.58.4",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.4"
   },
   "devDependencies": {
-    "cypress": "^6.8.0",
-    "eslint": "^7.22.0",
+    "cypress": "^7.1.0",
+    "eslint": "^7.25.0",
     "eslint-plugin-cypress": "^2.11.2"
   },
   "scripts": {

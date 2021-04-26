@@ -39,8 +39,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @return Core
      */
     protected function createMockCore($config_values = [], $user_config = [], $queries = [], $access = []) {
+        /** @var Core&\PHPUnit\Framework\MockObject\MockObject $core */
         $core = $this->createMock(Core::class);
 
+        /** @var Config&\PHPUnit\Framework\MockObject\MockObject $config */
         $config = $this->createMockModel(Config::class);
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
@@ -142,7 +144,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $core->method('getUser')->willReturn($user);
         }
 
-        /** @noinspection PhpParamsInspection */
+        /** @var Output&\PHPUnit\Framework\MockObject\MockObject $output */
         $output = $this->getMockBuilder(Output::class)
             ->setConstructorArgs([$core])
             ->setMethods(['addBreadcrumb'])
@@ -152,7 +154,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $core->method('getOutput')->willReturn($output);
 
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $core;
     }
 
