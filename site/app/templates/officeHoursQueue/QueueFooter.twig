@@ -33,11 +33,12 @@
         $("#queue_filter_" + current_queues[i]).prop("checked", true);
         filter_choices[current_queues[i]] = true;
       }
-      if (filter_choices[current_queues[i]]) {
-          document.getElementById('queue_filter_' + current_queues[i]).parentElement.classList.remove("fully-transparent");
+      var queue_filter = document.getElementById('queue_filter_' + current_queues[i]);
+      if (filter_choices[current_queues[i]] && queue_filter != null) {
+          queue_filter.parentElement.classList.remove("fully-transparent");
       }
-      else {
-          document.getElementById('queue_filter_' + current_queues[i]).parentElement.classList.add("fully-transparent");
+      else if(queue_filter != null) {
+          queue_filter.parentElement.classList.add("fully-transparent");
       }
     }
     localStorage.setItem('office_hour_queue_filters', JSON.stringify(filter_choices));
@@ -47,9 +48,7 @@
       let key = Object.keys(filter_choices)[index];
       if (filter_choices[key]) {
         let current_elements = $(".queue_current_" + key);
-
         current_elements.addClass("shown_queue_row");
-
         current_elements.show();
         current_elements.each(function(i, obj) {
           let timer = $(obj).find(".help_timer")

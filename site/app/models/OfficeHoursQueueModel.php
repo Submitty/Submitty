@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use DateTime;
+use DateInterval;
 
 class OfficeHoursQueueModel extends AbstractModel {
 
@@ -136,6 +137,19 @@ class OfficeHoursQueueModel extends AbstractModel {
         return date_format(date_create($time), "c");
     }
 
+    public function timePausedToISO($time_paused, $time_paused_start) {
+      $date_interval = new \DateInterval("PT{$time_paused}S");
+      $date_time = date_create($time_paused_start);
+      $date_time = date_sub($date_time, $date_interval);
+      return date_format($date_time, "c");
+    }
+
+    public function intTimePausedToStringTimePaused($int) {
+      $m = $int / 60 % 60;
+      $s = $int % 60;
+      return $m . ":" . ($s < 10 ? "0" : ""). $s;
+    }
+
     public function getTimeBeingHelped($time_out, $time_helped) {
         $diff = strtotime($time_out) - strtotime($time_helped);
         $h = $diff / 3600 % 24;
@@ -203,6 +217,14 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getCurrentQueueTimeIn() {
         return $this->current_queue_state['time_in'];
+    }
+
+    public function getCurrentTimePaused() {
+        return $this->current_queue_state['time_paused'];
+    }
+
+    public function getCurrentTimePausedStart() {
+        return $this->current_queue_state['time_paused_start'];
     }
 
     public function cleanForId($str) {

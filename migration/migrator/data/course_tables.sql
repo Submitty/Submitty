@@ -767,7 +767,9 @@ CREATE TABLE public.queue (
     contact_info text,
     last_time_in_queue timestamp with time zone,
     time_help_start timestamp with time zone,
-    paused boolean DEFAULT false NOT NULL
+    paused boolean DEFAULT false NOT NULL,
+    time_paused integer,
+    time_paused_start timestamp with time zone
 );
 
 

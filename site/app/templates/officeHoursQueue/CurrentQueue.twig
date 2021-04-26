@@ -6,6 +6,7 @@
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Time</th>
+        <th scope="col">Total Time Paused</th>
         <th scope="col">Queue</th>
         <th scope="col">Remove</th>
         <th scope="col" class="mobile-hide">ID</th>
@@ -62,6 +63,13 @@
           {% else %}
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
           {% endif %}
+
+          {% if entry['time_paused_start'] == NULL %}
+            <td>---</td>
+          {% else %}
+            <td class="help_timer" help_time="{{ viewer.timePausedToISO(entry['time_paused'], entry['time_paused_start']) }}"></td>
+          {% endif %}
+
           <td>{{ entry['queue_code'] }}</td>
           <td>
             <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">

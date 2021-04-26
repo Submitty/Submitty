@@ -5885,7 +5885,9 @@ AND gc_id IN (
                 help_started_by,
                 removed_by,
                 contact_info,
-                last_time_in_queue
+                last_time_in_queue,
+                time_paused,
+                time_paused_start
             ) VALUES (
                 'waiting',
                 NULL,
@@ -5899,8 +5901,10 @@ AND gc_id IN (
                 NULL,
                 NULL,
                 ?,
-                ?
-            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue]);
+                ?,
+                ?,
+                NULL
+            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue,0]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -5947,7 +5951,17 @@ AND gc_id IN (
     }
 
     public function setQueuePauseState($new_state) {
-        $this->course_db->query("UPDATE queue SET paused = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $this->core->getUser()->getId()]);
+        $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
+        $time_paused_start = date_create($this->core->getQueries()->getCurrentQueueState()['time_paused_start']);
+        if($new_state) {
+            $time_paused_start = $this->core->getDateTimeNow();
+        } else {
+            $time_paused_end = $this->core->getDateTimeNow();
+            $date_interval = date_diff($time_paused_start, $time_paused_end);
+            $time_paused = $time_paused + ($date_interval->h * 60 + $date_interval->i) * 60 + $date_interval->s;
+            $time_paused_start = NULL;
+        }
+        $this->course_db->query("UPDATE queue SET paused = ?, time_paused = ?, time_paused_start = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $time_paused, $time_paused_start, $this->core->getUser()->getId()]);
     }
 
     public function emptyQueue($queue_code) {
