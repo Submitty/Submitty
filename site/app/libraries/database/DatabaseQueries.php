@@ -3651,7 +3651,6 @@ SQL;
             $course->loadDisplayName();
             $return[] = $course;
         }
-
         return $return;
     }
 
