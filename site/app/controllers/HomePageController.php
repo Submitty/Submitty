@@ -31,10 +31,14 @@ class HomePageController extends AbstractController {
      * @Route("/api/courses", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
      *
+     * @param bool|string $as_instructor
      * @param string|null $user_id
      * @return MultiResponse
      */
-    public function getCourses($user_id = null) {
+    public function getCourses($user_id = null, $as_instructor = false) {
+        if ($as_instructor === 'true') {
+            $as_instructor = true;
+        }
 
         $user = $this->core->getUser();
         if (is_null($user_id) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
@@ -43,6 +47,14 @@ class HomePageController extends AbstractController {
 
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
+
+        if ($as_instructor) {
+            foreach (['archived_courses', 'unarchived_courses'] as $var) {
+                $$var = array_filter($$var, function (Course $course) use ($user_id) {
+                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester());
+                });
+            }
+        }
 
         $callback = function (Course $course) {
             return $course->getCourseInfo();

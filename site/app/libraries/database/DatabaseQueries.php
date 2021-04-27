@@ -3641,7 +3641,7 @@ SELECT t.name AS term_name, u.semester, u.course, u.user_group
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
 INNER JOIN terms t ON u.semester=t.term_id
-WHERE u.user_id=? ${extra}
+WHERE u.user_id=? ${extra} AND (u.registration_section IS NOT NULL OR u.user_group<> 4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -3651,11 +3651,6 @@ SQL;
             $course->loadDisplayName();
             $return[] = $course;
         }
-
-        // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
-        $return = array_filter($return, function (Course $course) use ($user_id) {
-            return $this->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
-        });
 
         return $return;
     }
