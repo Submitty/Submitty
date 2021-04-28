@@ -126,9 +126,9 @@ $(() => {
 
 function togglePanelSelectorModal(show) {
     if (show) {
-        $('#panels-selector-modal').removeClass('hide');
+        $('#panels-selector-modal').show();
     }
     else {
-        $('#panels-selector-modal').addClass('hide');
+        $('#panels-selector-modal').hide();
     }
 }
