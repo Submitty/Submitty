@@ -1,45 +1,68 @@
 {# This is a data table #}
 
 
+
 <div class="content">
     <header>
         <h1>Student Activity Dashboard</h1>
-        {#
-        <div class="slidecontainer">
-            <label for="myRange" style="display:inline">Flag students with no attendance for <p><span id="value"></span></p> days</label>
-            <input type="range" min="1" max="30" value="15" style="width:50%" id="myRange">
-        </div>
-        <div id="enter-days">
-            <input id="manual-days" type="text" onchange="setSlider()">
-        <div>
-        #}
+        
+                            
         <div class="btn-wrapper">
-            {# <a href="{{download_link}}" class="btn btn-primary">Download as CSV</a> #}
-            {# <a href="javascript:newSettingsForm()" class="btn btn-primary">Settings</a> #}
+          <a href="{{download_link}}" class="btn btn-primary">Download as CSV</a>
         </div>
     </header>
+    <div id="container">
+      <div class="line">
+        <label for="gradeable_access_date">Gradeable Access Date</label>
+        <input type="date" class="date_picker flatpickr-input active" id="gradeable_access_date">
+      </div>
+      <div class="line">
+        <label for="gradeable_submission_date">Gradeable Submission Date</label>
+        <input type="date" class="date_picker flatpickr-input active" id="gradeable_submission_date">
+      </div>
+      <div class="line">
+        <label for="forum_view_date">Forum View Date</label>
+        <input type="date" class="date_picker flatpickr-input active" id="forum_view_date">
+      </div>
+      <div class="line">
+        <label for="forum_post_date">Forum Post Date</label>
+        <input type="date" class="date_picker flatpickr-input active" id="forum_post_date">
+      </div>
+      <div class="line">
+        <label for="num_poll_responses">Number of Poll Responses</label>
+        <input type="date" class="date_picker" id="num_poll_responses">
+      </div>
+      <div class="line">
+        <label for="office_hours_queue_date">Office Hours Queue Date</label>
+        <input type="date" class="date_picker" id="office_hours_queue_date">
+      </div>
+
+      <div onclick="applySettings()" class="btn btn-primary">Apply</div> 
+      <div onclick="clearFields()" class="btn btn-primary">Clear</div>
+    </div>
 <table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" onclick="sortTable(0)" style="cursor: pointer">Registration Section</td>
-                <td id="1" onclick="sortTable(1)" style="cursor: pointer">User ID</td>
-                <td id="2" onclick="sortTable(2)" style="cursor: pointer">Last Name</td>
-                <td id="3" onclick="sortTable(3)" style="cursor: pointer">First Name</td>
-                <td id="4" onclick="sortTable(4)" style="cursor: pointer">Gradeable Access Date</td>
-                <td id="5" onclick="sortTable(5)" style="cursor: pointer">Gradeable Submission Date</td>
-                <td id="6" onclick="sortTable(6)" style="cursor: pointer">Forum View Date</td>
-                <td id="7" onclick="sortTable(7)" style="cursor: pointer">Forum Post Date</td>
-                <td id="8" onclick="sortTable(8)" style="cursor: pointer">Number of Poll Responses</td>
-                <td id="9" onclick="sortTable(9)" style="cursor: pointer">Office Hours Queue Date</td>
+                <td id="0" onclick="sortTable(0, false)" style="cursor: pointer">Registration Section</td>
+                <td id="1" onclick="sortTable(1, false)" style="cursor: pointer">User ID</td>
+                <td id="2" onclick="sortTable(2, false)" style="cursor: pointer">Last Name</td>
+                <td id="3" onclick="sortTable(3, false)" style="cursor: pointer">First Name</td>
+                <td id="4" onclick="sortTable(4, false)" style="cursor: pointer">Gradeable Access Date</td>
+                <td id="5" onclick="sortTable(5, false)" style="cursor: pointer">Gradeable Submission Date</td>
+                <td id="6" onclick="sortTable(6, false)" style="cursor: pointer">Forum View Date</td>
+                <td id="7" onclick="sortTable(7, false)" style="cursor: pointer">Forum Post Date</td>
+                <td id="8" onclick="sortTable(8, false)" style="cursor: pointer">Number of Poll Responses</td>
+                <td id="9" onclick="sortTable(9, false)" style="cursor: pointer">Office Hours Queue Date</td>
+                <td id="10" onclick="sortTable(10, false)" style="cursor: pointer; display:none">Flagged</td>
             </tr>
         </thead>
     
-        <tbody>
-            {% for row in data %}
+        <tbody id="tbody">
+          {% for row in data %}
             {# {% if row.registration_section == 4 %}
             <tr style="background-color: red">
             {% else %} #}
-            <tr>
+            <tr id="{{row.user_id}}">
             {# {% endif %} #}
                 <td>{{row.registration_section}}</td>
                 <td class='align-left'>{{row.user_id}}</td>
@@ -51,106 +74,69 @@
                 <td>{{row.forum_post}}</td>
                 <td>{{row.num_poll_response}}</td>
                 <td>{{row.office_hours_queue}}</td>
+                <td style="display: none;">False</td>
 
             </tr>
+          {% endfor %}
         </tbody>
-    {% endfor %}
 </table>
+
+<script>
+function applySettings(){
+  console.log(document.getElementById('office_hours_queue_date').value);
+  var grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
+  var grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
+  var forum_view = Date.parse(document.getElementById('forum_view_date').value);
+  var forum_post = Date.parse(document.getElementById('forum_post_date').value);
+  var num_poll = Date.parse(document.getElementById('num_poll_responses').value);
+  var off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
+  var data = {{data|json_encode|raw}};
+  var table = document.getElementById("data-table");
+  var rows = table.rows;
+  for(var i = 0; i < data.length; i++){
+    var s_grad_acc = data[i].gradeable_access;
+    var s_grad_sub = data[i].gradeable_submission;
+    var s_forum_view = data[i].forum_view;
+    var s_forum_post = data[i].forum_post;
+    var s_num_polls = data[i].num_poll_responses;
+    var s_off_hours = data[i].office_hours_queue;
+    var flag = false;
+    //if(s_grad_acc == null || s_grad_sub == null || s_forum_view == null || s_forum_post == null || s_num_poll == null || s_off_hours == null) document.getElementById(data[i].user_id).style.backgroundColor = 'red';
+    if(Date.parse(s_grad_acc) < grad_acc) flag = true;
+    else if(Date.parse(s_grad_sub) < grad_sub) flag = true;
+    else if(Date.parse(s_forum_view) < forum_view) flag = true;
+    else if(Date.parse(s_forum_post) < forum_post) flag = true;
+    else if(Date.parse(s_num_polls) < num_poll) flag = true;
+    else if(Date.parse(s_off_hours) < off_hours) flag = true;
+    else {
+      rows[i+1].getElementsByTagName("TD")[10].innerText = 'False'; 
+      document.getElementById(data[i].user_id).style.backgroundColor= 'green';
+    }
+    if(flag){
+      document.getElementById(data[i].user_id).style.backgroundColor = 'red';
+      console.log(rows[i+1].getElementsByTagName("TD")[10].innerText = 'True');
+    }
+
+  }
+  document.getElementById('office_hours_queue_date').value = '';
+
+  sortTable(10, true);
+}
+
+function clearFields(){
+  console.log("Clearing?");
+  document.getElementById('gradeable_access_date').value = '';
+  document.getElementById('gradeable_submission_date').value = '';
+  document.getElementById('forum_view_date').value = '';
+  document.getElementById('forum_post_date').value = '';
+  document.getElementById('num_poll_responses').value = '';
+  document.getElementById('office_hours_queue_date').value = '';
+  applySettings();
+  sortTable(0, false);
+}
+
+</script>
+
 </div>
 
-{% include('admin/users/DownloadForm.twig') with { 'code' : 'user' } %}
-
-
-<script>
-
-
-    var slider = document.getElementById("myRange");
-    var value = document.getElementById("value");
-    value.innerHTML = slider.value;
-
-    slider.oninput = function() {
-        value.innerHTML = this.value;
-    }
-</script>
-
-<script>
-function setSlider() {
-    var slider = document.getElementById("myRange");
-    var input = document.getElementById("manual-days");
-    var value = document.getElementById("value");
-    slider.value = input.value;
-    value.innerHTML = input.value;
-}
-
-function downloadData() {
-    console.log("{{data[0].user_id}}");
-}
-
-function sortTable(n) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("data-table");
-  document.getElementById(0).style.color = 'white';
-  document.getElementById(1).style.color = 'white';
-  document.getElementById(2).style.color = 'white';
-  document.getElementById(3).style.color = 'white';
-  document.getElementById(4).style.color = 'white';
-  document.getElementById(5).style.color = 'white';
-  document.getElementById(6).style.color = 'white';
-  document.getElementById(7).style.color = 'white';
-  document.getElementById(8).style.color = 'white';
-  document.getElementById(9).style.color = 'white';
-  document.getElementById(n).style.color = 'blue';
-  switching = true;
-  // Set the sorting direction to ascending:
-  dir = "asc";
-  /* Make a loop that will continue until
-  no switching has been done: */
-  while (switching) {
-    // Start by saying: no switching is done:
-    switching = false;
-    rows = table.rows;
-    /* Loop through all table rows (except the
-    first, which contains table headers): */
-    for (i = 1; i < (rows.length - 1); i++) {
-      // Start by saying there should be no switching:
-      shouldSwitch = false;
-      /* Get the two elements you want to compare,
-      one from current row and one from the next: */
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-      /* Check if the two rows should switch place,
-      based on the direction, asc or desc: */
-      if (dir == "asc") {
-        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          // If so, mark as a switch and break the loop:
-          shouldSwitch = true;
-          break;
-        }
-      } else if (dir == "desc") {
-        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          // If so, mark as a switch and break the loop:
-          shouldSwitch = true;
-          break;
-        }
-      }
-    }
-    if (shouldSwitch) {
-      /* If a switch has been marked, make the switch
-      and mark that a switch has been done: */
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      // Each time a switch is done, increase this count by 1:
-      switchcount ++;
-    } else {
-      /* If no switching has been done AND the direction is "asc",
-      set the direction to "desc" and run the while loop again. */
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
-  }
-}
-</script>
-
-
+{# {% include('admin/users/DownloadForm.twig') with { 'code' : 'user' } %} #}

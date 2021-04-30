@@ -1,0 +1,19 @@
+
+input[type=date] {
+  width: 50%;
+  padding: 12px 20px;
+  /* display: inline-block; */
+  float: right;
+}
+
+#container {
+  width: 500px;
+  margin-bottom: 5px;
+}
+
+.line {
+  width: 100%;
+  height: 30px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
