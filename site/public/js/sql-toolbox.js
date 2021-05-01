@@ -33,6 +33,15 @@ async function runSqlQuery() {
 
         const data = json.data;
 
+        if (data.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.innerText = 'No rows returned';
+            row.appendChild(cell);
+            table.appendChild(row);
+            return;
+        }
+
         const header = document.createElement('thead');
         const header_row = document.createElement('tr');
         Object.keys(data[0]).forEach((col) => {
