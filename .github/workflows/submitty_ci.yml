@@ -222,7 +222,7 @@ jobs:
             uses: actions/cache@v2
             with:
               path: path ~/.cache/pip
-              key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-${{ github.job }}-pip-
           - name: Install python dependencies
