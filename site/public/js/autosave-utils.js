@@ -1,5 +1,6 @@
 /* global saveNotebookToLocal */
 /* exported cancelAllDeferredSaves, cleanupAutosaveHistory, deferredSave, saveAndWarnUnsubmitted */
+
 /**
  * This value will be true if autosave is enabled for this session.
  *

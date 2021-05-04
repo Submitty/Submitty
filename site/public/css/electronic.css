@@ -810,22 +810,22 @@ tr.is_publish {
     overflow-y: auto;
 }
 
-#hotkeys-list {
+.ta-grading-setting-list {
     width: 100%;
     border-collapse: collapse;
 }
 
-#hotkeys-list tr {
+.ta-grading-setting-list tr {
     border: 1px solid #ddd;
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:nth-child(even) {
+.ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--alternating-row-color-light);
 }
 
-#hotkeys-list td {
+.ta-grading-setting-list td {
     padding: 4px;
 }
 
@@ -1376,7 +1376,7 @@ tr.is_publish {
 }
 
 /* Notebook panel */
-#notebook-view {
+#notebook-main-view {
     padding: 10px;
 }
 

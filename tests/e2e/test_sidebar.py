@@ -138,6 +138,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/gradeable', 'New Gradeable'],
             [base_url + '/config', 'Course Settings'],
+            [base_url + '/sql_toolbox', 'SQL Toolbox'],
             # the office hours queue is not initially enabled in the sample course
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/course_materials', 'Course Materials'],
