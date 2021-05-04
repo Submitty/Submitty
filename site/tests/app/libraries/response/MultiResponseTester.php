@@ -12,7 +12,7 @@ use app\libraries\response\WebResponse;
 use app\models\Config;
 use PHPUnit\Framework\TestCase;
 
-class ResponseTester extends TestCase {
+class MultiResponseTester extends TestCase {
     /** @var Core */
     private $core;
 
@@ -136,5 +136,53 @@ EOD;
         $response = new MultiResponse($json_response, null, $redirect_response);
         $response->render($this->core);
         $this->validateJsonResponse();
+    }
+
+    public function testConvertToJsonResponseForEmptyResponse() {
+        $response = new MultiResponse();
+        $newResponse = $response->convertToJsonResponse();
+        $this->assertInstanceOf(JsonResponse::class, $newResponse);
+        $expected = [
+            'status' => 'fail',
+            'message' => 'Cannot handle request'
+        ];
+        $this->assertEquals($expected, $newResponse->json);
+    }
+
+    public function testConvertToJsonResponseForJsonResponse() {
+        $response = new MultiResponse(JsonResponse::getSuccessResponse(['test' => true]));
+        $newResponse = $response->convertToJsonResponse();
+        $this->assertInstanceOf(JsonResponse::class, $newResponse);
+        $expected = [
+            'status' => 'success',
+            'data' => [
+                'test' => true,
+            ],
+        ];
+        $this->assertEquals($expected, $newResponse->json);
+    }
+
+    public function testConvertToJsonResponseForWebResponse() {
+        $response = new MultiResponse(null, new WebResponse('test', 'testFunc'));
+        $newResponse = $response->convertToJsonResponse();
+        $this->assertInstanceOf(JsonResponse::class, $newResponse);
+        $expected = [
+            'status' => 'error',
+            'message' => 'Webresponse not supported for this request type',
+        ];
+        $this->assertEquals($expected, $newResponse->json);
+    }
+
+    public function testConvertToJsonResponseForRedirectResponse() {
+        $response = new MultiResponse(null, null, new RedirectResponse('http://localhost'));
+        $newResponse = $response->convertToJsonResponse();
+        $this->assertInstanceOf(JsonResponse::class, $newResponse);
+        $expected = [
+            'status' => 'error',
+            'message' => 'Error handling request, redirecting',
+            'data' => 'http://localhost',
+            'code' => 302,
+        ];
+        $this->assertEquals($expected, $newResponse->json);
     }
 }
