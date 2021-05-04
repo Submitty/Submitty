@@ -77,8 +77,7 @@ function generateCalendarItem(item) {
     // Due date information
     let due_string = '';
     if (item['submission'] !== '') {
-        const due_time = new Date(`${item['submission']['date'].replace(/\s/, 'T')}Z`);
-        due_string = `Due: ${(due_time.getMonth() + 1).toString().padStart(2, '0')}/${(due_time.getDate()).toString().padStart(2, '0')}/${due_time.getFullYear()} @ ${due_time.getHours().toString().padStart(2, '0')}:${due_time.getMinutes().toString().padStart(2, '0')} ${item['submission']['timezone']}`;
+        due_string = `Due: ${item['submission']}`;
     }
     // Put detail in the tooltip
     const tooltip = `Course: ${item['course']}&#10;` +
@@ -91,10 +90,6 @@ function generateCalendarItem(item) {
            href="${item['url']}">
           ${item['title']}
         </a>`;
-}
-
-function addCalendarItem(date, item) {
-    $(`#cell-${date} > div.cal-cell-items-panel`).append(item);
 }
 
 /**
