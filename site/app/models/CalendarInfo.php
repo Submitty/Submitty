@@ -20,20 +20,20 @@ class CalendarInfo extends AbstractModel {
      * @var array<string, array<string, string|DateTime>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value
      * contains an array with a structure of
-     * 'gradeable_id' : string   (the id of the item, reserved row and useless for now)
-     * 'title'        : string   (the title of the item which will be shown on each clickable button)
-     * 'semester'     : string   (the semester of which the item belongs)
-     * 'course'       : string   (the title of the course of which the item belongs)
-     * 'url'          : string   (the url of the clickable button)
-     * 'onclick'      : string   (the onclick js function of the clickable button)
-     * 'submission'   : string   (the timestamp of the item, shown in the popup tooltip)
-     * 'status'       : string   (the status of the gradeable, open/closed/grading..., is used to show different
+     * 'gradeable_id' => string   (the id of the item, reserved row and useless for now)
+     * 'title'        => string   (the title of the item which will be shown on each clickable button)
+     * 'semester'     => string   (the semester of which the item belongs)
+     * 'course'       => string   (the title of the course of which the item belongs)
+     * 'url'          => string   (the url of the clickable button)
+     * 'onclick'      => string   (the onclick js function of the clickable button)
+     * 'submission'   => string   (the timestamp of the item, shown in the popup tooltip)
+     * 'status'       => string   (the status of the gradeable, open/closed/grading..., is used to show different
      *                             colors of item, relation between color and integer are recorded in css)
-     * 'status_note'  : string   (a string describing this status)
-     * 'grading_open' : string   (reserved, useless for now. Can be empty)
-     * 'grading_due'  : string   (reserved, useless for now. Can be empty)
-     * 'show_due'     : bool     (whether to show the due date when mouse is hovering over),
-     * 'icon'         : string   (the icon showed before the item),
+     * 'status_note'  => string   (a string describing this status)
+     * 'grading_open' => string   (reserved, useless for now. Can be empty)
+     * 'grading_due'  => string   (reserved, useless for now. Can be empty)
+     * 'show_due'     => bool     (whether to show the due date when mouse is hovering over),
+     * 'icon'         => string   (the icon showed before the item),
      */
     private $items_by_date = [];
 
@@ -42,10 +42,10 @@ class CalendarInfo extends AbstractModel {
      * @var array<int, array>
      * the structure of the array is a integer as key, and value
      * contains an array with a structure of
-     * "title"      : string (title shown at the top of the table),
-     * "subtitle"   : string (title shown at the top of the table, if any. Can be empty),
-     * "section_id" : string (the id of the section. Will be used as the HTML id)
-     * "gradeables" : array. The structure of this array is same as the element of value of $items_by_date
+     * "title"      => string (title shown at the top of the table),
+     * "subtitle"   => string (title shown at the top of the table, if any. Can be empty),
+     * "section_id" => string (the id of the section. Will be used as the HTML id)
+     * "gradeables" => array. The structure of this array is same as the element of value of $items_by_date
      */
     private $items_by_sections = [];
 

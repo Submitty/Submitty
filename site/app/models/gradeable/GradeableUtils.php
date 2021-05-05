@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\models\gradeable;
 
 use app\libraries\Core;
