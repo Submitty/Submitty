@@ -214,9 +214,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   std::string method = grader.value("method","");
   if      (method == "")                           { return NULL;                                                       }
   else if (method == "JUnitTestGrader")            { return dispatch::JUnitTestGrader_doit(*this,grader);               }
-  else if (method == "EmmaInstrumentationGrader")  { return dispatch::EmmaInstrumentationGrader_doit(*this,grader);     }
   else if (method == "MultipleJUnitTestGrader")    { return dispatch::MultipleJUnitTestGrader_doit(*this,grader);       }
-  else if (method == "EmmaCoverageReportGrader")   { return dispatch::EmmaCoverageReportGrader_doit(*this,grader);      }
   else if (method == "JaCoCoCoverageReportGrader") { return dispatch::JaCoCoCoverageReportGrader_doit(*this,grader);    }
   else if (method == "DrMemoryGrader")             { return dispatch::DrMemoryGrader_doit(*this,grader);                }
   else if (method == "PacmanGrader")               { return dispatch::PacmanGrader_doit(*this,grader);                  }

@@ -22,11 +22,16 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     const panelCont = panelEle.parentElement;
     const dragbar = document.querySelector(dragBarSel);
 
+    $(dragbar).css('touch-action', 'none');
+
     let xPos = 0, yPos = 0, panelHeight = 0, panelWidth = 0;
 
     // Width of left side
     const mouseDownHandler = (e) => {
         // Get the current mouse position
+        if (e.type == 'touchstart') {
+            e = e.touches[0];
+        }
         xPos = e.clientX;
         yPos = e.clientY;
         panelHeight = panelEle.getBoundingClientRect().height;
@@ -35,6 +40,8 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         // Attach the listeners to `document`
         document.addEventListener('mousemove', mouseMoveHandler);
         document.addEventListener('mouseup', mouseUpHandler);
+        document.addEventListener('touchmove', mouseMoveHandler);
+        document.addEventListener('touchend', mouseUpHandler);
     };
 
     const mouseUpHandler = () => {
@@ -48,9 +55,14 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         // Remove the handlers of `mousemove` and `mouseup`
         document.removeEventListener('mousemove', mouseMoveHandler);
         document.removeEventListener('mouseup', mouseUpHandler);
+        document.removeEventListener('touchmove', mouseMoveHandler);
+        document.removeEventListener('touchend', mouseUpHandler);
     };
 
     const mouseMoveHandler = (e) => {
+        if (e.type == 'touchmove') {
+            e = e.touches[0];
+        }
         let updateValue;
         if (isHorizontalResize) {
             const dy = e.clientY - yPos;
@@ -77,4 +89,5 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         }
     };
     dragbar.addEventListener('mousedown', mouseDownHandler);
+    dragbar.addEventListener('touchstart', mouseDownHandler);
 }

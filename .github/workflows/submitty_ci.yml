@@ -139,7 +139,7 @@ jobs:
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
-            python3 -m pip install SQLAlchemy jsonschema jsonref pytz tzlocal
+            python3 -m pip install "SQLAlchemy<1.4.0" jsonschema jsonref pytz tzlocal
             python3 -m pip install coverage
             python3 -m pip install paramiko 
             python3 -m pip install docker 
@@ -233,7 +233,7 @@ jobs:
               sudo pip3 -V
               pip3 install cryptography
               pip3 install python-pam
-              pip3 install sqlalchemy
+              pip3 install "sqlalchemy<1.4.0"
               pip3 install selenium
               pip3 install tzlocal
               pip3 install jsonschema
@@ -253,7 +253,6 @@ jobs:
               sudo pip3 install docker
               sudo pip3 install paramiko
               sudo pip3 install tzlocal
-              sudo pip3 install sqlalchemy
               sudo pip3 install jsonref
               sudo pip3 install numpy
               sudo pip3 install opencv-python
@@ -268,7 +267,7 @@ jobs:
               sudo pip3 install psutil
               sudo pip3 install psycopg2
               sudo pip3 install python-pam
-              sudo pip3 install sqlalchemy
+              sudo pip3 install "sqlalchemy<1.4.0"
 
           - name: Get composer cache dir
             id: composer-cache
