@@ -1,29 +1,4 @@
-function buildPostRequest(url, body, auth = null){
-    const header = {'Content-Type': 'application/json'};
-    if (auth !== null){
-        header['Authorization'] = auth;
-    }
-
-    return {
-        'method' : 'POST',
-        'url' : url,
-        'headers' : header,
-        'body' : JSON.stringify(body),
-    };
-}
-
-function buildGetRequest(url, auth = null){
-    const header = {'Content-Type': 'application/json'};
-    if (auth !== null){
-        header['Authorization'] = auth;
-    }
-
-    return {
-        'method' : 'POST',
-        'url' : url,
-        'headers' : header,
-    };
-}
+import {buildPostRequest, buildGetRequest} from '../../support/utils.js';
 
 describe('Test cases revolving around the API', () => {
 
@@ -42,17 +17,21 @@ describe('Test cases revolving around the API', () => {
 
 
     it('should require a user_id and password', () => {
-        cy.request(buildPostRequest('api/token', {
-            'foo' : 'bar',
-        })).should((response) => {
-            const data = JSON.parse(response.body);
-            expect(data['status']).to.equal('fail');
-            expect(data['message']).to.equal('Cannot leave user id or password blank');
+        [
+            {'foo' : 'bar'},
+            {'user_id' : 'instructor'},
+            {'password' : 'instructor'},
+        ].forEach((postBody) => {
+            cy.request(buildPostRequest('api/token', postBody)).should((response) => {
+                const data = JSON.parse(response.body);
+                expect(data['status']).to.equal('fail');
+                expect(data['message']).to.equal('Cannot leave user id or password blank');
+            });
         });
     });
 
 
-    it.only('should invalidate older tokens on request', () => {
+    it('should invalidate older tokens on request', () => {
 
         cy.request(buildPostRequest('api/token', {
             'user_id' : 'instructor',

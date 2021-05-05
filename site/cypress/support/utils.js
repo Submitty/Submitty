@@ -30,3 +30,31 @@ export function buildUrl(parts = [], include_base = false){
 
     return `${url}courses/${getCurrentSemester()}/${parts.join('/')}`;
 }
+
+
+export function buildPostRequest(url, body, auth = null){
+    const header = {'Content-Type': 'application/json'};
+    if (auth !== null){
+        header['Authorization'] = auth;
+    }
+
+    return {
+        'method' : 'POST',
+        'url' : url,
+        'headers' : header,
+        'body' : JSON.stringify(body),
+    };
+}
+
+export function buildGetRequest(url, auth = null){
+    const header = {'Content-Type': 'application/json'};
+    if (auth !== null){
+        header['Authorization'] = auth;
+    }
+
+    return {
+        'method' : 'POST',
+        'url' : url,
+        'headers' : header,
+    };
+}
