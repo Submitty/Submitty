@@ -104,7 +104,7 @@ class GradeableList extends AbstractModel {
                     $this->grading_gradeables[$id] = $gradeable;
                     break;
                 case self::GRADED:
-                    $this->grading_gradeables[$id] = $gradeable;
+                    $this->graded_gradeables[$id] = $gradeable;
                     break;
             }
         }
