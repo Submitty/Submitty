@@ -17,7 +17,7 @@ use DateTime;
 class CalendarInfo extends AbstractModel {
 
     /**
-     * @var array<string, array<string, string|DateTime>>
+     * @var array<string, array<string, string|bool>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value
      * contains an array with a structure of
      * 'gradeable_id' => string   (the id of the item, reserved row and useless for now)
