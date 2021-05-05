@@ -84,13 +84,13 @@ class CalendarInfo extends AbstractModel {
             $curr_section['gradeables'] = [];
 
             // Iterate over the Gradeable objects in current section and summarize data
-            foreach ($gradeables as $id => $gradeable) {
+            foreach ($gradeables as $key => $gradeable) {
                 /** @var Gradeable $gradeable */
-                [$semester, $course_title, $gradeable_id] = unserialize($id);
+                [$semester, $course_title, $gradeable_id] = unserialize($key);
 
                 // Get the submit button for the gradeable to retrieve the gradeable information
                 /** @var Button|null $submit_btn */
-                $submit_btn = $gradeables_of_user["submit_btns"][$id];
+                $submit_btn = $gradeables_of_user["submit_btns"][$key];
 
                 $currGradeable = [
                     'gradeable_id' => $gradeable_id,
@@ -111,7 +111,7 @@ class CalendarInfo extends AbstractModel {
                 ];
 
                 // Put gradeables in current section by their id which consists of semester, course title and gradeable id
-                $curr_section['gradeables'][$id] = $currGradeable;
+                $curr_section['gradeables'][$key] = $currGradeable;
 
                 // Put gradeables in by-date maps according to section (close/open)
                 $dueDate = ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format('Y-m-d') : '';
