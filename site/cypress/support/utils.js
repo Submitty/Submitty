@@ -32,6 +32,14 @@ export function buildUrl(parts = [], include_base = false){
 }
 
 
+/**
+* Build a dictionary that can be sent as a POST request, with either fetch or cy.request
+*
+* @param {String}  url endpoint, if using cy.request you do not need to include the base url
+* @param {Object} dictionary containing contents sent in the POST body
+* @param {String} [auth=null] optional authentication token to be put in the Authorization header
+* @returns {Object}
+*/
 export function buildPostRequest(url, body, auth = null){
     const header = {'Content-Type': 'application/json'};
     if (auth !== null){
@@ -46,6 +54,13 @@ export function buildPostRequest(url, body, auth = null){
     };
 }
 
+/**
+* Build a dictionary that can be sent as a GET request, with either fetch or cy.request
+*
+* @param {String}  url endpoint, if using cy.request you do not need to include the base url
+* @param {String} [auth=null] optional authentication token to be put in the Authorization header
+* @returns {Object}
+*/
 export function buildGetRequest(url, auth = null){
     const header = {'Content-Type': 'application/json'};
     if (auth !== null){
