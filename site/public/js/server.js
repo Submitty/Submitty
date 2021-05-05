@@ -1178,6 +1178,10 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
 
 function resizeFrame(id, max_height = 500, force_height=-1) {
     $("iframe#" + id).contents().find("html").css("height", "inherit");
+    var img = $("iframe#" + id).contents().find("img");
+    if(img) {
+        img.css("max-width", "100%");
+    }
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
     if (force_height != -1) {
         document.getElementById(id).height = force_height + "px";
