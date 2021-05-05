@@ -76,7 +76,6 @@ class GradeableUtils {
         // Load the gradeable information for each course
         $courses = $core->getQueries()->getCourseForUserId($user->getId());
         foreach ($courses as $course) {
-            /** @var Course $course */
             $gradeables_of_course = self::getGradeablesFromCourse($core, $course);
             $gradeables = array_merge($gradeables, $gradeables_of_course["gradeables"]);
             $graded_gradeables = array_merge($graded_gradeables, $gradeables_of_course["graded_gradeables"]);
