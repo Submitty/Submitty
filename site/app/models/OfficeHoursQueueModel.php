@@ -137,10 +137,8 @@ class OfficeHoursQueueModel extends AbstractModel {
         return date_format(date_create($time), "c");
     }
 
-    public function intToStringTimePaused($int) {
-        $m = $int / 60 % 60;
-        $s = $int % 60;
-        return $m . ":" . ($s < 10 ? "0" : "") . $s;
+    public function intToStringTimePaused($int): string {
+        return DateUtils::timeIntToString($int);
     }
 
     public function getTimeBeingHelped($time_out, $time_helped) {
@@ -212,11 +210,11 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['time_in'];
     }
 
-    public function getCurrentTimePaused() {
+    public function getCurrentTimePaused(): int {
         return $this->current_queue_state['time_paused'];
     }
 
-    public function getCurrentTimePausedStart() {
+    public function getCurrentTimePausedStart(): ?string {
         return $this->current_queue_state['time_paused_start'];
     }
 

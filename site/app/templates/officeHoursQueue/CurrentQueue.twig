@@ -64,7 +64,7 @@
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
           {% endif %}
 
-          {% if entry['time_paused_start'] == NULL %}
+          {% if entry['time_paused_start'] == NULL or entry['current_state'] == 'being_helped' %}
             <td>---</td>
           {% else %}
             <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_paused_start']) }}"></td>

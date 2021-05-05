@@ -11,9 +11,15 @@
   }
 
   var timers = []; //keep track of the current running timers on the page
+  var timerInterval = null; //keep track of the interval that updates the timers
 
   //Runs the function that gets and fills in the old filter settings
-  filterQueues();
+  {% if viewer.isGrader() %}
+    filterQueues();
+  {% else %}
+    setupStudentTimer()
+  {% endif %}
+
   //Unide the checkboxes now that they have been set
   $(".page_loading").removeClass("page_loading");
 
@@ -33,12 +39,11 @@
         $("#queue_filter_" + current_queues[i]).prop("checked", true);
         filter_choices[current_queues[i]] = true;
       }
-      var queue_filter = document.getElementById('queue_filter_' + current_queues[i]);
-      if (filter_choices[current_queues[i]] && queue_filter != null) {
-          queue_filter.parentElement.classList.remove("fully-transparent");
+      if (filter_choices[current_queues[i]]) {
+          document.getElementById('queue_filter_' + current_queues[i]).parentElement.classList.remove("fully-transparent");
       }
-      else if(queue_filter != null) {
-          queue_filter.parentElement.classList.add("fully-transparent");
+      else {
+          document.getElementById('queue_filter_' + current_queues[i]).parentElement.classList.add("fully-transparent");
       }
     }
     localStorage.setItem('office_hour_queue_filters', JSON.stringify(filter_choices));
@@ -48,11 +53,13 @@
       let key = Object.keys(filter_choices)[index];
       if (filter_choices[key]) {
         let current_elements = $(".queue_current_" + key);
+
         current_elements.addClass("shown_queue_row");
+
         current_elements.show();
         current_elements.each(function(i, obj) {
-          let timer = $(obj).find(".help_timer")
-          if (timer) {
+          let timer = $(obj).find(".help_timer");
+          if (timer.length) {
             timers.push([
               timer,
               new Date(timer.attr("help_time"))
@@ -65,7 +72,8 @@
         current_elements.removeClass("shown_queue_row");
       }
     }
-    updateTimers();
+    updateTimers(); // This singular call prevents the timer element from being momentarily blank before it is properly set up below
+    updateTimerInterval();
 
     var queue_rows = document.getElementsByClassName('shown_queue_row');
     var row_count = 0;
@@ -84,13 +92,33 @@
     }
   }
 
+  function setupStudentTimer() {
+    timers = [];
+    const timer = $("#student_timer");
+    if (timer.length) {
+      timers.push([
+        timer,
+        new Date(timer.attr("help_time"))
+      ]);
+      updateTimerInterval();
+    }
+  }
+
   function unhideId(element, id) {
     element.parentElement.innerHTML = id;
   }
 
-  //update the timers few seconds
-  updateTimers();
-  setInterval(updateTimers, 1000);
+  function updateTimerInterval() {
+    if (timers.length > 0 && timerInterval == null) {
+      updateTimers();
+      timerInterval = setInterval(updateTimers, 1000);
+    }
+    else if(timers.length == 0 && timerInterval != null) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
   function updateTimers() {
     for (var i = 0; i < timers.length; i++) {
       timer = (new Date() - timers[i][1]) / 1000
@@ -238,9 +266,13 @@
 
   function updateQueueStatus() {
       $.get("{{base_url}}/new_status", function(newStatus) {
-          if ($('#queue_status').length !== 0)
-              $("#queue_status").replaceWith(newStatus);
-          else $("#add_to_queue").replaceWith(newStatus);
+          if ($('#queue_status').length !== 0) {
+            $("#queue_status").replaceWith(newStatus);
+            setupStudentTimer();
+          }
+          else {
+            $("#add_to_queue").replaceWith(newStatus);
+          }
       });
   }
 
