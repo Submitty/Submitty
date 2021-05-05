@@ -392,7 +392,7 @@ class NavigationView extends AbstractView {
      * @param bool $submit_everyone If the user can submit for another user
      * @return Button|null
      */
-    public static function getSubmitButton(Core $core, Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone) {
+    public static function getSubmitButton(Core $core, Gradeable $gradeable, ?GradedGradeable $graded_gradeable, int $list_section, bool $submit_everyone) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $date_time = null;
