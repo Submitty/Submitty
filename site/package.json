@@ -11,27 +11,29 @@
   },
   "homepage": "https://github.com/Submitty/Submitty#readme",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "5.15.2",
+    "@fortawesome/fontawesome-free": "5.15.3",
     "@submitty/pdf-annotate.js": "2.2.2",
-    "bootstrap": "4.3.1",
+    "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
-    "codemirror": "5.58.3",
+    "codemirror": "5.61.0",
     "flatpickr": "4.6.6",
-    "jquery": "3.5.1",
+    "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
-    "jspdf": "^1.5.3",
-    "mermaid": "8.8.4",
+    "jspdf": "^2.3.1",
+    "mermaid": "8.9.3",
     "pdfjs-dist": "2.2.228",
-    "plotly.js-dist": "1.56.0",
+    "plotly.js-dist": "1.58.4",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.4"
   },
   "devDependencies": {
-    "eslint": "^7.20.0"
+    "cypress": "^7.2.0",
+    "eslint": "^7.25.0",
+    "eslint-plugin-cypress": "^2.11.2"
   },
   "scripts": {
-    "lint": "eslint \"public/js/**/*.js\"",
-    "lint:fix": "eslint \"public/js/**/*.js\" --fix"
+    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" --fix"
   }
 }

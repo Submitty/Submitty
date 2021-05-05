@@ -432,21 +432,21 @@ progress::-webkit-progress-value {
     flex: 0 0 auto;
     cursor: col-resize;
     position: relative;
-    width: 20px;
+    width: 14px;
     background: transparent;
 }
 
 .panel-item-section-drag-bar {
     cursor: ns-resize;
     position: relative;
-    height: 20px;
+    height: 14px;
     background: transparent;
 }
 
 .panel-item-section-drag-bar:after {
     content: "";
     position: absolute;
-    height: 10px;
+    height: 7px;
     width: 30%;
     max-width: 80px;
     top: 50%;
@@ -460,7 +460,7 @@ progress::-webkit-progress-value {
 .two-panel-drag-bar:after {
     content: "";
     position: absolute;
-    width: 10px;
+    width: 7px;
     height: 30%;
     max-height: 160px;
     top: 50%;
@@ -543,7 +543,6 @@ progress::-webkit-progress-value {
     border: solid 6px var(--important-post);
     position:relative;
     display: block;
-    float: left;
     width: 400px;
     height: 25px;
     top: 2px;
@@ -811,22 +810,22 @@ tr.is_publish {
     overflow-y: auto;
 }
 
-#hotkeys-list {
+.ta-grading-setting-list {
     width: 100%;
     border-collapse: collapse;
 }
 
-#hotkeys-list tr {
+.ta-grading-setting-list tr {
     border: 1px solid #ddd;
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:nth-child(even) {
+.ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--alternating-row-color-light);
 }
 
-#hotkeys-list td {
+.ta-grading-setting-list td {
     padding: 4px;
 }
 
@@ -1377,7 +1376,7 @@ tr.is_publish {
 }
 
 /* Notebook panel */
-#notebook-view {
+#notebook-main-view {
     padding: 10px;
 }
 

@@ -2,7 +2,7 @@
     {% if not poll is defined %}
         <h1> Add a New Poll </h1>
 
-        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll">
+        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
@@ -22,6 +22,12 @@
                     placeholder="Enter question here..."
                     maxlength="5000"></textarea>
             </label>
+            <br/><br/>
+
+            <label for="image-file">
+                Optional Image:
+            </label>
+            <input type="file" id="image-file" name="image_file"/>
             <br/><br/>
 
             <label for="poll-date">
@@ -50,9 +56,9 @@
     {% else %}
         <h1> Edit Poll </h1>
 
-        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits">
+        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+            <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
             <label for="poll-name">
@@ -71,6 +77,21 @@
                     maxlength="5000">{{ poll.getQuestion() }}</textarea>
             </label>
             <br/><br/>
+
+            <label for="image-file">
+                Optional Image:
+            </label>
+            <input type="file" id="image-file" name="image_file"/>
+            <br />
+            {% if poll.getImagePath() != null %}
+                Current Image: {{ poll.getImagePath() }}
+                <br/>
+                <label for="keep-image">
+                    Keep Image:
+                </label>
+                <input type="checkbox" id="keep-image" name="keep_image" checked />
+            {% endif %}
+            <br/>
 
             <label for="poll-date">
                 Expected release date:
