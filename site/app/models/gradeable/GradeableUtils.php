@@ -14,7 +14,7 @@ class GradeableUtils {
      *
      * @param Core $core
      * @param Course $course
-     * @return array<string, Gradeable[]|GradedGradeable[]|Button[]>
+     * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception
      */
     public static function getGradeablesFromCourse(Core $core, Course $course): array {
@@ -27,19 +27,24 @@ class GradeableUtils {
         /** @var array<string, Button> $submit_btns */
         $submit_btns = [];
 
+        // Load the database and configuration of a course
         $core->loadCourseConfig($course->getSemester(), $course->getTitle());
         $core->loadCourseDatabase();
+
+        // Load all Gradeable objects of the current course
         foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
             /** @var Gradeable $gradeable */
             $gradeables[serialize([$course->getSemester(), $course->getTitle(), $gradeable->getId()])] = $gradeable;
             $visible_gradeables[] = $gradeable;
         }
 
+        // Load all GradedGradable objects of the current course
         foreach ($core->getQueries()->getGradedGradeables($visible_gradeables, $core->getUser()->getId()) as $gg) {
             /** @var GradedGradeable $gg */
             $graded_gradeables[serialize([$course->getSemester(), $course->getTitle(), $gg->getGradeableId()])] = $gg;
         }
 
+        // Create submit buttons for all gradeables
         foreach ($gradeables as $key => $gradeable) {
             $can_submit_everyone = $core->getAccess()->canI('gradeable.submit.everyone', ['gradeable' => $gradeable]);
             $graded_gradeable = array_key_exists($key, $graded_gradeables) ? $graded_gradeables[$key] : null;
@@ -52,20 +57,21 @@ class GradeableUtils {
             }
         }
 
+        // Disconnect from the course database
         $core->getCourseDB()->disconnect();
 
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
     }
 
     /**
-     * A static factory method to create a new GradeableList object that contains
-     * all gradeables in all courses of a single user.
+     * A static factory method to create an array that contains information for all
+     * gradeables in all courses of a single user.
      * The method loads from the database of all courses and get all gradeables information.
      * Only load once unless the user refreshes the page.
      *
      * @param Core $core
      * @param User $user The user to filter gradeables by
-     * @return array<string, Gradeable[]|GradedGradeable[]|Button[]>
+     * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database
      */
     public static function getAllGradeableListFromUserId(Core $core, User $user): array {
@@ -76,7 +82,6 @@ class GradeableUtils {
         // Load the gradeable information for each course
         $courses = $core->getQueries()->getCourseForUserId($user->getId());
         foreach ($courses as $course) {
-            /** @var Course $course */
             $gradeables_of_course = self::getGradeablesFromCourse($core, $course);
             $gradeables = array_merge($gradeables, $gradeables_of_course["gradeables"]);
             $graded_gradeables = array_merge($graded_gradeables, $gradeables_of_course["graded_gradeables"]);
