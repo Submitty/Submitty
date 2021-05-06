@@ -15,17 +15,17 @@ describe('Test cases revolving around the API', () => {
     });
 
     [
-      ['no user_id or password', {'foo': 'bar'}],
-      ['no password', { 'user_id': 'instructor'}],
-      ['no user_id', {'password': 'instructor'}],
+        ['no user_id or password', {'foo': 'bar'}],
+        ['no password', { 'user_id': 'instructor'}],
+        ['no user_id', {'password': 'instructor'}],
     ].forEach(([title, postBody]) => {
-      it(`should require a user_id and password - ${title}`, () => {
-        cy.request(buildPostRequest('api/token', postBody)).should((response) => {
-            const data = JSON.parse(response.body);
-            expect(data['status']).to.equal('fail');
-            expect(data['message']).to.equal('Cannot leave user id or password blank');
+        it(`should require a user_id and password - ${title}`, () => {
+          cy.request(buildPostRequest('api/token', postBody)).should((response) => {
+              const data = JSON.parse(response.body);
+              expect(data['status']).to.equal('fail');
+              expect(data['message']).to.equal('Cannot leave user id or password blank');
+          });
         });
-      });
     });
 
     it('should invalidate older tokens on request', () => {
