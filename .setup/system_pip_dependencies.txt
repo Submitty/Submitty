@@ -1,0 +1,37 @@
+# Extract from install_system.sh, latest update May 7th
+
+python-pam==1.8.4
+PyYAML==3.12
+psycopg2-binary==2.8.6
+sqlalchemy<1.4.0
+pylint==2.8.1
+psutil==5.8.0
+python-dateutil==2.8.1
+watchdog==2.0.3
+xlsx2csv==0.7.8
+pause==0.3
+paramiko==2.7.2
+tzlocal==2.1
+PyPDF2==1.26.0
+distro==1.5.0
+jsonschema==3.2.0
+jsonref==0.2
+docker==5.0.0
+
+# For Lichen / Plagiarism Detection
+parso==0.8.2
+
+# Python3 implementation of python-clang bindings (may not work < 6.0)
+clang==11.0
+
+#python libraries for QR bulk upload
+pyzbar==0.1.8
+pdf2image==1.14.0
+opencv-python=4.5.1.48
+numpy==1.20.2
+
+#python libraries for OCR for digit recognition
+onnxruntime==1.7.0
+
+# Email catcher
+nullsmtpd==0.5.0
