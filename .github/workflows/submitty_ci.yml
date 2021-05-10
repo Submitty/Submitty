@@ -240,8 +240,6 @@ jobs:
               pip3 install psycopg2
               pip3 install docker
               pip3 install pyyaml
-              pip3 install selenium
-              pip3 install python-pam
               pip3 install python-dateutil
               pip3 install paramiko
               pip3 install pyzbar
