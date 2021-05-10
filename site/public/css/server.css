@@ -1474,23 +1474,40 @@ end of styles used in the admin gradeable page
     overflow-y: auto;
 }
 
-#hotkeys-list {
+.ta-grading-setting-list {
     width: 100%;
     border-collapse: collapse;
 }
 
-#hotkeys-list tr {
+.ta-grading-setting-list tr {
     border: 1px solid var(--standard-light-gray);
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:nth-child(even) {
+.ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--standard-pale-gray);
 }
 
-#hotkeys-list td {
+.ta-grading-setting-list td {
     padding: 4px;
+}
+
+.file-viewer{
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.file-viewer a,
+.file-viewer a:link,
+.file-viewer a:visited,
+.file-viewer a:active {
+    color: var(--file-browser-blue);
+}
+
+.file-viewer a:hover {
+    color: #6db7ff;
+    text-decoration: none;
 }
 
 .remap-button {
