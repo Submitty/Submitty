@@ -27,7 +27,7 @@ clang==11.0
 #python libraries for QR bulk upload
 pyzbar==0.1.8
 pdf2image==1.14.0
-opencv-python=4.5.1.48
+opencv-python==4.5.1.48
 numpy==1.20.2
 
 #python libraries for OCR for digit recognition
