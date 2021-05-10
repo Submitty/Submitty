@@ -237,6 +237,7 @@ jobs:
               pip3 install tzlocal
               pip3 install jsonschema
               pip3 install jsonref
+              pip3 install psycopg2
               pip3 install docker
               pip3 install pyyaml
               pip3 install selenium
@@ -260,6 +261,7 @@ jobs:
               sudo pip3 install watchdog
               sudo pip3 install python-dateutil
               sudo pip3 install psutil
+              sudo pip3 install psycopg2
               sudo pip3 install python-pam
               sudo pip3 install "sqlalchemy<1.4.0"
 
