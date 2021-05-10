@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "cypress": "^7.2.0",
-    "eslint": "^7.25.0",
+    "eslint": "^7.26.0",
     "eslint-plugin-cypress": "^2.11.3"
   },
   "scripts": {
