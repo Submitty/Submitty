@@ -221,7 +221,7 @@ jobs:
           - name: Cache pip
             uses: actions/cache@v2
             with:
-              path: path ~/.cache/pip
+              path: ~/.cache/pip
               key: ${{ runner.os }}-py-pip-${{ hashFiles('${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
