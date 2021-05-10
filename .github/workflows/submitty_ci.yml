@@ -218,11 +218,12 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
+
           - name: Cache pip
             uses: actions/cache@v2
             with:
               path: ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles(`system_requirements.txt') }}
+              key: ${{ runner.os }}-py-pip-${{ hashFiles('system_requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
 
