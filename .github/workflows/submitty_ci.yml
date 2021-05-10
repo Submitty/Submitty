@@ -223,7 +223,7 @@ jobs:
             uses: actions/cache@v2
             with:
               path: ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('system_requirements.txt') }}
+              key: ${{ runner.os }}-py-pip-${{ hashFiles('.setup/pip/system_requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
 
