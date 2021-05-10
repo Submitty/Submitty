@@ -231,20 +231,23 @@ jobs:
               sudo python3 -m pip install --upgrade pip setuptools wheel
               pip3 -V
               sudo pip3 -V
+              # Testing specific
+              pip3 install selenium
+              pip3 install psycopg2
+              # General dependency
               pip3 install python-pam
               pip3 install "sqlalchemy<1.4.0"
-              pip3 install selenium
               pip3 install tzlocal
               pip3 install jsonschema
               pip3 install jsonref
-              pip3 install psycopg2
               pip3 install docker
               pip3 install pyyaml
               pip3 install python-dateutil
               pip3 install paramiko
               pip3 install pyzbar
               pip3 install watchdog
-              #needs to be globally available for all users
+              # Needs to be globally available for all users
+              sudo pip3 install psycopg2 # Testing specific
               sudo pip3 install docker
               sudo pip3 install paramiko
               sudo pip3 install tzlocal
@@ -259,7 +262,6 @@ jobs:
               sudo pip3 install watchdog
               sudo pip3 install python-dateutil
               sudo pip3 install psutil
-              sudo pip3 install psycopg2
               sudo pip3 install python-pam
               sudo pip3 install "sqlalchemy<1.4.0"
 
