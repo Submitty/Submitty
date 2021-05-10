@@ -232,8 +232,10 @@ jobs:
               pip3 -V
               sudo pip3 -V
               # Testing specific
-              pip3 install selenium
+              pip3 install cryptography
               pip3 install psycopg2
+              pip3 install selenium
+              pip3 install websocket_client
               # General dependency
               pip3 install python-pam
               pip3 install "sqlalchemy<1.4.0"
@@ -247,7 +249,9 @@ jobs:
               pip3 install pyzbar
               pip3 install watchdog
               # Needs to be globally available for all users
-              sudo pip3 install psycopg2 # Testing specific
+              # Testing specific
+              sudo pip3 install psycopg2
+              # General dependency
               sudo pip3 install docker
               sudo pip3 install paramiko
               sudo pip3 install tzlocal
