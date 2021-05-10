@@ -227,6 +227,8 @@ jobs:
                 ${{ runner.os }}-py-pip
           - name: Install python dependencies
             run: |
+              python3 -m pip install --upgrade pip setuptools wheel  
+              sudo python3 -m pip install --upgrade pip setuptools wheel
               pip3 -V
               sudo pip3 -V
               # Testing specific
