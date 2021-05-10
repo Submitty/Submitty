@@ -182,7 +182,7 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
-pip install -r ${CURRENT_DIR}/system_pip_dependencies.txt
+pip3 install -r ${CURRENT_DIR}/.setup/pip/system_requirements.txt
 
 #################################################################
 # Node Package Setup

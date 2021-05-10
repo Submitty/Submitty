@@ -12,7 +12,7 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
-  
+
 jobs:
     eslint:
         runs-on: ubuntu-18.04
@@ -141,9 +141,9 @@ jobs:
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install "SQLAlchemy<1.4.0" jsonschema jsonref pytz tzlocal
             python3 -m pip install coverage
-            python3 -m pip install paramiko 
-            python3 -m pip install docker 
-            python3 -m pip install python-dateutil 
+            python3 -m pip install paramiko
+            python3 -m pip install docker
+            python3 -m pip install python-dateutil
         - name: Run migrator python unit tests
           working-directory: migration
           run : |
@@ -184,7 +184,7 @@ jobs:
         services:
           postgres:
             image: postgres
-            env: 
+            env:
               POSTGRES_PASSWORD: submitty_dbuser
               POSTGRES_USER: postgres
             options: >-
@@ -222,19 +222,15 @@ jobs:
             uses: actions/cache@v2
             with:
               path: ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt') }}
+              key: ${{ runner.os }}-py-pip-${{ hashFiles('${SUBMITTY_REPOSITORY}/.setup/system_requirements.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
           - name: Install python dependencies
             run: |
-              python3 -m pip install --upgrade pip setuptools wheel  
-              sudo python3 -m pip install --upgrade pip setuptools wheel
-              pip3 -V
-              sudo pip3 -V
-              pip3 install selenium
-              pip3 install psycopg2
-              pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt
-              sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt
+              # Install for local
+              pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+              # Install globally
+              sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
 
           - name: Get composer cache dir
             id: composer-cache
@@ -304,7 +300,7 @@ jobs:
 
           - name: Set up test suite
             run: |
-              cd $SUBMITTY_REPOSITORY 
+              cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
           - name: Set up apache
