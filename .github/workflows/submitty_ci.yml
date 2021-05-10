@@ -222,7 +222,7 @@ jobs:
             uses: actions/cache@v2
             with:
               path: path ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('.setup/system_pip_dependencies.txt') }}
+              key: ${{ runner.os }}-py-pip-${{ hashFiles('${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt') }}
               restore-keys: |
                 ${{ runner.os }}-py-pip
           - name: Install python dependencies
@@ -233,8 +233,8 @@ jobs:
               sudo pip3 -V
               pip3 install selenium
               pip3 install psycopg2
-              pip3 install -r .setup/system_pip_dependencies.txt
-              sudo pip3 install -r .setup/system_pip_dependencies.txt
+              pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt
+              sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/system_pip_dependencies.txt
 
           - name: Get composer cache dir
             id: composer-cache
