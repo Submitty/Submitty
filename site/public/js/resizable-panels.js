@@ -81,7 +81,6 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         document.body.style.userSelect = 'none';
         document.body.style.pointerEvents = 'none';
         // Add blurry effect on drag-bar
-        dragbar.style.filter = 'blur(5px)';
 
         // Callback function
         if (typeof callback === 'function') {
