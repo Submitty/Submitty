@@ -1,0 +1,4 @@
+SQLAlchemy<1.4.0
+paramiko
+docker
+python-dateutil

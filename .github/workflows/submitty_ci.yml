@@ -209,9 +209,40 @@ jobs:
             flags: migrator
 
 
+    python-unit-auto-grader: # TODO: Should come behind of submitty-util test
+      runs-on: ubuntu-18.04
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-
+        - name: Install python libraries
+          working-directory: autograder
+          run : |
+            python3 -m pip install --upgrade pip setuptools wheel
+            python3 -m pip install coverage
+            python3 -m pip install ../python_submitty_utils/
+            python3 -m pip install -r autograder_requirements.txt
+        - name: Run autograder python unit tests
+          working-directory: autograder
+          run : |
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload autograder Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: autograder/coverage.xml
+            flags: autograder
 
     e2e:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit-migration]
+        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit-migration, python-unit-auto-grader]
         runs-on: ubuntu-18.04
         if: ${{ false }}
         services:
