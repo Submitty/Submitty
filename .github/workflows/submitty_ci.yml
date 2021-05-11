@@ -124,7 +124,7 @@ jobs:
 
     python-unit:
       runs-on: ubuntu-18.04
-      needs: [python-unit-migration, python-unit-auto-grader]
+      needs: [python-unit-migration, python-unit-auto-grader, python-unit-submitty-utils]
       if: ${{ false }}
       steps:
         - uses: actions/checkout@v2 # Dummy
@@ -178,6 +178,38 @@ jobs:
 #            files: migration/coverage.xml
 #            flags: migrator
 
+    python-unit-submitty-utils:
+      runs-on: ubuntu-18.04
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+                ${{ runner.os }}-pip-
+        - name: Install python libraries
+          working-directory: python_submitty_utils
+          run : |
+            python3 -m pip install --upgrade pip setuptools wheel
+            python3 -m pip install coverage
+            python3 -m pip install -r submitty_utils_requirements.txt
+        - name: Run python_submitty_utils python unit tests
+          working-directory: python_submitty_utils
+          run : |
+            pip3 install .
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload submitty python utils Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: python_submitty_utils/coverage.xml
+            flags: python_submitty_utils
+
     python-unit-migration:
       runs-on: ubuntu-18.04
       steps:
@@ -209,9 +241,9 @@ jobs:
             files: migration/coverage.xml
             flags: migrator
 
-
-    python-unit-auto-grader: # TODO: Should come behind of submitty-util test
+    python-unit-auto-grader:
       runs-on: ubuntu-18.04
+      needs: [python-unit-submitty-utils]
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
