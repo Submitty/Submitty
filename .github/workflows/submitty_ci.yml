@@ -187,7 +187,7 @@ jobs:
 
     python-unit-auto-grader:
       runs-on: ubuntu-18.04
-      needs: [python-unit-submitty-utils]
+#      needs: [python-unit-submitty-utils] Not that necessary
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
