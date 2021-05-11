@@ -188,7 +188,7 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/migration_requirements.txt') }}
             restore-keys: |
                 ${{ runner.os }}-pip-
         - name: Install python libraries
@@ -211,7 +211,7 @@ jobs:
 
 
     e2e:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit-migration]
         runs-on: ubuntu-18.04
         if: ${{ false }}
         services:
