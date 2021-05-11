@@ -138,7 +138,9 @@
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}
-                                <span>&gt;</span> {# span required to give conditional rendering #}
+                              <div class="centered-icon">
+                                <i class="fas fa-angle-right"></i>
+                              </div>
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
