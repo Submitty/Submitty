@@ -133,7 +133,7 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/submitty_utils_requirements.txt') }}
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
             restore-keys: |
                 ${{ runner.os }}-pip-
         - name: Install python libraries
@@ -165,7 +165,7 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/migration_requirements.txt') }}
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
             restore-keys: |
                 ${{ runner.os }}-pip-
         - name: Install python libraries
@@ -197,7 +197,7 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/autograder_requirements.txt') }}
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
             restore-keys: |
               ${{ runner.os }}-pip-
         - name: Install python libraries

@@ -25,7 +25,7 @@ updates:
       prefix-development: "[DevDependency]"
   # Migration
   - package-ecosystem: pip
-    directory: "/migration/migration_requirements.txt"
+    directory: "/migration/requirements.txt"
     schedule:
       interval: daily
       time: "10:00"
@@ -37,7 +37,7 @@ updates:
       prefix-development: "[DevDependency]"
   # Auto-grader
   - package-ecosystem: pip
-    directory: "/autograder/autograder_requirements.txt"
+    directory: "/autograder/requirements.txt"
     schedule:
       interval: daily
       time: "10:00"
