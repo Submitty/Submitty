@@ -141,7 +141,7 @@ jobs:
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install coverage
-            python3 -m pip install -r submitty_utils_requirements.txt
+            python3 -m pip install -r requirements.txt
         - name: Run python_submitty_utils python unit tests
           working-directory: python_submitty_utils
           run : |
@@ -173,7 +173,7 @@ jobs:
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install coverage
-            python3 -m pip install -r migration_requirements.txt
+            python3 -m pip install -r requirements.txt
         - name: Run migrator python unit tests
           working-directory: migration
           run : |
@@ -206,7 +206,7 @@ jobs:
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install coverage
             python3 -m pip install ../python_submitty_utils/
-            python3 -m pip install -r autograder_requirements.txt
+            python3 -m pip install -r requirements.txt
         - name: Run autograder python unit tests
           working-directory: autograder
           run : |
