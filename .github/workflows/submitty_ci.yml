@@ -229,7 +229,6 @@ jobs:
           python-unit-submitty-utils
         ]
         runs-on: ubuntu-18.04
-        if: ${{ false }}
         services:
           postgres:
             image: postgres
