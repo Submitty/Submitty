@@ -1,2 +1,2 @@
-docker
+docker==5.0.0
 SQLAlchemy<1.4.0
