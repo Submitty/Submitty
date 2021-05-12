@@ -219,15 +219,14 @@ jobs:
             flags: autograder
 
     e2e:
-        needs: [
-          eslint,
-          php-lint-static,
-          php-unit,
-          python-lint,
-          python-unit-migration,
-          python-unit-auto-grader,
-          python-unit-submitty-utils
-        ]
+        needs:
+          - eslint
+          - php-lint-static
+          - php-unit
+          - python-lint
+          - python-unit-migration
+          - python-unit-auto-grader
+          - python-unit-submitty-utils
         runs-on: ubuntu-18.04
         services:
           postgres:
@@ -459,5 +458,4 @@ jobs:
 
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
-
 
