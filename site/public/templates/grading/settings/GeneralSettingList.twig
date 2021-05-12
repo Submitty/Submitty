@@ -1,0 +1,23 @@
+
+{% for setting in settings %}
+<h2>{{ setting.name }}</h2>
+<br>
+<table id="{{ setting.id }}" class="ta-grading-setting-list">
+        <tr>
+          <th>{{ setting.left|default('Setting') }}</th>
+          <th>{{ setting.right|default('Option') }}</th>
+        </tr>
+        {% for option in setting.values %}
+        <tr>
+            <td>{{ option.name }}</td>
+            <td>
+                <select class="ta-grading-setting-option" data-storage-code={{ option.storageCode }}>
+                {% for key, value in option.options %}
+                    <option value="{{ value }}"{% if option.currValue|default(null) == value %} selected="selected"{% endif %}>{{ key }}</option>
+                {% endfor %}
+                </select>
+            </td>
+        </tr>
+        {% endfor %}
+</table>
+{% endfor %}

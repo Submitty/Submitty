@@ -25,12 +25,12 @@ class CalendarInfo extends AbstractModel {
      * 'semester'     => string   (the semester of which the item belongs)
      * 'course'       => string   (the title of the course of which the item belongs)
      * 'url'          => string   (the url of the clickable button)
-     * 'submission'   => DateTime (the timestamp of the item, shown in the popup tooltip)
+     * 'submission'   => string   (the timestamp of the item, shown in the popup tooltip)
      * 'status'       => string   (the status of the gradeable, open/closed/grading..., is used to show different
      *                             colors of item, relation between color and integer are recorded in css)
      * 'status_note'  => string   (a string describing this status)
-     * 'grading_open' => DateTime (reserved, useless for now. Can be empty)
-     * 'grading_due'  => DateTime (reserved, useless for now. Can be empty)
+     * 'grading_open' => string   (reserved, useless for now. Can be empty)
+     * 'grading_due'  => string   (reserved, useless for now. Can be empty)
      */
     private $items_by_date = [];
 
@@ -60,6 +60,7 @@ class CalendarInfo extends AbstractModel {
      */
     public static function loadGradeableCalendarInfo(Core $core, GradeableList $gradeable_list): CalendarInfo {
         $info = new CalendarInfo($core);
+        $date_format = $core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
 
         // get the gradeables from the GradeableList and group them by section
         $gradeable_list_sections = [
@@ -91,11 +92,11 @@ class CalendarInfo extends AbstractModel {
                     'semester' => $semester,
                     'course' => $course_title,
                     'url' => $info->core->buildUrl(['courses', $semester, $course_title, 'gradeable', $gradeable->getId()]),
-                    'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate() : '',
+                    'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format($date_format) : '',
                     'status' => (string) $section,
                     'status_note' => $status_note,
-                    'grading_open' => $gradeable->getGradeStartDate(),
-                    'grading_due' => $gradeable->getGradeDueDate()
+                    'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
+                    'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
                 ];
 
                 // Put gradeables in current section by their id which consists of semester, course title and gradeable id
