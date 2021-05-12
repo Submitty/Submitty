@@ -54,6 +54,31 @@ class GradingOrder extends AbstractModel {
      */
     protected $not_fully_graded;
 
+        /**
+     * @var bool to_ungraded
+     */
+    protected $to_ungraded;
+
+    /**
+     * @var bool $skip_component_itempool
+     */
+    protected $skip_component_itempool;
+
+    /**
+     * @var int $itempool_size
+     */
+    protected $itempool_size;
+
+    /**
+     * @var int $itempool_hash_index
+     */
+    protected $itempool_hash_index;
+
+    /**
+     * @var string $itempool_from_pool_index
+     */
+    protected $itempool_from_pool_index;
+
     /**
      * GradingOrder constructor.
      * @param Core $core
@@ -104,6 +129,13 @@ class GradingOrder extends AbstractModel {
             /* @var GradedGradeable $graded_gradeable */
             $this->has_submission[$id] = $version > 0;
         }
+
+        $this->to_ungraded = false;
+        $this->skip_component_itempool = true;
+
+        $this->itempool_size = null;
+        $this->itempool_hash_index = null;
+        $this->itempool_from_pool_index = null;
     }
 
     /**
@@ -172,7 +204,22 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @return Submitter Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter) {
+    public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $component_itempool = null) {
+        $this->to_ungraded = $to_ungraded;
+
+        $this->skip_component_itempool = true;
+        if($to_ungraded) {
+            $this->initUsersNotFullyGraded($component_id);
+            if($component_itempool !== null && $this->getItempoolIndicesForSubmitter($submitter, $component_id, $component_itempool)) {
+                $this->skip_component_itempool = false;
+            }
+        }
+
+        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
+            return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
+             && ($this->skip_component_itempool || $this->gradeable->getAutogradingConfig()->getUserSpecificNotebook($sub->getId())->getHashes()[$this->itempool_hash_index] % $this->itempool_size === $this->itempool_from_pool_index);
+        });
+
         return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
             return $this->getHasSubmission($sub);
         });
@@ -184,9 +231,20 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @return Submitter Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter) {
+    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $component_itempool = null) {
+        $this->to_ungraded = $to_ungraded;
+
+        $this->skip_component_itempool = true;
+        if($to_ungraded) {
+            $this->initUsersNotFullyGraded($component_id);
+            if($component_itempool !== null && $this->getItempoolIndicesForSubmitter($submitter, $component_id, $component_itempool)) {
+                $this->skip_component_itempool = false;
+            }
+        }
+
         return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
-            return $this->getHasSubmission($sub);
+            return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
+             && ($this->skip_component_itempool || $this->gradeable->getAutogradingConfig()->getUserSpecificNotebook($sub->getId())->getHashes()[$this->itempool_hash_index] % $this->itempool_size === $this->itempool_from_pool_index);
         });
     }
 
@@ -200,49 +258,6 @@ class GradingOrder extends AbstractModel {
             $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
         }
     }
-
-    /**
-     * Get the next ungraded submitter
-     *
-     * If a component_id is passed in this function will return the next submitter with that specific
-     * component ungraded.  If component_id is not passed in this function returns the next submitter with
-     * any components ungraded.  Skips students with no submissions.
-     *
-     * @param Submitter $submitter Current grading submitter
-     * @param string $component_id The id of a gradeable component
-     * @return Submitter
-     */
-    public function getNextUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
-
-        // Query database to find out which users have not been completely graded
-        $this->initUsersNotFullyGraded($component_id);
-
-        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
-            return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
-        });
-    }
-
-    /**
-     * Get the prev ungraded submitter
-     *
-     * If a component_id is passed in this function will return the prev submitter with that specific
-     * component ungraded.  If component_id is not passed in this function returns the prev submitter with
-     * any components ungraded.  Skips students with no submissions.
-     *
-     * @param Submitter $submitter Current grading submitter
-     * @param string $component_id The id of a gradeable component
-     * @return Submitter
-     */
-    public function getPrevUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
-
-        // Query database to find out which users have not been completely graded
-        $this->initUsersNotFullyGraded($component_id);
-
-        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
-            return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
-        });
-    }
-
 
     /**
      * Given the current submitter, get the previous submitter to grade.
@@ -461,6 +476,37 @@ class GradingOrder extends AbstractModel {
         //Since the array's elements were not added in the same order as the indices, sort to fix it
         ksort($gg_idx);
         return array_merge($gg_idx, $unsorted);
+    }
+
+    public function getItempoolIndicesForSubmitter(Submitter $submitter, int $component_id, string $item_name) : bool {
+        $user_item_map = [];
+        $que_idx = 0;
+
+        $item_label = $this->gradeable->getComponent($component_id)->getItempool();
+
+        $gradeable_config = $this->gradeable->getAutogradingConfig();
+
+        $notebook_config = $gradeable_config->getNotebookConfig();
+        $hashes = $gradeable_config->getUserSpecificNotebook($submitter->getId())->getHashes();
+        foreach ($notebook_config as $key => $item) {
+            if (isset($item['type']) && $item['type'] === 'item') {
+                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
+                $item_id = isset($user_item_map[$item_id]) ? $item_id . '_' . $key : $item_id;
+                $selected_idx = $item["user_item_map"][$submitter->getId()] ?? null;
+                if (is_null($selected_idx)) {
+                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    if ($item_label === $item['item_label'] && $item_name === $item['from_pool'][$selected_idx]) { //not unique, also item_label?
+                        $this->itempool_size = count($item['from_pool']);
+                        $this->itempool_hash_index = $que_idx;
+                        $this->itempool_from_pool_index = $selected_idx;
+                        return true;
+                    }
+                    $que_idx++;
+                }
+                $user_item_map[$item_id] = $item['from_pool'][$selected_idx];
+            }
+        }
+        return false;
     }
 
     /**
