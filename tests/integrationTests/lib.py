@@ -8,6 +8,9 @@ import traceback
 import sys
 import shutil
 from submitty_utils import submitty_schema_validator
+from functools import wraps
+
+from multiprocessing import Pool
 
 # global variable available to be used by the test suite modules
 # this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
@@ -22,8 +25,8 @@ BUILD_MAIN_CONFIGUE_PATH = os.path.join(
 
 # Verify that this has been installed by just checking that this file is located in
 # a directory next to the config directory which has submitty.json in it
-if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
-    raise SystemExit('You must install the test suite before being able to run it.')
+# if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
+#     raise SystemExit('You must install the test suite before being able to run it.')
 
 SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
 GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
@@ -88,68 +91,88 @@ white = ASCIIEscapeManager([37])
 
 ###################################################################################
 ###################################################################################
-# Run the given list of test case names
+# Run the given list of test case names in parallel using multiprocessing
 def run_tests(names):
-    totalmodules = len(names)
+    arguments = [] # Arguments for run_single_test(list<str>, TestCaseFile)
     for name in sorted(names):
         name = name.split(".")
         key = name[0]
-        val = to_run[key]
-        modsuccess = True
-        with bold:
-            print("--- BEGIN TEST MODULE " + key.upper() + " ---")
-        cont = True
-        try:
-            print("* Starting compilation...")
-            val.prebuild()
-            val.wrapper.build()
-            print("* Finished compilation")
-        except Exception as e:
-            print("Build failed with exception: %s" % e)
-            modsuccess = False
-            cont = False
-        if cont:
-            testcases = []
-            if len(name) > 1:
-                for i in range(len(val.testcases)):
-                    if str(val.testcases_names[i]).lower() == name[1].lower():
-                        testcases.append(val.testcases[i])
-            else:
-                testcases = val.testcases
-            total = len(testcases)
-            for index, f in zip(range(1, total + 1), testcases):
-                try:
-                    f()
-                except Exception as e:
-                    with bold + red:
-                        lineno = None
-                        tb = traceback.extract_tb(sys.exc_info()[2])
-                        for i in range(len(tb)-1, -1, -1):
-                            if os.path.basename(tb[i][0]) == '__init__.py':
-                                lineno = tb[i][1]
-                        print("Testcase " + str(index) + " failed on line " + str(lineno) +
-                              " with exception: ", e)
-                        sys.exc_info()
-                        total -= 1
-            if total == len(testcases):
-                with bold + green:
-                    print("All testcases passed")
-            else:
-                with bold + red:
-                    print(str(total) + "/" + str(len(testcases)) + " testcases passed")
-                    modsuccess = False
-        with bold:
-            print("--- END TEST MODULE " + key.upper() + " ---")
-        print()
-        if not modsuccess:
-            totalmodules -= 1
-    if totalmodules == len(names):
+        case = to_run[key]
+        arguments.append((name, case))
+    # Concurrency note:
+    with Pool(5) as p:
+        test_result = p.starmap(__run_single_test_module, arguments)
+    if False in test_result:
+        with bold + red:
+            print(str(test_result.count(True)) + "/" + str(len(test_result)) + " modules passed")
+            sys.exit(1)
+    else:
         with bold + green:
             print("All " + str(len(names)) + " modules passed")
+
+# Executes a single test module, this method is executed across process boundary,
+# Not meant to be called externally.
+def __run_single_test_module(name, case):
+    key = name[0]
+    with bold:
+        print("--- BEGIN TEST MODULE " + key.upper() + " ---")
+    module_success = __compile_test_module(case)
+    if module_success:
+        testcases = __collect_test_cases(case, name)
+        succeed_count = len(testcases)
+        for index, f in zip(range(1, succeed_count + 1), testcases):
+            test_case_success = __execute_test_case(index, f)
+            if not test_case_success:
+                succeed_count -= 1
+        if succeed_count == len(testcases):
+            with bold + green:
+                print("All testcases passed")
+        else:
+            with bold + red:
+                print(str(succeed_count) + "/" + str(len(testcases)) + " testcases passed")
+                module_success = False
+    with bold:
+        print("--- END TEST MODULE " + key.upper() + " ---")
+    print()
+    return module_success
+
+def __compile_test_module(case):
+    try:
+        print("* Starting compilation...")
+        case.prebuild()
+        case.wrapper.build()
+        print("* Finished compilation")
+        return True
+    except Exception as e:
+        print("Build failed with exception: %s" % e)
+        return False
+
+
+def __collect_test_cases(case, name):
+    testcases = []
+    if len(name) > 1:
+        for i in range(len(case.testcases)):
+            if str(case.testcases_names[i]).lower() == name[1].lower():
+                testcases.append(case.testcases[i])
     else:
+        testcases = case.testcases
+    return testcases
+
+def __execute_test_case(index, test_case):
+    try:
+        test_case()
+        return True
+    except Exception as e:
         with bold + red:
-            print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
-            sys.exit(1)
+            lineno = None
+            tb = traceback.extract_tb(sys.exc_info()[2])
+            for i in range(len(tb) - 1, -1, -1):
+                if os.path.basename(tb[i][0]) == '__init__.py':
+                    lineno = tb[i][1]
+            print("Testcase " + str(index) + " failed on line " + str(lineno) +
+                  " with exception: ", e)
+            sys.exc_info()
+        return False
 
 
 # Run every test currently loaded
@@ -630,12 +653,14 @@ class TestcaseWrapper:
 
 
 ###################################################################################
+# Decorators
 ###################################################################################
 def prebuild(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
     tw = TestcaseWrapper(path)
+    @wraps(func)
     def wrapper():
         print("* Starting prebuild for " + modname + "... ", end="")
         func(tw)
@@ -659,6 +684,7 @@ def testcase(func):
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
     tw = TestcaseWrapper(path)
+    @wraps(func)
     def wrapper():
         print("* Starting testcase " + modname + "." + func.__name__ + "... ", end="")
         try:
