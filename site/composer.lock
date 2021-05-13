@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b562f914f141107541b6f535b3ec302c",
+    "content-hash": "be342dbbb53aaae79e2f7db3ecdf2a81",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1677,16 +1677,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.4.22",
+            "version": "v4.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "1a6f87ef99d05b1bf5c865b4ef7992263e1cb081"
+                "reference": "2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/1a6f87ef99d05b1bf5c865b4ef7992263e1cb081",
-                "reference": "1a6f87ef99d05b1bf5c865b4ef7992263e1cb081",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5",
+                "reference": "2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5",
                 "shasum": ""
             },
             "require": {
@@ -1725,7 +1725,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v4.4.22"
+                "source": "https://github.com/symfony/http-foundation/tree/v4.4.23"
             },
             "funding": [
                 {
@@ -1741,7 +1741,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-30T12:05:50+00:00"
+            "time": "2021-05-05T07:40:41+00:00"
         },
         {
             "name": "symfony/mime",
