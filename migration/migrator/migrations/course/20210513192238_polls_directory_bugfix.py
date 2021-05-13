@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 
 
-def up(config):
+def up(config, database, semester, course):
     """
     Run up migration.
 
@@ -21,7 +21,7 @@ def up(config):
 
 
 
-def down(config):
+def down(config, database, semester, course):
     """
     Run down migration (rollback).
 
