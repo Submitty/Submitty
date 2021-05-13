@@ -111,9 +111,9 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip
@@ -133,9 +133,9 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
@@ -222,9 +222,9 @@ jobs:
             uses: actions/cache@v2
             with:
               path: path ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
-                ${{ runner.os }}-py-pip
+                ${{ runner.os }}-${{ github.job }}-pip-
           - name: Install python dependencies
             run: |
               python3 -m pip install --upgrade pip setuptools wheel  

@@ -21,16 +21,16 @@
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
     "jspdf": "^2.3.1",
-    "mermaid": "8.9.3",
+    "mermaid": "8.10.1",
     "pdfjs-dist": "2.2.228",
     "plotly.js-dist": "1.58.4",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.4"
   },
   "devDependencies": {
-    "cypress": "^7.2.0",
-    "eslint": "^7.25.0",
-    "eslint-plugin-cypress": "^2.11.2"
+    "cypress": "^7.3.0",
+    "eslint": "^7.26.0",
+    "eslint-plugin-cypress": "^2.11.3"
   },
   "scripts": {
     "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\"",
