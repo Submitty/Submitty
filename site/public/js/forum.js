@@ -754,10 +754,11 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             var anon = json.anon;
             var change_anon = json.change_anon;
             var user_id = escapeSpecialChars(json.user);
+            json.post_time = json.post_time.replace(" ", "T");
             var time = Date.parse(json.post_time);
             if(!time) {
                 // Timezone suffix ":00" might be missing
-                time = Date.parse(json.post_time+":00");
+                time = Date.parse(json.post_time+"00");
             }
             time = new Date(time);
             var categories_ids = json.categories_ids;
