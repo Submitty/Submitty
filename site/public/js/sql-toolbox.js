@@ -55,13 +55,11 @@ async function runSqlQuery() {
         header.appendChild(header_row);
         table.appendChild(header);
         const body = document.createElement('tbody');
-        let rownum = 1;
-        data.forEach((row) => {
+        data.forEach((row, idx) => {
             const bodyRow = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.textContent = rownum;
+            cell.textContent = idx+1;
             bodyRow.appendChild(cell);
-            rownum++;
             Object.values(row).forEach((val) => {
                 const cell = document.createElement('td');
                 cell.textContent = val;
