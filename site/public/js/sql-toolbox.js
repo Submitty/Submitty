@@ -45,7 +45,7 @@ async function runSqlQuery() {
         const header = document.createElement('thead');
         const header_row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.innerText = 'Row #';
+        cell.innerText = '#';
         header_row.appendChild(cell);
         Object.keys(data[0]).forEach((col) => {
             const cell = document.createElement('td');
