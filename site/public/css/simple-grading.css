@@ -1,11 +1,11 @@
 .column-wrapper {
-    display:flex; 
+    display:flex;
     justify-content: space-between;
     align-items: flex-end;
 }
 
 .row-wrapper {
-    display:flex; 
+    display:flex;
     flex-direction:column;
 }
 
@@ -20,4 +20,23 @@
 
 .sticky-top label, .sticky-top .not-sticky {
     display: none !important;
+}
+
+.resizeable-textarea {
+    display: block;
+    width: 99%;
+    resize: vertical;
+    min-height: 1.2em;
+    line-height: 1.2em;
+    text-align: left;
+    border-width: 1px;
+    border-style: solid;
+    border-color: lightgray;
+    padding: 0.25em;
+    border-radius: 0.25em;
+}
+
+.resizeable-textarea[contenteditable]:empty::before {
+  content: "_";
+  color: transparent;
 }
