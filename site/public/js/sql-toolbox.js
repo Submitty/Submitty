@@ -1,5 +1,6 @@
 /* global buildCourseUrl, csrfToken */
 /* exported runSqlQuery */
+/* exported downloadSqlResult */
 
 async function runSqlQuery() {
     document.getElementById('query-results').style.display = 'block';
@@ -66,4 +67,34 @@ async function runSqlQuery() {
     catch (exc) {
         console.error(exc);
     }
+}
+
+async function downloadSqlResult(){
+    const results = document.getElementById('query-results');
+    let i;
+    let j;
+    let csv = '';
+    //Add headers to CSV string
+    for (i = 0; i < results.children.item(0).children.item(0).children.length; i++){
+        csv += `${results.children.item(0).children.item(0).children.item(i).textContent},`;
+    }
+    csv += '\n';
+
+    //Add data to CSV string
+    for (i = 0; i < results.children.item(1).children.length; i++){
+        for (j = 0; j < results.children.item(1).children.item(i).children.length; j++){
+            csv += `${results.children.item(1).children.item(i).children.item(j).textContent},`;
+        }
+        csv += '\n';
+    }
+    //Encode and download the CSV string
+    const address = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
+    const filename = 'submitty.csv';
+    const temp_element = document.createElement('a');
+    temp_element.setAttribute('href', address);
+    temp_element.setAttribute('download', filename);
+    temp_element.style.display = 'none';
+    document.body.appendChild(temp_element);
+    temp_element.click();
+    document.body.removeChild(temp_element);
 }

@@ -3,10 +3,12 @@
 
     <div>
       Use this toolbox to run a SELECT query. You cannot run any other type of query, and may only run a single query at a time.
+      You can download a CSV of the query results. Must Run Query before you can Download.
       <br /><br />
       <textarea id="toolbox-textarea" name="sql" ></textarea>
       <br />
       <button class="btn btn-primary" onclick="runSqlQuery()">Run Query</button>
+        <button class="btn btn-primary" onclick="downloadSqlResult()">Download CSV</button>
     </div>
 
     <div>
