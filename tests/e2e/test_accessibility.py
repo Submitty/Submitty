@@ -57,6 +57,7 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/grades',
         '/courses/{}/{}/polls',
         '/courses/{}/{}/polls/newPoll',
+        '/courses/{}/{}/sql_toolbox',
     ]
 
     urls_formatted = []
@@ -116,7 +117,7 @@ class TestAccessibility(BaseTestCase):
                         if skip_error:
                             continue
 
-                        if error['message'] not in baseline[self.urls[url_index]] and error['message'] not in foundErrorMessages:
+                        if (self.urls[url_index] not in baseline or error['message'] not in baseline[self.urls[url_index]]) and error['message'] not in foundErrorMessages:
                             foundErrorMessages.append(error['message'])
                             clean_error = {
                                 "error": error['message'].replace('\u201c', "'").replace('\u201d', "'").strip(),
