@@ -38,6 +38,10 @@ const taLayoutDet = {
   bottomFourPanelRightHeight: "50%",
 };
 
+let settingsCallbacks = {
+  "general-setting-arrow-function": changeStudentArrowTooltips
+}
+
 // Grading Panel header width
 let maxHeaderWidth = 0;
 // Navigation Toolbar Panel header width
@@ -81,10 +85,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
+  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');
     if(storageCode) {
       localStorage.setItem(storageCode, this.value);
+      if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](data);
+      }
     }
   })
 
@@ -170,6 +179,50 @@ $(function () {
   });
 
 });
+
+function changeStudentArrowTooltips(data) {
+  let component_id = getFirstOpenComponentId();
+  switch(data) {
+    case "ungraded":
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (component " + component_id + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (component " + component_id + ")");
+      }
+      break;
+    case "itempool":
+      if(component_id === NO_COMPONENT_ID || false) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (first open component not an item)");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (first open component not an item)");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (component " + component_id + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (component " + component_id + ")");
+      }
+      break;
+    case "ungraded-itempool":
+      if(component_id === NO_COMPONENT_ID || false) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (first open component not an item)");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (first open component not an item)");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (component " + component_id + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (component " + component_id + ")");
+      }
+      break;
+    default:
+      $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+      $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      break;
+  }
+}
+
+let orig_toggleComponent = window.toggleComponent;
+window.toggleComponent = function(component_id, saveChanges) {
+  let ret = orig_toggleComponent(me);
+  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  return ret;
+}
 
 function checkNotebookScroll() {
   if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
@@ -508,20 +561,31 @@ function gotoMainPage() {
 
 function gotoPrevStudent(to_ungraded = false) {
 
-  let selector;
-  let window_location;
+  let selector = "#next-student";
+  let window_location = $(selector)[0].dataset.href;
 
-  if(to_ungraded === true) {
-    selector = "#prev-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let switchType = localStorage.getItem("general-setting-arrow-function") || "default";
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-
-  }
-  else {
-    selector = "#prev-student";
-    window_location = $(selector)[0].dataset.href
+  switch(switchType) {
+    case "ungraded":
+      window_location += "&to_ungraded=true";
+      window_location += "&to_same_itempool=false";
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&to_ungraded=false";
+      window_location += "to_same_itempool=true";
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "ungraded_itempool":
+      window_location += "&to_ungraded=true";
+      window_location += "&to_same_itempool=true";
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    default:
+      window_location += "&to_ungraded=false";
+      window_location += "&to_same_itempool=false";
+      break;
   }
 
   if (getGradeableId() !== '') {
@@ -540,19 +604,31 @@ function gotoPrevStudent(to_ungraded = false) {
 
 function gotoNextStudent(to_ungraded = false) {
 
-  let selector;
-  let window_location;
+  let selector = "#next-student";
+  let window_location = $(selector)[0].dataset.href;
 
-  if(to_ungraded === true) {
-    selector = "#next-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let switchType = localStorage.getItem("general-setting-arrow-function") || "default";
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-  }
-  else {
-    selector = "#next-student";
-    window_location = $(selector)[0].dataset.href
+  switch(switchType) {
+    case "ungraded":
+      window_location += "&to_ungraded=true";
+      window_location += "&to_same_itempool=false";
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&to_ungraded=false";
+      window_location += "to_same_itempool=true";
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "ungraded_itempool":
+      window_location += "&to_ungraded=true";
+      window_location += "&to_same_itempool=true";
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    default:
+      window_location += "&to_ungraded=false";
+      window_location += "&to_same_itempool=false";
+      break;
   }
 
   if (getGradeableId() !== '') {

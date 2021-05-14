@@ -1087,12 +1087,8 @@ HTML;
         $studentBaseUrl = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']);
 
         // Setup urls for prev and next students
-        $prev_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'false' ]);
-        $next_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'false' ]);
-
-        // Setup urls for prev and next ungraded students
-        $prev_ungraded_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'true']);
-        $next_ungraded_student_url =  $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'true']);
+        $prev_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev']);
+        $next_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next']);
 
         $i_am_a_peer = false;
         if ($peer && $this->core->getUser()->getGroup() == 4) {
@@ -1105,9 +1101,7 @@ HTML;
             "i_am_a_peer" => $i_am_a_peer,
             "limited_access_blind" => $limited_access_blind,
             "prev_student_url" => $prev_student_url,
-            "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
-            "next_ungraded_student_url" => $next_ungraded_student_url,
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4,
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),

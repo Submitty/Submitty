@@ -54,7 +54,7 @@ class GradingOrder extends AbstractModel {
      */
     protected $not_fully_graded;
 
-        /**
+    /**
      * @var bool to_ungraded
      */
     protected $to_ungraded;
@@ -204,24 +204,21 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @return Submitter Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $component_itempool = null) {
+    public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = null) {
         $this->to_ungraded = $to_ungraded;
 
         $this->skip_component_itempool = true;
-        if($to_ungraded) {
+        if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
-            if($component_itempool !== null && $this->getItempoolIndicesForSubmitter($submitter, $component_id, $component_itempool)) {
-                $this->skip_component_itempool = false;
-            }
+        }
+
+        if ($to_same_itempool && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+            $this->skip_component_itempool = false;
         }
 
         return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
             return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
              && ($this->skip_component_itempool || $this->gradeable->getAutogradingConfig()->getUserSpecificNotebook($sub->getId())->getHashes()[$this->itempool_hash_index] % $this->itempool_size === $this->itempool_from_pool_index);
-        });
-
-        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
-            return $this->getHasSubmission($sub);
         });
     }
 
@@ -231,15 +228,16 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @return Submitter Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $component_itempool = null) {
+    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = false) {
         $this->to_ungraded = $to_ungraded;
 
         $this->skip_component_itempool = true;
-        if($to_ungraded) {
+        if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
-            if($component_itempool !== null && $this->getItempoolIndicesForSubmitter($submitter, $component_id, $component_itempool)) {
-                $this->skip_component_itempool = false;
-            }
+        }
+
+        if ($to_same_itempool && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+            $this->skip_component_itempool = false;
         }
 
         return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
@@ -478,7 +476,7 @@ class GradingOrder extends AbstractModel {
         return array_merge($gg_idx, $unsorted);
     }
 
-    public function getItempoolIndicesForSubmitter(Submitter $submitter, int $component_id, string $item_name) : bool {
+    public function getItempoolIndicesForSubmitter(Submitter $submitter, int $component_id): bool {
         $user_item_map = [];
         $que_idx = 0;
 
@@ -495,7 +493,7 @@ class GradingOrder extends AbstractModel {
                 $selected_idx = $item["user_item_map"][$submitter->getId()] ?? null;
                 if (is_null($selected_idx)) {
                     $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
-                    if ($item_label === $item['item_label'] && $item_name === $item['from_pool'][$selected_idx]) { //not unique, also item_label?
+                    if ($item_label === $item['item_label']) { //not unique, also item_label?
                         $this->itempool_size = count($item['from_pool']);
                         $this->itempool_hash_index = $que_idx;
                         $this->itempool_from_pool_index = $selected_idx;

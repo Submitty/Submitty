@@ -13,6 +13,21 @@ var remapping = {
 };
 
 let settingsData = [{
+        id: "general-setting-list",
+        name: "General",
+        values: [{
+                    name: "Prev/Next student arrow functionality",
+                    storageCode: "general-setting-arrow-function",
+                    options: {
+                        "Prev/Next Student": "default",
+                        "Prev/Next Ungraded Student": "ungraded",
+                        "Prev/Next Itempool Student": "itempool",
+                        "Prev/Next Ungraded Itempool Student": "ungraded-itempool"
+                    }, 
+                    default: "Prev/Next Student"
+                }]
+    },
+    {
         id: "notebook-setting-list",
         name: "Notebook",
         values: [{
