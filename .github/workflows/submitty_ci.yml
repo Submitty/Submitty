@@ -205,7 +205,6 @@ jobs:
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install coverage
-            python3 -m pip install ../python_submitty_utils/
             python3 -m pip install -r requirements.txt
         - name: Run autograder python unit tests
           working-directory: autograder
