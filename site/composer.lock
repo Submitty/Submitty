@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb1b17f5a9bc78182b0a62e897f3164f",
+    "content-hash": "da4bb103a0f34f31831dc40f6205456b",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -176,28 +176,30 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "1.12.1",
+            "version": "1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "b17c5014ef81d212ac539f07a1001832df1b6d3b"
+                "reference": "03cb2123a67d4be806554fe670d0adc298199808"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/b17c5014ef81d212ac539f07a1001832df1b6d3b",
-                "reference": "b17c5014ef81d212ac539f07a1001832df1b6d3b",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/03cb2123a67d4be806554fe670d0adc298199808",
+                "reference": "03cb2123a67d4be806554fe670d0adc298199808",
                 "shasum": ""
             },
             "require": {
                 "doctrine/lexer": "1.*",
                 "ext-tokenizer": "*",
-                "php": "^7.1 || ^8.0"
+                "php": "^7.1 || ^8.0",
+                "psr/cache": "^1 || ^2 || ^3"
             },
             "require-dev": {
-                "doctrine/cache": "1.*",
+                "doctrine/cache": "^1.11 || ^2.0",
                 "doctrine/coding-standard": "^6.0 || ^8.1",
                 "phpstan/phpstan": "^0.12.20",
-                "phpunit/phpunit": "^7.5 || ^9.1.5"
+                "phpunit/phpunit": "^7.5 || ^9.1.5",
+                "symfony/cache": "^4.4 || ^5.2"
             },
             "type": "library",
             "autoload": {
@@ -238,7 +240,11 @@
                 "docblock",
                 "parser"
             ],
-            "time": "2021-02-21T21:00:45+00:00"
+            "support": {
+                "issues": "https://github.com/doctrine/annotations/issues",
+                "source": "https://github.com/doctrine/annotations/tree/1.13.0"
+            },
+            "time": "2021-04-29T07:39:39+00:00"
         },
         {
             "name": "doctrine/lexer",
@@ -300,6 +306,10 @@
                 "parser",
                 "php"
             ],
+            "support": {
+                "issues": "https://github.com/doctrine/lexer/issues",
+                "source": "https://github.com/doctrine/lexer/tree/1.2.1"
+            },
             "funding": [
                 {
                     "url": "https://www.doctrine-project.org/sponsorship.html",
@@ -776,6 +786,55 @@
                 "polyfill"
             ],
             "time": "2020-10-14T04:23:31+00:00"
+        },
+        {
+            "name": "psr/cache",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/cache.git",
+                "reference": "d11b50ad223250cf17b86e38383413f5a6764bf8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/cache/zipball/d11b50ad223250cf17b86e38383413f5a6764bf8",
+                "reference": "d11b50ad223250cf17b86e38383413f5a6764bf8",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Cache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for caching libraries",
+            "keywords": [
+                "cache",
+                "psr",
+                "psr-6"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/cache/tree/master"
+            },
+            "time": "2016-08-06T20:24:11+00:00"
         },
         {
             "name": "psr/http-message",
@@ -1539,16 +1598,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v4.4.22",
+            "version": "v4.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "f6d8318c14e4be81525ae47b30e618f0bed4c7b3"
+                "reference": "be9e601f17fc684ddfd6c675fdfcd04bb51fa928"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/f6d8318c14e4be81525ae47b30e618f0bed4c7b3",
-                "reference": "f6d8318c14e4be81525ae47b30e618f0bed4c7b3",
+                "url": "https://api.github.com/repos/symfony/config/zipball/be9e601f17fc684ddfd6c675fdfcd04bb51fa928",
+                "reference": "be9e601f17fc684ddfd6c675fdfcd04bb51fa928",
                 "shasum": ""
             },
             "require": {
@@ -1595,7 +1654,7 @@
             "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/config/tree/v4.4.22"
+                "source": "https://github.com/symfony/config/tree/v4.4.23"
             },
             "funding": [
                 {
@@ -1611,7 +1670,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-07T15:47:03+00:00"
+            "time": "2021-05-07T13:37:51+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -1677,16 +1736,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.4.22",
+            "version": "v4.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "1a6f87ef99d05b1bf5c865b4ef7992263e1cb081"
+                "reference": "2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/1a6f87ef99d05b1bf5c865b4ef7992263e1cb081",
-                "reference": "1a6f87ef99d05b1bf5c865b4ef7992263e1cb081",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5",
+                "reference": "2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5",
                 "shasum": ""
             },
             "require": {
@@ -1725,7 +1784,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v4.4.22"
+                "source": "https://github.com/symfony/http-foundation/tree/v4.4.23"
             },
             "funding": [
                 {
@@ -1741,7 +1800,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-30T12:05:50+00:00"
+            "time": "2021-05-05T07:40:41+00:00"
         },
         {
             "name": "symfony/mime",
@@ -3236,16 +3295,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.86",
+            "version": "0.12.87",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "a84fdc53ecca7643dbc89ef8880d8b393a6c155a"
+                "reference": "d464e00776afb711f419faffa96826dc02e4d145"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a84fdc53ecca7643dbc89ef8880d8b393a6c155a",
-                "reference": "a84fdc53ecca7643dbc89ef8880d8b393a6c155a",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d464e00776afb711f419faffa96826dc02e4d145",
+                "reference": "d464e00776afb711f419faffa96826dc02e4d145",
                 "shasum": ""
             },
             "require": {
@@ -3276,7 +3335,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.86"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.87"
             },
             "funding": [
                 {
@@ -3292,7 +3351,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-08T11:29:01+00:00"
+            "time": "2021-05-12T15:17:52+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",

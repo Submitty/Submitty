@@ -45,6 +45,9 @@ async function runSqlQuery() {
 
         const header = document.createElement('thead');
         const header_row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.innerText = '#';
+        header_row.appendChild(cell);
         Object.keys(data[0]).forEach((col) => {
             const cell = document.createElement('td');
             cell.innerText = col;
@@ -53,8 +56,11 @@ async function runSqlQuery() {
         header.appendChild(header_row);
         table.appendChild(header);
         const body = document.createElement('tbody');
-        data.forEach((row) => {
+        data.forEach((row, idx) => {
             const bodyRow = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.textContent = idx+1;
+            bodyRow.appendChild(cell);
             Object.values(row).forEach((val) => {
                 const cell = document.createElement('td');
                 cell.textContent = val;

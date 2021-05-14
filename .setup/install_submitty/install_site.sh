@@ -151,7 +151,7 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
         chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
     fi
 
-    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error"
+    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error --no-save"
 
     NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
     VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
