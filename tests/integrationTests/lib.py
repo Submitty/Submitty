@@ -25,8 +25,8 @@ BUILD_MAIN_CONFIGUE_PATH = os.path.join(
 
 # Verify that this has been installed by just checking that this file is located in
 # a directory next to the config directory which has submitty.json in it
-# if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
-#     raise SystemExit('You must install the test suite before being able to run it.')
+if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
+    raise SystemExit('You must install the test suite before being able to run it.')
 
 SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
 GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
@@ -54,7 +54,7 @@ def print(*args, **kwargs):
 
 class TestcaseFile:
     def __init__(self):
-        self.prebuild = lambda: None
+        self.prebuild = type(None)
         self.testcases = []
         self.testcases_names = []
 
