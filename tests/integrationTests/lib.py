@@ -7,10 +7,10 @@ import subprocess
 import traceback
 import sys
 import shutil
-from submitty_utils import submitty_schema_validator
 from functools import wraps
+from multiprocessing import Pool, cpu_count
 
-from multiprocessing import Pool
+from submitty_utils import submitty_schema_validator
 
 # global variable available to be used by the test suite modules
 # this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
@@ -100,7 +100,7 @@ def run_tests(names):
         case = to_run[key]
         arguments.append((name, case))
     # Concurrency note:
-    with Pool(5) as p:
+    with Pool(cpu_count()) as p:
         test_result = p.starmap(__run_single_test_module, arguments)
     if False in test_result:
         with bold + red:
