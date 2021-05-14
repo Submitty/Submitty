@@ -405,7 +405,6 @@ function adjustGradingPanelHeader () {
     navBarBox.removeClass('mobile-view');
   }
   // From the complete content remove the height occupied by navigation-bar and panel-header element
-  // 6 is used for adding some space in the bottom
   document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight()) + "px)";
 }
 
