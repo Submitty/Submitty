@@ -107,7 +107,7 @@ class LateController extends AbstractController {
                 $user_timestamp = DateUtils::parseDateTime($user->getSinceTimestamp(), $this->core->getUser()->getUsableTimeZone());
                 if ($user->getId() == $_POST['user_id'] && $user_timestamp == $date_time) {
                     $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days'] + $user->getAllowedLateDays());
-                    $exists = True;
+                    $exists = true;
                     break;
                 }
             }
