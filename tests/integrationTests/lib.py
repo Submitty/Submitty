@@ -110,6 +110,14 @@ def run_tests(names):
         with bold + green:
             print("All " + str(len(names)) + " modules passed")
 
+# Concurrency note:
+# Currently all tests are run in parallel per-number of threads on a module level.
+# Different modules are run in parallel on different worker threads, but all the
+# test cases within the same module is run on the same thread sequentially.
+# To be able to work across process boundary, there must be no lambda expression
+# within the TestcaseFile class, and all wrappers must be annotated with
+# functools.wraps.
+
 # Executes a single test module, this method is executed across process boundary,
 # Not meant to be called externally.
 def __run_single_test_module(name, case):
