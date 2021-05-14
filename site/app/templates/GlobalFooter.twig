@@ -50,6 +50,9 @@
         Course Queries: <br /> {{ self.query_list(course_queries) }}
     </div>
 {% endif %}
+    {% for url in module_js %}
+        <script type="module" src="{{ url }}"></script>
+    {% endfor %}
 </body>
 </html>
 

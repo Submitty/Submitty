@@ -34,5 +34,32 @@
         "semi": ["error", "always"],
         "semi-style": ["error", "last"],
         "template-curly-spacing": ["error", "never"]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["./public/mjs/*.js"],
+            "parserOptions": {
+                "sourceType": "module"
+            }
+        },
+        {
+            "files": ["./tests/mjs/*.js"],
+            "plugins": ["jest"],
+            "parserOptions": {
+                "sourceType": "module"
+            },
+            "env": {
+                "jest/globals": true
+            },
+            "globals": {
+                "global": "readonly"
+            }
+        },
+        {
+            "files": ["jest.config.js"],
+            "env": {
+                "node": true
+            }
+        }
+    ]
 }
