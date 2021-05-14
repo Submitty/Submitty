@@ -195,11 +195,12 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @param {boolean} componentVersionConflict
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, student_grader) {
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student) {
+    
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
-        if (student_grader){
+        if (is_student){
             component.ta_comment = "";
         } else {
             component.student_comment = "";
@@ -367,4 +368,12 @@ function renderConflictMarks(conflict_marks) {
             decimal_precision: DECIMAL_PRECISION
         }));
     })
+}
+
+/**
+ * 
+ * @return {boolean}
+ */
+function isStudentGrader(){
+    return $("#student-grader").attr("is-student-grader"); 
 }
