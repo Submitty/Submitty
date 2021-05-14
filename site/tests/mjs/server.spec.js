@@ -1,4 +1,5 @@
 import { buildCourseUrl, getCsrfToken } from '../../public/mjs/server';
+import { describe, test } from '@jest/globals';
 
 describe('buildCourseUrl', () => {
     document.body.dataset.courseUrl = 'http://localhost/s20/sample';

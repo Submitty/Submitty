@@ -56,6 +56,11 @@ jobs:
                       ${{ runner.os }}-cache-node-modules-
             - run: npm install
             - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
 
 
     php-lint-static:
@@ -163,9 +168,9 @@ jobs:
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install "SQLAlchemy<1.4.0" jsonschema jsonref pytz tzlocal
             python3 -m pip install coverage
-            python3 -m pip install paramiko 
-            python3 -m pip install docker 
-            python3 -m pip install python-dateutil 
+            python3 -m pip install paramiko
+            python3 -m pip install docker
+            python3 -m pip install python-dateutil
         - name: Run migrator python unit tests
           working-directory: migration
           run : |
@@ -206,7 +211,7 @@ jobs:
         services:
           postgres:
             image: postgres
-            env: 
+            env:
               POSTGRES_PASSWORD: submitty_dbuser
               POSTGRES_USER: postgres
             options: >-
@@ -249,7 +254,7 @@ jobs:
                 ${{ runner.os }}-${{ github.job }}-pip-
           - name: Install python dependencies
             run: |
-              python3 -m pip install --upgrade pip setuptools wheel  
+              python3 -m pip install --upgrade pip setuptools wheel
               sudo python3 -m pip install --upgrade pip setuptools wheel
               pip3 -V
               sudo pip3 -V
@@ -359,7 +364,7 @@ jobs:
 
           - name: Set up test suite
             run: |
-              cd $SUBMITTY_REPOSITORY 
+              cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
           - name: Set up apache
