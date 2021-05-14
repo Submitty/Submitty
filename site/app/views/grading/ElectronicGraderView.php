@@ -1443,7 +1443,7 @@ HTML;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
-            if ($value->isPeer() || !$is_student){
+            if ($value->isPeer() || !$is_student) {
                 $id = $value->getId();
                 $solution_components[] = [
                     'id' => $id,
