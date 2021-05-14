@@ -4,6 +4,28 @@
     <div>
       Use this toolbox to run a SELECT query. You cannot run any other type of query, and may only run a single query at a time.
       <br /><br />
+
+        <div>
+            <button id="sqlDatabaseSchema" class="btn btn-primary">Database Schema Documentation</button>
+            <div id="sqlDatabaseSchemaContent" hidden>
+                <p>Click on each table to see columns</p>
+                <ul style="margin-left: 30px;">
+                    {% for name, table in tables %}
+                        <li><a class="sqlDatabaseTable">{{ name }}</a>
+                            <div class="sqlDatabaseColumns" hidden>
+                                <ul style="margin-left: 15px">
+                                    {% for column in table %}
+                                        <li>{{ column }}</li>
+                                    {% endfor %}
+                                </ul>
+
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <br>
       <textarea id="toolbox-textarea" name="sql" ></textarea>
       <br />
       <button class="btn btn-primary" onclick="runSqlQuery()">Run Query</button>

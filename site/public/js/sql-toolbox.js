@@ -73,3 +73,13 @@ async function runSqlQuery() {
         console.error(exc);
     }
 }
+
+$(window).on('load', () => {
+    $('#sqlDatabaseSchema').on('click', () => {
+        $('#sqlDatabaseSchemaContent').toggle();
+    });
+    $('.sqlDatabaseTable').on('click', (e) => {
+        $(e.target).next('.sqlDatabaseColumns').toggle();
+    });
+});
+
