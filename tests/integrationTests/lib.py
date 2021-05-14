@@ -52,8 +52,16 @@ def print(*args, **kwargs):
     sys.stdout.write(message)
 
 
+# Concurrency note:
+# To be able to work across process boundary, there must be no lambda expression
+# within the TestcaseFile class, and all wrappers must be annotated with
+# functools.wraps. This is a must for python to transfer the object to the worker
+# process, for more please see python pickling.
+# Note: there could still be lambdas and non-top level functions in client test
+# case code, its just the TestcaseFile must be pickle-able
 class TestcaseFile:
     def __init__(self):
+        self.wrapper = type(None)  # Equivalent to lambda: None, but pickle-able
         self.prebuild = type(None)
         self.testcases = []
         self.testcases_names = []
@@ -95,13 +103,17 @@ white = ASCIIEscapeManager([37])
 ###################################################################################
 # Run the given list of test case names in parallel using multiprocessing
 def run_tests(names):
-    arguments = []  # Arguments for run_single_test(list<str>, TestCaseFile)
+    arguments = []  # Arguments for run_single_test(list<str>, TestcaseFile)
     for name in sorted(names):
         name = name.split(".")
         key = name[0]
         case = to_run[key]
         arguments.append((name, case))
     # Concurrency note:
+    # Its best to use something close to cpu_count() here, as single-thread
+    # performance is important for some modules that are compute-intensive,
+    # they might timeout as a result of lack of single thread performance.
+    # This can happen with python_simple_homework.infinite_loop_time_cutoff
     with Pool(cpu_count()) as p:
         test_result = p.starmap(__run_single_test_module, arguments)
     if False in test_result:
@@ -117,17 +129,13 @@ def run_tests(names):
 # Currently all tests are run in parallel per-number of threads on a module level.
 # Different modules are run in parallel on different worker threads, but all the
 # test cases within the same module is run on the same thread sequentially.
-# To be able to work across process boundary, there must be no lambda expression
-# within the TestcaseFile class, and all wrappers must be annotated with
-# functools.wraps. This is a must for python to transfer the object to the worker
-# process, for more please see python pickling.
 
 # Executes a single test module, this method is executed across process boundary,
 # Not meant to be called externally.
 def __run_single_test_module(name, case):
     key = name[0]
     with bold:
-        print(f"--- BEGIN TEST MODULE {key.upper()} ---")
+        print(f"--- BEGIN TEST MODULE {key.upper()} AT PROCESS {os.getpid()} ---")
     module_success = __compile_test_module(case)
     if module_success:
         testcases = __collect_test_cases(case, name)
@@ -144,7 +152,7 @@ def __run_single_test_module(name, case):
                 print(f"{succeed_count}/{len(testcases)} testcases passed")
                 module_success = False
     with bold:
-        print("--- END TEST MODULE " + key.upper() + " ---")
+        print(f"--- END TEST MODULE {key.upper()} ---")
     print()
     return module_success
 
@@ -172,6 +180,12 @@ def __collect_test_cases(case, name):
     return testcases
 
 
+# Concurrency note:
+# For future integration test speed-ups, concurrency level can be
+# increased if this __execute_test_case is executed in parallel.
+# However test code will lose its ability to share states within a
+# test module across test cases as they are run in executed in
+# different processes.
 def __execute_test_case(index, test_case):
     try:
         test_case()
@@ -281,7 +295,7 @@ class TestcaseWrapper:
             return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
                                           cwd=os.path.join(self.testcase_path, "build"), stdout=cmake_output, stderr=cmake_output)
             if return_code != 0:
-                raise RuntimeError("Build (cmake) exited with exit code " + str(return_code))
+                raise RuntimeError(f"Build (cmake) exited with exit code {return_code}")
         with open(os.path.join(self.testcase_path, "log", "make_output.txt"), "w") as make_output:
             return_code = subprocess.call(["make"],
                                           cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
@@ -359,7 +373,7 @@ class TestcaseWrapper:
                     cwd=testcase_folder, stdout=log, stderr=log)
 
                 if return_code != 0:
-                    raise RuntimeError("Compile exited with exit code " + str(return_code))
+                    raise RuntimeError(f"Compile exited with exit code {return_code}")
 
         compiled_files_directory = os.path.join(self.testcase_path, 'compiled_files')
 
@@ -435,7 +449,7 @@ class TestcaseWrapper:
                     ],
                     cwd=testcase_folder, stdout=log, stderr=log)
                 if return_code != 0:
-                    raise RuntimeError("run.out exited with exit code " + str(return_code))
+                    raise RuntimeError(f"run.out exited with exit code {return_code}")
 
             # Copy the results to the data folder.
             copy_contents_into(work_folder, data_folder)
@@ -456,7 +470,7 @@ class TestcaseWrapper:
                                            "testassignment", user, subnum, subtime],  # "testuser", "1", "0"],
                                           cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
             if return_code != 0:
-                raise RuntimeError("Validator exited with exit code " + str(return_code))
+                raise RuntimeError(f"Validator exited with exit code {return_code}")
 
     ###################################################################################
     # Run the UNIX diff command given a filename. The files are compared between the
@@ -477,9 +491,9 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if not os.path.isfile(filename1):
-            raise RuntimeError("File " + filename1 + " does not exist")
+            raise RuntimeError(f"File {filename1} does not exist")
         if not os.path.isfile(filename2):
-            raise RuntimeError("File " + filename2 + " does not exist")
+            raise RuntimeError(f"File {filename2} does not exist")
 
         if arg == "":
             process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -487,12 +501,13 @@ class TestcaseWrapper:
             # Ignore changes in white space
             process = subprocess.Popen(["diff", arg, filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         else:
-            raise RuntimeError("ARGUMENT " + arg + " TO DIFF NOT TESTED")
+            raise RuntimeError(f"ARGUMENT {arg} TO DIFF NOT TESTED")
         out, _ = process.communicate()
         out = out.decode('utf-8')
         if process.returncode == 1:
-            raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
-                               " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
+            raise RuntimeError(f"Difference between {filename1} and {filename2} "
+                               f"exited with exit code {process.returncode}\n\n"
+                               f"Diff:\n{out}")
 
     # Helpful for debugging make errors on CI
     def debug_print(self, f):
@@ -519,9 +534,9 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if not os.path.isfile(filename1):
-            raise RuntimeError("File " + filename1 + " does not exist")
+            raise RuntimeError(f"File {filename1} does not exist")
         if not os.path.isfile(filename2):
-            raise RuntimeError("File " + filename2 + " does not exist")
+            raise RuntimeError(f"File {filename2} does not exist")
 
         with open(filename1) as file1:
             contents1 = file1.readlines()
@@ -533,7 +548,7 @@ class TestcaseWrapper:
         del contents2[num_lines_to_compare:]
 
         if contents1 != contents2:
-            raise RuntimeError("Files " + filename1 + " and " + filename2 + " are different within the first " + num_lines_to_compare + " lines.")
+            raise RuntimeError(f"Files {filename1} and {filename2} are different within the first {num_lines_to_compare} lines.")
 
     ###################################################################################
     def empty_file(self, f):
@@ -542,9 +557,9 @@ class TestcaseWrapper:
         f = os.path.join("data", f)
         filename = os.path.join(self.testcase_path, f)
         if not os.path.isfile(filename):
-            raise RuntimeError("File " + filename + " should exist")
+            raise RuntimeError(f"File {filename} should exist")
         if os.stat(filename).st_size != 0:
-            raise RuntimeError("File " + filename + " should be empty")
+            raise RuntimeError(f"File {filename} should be empty")
 
     ###################################################################################
     # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
@@ -575,9 +590,9 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if not os.path.isfile(filename1):
-            raise RuntimeError("File " + filename1 + " does not exist")
+            raise RuntimeError(f"File {filename1} does not exist")
         if not os.path.isfile(filename2):
-            raise RuntimeError("File " + filename2 + " does not exist")
+            raise RuntimeError(f"File {filename2} does not exist")
 
         with open(filename1) as file1:
             contents1 = json.load(file1)
@@ -595,7 +610,7 @@ class TestcaseWrapper:
                 json.dump(contents2, outfile, sort_keys=True, indent=4, separators=(',', ': '))
             print("\ndiff json_ordered_1.json json_ordered_2.json\n")
             process = subprocess.Popen(["diff", 'json_ordered_1.json', 'json_ordered_2.json'])
-            raise RuntimeError("JSON files are different:  " + filename1 + " " + filename2)
+            raise RuntimeError(f"JSON files are different:  {filename1} {filename2}")
 
     def empty_json_diff(self, f):
         f = os.path.join("data", f)
@@ -607,7 +622,7 @@ class TestcaseWrapper:
     # remove the running time, and many of the system stack trace lines
     def simplify_junit_output(self, filename):
         if not os.path.isfile(filename):
-            raise RuntimeError("File " + filename + " does not exist")
+            raise RuntimeError(f"File {filename} does not exist")
         simplified = []
         with open(filename, 'r') as file:
             for line in file:
@@ -625,7 +640,7 @@ class TestcaseWrapper:
                     continue
                 if '... ' in line and ' more' in line:
                     continue
-                # sys.stdout.write("LINE: " + line)
+                # sys.stdout.write(f"LINE: {line}")
                 simplified.append(line)
         return simplified
 
@@ -643,7 +658,7 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if self.simplify_junit_output(filename1) != self.simplify_junit_output(filename2):
-            raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
+            raise RuntimeError(f"JUNIT OUTPUT files {filename1} and {filename2} are different")
 
     # Validate a configuration against the submitty complete_config_schema.json
     def validate_complete_config(self, config_path):
@@ -654,8 +669,9 @@ class TestcaseWrapper:
             s.print_human_readable_error()
             raise
 
+        ###################################################################################
 
-###################################################################################
+
 # Decorators
 ###################################################################################
 def prebuild(func):
@@ -663,11 +679,13 @@ def prebuild(func):
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
     tw = TestcaseWrapper(path)
-    @wraps(func)
+
+    @wraps(func)  # Allows pickling for this lambda
     def wrapper():
-        print("* Starting prebuild for " + modname + "... ", end="")
+        print(f"* Starting prebuild for {modname}... ", end="")
         func(tw)
         print("Done")
+
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].prebuild = wrapper
@@ -687,9 +705,10 @@ def testcase(func):
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
     tw = TestcaseWrapper(path)
-    @wraps(func)
+
+    @wraps(func)  # Allows pickling for this lambda
     def wrapper():
-        print("* Starting testcase " + modname + "." + func.__name__ + "... ", end="")
+        print("* Starting testcase {modname}.{func.__name__}... ", end="")
         try:
             func(tw)
             with bold + green:
@@ -699,6 +718,7 @@ def testcase(func):
                 print("FAILED")
             # blank raise raises the last exception as is
             raise
+
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].testcases.append(wrapper)
