@@ -546,10 +546,11 @@ progress::-webkit-progress-value {
     width: 400px;
     height: 25px;
     top: 2px;
-    margin: auto;
+    left: 120px;
     padding-top:3px;
     padding-bottom:3px;
     text-align: center;
+    vertical-align: middle;
     line-height: 25px;
     font-weight:    bold;
     background-color: var(--badge-backgroud-red);
