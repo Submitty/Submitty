@@ -322,7 +322,7 @@ jobs:
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
 
-          - name: Install third party dependencies
+          - name: Setup auto grader dependencies & directory
             run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
