@@ -225,6 +225,18 @@ jobs:
         - name: Check dependency
           run: |
             python3 .setup/testing/check_dependency.py autograder/requirements.txt migration/requirements.txt
+        - name: Get message
+          if: ${{ failure() }}
+          run: |
+            echo message=$(python3 .setup/testing/check_dependency.py autograder/requirements.txt migration/requirements.txt) >> $GITHUB_ENV
+            echo branch=${GITHUB_REF#refs/heads/} >> $GITHUB_ENV
+        - uses: JasonEtco/create-an-issue@v2
+          if: ${{ failure() }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            filename: .github/ISSUE_TEMPLATE/dependency_inconsistentcy.md
+
 
     e2e:
         needs:
