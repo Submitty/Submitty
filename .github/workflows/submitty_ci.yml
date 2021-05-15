@@ -230,12 +230,16 @@ jobs:
           run: |
             echo message=$(python3 .setup/testing/check_dependency.py autograder/requirements.txt migration/requirements.txt) >> $GITHUB_ENV
             echo branch=${GITHUB_REF#refs/heads/} >> $GITHUB_ENV
+            echo date_time=$(date "+%Y-%m-%d-%H:%M") >> $GITHUB_ENV
         - uses: JasonEtco/create-an-issue@v2
           if: ${{ failure() }}
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            branch: ${{ env.branch }}
+            date_time: ${{ env.date_time }}
           with:
             filename: .github/ISSUE_TEMPLATE/dependency_inconsistentcy.md
+            update_existing: true
 
 
     e2e:
