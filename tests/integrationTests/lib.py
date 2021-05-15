@@ -238,7 +238,7 @@ def move_only_files(source, target):
     source_files = os.listdir(source)
     for file_name in source_files:
         full_file_name = os.path.join(source, file_name)
-        if (os.path.isfile(full_file_name)):
+        if os.path.isfile(full_file_name):
             shutil.move(full_file_name, target)
 
 
@@ -708,7 +708,7 @@ def testcase(func):
 
     @wraps(func)  # Allows pickling for this lambda
     def wrapper():
-        print("* Starting testcase {modname}.{func.__name__}... ", end="")
+        print(f"* Starting testcase {modname}.{func.__name__}... ", end="")
         try:
             func(tw)
             with bold + green:
