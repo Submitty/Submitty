@@ -163,10 +163,40 @@ class PollController extends AbstractController {
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
-            $file = $_FILES["image_file"];
-            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
-            move_uploaded_file($file["tmp_name"], $file_path);
-            $this->core->getQueries()->setPollImage($poll_id, $file_path);
+            //$file = $_FILES["image_file"];
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            $errors = array();
+            $maxsize = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $acceptable = array(
+                'image/jpeg',
+                'image/jpg',
+                'image/gif',
+                'image/png'
+            );
+            if(($_FILES['image_file']['size'] >= $maxsize) || ($_FILES["image_file"]["size"] == 0)) {
+                $this->core->addErrorMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb.");
+            }
+            if((!in_array($_FILES['image_file']['type'], $acceptable)) && (!empty($_FILES["image_file"]["type"]))) {
+                $this->core->addErrorMessage("Upload failed: Invalid file type. Only JPG, GIF and PNG types are accepted.");
+            }
+            if(count($errors) === 0) {
+                $file = $_FILES["image_file"];
+                $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
+                move_uploaded_file($file["tmp_name"], $file_path);
+                $this->core->getQueries()->setPollImage($poll_id, $file_path);
+            } else {
+                foreach($errors as $error) {
+                    echo '<script>alert("'.$error.'");</script>';
+                }
+                die(); //Ensure no more processing is done
+            }
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+            //$file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
+            //move_uploaded_file($file["tmp_name"], $file_path);
+            //$this->core->getQueries()->setPollImage($poll_id, $file_path);
         }
 
         return MultiResponse::RedirectOnlyResponse(
@@ -345,13 +375,41 @@ class PollController extends AbstractController {
         }
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
+            
             $file = $_FILES["image_file"];
             $current_file_path = $poll->getImagePath();
             if ($current_file_path !== null) {
                 unlink($current_file_path);
             }
-            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
-            move_uploaded_file($file["tmp_name"], $file_path);
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            $errors = array();
+            $maxsize = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $acceptable = array(
+                'image/jpeg',
+                'image/jpg',
+                'image/gif',
+                'image/png'
+            );
+            if(($_FILES['image_file']['size'] >= $maxsize) || ($_FILES["image_file"]["size"] == 0)) {
+                $this->core->addErrorMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb.");
+            }
+            if((!in_array($_FILES['image_file']['type'], $acceptable)) && (!empty($_FILES["image_file"]["type"]))) {
+                $this->core->addErrorMessage("Upload failed: Invalid file type. Only JPG, GIF and PNG types are accepted.");
+            }
+            if(count($errors) === 0) {
+                $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
+                move_uploaded_file($file["tmp_name"], $file_path);
+            } else {
+                foreach($errors as $error) {
+                    echo '<script>alert("'.$error.'");</script>';
+                }
+                die(); //Ensure no more processing is done
+            }
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            //$file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
+            //move_uploaded_file($file["tmp_name"], $file_path);
         }
         elseif (isset($_POST['keep_image'])) {
             $file_path = $poll->getImagePath();
