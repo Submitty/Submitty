@@ -217,6 +217,15 @@ jobs:
             files: autograder/coverage.xml
             flags: autograder
 
+    python-dependency:
+      runs-on: ubuntu-18.04
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+        - name: Check dependency
+          run: |
+            python3 .setup/testing/check_dependency.py autograder/requirements.txt migration/requirements.txt
+
     e2e:
         needs:
           - eslint
