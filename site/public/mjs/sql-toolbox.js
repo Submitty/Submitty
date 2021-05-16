@@ -71,6 +71,7 @@ export async function runSqlQuery() {
     }
     catch (exc) {
         console.error(exc);
+        alert(exc.toString());
     }
 }
 
