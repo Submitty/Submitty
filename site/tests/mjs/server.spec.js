@@ -4,7 +4,11 @@ import { describe, test } from '@jest/globals';
 describe('buildCourseUrl', () => {
     document.body.dataset.courseUrl = 'http://localhost/s20/sample';
 
-    test('build url with no parts', () => {
+    test('build url with no parameter', () => {
+        expect(buildCourseUrl()).toEqual('http://localhost/s20/sample');
+    });
+
+    test('build url with empty array parameter', () => {
         expect(buildCourseUrl()).toEqual('http://localhost/s20/sample');
     });
 
