@@ -80,7 +80,6 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         // Disable text selection when dragging
         document.body.style.userSelect = 'none';
         document.body.style.pointerEvents = 'none';
-        // Add blurry effect on drag-bar
 
         // Callback function
         if (typeof callback === 'function') {
