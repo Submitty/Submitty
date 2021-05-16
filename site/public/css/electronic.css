@@ -475,7 +475,7 @@ progress::-webkit-progress-value {
     transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after{
+.two-panel-drag-bar:hover:after {
   width: 9px;
 }
 
