@@ -79,4 +79,5 @@ export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
 }
 
+/* istanbul ignore next */
 document.addEventListener('DOMContentLoaded', () => init());

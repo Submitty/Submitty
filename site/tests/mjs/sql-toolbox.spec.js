@@ -73,6 +73,7 @@ test('failure', async () => {
 
 test('thrown exception is caught and logged to console.error', async () => {
     console.error = jest.fn();
+    jest.spyOn(window, 'alert').mockImplementation(() => {});
 
     mockFetch({
         status: 'success',
@@ -80,9 +81,12 @@ test('thrown exception is caught and logged to console.error', async () => {
 
     await runSqlQuery();
 
+    const exceptionString = "TypeError: Cannot read property 'length' of undefined";
+
     expect(console.error.mock.calls.length).toEqual(1);
-    expect(console.error.mock.calls[0][0].toString()).toEqual("TypeError: Cannot read property 'length' of undefined");
+    expect(console.error.mock.calls[0][0].toString()).toEqual(exceptionString);
     expect(document.getElementById('query-results').innerHTML).toEqual('');
+    expect(window.alert).toBeCalledWith(exceptionString);
 });
 
 test('init binds submit button', (done) => {
