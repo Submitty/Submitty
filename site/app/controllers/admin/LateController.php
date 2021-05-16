@@ -98,21 +98,12 @@ class LateController extends AbstractController {
 
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
-            // This is by all means an ugly hack but this same process is completed elsewhere while loading this page
-            // and there is no way to get a specific user by ID and get the number of late days at the same time.
-            // Ultimately, the performance difference is rather negligible since only instructors load this page.
-            $users = $this->core->getQueries()->getUsersWithLateDays();
-            $exists = false;
-            foreach ($users as $user) {
-                $user_timestamp = DateUtils::parseDateTime($user->getSinceTimestamp(), $this->core->getUser()->getUsableTimeZone());
-                if ($user->getId() == $_POST['user_id'] && $user_timestamp == $date_time) {
-                    $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days'] + $user->getAllowedLateDays());
-                    $exists = true;
-                    break;
-                }
+
+            $existing_user = $this->core->getQueries()->getLateDaysForUserOnTimestamp($_POST['user_id'], $date_time);
+            if (isset($existing_user)) {
+                $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days'] + $existing_user->getAllowedLateDays());
             }
-            // The user doesn't have any late days yet so we just assign them the number of late days.
-            if (!$exists) {
+            else { // The user doesn't have any late days yet so we just assign them the number of late days specified.
                 $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             }
 
