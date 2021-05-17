@@ -1,12 +1,10 @@
-/* global buildCourseUrl, csrfToken */
-/* exported runSqlQuery */
-/* exported downloadSqlResult */
+import { buildCourseUrl, getCsrfToken } from './server.js';
 
-async function runSqlQuery() {
+export async function runSqlQuery() {
     document.getElementById('query-results').style.display = 'block';
 
     const form_data = new FormData();
-    form_data.append('csrf_token', csrfToken);
+    form_data.append('csrf_token', getCsrfToken());
     form_data.append('sql', document.querySelector('[name="sql"]').value);
 
     try {
@@ -25,7 +23,7 @@ async function runSqlQuery() {
         table.innerHTML = '';
 
         if (json.status !== 'success') {
-            error_mesage.innerText = json.message;
+            error_mesage.textContent = json.message;
             error.style.display = 'block';
             return;
         }
@@ -37,7 +35,7 @@ async function runSqlQuery() {
         if (data.length === 0) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.innerText = 'No rows returned';
+            cell.textContent = 'No rows returned';
             row.appendChild(cell);
             table.appendChild(row);
             return;
@@ -46,11 +44,11 @@ async function runSqlQuery() {
         const header = document.createElement('thead');
         const header_row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.innerText = '#';
+        cell.textContent = '#';
         header_row.appendChild(cell);
         Object.keys(data[0]).forEach((col) => {
             const cell = document.createElement('td');
-            cell.innerText = col;
+            cell.textContent = col;
             header_row.appendChild(cell);
         });
         header.appendChild(header_row);
@@ -72,6 +70,7 @@ async function runSqlQuery() {
     }
     catch (exc) {
         console.error(exc);
+        alert(exc.toString());
     }
 }
 
@@ -104,3 +103,10 @@ async function downloadSqlResult(){
     temp_element.click();
     document.body.removeChild(temp_element);
 }
+
+export function init() {
+    document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
+}
+
+/* istanbul ignore next */
+document.addEventListener('DOMContentLoaded', () => init());

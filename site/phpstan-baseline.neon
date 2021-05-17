@@ -364,11 +364,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^PHPDoc tag @return with type array is incompatible with native type Ds\\\\Set\\.$#"
-			count: 2
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
 			count: 1
 			path: app/libraries/Output.php

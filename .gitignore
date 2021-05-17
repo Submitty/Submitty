@@ -18,7 +18,9 @@ __pycache__/
 .coverage
 coverage.xml
 
+
 /site/cache/
+/site/coverage/
 /site/vendor/
 /site/node_modules/
 /site/public/vendor/
