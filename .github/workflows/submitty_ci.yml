@@ -12,6 +12,7 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
+  NODE_VERSION: 10
 
 jobs:
     eslint:
@@ -21,9 +22,9 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2.1.2
+            - uses: actions/setup-node@v2
               with:
-                node-version: '10'
+                node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
               uses: actions/cache@v2
               with:
@@ -34,6 +35,32 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
+
+
+    js-unit:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
 
 
     php-lint-static:
@@ -111,9 +138,9 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip
@@ -133,9 +160,9 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
@@ -177,7 +204,7 @@ jobs:
             flags: migrator
 
     integration-testing:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+        needs: [eslint, js-unit, php-lint-static, php-unit, python-lint, python-unit]
         runs-on: ubuntu-18.04
         services:
           postgres:
@@ -307,7 +334,7 @@ jobs:
 
 
     e2e:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+        needs: [eslint, js-unit, php-lint-static, php-unit, python-lint, python-unit]
         runs-on: ubuntu-18.04
         services:
           postgres:
@@ -350,9 +377,9 @@ jobs:
             uses: actions/cache@v2
             with:
               path: path ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
-                ${{ runner.os }}-py-pip
+                ${{ runner.os }}-${{ github.job }}-pip-
           - name: Install python dependencies
             run: |
               python3 -m pip install --upgrade pip setuptools wheel
