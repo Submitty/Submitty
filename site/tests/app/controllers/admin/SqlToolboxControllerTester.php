@@ -41,6 +41,12 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     public function testShowToolbox(): void {
+        $this->setUpDatabase();
+
+        /*$courseDb = $this->core->getCourseDB();
+        $courseDb->expects($this->once())->method('query')->with("SELECT * FROM information_schema.columns WHERE table_schema='public'");
+        $courseDb->expects($this->once())->method('rows')->with()->willReturn();*/
+
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
