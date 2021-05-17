@@ -74,14 +74,14 @@ export async function runSqlQuery() {
     }
 }
 
-export async function downloadSqlResult(){
-    const results = document.getElementById('query-results');
+export function generateCSV(id){
+    const results = document.getElementById(id);
     let csv = '';
     //Add headers to CSV string
     const header = results.children.item(0);
     const row = header.children.item(0);
     for (let i = 1; i < row.children.length; i++){
-        csv += `"${row.children.item(i).textContent}",`;
+        csv += `"${row.children.item(i).textContent.split('"').join('""')}",`;
     }
     csv += '\n';
 
@@ -90,10 +90,15 @@ export async function downloadSqlResult(){
     for (let i = 0; i < data.children.length; i++){
         const row = data.children.item(i);
         for (let j = 1; j < row.children.length; j++){
-            csv += `"${row.children.item(j).textContent.replaceAll('"', '""')}",`;
+            csv += `"${row.children.item(j).textContent.split('"').join('""')}",`;
         }
         csv += '\n';
     }
+    return csv;
+}
+
+export async function downloadSqlResult(id){
+    const csv = generateCSV(id);
     //Encode and download the CSV string
     const address = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
     const filename = 'submitty.csv';
@@ -108,7 +113,7 @@ export async function downloadSqlResult(){
 
 export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
-    document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult());
+    document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult('query-results'));
 }
 
 /* istanbul ignore next */
