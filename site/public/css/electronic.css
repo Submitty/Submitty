@@ -457,7 +457,7 @@ progress::-webkit-progress-value {
     background-color: var(--submitty-logo-blue);
 }
 
-.panel-item-section-drag-bar:hover:after {
+.panel-item-section-drag-bar:hover:after, .panel-item-section-drag-bar:active:after {
   height: 9px;
 }
 
@@ -475,7 +475,7 @@ progress::-webkit-progress-value {
     transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after {
+.two-panel-drag-bar:hover:after, .two-panel-drag-bar:active:after  {
   width: 9px;
 }
 
