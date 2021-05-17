@@ -185,9 +185,7 @@ jobs:
           - php-lint-static
           - php-unit
           - python-lint
-          - python-unit-migration
-          - python-unit-auto-grader
-          - python-unit-submitty-utils
+          - python-unit
         runs-on: ubuntu-18.04
         services:
           postgres:
