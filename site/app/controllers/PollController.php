@@ -163,9 +163,9 @@ class PollController extends AbstractController {
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
-            $maxsize = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
             $acceptable = ['image/jpeg','image/jpg','image/gif','image/png'];
-            if (($_FILES['image_file']['size'] >= $maxsize) || ($_FILES["image_file"]["size"] == 0)) {
+            if (($_FILES['image_file']['size'] >= $max_size) || ($_FILES["image_file"]["size"] == 0)) {
                 $this->core->addErrorMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb.");
             }
             elseif ((!in_array($_FILES['image_file']['type'], $acceptable)) && (!empty($_FILES["image_file"]["type"]))) {
@@ -360,9 +360,9 @@ class PollController extends AbstractController {
             if ($current_file_path !== null) {
                 unlink($current_file_path);
             }
-            $maxsize = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
             $acceptable = ['image/jpeg','image/jpg','image/gif','image/png'];
-            if (($_FILES['image_file']['size'] >= $maxsize) || ($_FILES["image_file"]["size"] == 0)) {
+            if (($_FILES['image_file']['size'] >= $max_size) || ($_FILES["image_file"]["size"] == 0)) {
                 $this->core->addErrorMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb.");
             }
             elseif ((!in_array($_FILES['image_file']['type'], $acceptable)) && (!empty($_FILES["image_file"]["type"]))) {
