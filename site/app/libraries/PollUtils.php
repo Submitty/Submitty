@@ -23,13 +23,14 @@ class PollUtils {
                 $responses[$response] = $poll->getResponseString($response);
             }
             $data[] = [
-                "id" => $poll->getID(),
+                "id" => $poll->getId(),
                 "name" => $poll->getName(),
                 "question" => $poll->getQuestion(),
                 "responses" => $responses,
                 "correct_responses" => $poll->getAnswers(),
                 "release_date" => $poll->getReleaseDate(),
-                "status" => $poll->getStatus()
+                "status" => $poll->getStatus(),
+                "image_path" => $poll->getImagePath()
             ];
         }
         return $data;

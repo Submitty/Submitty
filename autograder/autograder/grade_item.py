@@ -38,7 +38,7 @@ def get_testcases(
         for notebook_item in notebook_data:
             item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
             if item_dict is None:
-                config.log_message(
+                config.logger.log_message(
                     f"ERROR: could not find {notebook_item} in item pool.",
                     job_id=queue_obj["job_id"],
                     is_batch=queue_obj["regrade"],
@@ -451,7 +451,16 @@ def grade_from_zip(
 
     # Remove the tmp directory.
     shutil.rmtree(working_directory)
-    autograding_utils.cleanup_stale_containers(which_untrusted)
+    try:
+        autograding_utils.cleanup_stale_containers(which_untrusted, config.logger.log_message)
+    except Exception:
+        config.logger.log_stack_trace(
+            traceback.format_exc(),
+            job_id=queue_obj['job_id'],
+            is_batch=queue_obj["regrade"],
+            which_untrusted=which_untrusted,
+            jobname=item_name
+        )
     return my_results_zip_file
 
 

@@ -45,24 +45,15 @@
             </div>
             {# /Files #}
         </div>
-        <div id="file-view" class="hide">
-            <div class="sticky-file-info">
-                <div class="flex-row">
-                    <span>
-                        <span class="grading_label">Submissions and Results Browser ></span>
-                        <span class="grading_label" id="grading_file_name"></span>
-                        <a onclick='collapseFile()'
-                           aria-label="Collapse File"
-                           class="key_to_click"
-                           tabindex="0"
-                        ><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
-                    </span>
-                    <strong id="save_status">No changes</strong>
-                </div>
-                {% include "grading/electronic/PDFAnnotationBar.twig" %}
-            </div>
-            <div id="file-content"></div>
-        </div>
+        {% include "grading/electronic/FileView.twig" with {
+            "panel": "submission",
+            "panelTitle": "Submissions and Results Browser",
+            "file_view_id": "file-view",
+            "grading_file_name_id": "grading_file_name",
+            "save_status_id": "save_status",
+            "file_content_id": "file-content",
+            "show_pdf_bar": true
+        } %}
     </div>
 </div>
 
@@ -81,12 +72,12 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|e('js') }}", "{{ path|e('js') }}", "{{ id }}"); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a id = 'open_file_{{ dir }}' onclick='popOutSubmittedFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
-            <a onclick='viewFileFullPanel("{{ dir }}", "{{ path }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            <a onclick='viewFileFullPanel("{{ dir|e('js') }}", "{{ path|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
+            <a onclick='downloadFile("{{ path|url_encode }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>

@@ -237,7 +237,7 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$graded_gradeable->getSubmitter()->getId()][$graded_gradeable->getGradeableId()] ?? null);
+            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
             $ggs[] = $graded_gradeable;
         }
         return $ggs;
@@ -390,7 +390,7 @@ class ReportController extends AbstractController {
         $polls_data = [];
         foreach ($polls as $poll) {
             $polls_data[] = [
-                "id" => $poll->getID(),
+                "id" => $poll->getId(),
                 "responses" => $poll->getUserResponses()
             ];
         }
