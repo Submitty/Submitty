@@ -176,6 +176,133 @@ jobs:
             files: migration/coverage.xml
             flags: migrator
 
+    integration-testing:
+        runs-on: ubuntu-18.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
+
+        steps:
+          - uses: actions/checkout@v2
+            with:
+              path: SUBMITTY_CPY/
+          - name: Copy Repo
+            run: |
+              # have to copy first, absolute paths not supported by actions/checkout@v2
+                sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+                sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+                sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+                sudo chmod -R a+rwx /tmp/
+
+          - uses: actions/setup-python@v2
+            with:
+              python-version: '3.6'
+          - name: Install python dependencies
+            run: |
+              python3 -m pip install --upgrade pip setuptools wheel
+              sudo python3 -m pip install --upgrade pip setuptools wheel
+              pip3 -V
+              sudo pip3 -V
+              pip3 install cryptography
+              pip3 install python-pam
+              pip3 install "sqlalchemy<1.4.0"
+              pip3 install selenium
+              pip3 install tzlocal
+              pip3 install jsonschema
+              pip3 install jsonref
+              pip3 install websocket_client
+              pip3 install psycopg2
+              pip3 install docker
+              pip3 install pyyaml
+              pip3 install selenium
+              pip3 install websocket_client
+              pip3 install python-pam
+              pip3 install python-dateutil
+              pip3 install paramiko
+              pip3 install pyzbar
+              pip3 install watchdog
+              #needs to be globally available for all users
+              sudo pip3 install docker
+              sudo pip3 install paramiko
+              sudo pip3 install tzlocal
+              sudo pip3 install jsonref
+              sudo pip3 install numpy
+              sudo pip3 install opencv-python
+              sudo pip3 install pyPdf
+              sudo apt-get install libzbar0
+              sudo pip3 install pyzbar
+              sudo pip3 install PyPDF2
+              sudo pip3 install pdf2image
+              sudo pip3 install onnxruntime
+              sudo pip3 install watchdog
+              sudo pip3 install python-dateutil
+              sudo pip3 install psutil
+              sudo pip3 install psycopg2
+              sudo pip3 install python-pam
+              sudo pip3 install "sqlalchemy<1.4.0"
+
+          - name: Install Submitty python utils
+            run: |
+              cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+              pip3 install .
+              pip3 show submitty_utils
+              umask 022
+              sudo -H pip3 install .
+              sudo pip3 show submitty_utils
+
+          - name: Install accessibility checker
+            run: |
+              wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
+              unzip vnu.jar_20.3.16.zip
+              sudo mv dist/vnu.jar /usr/bin/
+
+          - name: Create Database and default user
+            run: |
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+
+          - name: Install apt-get packages
+            run: |
+              sudo apt-get update
+              sudo apt-get install libseccomp-dev
+              sudo apt-get install libboost-all-dev
+              sudo apt-get install apache2
+              sudo apt-get install apache2-suexec-custom
+              sudo apt-get install libapache2-mod-authnz-external
+              sudo apt-get install libapache2-mod-authz-unixgroup
+              sudo apt-get install libapache2-mod-wsgi-py3
+              sudo apt-get install nginx
+              sudo apt-get install php${PHP_VER}-fpm
+              sudo apt-get install poppler-utils
+              sudo apt-get install valgrind
+
+          - name: Install third party dependencies
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+
+          - name: Configure Test suite
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+
+          - name: Set up test suite
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+
+          - name: Run integration tests
+            run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
 
     e2e:
@@ -433,8 +560,3 @@ jobs:
           - name: Check for site errors
             working-directory: ${{ env.SUBMITTY_REPOSITORY }}
             run: sudo bash tests/test_site_error_log.sh
-
-          - name: Run integration tests
-            run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
-
-
