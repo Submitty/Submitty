@@ -139,6 +139,7 @@ jobs:
         - name: Install python libraries
           run : |
             python3 -m pip install -r .setup/pip/system_requirements.txt
+            python3 -m pip install coverage # Testing util.
 
         # Submitty utils install & unit testing, must be put before auto grader
         # testing as auto grader depends on submitty utils to function.
