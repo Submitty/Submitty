@@ -28,12 +28,19 @@
     "twig": "1.15.4"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.2",
+    "@babel/preset-env": "^7.14.2",
+    "babel-jest": "^26.6.3",
     "cypress": "^7.3.0",
     "eslint": "^7.26.0",
-    "eslint-plugin-cypress": "^2.11.3"
+    "eslint-plugin-cypress": "^2.11.3",
+    "eslint-plugin-jest": "^24.3.6",
+    "jest": "^26.6.3",
+    "regenerator-runtime": "^0.13.7"
   },
   "scripts": {
-    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\"",
-    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" --fix"
+    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\" --fix",
+    "test": "jest"
   }
 }

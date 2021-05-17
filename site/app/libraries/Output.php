@@ -35,6 +35,8 @@ class Output {
     private $css;
     /** @var Set */
     private $js;
+    /** @var Set */
+    private $module_js;
 
     private $use_header = true;
     private $use_footer = true;
@@ -61,6 +63,7 @@ class Output {
 
         $this->css = new Set();
         $this->js = new Set();
+        $this->module_js = new Set();
     }
 
     /**
@@ -151,6 +154,7 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
+        $this->addInternalModuleJs('server.js');
         $this->addInternalJs('menu.js');
     }
 
@@ -492,6 +496,10 @@ HTML;
         $this->css->add($url);
     }
 
+    public function addInternalModuleJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs'));
+    }
+
     public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
@@ -502,6 +510,10 @@ HTML;
 
     public function addJs(string $url): void {
         $this->js->add($url);
+    }
+
+    public function addModuleJs(string $url): void {
+        $this->module_js->add($url);
     }
 
     public function timestampResource($file, $folder) {
@@ -555,18 +567,16 @@ HTML;
         return end($this->breadcrumbs)->getTitle();
     }
 
-    /**
-     * @return array
-     */
     public function getCss(): Set {
         return $this->css;
     }
 
-    /**
-     * @return array
-     */
     public function getJs(): Set {
         return $this->js;
+    }
+
+    public function getModuleJs(): Set {
+        return $this->module_js;
     }
 
     /**
