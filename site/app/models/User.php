@@ -27,6 +27,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *                                        otherwise return the legal last name field for the user.
  * @method string getEmail()
  * @method void setEmail(string $email)
+ * @method string getSecondaryEmail()
+ * @method void setSecondaryEmail(string $email)
+ * @method bool getEmailBoth()
+ * @method void setEmailBoth(bool $flag)
  * @method int getGroup()
  * @method int getAccessLevel()
  * @method void setGroup(integer $group)
@@ -88,8 +92,12 @@ class User extends AbstractModel {
     protected $preferred_last_name = "";
     /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
-    /** @prop @var string The email of the user */
+    /** @prop @var string The primary email of the user */
     protected $email;
+    /** @prop @var string The secondary email of the user */
+    protected $secondary_email;
+    /** @prop @var string The secondary email of the user */
+    protected $email_both;
     /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
     /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
@@ -173,6 +181,8 @@ class User extends AbstractModel {
         }
 
         $this->email = $details['user_email'];
+        $this->secondary_email = $details['user_email_secondary'];
+        $this->email_both = $details['user_email_secondary_notify'];
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;

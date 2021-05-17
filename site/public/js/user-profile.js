@@ -24,6 +24,14 @@ function showUpdateProfilePhotoForm() {
   form.find('.form-body').scrollTop(0);
 }
 
+function showUpdateSecondaryEmailForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-secondary-email-form")
+    form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
+    $('[name="user_secondary_email_change"]', form).val("");
+}
+
 /**
  * Gets the list of all available time zones as an array
  * @returns {string[]}
@@ -119,6 +127,10 @@ function updateUserProfilePhoto () {
   $('.popup-form').css('display', 'none');
   $('#user-image-button').val(null);
   return false;
+}
+
+function updateUserSecondaryEmail () {
+
 }
 
 $(document).ready(function() {

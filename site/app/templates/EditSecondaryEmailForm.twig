@@ -1,0 +1,17 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-secondary-email-form{% endblock %}
+{% block title %}Edit Secondary Email{% endblock %}
+{% block body %}
+    <p>Please fill in below to change your secondary email and configure whether or not you would like
+    us to send emails to it in addition to your normal email address.</p>
+
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateUserSecondaryEmail()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
