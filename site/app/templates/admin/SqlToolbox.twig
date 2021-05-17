@@ -6,13 +6,13 @@
       <br /><br />
 
         <div>
-            <button id="sqlDatabaseSchema" class="btn btn-primary">Database Schema Documentation</button>
-            <div id="sqlDatabaseSchemaContent" hidden>
+            <button id="sql-database-schema" class="btn btn-primary">Database Schema Documentation</button>
+            <div id="sql-database-schema-content" hidden>
                 <p>Click on each table to see columns</p>
                 <ul style="margin-left: 30px;">
                     {% for name, table in tables %}
-                        <li><a class="sqlDatabaseTable">{{ name }}</a>
-                            <div class="sqlDatabaseColumns" hidden>
+                        <li><a class="sql-database-table">{{ name }}</a>
+                            <div class="sql-database-columns" hidden>
                                 <ul style="margin-left: 15px">
                                     {% for column in table %}
                                         <li>{{ column }}</li>

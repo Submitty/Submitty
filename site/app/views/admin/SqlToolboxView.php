@@ -7,7 +7,7 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class SqlToolboxView extends AbstractView {
-    public function showToolbox($tables): string {
+    public function showToolbox(array $tables): string {
         $this->output->addInternalModuleJs('sql-toolbox.js');
 
         $this->output->addInternalCss('sql-toolbox.css');

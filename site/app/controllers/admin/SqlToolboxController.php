@@ -24,18 +24,14 @@ class SqlToolboxController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"GET"})
      */
     public function showToolbox(): WebResponse {
-        $this->core->getCourseDB()->query("SELECT * FROM information_schema.columns WHERE table_schema='public'");
-        $tables = $this->core->getCourseDB()->rows();
         $organizedTables = [];
         //Loop through and create a 2d array that holds all columns for each table name.
-        foreach ($tables as $table) {
+        foreach ($this->core->getQueries()->getCourseSchemaTables() as $table) {
             if (!isset($organizedTables[$table['table_name']])) {
                 $organizedTables[$table['table_name']] = [];
             }
-            array_push($organizedTables[$table['table_name']], $table['column_name']);
+            $organizedTables[$table['table_name']][] = $table['column_name'];
         }
-        //Sort the associative index order
-        ksort($organizedTables);
         return new WebResponse(SqlToolboxView::class, 'showToolbox', $organizedTables);
     }
 

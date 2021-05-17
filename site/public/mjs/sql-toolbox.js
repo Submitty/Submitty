@@ -77,11 +77,11 @@ export async function runSqlQuery() {
 
 export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
-    $('#sqlDatabaseSchema').on('click', () => {
-        $('#sqlDatabaseSchemaContent').toggle();
+    $('#sql-database-schema').on('click', () => {
+        $('#sql-database-schema-content').toggle();
     });
-    $('.sqlDatabaseTable').on('click', (e) => {
-        $(e.target).next('.sqlDatabaseColumns').toggle();
+    $('.sql-database-table').on('click', (e) => {
+        $(e.target).next('.sql-database-columns').toggle();
     });
 }
 
