@@ -8,7 +8,7 @@ use app\views\AbstractView;
 
 class SqlToolboxView extends AbstractView {
     public function showToolbox($tables): string {
-        $this->output->addInternalJs('sql-toolbox.js');
+        $this->output->addInternalModuleJs('sql-toolbox.js');
 
         $this->output->addInternalCss('sql-toolbox.css');
         $this->output->addInternalCss('table.css');
