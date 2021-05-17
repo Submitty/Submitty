@@ -81,7 +81,7 @@
             <label for="image-file">
                 Optional Image:
             </label>
-            <input type="file" id="image-file" name="image_file"/>
+            <input type="file" id="image-file" name="image_file" accept="'image/jpeg','image/jpg','image/gif','image/png'" />
             <br />
             {% if poll.getImagePath() != null %}
                 Current Image: {{ poll.getImagePath() }}
@@ -89,9 +89,8 @@
                 <label for="keep-image">
                     Keep Image:
                 </label>
-                <input type="checkbox" id="keep-image" name="keep_image" checked />
-            {% endif %}
-            <br/>
+                <input type="checkbox" id="keep-image" name="keep_image" accept="'image/jpeg','image/jpg','image/gif','image/png'" checked />
+            {% endif %}"<br/>
 
             <label for="poll-date">
                 Expected release date:
