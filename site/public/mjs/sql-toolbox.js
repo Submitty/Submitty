@@ -74,7 +74,7 @@ export async function runSqlQuery() {
     }
 }
 
-async function downloadSqlResult(){
+export async function downloadSqlResult(){
     const results = document.getElementById('query-results');
     let i;
     let j;
@@ -106,6 +106,7 @@ async function downloadSqlResult(){
 
 export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
+    document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult());
 }
 
 /* istanbul ignore next */
