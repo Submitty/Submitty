@@ -23,31 +23,6 @@ updates:
     commit-message:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency]"
-  # Migration
-  - package-ecosystem: pip
-    directory: "/migration/requirements.txt"
-    schedule:
-      interval: daily
-      time: "10:00"
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-    commit-message:
-      prefix: "[Dependency] "
-      prefix-development: "[DevDependency]"
-  # Auto-grader
-  - package-ecosystem: pip
-    directory: "/autograder/requirements.txt"
-    schedule:
-      interval: daily
-      time: "10:00"
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-    commit-message:
-      prefix: "[Dependency] "
-      prefix-development: "[DevDependency]"
-  # Setup scripts
   - package-ecosystem: pip
     directory: "/.setup/pip/system_requirements.txt"
     schedule:

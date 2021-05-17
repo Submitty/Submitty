@@ -1,4 +1,17 @@
-# Extract from install_system.sh, latest update May 7th
+# Requirements.txt for the entire project
+
+# Migrator module depends on:
+# docker & sqlalchemy
+
+# Auto-grader module depends on:
+# sqlalchemy & paramiko & docker & python-dateutil & submitty_util (internal)
+
+# Submitty util module depends on:
+# jsonschema & jsonref & pytz & tzlocal
+pytz==2021.1 # Submitty-util specific.
+
+# Submodule dependency last updated: May 17 2021.
+
 
 python-pam==1.8.4
 PyYAML==3.12

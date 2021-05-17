@@ -1,6 +1,0 @@
-sqlalchemy==1.3.24
-paramiko==2.7.2
-docker==5.0.0
-python-dateutil==2.8.1
-# Please run install under the autograder folder to let this resolve properly
-../python_submitty_utils/

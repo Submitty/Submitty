@@ -122,7 +122,7 @@ jobs:
           run : python3 -m flake8
 
 
-    python-unit-submitty-utils:
+    python-unit:
       runs-on: ubuntu-18.04
       steps:
         - uses: actions/checkout@v2
@@ -133,15 +133,15 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
             restore-keys: |
                 ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
-          working-directory: python_submitty_utils
           run : |
-            python3 -m pip install --upgrade pip setuptools wheel
-            python3 -m pip install coverage
-            python3 -m pip install -r requirements.txt
+            python3 -m pip install -r .setup/pip/system_requirements.txt
+
+        # Submitty utils install & unit testing, must be put before auto grader
+        # testing as auto grader depends on submitty utils to function.
         - name: Run python_submitty_utils python unit tests
           working-directory: python_submitty_utils
           run : |
@@ -154,26 +154,7 @@ jobs:
             files: python_submitty_utils/coverage.xml
             flags: python_submitty_utils
 
-    python-unit-migration:
-      runs-on: ubuntu-18.04
-      steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
-          with:
-            python-version: '3.6'
-        - name: Cache Pip
-          uses: actions/cache@v2
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-            restore-keys: |
-                ${{ runner.os }}-pip-
-        - name: Install python libraries
-          working-directory: migration
-          run : |
-            python3 -m pip install --upgrade pip setuptools wheel
-            python3 -m pip install coverage
-            python3 -m pip install -r requirements.txt
+        # Migrator unit test
         - name: Run migrator python unit tests
           working-directory: migration
           run : |
@@ -185,27 +166,7 @@ jobs:
             files: migration/coverage.xml
             flags: migrator
 
-    python-unit-auto-grader:
-      runs-on: ubuntu-18.04
-      # needs: [python-unit-submitty-utils] Not that necessary
-      steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
-          with:
-            python-version: '3.6'
-        - name: Cache Pip
-          uses: actions/cache@v2
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-            restore-keys: |
-              ${{ runner.os }}-pip-
-        - name: Install python libraries
-          working-directory: autograder
-          run : |
-            python3 -m pip install --upgrade pip setuptools wheel
-            python3 -m pip install coverage
-            python3 -m pip install -r requirements.txt
+        # Auto grader unit test
         - name: Run autograder python unit tests
           working-directory: autograder
           run : |
@@ -216,30 +177,6 @@ jobs:
           with:
             files: autograder/coverage.xml
             flags: autograder
-
-    python-dependency:
-      runs-on: ubuntu-18.04
-      steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
-        - name: Check dependency
-          run: |
-            python3 .setup/testing/check_dependency.py autograder/requirements.txt migration/requirements.txt
-        - name: Get message
-          if: ${{ failure() }}
-          run: |
-            echo message=$(python3 .setup/testing/check_dependency.py autograder/requirements.txt migration/requirements.txt) >> $GITHUB_ENV
-            echo branch=${GITHUB_REF#refs/heads/} >> $GITHUB_ENV
-            echo date_time=$(date "+%Y-%m-%d-%H:%M") >> $GITHUB_ENV
-        - uses: JasonEtco/create-an-issue@v2
-          if: ${{ failure() }}
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            branch: ${{ env.branch }}
-            date_time: ${{ env.date_time }}
-          with:
-            filename: .github/ISSUE_TEMPLATE/dependency_inconsistentcy.md
-            update_existing: true
 
 
     e2e:
