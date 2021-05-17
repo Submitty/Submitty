@@ -76,19 +76,21 @@ export async function runSqlQuery() {
 
 export async function downloadSqlResult(){
     const results = document.getElementById('query-results');
-    let i;
-    let j;
     let csv = '';
     //Add headers to CSV string
-    for (i = 1; i < results.children.item(0).children.item(0).children.length; i++){
-        csv += `"${results.children.item(0).children.item(0).children.item(i).textContent}",`;
+    const header = results.children.item(0);
+    const row = header.children.item(0);
+    for (let i = 1; i < row.children.length; i++){
+        csv += `"${row.children.item(i).textContent}",`;
     }
     csv += '\n';
 
     //Add data to CSV string
-    for (i = 0; i < results.children.item(1).children.length; i++){
-        for (j = 1; j < results.children.item(1).children.item(i).children.length; j++){
-            csv += `"${results.children.item(1).children.item(i).children.item(j).textContent.replaceAll('"', '""')}",`;
+    const data = results.children.item(1);
+    for (let i = 0; i < data.children.length; i++){
+        const row = data.children.item(i);
+        for (let j = 1; j < row.children.length; j++){
+            csv += `"${row.children.item(j).textContent.replaceAll('"', '""')}",`;
         }
         csv += '\n';
     }
