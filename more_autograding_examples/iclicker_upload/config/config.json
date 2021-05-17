@@ -21,7 +21,6 @@
     "testcases" : [ 
         {
             "title" : "iClicker ID",
-            "actual_file" : "input_0.txt",
             "points" : 1,
             "command" : [],
             "validation": [

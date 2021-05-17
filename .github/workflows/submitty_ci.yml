@@ -12,6 +12,7 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
+  NODE_VERSION: 10
 
 jobs:
     eslint:
@@ -21,9 +22,9 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2.1.2
+            - uses: actions/setup-node@v2
               with:
-                node-version: '10'
+                node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
               uses: actions/cache@v2
               with:
@@ -34,6 +35,32 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
+
+
+    js-unit:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
 
 
     php-lint-static:
@@ -187,6 +214,7 @@ jobs:
           - php-unit
           - python-lint
           - python-unit
+          - js-unit
         runs-on: ubuntu-18.04
         services:
           postgres:
@@ -418,4 +446,5 @@ jobs:
 
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
 
