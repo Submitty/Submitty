@@ -379,26 +379,6 @@ parameters:
 			path: app/libraries/SessionManager.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\Utils\\:\\:stripStringFromArray\\(\\) should return array but returns null\\.$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 119$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected type at offset 404$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected type at offset 163$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
 			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
