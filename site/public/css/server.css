@@ -222,7 +222,7 @@ table tr.table-header {
     border-top: 1px solid var(--standard-light-gray);
 }
 
-.table tr {
+.table tr, .table td[scope="col"] {
     border-top: 1px solid #ddd;
 }
 
