@@ -221,6 +221,7 @@ class UsersController extends AbstractController {
                 'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
                 'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
                 'user_email' => $user->getEmail(),
+                'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
                 'registration_section' => $user->getRegistrationSection(),
                 'rotating_section' => $user->getRotatingSection(),
@@ -301,6 +302,8 @@ class UsersController extends AbstractController {
         }
 
         $user->setEmail(trim($_POST['user_email']));
+
+        $user->setSecondaryEmail(trim($_POST['user_email_secondary']));
 
         if (!empty($_POST['user_password'])) {
             $user->setPassword($_POST['user_password']);

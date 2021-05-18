@@ -146,31 +146,31 @@ function checkValidEntries() {
     switch(input.prop("id")) {
         case "user_id":
             if (input.val() == "") {
-                input[0].setCustomValidity(input.prop('id')+" is required");
+                input[0].setCustomValidity(input.prop('id') + " is required");
                 break;
             }
             if (!$('#user-form-already-exists-error-message').is(':hidden')) {
-                input[0].setCustomValidity(input.prop('id')+" already exists");
+                input[0].setCustomValidity(input.prop('id') + " already exists");
                 break;
             }
             var valid_expression = /^[a-z0-9_\-]*$/;
-            setRedOrTransparent(input,valid_expression);
+            setRedOrTransparent(input, valid_expression);
             break;
         case "user_numeric_id":
             break;
         case "user_firstname":
         case "user_lastname":
             if (input.val() == "") {
-                input[0].setCustomValidity(input.prop('id')+" is required");
+                input[0].setCustomValidity(input.prop('id') + " is required");
                 break;
             }
             var valid_expression = /^[a-zA-Z'`\-\.\(\) ]*$/;
-            setRedOrTransparent(input,valid_expression);
+            setRedOrTransparent(input, valid_expression);
             break;
         case "user_preferred_firstname":
         case "user_preferred_lastname":
             var valid_expression = /^[a-zA-Z'`\-\.\(\) ]{0,30}$/;
-            setRedOrTransparent(input,valid_expression);
+            setRedOrTransparent(input, valid_expression);
             break;
         case "user_email":
             if (input.val() == '') {
@@ -178,9 +178,17 @@ function checkValidEntries() {
                 break;
             }
             var valid_expression = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$/;
-            setRedOrTransparent(input,valid_expression);
+            setRedOrTransparent(input, valid_expression);
             break;
-        }
+        case "user_email_secondary":
+            if (input.val() == '') {
+                input.css("background-color", "transparent");
+                break;
+            }
+            var valid_expression = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$/;
+            setRedOrTransparent(input, valid_expression);
+            break;
+    }
 
     //disable submit button if anything is invalid
     var has_invalid_entry = false;
