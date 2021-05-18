@@ -497,7 +497,7 @@ class User extends AbstractModel {
                 return $validator->isValid($data, new RFCValidation());
             case 'user_email_secondary':
                 // secondary emails are allowed to be the empty string...
-                if($data === "") {
+                if ($data === "") {
                     return true;
                 }
                 // -- or ---
