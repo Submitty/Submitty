@@ -4149,12 +4149,16 @@ AND gc_id IN (
      */
     public function insertEmails(array $flattened_emails, int $email_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, current_timestamp, ?)";
+        $semester = "s20";
+        $course = "TEST";
+        
+        $row_string = "(?, ?, current_timestamp, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query(
             "
-            INSERT INTO emails(subject, body, created, user_id)
+            INSERT INTO emails(subject, body, created, user_id, semester, course)
             VALUES " . $value_param_string,
+            //$flattened_emails
             $flattened_emails
         );
     }
