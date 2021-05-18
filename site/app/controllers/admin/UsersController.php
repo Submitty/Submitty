@@ -58,6 +58,7 @@ class UsersController extends AbstractController {
                 'last_name' => $student->getDisplayedLastName(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
+                'secondary_email' => $student->getSecondaryEmail(),
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
@@ -124,6 +125,7 @@ class UsersController extends AbstractController {
                 'last_name' => $grader->getDisplayedLastName(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
+                'secondary_email' => $grader->getSecondaryEmail(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
