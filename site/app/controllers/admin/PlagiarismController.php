@@ -604,6 +604,7 @@ class PlagiarismController extends AbstractController {
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
             }
             while (!$matches->isEmpty()) {
+                /** @var \app\libraries\plagiarism\Interval $match */
                 $match = $matches->peek();
                 $s_pos = $match->getStart();
                 $e_pos = $match->getEnd();
