@@ -189,6 +189,7 @@ class UsersController extends AbstractController {
             'user_preferred_firstname' => $user->getPreferredFirstName(),
             'user_preferred_lastname' => $user->getPreferredLastName(),
             'user_email' => $user->getEmail(),
+            'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
             'rotating_section' => $user->getRotatingSection(),
@@ -256,6 +257,8 @@ class UsersController extends AbstractController {
         $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_lastname']) . "\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
         $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
+        //Check secondary email address for appropriate format.
+        $error_message .= User::validateUserData('user_email_secondary', trim($_POST['user_email_secondary'])) ? "" : "Error in secondary email: \"" . strip_tags($_POST['user_email_secondary']) . "\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
             $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_firstname']) . "\"<br>";

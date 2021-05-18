@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\views\grading\ImagesView;
+use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -177,7 +178,25 @@ class UserProfileController extends AbstractController {
 
         if(!empty($_POST['secondary_email']) && !empty($_POST['secondary_email_notify'])){
             $secondaryEmail = trim($_POST['secondary_email']);
+            $secondaryEmailNotify = trim($_POST['secondary_email_notify']);
 
+            if($user->validateUserData('user_email_secondary', $secondaryEmail) === true){
+                $user->setSecondaryEmail($secondaryEmail);
+                $user->setEmailBoth($secondaryEmailNotify === "true");
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => 'Secondary email address updated successfully',
+                    'secondary_email' => $secondaryEmail,
+                    'secondary_email_notify' => $secondaryEmailNotify
+                ]);
+            }
+            else{
+                return JsonResponse::getErrorResponse("Secondary email address must be a valid email and the notify setting must be a boolean");
+            }
+        }
+        else{
+            return JsonResponse::getErrorResponse("Secondary email and secondary email notify must both be set");
         }
     }
 }

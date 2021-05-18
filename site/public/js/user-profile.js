@@ -131,13 +131,33 @@ function updateUserProfilePhoto () {
 function updateUserSecondaryEmail () {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
-    if(second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)){
+    if (second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)) {
         displayErrorMessage('No changes detected to secondary email');
     }
-    else{
-        let data = FormData();
+    else {
+        let data = new FormData();
         data.append('csrf_token', $("#user-secondary-email-csrf").val());
-        //data.append()
+        data.append('secondary_email', second_email.val());
+        data.append('secondary_email_notify', second_email_notify.get(0).checked);
+        let url = buildUrl(['user_profile', 'change_secondary_email']);
+        $.ajax({
+            url,
+            type: "POST",
+            data,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                const response = JSON.parse(res);
+                if (response.status === "success") {
+                    const { data } = response;
+                    displaySuccessMessage(data.message);
+                    $('#secondary-email-row .value').text(data.secondary_email);
+                    $('#secondary-email-notify-row .value').text(data.secondary_email_notify.charAt(0).toUpperCase() + data.secondary_email_notify.slice(1));
+                    second_email.data('current-second-email', data.secondary_email);
+                    second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "true" ? 1 : 0);
+                }
+            }
+        });
     }
     $('.popup-form').css('display', 'none');
     return false;

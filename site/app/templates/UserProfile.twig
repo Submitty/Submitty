@@ -68,19 +68,15 @@
                             {{ user.getEmail() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="email-row">
+                    <div class="flex-row" id="secondary-email-row">
                         <span class="label">
                             Secondary Email:
                         </span>
                         <span class="value">
-                            {% if user.getSecondaryEmail() == null %}
-                                Not set
-                            {% else %}
-                                {{ user.getSecondaryEmail() }}
-                            {% endif %}
+                            {{ user.getSecondaryEmail() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="email-row">
+                    <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
                             Send Email to Secondary Address:
                         </span>

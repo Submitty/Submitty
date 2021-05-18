@@ -232,6 +232,7 @@ function completeUserFormInformation(user) {
     $('[name="user_preferred_lastname"]', form).val(user['user_preferred_lastname']);
     $('[name="user_preferred_lastname"]').change();
     $('[name="user_email"]', form).val(user['user_email']);
+    $('[name="user_email_secondary"]', form).val(user['user_email_secondary']);
     $('[name="user_email"]').change();
     $('[name="registration_subsection"]', form).val(user['registration_subsection']);
     $('[name="registration_subsection"]').change();
