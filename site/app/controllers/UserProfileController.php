@@ -166,4 +166,18 @@ class UserProfileController extends AbstractController {
             }
         }
     }
+
+    /**
+     * @Route("/user_profile/change_secondary_email", methods={"POST"})
+     * @return JsonResponse
+     * @throws \ImagickException
+     */
+    public function changeSecondaryEmail() {
+        $user = $this->core->getUser();
+
+        if(!empty($_POST['secondary_email']) && !empty($_POST['secondary_email_notify'])){
+            $secondaryEmail = trim($_POST['secondary_email']);
+
+        }
+    }
 }

@@ -29,7 +29,6 @@ function showUpdateSecondaryEmailForm() {
     var form = $("#edit-secondary-email-form")
     form.css("display", "block");
     form.find('.form-body').scrollTop(0);
-    $('[name="user_secondary_email_change"]', form).val("");
 }
 
 /**
@@ -130,7 +129,18 @@ function updateUserProfilePhoto () {
 }
 
 function updateUserSecondaryEmail () {
-
+    const second_email = $('#user-secondary-email-change');
+    const second_email_notify = $('#user-secondary-email-notify-change');
+    if(second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)){
+        displayErrorMessage('No changes detected to secondary email');
+    }
+    else{
+        let data = FormData();
+        data.append('csrf_token', $("#user-secondary-email-csrf").val());
+        //data.append()
+    }
+    $('.popup-form').css('display', 'none');
+    return false;
 }
 
 $(document).ready(function() {

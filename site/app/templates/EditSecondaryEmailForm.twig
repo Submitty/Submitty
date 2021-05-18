@@ -4,7 +4,33 @@
 {% block body %}
     <p>Please fill in below to change your secondary email and configure whether or not you would like
     us to send emails to it in addition to your normal email address.</p>
+    <div class="flex-col" id="user_settings_modal">
+        <input id="user-secondary-email-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <h2>My Secondary Email</h2>
+        <div class="edit_user_row">
+            <label for="user-secondary-email-change">Secondary Email Address:&emsp;</label>
+            <input type="text"
+                   name="user_secondary_email_change"
+                   value="{{ user.getSecondaryEmail() }}"
+                   id="user-secondary-email-change"
+                   data-current-second-email="{{ user.getSecondaryEmail() }}"/>
+        </div>
+        <div class="edit_user_row">
+            <label for="user-secondary-email-notify-change">Enable Second Email:</label>
+            <input type="checkbox"
+                   name="user_secondary_email_notify_change"
+                   {% if user.getEmailBoth() %}
+                       checked
+                   {% endif %}
+                   id="user-secondary-email-notify-change"
+                   {% if user.getEmailBoth() %}
+                       data-current-second-email-notify="1"/>
+                   {% else %}
+                       data-current-second-email-notify="0"/>
+                   {% endif %}
+        </div>
 
+    </div>
 {% endblock %}
 {% block form %}
     <form method="post" onsubmit="return updateUserSecondaryEmail()">
