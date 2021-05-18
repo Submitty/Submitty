@@ -369,16 +369,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$session_id\\)\\: Unexpected token \"\\$session_id\", expected type at offset 257$#"
-			count: 1
-			path: app/libraries/SessionManager.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/SessionManager.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\Utils\\:\\:stripStringFromArray\\(\\) should return array but returns null\\.$#"
 			count: 1
 			path: app/libraries/Utils.php
