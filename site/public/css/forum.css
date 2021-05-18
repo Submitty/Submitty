@@ -594,7 +594,7 @@
   box-shadow: none;
 }
 
-[data-theme="dark"] .post_box {
+[data-theme="dark"] .post_box:not(.important) {
     border:1px solid #bbb;
 }
 
