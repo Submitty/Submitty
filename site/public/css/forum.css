@@ -594,6 +594,10 @@
   box-shadow: none;
 }
 
+[data-theme="dark"] .post_box {
+    border:1px solid #bbb;
+}
+
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
