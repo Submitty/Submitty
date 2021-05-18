@@ -31,10 +31,6 @@ input[type=text]:valid {
  }
 
 input[type=text]:invalid {
-    background-color: var(--alert-invalid-entry-pink);
-}
-
-input[type=text]:invalid {
     background-color: var(--alert-danger-red);
 }
 
