@@ -25,6 +25,7 @@ export async function runSqlQuery() {
         if (json.status !== 'success') {
             error_mesage.textContent = json.message;
             error.style.display = 'block';
+            document.getElementById('download-sql-btn').disabled = true;
             return;
         }
 
@@ -67,10 +68,12 @@ export async function runSqlQuery() {
             body.appendChild(bodyRow);
         });
         table.appendChild(body);
+        document.getElementById('download-sql-btn').disabled = false;
     }
     catch (exc) {
         console.error(exc);
         alert(exc.toString());
+        document.getElementById('download-sql-btn').disabled = true;
     }
 }
 
