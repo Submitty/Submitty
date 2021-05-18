@@ -288,14 +288,16 @@
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
-            <span class="resizeable-textarea option-small-box cell-grade"
+            <textarea class="option-small-box cell-grade"
                   tabindex="0" id="cell-{{ index }}-{{ text_start + loop.index0 }}"
                   role="textbox" contenteditable
                   value="{{ component_grade.getComment() }}"
                   onclick="this.select()"
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
-            ></span>
+                  rows="1"
+                  style="resize: vertical;"
+            ></textarea>
         </td>
     {% endfor %}
 {% endmacro %}
