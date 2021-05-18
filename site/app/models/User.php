@@ -495,6 +495,15 @@ class User extends AbstractModel {
                 // validate email address against email RFCs
                 $validator = new EmailValidator();
                 return $validator->isValid($data, new RFCValidation());
+            case 'user_email_secondary':
+                // secondary emails are allowed to be the empty string...
+                if($data === "") {
+                    return true;
+                }
+                // -- or ---
+                // validate email address against email RFCs
+                $validator = new EmailValidator();
+                return $validator->isValid($data, new RFCValidation());
             case 'user_group':
                 //user_group check is a digit between 1 - 4.
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
