@@ -72,6 +72,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
             'user_group' => 4
         ]));
 
