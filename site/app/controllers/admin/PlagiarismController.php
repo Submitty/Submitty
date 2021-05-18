@@ -619,8 +619,8 @@ class PlagiarismController extends AbstractController {
                     $segment_info["{$start_line}_{$start_pos}"] = [];
                     $orange_color = false;
                 foreach ($match->getUsers() as $i => $other) {
-                    $segment_info["{$start_line}_{$start_pos}"][] = $other->getUid() . "_" . $other->getVid();
-                    if ($other->getUid() == $user_id_2) {
+                    $segment_info["{$start_line}_{$start_pos}"][] = $other->getUserId() . "_" . $other->getVersion();
+                    if ($other->getUserId() == $user_id_2) {
                         $orange_color = true;
                         if ($codebox == "2" && $user_id_2 != "") {
                             foreach ($other->getMatchingPositions() as $pos) {
