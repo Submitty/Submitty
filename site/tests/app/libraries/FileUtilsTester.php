@@ -686,10 +686,6 @@ STRING;
     }
 
     public function testvalidateUploadedFilesFail() {
-        $stat = FileUtils::validateUploadedFiles(null);
-        $this->assertArrayHasKey("failed", $stat);
-        $this->assertEquals($stat["failed"], "No files sent to validate");
-
         $stat = FileUtils::validateUploadedFiles([]);
         $this->assertArrayHasKey("failed", $stat);
         $this->assertEquals($stat["failed"], "No files sent to validate");
@@ -759,33 +755,19 @@ STRING;
             $stat[0]
         );
 
-        $this->buildSingleFakeFile('tes<>t2.zip');
-        $stat = FileUtils::validateUploadedFiles($_FILES["file"]);
-        $this->assertCount(1, $stat);
-        $this->assertEquals(
-            $stat[0],
-            ['name' => 'test2.zip',
-             'type' => 'application/zip',
-             'error' => 'No error.',
-             'size' => 9,
-             'is_zip' => true,
-             'success' => true
-            ]
-        );
-
         $zip = new \ZipArchive();
         $zip->open(FileUtils::joinPaths($this->path, 'tes<>t2.zip'), \ZipArchive::CREATE);
         $zip->addFromString('testfile', "file test");
         $zip->close();
 
         $this->buildSingleFakeFile('tes<>t2.zip');
-        $stat = FileUtils::validateUploadedFiles($_FILES["file"]);
+        $stat = FileUtils::validateUploadedFiles($_FILES["tes<>t2.zip"]);
         $this->assertCount(1, $stat);
         $this->assertEquals(
             $stat[0],
-            ['name' => 'test2.zip',
+            ['name' => 'tes<>t2.zip',
              'type' => 'application/zip',
-             'error' => 'No error.',
+             'error' => 'Invalid filename',
              'size' => 9,
              'is_zip' => true,
              'success' => true
