@@ -16,11 +16,13 @@ env:
 
 jobs:
     vagrant-up:
-        runs-on: ubuntu-18.04
+        runs-on: macos-10.15
         steps:
           - uses: actions/checkout@v2
           - name: Vagrant up
-            run: vagrant up
+            run: |
+              pwd
+              vagrant up
 
     # eslint:
     #     runs-on: ubuntu-18.04
