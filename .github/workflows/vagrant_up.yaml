@@ -14,4 +14,4 @@ jobs:
       - name: Vagrant up
         run: |
           vagrant plugin install vagrant-vbguest
-          vagrant up
+          NO_SUBMISSIONS=1 vagrant up
