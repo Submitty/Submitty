@@ -232,13 +232,13 @@
   }
 
   function updateCurrentQueue() {
-      var queue_empty_before = $( '.help_btn:visible[ready="true"]' ).length === 0;
+      var queue_empty_before = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
 
       $.get("{{base_url}}/current_queue", function(newQueue) {
           $("#current_queue").replaceWith(newQueue);
           filterQueues();
 
-          var queue_empty_after = $( '.help_btn:visible[ready="true"]' ).length === 0;
+          var queue_empty_after = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
           var helping_student = $( '.finish_helping_btn.btn-success:visible').length > 0;
 
           if(notifications_enabled && queue_empty_before && !queue_empty_after && !helping_student) {

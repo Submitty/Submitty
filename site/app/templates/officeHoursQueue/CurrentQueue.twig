@@ -23,19 +23,19 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['paused'] %}
-                  <button type="submit" class="btn btn-primary help_btn" title="Student paused" ready="false">
+                  <button type="submit" class="btn btn-primary help_btn" title="Student paused" data-ready="false">
                     <i class="fas fa-pause"></i>
                     Help</button>
                 {% elseif viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
-                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week" ready="true">
+                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week" data-ready="true">
                     <i class="fas fa-star"></i>
                     Help</button>
                 {% elseif viewer.firstTimeInQueueToday(entry['last_time_in_queue']) %}
-                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today" ready="true">
+                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today" data-ready="true">
                     <i class="fas fa-star-half"></i>
                     Help</button>
                 {% else %}
-                  <button type="submit" class="btn btn-primary help_btn" ready="true">Help</button>
+                  <button type="submit" class="btn btn-primary help_btn" data-ready="true">Help</button>
                 {% endif %}
               </form>
             </td>
