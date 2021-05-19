@@ -761,7 +761,7 @@ STRING;
         $zip->close();
 
         $this->buildSingleFakeFile('tes<>t2.zip');
-        $stat = FileUtils::validateUploadedFiles($_FILES["tes<>t2.zip"]);
+        $stat = FileUtils::validateUploadedFiles($_FILES["file"]);
         $this->assertCount(1, $stat);
         $this->assertEquals(
             $stat[0],
