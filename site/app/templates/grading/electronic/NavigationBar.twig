@@ -1,4 +1,19 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
+    <div id="grading-panel-student-name">
+        <b>{% if not limited_access_blind %}
+                {% if team_assignment %}
+                    Team:<br/>
+                    {% for team_member in submitter.getTeam().getMemberUsers() %}
+                        &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
+                    {% endfor %}
+                {% else %}
+                    Student:<br/>
+                    {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                    <br/>
+                {% endif %}
+            {% endif %}
+        </b>
+    </div>
     <div class="navigation-box">
         <div class="grading_toolbar">
             {# Back to list button #}

@@ -909,7 +909,8 @@ HTML;
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
                 $isRegradePanel,
-                $gradeable->getAutogradingConfig()->isNotebookGradeable()
+                $gradeable->getAutogradingConfig()->isNotebookGradeable(),
+                $graded_gradeable
             );
 
             $return .= <<<HTML
@@ -1079,6 +1080,7 @@ HTML;
      * @return string
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind) {
+        $gradeable = $graded_gradeable->getGradeable();
         $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
 
         $studentBaseUrl = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']);
@@ -1107,7 +1109,9 @@ HTML;
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4,
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
-            'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
+            'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
+            'submitter' => $graded_gradeable->getSubmitter(),
+            'team_assignment' => $gradeable->isTeamAssignment()
         ]);
     }
 

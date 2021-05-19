@@ -483,6 +483,12 @@ progress::-webkit-progress-value {
     padding-top: 20%;
 }
 
+#grading-panel-student-name{
+    position: relative;
+    float: left;
+    padding-left: 5px;
+}
+
 #regrade_inner_info .inner-container {
     padding: 20px;
 }
