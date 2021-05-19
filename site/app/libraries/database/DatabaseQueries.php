@@ -2637,7 +2637,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     /**
      * Gets the date for a specified gradeable
      *
-     * @param $id
+     * @param string $id
      * @return \DateTime
      */
     public function getDateForGradeableById($id) {

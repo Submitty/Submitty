@@ -79,10 +79,7 @@ class PlagiarismController extends AbstractController {
                 unset($gradeables_with_plagiarism_result[$i]);
                 continue;
             }
-            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
-            if (isset($duedate)) {
-                $gradeables_with_plagiarism_result[$i]['g_grade_due_date'] = $duedate;
-            }
+            $gradeables_with_plagiarism_result[$i]['g_grade_due_date'] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
         }
 
         usort($gradeables_with_plagiarism_result, function ($a, $b) {
