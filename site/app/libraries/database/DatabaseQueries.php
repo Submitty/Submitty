@@ -26,6 +26,7 @@ use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueModel;
+use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -5752,6 +5753,20 @@ AND gc_id IN (
         $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
+    }
+
+    /**
+     * Get a status of emails sent of a course with course name and semester
+     * 
+     * @param string $course
+     * @param string $semester
+     */
+    public function getEmailStatusWithCourse($course, $semester){
+        $parameters = [$course, $semester];
+        $this->submitty_db->query('SELECT * FROM emails');
+        $details = $this->submitty_db->rows();
+        return new EmailStatusModel($this->core, $parameters);
+        return new EmailStatusModel($this->core, $details); 
     }
 
     /**
