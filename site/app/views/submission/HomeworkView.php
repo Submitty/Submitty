@@ -330,6 +330,7 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
         }
+        $this->core->getOutput()->addInternalJs('submission-page.js');
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
         if ($graded_gradeable !== null) {

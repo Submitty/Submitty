@@ -33,6 +33,7 @@
                 {% if diff_time_zone %}
                     <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
                 {% endif %}
+                <h2 id="time_remaining_text">Time Left until Due: </h2>
             </div>
         {% endif %}
         <div class="loading-bar-wrapper">

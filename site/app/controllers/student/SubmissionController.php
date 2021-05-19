@@ -1723,4 +1723,24 @@ class SubmissionController extends AbstractController {
 
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")
+     * @return JsonResponse
+     */
+    public function getTimeRemainingData($gradeable_id) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable !== null) {
+            $now = new \DateTime('now');
+            $duedate = $gradeable->getSubmissionDueDate();
+            $remaining = $now->diff($duedate);
+            return JsonResponse::getSuccessResponse([
+                'days' => $remaining->d,
+                'hours' => $remaining->h,
+                'mins' => $remaining->i,
+                'seconds' => $remaining->s,
+                'invert' => $remaining->invert
+            ]);
+        }
+    }
 }
