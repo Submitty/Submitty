@@ -42,23 +42,23 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     public function testShowToolbox(): void {
-            $tables = [
-            [
-                'table_name' => 'gradeable',
-                'column_name' => 'g_title'
-            ],
-            [
-                'table_name' => 'gradeable',
-                'column_name' => 'g_gradeable_type'
-            ],
-            [
-                'table_name' => 'threads',
-                'column_name' => 'title'
-            ],
-            [
-                'table_name' => 'threads',
-                'column_name' => 'is_visible'
-            ]
+        $tables = [
+        [
+            'table_name' => 'gradeable',
+            'column_name' => 'g_title'
+        ],
+        [
+            'table_name' => 'gradeable',
+            'column_name' => 'g_gradeable_type'
+        ],
+        [
+            'table_name' => 'threads',
+            'column_name' => 'title'
+        ],
+        [
+            'table_name' => 'threads',
+            'column_name' => 'is_visible'
+        ]
         ];
         $mock_queries = $this->createMock(DatabaseQueries::class);
         $mock_queries->expects($this->once())->method('getCourseSchemaTables')->willReturn($tables);
