@@ -475,9 +475,9 @@ progress::-webkit-progress-value {
 
 #panel-instructions{
     color: dimgray;
-    text-align: center;
-    position: relative;
-    padding-top: 200px;
+    display: flex;
+    justify-content: center;
+    padding-top: 20%;
 }
 
 #regrade_inner_info .inner-container {
