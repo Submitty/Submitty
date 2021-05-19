@@ -64,13 +64,10 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $mock_queries->expects($this->once())->method('getCourseSchemaTables')->willReturn($tables);
         $this->core->setQueries($mock_queries);
 
-        $organizedTables = [];
-        foreach ($tables as $table) {
-            if (!isset($organizedTables[$table['table_name']])) {
-                $organizedTables[$table['table_name']] = [];
-            }
-            $organizedTables[$table['table_name']][] = $table['column_name'];
-        }
+        $organizedTables = [
+            'gradeable' => ['g_title', 'g_gradeable_type'],
+            'threads' => ['title', 'is_visible']
+        ];
 
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
