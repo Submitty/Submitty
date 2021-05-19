@@ -77,11 +77,17 @@ export async function runSqlQuery() {
 
 export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
-    $('#sql-database-schema').on('click', () => {
-        $('#sql-database-schema-content').toggle();
+    document.getElementById('sql-database-schema').addEventListener('click', () => {
+        document.getElementById('sql-database-schema-content').style.display =
+            document.getElementById('sql-database-schema-content').style.display === 'block'
+                ? 'none' : 'block';
     });
-    $('.sql-database-table').on('click', (e) => {
-        $(e.target).next('.sql-database-columns').toggle();
+    document.querySelectorAll('.sql-database-table').forEach((elem) => {
+        elem.addEventListener('click', (e) => {
+            e.target.nextElementSibling.style.display =
+                e.target.nextElementSibling.style.display === 'block'
+                    ? 'none' : 'block';
+        });
     });
 }
 

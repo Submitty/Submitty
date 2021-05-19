@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
 use app\exceptions\DatabaseException;
@@ -41,17 +42,41 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     public function testShowToolbox(): void {
-        $this->setUpDatabase();
+            $tables = [
+            [
+                'table_name' => 'gradeable',
+                'column_name' => 'g_title'
+            ],
+            [
+                'table_name' => 'gradeable',
+                'column_name' => 'g_gradeable_type'
+            ],
+            [
+                'table_name' => 'threads',
+                'column_name' => 'title'
+            ],
+            [
+                'table_name' => 'threads',
+                'column_name' => 'is_visible'
+            ]
+        ];
+        $mock_queries = $this->createMock(DatabaseQueries::class);
+        $mock_queries->expects($this->once())->method('getCourseSchemaTables')->willReturn($tables);
+        $this->core->setQueries($mock_queries);
 
-        /*$courseDb = $this->core->getCourseDB();
-        $courseDb->expects($this->once())->method('query')->with("SELECT * FROM information_schema.columns WHERE table_schema='public'");
-        $courseDb->expects($this->once())->method('rows')->with()->willReturn();*/
+        $organizedTables = [];
+        foreach ($tables as $table) {
+            if (!isset($organizedTables[$table['table_name']])) {
+                $organizedTables[$table['table_name']] = [];
+            }
+            $organizedTables[$table['table_name']][] = $table['column_name'];
+        }
 
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertEmpty($response->parameters);
+        $this->assertSame($response->parameters, [$organizedTables]);
     }
 
     public function testRunQuery(): void {

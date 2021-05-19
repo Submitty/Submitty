@@ -11,6 +11,17 @@ beforeEach(() => {
 
     document.body.innerHTML = `
         <form>
+        <div>
+            <button id="sql-database-schema">Database Schema Documentation</button>
+            <div id="sql-database-schema-content" hidden>
+                <ul>
+                    <li>
+                        <a class="sql-database-table"></a>
+                        <div class="sql-database-columns"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
         <textarea name='sql'>SELECT * FROM users;</textarea>
         <div id='run-sql-btn'>Submit</div>
         </form>
