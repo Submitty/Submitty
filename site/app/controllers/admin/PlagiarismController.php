@@ -85,7 +85,7 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        usort($gradeables_with_plagiarism_result, function($a, $b) {
+        usort($gradeables_with_plagiarism_result, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
         });
 
