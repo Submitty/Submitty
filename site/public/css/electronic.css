@@ -50,7 +50,7 @@ aside {
 }
 
 .navigation-box {
-    margin-left: 30%;
+    margin: 0 auto;
     display: flex;
     width: max-content;
     max-width: 100%;
