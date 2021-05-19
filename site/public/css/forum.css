@@ -595,7 +595,7 @@
 }
 
 [data-theme="dark"] .post_box:not(.important) {
-    border:1px solid #bbb;
+    border: 1px solid #bbb;
 }
 
 .thread-box-full {
