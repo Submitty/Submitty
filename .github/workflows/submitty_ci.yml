@@ -15,6 +15,13 @@ env:
   NODE_VERSION: 10
 
 jobs:
+    vagrant-up:
+        runs-on: ubuntu-18
+        steps:
+          - uses: actions/checkout@v2
+          - name: Vagrant up
+            run: vagrant up
+
     eslint:
         runs-on: ubuntu-18.04
         defaults:
