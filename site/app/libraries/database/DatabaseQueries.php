@@ -2634,6 +2634,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    /**
+     * Gets the date for a specified gradeable
+     *
+     * @param $id
+     * @return \DateTime
+     */
+    public function getDateForGradeableById($id) {
+        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
+        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    }
+
     public function getAllGradeablesIds() {
         $this->course_db->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->course_db->rows();

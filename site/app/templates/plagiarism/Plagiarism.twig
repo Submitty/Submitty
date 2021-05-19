@@ -41,13 +41,15 @@
 
 {% macro renderPlagiarismRow(row) %}
     <tr>
-        {% if row['ranking_available'] %}
-            <td>
+        <td>
+            {% if row['ranking_available'] %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
-            </td>
-        {% else %}
-            <td>{{ row['title'] }}</td>
-        {% endif %}
+            {% else %}
+                {{ row['title'] }}
+            {% endif %}
+            <br/>
+            {{ row['duedate'] }}
+        </td>
         {% if row['in_queue'] %}
             <td colspan=4>
                 {% if row['processing'] %}

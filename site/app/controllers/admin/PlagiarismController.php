@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
@@ -76,6 +77,11 @@ class PlagiarismController extends AbstractController {
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
             if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id_title['g_id'] . ".txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeables_with_plagiarism_result[$i]);
+                continue;
+            }
+            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
+            if (isset($duedate)) {
+                $gradeables_with_plagiarism_result[$i]['g_grade_due_date'] = $duedate;
             }
         }
 
