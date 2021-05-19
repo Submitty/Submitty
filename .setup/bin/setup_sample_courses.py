@@ -102,6 +102,7 @@ def main():
             courses[course.code] = course
 
     create_group("submitty_course_builders")
+    print("create course builders group\n")
 
     for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
@@ -118,6 +119,8 @@ def main():
             for key in courses.keys():
                 courses[key].users.append(user)
 
+    print("created users\n")
+
     # To make Rainbow Grades testing possible, need to seed random to have the same users each time
     random.seed(10090542)
 
@@ -132,10 +135,13 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
+    print("connecting to: ")
+    print("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
     submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
     user_table = Table('users', submitty_metadata, autoload=True)
+    print("attempting to insert users\n")
     for user_id in sorted(users.keys()):
         user = users[user_id]
         submitty_conn.execute(user_table.insert(),
@@ -150,6 +156,7 @@ def main():
                               user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
+    print("inserted users to db\n")
     #Sort alphabetically extra students. Shouldn't affect randomness....
     extra_students.sort(key=lambda x: x.id)
 
@@ -165,6 +172,7 @@ def main():
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
+    print("inserted extra users to db\n")
     # INSERT term into terms table, based on today's date.
     today = datetime.today()
     year = str(today.year)
@@ -187,6 +195,7 @@ def main():
                           end_date   = term_end)
 
     submitty_conn.close()
+    print("closed db connection\n")
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
@@ -218,7 +227,7 @@ def main():
             key += 1
 
 
-
+    print("attempting to make course json\n")
     for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]
         courses[course].check_rotating(users)

@@ -743,11 +743,14 @@ if [ ${WORKER} == 0 ]; then
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
+            echo "Creating courses with submissions"
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
         else
+            echo "Creating courses with NO submissions"
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
 
+        echo "setting up sample user data"
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
     fi
 fi
