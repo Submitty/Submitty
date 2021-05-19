@@ -2,6 +2,7 @@ import { buildCourseUrl, getCsrfToken } from './server.js';
 
 export async function runSqlQuery() {
     document.getElementById('query-results').style.display = 'block';
+    document.getElementById('download-sql-btn').disabled = true;
 
     const form_data = new FormData();
     form_data.append('csrf_token', getCsrfToken());
@@ -25,7 +26,6 @@ export async function runSqlQuery() {
         if (json.status !== 'success') {
             error_mesage.textContent = json.message;
             error.style.display = 'block';
-            document.getElementById('download-sql-btn').disabled = true;
             return;
         }
 
@@ -73,7 +73,6 @@ export async function runSqlQuery() {
     catch (exc) {
         console.error(exc);
         alert(exc.toString());
-        document.getElementById('download-sql-btn').disabled = true;
     }
 }
 
