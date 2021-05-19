@@ -1,18 +1,32 @@
-<div class="content" style="min-height:78vh">
+<div class="content">
     <Table class="table">
         {% if not data|length == 0 %}
             {% for subject in data|keys %}
-                <button class="btn btn-outline-secondary text-left"  data-toggle="collapse" href={{"#collapse" ~ loop.index}} aria-expanded="false">
-                    <div> {{subject ~ " "}} </div>
-                    <div> {{data[subject][0]["created"]}}</div>
+                <button class="btn btn-primary text-left"  data-toggle="collapse" href={{"#collapse" ~ loop.index}} aria-expanded="false">
+                    <div> Email Subject: {{subject ~ " "}} </div>
+                    <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
                 </button>
                 <div class="collapse in card" id={{"collapse"~loop.index}}>
                     <ul class="list-group list-group-flush">
                         {% for row in data[subject] %}
                             {% if  row["sent"] != null %}
-                                <li class="list-group-item"> {{row["user_id"]}}, time sent: {{row["sent"]}} </li>
+                                <li class="list-group-item list-group-item-success"> 
+                                    <div>Recipient:  {{row["user_id"]}}</div> 
+                                    <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
+                                </li>
+                            {% elseif row["error"] == null %}
+                                <li class="list-group-item list-group-item-warning">
+                                    <div>Recipient: {{row["user_id"]}}</div>
+                                    <div>Time Sent: Not Sent</div>
+                                </li>
                             {% else %}
-                                <li class="list-group-item list-group-item-danger"> {{row["user_id"]}}, Not Sent </li>
+                                <li class="list-group-item list-group-item-danger">
+                                    <div>Recipient: {{row["user_id"]}}</div>
+                                    <div>Time Sent: Not Sent</div>
+                                    <div>
+                                        Error: {{row["error"]}}
+                                    </div>
+                                </li>
                             {% endif %}
                         {% endfor %}
                     </ul>
