@@ -1,0 +1,16 @@
+name: Vagrant Up
+
+on: 
+  workflow_dispatch
+  schedule:
+    0 0 * * 0
+
+
+vagrant-up:
+  runs-on: macos-10.15
+  steps:
+    - uses: actions/checkout@v2
+    - name: Vagrant up
+      run: |
+        vagrant plugin install vagrant-vbguest
+        vagrant up
