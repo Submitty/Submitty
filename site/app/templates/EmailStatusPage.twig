@@ -1,5 +1,17 @@
 <div class="content" style="min-height:78vh">
     <Table class="table">
-        <div> {{data[0]}}, {{data[1]}}</div>
+        {% if not data|length == 0 %}
+            {% for row in data %}
+                {% if row["sent"] != null%}
+                    <div> {{row["user_id"]}}, {{row["subject"]}}, {{row["sent"]}}</div>
+                {% else %}
+                    <div> {{row["user_id"]}}, {{row["subject"]}}, Not Sent</div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div>
+                No Result
+            </div>
+        {% endif %}
     </Table>
 </div>

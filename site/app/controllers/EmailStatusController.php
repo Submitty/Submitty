@@ -18,7 +18,7 @@ class EmailStatusController extends AbstractController{
 
     
     /**
-     * @Route("/courses/{semester}/{course}/email_status")
+     * @Route("/courses/{_semester}/{_course}/email_status")
      * @return MultiResponse
      */
     public function getEmailStatusPage() {
