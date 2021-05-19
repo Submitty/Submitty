@@ -770,7 +770,7 @@ STRING;
              'error' => 'Invalid filename',
              'size' => 9,
              'is_zip' => true,
-             'success' => true
+             'success' => false
             ]
         );
     }
