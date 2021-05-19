@@ -50,10 +50,10 @@ aside {
 }
 
 .navigation-box {
-    margin: 0 auto;
     display: flex;
     width: max-content;
     max-width: 100%;
+    margin-left: 30%;
 }
 
 .navigation-box.smaller-navbar .progress_bar {
