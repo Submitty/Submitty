@@ -1081,6 +1081,10 @@ HTML;
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind) {
         $gradeable = $graded_gradeable->getGradeable();
+        $isBlind = false;
+        if($gradeable->getLimitedAccessBlind() == 2){
+            $isBlind = true;
+        }
         $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
 
         $studentBaseUrl = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']);
@@ -1111,7 +1115,8 @@ HTML;
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
-            'team_assignment' => $gradeable->isTeamAssignment()
+            'team_assignment' => $gradeable->isTeamAssignment(),
+            'isBlind' => $isBlind
         ]);
     }
 
