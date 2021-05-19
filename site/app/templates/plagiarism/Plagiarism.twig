@@ -6,11 +6,23 @@
         >+ Configure New Gradeable for Plagiarism Detection</a>
     </div>
 
-    <div class="sub plag-table-cont">
-        <table class="plag-table">
-            {% for row in plagiarism_results_info %}
-                {{ _self.renderPlagiarismRow(row) }}
-            {% endfor %}
+    <div class="plag-table-cont">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Gradeable</th>
+                    <th></th>
+                    <th>Last Run</th>
+                    <th>Submissions</th>
+                    <th>Students<br/>Matched</th>
+                    <th>Nightly<br/>Re-run</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in plagiarism_results_info %}
+                    {{ _self.renderPlagiarismRow(row) }}
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </div>
@@ -28,32 +40,7 @@
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 
 {% macro renderPlagiarismRow(row) %}
-    {% if row['in_queue'] %}
-        <tr>
-            <td>{{ row['title'] }}
-            </td>
-            <td colspan=3>
-                {% if row['processing'] %}
-                    <i>Running</i>
-                {% else %}
-                    <i>In queue</i>
-                {% endif %}
-            </td>
-            <td>
-                Last run: {{ row['timestamp'] }}
-            </td>
-            <td>
-                {{ row['students'] }} students, {{ row['submissions'] }} submissions
-            </td>
-            <td>
-                <label>
-                    <input type="checkbox" {{ row['nightly_rerun_status'] }}>
-                    Nightly Re-run
-                </label>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
+    <tr>
         {% if row['ranking_available'] %}
             <td>
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
@@ -61,11 +48,19 @@
         {% else %}
             <td>{{ row['title'] }}</td>
         {% endif %}
+        {% if row['in_queue'] %}
+            <td colspan=4>
+                {% if row['processing'] %}
+                    <i>Running</i>
+                {% else %}
+                    <i>In queue</i>
+                {% endif %}
+            </td>
+        {% else %}
             <td>
                 <span class="plag-action-btn-cont">
                     <a href="{{ row['edit_plagiarism_link'] }}"
-                       aria-label="Edit {{ row['title'] }}"
-                    >
+                       aria-label="Edit {{ row['title'] }}">
                         <i class="fas fa-pencil-alt"></i>
                     </a>
                     <a href="{{ row['rerun_plagiarism_link'] }}"
@@ -81,7 +76,7 @@
                 </span>
             </td>
             <td>
-                Last run: {{ row['timestamp'] }}
+                {{ row['timestamp'] }}
             </td>
             <td>
                 {{ row['students'] }} students, {{ row['submissions'] }} submissions
@@ -89,14 +84,11 @@
             <td>
                 {{ row['matches_and_topmatch'] }}
             </td>
-            <td>
-                <label>
-                    <input type="checkbox"
-                           onclick='window.location.href = {{ row['nightly_rerun_link'] }};'
-                           {{ row['nightly_rerun_status'] }}>
-                    Nightly Re-run
-                </label>
-            </td>
-        </tr>
     {% endif %}
+        <td>
+            <input type="checkbox"
+                   onclick='window.location.href = {{ row['nightly_rerun_link'] }};'
+                   {{ row['nightly_rerun_status'] }}>
+        </td>
+    </tr>
 {% endmacro %}
