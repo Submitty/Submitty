@@ -135,7 +135,8 @@ def get_email_queue(db):
     """Get an active queue of emails waiting to be sent."""
     result = db.execute(
         "SELECT emails.id, emails.user_id, users.user_email, emails.subject," +
-        " emails.body FROM emails INNER JOIN users ON" +
+        " emails.body, users.user_email_secondary, users.user_email_secondary_notify" +
+        " FROM emails INNER JOIN users ON" +
         " emails.user_id = users.user_id WHERE" +
         " emails.sent is NULL AND emails.error = ''" +
         " ORDER BY id LIMIT 100;")
@@ -149,6 +150,14 @@ def get_email_queue(db):
             'subject': row[3],
             'body': row[4]
             })
+        if row[6]:
+            queued_emails.append({
+                'id': row[0],
+                'user_id': row[1],
+                'send_to': row[5],
+                'subject': row[3],
+                'body': row[4]
+                })
 
     return queued_emails
 
