@@ -85,6 +85,10 @@ class PlagiarismController extends AbstractController {
             }
         }
 
+        usort($gradeables_with_plagiarism_result, function($a, $b) {
+            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+        });
+
         $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
         if (!file_exists($nightly_rerun_info_file)) {
             $nightly_rerun_info = [];
