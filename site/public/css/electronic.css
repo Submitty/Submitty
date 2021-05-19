@@ -473,6 +473,13 @@ progress::-webkit-progress-value {
     filter: blur(3px);
 }
 
+#panel-instructions{
+    color: dimgray;
+    text-align: center;
+    position: relative;
+    padding-top: 200px;
+}
+
 #regrade_inner_info .inner-container {
     padding: 20px;
 }
