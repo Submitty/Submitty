@@ -174,6 +174,10 @@ class PlagiarismController extends AbstractController {
             $gradeable_ids_titles[$i]['g_grade_due_date'] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id'])->format('F d Y H:i:s');;
         }
 
+        usort($gradeable_ids_titles, function ($a, $b) {
+            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+        });
+
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
     }
