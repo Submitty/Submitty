@@ -169,7 +169,9 @@ class PlagiarismController extends AbstractController {
         foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
             if (!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeable_ids_titles[$i]);
+                continue;
             }
+            $gradeable_ids_titles[$i]['g_grade_due_date'] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id'])->format('F d Y H:i:s');;
         }
 
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
