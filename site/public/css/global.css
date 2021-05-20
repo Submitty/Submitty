@@ -181,6 +181,19 @@ footer .footer-separator {
     margin-left: 10px;
 }
 
-.timer-under-min{
-    color: #dc3545;
+#gradeable-progress-bar{
+    width: 0%;
+    height: 30px;
+    background-color: green;
+    border-radius: 20px;
+    transform: translateY(5px);
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#gradeable-progress{
+    width: 100%;
+    height: 40px;
+    background-color: gray;
+    border-radius: 20px;
 }

@@ -1739,7 +1739,9 @@ class SubmissionController extends AbstractController {
                 $duedate = $gradeable->getSubmissionDueDate();
                 return JsonResponse::getSuccessResponse([
                     'deadline' => $duedate->getTimestamp() * 1000,
-                    'user_allowed_time' => $now->getTimestamp() * 1000
+                    'user_allowed_time_deadline' => $now->getTimestamp() * 1000,
+                    'user_allowed_time' => $allowed_time,
+                    'user_start_time' => (new \DateTime($thing))->getTimestamp() * 1000
                 ]);
             }
             else {

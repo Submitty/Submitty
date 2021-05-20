@@ -450,6 +450,7 @@ class HomeworkView extends AbstractView {
             'github_user_id' => $github_user_id,
             'github_repo_id' => $github_repo_id,
             'has_due_date' => $gradeable->hasDueDate(),
+            'is_timed' => $gradeable->hasAllowedTime(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the

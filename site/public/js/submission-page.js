@@ -11,7 +11,10 @@ function openActionsPopup(popup_css, element_id) {
 document.addEventListener('DOMContentLoaded', () => {
     let days, hours, mins, seconds = 0;
     let deadline = 0;
-    if (document.getElementById('time_remaining_text') !== null) {
+    let startTime = 0;
+    let width = 0;
+    let allowedTime = 0;
+    if (document.getElementById('time-remaining-text') !== null) {
         syncDeadline();
     }
 
@@ -26,8 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
+                    if (Object.prototype.hasOwnProperty.call(data, 'user_allowed_time_deadline')) {
+                        deadline = data.user_allowed_time_deadline;
+                    }
                     if (Object.prototype.hasOwnProperty.call(data, 'user_allowed_time')) {
-                        deadline = data.user_allowed_time;
+                        allowedTime = data.user_allowed_time;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(data, 'user_start_time')) {
+                        startTime = data.user_start_time;
                     }
                     else {
                         deadline = data.deadline;
@@ -47,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateTime() {
         if (Date.now() > deadline) {
-            document.getElementById('time_remaining_text').textContent = 'Time Left until Due: Past Due';
+            document.getElementById('time-remaining-text').textContent = 'Time Left until Due: Past Due';
         }
         else {
             const time = Math.floor((deadline - Date.now())/1000);
@@ -55,18 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
             mins = Math.floor(time / 60) % 60;
             hours = Math.floor(time / 3600) % 24;
             days = Math.floor(time / (3600*24));
+            width = ((Date.now() - startTime) / 1000 / 60 / allowedTime * 100) * 0.95;
+            if (width > 75 && width < 90) {
+                document.getElementById('gradeable-progress-bar').style.backgroundColor = 'yellow';
+            }
+            else if (width > 90) {
+                document.getElementById('gradeable-progress-bar').style.backgroundColor = 'red';
+            }
+            document.getElementById('gradeable-progress-bar').style.width = `${width}%`;
             if (days > 0) {
-                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${days.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} days ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours`;
+                document.getElementById('time-remaining-text').textContent = `Time Left until Due: ${days.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} days ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours`;
             }
             else if (hours > 0) {
-                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins`;
-            }
-            else if (mins > 0) {
-                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
+                document.getElementById('time-remaining-text').textContent = `Time Left until Due: ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins`;
             }
             else {
-                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
-                document.getElementById('time_remaining_text').classList.add('timer-under-min');
+                document.getElementById('time-remaining-text').textContent = `Time Left until Due: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
             }
             setTimeout(updateTime, 1000);
         }

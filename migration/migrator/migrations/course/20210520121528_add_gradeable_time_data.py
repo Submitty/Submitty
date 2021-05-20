@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE gradeable ADD COLUMN g_allowed_time integer DEFAULT NULL;")
+    database.execute("ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_allowed_time integer DEFAULT NULL;")
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS gradeable_allowed_time_override (
