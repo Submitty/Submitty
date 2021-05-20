@@ -23,7 +23,7 @@
                     {% endif %}
                 {% else %}
                     {% if poll.getUserResponse(user_id) is same as(null) %}
-                        <input type="radio" value="-1" name="answer" id="answer-no-response" class="disabled-radio" checked disabled/>
+                        <input type="radio" value="-1" name="answer" id="answer-no-response" checked disabled/>
                     {% else %}
                         <input type="radio" value="-1" name="answer" id="answer-no-response" disabled/>
                     {% endif %}
@@ -39,7 +39,7 @@
                         {% if poll.isOpen() %}
                             <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" checked/>
                         {% else %}
-                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" class="disabled-radio" checked disabled/>
+                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" checked disabled/>
                         {% endif %}
                     {% elseif poll.isOpen() %}
                         <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}"/>
