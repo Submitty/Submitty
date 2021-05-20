@@ -1736,5 +1736,6 @@ class SubmissionController extends AbstractController {
                 'deadline' => $duedate->getTimestamp() * 1000,
             ]);
         }
+        return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
     }
 }

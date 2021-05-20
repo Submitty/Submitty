@@ -180,3 +180,7 @@ footer .footer-separator {
 #loading-bar-percentage{
     margin-left: 10px;
 }
+
+.timer-under-min{
+    color: #dc3545;
+}
