@@ -9,15 +9,14 @@ function openActionsPopup(popup_css, element_id) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    let url  = '';
     let days, hours, mins, seconds = 0;
     let deadline = 0;
     if (document.getElementById('time_remaining_text') !== null) {
-        url = `${window.location}/time_remaining_data`;
         syncDeadline();
     }
 
     function syncDeadline() {
+        const url = `${window.location}/time_remaining_data`;
         $.ajax({
             url,
             type: 'GET',
@@ -27,7 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
-                    deadline = data.deadline;
+                    if (Object.prototype.hasOwnProperty.call(data, 'user_allowed_time')) {
+                        deadline = data.user_allowed_time;
+                    }
+                    else {
+                        deadline = data.deadline;
+                    }
                     updateTime();
                 }
                 else {

@@ -1731,10 +1731,23 @@ class SubmissionController extends AbstractController {
     public function getTimeRemainingData($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable !== null) {
-            $duedate = $gradeable->getSubmissionDueDate();
-            return JsonResponse::getSuccessResponse([
-                'deadline' => $duedate->getTimestamp() * 1000,
-            ]);
+            if ($gradeable->hasAllowedTime()) {
+                $allowed_time = $gradeable->getUserAllowedTime($this->core->getUser());
+                $thing = $this->core->getQueries()->getGradeableAccessUser($gradeable->getId(), $this->core->getUser()->getId())[0]['timestamp'];
+                $now = new \DateTime($thing);
+                $now->add(new \DateInterval('PT' . $allowed_time . 'M'));
+                $duedate = $gradeable->getSubmissionDueDate();
+                return JsonResponse::getSuccessResponse([
+                    'deadline' => $duedate->getTimestamp() * 1000,
+                    'user_allowed_time' => $now->getTimestamp() * 1000
+                ]);
+            }
+            else {
+                $duedate = $gradeable->getSubmissionDueDate();
+                return JsonResponse::getSuccessResponse([
+                    'deadline' => $duedate->getTimestamp() * 1000,
+                ]);
+            }
         }
         return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
     }
