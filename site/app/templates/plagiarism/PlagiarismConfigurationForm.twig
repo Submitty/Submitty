@@ -13,7 +13,7 @@
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id">
                             {% for gradeable_id_title in gradeable_ids_titles %}
-                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} | Due {{ gradeable_id_title['g_grade_due_date'] }}</option>
+                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} (Due {{ gradeable_id_title['g_grade_due_date'] }})</option>
                             {% endfor %}
                         </select>
                     {% else %}
