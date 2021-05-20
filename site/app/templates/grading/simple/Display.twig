@@ -283,6 +283,15 @@
         </td>
     {% endif %}
 
+    <script type="text/javascript">
+        function adjustHeight(el){
+            el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+        }
+        function minimizeHeight(el) {
+            el.style.height = '30px';
+        }
+    </script>
+
     {% set text_start = components_numeric|length %}
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
@@ -293,6 +302,9 @@
                   role="textbox" contenteditable
                   value="{{ component_grade.getComment() }}"
                   onclick="this.select()"
+                  onfocus="adjustHeight(this);"
+                  onfocusout="minimizeHeight(this);"
+                  onkeyup="adjustHeight(this);"
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
                   rows="1"
