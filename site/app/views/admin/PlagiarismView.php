@@ -88,7 +88,8 @@ class PlagiarismView extends AbstractView {
     }
 
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title, $rankings) {
-        $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
+        $this->core->getOutput()->addBreadcrumb('Plagiarism', $this->core->buildCourseUrl(['plagiarism']));
+        $this->core->getOutput()->addBreadcrumb($gradeable_title, $this->core->buildCourseUrl([$gradeable_title]));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
         $this->core->getOutput()->addInternalJs('plagiarism.js');
