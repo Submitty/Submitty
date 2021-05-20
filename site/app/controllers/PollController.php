@@ -167,7 +167,7 @@ class PollController extends AbstractController {
             // validate the uploaded file size
             if (array_key_exists("failed", $status)) {
                 unlink($file_path);
-                return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
+                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
             }
             else {
                 $file = $_FILES["image_file"];
