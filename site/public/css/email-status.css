@@ -3,3 +3,18 @@
     margin-top: 1vh;
     text-align: left;
 }
+.expand{
+    display: none;
+}
+.status{
+    list-style: none;
+}
+.status-error{
+    background-color: var(--danger-red);
+}
+.status-warning{
+    background-color: var(--active-warning-brown);
+}
+.status-success{
+    background-color: var(--alert-success-green);
+}
