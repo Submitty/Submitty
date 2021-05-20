@@ -9,15 +9,19 @@ function openActionsPopup(popup_css, element_id) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const url = `${window.location}/time_remaining_data`;
-
+    let url  = '';
     let days, hours, mins, seconds = 0;
+    let deadline = 0;
+    if (document.getElementById('time_remaining_text') !== null) {
+        url = `${window.location}/time_remaining_data`;
+        syncTimer();
+    }
 
-    let untilUpdate = 600;
-
-    let lastTime = Date.now();
-
-    syncTimer();
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            console.log('tab active');
+        }
+    });
 
     function syncTimer() {
         $.ajax({
@@ -29,24 +33,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
-                    if (data.invert === 0) {
-                        days = data.days;
-                        hours = data.hours;
-                        mins = data.mins;
-                        seconds = data.seconds;
-                        lastTime = Date.now();
-                        updateTime();
-                    }
-                    else {
-                        document.getElementById('time_remaining_text').textContent = 'Time Left until Due: Past Due';
-                    }
+                    deadline = data.deadline;
+                    updateTime();
                 }
             },
         });
     }
 
-
     function updateTime() {
+        if (Date.now() > deadline) {
+            document.getElementById('time_remaining_text').textContent = 'Time Left until Due: Past Due';
+        }
+        else {
+            const time = Math.floor((deadline - Date.now())/1000);
+            seconds = time % 60;
+            mins = Math.floor(time / 60) % 60;
+            hours = Math.floor(time / 3600) % 60;
+            days = Math.floor(time / (3600*24)) % 24;
+            if (days > 0) {
+                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${days.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} days ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours`;
+            }
+            else if (hours > 0) {
+                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${hours.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} hours ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins`;
+            }
+            else {
+                document.getElementById('time_remaining_text').textContent = `Time Left until Due: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
+            }
+            setTimeout(updateTime, 1000);
+        }
+    }
+
+
+    /*function updateTime() {
         const oldseconds = seconds;
         seconds -= Math.floor((Date.now()-lastTime)/1000);
         lastTime = Date.now();
@@ -87,5 +105,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-    }
+    }*/
 });

@@ -1731,15 +1731,9 @@ class SubmissionController extends AbstractController {
     public function getTimeRemainingData($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable !== null) {
-            $now = new \DateTime('now');
             $duedate = $gradeable->getSubmissionDueDate();
-            $remaining = $now->diff($duedate);
             return JsonResponse::getSuccessResponse([
-                'days' => $remaining->d,
-                'hours' => $remaining->h,
-                'mins' => $remaining->i,
-                'seconds' => $remaining->s,
-                'invert' => $remaining->invert
+                'deadline' => $duedate->getTimestamp() * 1000,
             ]);
         }
     }
