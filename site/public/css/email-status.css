@@ -1,6 +1,5 @@
 .btn{
     min-width: 100%;
-    margin-top: 1vh;
     text-align: left;
 }
 .expand{
@@ -17,4 +16,11 @@
 }
 .status-success{
     background-color: var(--alert-success-green);
+}
+.status-container{
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+div{
+    word-wrap: break-word;
 }

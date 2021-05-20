@@ -2,34 +2,36 @@
     <Table class="table">
         {% if not data|length == 0 %}
             {% for subject in data|keys %}
-                <button class="btn btn-primary text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
-                    <div> Email Subject: {{subject ~ " "}} </div>
-                    <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
-                </button>
-                <div class="expand" id={{"collapse"~loop.index}}>
-                    <ul>
-                        {% for row in data[subject] %}
-                            {% if  row["sent"] != null %}
-                                <li class="status status-success"> 
-                                    <div>Recipient:  {{row["user_id"]}}</div> 
-                                    <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
-                                </li>
-                            {% elseif row["error"] == null %}
-                                <li  class="status status-warning">
-                                    <div>Recipient: {{row["user_id"]}}</div>
-                                    <div>Time Sent: Not Sent</div>
-                                </li>
-                            {% else %}
-                                <li class="status status-error">
-                                    <div>Recipient: {{row["user_id"]}}</div>
-                                    <div>Time Sent: Not Sent</div>
-                                    <div>
-                                        Error: {{row["error"]}}
-                                    </div>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+                <div class="status-container">
+                    <button class="btn btn-primary text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        <div> Email Subject: {{subject ~ " "}} </div>
+                        <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
+                    </button>
+                    <div class="expand" id={{"collapse"~loop.index}}>
+                        <ul>
+                            {% for row in data[subject] %}
+                                {% if  row["sent"] != null %}
+                                    <li class="status status-success"> 
+                                        <div>Recipient:  {{row["user_id"]}}</div> 
+                                        <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
+                                    </li>
+                                {% elseif row["error"] == null %}
+                                    <li  class="status status-warning">
+                                        <div>Recipient: {{row["user_id"]}}</div>
+                                        <div>Time Sent: Not Sent</div>
+                                    </li>
+                                {% else %}
+                                    <li class="status status-error">
+                                        <div>Recipient: {{row["user_id"]}}</div>
+                                        <div>Time Sent: Not Sent</div>
+                                        <div>
+                                            Error: {{row["error"]}}
+                                        </div>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             {% endfor %}
         {% else %}
