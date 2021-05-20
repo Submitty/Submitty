@@ -28,7 +28,7 @@
                 Optional Image:
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
-	    <br/><br/>
+  	    <br/><br/>
 
             <label for="poll-date">
                 Expected release date:
@@ -51,7 +51,7 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
-	    <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
+  	    <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -253,10 +253,10 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-question-error").show();
-	} else if (!size_is_valid) {
-	    $("#poll-form-submit").prop("disabled", true);
-	    $(".polls-submit-error").hide();
-	    $("#file-size-error").show();
+        } else if (!size_is_valid)
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#file-size-error").show();
         } else if ($("#poll-date").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
