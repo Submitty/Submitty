@@ -177,8 +177,8 @@ class PollController extends AbstractController {
                 if (!FileUtils::isValidImage($file_path)) {
                     unlink($file_path);
                     $this->core->getOutput()->renderResultMessage("Error: " . $_FILES["image_file"]["name"] . " is not a valid image file. File was not successfully uploaded.", false);
-                } 
-                else { 
+                }
+                else {
                     $this->core->getQueries()->setPollImage($poll_id, $file_path);
                 }
             }
