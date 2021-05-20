@@ -283,7 +283,7 @@
         </td>
     {% endif %}
 
-    <script type="text/javascript">
+    <script>
         function adjustHeight(el){
             el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
         }
@@ -299,8 +299,7 @@
         <td class="option-small-input">
             <textarea class="option-small-box cell-grade"
                   tabindex="0" id="cell-{{ index }}-{{ text_start + loop.index0 }}"
-                  role="textbox" contenteditable
-                  value="{{ component_grade.getComment() }}"
+                  contenteditable
                   onclick="this.select()"
                   onfocus="adjustHeight(this);"
                   onfocusout="minimizeHeight(this);"
@@ -309,7 +308,7 @@
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
                   rows="1"
                   style="resize: vertical;"
-            ></textarea>
+            >{{ component_grade.getComment() }}</textarea>
         </td>
     {% endfor %}
 {% endmacro %}
