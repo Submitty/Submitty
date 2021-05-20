@@ -171,7 +171,8 @@ class PlagiarismController extends AbstractController {
                 unset($gradeable_ids_titles[$i]);
                 continue;
             }
-            $gradeable_ids_titles[$i]['g_grade_due_date'] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id'])->format('F d Y H:i:s');;
+            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
+            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
         }
 
         usort($gradeable_ids_titles, function ($a, $b) {
