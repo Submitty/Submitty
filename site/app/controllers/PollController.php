@@ -163,19 +163,24 @@ class PollController extends AbstractController {
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
-            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-            $acceptable = ['image/jpeg','image/jpg','image/gif','image/png'];
-            if (($_FILES['image_file']['size'] >= $max_size) || ($_FILES["image_file"]["size"] == 0)) {
-                $this->core->addErrorMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb.");
-            }
-            elseif ((!in_array($_FILES['image_file']['type'], $acceptable)) && (!empty($_FILES["image_file"]["type"]))) {
-                $this->core->addErrorMessage("Upload failed: Invalid file type. Only JPG, JPEG, GIF and PNG types are accepted.");
+            $status = FileUtils::validateUploadedFiles($_FILES["image_file"]);
+            // validate the uploaded file size
+            if (array_key_exists("failed", $status)) {
+                unlink($file_path);
+                return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
             }
             else {
                 $file = $_FILES["image_file"];
                 $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
                 move_uploaded_file($file["tmp_name"], $file_path);
-                $this->core->getQueries()->setPollImage($poll_id, $file_path);
+                // validate the uploaded file type is indeed an image
+                if (!FileUtils::isValidImage($file_path)) {
+                    unlink($file_path);
+                    $this->core->getOutput()->renderResultMessage("Error: " . $_FILES["image_file"]["name"] . " is not a valid image file. File was not successfully uploaded.", false);
+                } 
+                else { 
+                    $this->core->getQueries()->setPollImage($poll_id, $file_path);
+                }
             }
         }
 
@@ -360,17 +365,14 @@ class PollController extends AbstractController {
             if ($current_file_path !== null) {
                 unlink($current_file_path);
             }
-            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-            $acceptable = ['image/jpeg','image/jpg','image/gif','image/png'];
-            if (($_FILES['image_file']['size'] >= $max_size) || ($_FILES["image_file"]["size"] == 0)) {
-                $this->core->addErrorMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb.");
+            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
+            move_uploaded_file($file["tmp_name"], $file_path);
+            $status = FileUtils::validateUploadedFiles($_FILES["image_file"]);
+            if (array_key_exists("failed", $status)) {
+                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
             }
-            elseif ((!in_array($_FILES['image_file']['type'], $acceptable)) && (!empty($_FILES["image_file"]["type"]))) {
-                $this->core->addErrorMessage("Upload failed: Invalid file type. Only JPG, GIF and PNG types are accepted.");
-            }
-            else {
-                $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
-                move_uploaded_file($file["tmp_name"], $file_path);
+            if (!FileUtils::isValidImage($file_path)) {
+                $this->core->getOutput()->renderResultMessage("Error: " . $_FILES["image_file"]["name"] . " is not a valid image file.", false);
             }
         }
         elseif (isset($_POST['keep_image'])) {
