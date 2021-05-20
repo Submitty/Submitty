@@ -138,9 +138,9 @@
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}
-                              <div class="centered-icon">
-                                <i class="fas fa-angle-right"></i>
-                              </div>
+                                <span class="centered-icon">
+                                    <i class="fas fa-angle-right"></i>
+                                </span>
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
