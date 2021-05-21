@@ -32,7 +32,7 @@ class EmailStatusModel extends AbstractModel {
             if ($row["sent"] != null) {
                 $this->successes[$row["subject"]][] = $row;
             }
-            else if($row["error"] !=  null) {
+            elseif ($row["error"] != null) {
                 $this->errors[$row["subject"]][] = $row;
             }
             else {
@@ -44,7 +44,7 @@ class EmailStatusModel extends AbstractModel {
         return $this->subjects;
     }
     public function getPending() {
-        return $this->pending; 
+        return $this->pending;
     }
     public function getSuccesses() {
         return $this->successes;
