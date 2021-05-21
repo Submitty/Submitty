@@ -443,6 +443,11 @@ HTML;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
+        if(array_key_exists('anon_mode', $_COOKIE)){
+            if($_COOKIE['anon_mode'] === 'on'){
+                $anon_mode = true;
+            }
+        }
 
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
@@ -517,7 +522,7 @@ HTML;
             else {
                 $columns[]     = ["width" => "2%",  "title" => "",                 "function" => "index"];
                 $columns[]     = ["width" => "8%", "title" => "Section",          "function" => "section"];
-                if ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2) {
+                if (($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2) || $anon_mode) {
                     $columns[]         = ["width" => "43%", "title" => "Student",          "function" => "user_id_anon"];
                 }
                 else {
@@ -796,7 +801,6 @@ HTML;
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
 
         $this->core->getOutput()->enableMobileViewport();
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -824,6 +828,8 @@ HTML;
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "toggle_anon_mode_url" => $details_base_url . '?' .
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => !$anon_mode]),
+            "anon_mode_url" => $details_base_url . '?' .
+                http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => 1]),
             "sort" => $sort,
             "direction" => $direction
         ]);
