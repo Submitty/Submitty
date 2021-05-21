@@ -1,5 +1,7 @@
 {% import _self as self %} {# Required to use macros in same template #}
-
+{% if anon_mode_cookie == 'on' %}
+    <h1>anon mode on</h1>
+{% endif %}
 <div class="content">
     {#
         Default is viewing your sections
@@ -49,7 +51,7 @@
                 </a>
                 {% if toggle_anon_button %}
                 <a class="btn btn-default"
-                   href="{{ toggle_anon_mode_url }}">
+                   href="{{ toggle_anon_mode_url }}" onclick="changeAnon()">
                     {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
                 </a>
                 {% endif %}
@@ -687,3 +689,17 @@
 {% endmacro %}
 
 {# /Column functions #}
+
+<script type="text/javascript">
+    function changeAnon() {
+        var status = '{{ anon_mode_cookie }}';
+
+        if (status == 'off') {
+            document.cookie = "anon_mode=on;";
+        }
+        else {
+            document.cookie = "anon_mode=off;";
+        }
+        location.reload();
+    }
+</script>

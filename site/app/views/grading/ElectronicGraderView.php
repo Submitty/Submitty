@@ -806,6 +806,7 @@ HTML;
             "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
+            "anon_mode_cookie" => array_key_exists('anon_mode', $_COOKIE) ? $_COOKIE['anon_mode'] : 'off',
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
@@ -1098,7 +1099,6 @@ HTML;
         if ($peer && $this->core->getUser()->getGroup() == 4) {
             $i_am_a_peer = true;
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,
