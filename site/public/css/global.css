@@ -181,14 +181,3 @@ footer .footer-separator {
     margin-left: 10px;
 }
 
-#gradeable-progress-bar{
-    width: 0%;
-    height: 30px;
-    background-color: var(--standard-dark-green);
-}
-
-#gradeable-progress{
-    width: 100%;
-    height: 30px;
-    background-color: gray;
-}

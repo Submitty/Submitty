@@ -15,9 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let startTime = 0;
     let width = 0;
     let allowedTime = 0;
-    if (document.getElementById('time-remaining-text') !== null || document.getElementById('gradeable-time-remaining-text') !== null) {
-        syncDeadline();
-    }
+    syncDeadline();
 
     function syncDeadline() {
         const url = `${window.location}/time_remaining_data`;
@@ -40,10 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         startTime = data.user_start_time;
                     }
                     if (user_deadline !== 0) {
-                        updateUserTime();
+                        if (document.getElementById('time-remaining-text') !== null) {
+                            updateUserTime();
+                        }
                     }
                     deadline = data.deadline;
-                    updateGradeableTime();
+                    if (document.getElementById('gradeable-time-remaining-text') !== null) {
+                        updateGradeableTime();
+                    }
                 }
                 else {
                     // eslint-disable-next-line no-undef
@@ -59,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUserTime() {
         if (Date.now() > user_deadline) {
             document.getElementById('time-remaining-text').textContent = 'Your Time Remaining: Past Due';
+            document.getElementById('gradeable-progress-bar').style.backgroundColor = 'var(--alert-danger-red)';
+            document.getElementById('gradeable-progress-bar').style.width = '100%';
         }
         else {
             const time = Math.floor((user_deadline - Date.now())/1000);
@@ -66,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mins = Math.floor(time / 60) % 60;
             hours = Math.floor(time / 3600) % 24;
             days = Math.floor(time / (3600*24));
-            width = ((Date.now() - startTime) / 1000 / 60 / allowedTime * 100);
+            width = ((Date.now() - startTime) / 1000 / 60 / allowedTime * 100) * 0.95 + 5;
             if (width > 75 && width < 90) {
                 document.getElementById('gradeable-progress-bar').style.backgroundColor = 'var(--standard-vibrant-yellow)';
             }
