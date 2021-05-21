@@ -146,18 +146,10 @@ def get_email_queue(db):
         queued_emails.append({
             'id': row[0],
             'user_id': row[1],
-            'send_to': row[2],
+            'send_to': [row[2], row[5]] if row[6] else [row[2]],
             'subject': row[3],
             'body': row[4]
             })
-        if row[6]:
-            queued_emails.append({
-                'id': row[0],
-                'user_id': row[1],
-                'send_to': row[5],
-                'subject': row[3],
-                'body': row[4]
-                })
 
     return queued_emails
 
@@ -181,7 +173,7 @@ def construct_mail_string(send_to, subject, body):
     """Format an email string."""
     headers = [
         ('Content-Type', 'text/plain; charset=utf-8'),
-        ('TO', send_to),
+        ('TO', ', '.join(send_to)),
         ('From', EMAIL_SENDER),
         ('reply-to', EMAIL_REPLY_TO),
         ('Subject', subject)
