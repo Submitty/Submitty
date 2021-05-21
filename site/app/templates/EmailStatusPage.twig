@@ -1,14 +1,14 @@
 <div class="content">
     <Table class="table">
-        {% if not data|length == 0 %}
-            {% for subject in data|keys %}
+        {% if not subjects|length == 0 %}
+            {% for subject in subjects|keys %}
                 <div class="status-container">
-                    {% if data[subject]|length == successes[subject] %}
+                    {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
                         <button class="btn btn-success text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
                             <div> Email Subject: {{subject ~ " "}} </div>
                             <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
                         </button>
-                    {% elseif errors[subject]!= 0 %}
+                    {% elseif errors[subject]|length != 0 %}
                         <button class="btn btn-danger text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
                             <div> Email Subject: {{subject ~ " "}} </div>
                             <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
@@ -21,26 +21,26 @@
                     {% endif %}
                     <div class="expand" id={{"collapse"~loop.index}}>
                         <ul>
-                            {% for row in data[subject] %}
-                                {% if  row["sent"] != null %}
-                                    <li class="status status-success"> 
-                                        <div>Recipient:  {{row["user_id"]}}</div> 
-                                        <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
-                                    </li>
-                                {% elseif row["error"] == null %}
-                                    <li  class="status status-warning">
-                                        <div>Recipient: {{row["user_id"]}}</div>
-                                        <div>Time Sent: Not Sent</div>
-                                    </li>
-                                {% else %}
-                                    <li class="status status-error">
-                                        <div>Recipient: {{row["user_id"]}}</div>
-                                        <div>Time Sent: Not Sent</div>
-                                        <div>
-                                            Error: {{row["error"]}}
-                                        </div>
-                                    </li>
-                                {% endif %}
+                            {% for row in errors[subject] %}
+                                <li class="status status-error">
+                                    <div>Recipient: {{row["user_id"]}}</div>
+                                    <div>Time Sent: Not Sent</div>
+                                    <div>
+                                        Error: {{row["error"]}}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                            {% for row in pending[subject] %}
+                                <li  class="status status-warning">
+                                    <div>Recipient: {{row["user_id"]}}</div>
+                                    <div>Time Sent: Not Sent</div>
+                                </li>
+                            {% endfor %}
+                            {% for row in successes[subject] %}
+                                <li class="status status-success"> 
+                                    <div>Recipient:  {{row["user_id"]}}</div> 
+                                    <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
+                                </li>
                             {% endfor %}
                         </ul>
                     </div>
