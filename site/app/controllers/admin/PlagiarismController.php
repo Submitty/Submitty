@@ -710,8 +710,8 @@ class PlagiarismController extends AbstractController {
             foreach ($content as $match) {
                 if ($match["type"] == "match") {
                     foreach ($match["others"] as $match_info) {
-                        if (!in_array([$match_info["username"],$match_info["version"]], $return)) {
-                            array_push($return, [$match_info["username"],$match_info["version"]]);
+                        if (!in_array([$match_info["username"], $match_info["version"]], $return)) {
+                            array_push($return, [$match_info["username"], $match_info["version"]]);
                         }
                     }
                 }
@@ -741,7 +741,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
         if (!file_exists($file_path)) {
-            echo(json_encode(["error" => "user 1 matches.json does not exists"]));
+            echo(json_encode(["error" => "user 1 matches.json does not exist"]));
         }
         else {
             $content = json_decode(file_get_contents($file_path), true);

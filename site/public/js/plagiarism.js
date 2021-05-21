@@ -171,7 +171,7 @@ function requestAjaxData(url, f, es) {
 
 function createRightUsersList(data, select = null) {
     var position = 0;
-    var append_options='<option value="">None</option>';
+    var append_options;
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select == users[0]) {
@@ -180,7 +180,7 @@ function createRightUsersList(data, select = null) {
         } else {
             append_options += '>';
         }
-        append_options += users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
+        append_options += '(' + users[4] + ' Match) ' + users[2] + ' '+ users[3] + ' &lt;' + users[0] + '&gt; (version:'+users[1] + ')</option>';
     });
     $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
     $('[name="user_id_2"] option', form).eq(position).prop('selected', true);
