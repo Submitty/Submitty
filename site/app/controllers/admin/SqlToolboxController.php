@@ -30,7 +30,7 @@ class SqlToolboxController extends AbstractController {
             if (!isset($organizedTables[$table['table_name']])) {
                 $organizedTables[$table['table_name']] = [];
             }
-            $organizedTables[$table['table_name']][] = $table['column_name'];
+            $organizedTables[$table['table_name']][] = $table['column_name'] . " - " . $table['data_type'];
         }
         return new WebResponse(SqlToolboxView::class, 'showToolbox', $organizedTables);
     }
