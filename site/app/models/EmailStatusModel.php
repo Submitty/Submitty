@@ -19,37 +19,37 @@ class EmailStatusModel extends AbstractModel {
     /** @prop-read array */
     protected $errors = [];
 
-    public function __construct(Core $core, $data){
+    public function __construct(Core $core, $data) {
         parent::__construct($core);
-        foreach ($data as $row){
+        foreach ($data as $row) {
             $this->subjects[$row["subject"]] = 1;
-            if (!array_key_exists($row["subject"], $this->subjects)){
+            if (!array_key_exists($row["subject"], $this->subjects)) {
                 // initialize all the counter arrays
                 $this->pending[$row["subject"]] = [];
                 $this->successes[$row["subject"]] = [];
                 $this->errors[$row["subject"]] = [];
             }
-            if ($row["sent"] != null){
+            if ($row["sent"] != null) {
                 $this->successes[$row["subject"]][] = $row;
             }
-            else if($row["error"] !=  null){
+            else if($row["error"] !=  null) {
                 $this->errors[$row["subject"]][] = $row;
-            } 
+            }
             else {
                 $this->pending[$row["subject"]][] = $row;
             }
         }
     }
-    public function getSubjects(){
+    public function getSubjects() {
         return $this->subjects;
     }
-    public function getPending(){
+    public function getPending() {
         return $this->pending; 
     }
-    public function getSuccesses(){
+    public function getSuccesses() {
         return $this->successes;
     }
-    public function getErrors(){
+    public function getErrors() {
         return $this->errors;
     }
 }

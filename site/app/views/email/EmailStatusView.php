@@ -8,7 +8,7 @@ use app\libraries\FileUtils;
 use app\models\EmailStatusModel;
 
 class EmailStatusView extends AbstractView {
-    public function showEmailStatus($emailStatus){
+    public function showEmailStatus($emailStatus) {
         $this->core->getOutput()->addBreadcrumb("Email", $this->core->buildCourseUrl(["email"]));
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalCss('bootstrap.css');
@@ -19,7 +19,6 @@ class EmailStatusView extends AbstractView {
             "pending" => $emailStatus->getPending(),
             "successes" => $emailStatus->getSuccesses(),
             "errors" => $emailStatus->getErrors()
-        ]); 
+        ]);
     }
-
 }

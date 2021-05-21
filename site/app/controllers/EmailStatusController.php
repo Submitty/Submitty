@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace app\controllers;
 
@@ -11,12 +11,11 @@ use app\models\email\EmailStatusPage;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
-class EmailStatusController extends AbstractController{
-    public function __construct(Core $core){
+class EmailStatusController extends AbstractController {
+    public function __construct(Core $core) {
         parent::__construct($core);
     }
 
-    
     /**
      * @Route("/courses/{_semester}/{_course}/email_status")
      * @return MultiResponse
@@ -32,7 +31,5 @@ class EmailStatusController extends AbstractController{
                 $result
             )
         );
-    }
-
-    
+    }   
 }

@@ -4162,9 +4162,6 @@ AND gc_id IN (
         );
     }
 
-    /** 
-     * 
-    */
     /**
      * Returns notifications for a user
      *
@@ -5757,11 +5754,11 @@ AND gc_id IN (
 
     /**
      * Get a status of emails sent of a course with course name and semester
-     * 
+     *
      * @param string $course
      * @param string $semester
      */
-    public function getEmailStatusWithCourse($course, $semester){
+    public function getEmailStatusWithCourse($course, $semester) {
         $parameters = [$course, $semester];
         $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
         $details = $this->submitty_db->rows();
