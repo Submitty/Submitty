@@ -450,8 +450,12 @@ progress::-webkit-progress-value {
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 50px;
-    background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
+    background-color: var(--submitty-logo-blue);
+}
+
+.panel-item-section-drag-bar:hover:after, .panel-item-section-drag-bar:active:after {
+  height: 9px;
 }
 
 .two-panel-drag-bar:after {
@@ -465,12 +469,11 @@ progress::-webkit-progress-value {
     transform: translate(-50%, -50%);
     border-radius: 50px;
     background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after,
-.panel-item-section-drag-bar:hover:after {
-    filter: blur(3px);
+.two-panel-drag-bar:hover:after, .two-panel-drag-bar:active:after  {
+  width: 9px;
 }
 
 #regrade_inner_info .inner-container {
