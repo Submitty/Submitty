@@ -4,20 +4,31 @@
             {% for subject in subjects|keys %}
                 <div class="status-container">
                     {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
-                        <button class="btn btn-success text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
-                            <div> Email Subject: {{subject ~ " "}} </div>
-                            <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
-                        </button>
+                        <div class = "button-container">
+                            <div>
+                                <div> Email Subject: {{subject ~ " "}} </div>
+                                <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
+                            </div>
+                            <button class="btn btn-success text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                                Show Details
+                            </button>
+                        </div>
                     {% elseif errors[subject]|length != 0 %}
-                        <button class="btn btn-danger text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        <div class = "button-container">
                             <div> Email Subject: {{subject ~ " "}} </div>
-                            <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
-                        </button>
+                            <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
+                            <button class="btn btn-danger  text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                                Show Details
+                            </button>
+                        </div>
                     {% else %}
-                        <button class="btn btn-primary text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        <div class = "button-container">
                             <div> Email Subject: {{subject ~ " "}} </div>
-                            <div> Time Created: {{data[subject][0]["created"]|slice(0,19)}}</div>
-                        </button>
+                            <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
+                            <button class="btn btn-primary  text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                                Show Details
+                            </button>
+                        </div>
                     {% endif %}
                     <div class="expand" id={{"collapse"~loop.index}}>
                         <ul>
@@ -38,12 +49,13 @@
                             {% endfor %}
                             {% for row in successes[subject] %}
                                 <li class="status status-success"> 
-                                    <div>Recipient:  {{row["user_id"]}}</div> 
+                                    <div>Recipient: {{row["user_id"]}}</div> 
                                     <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
                                 </li>
                             {% endfor %}
                         </ul>
                     </div>
+                    <hr class = "divider">
                 </div>
             {% endfor %}
         {% else %}
@@ -58,9 +70,11 @@
         const expandTarget = $(button).data('target');
         if ($(expandTarget).is(':visible')) {
             $(expandTarget).hide();
+            $(button).text("Show Details");
         }
         else {
             $(expandTarget).show();
+            $(button).text("Hide Details");
         }
     }
 </script>

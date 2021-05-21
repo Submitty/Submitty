@@ -6,7 +6,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 
 class EmailStatusModel extends AbstractModel {
-    // A set of all unique subjects of emails
+    // A map of all unique subjects of emails to the time created
     /** @prop-read Set */
     protected $subjects = [];
     // A map of email subjects to the rows that are still pending to send in the database
@@ -22,7 +22,7 @@ class EmailStatusModel extends AbstractModel {
     public function __construct(Core $core, $data) {
         parent::__construct($core);
         foreach ($data as $row) {
-            $this->subjects[$row["subject"]] = 1;
+            $this->subjects[$row["subject"]] = $row["created"];
             if (!array_key_exists($row["subject"], $this->subjects)) {
                 // initialize all the counter arrays
                 $this->pending[$row["subject"]] = [];

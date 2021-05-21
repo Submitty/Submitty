@@ -1,9 +1,19 @@
 .btn{
-    min-width: 100%;
-    text-align: left;
+    position: absolute;
+    min-width: 10%;
+    height: 5vh;
+    top: 0px;
+    right: 0px;
+}
+.button-container{
+    position: relative;
+    height: 5vh;
+    margin: auto;
+    display: inline-flexbox;
 }
 .expand{
     display: none;
+    padding: 1vh;
 }
 .status{
     list-style: none;
@@ -13,10 +23,10 @@
     background-color: var(--danger-red);
 }
 .status-warning{
-    background-color: var(--active-warning-brown);
+    background-color: transparent;
 }
 .status-success{
-    background-color: var(--alert-success-green);
+    background-color: var(--good-green);
 }
 .status-container{
     margin-top: 1vh;
@@ -24,4 +34,7 @@
 }
 div{
     word-wrap: break-word;
+}
+.divider{
+    border-top: 1px solid black;
 }
