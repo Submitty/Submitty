@@ -31,5 +31,5 @@ class EmailStatusController extends AbstractController {
                 $result
             )
         );
-    }   
+    }
 }
