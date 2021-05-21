@@ -73,13 +73,32 @@ class PlagiarismController extends AbstractController {
             $return = ['error' => 'Ranking file not exists.'];
             $return = json_encode($return);
             echo($return);
-            return "";
+            return 'error';
         }
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], '', $content));
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings, 3);
         return $rankings;
+    }
+
+    /**
+     * Returns a string containing the concatenated contents of the specified user's submission
+     *
+     * @param $user_id
+     * @param $gradeable_id
+     * @param $version
+     * @return string
+     */
+    private function getConcatenatedSubmission($user_id, $gradeable_id, $version) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id . "/" . $version . "/submission.concatenated";
+
+        if (!file_exists($file_name) || !$this->core->getUser()->accessAdmin()) {
+            return 'error';
+        }
+        $data = file_get_contents($file_name);
+        return $data;
     }
 
     /**
