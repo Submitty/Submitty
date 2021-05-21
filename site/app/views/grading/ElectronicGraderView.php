@@ -828,8 +828,6 @@ HTML;
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "toggle_anon_mode_url" => $details_base_url . '?' .
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => !$anon_mode]),
-            "anon_mode_url" => $details_base_url . '?' .
-                http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => 1]),
             "sort" => $sort,
             "direction" => $direction
         ]);
