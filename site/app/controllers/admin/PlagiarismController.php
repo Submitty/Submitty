@@ -65,6 +65,23 @@ class PlagiarismController extends AbstractController {
         }
         return $return;
     }
+
+    private function getRankings($gradeable_id) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
+        if (!file_exists($file_path)) {
+            $return = ['error' => 'Ranking file not exists.'];
+            $return = json_encode($return);
+            echo($return);
+            return "";
+        }
+        $content = file_get_contents($file_path);
+        $content = trim(str_replace(["\r", "\n"], '', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings, 3);
+        return $rankings;
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism")
      */
@@ -524,17 +541,9 @@ class PlagiarismController extends AbstractController {
 
         $return = "";
         $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
-        if (!file_exists($file_path)) {
-            $return = ['error' => 'Ranking file not exists.'];
-            $return = json_encode($return);
-            echo($return);
-            return;
-        }
-        $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
-        $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+
+        $rankings = $this->getRankings($gradeable_id);
+
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
@@ -681,17 +690,9 @@ class PlagiarismController extends AbstractController {
 
         $return = [];
         $error = "";
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
-        if (!file_exists($file_path)) {
-            $return = ['error' => 'Ranking file not exists.'];
-            $return = json_encode($return);
-            echo($return);
-            return;
-        }
-        $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
-        $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+
+        $rankings = $this->getRankings($gradeable_id);
+
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
