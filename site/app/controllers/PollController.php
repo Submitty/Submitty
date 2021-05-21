@@ -364,8 +364,8 @@ class PollController extends AbstractController {
             if (!$status[0]["success"]) {
                 $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["success"], false);
             }
-            // validate file type
             elseif (!FileUtils::isValidImage($file["tmp_name"])) {
+                // validate file type
                 $this->core->getOutput()->renderResultMessage("Error: " . $file["name"] . " is not a valid image file. Image was not successfully updated in poll '" . $_POST["name"] . "'.", false);
                 // reject the new image, but keep the old one
                 $file_path = $poll->getImagePath();
