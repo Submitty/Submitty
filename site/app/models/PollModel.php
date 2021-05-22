@@ -12,7 +12,7 @@ use app\libraries\DateUtils;
  * @method int getId()
  * @method string getName()
  * @method string getQuestion()
- ///* @method array getAnswers()
+ * @method array getAnswers()
  * @method array getUserResponses()
  * @method string|null getImagePath()
  */
