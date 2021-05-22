@@ -254,26 +254,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$course\\)\\: Unexpected token \"\\$course\", expected type at offset 484$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$semester\\)\\: Unexpected token \"\\$semester\", expected type at offset 460$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 22$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$status_code$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected type at offset 230$#"
 			count: 1
 			path: app/libraries/DateUtils.php
