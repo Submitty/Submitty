@@ -924,18 +924,6 @@ CREATE TABLE public.seeking_team (
 
 
 --
--- Name: sessions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.sessions (
-    session_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
-    csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
-);
-
-
---
 -- Name: solution_ta_notes; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1486,14 +1474,6 @@ ALTER TABLE ONLY public.sections_rotating
 
 ALTER TABLE ONLY public.seeking_team
     ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id);
-
-
---
--- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
 
 
 --
@@ -2136,14 +2116,6 @@ ALTER TABLE ONLY public.regrade_requests
 
 ALTER TABLE ONLY public.seeking_team
     ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: sessions sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --
