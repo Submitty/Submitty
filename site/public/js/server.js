@@ -1177,15 +1177,19 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
 }
 
 function resizeFrame(id, max_height = 500, force_height=-1) {
-    $("iframe#" + id).contents().find("html").css("height", "inherit");
-    var img = $("iframe#" + id).contents().find("img");
-    if(img) {
-        img.css("max-width", "100%");
-    }
-    var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+    if($("iframe#" + id).contents().find("html").length !== 0) {
+        $("iframe#" + id).contents().find("html").css("height", "inherit");
+        var img = $("iframe#" + id).contents().find("img");
+        if(img) {
+            img.css("max-width", "100%");
+        }
+        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+    } else { //Handling issue with FireFox and jQuery not being able to access iframe contents for PDF reader
+        var height = max_height;
+    }    
     if (force_height != -1) {
         document.getElementById(id).height = force_height + "px";
-    } else if (height > max_height) {
+    } else if (height >= max_height) {
         document.getElementById(id).height= max_height + "px";
     }
     else {
