@@ -811,12 +811,10 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
         }
+        $anon_mode = false;
         if (array_key_exists('anon_mode', $_COOKIE)) {
             if ($_COOKIE['anon_mode'] === 'on') {
                 $anon_mode = true;
-            }
-            else {
-                $anon_mode = false;
             }
         }
         //Checks to see if the Grader has access to all users in the course,
