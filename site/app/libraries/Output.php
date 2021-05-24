@@ -192,7 +192,7 @@ HTML;
      * Output()->renderTemplate(array("submission", "Global"), "header")
      * Would load views\submission\GlobalView->header()
      *
-     * @return string
+     * @return null|string
      */
     public function renderTemplate($view, string $function, ...$args) {
         if (!$this->render) {
@@ -213,7 +213,7 @@ HTML;
      * Please avoid using this function unless absolutely necessary.
      * Please use renderJsonSuccess, renderJsonFail and renderJsonError
      * instead to ensure JSON responses have consistent format.
-     * @param $json
+     * @param mixed $json
      */
     public function renderJson($json) {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
@@ -293,7 +293,7 @@ HTML;
 
     /**
      * Renders success/error messages and/or JSON responses.
-     * @param $message
+     * @param string $message
      * @param bool $success
      * @param bool $show_msg
      * @return array
@@ -365,7 +365,7 @@ HTML;
      * All views inheriet from BaseView which make them be a singleton and have the
      * getInstance method.
      *
-     * @param string $view
+     * @param string $class
      *
      * @return string
      */
@@ -423,8 +423,6 @@ HTML;
 
     /**
      * Returns the stored output buffer that we've been building
-     *
-     * @return string
      */
     public function displayOutput() {
         echo($this->getOutput());
@@ -450,8 +448,9 @@ HTML;
         if ($this->twig === null) {
             $this->loadTwig(false);
         }
-        /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = $this->getView(ErrorView::class)->exceptionPage($exception);
+        /** @var \app\views\ErrorView $view */
+        $view = $this->getView(ErrorView::class);
+        $exceptionPage = $view->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -610,6 +609,8 @@ HTML;
      */
     public function setTwigTimeZone(string $time_zone): void {
         $tz = $time_zone === 'NOT_SET/NOT_SET' ? $this->core->getConfig()->getTimezone() : $time_zone;
-        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone($tz);
+        /** @var \Twig\Extension\CoreExtension $extension */
+        $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
+        $extension->setTimezone($tz);
     }
 }
