@@ -13,7 +13,7 @@ use app\libraries\routers\AccessControl;
 
 /**
  * @AccessControl(role="INSTRUCTOR")
- */
+*/
 class EmailStatusController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
