@@ -51,6 +51,7 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
+            'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('poll')
           ]);
     }
 
