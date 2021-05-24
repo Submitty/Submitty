@@ -88,24 +88,6 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));
     }
 
-    public function testStripStringFromArray() {
-        $array = [
-            "test/aa",
-            [
-                "test/test2/aa",
-                "bb"
-            ]
-        ];
-        $expected = ["/aa", ["/2/aa", "bb"]];
-        $this->assertEquals($expected, Utils::stripStringFromArray("test", $array));
-    }
-
-    public function testStripStringFromArrayNull() {
-        $this->assertNull(Utils::stripStringFromArray("test", null));
-        $this->assertNull(Utils::stripStringFromArray(null, []));
-        $this->assertNull(Utils::stripStringFromArray(1, []));
-    }
-
     public function elementDataProvider() {
         return [
             [[], null, null],

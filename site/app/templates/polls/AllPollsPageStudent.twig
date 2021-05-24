@@ -10,9 +10,9 @@
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
-                <col style="width: 33%">
-                <col style="width: 33%">
-                <col style="width: 33%">
+                <col style="width: 40%">
+                <col style="width: 35%">
+                <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -23,8 +23,8 @@
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td align="left"> {{ poll.getName() }} </td>
+                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                         <td>
                             <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -58,9 +58,9 @@
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
-            <col style="width: 33%">
-            <col style="width: 33%">
-            <col style="width: 33%">
+            <col style="width: 40%">
+            <col style="width: 35%">
+            <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -71,8 +71,8 @@
             <tbody>
                 {% for poll in older_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td align="left"> {{ poll.getName() }} </td>
+                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                         <td>
                             <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
