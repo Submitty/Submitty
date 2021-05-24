@@ -8,38 +8,37 @@
         "show_filter": false
     } %}
 
-    <h3 style="margin-bottom:10px;"> Manage Categories </h3>
-
-    <div id="manage_categories_view" style="margin: 0 auto; max-width: 750px;">
+    <div id="manage_categories_view" style="margin: 0 auto; max-width: 750px; padding-bottom: 20px">
+        <h3 style="margin-bottom:10px;"> Manage Categories </h3>
         <div>
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <span  style="float: right;">
                 <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
-                <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
+                <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}'); window.location.reload();" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
                     <i class="fas fa-plus-circle fa-1x"></i> Add category
                 </button>
             </span>
         <pre>(Drag to re-order)</pre><br>
         {% if categories|length == 0 %}
             <span class='category-list-no-element' style="margin-left: 1em;" >
-                    No categories exists please create one.
+                    No categories exist, please create one.
                 </span>
         {% endif %}
 
-        <ul id='ui-category-list' style="padding-left: 1em;">
+        <ul id="ui-category-list" style="padding-left: 0em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
-                <li id="categorylistitem-{{ category.category_id }}" class="category-sortable" style="color: {{ category.color }};">
+                <li id="categorylistitem-{{ category.category_id }}" class="category-sortable catergory-item-box" style="color: {{ category.color }};">
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
                             <span style="word-wrap: break-word;">{{ category.category_desc }}</span>
-                            <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit"></i></a>
+                            <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit edit-category-button"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
-                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
-                            <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check"></i></a>
-                            <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times"></i></a>
+                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" class="edit-catergoty-name" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
+                            <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check edit-category-button"></i></a>
+                            <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times edit-category-button"></i></a>
                         </span>
                     <div style="float: right;width: auto;">
                         <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
@@ -48,7 +47,7 @@
                             {% endfor %}
                         </select>
                         &nbsp;
-                        <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash"></i></a>
+                        <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash edit-category-button"></i></a>
                     </div>
                 </li>
             {% endfor %}
@@ -56,30 +55,6 @@
 
         </div>
     </div>
-    {# Template Category used to display new categoreis on the client side #}
-    <ul id='ui-category-template' style="padding-left: 1em; display: none;">
-        <li id="categorylistitem-0" class="category-sortable" style="color: #000000; display: none;">
-            <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
-            <span class="categorylistitem-desc">
-                <span style="word-wrap: break-word;">Template</span>
-                <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit"></i></a>
-                </span>
-            <span class="categorylistitem-editdesc" style="display: none;">
-                <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
-                <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check"></i></a>
-                <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times"></i></a>
-                </span>
-            <div style="float: right;width: auto;">
-                <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
-                    {% for color_name, color_code in category_colors %}
-                        <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
-                    {% endfor %}
-                </select>
-                &nbsp;
-                <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash"></i></a>
-            </div>
-        </li>
-    </ul>
 </div>
 
 <script>
