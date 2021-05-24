@@ -10,11 +10,12 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
+    sql = "ALTER TABLE emails ADD COLUMN IF NOT EXISTS semester VARCHAR DEFAULT NULL;"
+    database.execute(sql)
+    
     sql = "ALTER TABLE emails ADD COLUMN IF NOT EXISTS course VARCHAR DEFAULT NULL;"
     database.execute(sql)
     
-    sql = "ALTER TABLE emails ADD COLUMN IF NOT EXISTS semester VARCHAR DEFAULT NULL;"
-    database.execute(sql)
 
 
 def down(config, database):

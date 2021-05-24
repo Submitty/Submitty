@@ -5756,7 +5756,7 @@ AND gc_id IN (
      * @param string $course
      * @param string $semester
      */
-    public function getEmailStatusWithCourse($course, $semester) {
+    public function getEmailStatusWithCourse($semester, $course) {
         $parameters = [$course, $semester];
         $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
         $details = $this->submitty_db->rows();

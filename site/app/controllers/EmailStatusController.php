@@ -26,7 +26,7 @@ class EmailStatusController extends AbstractController {
     public function getEmailStatusPage() {
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
-        $result = $this->core->getQueries()->getEmailStatusWithCourse($course, $semester);
+        $result = $this->core->getQueries()->getEmailStatusWithCourse($semester, $course);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 "app\\views\\email\EmailStatusView",
