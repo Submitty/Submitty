@@ -22,25 +22,37 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     const panelCont = panelEle.parentElement;
     const dragbar = document.querySelector(dragBarSel);
 
+    $(dragbar).css('touch-action', 'none');
+
     let xPos = 0, yPos = 0, panelHeight = 0, panelWidth = 0;
 
     // Width of left side
     const mouseDownHandler = (e) => {
         // Get the current mouse position
+        if (e.type == 'touchstart') {
+            e = e.touches[0];
+        }
         xPos = e.clientX;
         yPos = e.clientY;
         panelHeight = panelEle.getBoundingClientRect().height;
         panelWidth = panelEle.getBoundingClientRect().width;
 
+        document.documentElement.style.setProperty(
+            'cursor',
+            dragBarSel === '.two-panel-drag-bar' ? 'col-resize' : 'ns-resize',
+            'important',
+        );
+
         // Attach the listeners to `document`
         document.addEventListener('mousemove', mouseMoveHandler);
         document.addEventListener('mouseup', mouseUpHandler);
+        document.addEventListener('touchmove', mouseMoveHandler);
+        document.addEventListener('touchend', mouseUpHandler);
     };
 
     const mouseUpHandler = () => {
         // remove the dragging CSS props to go back to initial styling
-        dragbar.style.removeProperty('cursor');
-        document.body.style.removeProperty('cursor');
+        document.documentElement.style.removeProperty('cursor');
         document.body.style.removeProperty('user-select');
         document.body.style.removeProperty('pointer-events');
         dragbar.style.removeProperty('filter');
@@ -48,9 +60,14 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         // Remove the handlers of `mousemove` and `mouseup`
         document.removeEventListener('mousemove', mouseMoveHandler);
         document.removeEventListener('mouseup', mouseUpHandler);
+        document.removeEventListener('touchmove', mouseMoveHandler);
+        document.removeEventListener('touchend', mouseUpHandler);
     };
 
     const mouseMoveHandler = (e) => {
+        if (e.type == 'touchmove') {
+            e = e.touches[0];
+        }
         let updateValue;
         if (isHorizontalResize) {
             const dy = e.clientY - yPos;
@@ -63,13 +80,9 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
             panelEle.style.width = `${updateValue}%`;
         }
 
-        // consistent mouse pointer during dragging
-        document.body.style.cursor = 'col-resize';
         // Disable text selection when dragging
         document.body.style.userSelect = 'none';
         document.body.style.pointerEvents = 'none';
-        // Add blurry effect on drag-bar
-        dragbar.style.filter = 'blur(5px)';
 
         // Callback function
         if (typeof callback === 'function') {
@@ -77,4 +90,5 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         }
     };
     dragbar.addEventListener('mousedown', mouseDownHandler);
+    dragbar.addEventListener('touchstart', mouseDownHandler);
 }

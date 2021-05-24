@@ -38,7 +38,7 @@ def get_testcases(
         for notebook_item in notebook_data:
             item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
             if item_dict is None:
-                config.log_message(
+                config.logger.log_message(
                     f"ERROR: could not find {notebook_item} in item pool.",
                     job_id=queue_obj["job_id"],
                     is_batch=queue_obj["regrade"],

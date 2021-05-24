@@ -300,30 +300,29 @@ def cleanup_stale_containers(user_id_of_runner, my_log_function):
     # Remove any docker containers left over from past runs.
     client = docker.from_env(timeout=60)
     try:
-
-        old_containers = []
-        for c in client.containers.list(all=True):
-            if user_id_of_runner in c.name:
-                my_log_function(f'Removing stale container {c.name}')
-                old_containers.append(c)
-
-        if len(old_containers) > 0:
-            print('REMOVING STALE CONTAINERS')
-
+        # Get all containers (running or not) with user_id_of_runner in their name
+        # sparse=True gets containers without fully evaluating them. This is important,
+        # as race conditions with other grading threads can cause this call to fail otherwise.
+        old_containers = client.containers.list(all=True, filters={"name":user_id_of_runner}, sparse=True)
         for old_container in old_containers:
-            old_container.remove(force=True)
+            try:
+                my_log_function(f'Removing stale container {old_container.name}')
+                old_container.remove(force=True)
+            except docker.errors.NotFound:
+                # This is an expected case which does not constitute an error, caused
+                # by the use of sparse=True
+                pass
+            except Exception:
+                my_log_function("ERROR: Could not remove docker container")
 
-        old_networks = []
-        for n in client.networks.list():
-            if user_id_of_runner in n.name:
-                my_log_function(f'Removing stale network {n.name}')
-                old_networks.append(n)
-
-        if len(old_networks) > 0:
-            print('REMOVING STALE NETWORKS')
-
+        # Get all networks with user_id_of_runner in their name
+        old_networks = client.networks.list(filters={"name":user_id_of_runner})
         for old_network in old_networks:
-            old_network.remove()
+            try:
+                my_log_function(f'Removing stale network {old_network.name}')
+                old_network.remove()
+            except Exception:
+                my_log_function("ERROR: Could not remove docker network")
     finally:
         client.close()
 
