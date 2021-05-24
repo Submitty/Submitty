@@ -1003,7 +1003,7 @@ function check_lichen_jobs(url, semester, course) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
 function downloadStudentAnnotations(url, path, dir) {
@@ -1132,10 +1132,27 @@ function changeName(element, user, visible_username, anon){
     }
 }
 
-function openFrame(url, id, filename) {
+function openFrame(url, id, filename, ta_grading_interpret=false) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
         var iframeId = "file_viewer_" + id + "_iframe";
+        if(ta_grading_interpret) {
+            let display_file_url = buildCourseUrl(['display_file']);
+            let directory = "";
+            if (url.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url.includes("results_public")) {
+                directory = "results_public";
+            }
+            else if (url.includes("results")) {
+                directory = "results";
+            }
+            else if (url.includes("checkout")) {
+                directory = "checkout";
+            }
+            url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -1159,10 +1176,13 @@ function openFrame(url, id, filename) {
     return false;
 }
 
-function resizeFrame(id) {
+function resizeFrame(id, max_height = 500, force_height=-1) {
+    $("iframe#" + id).contents().find("html").css("height", "inherit");
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-    if (height > 500) {
-        document.getElementById(id).height= "500px";
+    if (force_height != -1) {
+        document.getElementById(id).height = force_height + "px";
+    } else if (height > max_height) {
+        document.getElementById(id).height= max_height + "px";
     }
     else {
         document.getElementById(id).height = (height+18) + "px";
@@ -1687,6 +1707,29 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         }
     })
 }
+
+function popOutSubmittedFile(html_file, url_file) {
+    var directory = "";
+    let display_file_url = buildCourseUrl(['display_file']);
+    if (url_file.includes("submissions")) {
+      directory = "submissions";
+      url_file = url_file;
+    }
+    else if (url_file.includes("results_public")) {
+      directory = "results_public";
+    }
+    else if (url_file.includes("results")) {
+      directory = "results";
+    }
+    else if (url_file.includes("checkout")) {
+      directory = "checkout";
+    }
+    else if (url_file.includes("split_pdf")) {
+      directory = "split_pdf";
+    }
+    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    return false;
+  }
 
 /**
  * Function for course staff to flag/unflag a user's preferred photo as inappropriate.

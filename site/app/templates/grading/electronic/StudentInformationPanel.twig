@@ -22,7 +22,7 @@
                         <br/>
                     {% endif %}
                 </div>
-                <div>
+                <div style="padding-left:10px;">
                     <b>
                         {% if team_assignment %}
                             Team:<br/>
@@ -39,9 +39,11 @@
                         Submitted: {{ submission_time|date("m/d/Y H:i:s T") }}<br/>
                     </b>
                 </div>
-                {% for table in tables %}
-                    {{ table|raw }}
-                {% endfor %}
+                <div style="padding-left:10px; padding-right:10px;">
+                        {% for table in tables %}
+                            {{ table|raw }}
+                        {% endfor %}
+                </div>
             </div>
         </div>
     </div>

@@ -1,4 +1,5 @@
 {
+	"required_capabilities": "notebook",
     "assignment_message" : "#A Notebook with File Submission",
     "autograding" : {
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
