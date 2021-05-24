@@ -1236,6 +1236,10 @@ class ElectronicGraderController extends AbstractController {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
+        $anon_mode = false;
+        echo '<script type="text/javascript">';
+        echo ' alert("JavaScript Alert Box by PHP")';  //not showing an alert box.
+        echo '</script>';
         /** @var Gradeable $gradeable */
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -1276,7 +1280,7 @@ class ElectronicGraderController extends AbstractController {
             }
 
             if ($from_graded_gradeable === false) {
-                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
             }
 
             // Get the user ID of the user we were viewing on the TA grading interface
@@ -1319,7 +1323,7 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             if (is_null($who_id) || $who_id == '') {
-                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+                    $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             }
         }
         // Get the graded gradeable for the submitter we are requesting
