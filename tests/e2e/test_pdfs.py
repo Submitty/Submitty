@@ -1,6 +1,8 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import NoSuchElementException        
 import os
 import unittest
 import time
@@ -34,7 +36,6 @@ class TestPDFs(BaseTestCase):
         self.pdf_access("grader", "2", "6", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
         self.pdf_access("bauchg", "1", "5", "grading_pdf_peer_team_homework", "words_881.pdf", "1")
     def pdf_access(self, user_id, tr_number, td_number, gradeable_id, pdf_name, version):
-        self.log_out()
         self.log_in(user_id=user_id)
         self.click_class('sample')
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/'+gradeable_id+'/grading/status")]').click()
@@ -45,27 +46,32 @@ class TestPDFs(BaseTestCase):
         self.wait_for_element((By.ID, "submission_browser"))
         self.driver.find_element_by_id('submissions').click()
         current_window = self.driver.window_handles[0]
-        self.driver.find_element_by_id('open_file_'+pdf_name).click()
-        new_window = self.driver.window_handles[1]
-        self.driver.switch_to.window(new_window)
-        #self.wait_for_element((By.ID, "content"))  
-        #text = self.driver.find_element_by_id("content")   
-        #self.assertFalse("You don't have access to this page." in text)
-        self.driver.close()
-        self.driver.switch_to.window(current_window)
+        if not self.options.headless:
+            self.driver.find_element_by_id('open_file_'+pdf_name).click()
+            new_window = self.driver.window_handles[1]
+            self.driver.switch_to.window(new_window)
+            try:
+                self.driver.find_element_by_xpath('//embed[contains(@type,"application/pdf")]')
+            except NoSuchElementException:
+                return False
+            self.driver.close()
+            self.driver.switch_to.window(current_window)
         self.driver.find_element_by_xpath('//a[contains(@file-url,"'+pdf_name+'")]').click()
-        self.driver.implicitly_wait(20)
+        self.wait_for_element((By.ID, "pageContainer1"))
         self.driver.find_element_by_id('pageContainer1')
-    def switch_settings(self, setting):
+        self.driver.find_element_by_xpath('//a[contains(@onclick,"collapseFile()")]').click()
+        self.driver.maximize_window()
+        self.wait_for_element((By.ID, "logout"))
         self.log_out()
+    def switch_settings(self, setting):
         self.log_in(user_id="instructor")
         self.click_class('sample')
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_pdf/update")]').click()
         self.driver.find_element_by_id('page_3_nav').click()
         select_element = Select(self.driver.find_element_by_id("minimum_grading_group"))
         select_element.select_by_visible_text(setting)
+        self.wait_for_element((By.ID, "logout"))
         self.log_out()
-        self.driver.implicitly_wait(20)
 
 if __name__ == "__main__":
     import unittest

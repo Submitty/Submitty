@@ -101,7 +101,7 @@ class User extends AbstractModel {
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
-    protected $registration_subsection = null;
+    protected $registration_subsection = "";
 
     /**
      * @prop
