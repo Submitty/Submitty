@@ -769,7 +769,7 @@ CREATE TABLE public.queue (
     last_time_in_queue timestamp with time zone,
     time_help_start timestamp with time zone,
     paused boolean DEFAULT false NOT NULL,
-    time_paused integer,
+    time_paused integer DEFAULT 0 NOT NULL,
     time_paused_start timestamp with time zone
 );
 

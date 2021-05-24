@@ -121,9 +121,9 @@
 
   function updateTimers() {
     for (var i = 0; i < timers.length; i++) {
-      timer = (new Date() - timers[i][1]) / 1000
-      var min = Math.floor(timer / 60)
-      var sec = Math.floor(timer % 60).toString().padStart(2, '0')
+      timer = (new Date() - timers[i][1]) / 1000;
+      var min = Number(Math.floor(timer / 60));
+      var sec = Math.floor(timer % 60).toString().padStart(2, '0');
       var timerstring = min + ":" + sec;
       if (min >= 100) {
         timerstring = "∞";
