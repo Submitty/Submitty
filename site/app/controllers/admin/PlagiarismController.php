@@ -66,17 +66,23 @@ class PlagiarismController extends AbstractController {
         return $return;
     }
 
+    /**
+     * @param $gradeable_id
+     * @return array
+     */
     private function getRankings($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
         if (!file_exists($file_path)) {
-            $return = ['error' => 'Ranking file not exists.'];
-            $return = json_encode($return);
-            echo($return);
-            return 'error';
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        if (file_get_contents($file_path) == "") {
+            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
         }
         $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
+        $content = trim(str_replace(["\r", "\n"], ' ', $content));
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings, 3);
         return $rankings;
@@ -164,21 +170,8 @@ class PlagiarismController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_title = ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
-        $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
-        $file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id . ".txt";
-        if (!file_exists($file_path)) {
-            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
-            $this->core->redirect($return_url);
-        }
-        if (file_get_contents($file_path) == "") {
-            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            $this->core->redirect($return_url);
-        }
-        $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
-        $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+        $rankings = $this->getRankings($gradeable_id);
         foreach ($rankings as $i => $ranking) {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
@@ -568,7 +561,7 @@ class PlagiarismController extends AbstractController {
                 $max_matching_version = $ranking[2];
             }
         }
-        if ($version_user_1 == "max_matching") {
+        if ($version_user_1 == "max_matching" || $version_user_1 == "") {
             $version_user_1 = $max_matching_version;
         }
         $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), [".", ".."]);
