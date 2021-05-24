@@ -1,6 +1,6 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
     <div id="grading-panel-student-name">
-        <b>{% if not limited_access_blind and not isBlind and not anon_mode %}
+        <b>{% if not limited_access_blind and not isBlind %}
                 {% if team_assignment %}
                     Team:<br/>
                     {% for team_member in submitter.getTeam().getMemberUsers() %}

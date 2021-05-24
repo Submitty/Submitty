@@ -1235,11 +1235,12 @@ class ElectronicGraderController extends AbstractController {
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
+            echo '<script type="text/javascript">';
+            echo ' alert("JavaScript Alert Box by PHP")';  //not showing an alert box.
+            echo '</script>';
         }
-        $anon_mode = false;
-        echo '<script type="text/javascript">';
-        echo ' alert("JavaScript Alert Box by PHP")';  //not showing an alert box.
-        echo '</script>';
+        ///$anon_mode = false;
+
         /** @var Gradeable $gradeable */
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
