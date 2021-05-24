@@ -540,25 +540,21 @@ class FileUtils {
      *            'success','size' => 100, 'is_zip' => false, 'success' => true)
      * if $files is null returns failed => no files sent to validate
      */
-    public static function validateUploadedFiles($files) {
+    public static function validateUploadedFiles(array $files): array {
         if (empty($files)) {
             return ["failed" => "No files sent to validate"];
         }
 
-        $ret = [];
-        $num_files = count($files['name']);
-        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $validator = function ($file) {
+            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $name = $file['name'];
+            $tmp_name = $file['tmp_name'];
 
-        for ($i = 0; $i < $num_files; $i++) {
-            //extract the values from each file
-            $name = $files['name'][$i];
-            $tmp_name = $files['tmp_name'][$i];
             $type = mime_content_type($tmp_name);
-
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
-            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
-                $errors[] = ErrorMessages::uploadErrors($files['error'][$i]);
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $errors[] = ErrorMessages::uploadErrors($file['error']);
             }
 
             //check if its a zip file
@@ -580,7 +576,7 @@ class FileUtils {
             }
 
             //for zip files use the size of the contents in case it gets extracted
-            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $files['size'][$i];
+            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $file['size'];
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
@@ -598,7 +594,7 @@ class FileUtils {
                 $success = false;
             }
 
-            $ret[] = [
+            return [
                 'name' => $name,
                 'type' => $type,
                 'error' => $success ? "No error." : implode(" ", $errors),
@@ -606,6 +602,27 @@ class FileUtils {
                 'is_zip' => $is_zip,
                 'success' => $success,
             ];
+        };
+
+        $ret = [];
+        if (!is_array($files['name'])) {
+            $ret[] = $validator($files);
+        }
+        else {
+            $num_files = count($files['name']);
+
+            for ($i = 0; $i < $num_files; $i++) {
+                //construct single file from uploaded file array
+                $file = [
+                    'name' => $files['name'][$i],
+                    'type' => $files['type'][$i],
+                    'tmp_name' => $files['tmp_name'][$i],
+                    'error' => $files['error'][$i],
+                    'size' => $files['size'][$i]
+                ];
+
+                $ret[] = $validator($file);
+            }
         }
 
         return $ret;

@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "python",
+
   "autograding" : {
     "work_to_details" : ["**/*.txt"]
   },

@@ -105,15 +105,15 @@ class Logger {
      * We log a message as well as the calling URI if available. It's saved to $log_path/yyyymmdd.txt
      * (yyyy is year, mm is month dd is day) with each log entry seperated by bunch of "=-".
      *
-     * @param int $level: message level
+     * @param int $level message level
      *     0. Debug
      *     1. Info
      *     2. Warn
      *     3. Error
      *     4. Fatal Error
-     * @param $message: message to log to the file
+     * @param string $message message to log to the file
      */
-    private static function logError($level = 0, $message = "") {
+    private static function logError($level = 0, string $message = "") {
         if (static::$log_path === null) {
             return;
         }
@@ -183,12 +183,8 @@ class Logger {
      *
      * where action is defined broadly as the page they're accessing and any other relevant information
      * (so gradeable id for when they're submitting).
-     *
-     * @param $user_id
-     * @param $token
-     * @param $action
      */
-    public static function logAccess($user_id, $token, $action) {
+    public static function logAccess(string $user_id, string $token, string $action) {
         $log_message[] = $user_id;
         $log_message[] = $token;
         $log_message[] = $_SERVER['REMOTE_ADDR'];
@@ -209,9 +205,9 @@ class Logger {
      * where action is defined broadly as the page they're accessing and any other relevant information
      * (so gradeable id for when they're submitting).
      *
-     * @param $params All the params in a key-value array
+     * @param array $params All the params in a key-value array
      */
-    public static function logTAGrading($params) {
+    public static function logTAGrading(array $params) {
         $log_message[] = $params['course_semester'];
         $log_message[] = $params['course_name'];
         $log_message[] = $params['gradeable_id'];
