@@ -789,7 +789,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC", $anon_mode = false) {
+    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -814,6 +814,9 @@ class ElectronicGraderController extends AbstractController {
         if (array_key_exists('anon_mode', $_COOKIE)) {
             if ($_COOKIE['anon_mode'] === 'on') {
                 $anon_mode = true;
+            }
+            else {
+                $anon_mode = false;
             }
         }
         //Checks to see if the Grader has access to all users in the course,
