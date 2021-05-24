@@ -52,6 +52,7 @@
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
+            <button type="button" id="poll-preview-btn" class="btn btn-primary" onclick="previewPoll();" disabled>Preview</button>
         </form>
     {% else %}
         <h1> Edit Poll </h1>
@@ -134,6 +135,7 @@
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
+            <button type="button" id="poll-preview-btn" class="btn btn-primary" onclick="previewPoll();">Preview</button>
         </form>
     {% endif %}
 </div>
@@ -253,6 +255,7 @@
             $("#correct-response-count-error").show();
         } else {
             $("#poll-form-submit").prop("disabled", false);
+            $("#poll-preview-btn").prop("disabled", false);
             $(".polls-submit-error").hide();
         }
     }
@@ -307,5 +310,10 @@
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
     });
+    
+    function previewPoll(){
+        $('#poll-preview').css('display', 'block');
+    }
 
 </script>
+{% include("polls/PollPreview.twig") %}
