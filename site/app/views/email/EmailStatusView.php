@@ -11,9 +11,7 @@ class EmailStatusView extends AbstractView {
     public function showEmailStatus($emailStatus) {
         $this->core->getOutput()->addBreadcrumb("Email", $this->core->buildCourseUrl(["email"]));
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
-        $this->core->getOutput()->addInternalCss('bootstrap.css');
         $this->core->getOutput()->addInternalCss('email-status.css');
-        $this->core->getOutput()->addInternalJs('email-status.js');
         return $this->core->getOutput()->renderTwigTemplate("EmailStatusPage.twig", [
             "subjects" => $emailStatus->getSubjects(),
             "pending" => $emailStatus->getPending(),

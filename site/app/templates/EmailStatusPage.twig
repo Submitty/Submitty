@@ -1,4 +1,4 @@
-<div class="content">
+<div id="email" class="content">
     <h1>Email Status</h1>
     {% if not subjects|length == 0 %}
         {% for subject in subjects|keys %}
@@ -9,7 +9,7 @@
                             <div> Email Subject: {{subject ~ " "}} </div>
                             <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
                         </div>
-                        <button class="btn btn-success text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        <button class="btn btn-success text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
                             Show Details
                         </button>
                     </div>
@@ -17,7 +17,7 @@
                     <div class = "button-container">
                         <div> Email Subject: {{subject ~ " "}} </div>
                         <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
-                        <button class="btn btn-danger  text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        <button class="btn btn-danger  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
                             Show Details
                         </button>
                     </div>
@@ -25,7 +25,7 @@
                     <div class = "button-container">
                         <div> Email Subject: {{subject ~ " "}} </div>
                         <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
-                        <button class="btn btn-primary  text-left"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        <button class="btn btn-primary  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
                             Show Details
                         </button>
                     </div>
@@ -34,23 +34,23 @@
                     <ul>
                         {% for row in errors[subject] %}
                             <li class="status status-error">
-                                <div>Recipient: {{row["user_id"]}}</div>
-                                <div>Time Sent: Not Sent</div>
-                                <div>
+                                <div class="status-message">Recipient: {{row["user_id"]}}</div>
+                                <div class="status-message">Time Sent: Not Sent</div>
+                                <div class="status-message">
                                     Error: {{row["error"]}}
                                 </div>
                             </li>
                         {% endfor %}
                         {% for row in pending[subject] %}
-                            <li  class="status status-warning">
-                                <div>Recipient: {{row["user_id"]}}</div>
-                                <div>Time Sent: Not Sent</div>
+                            <li  class="status status-warning status">
+                                <div class="status-message">Recipient: {{row["user_id"]}}</div>
+                                <div class="status-message">Time Sent: Not Sent</div>
                             </li>
                         {% endfor %}
                         {% for row in successes[subject] %}
-                            <li class="status status-success"> 
-                                <div>Recipient: {{row["user_id"]}}</div> 
-                                <div>Time Sent: {{row["sent"]|slice(0,19)}}</div> 
+                            <li class="status status-success status"> 
+                                <div class="status-message">Recipient: {{row["user_id"]}}</div> 
+                                <div class="status-message">Time Sent: {{row["sent"]|slice(0,19)}}</div> 
                             </li>
                         {% endfor %}
                     </ul>

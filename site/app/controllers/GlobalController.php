@@ -189,7 +189,6 @@ class GlobalController extends AbstractController {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['email_status']),
                 "title" => "Email Status",
-                "id" => "nav-sidebar-email",
                 "icon" => "fa-envelope"
             ]);
         }
