@@ -2,15 +2,25 @@ name: Vagrant Up
 
 on: 
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 * * *'
   workflow_dispatch:
+  push:
 
 jobs:
   vagrant-up:
     runs-on: macos-10.15
+    
+    strategy:
+      matrix:
+        include:
+          - image: ubuntu-18.04
+            port: 1501
+          - image: ubuntu-20.04
+            port: 1511
+
     steps:
       - uses: actions/checkout@v2
-      - name: Vagrant up
-        run: |
-          vagrant plugin install vagrant-vbguest
-          NO_SUBMISSIONS=1 vagrant up
+      - run: vagrant plugin install vagrant-vbguest
+      - run: NO_SUBMISSIONS=1 vagrant up ${{ matrix.image }}
+      - name: Validate image
+        run: curl --show-error --fail http://localhost:${{ matrix.port }}
