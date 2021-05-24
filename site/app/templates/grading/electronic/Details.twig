@@ -686,19 +686,16 @@
 {% endmacro %}
 
 {# /Column functions #}
-
-<script type="text/javascript">
-
+<script type = "text/javascript">
     function changeAnon() {
-        var status = '{{ anon_mode_cookie }}';
-
+        const status = '{{ anon_mode_cookie }}';
         if (status === 'off') {
-            document.cookie = "anon_mode=on;";
+            document.cookie = 'anon_mode=on;';
         }
         else {
-            document.cookie = "anon_mode=off;";
+            document.cookie = 'anon_mode=off;';
         }
         location.reload();
     }
-
 </script>
+

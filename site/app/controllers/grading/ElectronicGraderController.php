@@ -811,7 +811,11 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
         }
-
+        if(array_key_exists('anon_mode', $_COOKIE)){
+            if($_COOKIE['anon_mode'] === 'on'){
+                $anon_mode = true;
+            }
+        }
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
