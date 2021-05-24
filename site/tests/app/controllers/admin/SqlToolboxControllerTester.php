@@ -69,8 +69,26 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->core->setQueries($mock_queries);
 
         $organizedTables = [
-            'gradeable' => ['g_title - character varying', 'g_gradeable_type - integer'],
-            'threads' => ['title - character varying', 'is_visible - boolean']
+            'gradeable' => [
+                [
+                    'name' => 'g_title',
+                    'type' => 'character varying'
+                ],
+                [
+                    'name' => 'g_gradeable_type',
+                    'type' => 'integer'
+                ]
+            ],
+            'threads' => [
+                [
+                    'name' => 'title',
+                    'type' => 'character varying'
+                ],
+                [
+                    'name' => 'is_visible',
+                    'type' => 'boolean'
+                ]
+            ]
         ];
 
         $response = $this->controller->showToolbox();

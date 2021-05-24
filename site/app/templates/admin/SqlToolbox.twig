@@ -15,7 +15,7 @@
                             <div class="sql-database-columns" hidden>
                                 <ul style="margin-left: 15px">
                                     {% for column in table %}
-                                        <li>{{ column }}</li>
+                                        <li>{{ column.name }} - {{ column.type }}</li>
                                     {% endfor %}
                                 </ul>
 

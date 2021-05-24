@@ -27,10 +27,10 @@ class SqlToolboxController extends AbstractController {
         $organizedTables = [];
         //Loop through and create a 2d array that holds all columns for each table name.
         foreach ($this->core->getQueries()->getCourseSchemaTables() as $table) {
-            if (!isset($organizedTables[$table['table_name']])) {
-                $organizedTables[$table['table_name']] = [];
-            }
-            $organizedTables[$table['table_name']][] = $table['column_name'] . " - " . $table['data_type'];
+            $organizedTables[$table['table_name']][] = [
+                'name' => $table['column_name'],
+                'type' => $table['data_type']
+            ];
         }
         return new WebResponse(SqlToolboxView::class, 'showToolbox', $organizedTables);
     }
