@@ -316,6 +316,7 @@ class ElectronicGraderView extends AbstractView {
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
+            "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data
         ]);
     }
@@ -887,6 +888,7 @@ HTML;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
+            $isStudentInfoPanel = false;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
         $this->core->getOutput()->enableMobileViewport();
@@ -978,7 +980,8 @@ HTML;
                         $old_files[] = [
                             'name' => str_replace('\'', '\\\'', $file['name']),
                             'size' => number_format($file['size'] / 1024, 2),
-                            'part' => $i
+                            'part' => $i,
+                            'path' => $file['path']
                         ];
                     }
                 }
@@ -999,7 +1002,7 @@ HTML;
 
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        if ($this->core->getUser()->getGroup() !== User::GROUP_STUDENT && $gradeable->getLimitedAccessBlind() !== 2) {
+        if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {

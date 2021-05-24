@@ -27,14 +27,14 @@ class GlobalView extends AbstractView {
 
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
-            $page_title = "Submitty Login";
+            $page_title = "Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
-            $page_title = "Submitty " . $course_name . " " . $page_name;
+            $page_title = $page_name . " - " . $course_name;
         }
         elseif (!empty($page_name) && $page_name !== "Submitty") {
             // $page_name !== "Submitty" is needed so we dont end up with pages with the title "Submitty Submitty"
-            $page_title = "Submitty " . $page_name;
+            $page_title = $page_name;
         }
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
@@ -69,7 +69,8 @@ class GlobalView extends AbstractView {
             "wrapper_urls" => $wrapper_urls,
             "latest_tag" => $this->core->getConfig()->getLatestTag(),
             "latest_commit" => $this->core->getConfig()->getLatestCommit(),
-            "footer_links" => $footer_links
+            "footer_links" => $footer_links,
+            "module_js" => $this->output->getModuleJs(),
         ]);
     }
 }
