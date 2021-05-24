@@ -294,118 +294,6 @@ TestResults* dispatch::JUnitTestGrader_doit (const TestCase &tc, const nlohmann:
 
 // =============================================================================
 
-TestResults* dispatch::EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann::json& j) {
-
-  std::string filename = j.value("actual_file","");
-
-  // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((tc.getPrefix()+filename).c_str());
-
-  // check to see if the file was opened successfully
-  if (!junit_output.good()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output does not exist")});
-  }
-
-  // look for version number on opening line
-  std::string token;
-
-  //
-  // NOTE: instrumentation will probably not be auto-graded (no points)
-  //
-
-  // look for the final line of the file that starts with "EMMA: metadata merged"
-  while (junit_output >> token) {
-    if (token == "EMMA:") {
-      junit_output >> token;
-      if (token == "metadata") {
-        junit_output >> token;
-        if (token == "merged") {
-          return new TestResults(1.0); // Awarding full credit, no message
-        }
-      }
-    }
-  }
-
-  return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit EMMA instrumentation not verified")});
-}
-
-// =============================================================================
-
-TestResults* dispatch::EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::json& j) {
-
-  std::string filename = j.value("actual_file","");
-
-  // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((tc.getPrefix()+filename).c_str());
-
-  // check to see if the file was opened successfully
-  if (!junit_output.good()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output does not exist")});
-  }
-
-  float coverage_threshold = j.value("coverage_threshold",100);
-
-  // look for version number on opening line
-  std::string token1, token2;
-  junit_output >> token1 >> token2;
-  if (token1 != "[EMMA" || token2 != "v2.0.5312") {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit EMMA output format and/or version number incompatible with grader")});
-  }
-
-  // read the rest of the file, one line at a time.
-  std::string line;
-  bool breakdown_by_package = false;
-  while (getline(junit_output,line)) {
-    if (line == "COVERAGE BREAKDOWN BY PACKAGE:") {
-      breakdown_by_package = true;
-    } else if (breakdown_by_package) {
-      if (line.find("[class, %]") != std::string::npos) { continue; }
-      if (line.size() == 0) { continue; }
-      if (line.find(".test")     != std::string::npos) { continue; }
-      if (line.find("hw")        == std::string::npos) { continue; }
-
-      // output looks something line this:
-
-      // [class, %]      [method, %]     [block, %]      [line, %]       [name]
-      // 83%  (5/6)!     88%  (23/26)    83%  (223/270)  80%  (53/66)    hw0
-      // 100% (4/4)      97%  (32/33)    98%  (1104/1130)        97%  (195/202)  hw0.test
-
-      std::stringstream ss(line);
-      int class_p, method_p, block_p, line_p;
-      char c;
-      std::string tmp, name;
-      ss >> class_p  >> c >> tmp; assert (c == '%');
-      ss >> method_p >> c >> tmp; assert (c == '%');
-      ss >> block_p  >> c >> tmp; assert (c == '%');
-      ss >> line_p   >> c >> tmp; assert (c == '%');
-      ss >> name;
-
-      std::stringstream ss2;
-
-      assert (coverage_threshold >= 0.0 && coverage_threshold <= 100.0);
-
-      if (block_p >= coverage_threshold) {
-        // && line_p >= coverage_threshold) {
-        return new TestResults(1.0); // Awarding full credit, no message
-      }
-
-      else {
-        // simple formula for partial credit based on coverage.
-        // float partial = float(std::min(block_p,line_p)) / coverage_threshold;
-        float partial = float(block_p) / coverage_threshold;
-        ss2 << "ERROR: Insuffficient block coverage below threshold for... " << name
-            << " (" << block_p << "/" << coverage_threshold << " = " << partial << ")";
-        return new TestResults(partial,{std::make_pair(MESSAGE_FAILURE,ss2.str())});
-      }
-    }
-  }
-
-  return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Did not successfully parse EMMA output.")});
-}
-
-// =============================================================================
-// =============================================================================
-
 TestResults* dispatch::JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
   float instruction_coverage_threshold = j.value("instruction_coverage_threshold",0);
@@ -983,7 +871,7 @@ TestResults* dispatch::errorIfNotEmpty_doit (const TestCase &tc, const nlohmann:
   // flag manually when they manually insert this validation check.
   // Checking for this flag is not strictly necessary, but we should
   // revisit this in the upcoming refactor.
-  
+
   if (//j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
       JavaToolOptionsCheck(student_file_contents)) {
     return new TestResults(1.0);
@@ -1030,7 +918,7 @@ TestResults* dispatch::errorIfEmpty_doit (const TestCase &tc, const nlohmann::js
 */
 std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> dispatch::getAllCustomValidatorMessages(const nlohmann::json& j) {
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> messages;
-  
+
   if (j["data"].find("message") != j["data"].end() && j["data"]["message"].is_string()) {
     messages.push_back(dispatch::getCustomValidatorMessage(j["data"]));
   }
@@ -1043,7 +931,7 @@ std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> dispatch::getAllC
 }
 
 /**
-* Gets a message/status pair from a json object. 
+* Gets a message/status pair from a json object.
 * On failure returns the empty string for the message, and MESSAGE_INFORMATION for status and prints errors to stdout.
 */
 std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> dispatch::getCustomValidatorMessage(const nlohmann::json& j) {
@@ -1088,9 +976,9 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   std::string validator_error_filename = "validation_stderr.txt";
   std::string validator_log_filename    = "validation_logfile.txt";
   std::string validator_json_filename   = "validation_results.json";
-  std::string final_validator_log_filename    = "validation_logfile_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
-  std::string final_validator_error_filename    = "validation_stderr_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
-  std::string final_validator_json_filename   = "validation_results_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".json";
+  std::string final_validator_log_filename    = "validation_logfile_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_error_filename    = "validation_stderr_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_json_filename   = "validation_results_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".json";
   std::string input_file_name           = "custom_validator_input.json";
 
 
@@ -1123,7 +1011,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
       dest.close();
     }
     stdout_reader.close();
-  } 
+  }
   // If we can use the validator json, archive it.
   else {
     std::ofstream dest( final_validator_json_filename, std::ios::binary );
@@ -1196,7 +1084,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
-  
+
   if(result["data"].find("score") == result["data"].end() || !result["data"]["score"].is_number()){
     std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
@@ -1212,7 +1100,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   }
 
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> messages = dispatch::getAllCustomValidatorMessages(result);
-  
+
   return new TestResults(score, messages);
 }
 

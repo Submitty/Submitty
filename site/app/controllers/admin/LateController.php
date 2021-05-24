@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\DatabaseException;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
@@ -54,8 +55,9 @@ class LateController extends AbstractController {
     public function updateLateDays($csv_option = null) {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             $data = [];
-            if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "late"))) {
-                $error = "Something is wrong with the CSV you have chosen. Try again.";
+            $result = $this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "late");
+            if (!$result['success']) {
+                $error = "Something is wrong with the CSV you have chosen, error: {$result['error']}. Please try again.";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
@@ -116,8 +118,8 @@ class LateController extends AbstractController {
                 JsonResponse::getFailResponse($error)
             );
         }
-        if ((!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp']))) {
-            $error = "Datestamp must be mm/dd/yy";
+        if (!isset($_POST['datestamp'])) {
+            $error = "Deleting late days requires a valid date (mm/dd/yy)";
             $this->core->addErrorMessage($error);
 
             return MultiResponse::JsonOnlyResponse(
@@ -137,8 +139,9 @@ class LateController extends AbstractController {
     public function updateExtension() {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             $data = [];
-            if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension"))) {
-                $error = "Something is wrong with the CSV you have chosen. Try again.";
+            $result = $this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension");
+            if (!$result['success']) {
+                $error = "Something is wrong with the CSV you have chosen, error: {$result['error']}. Please try again.";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
@@ -258,14 +261,13 @@ class LateController extends AbstractController {
         );
     }
 
-    private function parseAndValidateCsv($csv_file, &$data, $type) {
-    //IN:  * csv file name and path
-    //     * (by reference) empty data array that will be filled.
-    //OUT: TRUE should csv file be properly validated and data array filled.
-    //     FALSE otherwise.
-    //PURPOSE:  (1) validate uploaded csv file so it may be parsed.
-    //          (2) create data array of csv information.
-
+    /**
+     * Given a path to an uploaded CSV file, parse and validate it, creating an array of data from the CSV information.
+     * The function returns an array with two keys:
+     *      success: boolean, true if CSV was properly validated and parsed
+     *      error: string, why the CSV failed to validate and parse
+     */
+    private function parseAndValidateCsv(string $csv_file, array &$data, string $type): array {
         //Validate file MIME type (needs to be "text/plain")
         $file_info = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
@@ -273,14 +275,21 @@ class LateController extends AbstractController {
         //MIME type must be text, but all subtypes are acceptable.
         if (substr($mime_type, 0, 5) !== "text/") {
             $data = null;
-            return false;
+            return [
+                "success" => false,
+                "error" => "Invalid mimetype, must start with 'text/', got '{$mime_type}'"
+            ];
         }
         $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($rows === false) {
             $data = null;
-            return false;
+            return [
+                "success" => false,
+                "error" => "Could not open CSV file for reading",
+            ];
         }
-        foreach ($rows as $row) {
+        foreach ($rows as $idx => $row) {
+            $row_number = $idx + 1;
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
             $fields = array_map(function ($k) {
@@ -290,37 +299,54 @@ class LateController extends AbstractController {
             //Each row has three fields
             if (count($fields) !== 3) {
                 $data = null;
-                return false;
+                return [
+                    "success" => false,
+                    "error" => "Row {$row_number} did not have 3 columns",
+                ];
             }
             //$fields[0]: Verify student exists in class (check by student user ID)
             if ($this->core->getQueries()->getUserById($fields[0]) === null) {
                 $data = null;
-                return false;
+                return [
+                    "success" => false,
+                    "error" => "Could not find user for given id '{$fields[0]}' on row {$row_number}",
+                ];
             }
             //$fields[1] represents timestamp in the format (MM/DD/YY) for late days
             //(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
-            if ($type == "late" && !DateUtils::validateTimestamp($fields[1])) {
+            if ($type === "late" && !DateUtils::validateTimestamp($fields[1])) {
                 $data = null;
-                return false;
+                return [
+                    "success" => false,
+                    "error" => "Could not validate timestamp '{$fields[1]}' on row {$row_number}",
+                ];
             }
             //$fields[1] represents the gradeable id for extensions
-            if ($type == "extension" && !$this->validateHomework($fields[1])) {
+            if ($type === "extension" && !$this->validateHomework($fields[1])) {
                 $data = null;
-                return false;
+                return [
+                    "successs" => false,
+                    "error" => "Could not resolve gradeable ID '{$fields[1]}' on row {$row_number}",
+                ];
             }
             //$fields[2]: Number of late days must be an integer >= 0
-            if (!ctype_digit($fields[2])) {
+            if (!ctype_digit($fields[2]) && intval($fields[2]) < 0) {
                 $data = null;
-                return false;
+                return [
+                    "success" => false,
+                    "error" => "Third column must be an integer greater or equal to zero, got '{$fields[2]}' on row {$row_number}",
+                ];
             }
             //Fields information seems okay.  Push fields onto data array.
             $data[] = $fields;
         }
         //Validation successful.
-        return true;
+        return [
+            "success" => true,
+        ];
     }
 
-    private function validateHomework($id) {
+    private function validateHomework(string $id): bool {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
         foreach ($g_ids as $index => $value) {
             if ($id === $value['g_id']) {

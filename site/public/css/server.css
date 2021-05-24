@@ -85,6 +85,10 @@ a.btn, a.icon {
     text-decoration: none;
 }
 
+.width-full {
+    width: 100%;
+}
+
 /****************************
  * INPUT STYLES
  ***************************/
@@ -148,6 +152,7 @@ input[type="checkbox"]{
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
+    min-width:20px;
 }
 
 input[type="checkbox"]:checked{
@@ -349,10 +354,6 @@ td>a.active-sort {
 
 .content.gradeable_message a {
     color: var(--always-default-white);
-}
-
-.content.gradeable_message p:not(:last-child){
-    padding-bottom: 20px;
 }
 
 .content.overridden_message {
@@ -1473,23 +1474,40 @@ end of styles used in the admin gradeable page
     overflow-y: auto;
 }
 
-#hotkeys-list {
+.ta-grading-setting-list {
     width: 100%;
     border-collapse: collapse;
 }
 
-#hotkeys-list tr {
+.ta-grading-setting-list tr {
     border: 1px solid var(--standard-light-gray);
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:nth-child(even) {
+.ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--standard-pale-gray);
 }
 
-#hotkeys-list td {
+.ta-grading-setting-list td {
     padding: 4px;
+}
+
+.file-viewer{
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.file-viewer a,
+.file-viewer a:link,
+.file-viewer a:visited,
+.file-viewer a:active {
+    color: var(--file-browser-blue);
+}
+
+.file-viewer a:hover {
+    color: #6db7ff;
+    text-decoration: none;
 }
 
 .remap-button {
@@ -1605,9 +1623,9 @@ end of styles used in the admin gradeable page
 }
 
 .required::-webkit-input-placeholder { color: var(--error-alert-dark-red); }
-.required:-moz-placeholder { var(--error-alert-dark-red); }
-.required::-moz-placeholder { var(--error-alert-dark-red); }
-.required:-ms-input-placeholder { var(--error-alert-dark-red); }
+.required:-moz-placeholder { color: var(--error-alert-dark-red); }
+.required::-moz-placeholder { color: var(--error-alert-dark-red); }
+.required:-ms-input-placeholder { color: var(--error-alert-dark-red); }
 
 .required_type{
     color: var(--error-alert-dark-red);

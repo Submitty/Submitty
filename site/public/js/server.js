@@ -270,7 +270,7 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time) {
 
     let form = $("#edit-course-materials-form");
 
@@ -302,6 +302,8 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
         $("#all-sections-showing-no", form).prop('checked',true);
     }
     $("#material-edit-form", form).attr('data-directory', path);
+    $("#edit-picker", form).attr('value', release_time);
+    $("#edit-sort", form).attr('value', dir);
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
@@ -600,7 +602,8 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members, lock_date) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, 
+    pending_members, multiple_invite_members, max_members, lock_date) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -628,8 +631,11 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     team_history_div_left.empty();
     var team_history_div_right = $("#admin-team-history-right");
     team_history_div_right.empty();
+    var team_history_div_bottom = $('#admin-team-history-bottom');
+    team_history_div_bottom.empty();
     members_div.append('Team Member IDs:<br />');
     var student_full = JSON.parse($('#student_full_id').val());
+    let exists_multiple_invite_member = false;
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
@@ -657,7 +663,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
-            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
+            if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
+                name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
                 <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
@@ -668,7 +676,6 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             });
             $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
-
         if (user_assignment_setting_json != false) {
             var team_history_len=user_assignment_setting_json.team_history.length;
             team_history_title_div.append('Team History: ');
@@ -716,9 +723,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
             }
-            $('#admin-team-history-bottom').empty();
             if (past_lock_date) {
-                $('#admin-team-history-bottom').append('*History items highlighted in red were performed after team lock date.');
+                team_history_div_bottom.append('*History items highlighted in red were performed after team lock date.');
             }
         }
     }
@@ -754,6 +760,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
+    if (exists_multiple_invite_member) {
+        members_div.append('<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:75%">\
+        *Pending members highlighted in red have invites to multiple teams.');
+    }
 }
 
 function removeTeamMemberInput(i) {
@@ -771,6 +781,8 @@ function approveTeamMemberInput(old, i) {
     $("#approve_member_"+i).remove();
     $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
     $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
+    let user_id = ($('[name="user_id_'+i+'"]', form).val()).substring(9);
+    $('[name="user_id_'+i+'"]', form).attr("value", user_id);
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
@@ -779,6 +791,7 @@ function approveTeamMemberInput(old, i) {
 
 function addTeamMemberInput(old, i) {
     old.remove()
+    $('#multiple-invites-warning').remove();
     var form = $("#admin-team-form");
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
@@ -990,7 +1003,7 @@ function check_lichen_jobs(url, semester, course) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
 function downloadStudentAnnotations(url, path, dir) {
@@ -1119,10 +1132,27 @@ function changeName(element, user, visible_username, anon){
     }
 }
 
-function openFrame(url, id, filename) {
+function openFrame(url, id, filename, ta_grading_interpret=false) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
         var iframeId = "file_viewer_" + id + "_iframe";
+        if(ta_grading_interpret) {
+            let display_file_url = buildCourseUrl(['display_file']);
+            let directory = "";
+            if (url.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url.includes("results_public")) {
+                directory = "results_public";
+            }
+            else if (url.includes("results")) {
+                directory = "results";
+            }
+            else if (url.includes("checkout")) {
+                directory = "checkout";
+            }
+            url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -1146,10 +1176,13 @@ function openFrame(url, id, filename) {
     return false;
 }
 
-function resizeFrame(id) {
+function resizeFrame(id, max_height = 500, force_height=-1) {
+    $("iframe#" + id).contents().find("html").css("height", "inherit");
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-    if (height > 500) {
-        document.getElementById(id).height= "500px";
+    if (force_height != -1) {
+        document.getElementById(id).height = force_height + "px";
+    } else if (height > max_height) {
+        document.getElementById(id).height= max_height + "px";
     }
     else {
         document.getElementById(id).height = (height+18) + "px";
@@ -1674,6 +1707,29 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         }
     })
 }
+
+function popOutSubmittedFile(html_file, url_file) {
+    var directory = "";
+    let display_file_url = buildCourseUrl(['display_file']);
+    if (url_file.includes("submissions")) {
+      directory = "submissions";
+      url_file = url_file;
+    }
+    else if (url_file.includes("results_public")) {
+      directory = "results_public";
+    }
+    else if (url_file.includes("results")) {
+      directory = "results";
+    }
+    else if (url_file.includes("checkout")) {
+      directory = "checkout";
+    }
+    else if (url_file.includes("split_pdf")) {
+      directory = "split_pdf";
+    }
+    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    return false;
+  }
 
 /**
  * Function for course staff to flag/unflag a user's preferred photo as inappropriate.

@@ -540,25 +540,21 @@ class FileUtils {
      *            'success','size' => 100, 'is_zip' => false, 'success' => true)
      * if $files is null returns failed => no files sent to validate
      */
-    public static function validateUploadedFiles($files) {
+    public static function validateUploadedFiles(array $files): array {
         if (empty($files)) {
             return ["failed" => "No files sent to validate"];
         }
 
-        $ret = [];
-        $num_files = count($files['name']);
-        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $validator = function ($file) {
+            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $name = $file['name'];
+            $tmp_name = $file['tmp_name'];
 
-        for ($i = 0; $i < $num_files; $i++) {
-            //extract the values from each file
-            $name = $files['name'][$i];
-            $tmp_name = $files['tmp_name'][$i];
             $type = mime_content_type($tmp_name);
-
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
-            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
-                $errors[] = ErrorMessages::uploadErrors($files['error'][$i]);
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $errors[] = ErrorMessages::uploadErrors($file['error']);
             }
 
             //check if its a zip file
@@ -580,7 +576,7 @@ class FileUtils {
             }
 
             //for zip files use the size of the contents in case it gets extracted
-            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $files['size'][$i];
+            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $file['size'];
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
@@ -598,7 +594,7 @@ class FileUtils {
                 $success = false;
             }
 
-            $ret[] = [
+            return [
                 'name' => $name,
                 'type' => $type,
                 'error' => $success ? "No error." : implode(" ", $errors),
@@ -606,8 +602,116 @@ class FileUtils {
                 'is_zip' => $is_zip,
                 'success' => $success,
             ];
+        };
+
+        $ret = [];
+        if (!is_array($files['name'])) {
+            $ret[] = $validator($files);
+        }
+        else {
+            $num_files = count($files['name']);
+
+            for ($i = 0; $i < $num_files; $i++) {
+                //construct single file from uploaded file array
+                $file = [
+                    'name' => $files['name'][$i],
+                    'type' => $files['type'][$i],
+                    'tmp_name' => $files['tmp_name'][$i],
+                    'error' => $files['error'][$i],
+                    'size' => $files['size'][$i]
+                ];
+
+                $ret[] = $validator($file);
+            }
         }
 
         return $ret;
+    }
+
+    /**
+     * Given an absolute path check a file or directory for permission problems.  If any problems are detected return
+     * an array of error strings describing the problems.
+     *
+     * Use this function to check that:
+     * - File or directory at $path exists
+     * - File or directory at $path has the correct owner (optional)
+     * - File or directory at $path has the correct group (optional)
+     * - File or directory at $path is readable
+     * - File or directory at $path is writable
+     *
+     * @param string $path Absolute path to file or directory
+     * @param string|null $expected_owner Expected owner name of the file, or null to omit this check
+     * @param string|null $expected_group Expected group name owner of the file, or null to omit this check
+     * @return array Empty array if no errors were detected or an array containing one or more error message strings if
+     *               errors were detected.
+     */
+    public static function checkForPermissionErrors(string $path, ?string $expected_owner, ?string $expected_group): array {
+        $results = [];
+
+        // Check exists
+        $exists = file_exists($path);
+        if (!$exists) {
+            $results[] = "'${path}' does not exist.";
+            return $results;
+        }
+
+        // Check owner
+        if ($expected_owner) {
+            $owner_id = fileowner($path);
+            $owner_name = posix_getpwuid($owner_id)['name'];
+            if ($owner_name !== $expected_owner) {
+                $results[] = "Expected '${path}' to have owner '${expected_owner}' but instead got '${owner_name}'.";
+            }
+        }
+
+        // Check group
+        if ($expected_group) {
+            $group_id = filegroup($path);
+            $group_name = posix_getgrgid($group_id)['name'];
+            if ($group_name !== $expected_group) {
+                $results[] = "Expected '${path}' to have group '${expected_group}' but instead got '${group_name}'.";
+            }
+        }
+
+        // Check is readable
+        $readable = is_readable($path);
+        if (!$readable) {
+            $results[] = "'${path}' is not readable.";
+        }
+
+        // Check is writable
+        $writable = is_writable($path);
+        if (!$writable) {
+            $results[] = "'${path}' is not writable.";
+        }
+
+        return $results;
+    }
+
+    /**
+     * Recursively traverse a directory structure starting at $dir.  The passed in $results array will be populated
+     * with the absolute path to each file or sub-directory.
+     *
+     * NOTE: Sub-directories are treated like files, and thus will be included as their own entries in the array.
+     *
+     * Credit:
+     * https://stackoverflow.com/questions/24783862/list-all-the-files-and-folders-in-a-directory-with-php-recursive-function
+     *
+     * @param string $dir The starting directory (not included in results)
+     * @param array $results An array passed by reference which will be populated
+     */
+    public static function getDirContents(string $dir, &$results = []): void {
+        $files = scandir($dir);
+
+        foreach ($files as $key => $value) {
+            $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
+            if (!is_dir($path)) {
+                $results[] = $path;
+            }
+            elseif ($value != "." && $value != "..") {
+                self::getDirContents($path, $results);
+                $results[] = $path;
+            }
+        }
     }
 }

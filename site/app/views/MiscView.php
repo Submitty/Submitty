@@ -16,7 +16,7 @@ class MiscView extends AbstractView {
         $code_css[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'codemirror.css'), 'vendor');
         $code_css[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'), 'vendor');
         $code_css[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'), 'vendor');
-        
+
         $code_js = [];
         $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'codemirror.js'), 'vendor');

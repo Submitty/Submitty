@@ -1,3 +1,6 @@
+/* global CodeMirror, getFocusableElements */
+/* exported getLargeCodeMirror, getSmallCodeMirror, rowsToPixels */
+
 /**
  * Generate a large codemirror.  This is simply a regular codemirror except we've bound accessibility keys to
  * make keyboard navigation better.  It also adds a small instructional message above the codemirror.
@@ -55,7 +58,7 @@ function getSmallCodeMirror(attachment_elem, codemirror_config) {
  *                             Will probably be 'Esc' or 'Tab'.
  */
 function makeCodeMirrorAccessible(cm, advance_key) {
-    const keys = {}
+    const keys = {};
 
     keys['Shift-Tab'] = () => {
         const elements = getFocusableElements();
@@ -66,7 +69,7 @@ function makeCodeMirrorAccessible(cm, advance_key) {
         }
 
         elements[index].focus();
-    }
+    };
 
     keys[advance_key] = () => {
         const elements = getFocusableElements();
@@ -77,9 +80,9 @@ function makeCodeMirrorAccessible(cm, advance_key) {
         }
 
         elements[index].focus();
-    }
+    };
 
-    cm.setOption("extraKeys", keys);
+    cm.setOption('extraKeys', keys);
 }
 
 /**
@@ -89,7 +92,7 @@ function makeCodeMirrorAccessible(cm, advance_key) {
  */
 function disableEnterKey(cm) {
     cm.addKeyMap({
-        'Enter': () => { /** Pass */ }
+        'Enter': () => { /** Pass */ },
     });
 }
 

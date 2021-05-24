@@ -208,6 +208,7 @@ def main():
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
 
+                # FIXME: This will be incorrect if the username includes an underscore
                 if '_' not in my_who:
                     my_user = my_who
                     my_team = ""
@@ -217,22 +218,38 @@ def main():
                     my_team = my_who
                     my_is_team = True
 
-                # FIXME: Set this value appropriately
+                # Note: If the initial checkout failed, or if
+                # autograding failed to create a results subdirectory
+                # or create a history file, regrading will also fail.
+                history_file=os.path.join(data_dir, my_semester, my_course,
+                                          "results", my_gradeable, my_who,
+                                          my_version, "history.json")
                 is_vcs_checkout = False
+                if os.path.exists(history_file):
+                    with open(history_file) as hf:
+                        obj = json.load(hf)
+                        if len(obj) > 0 and 'revision' in obj[0]:
+                            is_vcs_checkout = True
+                            revision = obj[0]['revision']
 
-                grade_queue.append({"semester": my_semester,
-                                    "course": my_course,
-                                    "gradeable": my_gradeable,
-                                    "user": my_user,
-                                    "team": my_team,
-                                    "who": my_who,
-                                    "is_team": my_is_team,
-                                    "version": my_version,
-                                    "vcs_checkout": is_vcs_checkout,
-                                    "required_capabilities" : required_capabilities,
-                                    "queue_time":queue_time,
-                                    "regrade":True,
-                                    "max_possible_grading_time" : max_grading_time})
+                obj = {"semester": my_semester,
+                       "course": my_course,
+                       "gradeable": my_gradeable,
+                       "user": my_user,
+                       "team": my_team,
+                       "who": my_who,
+                       "is_team": my_is_team,
+                       "version": my_version,
+                       "vcs_checkout": is_vcs_checkout,
+                       "required_capabilities" : required_capabilities,
+                       "queue_time":queue_time,
+                       "regrade":True,
+                       "max_possible_grading_time" : max_grading_time}
+
+                if is_vcs_checkout:
+                    obj['revision'] = revision
+
+                grade_queue.append(obj)
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:

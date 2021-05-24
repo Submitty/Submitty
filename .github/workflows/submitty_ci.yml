@@ -1,0 +1,467 @@
+name: Submitty CI
+
+on: [push, pull_request]
+
+env:
+  PGPASSWORD: submitty_dbuser
+  PHP_USER: submitty_php
+  PHP_GROUP: submitty_php
+  CGI_USER: submitty_cgi
+  SUBMITTY_DATA_DIR: /var/local/submitty
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
+  SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
+  POSTGRES_HOST: localhost
+  PHP_VER: 7.2
+  NODE_VERSION: 10
+
+jobs:
+    eslint:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - name: Run eslint
+              run: npm run lint
+
+
+    js-unit:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
+
+
+    php-lint-static:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: shivammathur/setup-php@2.7.0
+              with:
+                php-version: ${{ env.PHP_VER }}
+            - name: Cache Composer
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            - name: Install Composer
+              uses: actions/cache@v2
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --dev
+            - name: Run php linting and static analysis
+              run : |
+                  php vendor/bin/phpcs --version
+                  php vendor/bin/phpcs --standard=tests/ruleset.xml
+                  php vendor/bin/phpstan  --version
+                  php vendor/bin/phpstan analyze app
+
+
+    php-unit:
+      runs-on: ubuntu-18.04
+      defaults:
+          run:
+              working-directory: site
+      steps:
+          - uses: actions/checkout@v2
+          - uses: shivammathur/setup-php@2.7.0
+            with:
+              php-version: ${{ env.PHP_VER }}
+              extensions: imagick
+              coverage: pcov
+          - name: Cache Composer
+            id: composer-cache
+            run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+          - name: Install Composer
+            uses: actions/cache@v2
+            with:
+                path: ${{ steps.composer-cache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                restore-keys: |
+                    ${{ runner.os }}-composer-
+          - name: Install dependencies
+            run: composer install --prefer-dist --dev
+          - name: Run php unit tests
+            run : php vendor/bin/phpunit --configuration tests/phpunit.xml
+          - name: Upload Coverage
+            uses: codecov/codecov-action@v1
+            with:
+              files: site/tests/report/clover.xml
+              flags: php
+
+
+    python-lint:
+      runs-on: ubuntu-18.04
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+            restore-keys: |
+                ${{ runner.os }}-${{ github.job }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install flake8 flake8-bugbear
+        - name: Run python linting
+          run : python3 -m flake8
+
+
+    python-unit:
+      runs-on: ubuntu-18.04
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.6'
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+            restore-keys: |
+                ${{ runner.os }}-${{ github.job }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install --upgrade pip setuptools wheel
+            python3 -m pip install "SQLAlchemy<1.4.0" jsonschema jsonref pytz tzlocal
+            python3 -m pip install coverage
+            python3 -m pip install paramiko
+            python3 -m pip install docker
+            python3 -m pip install python-dateutil
+        - name: Run migrator python unit tests
+          working-directory: migration
+          run : |
+            coverage run -m unittest discover
+            coverage xml
+        - name: Run python_submitty_utils python unit tests
+          working-directory: python_submitty_utils
+          run : |
+            pip3 install .
+            coverage run -m unittest discover
+            coverage xml
+        - name: Run autograder python unit tests
+          working-directory: autograder
+          run : |
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload autograder Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: autograder/coverage.xml
+            flags: autograder
+        - name: Upload submitty python utils Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: python_submitty_utils/coverage.xml
+            flags: python_submitty_utils
+        - name: Upload migrator Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: migration/coverage.xml
+            flags: migrator
+
+
+
+    e2e:
+        needs: [eslint, js-unit, php-lint-static, php-unit, python-lint, python-unit]
+        runs-on: ubuntu-18.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
+
+        steps:
+          - name: Cancel Previous Runs
+            uses: styfle/cancel-workflow-action@0.8.0
+            with:
+              access_token: ${{ github.token }}
+          - uses: actions/checkout@v2
+            with:
+              path: SUBMITTY_CPY/
+          - name: Copy Repo
+            run: |
+              # have to copy first, absolute paths not supported by actions/checkout@v2
+                sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+                sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+                sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+                sudo chmod -R a+rwx /tmp/
+
+          - uses: actions/setup-python@v2
+            with:
+              python-version: '3.6'
+          - uses: shivammathur/setup-php@2.7.0
+            with:
+              php-version: ${{ env.PHP_VER }}
+              extensions: imagick
+          - name: Cache pip
+            uses: actions/cache@v2
+            with:
+              path: path ~/.cache/pip
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/requirements.txt') }}
+              restore-keys: |
+                ${{ runner.os }}-${{ github.job }}-pip-
+          - name: Install python dependencies
+            run: |
+              python3 -m pip install --upgrade pip setuptools wheel
+              sudo python3 -m pip install --upgrade pip setuptools wheel
+              pip3 -V
+              sudo pip3 -V
+              pip3 install cryptography
+              pip3 install python-pam
+              pip3 install "sqlalchemy<1.4.0"
+              pip3 install selenium
+              pip3 install tzlocal
+              pip3 install jsonschema
+              pip3 install jsonref
+              pip3 install websocket_client
+              pip3 install psycopg2
+              pip3 install docker
+              pip3 install pyyaml
+              pip3 install selenium
+              pip3 install websocket_client
+              pip3 install python-pam
+              pip3 install python-dateutil
+              pip3 install paramiko
+              pip3 install pyzbar
+              pip3 install watchdog
+              #needs to be globally available for all users
+              sudo pip3 install docker
+              sudo pip3 install paramiko
+              sudo pip3 install tzlocal
+              sudo pip3 install jsonref
+              sudo pip3 install numpy
+              sudo pip3 install opencv-python
+              sudo pip3 install pyPdf
+              sudo apt-get install libzbar0
+              sudo pip3 install pyzbar
+              sudo pip3 install PyPDF2
+              sudo pip3 install pdf2image
+              sudo pip3 install onnxruntime
+              sudo pip3 install watchdog
+              sudo pip3 install python-dateutil
+              sudo pip3 install psutil
+              sudo pip3 install psycopg2
+              sudo pip3 install python-pam
+              sudo pip3 install "sqlalchemy<1.4.0"
+
+          - name: Get composer cache dir
+            id: composer-cache
+            run: |
+              cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+              echo "::set-output name=dir::$(composer config cache-files-dir)"
+          - name: Install composer Cache
+            uses: actions/cache@v2
+            with:
+              path: ${{ steps.composer-cache.outputs.dir }}
+              key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
+              restore-keys: |
+                ${{ runner.os }}-php-composer-
+
+          - name: Install PHP dependencies
+            run: |
+              cd  ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
+              composer install --prefer-dist
+
+          - name: Install Submitty python utils
+            run: |
+              cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+              pip3 install .
+              pip3 show submitty_utils
+              umask 022
+              sudo -H pip3 install .
+              sudo pip3 show submitty_utils
+
+          - name: Install accessibility checker
+            run: |
+              wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
+              unzip vnu.jar_20.3.16.zip
+              sudo mv dist/vnu.jar /usr/bin/
+
+          - name: Create Database and default user
+            run: |
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+
+          - name: Install apt-get packages
+            run: |
+              sudo apt-get update
+              sudo apt-get install libseccomp-dev
+              sudo apt-get install libboost-all-dev
+              sudo apt-get install apache2
+              sudo apt-get install apache2-suexec-custom
+              sudo apt-get install libapache2-mod-authnz-external
+              sudo apt-get install libapache2-mod-authz-unixgroup
+              sudo apt-get install libapache2-mod-wsgi-py3
+              sudo apt-get install nginx
+              sudo apt-get install php${PHP_VER}-fpm
+              sudo apt-get install poppler-utils
+              sudo apt-get install valgrind
+
+          - name: Install third party dependencies
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+
+          - name: Configure Test suite
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+
+          - name: Set up sample course
+            run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
+
+          - name: Set up test suite
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+
+          - name: Set up apache
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+              sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
+              sudo mkdir -p /run/php
+              sudo chown www-data:www-data /run/php
+              sudo chmod 755 /run/php
+              sudo a2dissite 000-default
+              sudo rm -rf /etc/apache2/sites-available/*
+              sudo rm -rf /etc/apache2/sites-enabled/*
+              sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
+              sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
+              sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+              sudo chmod 0640 /etc/apache2/suexec/www-data
+              sudo a2ensite submitty
+              sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+              sudo apache2ctl -t
+              sudo service php${PHP_VER}-fpm restart
+              sudo service apache2 restart
+
+          - name: Set up nginx
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo mkdir /etc/systemd/system/nginx.service.d
+              sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
+              sudo systemctl daemon-reload
+              sudo rm -rf /etc/nginx/sites-available/*
+              sudo rm -rf /etc/nginx/sites-enabled/*
+              sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+              sudo chmod 644 /etc/nginx/sites-available/submitty.conf
+              sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+              sudo service nginx restart
+
+          - uses: nanasess/setup-chromedriver@master
+          - name: Setup chromedriver
+            run: |
+              sudo systemctl restart submitty_autograding_worker
+              sudo systemctl restart submitty_autograding_shipper
+              export DISPLAY=:99
+              chromedriver --url-base=/wd/hub &
+
+          - name: Run selenium e2e tests with pam auth
+            run: |
+              pushd ${SUBMITTY_REPOSITORY}
+              echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+              sudo bash tests/test_site_error_log.sh
+
+          # TODO: Remove this block after upgrading jsPDF
+          - name: Cache Node Modules
+            uses: actions/cache@v2
+            with:
+              path: ~/.npm
+              key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
+              restore-keys: |
+                 ${{ runner.os }}-cache-node-modules-dev
+          - name: Install Cypress
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            run: |
+              npm install file-saver --save
+              npm install --production=false
+
+          - name: Run cypress e2e tests with pam auth
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+
+          - name: Switch to database auth
+            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
+
+          - name: Run cypress e2e login tests with databse auth
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/integration/login.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+
+          - uses: actions/upload-artifact@v2
+            if: failure()
+            with:
+              name: cypress-screenshots
+              path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+          - uses: actions/upload-artifact@v2
+            if: failure()
+            with:
+              name: cypress-videos
+              path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+
+          - name: Check for site errors
+            working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+            run: sudo bash tests/test_site_error_log.sh
+
+          - name: Run integration tests
+            run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
+

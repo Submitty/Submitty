@@ -1389,7 +1389,7 @@ function getOpenComponentIds() {
  * @return {int}
  */
 function getComponentIdByOrder(order) {
-    return $('.component-container').eq(order).find('.component').attr('data-component_id');
+    return parseInt($('.component-container').eq(order).find('.component').attr('data-component_id'));
 }
 
 /**
@@ -1833,30 +1833,30 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-  const component_id = getComponentIdFromDOMElement(me);
-  const gradeable_id = getGradeableId();
-  const anon_id = getAnonId();
-  ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
-    // If there is any changes made in comment of a component , prompt the TA
-    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
-      if(confirm( "Are you sure you want to discard all changes to the student message?")){
-        toggleComponent(component_id, false)
-          .catch(function (err) {
-            console.error(err);
-            alert('Error closing component! ' + err.message);
-          });
-      }
-    }
-    // There is no change in comment, i.e it is same as the saved comment (before)
-    else {
-      toggleComponent(component_id, false)
-        .catch(function (err) {
-          console.error(err);
-          alert('Error closing component! ' + err.message);
-        });
-    }
-  });
-
+    const component_id = getComponentIdFromDOMElement(me);
+    const gradeable_id = getGradeableId();
+    const anon_id = getAnonId();
+    ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component) => {
+        const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
+        // If there is any changes made in comment of a component , prompt the TA
+        if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
+            if (confirm('Are you sure you want to discard all changes to the student message?')){
+                toggleComponent(component_id, false)
+                    .catch((err) => {
+                        console.error(err);
+                        alert(`Error closing component! ${err.message}`);
+                    });
+            }
+        }
+        // There is no change in comment, i.e it is same as the saved comment (before)
+        else {
+            toggleComponent(component_id, false)
+                .catch((err) => {
+                    console.error(err);
+                    alert(`Error closing component! ${err.message}`);
+                });
+        }
+    });
 }
 
 function onCancelEditRubricComponent(me) {
@@ -2065,7 +2065,7 @@ function onClickCountDown(me) {
  */
 function onComponentPointsChange(me) {
     if (dividesEvenly($(me).val(), getPointPrecision())) {
-        $(me).css("background-color", "#ffffff");
+        $(me).css("background-color", "var(--standard-input-background)");
         refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
             .catch(function (err) {
                 console.error(err);
@@ -2364,7 +2364,7 @@ function closeAllComponents(save_changes) {
     //  but just in case there is...
     getOpenComponentIds().forEach(function (id) {
         sequence = sequence.then(function () {
-            return closeComponent(id);
+            return closeComponent(id, save_changes);
         });
     });
     return sequence;
@@ -2931,7 +2931,7 @@ function saveComponent(component_id) {
         let gradedComponent = getGradedComponentFromDOM(component_id);
         if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
             if (!confirm("Are you sure you want to delete the custom mark?")) {
-                return promise.reject();
+                return Promise.reject();
             }
         }
         // We're in grade mode, so save the graded component

@@ -6,6 +6,7 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\ResponseInterface;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -59,7 +60,7 @@ set_exception_handler("exception_handler");
 
 function error_handler() {
     $error = error_get_last();
-    if ($error['type'] === E_ERROR) {
+    if (!is_null($error) && $error['type'] === E_ERROR) {
         exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file
         " . $error['file'] . " on line " . $error['line']));
     }
@@ -74,6 +75,7 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
+$core->initializeTokenManager();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
@@ -125,7 +127,14 @@ if ($is_api) {
 }
 else {
     $response = WebRouter::getWebResponse($request, $core);
+    $request_json = isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] === "application/json";
+
+    if ($request->isXmlHttpRequest() && ($response instanceof MultiResponse) && $request_json) {
+        //convert to JSON if an ajax request asks for it
+        $response = $response->convertToJsonResponse();
+    }
 }
+
 
 if ($response instanceof ResponseInterface) {
     $response->render($core);

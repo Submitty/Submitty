@@ -14,7 +14,7 @@ use Ds\Set;
 /**
  * Class Output
  *
- * We us this class to act as a wrapper around Twig as well as to hold our output
+ * We use this class to act as a wrapper around Twig as well as to hold our output
  * as we build it before final output either when we output at the end of the calling
  * class or if the application has thrown an uncaught exception
  */
@@ -35,6 +35,8 @@ class Output {
     private $css;
     /** @var Set */
     private $js;
+    /** @var Set */
+    private $module_js;
 
     private $use_header = true;
     private $use_footer = true;
@@ -61,6 +63,7 @@ class Output {
 
         $this->css = new Set();
         $this->js = new Set();
+        $this->module_js = new Set();
     }
 
     /**
@@ -145,12 +148,13 @@ HTML;
         $this->addInternalCss('bootstrap.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
-
+        $this->addInternalCss('markdown.css');
 
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
+        $this->addInternalModuleJs('server.js');
         $this->addInternalJs('menu.js');
     }
 
@@ -188,7 +192,7 @@ HTML;
      * Output()->renderTemplate(array("submission", "Global"), "header")
      * Would load views\submission\GlobalView->header()
      *
-     * @return string
+     * @return null|string
      */
     public function renderTemplate($view, string $function, ...$args) {
         if (!$this->render) {
@@ -209,7 +213,7 @@ HTML;
      * Please avoid using this function unless absolutely necessary.
      * Please use renderJsonSuccess, renderJsonFail and renderJsonError
      * instead to ensure JSON responses have consistent format.
-     * @param $json
+     * @param mixed $json
      */
     public function renderJson($json) {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
@@ -289,7 +293,7 @@ HTML;
 
     /**
      * Renders success/error messages and/or JSON responses.
-     * @param $message
+     * @param string $message
      * @param bool $success
      * @param bool $show_msg
      * @return array
@@ -361,7 +365,7 @@ HTML;
      * All views inheriet from BaseView which make them be a singleton and have the
      * getInstance method.
      *
-     * @param string $view
+     * @param string $class
      *
      * @return string
      */
@@ -419,8 +423,6 @@ HTML;
 
     /**
      * Returns the stored output buffer that we've been building
-     *
-     * @return string
      */
     public function displayOutput() {
         echo($this->getOutput());
@@ -446,8 +448,9 @@ HTML;
         if ($this->twig === null) {
             $this->loadTwig(false);
         }
-        /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = $this->getView(ErrorView::class)->exceptionPage($exception);
+        /** @var \app\views\ErrorView $view */
+        $view = $this->getView(ErrorView::class);
+        $exceptionPage = $view->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -492,6 +495,10 @@ HTML;
         $this->css->add($url);
     }
 
+    public function addInternalModuleJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs'));
+    }
+
     public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
@@ -502,6 +509,10 @@ HTML;
 
     public function addJs(string $url): void {
         $this->js->add($url);
+    }
+
+    public function addModuleJs(string $url): void {
+        $this->module_js->add($url);
     }
 
     public function timestampResource($file, $folder) {
@@ -555,18 +566,16 @@ HTML;
         return end($this->breadcrumbs)->getTitle();
     }
 
-    /**
-     * @return array
-     */
     public function getCss(): Set {
         return $this->css;
     }
 
-    /**
-     * @return array
-     */
     public function getJs(): Set {
         return $this->js;
+    }
+
+    public function getModuleJs(): Set {
+        return $this->module_js;
     }
 
     /**
@@ -600,6 +609,8 @@ HTML;
      */
     public function setTwigTimeZone(string $time_zone): void {
         $tz = $time_zone === 'NOT_SET/NOT_SET' ? $this->core->getConfig()->getTimezone() : $time_zone;
-        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone($tz);
+        /** @var \Twig\Extension\CoreExtension $extension */
+        $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
+        $extension->setTimezone($tz);
     }
 }

@@ -13,9 +13,12 @@ main#main {
 
 main#main.full-screen-mode {
     z-index: 10;
-    animation-duration: 0.8s;
-    animation-name: scaleUp;
-    animation-fill-mode: forwards;
+    transform: scale(1, 1);
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
 }
 
 main#main.full-screen-mode .content {
@@ -154,11 +157,9 @@ button > i.fas:hover {
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
-    margin-top: 4px;
     border: 2px solid black;
     border-radius: 5px;
     box-shadow: 2px 2px 4px;
-    box-sizing: border-box;
 }
 
 #prev-student-navlink i,
@@ -371,8 +372,7 @@ progress::-webkit-progress-value {
 /* Grading Panels CSS */
 
 .panels-container {
-    height: calc(100% - 140px);
-    margin: 0 6px;
+    margin: 0;
     background: var(--standard-medium-gray);
 }
 
@@ -429,35 +429,39 @@ progress::-webkit-progress-value {
     flex: 0 0 auto;
     cursor: col-resize;
     position: relative;
-    width: 20px;
+    width: 14px;
     background: transparent;
 }
 
 .panel-item-section-drag-bar {
     cursor: ns-resize;
     position: relative;
-    height: 20px;
+    height: 14px;
     background: transparent;
 }
 
 .panel-item-section-drag-bar:after {
     content: "";
     position: absolute;
-    height: 10px;
+    height: 7px;
     width: 30%;
     max-width: 80px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 50px;
-    background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
+    background-color: var(--submitty-logo-blue);
+}
+
+.panel-item-section-drag-bar:hover:after, .panel-item-section-drag-bar:active:after {
+  height: 9px;
 }
 
 .two-panel-drag-bar:after {
     content: "";
     position: absolute;
-    width: 10px;
+    width: 7px;
     height: 30%;
     max-height: 160px;
     top: 50%;
@@ -465,12 +469,11 @@ progress::-webkit-progress-value {
     transform: translate(-50%, -50%);
     border-radius: 50px;
     background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after,
-.panel-item-section-drag-bar:hover:after {
-    filter: blur(3px);
+.two-panel-drag-bar:hover:after, .two-panel-drag-bar:active:after  {
+  width: 9px;
 }
 
 #regrade_inner_info .inner-container {
@@ -540,7 +543,6 @@ progress::-webkit-progress-value {
     border: solid 6px var(--important-post);
     position:relative;
     display: block;
-    float: left;
     width: 400px;
     height: 25px;
     top: 2px;
@@ -808,22 +810,22 @@ tr.is_publish {
     overflow-y: auto;
 }
 
-#hotkeys-list {
+.ta-grading-setting-list {
     width: 100%;
     border-collapse: collapse;
 }
 
-#hotkeys-list tr {
+.ta-grading-setting-list tr {
     border: 1px solid #ddd;
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:nth-child(even) {
+.ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--alternating-row-color-light);
 }
 
-#hotkeys-list td {
+.ta-grading-setting-list td {
     padding: 4px;
 }
 
@@ -1244,6 +1246,7 @@ tr.is_publish {
     position:relative;
     float:left;
     width:100%;
+    padding-left: 10px;
 }
 
 #file-view {
@@ -1372,6 +1375,12 @@ tr.is_publish {
     margin-bottom: 10px;
     resize: none;
 }
+
+/* Notebook panel */
+#notebook-main-view {
+    padding: 10px;
+}
+
 
 /* Media queries */
 @media (max-width: 540px) {

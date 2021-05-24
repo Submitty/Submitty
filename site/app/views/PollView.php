@@ -4,10 +4,11 @@ namespace app\views;
 
 use app\models\User;
 use app\libraries\FileUtils;
+use app\models\PollModel;
 
 class PollView extends AbstractView {
 
-    public function showPollsInstructor($todays_polls, $older_polls, $future_polls) {
+    public function showPollsInstructor($todays_polls, $older_polls, $future_polls, $dropdown_states) {
         $this->core->getOutput()->addBreadcrumb("Polls");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
@@ -17,7 +18,10 @@ class PollView extends AbstractView {
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
-            'future_polls' => $future_polls
+            'future_polls' => $future_polls,
+            'dropdown_states' => $dropdown_states,
+            'semester' => $this->core->getConfig()->getSemester(),
+            'course' => $this->core->getConfig()->getCourse()
           ]);
     }
 
@@ -55,15 +59,22 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->enableMobileViewport();
+        $image_path = $poll->getImagePath();
+        $file_data = null;
+        if ($image_path !== null) {
+            $file_data = base64_encode(file_get_contents($image_path));
+            $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
+        }
         return $this->core->getOutput()->renderTwigTemplate("polls/PollPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
             'user_id' => $this->core->getUser()->getId(),
+            'file_data' => $file_data
           ]);
     }
 
-    public function editPoll($poll) {
+    public function editPoll(PollModel $poll) {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("Edit Poll");
         $this->core->getOutput()->addInternalCss('polls.css');

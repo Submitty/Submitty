@@ -65,19 +65,20 @@ class TestSidebar(BaseTestCase):
                                 .find_elements(By.TAG_NAME, 'h1')[0].text)
             if(self.driver.find_element(By.ID, 'breadcrumbs')
                and len(self.driver.find_element(By.ID, 'breadcrumbs')
-                       .find_elements(By.TAG_NAME, 'h1')) > 0):
+                       .find_elements(By.TAG_NAME, 'span')) > 2):
                 heading_text.append(self.driver.find_element(By.ID, 'breadcrumbs')
-                                    .find_elements(By.TAG_NAME, 'h1')[0].text)
+                                    .find_elements(By.TAG_NAME, 'span')[2].text)
             self.assertIn(expected_text, heading_text)
             current_idx += 1
-
 
     def test_click_sidebar_links_superuser(self):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
@@ -89,6 +90,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -97,8 +99,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'instructor', 'Quinn')
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
-                         "cannot run in Travis-CI, blank course does not exist")
+    @unittest.skipUnless(os.environ.get('CI') is None,
+                         "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_instructor_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -119,6 +121,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -134,6 +138,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/gradeable', 'New Gradeable'],
             [base_url + '/config', 'Course Settings'],
+            [base_url + '/sql_toolbox', 'SQL Toolbox'],
             # the office hours queue is not initially enabled in the sample course
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/course_materials', 'Course Materials'],
@@ -150,6 +155,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -162,14 +169,16 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
 
         self.sidebar_test_helper('', expected, 'ta', 'Jill')
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
-                         "cannot run in Travis-CI, blank course does not exist")
+    @unittest.skipUnless(os.environ.get('CI') is None,
+                         "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_ta_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -179,6 +188,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -199,6 +210,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -209,14 +222,16 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
 
         self.sidebar_test_helper('', expected, 'student', 'Joe')
 
-    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
-                         "cannot run in Travis-CI, blank course does not exist")
+    @unittest.skipUnless(os.environ.get('CI') is None,
+                         "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_student_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -225,6 +240,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
@@ -244,6 +261,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]

@@ -4,17 +4,18 @@
 	<script>
 
 		$(document).ready(function() {
+		    let filterOption = '{{ more_data[0]["filter_option"] }}';
+		    if (filterOption) {
+                $('#' + filterOption).parent().removeClass("active");
+                $('#' + filterOption).addClass("active");
+            }
+			let del = $('#delete');
+			let merge  = $('#merge_thread');
 
-			$('#{{ more_data[0]["filter_option"] }}').parent().removeClass("active");
-			$('#{{ more_data[0]["filter_option"] }}').addClass("active");
+			let deleteActive = typeof del[0] !== typeof undefined && del[0].hasAttribute('class') && del.attr('class').includes('active');
+			let deleteMerge  = merge[0].hasAttribute('class')  && merge.attr('class').includes('active');
 
-			var del = $('#delete');
-			var merge  = $('#merge_thread');
-
-			var deleteActive = typeof del[0] !== typeof undefined && del[0].hasAttribute('class') && del.attr('class').includes('active');
-			var deleteMerge  = merge[0].hasAttribute('class')  && merge.attr('class').includes('active');
-
-			if('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) {
+			if(('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) || {{is_full_threads_page}}) {
 				$('#dropdownLabel').removeClass("active");
 			}
 			else {
@@ -86,29 +87,45 @@
 				{% if user_group <= more.required_rank %}
 					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
 					{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-	          		<li class='dropdown-item' role="menuitem"><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
+	          		<li class='dropdown-item' role="menuitem">
+						<a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a>
+					</li>
 	          	{% endif %}
 	        {% endfor %}
 	        {% if core.getUser().accessGrading() %}
-              <li class="dropdown-divider"></li>
-              <li title="Click to edit categories" class='dropdown-item' role="menuitem">
-            	<a href ="{{ manage_categories_url }}" title="Edit Forum Categories" target="_blank" >Edit Categories</a>
+                <li class="divider"></li>
+              	<li title="Click to edit categories" class='dropdown-item' role="menuitem">
+            		<a href="{{ manage_categories_url }}" title="Edit Forum Categories" >Edit Categories</a>
+				</li>
 			{% endif %}
-			{% if thread_exists %}
-	          <li class="dropdown-divider"></li>
-	          <li title="Click to toggle all post attachments" class='dropdown-item' role="menuitem">
-	          	<a href="#" class="key_to_click" tabindex="0" onclick="loadAllInlineImages()">
-   					Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
-   				</a></li>
-	          <li class="dropdown-divider"></li>
-	              <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item' role="menuitem"><a class="key_to_click"  onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
-				        <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
-	              {% if user_group <= core.getUser().accessGrading() %}
-	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha')">Alphabetical</a></li>
-	              	<li title="Sort posts by author's registration section then last name" id="alpha_by_registration" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration</a></li>
-	              	<li title="Sort posts by author's rotating section then last name" id="alpha_by_rotating" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating</a></li>
-	              {% endif %}
+			{% if thread_exists and not is_full_threads_page %}
+	          	<li class="divider"></li>
+	          	<li title="Click to toggle all post attachments" class='dropdown-item' role="menuitem">
+	          		<a href="#" class="key_to_click" tabindex="0" onclick="loadAllInlineImages()">
+   						Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
+   					</a>
+				</li>
+	          	<li class="divider"></li>
+              	<li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item' role="menuitem">
+				  	<a class="key_to_click"  onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a>
+				</li>
+              	<li title="Sort posts by ascending chronological order" id="time" class='dropdown-item' role="menuitem">
+					<a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a>
+				</li>
+			    <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item' role="menuitem">
+					<a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological <i class="fas fa-angle-down"></i> </a>
+				</li>
+              	{% if user_group <= core.getUser().accessGrading() %}
+              		<li title="Sort posts by author's last name" id="alpha" class='dropdown-item' role="menuitem">
+						<a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha')">Alphabetical</a>
+					</li>
+              		<li title="Sort posts by author's registration section then last name" id="alpha_by_registration" class='dropdown-item' role="menuitem">
+						<a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration</a>
+					</li>
+              		<li title="Sort posts by author's rotating section then last name" id="alpha_by_rotating" class='dropdown-item' role="menuitem">
+						<a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating</a>
+					</li>
+	            {% endif %}
 	        {% endif %}
 	        </ul>
 	    </div>
