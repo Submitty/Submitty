@@ -1833,30 +1833,30 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-  const component_id = getComponentIdFromDOMElement(me);
-  const gradeable_id = getGradeableId();
-  const anon_id = getAnonId();
-  ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
-    // If there is any changes made in comment of a component , prompt the TA
-    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
-      if(confirm( "Are you sure you want to discard all changes to the student message?")){
-        toggleComponent(component_id, false)
-          .catch(function (err) {
-            console.error(err);
-            alert('Error closing component! ' + err.message);
-          });
-      }
-    }
-    // There is no change in comment, i.e it is same as the saved comment (before)
-    else {
-      toggleComponent(component_id, false)
-        .catch(function (err) {
-          console.error(err);
-          alert('Error closing component! ' + err.message);
-        });
-    }
-  });
-
+    const component_id = getComponentIdFromDOMElement(me);
+    const gradeable_id = getGradeableId();
+    const anon_id = getAnonId();
+    ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component) => {
+        const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
+        // If there is any changes made in comment of a component , prompt the TA
+        if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
+            if (confirm('Are you sure you want to discard all changes to the student message?')){
+                toggleComponent(component_id, false)
+                    .catch((err) => {
+                        console.error(err);
+                        alert(`Error closing component! ${err.message}`);
+                    });
+            }
+        }
+        // There is no change in comment, i.e it is same as the saved comment (before)
+        else {
+            toggleComponent(component_id, false)
+                .catch((err) => {
+                    console.error(err);
+                    alert(`Error closing component! ${err.message}`);
+                });
+        }
+    });
 }
 
 function onCancelEditRubricComponent(me) {
@@ -2065,7 +2065,7 @@ function onClickCountDown(me) {
  */
 function onComponentPointsChange(me) {
     if (dividesEvenly($(me).val(), getPointPrecision())) {
-        $(me).css("background-color", "#ffffff");
+        $(me).css("background-color", "var(--standard-input-background)");
         refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
             .catch(function (err) {
                 console.error(err);

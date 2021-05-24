@@ -15,5 +15,14 @@
         "max_file_uploads" : max_file_uploads,
         "old_files" : old_files
     } %}
+    {% include "grading/electronic/FileView.twig" with {
+        "panel": "notebook",
+        "panelTitle": "Notebook",
+        "file_view_id": "notebook-file-view",
+        "grading_file_name_id": "notebook_grading_file_name",
+        "save_status_id": "notebook_save_status",
+        "file_content_id": "notebook-file-content",
+        "show_pdf_bar": false
+    } %}
 </div>
 

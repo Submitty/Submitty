@@ -15,5 +15,3 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
 cp -r tests/. ${SUBMITTY_INSTALL_DIR}/test_suite
 
 echo "trying to debug " ${PHP_USER} ${CGI_USER}
-
-sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
