@@ -688,12 +688,12 @@
 {# /Column functions #}
 <script type = "text/javascript">
     function changeAnon() {
-        const status = '{{ anon_mode_cookie }}';
-        if (status === 'off') {
-            document.cookie = 'anon_mode=on;';
+        const status = '{{ anon_mode }}';
+        if (status) {
+            document.cookie = 'anon_mode=off;';
         }
         else {
-            document.cookie = 'anon_mode=off;';
+            document.cookie = 'anon_mode=on;';
         }
         location.reload();
     }
