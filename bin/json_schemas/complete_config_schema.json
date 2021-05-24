@@ -1252,30 +1252,6 @@
           "properties" : {
             "method" : {
               "type" : "string",
-              "enum" : ["EmmaInstrumentationGrader"]
-            }
-          }
-        },
-        {
-          "type" : "object",
-          "required" : ["method", "coverage_threshold"],
-          "properties" : {
-            "method" : {
-              "type" : "string",
-              "enum" : ["EmmaCoverageReportGrader_doit"]
-            },
-            "coverage_threshold" : {
-              "type" : "number",
-              "minimum" : 0
-            }
-          }
-        },
-        {
-          "type" : "object",
-          "required" : ["method"],
-          "properties" : {
-            "method" : {
-              "type" : "string",
               "enum" : ["DrMemoryGrader"]
             }
           }
@@ -1454,11 +1430,25 @@
           "properties" : {
             "method" : {
               "type" : "string",
-              "not" : {"enum":["JUnitTestGrader", "EmmaInstrumentationGrader", "MultipleJUnitTestGrader",
-                       "EmmaCoverageReportGrader", "JaCoCoCoverageReportGrader", "DrMemoryGrader",
-                       "PacmanGrader", "searchToken", "intComparison", "diff", "fileExists",
-                       "warnIfNotEmpty", "warnIfEmpty", "errorIfNotEmpty", "errorIfEmpty", "ImageDiff",
-                       "custom_validator"]}
+              "not" : {
+                "enum": [
+                  "JUnitTestGrader",
+                  "MultipleJUnitTestGrader",
+                  "JaCoCoCoverageReportGrader",
+                  "DrMemoryGrader",
+                  "PacmanGrader",
+                  "searchToken",
+                  "intComparison",
+                  "diff",
+                  "fileExists",
+                  "warnIfNotEmpty",
+                  "warnIfEmpty",
+                  "errorIfNotEmpty",
+                  "errorIfEmpty",
+                  "ImageDiff",
+                  "custom_validator"
+                ]
+              }
             }
           }
         }

@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2014-2020, [Submitty team](AUTHORS.md) 
+Copyright (c) 2014-2021, [Submitty team](AUTHORS.md) 
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
