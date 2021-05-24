@@ -725,9 +725,6 @@ function toggleFullScreenMode () {
   initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
   //Save the taLayoutDetails in LS
   saveTaLayoutDetails();
-  if(taLayoutDet.isFullLeftColumnMode){
-    $("#grading-panel-student-name").toggle();
-  }
 }
 
 function toggleFullLeftColumnMode (forceVal = false) {
