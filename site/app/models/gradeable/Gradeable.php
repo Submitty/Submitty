@@ -72,7 +72,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method Component[] getComponents()
- * @method void setAllowedTime($time)
+ * @method void setAllowedMinutes($minutes)
  * @method bool isRegradeAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -197,9 +197,9 @@ class Gradeable extends AbstractModel {
     /** @prop @var bool If this gradeable has a due date or not */
     protected $has_due_date = false;
     /** @prop @var int The amount of time given to a default student to complete assignment */
-    protected $allowed_time = null;
+    protected $allowed_minutes = null;
     /** @prop @var array Contains all of the allowed time overrides */
-    protected $allowed_time_overrides = [];
+    protected $allowed_minutes_overrides = [];
 
     /* Dates for all types of gradeables */
 
@@ -294,7 +294,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
-            $this->setAllowedTime($details['allowed_time']);
+            $this->setAllowedMinutes($details['allowed_minutes']);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }
@@ -2091,7 +2091,7 @@ class Gradeable extends AbstractModel {
      * @return bool True if has allowed, false otherwise.
      */
     public function hasAllowedTime(): bool {
-        return $this->allowed_time !== null;
+        return $this->allowed_minutes !== null;
     }
 
     /**
@@ -2100,17 +2100,17 @@ class Gradeable extends AbstractModel {
      * @return int Number of minutes allowed
      */
     public function getUserAllowedTime(User $user): ?int {
-        if ($this->allowed_time === null) {
+        if ($this->allowed_minutes === null) {
             return null;
         }
-        if (empty($this->allowed_time_overrides) || $this->allowed_time_overrides === null) {
-            return $this->allowed_time;
+        if (empty($this->allowed_minutes_overrides) || $this->allowed_minutes_overrides === null) {
+            return $this->allowed_minutes;
         }
-        if (isset($this->allowed_time_overrides[$user->getId()])) {
-            return $this->allowed_time_overrides[$user->getId()];
+        if (isset($this->allowed_minutes_overrides[$user->getId()])) {
+            return $this->allowed_minutes_overrides[$user->getId()];
         }
         else {
-            return $this->allowed_time;
+            return $this->allowed_minutes;
         }
     }
 
@@ -2119,9 +2119,9 @@ class Gradeable extends AbstractModel {
      *
      * @return void
      */
-    public function setAllowedTimeOverrides(array $overrides): void {
+    public function setAllowedMinutesOverrides(array $overrides): void {
         foreach ($overrides as $override) {
-            $this->allowed_time_overrides[$override['user_id']] = $override['allowed_time'];
+            $this->allowed_minutes_overrides[$override['user_id']] = $override['allowed_minutes'];
         }
     }
 }

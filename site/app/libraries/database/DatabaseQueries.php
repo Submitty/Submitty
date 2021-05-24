@@ -4428,7 +4428,7 @@ AND gc_id IN (
               g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
-              g_allowed_time AS allowed_time,
+              g_allowed_minutes AS allowed_minutes,
               eg.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
@@ -4520,7 +4520,7 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
-            $gradeable->setAllowedTimeOverrides($this->getGradeableTimeOverride($gradeable->getId()));
+            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
 
             // Construct the components
             $component_properties = [
@@ -7180,8 +7180,8 @@ SQL;
 SQL;
     }
 
-    private function getGradeableTimeOverride(string $gradeable_id): array {
-        $this->course_db->query('SELECT * FROM gradeable_allowed_time_override WHERE g_id=?', [$gradeable_id]);
+    private function getGradeableMinutesOverride(string $gradeable_id): array {
+        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
         return $this->course_db->rows();
     }
 }

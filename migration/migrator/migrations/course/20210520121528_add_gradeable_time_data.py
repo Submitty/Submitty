@@ -14,13 +14,13 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_allowed_time integer DEFAULT NULL;")
+    database.execute("ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_allowed_minutes integer DEFAULT NULL;")
     database.execute(
         """
-        CREATE TABLE IF NOT EXISTS gradeable_allowed_time_override (
+        CREATE TABLE IF NOT EXISTS gradeable_allowed_minutes_override (
             g_id character varying(255) NOT NULL,
             user_id character varying(255) NOT NULL,
-            allowed_time integer NOT NULL
+            allowed_minutes integer NOT NULL
         );
         """
     )
