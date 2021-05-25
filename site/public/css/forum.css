@@ -557,8 +557,8 @@
     font-size: 1.8em;
 }
 
-.post_content > p{
-    white-space: pre;
+.post_content p {
+    white-space: pre-wrap;
 }
 
 .post_content li {
