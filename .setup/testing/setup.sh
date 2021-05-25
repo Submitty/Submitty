@@ -62,7 +62,7 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --install-dir $SUBMITTY_INSTALL_DIR --data-dir $SUBMITTY_DATA_DIR
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --install-dir $SUBMITTY_INSTALL_DIR --data-dir $SUBMITTY_DATA_DIR
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"

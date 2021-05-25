@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "et-cetera",
+
     "autograding" : {
         "submission_to_runner" : [ "*.txt", "*.png" ],
 	       "work_to_details" : ["**/*.png"]

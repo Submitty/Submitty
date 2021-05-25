@@ -684,7 +684,8 @@ CREATE TABLE public.polls (
     name text NOT NULL,
     question text NOT NULL,
     status text NOT NULL,
-    release_date date NOT NULL
+    release_date date NOT NULL,
+    image_path text
 );
 
 
@@ -923,18 +924,6 @@ CREATE TABLE public.seeking_team (
 
 
 --
--- Name: sessions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.sessions (
-    session_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
-    csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
-);
-
-
---
 -- Name: solution_ta_notes; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1062,7 +1051,7 @@ CREATE TABLE public.users (
     last_updated timestamp(6) with time zone,
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
-    registration_subsection character varying(255),
+    registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1221,6 +1210,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_data g_id_gd_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_data
+    ADD CONSTRAINT g_id_gd_team_id_unique UNIQUE (g_id, gd_team_id);
 
 
 --
@@ -1485,14 +1482,6 @@ ALTER TABLE ONLY public.sections_rotating
 
 ALTER TABLE ONLY public.seeking_team
     ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id);
-
-
---
--- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
 
 
 --
@@ -2135,14 +2124,6 @@ ALTER TABLE ONLY public.regrade_requests
 
 ALTER TABLE ONLY public.seeking_team
     ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: sessions sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

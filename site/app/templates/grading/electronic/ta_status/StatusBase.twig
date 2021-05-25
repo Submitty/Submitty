@@ -394,4 +394,17 @@
             $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
         }
     }
+
+    function changeOverride() {
+        var status = '{{ include_overridden }}';
+
+        if (status == 'omit') {
+            document.cookie = "include_overridden=include;";
+        }
+        else {
+            document.cookie = "include_overridden=omit;";
+        }
+        location.reload();
+    }
+    
 </script>

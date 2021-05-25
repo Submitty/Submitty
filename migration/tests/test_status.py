@@ -60,10 +60,10 @@ class TestStatus(unittest.TestCase):
         self.args.config.database = dict()
 
         with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError('test', None, None)
+            mock_class.side_effect = OperationalError('test', None, "No Database")
             main.status(self.args)
         self.assertEqual(
-            "Could not get database for migrations for master\n",
+            "Could not get database for migrations for master:\n  (builtins.str) No Database\n",
             sys.stdout.getvalue()
         )
 
@@ -73,10 +73,10 @@ class TestStatus(unittest.TestCase):
         self.args.config.database = dict()
 
         with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError('test', None, None)
+            mock_class.side_effect = OperationalError('test', None, "No Database")
             main.status(self.args)
         self.assertEqual(
-            "Could not get database for migrations for system\n",
+            "Could not get database for migrations for system:\n  (builtins.str) No Database\n",
             sys.stdout.getvalue()
         )
 
@@ -107,10 +107,12 @@ class TestStatus(unittest.TestCase):
         Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
 
         with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError('test', None, None)
+            mock_class.side_effect = OperationalError('test', None, "No Database")
             main.status(self.args)
-        expected = """Could not get database for migrations for master
-Could not get database for migrations for system
+        expected = """Could not get database for migrations for master:
+  (builtins.str) No Database
+Could not get database for migrations for system:
+  (builtins.str) No Database
 Could not get the status for the migrations for f19.csci1100
 """
         self.assertEqual(expected, sys.stdout.getvalue())
