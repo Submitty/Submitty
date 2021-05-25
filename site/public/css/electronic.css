@@ -66,10 +66,6 @@ aside {
     display: none;
 }
 
-.navigation-box.smaller-navbar #grading-panel-student-name {
-    color: black;
-}
-
 .navigation-box.smaller-navbar .progress-value {
     position: unset;
     display: block;

@@ -1236,8 +1236,6 @@ class ElectronicGraderController extends AbstractController {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
-
-
         /** @var Gradeable $gradeable */
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -1321,7 +1319,7 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             if (is_null($who_id) || $who_id == '') {
-                    $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             }
         }
         // Get the graded gradeable for the submitter we are requesting
