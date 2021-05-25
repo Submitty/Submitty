@@ -87,7 +87,7 @@ class PlagiarismController extends AbstractController {
 
     /**
      * Returns a string containing the concatenated contents of the specified user's submission
-     * 
+     *
      * @return string
      */
     private function getConcatenatedSubmission($user_id, $gradeable_id, $version) {
