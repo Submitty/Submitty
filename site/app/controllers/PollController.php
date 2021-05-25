@@ -166,7 +166,7 @@ class PollController extends AbstractController {
             // validate the uploaded file size
             $status = FileUtils::validateUploadedFiles($_FILES["image_file"]);
             if (!$status[0]["success"]) {
-                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["success"], false);
+                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["error"], false);
             }
             else {
                 $file = $_FILES["image_file"];
@@ -362,7 +362,7 @@ class PollController extends AbstractController {
             // validate file size
             $status = FileUtils::validateUploadedFiles($file);
             if (!$status[0]["success"]) {
-                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["success"], false);
+                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["error"], false);
             }
             elseif (!FileUtils::isValidImage($file["tmp_name"])) {
                 // validate file type
