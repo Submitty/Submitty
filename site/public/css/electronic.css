@@ -1288,7 +1288,7 @@ tr.is_publish {
     font-weight: initial;
 }
 
-.layouts-cont .layout-option {
+.layout-option {
     margin-bottom: 20px;
 }
 
@@ -1299,7 +1299,7 @@ tr.is_publish {
 .layout-option-cont {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
-    width: 83vw;
+    max-width: 83vw;
     grid-column-gap: 5px;
     grid-row-gap: 5px;
 }
