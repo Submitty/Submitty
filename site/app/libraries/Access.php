@@ -343,7 +343,7 @@ class Access {
             throw new InvalidArgumentException("Unknown action '$action'");
         }
         $checks = $this->permissions[$action];
-
+        
         //Because sometimes we need to explicitly deny permissions to everyone
         if ($checks === self::DENY_ALL) {
             return false;
