@@ -1735,17 +1735,15 @@ function loadAllInlineImages() {
   $(".attachment-btn").each(function () {
     $(this).click();
   });
-  $(".attachment-well").each(function () {
-    $(this).show();
-  });
 }
 
 function loadInlineImages(encoded_data) {
   var data = JSON.parse(encoded_data);
   var attachment_well = $("#"+data[data.length-1]);
 
-  if (attachment_well.is(':visible'))
+  if (attachment_well.is(':visible')){
     attachment_well.hide();
+  }
   else {
     attachment_well.show();
   }
