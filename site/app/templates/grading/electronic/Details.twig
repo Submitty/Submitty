@@ -688,7 +688,7 @@
 {# /Column functions #}
 <script>
     function changeAnon() {
-        const status = '{{ anon_mode }}';
+        const status = {{ anon_mode ? 1 : 0}};
         if (status) {
             document.cookie = 'anon_mode=off;';
         }
