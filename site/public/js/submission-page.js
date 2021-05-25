@@ -63,12 +63,14 @@ function syncWithServer(criticalSync) {
             if (!criticalSync) {
                 updateTime();
             }
-            if (document.getElementById('gradeable-time-remaining-text') !== null) {
-                document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
-            }
-            if (user_deadline !== 0) {
-                if (document.getElementById('time-remaining-text') !== null) {
-                    document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+            else{
+                if (document.getElementById('gradeable-time-remaining-text') !== null) {
+                    document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+                }
+                if (user_deadline !== 0) {
+                    if (document.getElementById('time-remaining-text') !== null) {
+                        document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+                    }
                 }
             }
         },
