@@ -1,4 +1,5 @@
 {
+	"required_capabilities": "notebook",
 
     "load_gradeable_message" : {
         "message" : "# This gradeable is TIMED  \n\

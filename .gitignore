@@ -18,13 +18,18 @@ __pycache__/
 .coverage
 coverage.xml
 
+
 /site/cache/
+/site/coverage/
 /site/vendor/
 /site/node_modules/
 /site/public/vendor/
 /site/tests/report/
 /site/config/*
 !/site/config/course_template.json
+/site/cypress/downloads/
+/site/cypress/screenshots/
+/site/cypress/videos/
 
 db_update.php
 .setup/data/random_users.txt

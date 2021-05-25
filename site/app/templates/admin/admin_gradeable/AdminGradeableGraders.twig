@@ -67,6 +67,39 @@ Form
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
+<br />
+{% if electronic %}
+<fieldset>
+    <legend>
+        How should grading be anonymized for limited access graders?
+    </legend>
+    <input type="radio" name="limited_access_blind" value="1" id="unblind_limited_access_grading"
+        {{ (gradeable.getLimitedAccessBlind() == 1) ? 'checked' : '' }}> <label for="unblind_limited_access_grading">Unblinded Grading</label>
+
+    <input type="radio" name="limited_access_blind" value="2" id="blind_limited_access_grading"
+        {{ (gradeable.getLimitedAccessBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_limited_access_grading">Blinded Grading</label>
+
+</fieldset>
+{% endif %}
+
+{% if peer %}
+
+    <br />
+    <fieldset>
+        <legend>
+            How should grading be anonymized for peer graders?
+        </legend>
+        <input type="radio" name="peer_blind" value="1" id="unblind_peer_grading"
+            {{ (gradeable.getPeerBlind() == 1) ? 'checked' : ''}}><label for="unblind_peer_grading">Unblinded Grading</label>
+        <input type="radio" name="peer_blind" value="2" id="single_blind_peer_grading"
+            {{ (gradeable.getPeerBlind() == 2) ? 'checked' : '' }}> <label for="single_blind_peer_grading">Single Blinded Grading</label>
+
+        <input type="radio" name="peer_blind" value="3" id="double_blind_peer_grading"
+            {{ (gradeable.getPeerBlind() == 3 or action == "new") ? 'checked' : '' }}><label for="double_blind_peer_grading">Double Blinded Grading</label>
+
+    </fieldset>
+
+{% endif %}
 
 <div id="doc_all_access">
     <br />
@@ -231,7 +264,7 @@ Form
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
         $('#minimum_grading_group').change(onMinGraderChange);
-
+        
         // update "all" check boxes
         {% for grader in graders_from_usertypes[1] %}
         updateCheckBoxes('g1', "{{ grader[0] }}", 1);

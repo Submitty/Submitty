@@ -9,6 +9,7 @@ use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\PollUtils;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -67,6 +68,14 @@ class ReportController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
+        $poll_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'polls');
+
+        // Check that the directory is writable, fail if not
+        if ($this->core->getConfig()->isPollsEnabled() && !is_writable($poll_base_path)) {
+            $this->core->addErrorMessage('Unable to write to the poll summary directory');
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        }
+
         $g_sort_keys = [
             'type',
             'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
@@ -81,6 +90,11 @@ class ReportController extends AbstractController {
             $this->saveUserToFile($base_path, $a, $b, $c, $d);
             return null;
         });
+
+        if ($this->core->getConfig()->isPollsEnabled()) {
+            $this->generatePollSummaryInternal($poll_base_path);
+        }
+
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->redirect($this->core->buildCourseUrl(['reports']));
         return $this->core->getOutput()->renderJsonSuccess();
@@ -223,7 +237,7 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$graded_gradeable->getSubmitter()->getId()][$graded_gradeable->getGradeableId()] ?? null);
+            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
             $ggs[] = $graded_gradeable;
         }
         return $ggs;
@@ -355,6 +369,7 @@ class ReportController extends AbstractController {
         $user_data['legal_last_name'] = $user->getLegalLastName();
         $user_data['preferred_last_name'] = $user->getPreferredLastName();
         $user_data['registration_section'] = $user->getRegistrationSection();
+        $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y");
 
@@ -364,6 +379,23 @@ class ReportController extends AbstractController {
         }
 
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
+    }
+
+    /**
+     * Generates a summary of all polls over a semester if polling is enabled
+     * @param string $base_path the base path to store the report
+     */
+    private function generatePollSummaryInternal(string $base_path): void {
+        $polls = $this->core->getQueries()->getPolls();
+        $polls_data = [];
+        foreach ($polls as $poll) {
+            $polls_data[] = [
+                "id" => $poll->getId(),
+                "responses" => $poll->getUserResponses()
+            ];
+        }
+        FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_responses.json"), $polls_data);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_questions.json"), PollUtils::getPollExportData($polls));
     }
 
     /**

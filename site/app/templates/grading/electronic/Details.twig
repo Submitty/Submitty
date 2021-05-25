@@ -1,5 +1,4 @@
 {% import _self as self %} {# Required to use macros in same template #}
-
 <div class="content">
     {#
         Default is viewing your sections
@@ -47,6 +46,12 @@
                    href="{{ order_toggle_url }}">
                     {{ sort == 'random' ? "Default Order" : "Random Order" }}
                 </a>
+                {% if toggle_anon_button %}
+                <a class="btn btn-default" id="toggle-anon-button"
+                   href="" onclick="changeAnon()">
+                    {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -210,9 +215,9 @@
                 {{ self.render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
                 {{ self.render_column_grading(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "grading_peer" %}
-                {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "grading_peer" %}
+            {% elseif column.function == "grading_blind" %}
+                {{ self.render_column_grading_blind(self, context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "grading_blind" %}
                 {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ self.render_column_index(self, context, section, graded_gradeable, index, info, column) }}
@@ -445,7 +450,7 @@
 {% endmacro %}
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
-{% macro render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_grading_blind(self, context, section, graded_gradeable, index, info, column) %}
     {% if  graded_gradeable.hasOverriddenGrades() %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
@@ -681,3 +686,16 @@
 {% endmacro %}
 
 {# /Column functions #}
+<script>
+    function changeAnon() {
+        const status = {{ anon_mode ? 1 : 0}};
+        if (status) {
+            document.cookie = 'anon_mode=off;';
+        }
+        else {
+            document.cookie = 'anon_mode=on;';
+        }
+        location.reload();
+    }
+</script>
+

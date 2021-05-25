@@ -1,0 +1,295 @@
+ /* the entire table of calendar */
+.table-calendar {
+    text-align: left;
+    border:1px solid black
+}
+
+/* the title at the top of the calendar table, showing month, year */
+.cal-navigation {
+    margin-bottom: 0;
+    margin-top: 3px;
+}
+
+.cal-title {
+    text-align: center;
+}
+
+.cal-btn {
+    font-size: 28px;
+    padding-left:10px;
+    padding-right:10px;
+    vertical-align: middle;
+    -moz-user-select:none;
+    -webkit-user-select:none;
+    -ms-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+}
+
+a.cal-btn {
+    color: var(--text-black);
+}
+
+a.cal-btn:hover {
+    color: var(--text-black);
+    background: var(--selected-nav-sidebar);
+    border-radius: 20%;
+}
+
+a.cal-btn:visited {
+    color: var(--text-black);
+}
+
+a.cal-btn:focus {
+    color: var(--text-black);
+}
+
+.cal-next-btn {
+    margin-left: 20px;
+}
+
+.cal-prev-btn {
+    margin-right: 20px;
+}
+
+
+#prev-month-switch {
+    text-align: right;
+}
+
+#next-month-switch {
+    text-align: left;
+}
+
+.cal-month-title {
+    font-size: 26px;
+    text-transform:uppercase;
+    border:0;
+    margin-top:0;
+    margin-bottom:0;
+    line-height: 100%;
+}
+
+h2.cal-month-title {
+    margin-top:0;
+    margin-bottom:0;
+    line-height: 100%;
+}
+
+.cal-year-title {
+    font-size: 18px;
+    margin-top:0;
+    margin-bottom:0;
+    line-height: 100%;
+}
+
+/* the row of Monday, Tuesday, ... */
+.cal-week-title-row {
+    margin-bottom: 20px
+}
+
+.cal-week-title {
+    padding-left: 3px;
+}
+
+.cal-week-title-sun {
+    width: 12%
+}
+
+.cal-week-title-mon {
+    width: 15%
+}
+
+.cal-week-title-tue {
+    width: 15%
+}
+
+.cal-week-title-wed {
+    width: 16%
+}
+
+.cal-week-title-thu {
+    width: 15%
+}
+
+.cal-week-title-fri {
+    width: 15%
+}
+
+.cal-week-title-sat {
+    width: 12%
+}
+
+/* the day number in each cell */
+.cal-day-title {
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* the day number in each cell if the day is the current date */
+.cal-today-title {
+    background: var(--actionable-blue);
+    color: var(--btn-text-white);
+    font-style: normal;
+    border-radius: 50%;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+/* the day number in each cell if the day belongs to prev/next month of the month the calendar is viewing */
+.cal-next-month-date {
+    color:var(--standard-medium-dark-gray);
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* the cell of each table in the calendar, representing a date */
+.cal-day-cell {
+    min-height: 100px;
+    max-height: 195px;
+}
+
+.cal-cell-expand {
+    height: 195px;
+}
+
+/* area in each day cell that lists the items (gradeables, etc) */
+.cal-cell-items-panel {
+    max-height:160px;
+    width:100%;
+    display:block;
+    overflow-y:auto;
+    overflow-x: hidden;
+}
+
+ /* each item in the day cell */
+.cal-gradeable-item {
+    margin:1px;
+    text-decoration: none;
+    white-space: normal;
+    font-size: 100%;
+    font-weight: normal;
+    line-height: normal;
+    text-align: left;
+    vertical-align: baseline;
+    padding: 0 0 0 5px;
+    display: block;
+    width: 100%;
+    user-select: none;
+    background-image: none;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px 0 var(--box-shadow-very-transparent), 0 2px 1px -1px var(--box-shadow-very-transparent), 0 1px 3px 0 var(--box-shadow-slightly-transparent);
+}
+
+ /* each item in the day cell as a button */
+a.cal-gradeable-item {
+}
+
+a.cal-gradeable-item:hover {
+    cursor:pointer;
+}
+
+/* Item colors */
+/** Pure Text **/
+a.cal-gradeable-status-text {
+    color: var(--text-black);
+    padding: 0 0 0 0;
+    border: none;
+    box-shadow: none;
+}
+
+a.cal-gradeable-status-text:hover {
+    color: var(--text-black);
+    padding: 0 0 0 0;
+    cursor:default;
+    border: none;
+}
+
+a.cal-gradeable-status-text:focus {
+    color: var(--text-black);
+    padding: 0 0 0 0;
+    border: none;
+}
+
+/** Announcement **/
+a.cal-gradeable-status-ann {
+    color: #218ffd;  /* This color is from DS website */
+    padding: 0 0 0 0;
+    font-style: italic;
+    border: none;
+    box-shadow: none;
+}
+
+a.cal-gradeable-status-ann:hover {
+    color: #218ffd;
+    padding: 0 0 0 0;
+    font-style: italic;
+    cursor:default;
+    border: none;
+}
+
+a.cal-gradeable-status-ann:focus {
+    color: #218ffd;
+    padding: 0 0 0 0;
+    font-style: italic;
+    border: none;
+}
+
+/** Link **/
+a.cal-gradeable-status-link {
+    color: var(--external-link-blue);
+    padding: 0 0 0 0;
+    text-decoration: underline;
+    border: none;
+    box-shadow: none;
+}
+
+a.cal-gradeable-status-link:hover {
+    color: var(--external-link-hover);
+    padding: 0 0 0 0;
+    border: none;
+}
+
+a.cal-gradeable-status-link:focus {
+    color: var(--external-link-active);
+    padding: 0 0 0 0;
+    border: none;
+}
+
+/* Future homework */
+.cal-gradeable-status-0 {
+}
+
+/* Reserved: Beta homework */
+.cal-gradeable-status-1 {
+}
+
+/* OPEN TO SUBMIT */
+.cal-gradeable-status-2 {
+}
+
+/* PAST DUE / LATE SUBMIT */
+.cal-gradeable-status-3 {
+}
+
+/* CLOSED  being graded by TA/Instructor */
+a.cal-gradeable-status-4 {
+}
+
+/* GRADES AVAILABLE */
+a.cal-gradeable-status-5 {
+}
+
+@media (max-width: 800px) {
+    #calendar-list{
+        margin: 0;
+    }
+
+    #calendar-list td:nth-of-type(1):before { content: "Course"; }
+    #calendar-list td:nth-of-type(2):before { content: "Gradeable"; }
+    #calendar-list td:nth-of-type(3):before { content: "Submission Closes"; }
+
+    #calendar-list thead{
+        display: none;
+    }
+}

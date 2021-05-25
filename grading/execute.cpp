@@ -266,8 +266,7 @@ std::string validate_option(const std::string &program, const std::string &optio
 
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
-        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+      { { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
         { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
         { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
@@ -282,8 +281,7 @@ std::string validate_option(const std::string &program, const std::string &optio
       }
     },
     { "/usr/bin/java",
-      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
-        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+      { { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
         { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
         { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
@@ -1241,10 +1239,15 @@ int execute(const std::string &cmd,
       const std::string display_variable2,
       const bool timestamped_stdout) {
 
+  if (windowed == false) {
+    std::cout << "Execution has no graphics display" << std::endl;
+  } else {
+    std::cout << "Graphics display is enabled and set to: '" << display_variable2 << "'" << std::endl;
+  }
 
   std::string display_variable = display_variable2;
   if (display_variable == "NO_DISPLAY_SET") {
-    display_variable = ":1";
+    display_variable = ":0";
   }
 
 
@@ -1282,7 +1285,8 @@ int execute(const std::string &cmd,
   }
 
   if(window_mode){
-    std::cout <<"Window mode activated." << std::endl;
+    std::cout << "Window mode activated." << std::endl;
+    std::cout << "Going to setenv DISPLAY to " << display_variable << std::endl;
     setenv("DISPLAY", display_variable.c_str(), 1);
     invalid_windows = snapshotOfActiveWindows();
   }

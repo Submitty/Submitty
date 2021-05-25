@@ -672,7 +672,8 @@ class ForumThreadView extends AbstractView {
             "edit_url" => $this->core->buildCourseUrl(['forum']),
             "current_user" => $this->core->getUser()->getId(),
             "user_group" => $this->core->getUser()->getGroup(),
-            "thread_exists" => $thread_exists
+            "thread_exists" => $thread_exists,
+            "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories'])
         ]);
     }
 
@@ -1259,7 +1260,7 @@ class ForumThreadView extends AbstractView {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
-
+        $this->core->getOutput()->addInternalJs('stat-page.js');
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 

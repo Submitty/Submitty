@@ -10,9 +10,9 @@
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
-                <col style="width: 33%">
-                <col style="width: 33%">
-                <col style="width: 33%">
+                <col style="width: 40%">
+                <col style="width: 35%">
+                <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -23,12 +23,12 @@
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td align="left"> {{ poll.getName() }} </td>
+                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                         <td>
-                            <form method="post" action="{{ base_url }}/viewPoll">
+                            <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}
                                     {% if poll.getUserResponse(user_id) is same as(null) %}
                                         <button type="submit" class="btn btn-success"> Answer
@@ -37,11 +37,11 @@
                                     {% endif %}
                                     </button>
                                 {% elseif poll.isEnded() %}
-                                    <button type="submit" class="btn btn-primary"> View Poll
+                                    <button type="submit" class="btn btn-primary"> View Poll </button>
                                 {% else %}
-                                    Closed
+                                    <a style="color:inherit ; pointer-events: none ; cursor: default ;" >Closed</a>
                                 {% endif %}
-                            </form>
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -58,9 +58,9 @@
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
-            <col style="width: 33%">
-            <col style="width: 33%">
-            <col style="width: 33%">
+            <col style="width: 40%">
+            <col style="width: 35%">
+            <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -71,15 +71,25 @@
             <tbody>
                 {% for poll in older_polls %}
                     <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td align="left"> {{ poll.getName() }} </td>
+                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                         <td>
-                            <form method="post" action="{{ base_url }}/viewPoll">
+                            <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary"> View Poll
-                                </button>
-                            </form>
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                                {% if poll.isOpen() %}
+                                    {% if poll.getUserResponse(user_id) is same as(null) %}
+                                        <button type="submit" class="btn btn-success"> Answer
+                                    {% else %}
+                                        <button type="submit" class="btn btn-primary"> Edit Answer
+                                    {% endif %}
+                                    </button>
+                                {% elseif poll.isEnded() %}
+                                    <button type="submit" class="btn btn-primary"> View Poll </button>
+                                {% else %}
+                                    <a style="color:inherit ; pointer-events: none ; cursor: default ;" >Closed</a>
+                                {% endif %}
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}

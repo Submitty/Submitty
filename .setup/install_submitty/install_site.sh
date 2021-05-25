@@ -61,7 +61,7 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' --exclude '/site/.eslintrc.json' --exclude '/site/.eslintignore' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' --exclude '/site/.eslintrc.json' --exclude '/site/.eslintignore' --exclude '/site/cypress/' --exclude '/site/cypress.json' --exclude '/site/jest.config.js' --exclude '/site/.babelrc.json' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
 
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
@@ -151,7 +151,7 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
         chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
     fi
 
-    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error"
+    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error --no-save"
 
     NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
     VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
@@ -217,7 +217,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
     # jspdf
     mkdir ${VENDOR_FOLDER}/jspdf
-    cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js.map ${VENDOR_FOLDER}/jspdf/jspdf.min.js.map
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;

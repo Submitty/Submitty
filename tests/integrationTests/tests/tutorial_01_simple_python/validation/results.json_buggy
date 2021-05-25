@@ -12,11 +12,11 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Python - Simple Grading"
+            "test_name": "Python - Simple Grading"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 2 Submission Limit",
+            "test_name": "Submission Limit",
             "view_testcase": false
         }
     ]

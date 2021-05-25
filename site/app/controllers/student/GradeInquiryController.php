@@ -135,26 +135,57 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
-     * @return MultiResponse
      */
     public function getSingleGradeInquiryPost($gradeable_id) {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        //TODO: look into why these aren't getting sent by websockets
+        if (!isset($_POST['submitter_id']) || !isset($_POST['post_id']) || !isset($_POST['gc_id'])) {
+            return "";
+        }
+
+        $gc_id = intval($_POST['gc_id']);
         $submitter_id = $_POST['submitter_id'];
         $post_id = $_POST['post_id'];
 
-        $new_post = $this->core->getQueries()->getRegradePost($post_id);
-
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if (!$gradeable) {
+            return "";
+        }
 
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['submission', 'Homework'],
-                'renderSingleGradeInquiryPost',
-                $new_post,
-                $graded_gradeable
-            )
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if (!$graded_gradeable) {
+            return "";
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            return "";
+        }
+
+        $user = $this->core->getUser();
+        $can_inquiry = $this->core->getAccess()->canI(
+            "grading.electronic.grade_inquiry",
+            ['graded_gradeable' => $graded_gradeable]
+        );
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
+            return "";
+        }
+
+        $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
+        if (is_null($grade_inquiry)) {
+            return "";
+        }
+
+        $new_post = $this->core->getQueries()->getRegradePost($post_id);
+        if ($new_post === null || $new_post['regrade_id'] !== $grade_inquiry->getId()) {
+            return "";
+        }
+
+        return new WebResponse(
+            ['submission', 'Homework'],
+            'renderSingleGradeInquiryPost',
+            $new_post,
+            $graded_gradeable
         );
     }
 
