@@ -1444,6 +1444,18 @@ function getComponentCount() {
     return $('.component-container').length;
 }
 
+function getOpenItemComponentIds() {
+    
+}
+
+function getFirstOpenItemComponentId() {
+    let component = getOpenItemComponentIds();
+    if (component_ids.length === 0) {
+        return NO_COMPONENT_ID;
+    }
+    return component_ids[0];
+}
+
 /**
  * Gets the mark id for a component and order
  * @param {int} component_id
@@ -2328,6 +2340,7 @@ function reloadGradingComponent(component_id, editable = false, showMarkList = f
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
+            console.log(graded_component);
             // Set the global graded component list data for this component to detect changes
             OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
 

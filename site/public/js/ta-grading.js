@@ -219,7 +219,7 @@ function changeStudentArrowTooltips(data) {
 
 let orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function(component_id, saveChanges) {
-  let ret = orig_toggleComponent(me);
+  let ret = orig_toggleComponent(component_id, saveChanges);
   changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
   return ret;
 }
