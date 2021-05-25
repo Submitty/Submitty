@@ -32,10 +32,8 @@ Required Parameters:
                 rows="5"
                 data-previous-comment="{{overall_comment["logged_in_user"]["comment"]|escape }}"
                 class="general-comment-entry noscroll key_to_click" tabindex="0"
-                onkeyup="auto_grow(this)"
                 onchange="{{ grading_disabled ? '' : 'onChangeOverallComment()'}}"
                 placeholder="Overall message for student about the gradeable...">{{overall_comment["logged_in_user"]["comment"]|escape }}</textarea>
-
         {% for user, comment in overall_comment["other_graders"] %}
             <textarea disabled
                     id="overall-comment-{{user | escape }}"
