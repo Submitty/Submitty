@@ -918,6 +918,7 @@ HTML;
 
             $return .= <<<HTML
                 <div class="panels-container">
+                    <h3 id="panel-instructions">Click above to select a panel for display</h3>
                     <div class="two-panel-cont">
                          <div class="two-panel-item two-panel-left active">
                             <div class="panel-item-section left-top"></div>

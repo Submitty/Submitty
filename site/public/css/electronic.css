@@ -476,6 +476,13 @@ progress::-webkit-progress-value {
   width: 9px;
 }
 
+#panel-instructions{
+    color: dimgray;
+    display: flex;
+    justify-content: center;
+    padding-top: 20%;
+}
+
 #regrade_inner_info .inner-container {
     padding: 20px;
 }
