@@ -233,13 +233,14 @@ class PlagiarismController extends AbstractController {
         }
 
         $language = $_POST['language'];
-        if (isset($_POST['threshold']) && $_POST['threshold'] !== '') {
+        if (isset($_POST['threshold']) && $_POST['threshold'] !== '' && $_POST['threshold'] >= 0) {
             $threshold = $_POST['threshold'];
         }
         else {
             $this->core->addErrorMessage("No input provided for threshold");
             $this->core->redirect($return_url);
         }
+
         if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && $_POST['sequence_length'] > 0) {
             $sequence_length = $_POST['sequence_length'];
         }
