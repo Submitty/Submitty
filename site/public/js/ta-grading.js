@@ -691,9 +691,10 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
       }
-      if( taLayoutDet.currentOpenPanel === null){
+      if (taLayoutDet.currentOpenPanel === null) {
         $("#panel-instructions").show();
-      }else{
+      }
+      else {
         $("#panel-instructions").hide();
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
@@ -765,11 +766,13 @@ function togglePanelLayoutModes(forceVal = false) {
   if (!forceVal) {
     taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
   }
-  if( taLayoutDet.currentOpenPanel === null){
+  if (taLayoutDet.currentOpenPanel === null) {
     $("#panel-instructions").show();
-  }else{
+  }
+  else {
     $("#panel-instructions").hide();
   }
+
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
     twoPanelCont.addClass("active");
     $("#two-panel-exchange-btn").addClass("active");
