@@ -345,15 +345,11 @@ class PlagiarismController extends AbstractController {
             $old_array = json_decode($old_config, true);
             $regex_in_old = in_array("regex", $old_array);
             $regex_in_new = in_array("regex", $json_data);
-            $json_data["regex_updated"] = false;
-            if (
-                ($regex_in_old
-                && !$regex_in_new)
-                 || (!$regex_in_old
-                 && $regex_in_new)
-                 || ($old_array['regex'] != $json_data['regex'])
-            ) {
+            if ($regex_in_old || $regex_in_new) {
+                $json_data["regex_updated"] = false;
+                if (($regex_in_old && !$regex_in_new) || (!$regex_in_old && $regex_in_new) || ($old_array['regex'] != $json_data['regex'])) {
                     $json_data["regex_updated"] = true;
+                }
             }
         }
         if ($instructor_provided_code == true) {
