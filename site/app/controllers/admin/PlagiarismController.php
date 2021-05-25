@@ -195,7 +195,6 @@ class PlagiarismController extends AbstractController {
         if ($new_or_edit == "new") {
             $gradeable_id = $_POST['gradeable_id'];
         }
-
         if ($new_or_edit == "edit") {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . '?' . http_build_query(['gradeable_id' => $gradeable_id]);
         }
@@ -237,7 +236,7 @@ class PlagiarismController extends AbstractController {
             $threshold = $_POST['threshold'];
         }
         else {
-            $this->core->addErrorMessage("No input provided for threshold");
+            $this->core->addErrorMessage("Invalid input provided for threshold");
             $this->core->redirect($return_url);
         }
 
