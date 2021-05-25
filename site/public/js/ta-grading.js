@@ -741,7 +741,7 @@ function toggleFullLeftColumnMode (forceVal = false) {
 
   panelsContSelector = newPanelsContSelector;
 
-  if(!taLayoutDet.isFullScreenMode){
+  if (!taLayoutDet.isFullScreenMode) {
     $("#grading-panel-student-name").hide();
   }
 }
@@ -763,7 +763,7 @@ function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
   initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
   initializeHorizontalTwoPanelDrag();
   togglePanelSelectorModal(false);
-  if(!taLayoutDet.isFullLeftColumnMode){
+  if (!taLayoutDet.isFullLeftColumnMode) {
     $("#grading-panel-student-name").show();
   }
 }
