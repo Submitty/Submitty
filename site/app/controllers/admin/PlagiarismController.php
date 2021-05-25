@@ -66,10 +66,7 @@ class PlagiarismController extends AbstractController {
         return $return;
     }
 
-    /**
-     * @param $gradeable_id
-     * @return array
-     */
+
     private function getRankings($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
@@ -90,10 +87,7 @@ class PlagiarismController extends AbstractController {
 
     /**
      * Returns a string containing the concatenated contents of the specified user's submission
-     *
-     * @param $user_id
-     * @param $gradeable_id
-     * @param $version
+     * 
      * @return string
      */
     private function getConcatenatedSubmission($user_id, $gradeable_id, $version) {
