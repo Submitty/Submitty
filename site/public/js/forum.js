@@ -1732,9 +1732,34 @@ function loadThreadHandler(){
 }
 
 function loadAllInlineImages() {
-  $(".attachment-btn").each(function () {
+  const toggleButton = $('#toggle-attachments-button');
+
+  const allShown = $('.attachment-well').filter(function(){ return $(this).is(':visible') }).length === $('.attachment-well').length;
+  //if the button were to show them all but they have all been individually shown,
+  //we should hide them all
+  if (allShown && toggleButton.hasClass('show-all')) {
+    toggleButton.removeClass('show-all');
+  }
+
+  const allHidden = $('.attachment-well').filter(function(){ return !($(this).is(':visible')) }).length === $('.attachment-well').length;
+  //if the button were to hide them all but they have all been individually hidden,
+  //we should show them all
+  if (allHidden && !(toggleButton.hasClass('show-all'))) {
+    toggleButton.addClass('show-all');
+  }
+
+  $('.attachment-btn').each(function (i) {
     $(this).click();
+
+    //overwrite individual button click behavior to decide if it should be shown/hidden
+    if(toggleButton.hasClass('show-all')){
+      $('.attachment-well').eq(i).show();
+    } else {
+      $('.attachment-well').eq(i).hide();
+    }
   });
+
+  toggleButton.toggleClass('show-all');
 }
 
 function loadInlineImages(encoded_data) {
