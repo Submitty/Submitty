@@ -58,7 +58,3 @@
 .active {
     background: var(--always-default-white);
 }
-
-#btn-close-preview {
-    float: right;
-}
