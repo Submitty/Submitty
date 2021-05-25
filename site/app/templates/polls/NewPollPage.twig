@@ -322,15 +322,15 @@
                 <h2> Possible responses: </h2>
             </legend>
             <div class = "radio">
-                <input type="radio" value="-1" name="answer" checked/>No response<br/><br/>
+                <input type="radio" value="-1" name="answer" checked/><p> No response</p><br/><br/>
             </div>
         `);
         // while an element with the id response_count exists
         while ($("#response_"+count).length) {
             $("#poll-preview-answers").append(`
                 <div class = "radio">
-                    <input type="radio" name="answer"/>`+
-                        $("#response_"+count).val()+`
+                    <input type="radio" name="answer"/>
+                        <p>`+$("#response_"+count).val()+`</p>
                     <br/>
                     <br/>
                 </div>
