@@ -103,7 +103,7 @@ class PlagiarismController extends AbstractController {
         if (!file_exists($file_name) || !$this->core->getUser()->accessAdmin()) {
             return 'error';
         }
-        return file_get_contents($file_name);;
+        return file_get_contents($file_name);
     }
 
     /**
