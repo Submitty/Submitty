@@ -2065,7 +2065,7 @@ function onClickCountDown(me) {
  */
 function onComponentPointsChange(me) {
     if (dividesEvenly($(me).val(), getPointPrecision())) {
-        $(me).css("background-color", "#ffffff");
+        $(me).css("background-color", "var(--standard-input-background)");
         refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
             .catch(function (err) {
                 console.error(err);

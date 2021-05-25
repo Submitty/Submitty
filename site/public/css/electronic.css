@@ -157,11 +157,9 @@ button > i.fas:hover {
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
-    margin-top: 4px;
     border: 2px solid black;
     border-radius: 5px;
     box-shadow: 2px 2px 4px;
-    box-sizing: border-box;
 }
 
 #prev-student-navlink i,
@@ -374,8 +372,7 @@ progress::-webkit-progress-value {
 /* Grading Panels CSS */
 
 .panels-container {
-    height: calc(100% - 140px);
-    margin: 0 6px;
+    margin: 0;
     background: var(--standard-medium-gray);
 }
 
@@ -453,8 +450,12 @@ progress::-webkit-progress-value {
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 50px;
-    background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
+    background-color: var(--submitty-logo-blue);
+}
+
+.panel-item-section-drag-bar:hover:after, .panel-item-section-drag-bar:active:after {
+  height: 9px;
 }
 
 .two-panel-drag-bar:after {
@@ -468,12 +469,18 @@ progress::-webkit-progress-value {
     transform: translate(-50%, -50%);
     border-radius: 50px;
     background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after,
-.panel-item-section-drag-bar:hover:after {
-    filter: blur(3px);
+.two-panel-drag-bar:hover:after, .two-panel-drag-bar:active:after  {
+  width: 9px;
+}
+
+#panel-instructions{
+    color: dimgray;
+    display: flex;
+    justify-content: center;
+    padding-top: 20%;
 }
 
 #regrade_inner_info .inner-container {
@@ -1246,6 +1253,7 @@ tr.is_publish {
     position:relative;
     float:left;
     width:100%;
+    padding-left: 10px;
 }
 
 #file-view {
@@ -1287,7 +1295,7 @@ tr.is_publish {
     font-weight: initial;
 }
 
-.layouts-cont .layout-option {
+.layout-option {
     margin-bottom: 20px;
 }
 
@@ -1298,7 +1306,7 @@ tr.is_publish {
 .layout-option-cont {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
-    width: 83vw;
+    max-width: 83vw;
     grid-column-gap: 5px;
     grid-row-gap: 5px;
 }

@@ -15,7 +15,7 @@
     "@submitty/pdf-annotate.js": "2.2.2",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
-    "codemirror": "5.61.0",
+    "codemirror": "5.61.1",
     "flatpickr": "4.6.6",
     "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",
@@ -28,12 +28,19 @@
     "twig": "1.15.4"
   },
   "devDependencies": {
-    "cypress": "^7.3.0",
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.2",
+    "babel-jest": "^26.6.3",
+    "cypress": "^7.4.0",
     "eslint": "^7.26.0",
-    "eslint-plugin-cypress": "^2.11.3"
+    "eslint-plugin-cypress": "^2.11.3",
+    "eslint-plugin-jest": "^24.3.6",
+    "jest": "^26.6.3",
+    "regenerator-runtime": "^0.13.7"
   },
   "scripts": {
-    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\"",
-    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" --fix"
+    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\" --fix",
+    "test": "jest"
   }
 }

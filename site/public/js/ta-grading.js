@@ -137,13 +137,13 @@ $(function () {
   if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
     let notebookPanel = $('#notebook-view');
     if(notebookPanel.length != 0) {
-      let notebookItems = notebookPanel.find('.openAllFilesubmissions'); 
+      let notebookItems = notebookPanel.find('.openAllFilesubmissions');
       for(var i = 0; i < notebookItems.length; i++) {
         notebookItems[i].onclick();
       }
     }
   }
-  
+
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -233,7 +233,7 @@ function notebookScrollSave() {
         element = element.next();
       }
     }
-    
+
     if (element.length !== 0) {
       if (element.attr('data-item-ref') === undefined) {
         localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
@@ -405,8 +405,7 @@ function adjustGradingPanelHeader () {
     navBarBox.removeClass('mobile-view');
   }
   // From the complete content remove the height occupied by navigation-bar and panel-header element
-  // 6 is used for adding some space in the bottom
-  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight() +6) + "px)";
+  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight()) + "px)";
 }
 
 function onAjaxInit() {}
@@ -656,6 +655,7 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities () {
+    $("#panel-instructions").hide();
     panelElements.forEach((panel) => {
       let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
 
@@ -690,6 +690,12 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
+      }
+      if (taLayoutDet.currentOpenPanel === null) {
+        $("#panel-instructions").show();
+      }
+      else {
+        $("#panel-instructions").hide();
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
@@ -759,6 +765,12 @@ function togglePanelLayoutModes(forceVal = false) {
   const twoPanelCont = $('.two-panel-cont');
   if (!forceVal) {
     taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
+  }
+  if (taLayoutDet.currentOpenPanel === null) {
+    $("#panel-instructions").show();
+  }
+  else {
+    $("#panel-instructions").hide();
   }
 
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
@@ -1330,8 +1342,8 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});" 
-                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});"
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
                 width="95%">
         </iframe>
       `;

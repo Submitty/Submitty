@@ -9,6 +9,7 @@ use app\controllers\GlobalController;
 use app\libraries\response\WebResponse;
 use app\models\CalendarInfo;
 use app\models\gradeable\GradeableList;
+use app\models\gradeable\GradeableUtils;
 use app\views\calendar\CalendarView;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -27,8 +28,8 @@ class CalendarController extends AbstractController {
      */
     public function viewCalendar(): WebResponse {
         $user = $this->core->getUser();
-        $gradeable_list = GradeableList::getAllGradeableListFromUserId($this->core, $user);
+        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user);
 
-        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeable_list));
+        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user));
     }
 }
