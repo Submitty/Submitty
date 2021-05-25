@@ -232,7 +232,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $language = $_POST['language'];
-        if (isset($_POST['threshold']) && $_POST['threshold'] !== '' && $_POST['threshold'] >= 0) {
+        if (isset($_POST['threshold']) && $_POST['threshold'] !== '' && is_numeric($_POST['threshold']) && $_POST['threshold'] >= 0) {
             $threshold = $_POST['threshold'];
         }
         else {
@@ -240,7 +240,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && $_POST['sequence_length'] > 0) {
+        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && is_numeric($_POST['sequence_length']) && $_POST['sequence_length'] > 0) {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
