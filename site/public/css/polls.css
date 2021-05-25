@@ -1,24 +1,19 @@
 .dropdown-wrapper h2 {
     display: inline;
-    margin: 0px;
+    margin: 0;
 }
 
 .dropdown-bar {
-    padding: 0px 0px 20px 0px;
-}
-
-.dropdown-arrow {
-    border: solid black;
-    border-width: 0 5px 5px 0;
-    display: inline-block;
-    padding: 8px;
+    padding: 0 0 20px 0;
 }
 
 .dropdown-btn {
-    background: transparent;
-    border: none !important;
-    padding: 4px 0px 0px 0px !important;
     float: right;
+    font-size: 31px;
+}
+
+.dropdown-btn .down{
+    transform: rotate(-90deg);
 }
 
 .move-btn {
@@ -29,26 +24,6 @@
     border-style: solid;
     border-radius: 5px;
     cursor: pointer;
-}
-
-.dropdown-btn .right {
-    transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-}
-
-.dropdown-btn .down{
-    transform: rotate(45deg);
-    -webkit-transform: rotate(45deg);
-}
-
-.dropdown-btn .up{
-    transform: rotate(-135deg);
-    -webkit-transform: rotate(-135deg);
-}
-
-.dropdown-btn .left {
-    transform: rotate(135deg);
-    -webkit-transform: rotate(135deg);
 }
 
 .radio p {

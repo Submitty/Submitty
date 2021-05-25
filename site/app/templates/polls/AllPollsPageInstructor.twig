@@ -13,7 +13,7 @@
         <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "today_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['today'] ? ' down' : ' right'}}"></i>
+                <i class="fa fa-chevron-down"></i>
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
@@ -76,7 +76,7 @@
         <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "old_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}}"></i>
+                <i class="fa fa-chevron-down"></i>
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
@@ -141,7 +141,7 @@
         <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "future_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}}"></i>
+                <i class="fa fa-chevron-down"></i>
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
