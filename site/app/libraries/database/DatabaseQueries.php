@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-use _HumbugBoxec8571fe8659\Nette\Utils\DateTime;
 use app\exceptions\DatabaseException;
 use app\exceptions\NotImplementedException;
 use app\exceptions\ValidationException;

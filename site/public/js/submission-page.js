@@ -22,10 +22,10 @@ let ticks_till_update = 600000;
 
 function initializeTimer(gradeableID) {
     gradeable_id = gradeableID;
-    syncWithServer();
+    syncWithServer(true);
 }
 
-function syncWithServer() {
+function syncWithServer(criticalSync) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['gradeable', gradeable_id, 'time_remaining_data']);
     $.ajax({
@@ -58,15 +58,30 @@ function syncWithServer() {
             }
         },
         error: function (err) {
+            ticks_till_update = 600000;
             console.log(err);
+            if (!criticalSync) {
+                updateTime();
+            }
+            if (document.getElementById('gradeable-time-remaining-text') !== null) {
+                document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+            }
+            if (user_deadline !== 0) {
+                if (document.getElementById('time-remaining-text') !== null) {
+                    document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+                }
+            }
         },
     });
 }
 
 function updateTime() {
-    if (Math.abs(Date.now() - lastTime) > 5000 || ticks_till_update <= 0) {
+    if (Math.abs(Date.now() - lastTime) > 5000) {
         //we need to sync back up
-        syncWithServer();
+        syncWithServer(true);
+    }
+    if (ticks_till_update <= 0) {
+        syncWithServer(false);
     }
     else {
         curTime += (Date.now()-lastTime);
