@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
@@ -76,8 +77,14 @@ class PlagiarismController extends AbstractController {
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
             if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id_title['g_id'] . ".txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeables_with_plagiarism_result[$i]);
+                continue;
             }
+            $gradeables_with_plagiarism_result[$i]['g_grade_due_date'] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
         }
+
+        usort($gradeables_with_plagiarism_result, function ($a, $b) {
+            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+        });
 
         $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
         if (!file_exists($nightly_rerun_info_file)) {
@@ -162,8 +169,15 @@ class PlagiarismController extends AbstractController {
         foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
             if (!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeable_ids_titles[$i]);
+                continue;
             }
+            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
+            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
         }
+
+        usort($gradeable_ids_titles, function ($a, $b) {
+            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+        });
 
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);

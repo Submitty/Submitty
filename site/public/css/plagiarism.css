@@ -7,11 +7,6 @@
     margin-top: 24px;
 }
 
-.sub table {
-    border-collapse: separate;
-    border-spacing: 15px 10px;
-}
-
 td .plag-action-btn-cont {
     display: flex;
 }
@@ -189,25 +184,6 @@ main#main.full-screen-mode .plagiarism-result-cont {
         width: 100%;
     }
 
-    .plag-table {
-        width: 100%;
-    }
-
-    .plag-table tbody {
-        display: block;
-    }
-
-    .plag-table tbody tr {
-       display: flex;
-       flex-direction: column;
-       border-bottom: 1px solid;
-       padding: 15px 0;
-    }
-
-    .plag-table tbody tr td {
-        padding: 2px 8px;
-        margin: 2px 0;
-    }
     #users_with_plagiarism.plag-flex a,
     #users_with_plagiarism.plag-flex span {
         flex-grow: 1;
