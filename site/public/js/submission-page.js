@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else {
                 document.getElementById('time-remaining-text').textContent = `Your Time Remaining: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
             }
-            setTimeout(updateUserTime, 1000);
+            setTimeout(updateUserTime, 100);
         }
     }
 
@@ -111,6 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('gradeable-time-remaining-text').textContent = `Gradeable Time Remaining: ${mins.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} mins ${seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false})} seconds`;
             }
         }
-        setTimeout(updateGradeableTime, 1000);
+        setTimeout(updateGradeableTime, 100);
     }
 });
