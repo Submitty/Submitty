@@ -240,11 +240,11 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("No input provided for threshold");
             $this->core->redirect($return_url);
         }
-        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '') {
+        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && $_POST['sequence_length'] > 0) {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
-            $this->core->addErrorMessage("No input provided for sequence length");
+            $this->core->addErrorMessage("Invalid input provided for sequence length");
             $this->core->redirect($return_url);
         }
 
