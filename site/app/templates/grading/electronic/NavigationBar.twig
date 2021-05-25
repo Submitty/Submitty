@@ -1,6 +1,6 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
     <div id="grading-panel-student-name">
-        <b>{% if not limited_access_blind and not isBlind and not anon_mode %}
+        <b>{% if not isBlind and not anon_mode and peer_blind_grading is same as('unblind') %}
                 {% if team_assignment %}
                     Team:<br/>
                     {% for team_member in submitter.getTeam().getMemberUsers() %}
@@ -106,9 +106,9 @@
     </div>
 </div>
 <script>
-    if ({{ not anon_mode }}) {
+    if ({{ not anon_mode and not isBlind}}) {
         $('.navigation-box').css({'position':'relative'});
         $('.navigation-box').css({'float':'left'});
-        $('.navigation-box').css({'margin-left':'18%'});
+        $('.navigation-box').css({'margin-left':'20%'});
     }
 </script>
