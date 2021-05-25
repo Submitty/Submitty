@@ -31,4 +31,5 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    pass
+    database.execute("UPDATE electronic_gradeable SET eg_submission_due_date = '9997-01-01 04:59:59.000000' WHERE eg_submission_due_date is NULL;")
+    database.execute("UPDATE gradeable SET g_grade_released_date = '9997-01-01 04:59:59.000000' WHERE g_grade_released_date is NULL;")
