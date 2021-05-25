@@ -13,7 +13,7 @@
 }
 
 .dropdown-btn .down{
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
 }
 
 .move-btn {
