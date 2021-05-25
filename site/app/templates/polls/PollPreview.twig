@@ -4,8 +4,8 @@
 {% block body %}
 <div>
     <div class="content">
-        <h1> {{ poll.getName() }} </h1>
-        {{ poll.getQuestion() | markdown}}
+        <h1 id="poll-preview-name"></h1>
+        <span id="poll-preview-question"></span>
         {% if file_data is not null %}
             <br/>
             <img src="{{ file_data }}">
@@ -15,23 +15,7 @@
         <form>
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-            <fieldset>
-                <legend>
-                    <h2> Possible responses: </h2>
-                </legend>
-                {% set index = 0%}
-                <div class = "radio">
-                    <input type="radio" value="-1" name="answer" checked/>No response<br/><br/>
-                </div>
-                {% for response in poll.getResponses() %}
-                    <div class = "radio">
-                        <input type=radio value="{{ response }}" name="answer"/>
-                        {{ poll.getResponseString(response) | markdown}}
-                        <br/>
-                        <br/>
-                    </div>
-                {% set index = index + 1%}
-                {% endfor %}
+            <fieldset id="poll-preview-answers">
             </fieldset>
         </form>
     </div>

@@ -108,7 +108,7 @@
                         <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
                         <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
                         <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
-                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}" id="response_{{response}}" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                         rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
@@ -151,8 +151,8 @@
     });
 
     function addResponse() {
-        let count = $(".poll_response").length
-        let first_free_id = 0
+        let count = $(".poll_response").length;
+        let first_free_id = 0;
         while($(`.option_id[value="${first_free_id}"]`).length != 0){
             first_free_id++;
         }
@@ -161,7 +161,7 @@
                 <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
                 <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
                 <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_${count}">
-                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                <textarea aria-label="Response text" class="poll_response" name="response_${count}" id="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
                     <i class="fa fa-lg fa-chevron-up"></i>
@@ -176,60 +176,60 @@
             </div>
         `);
         $(`#response_${count}_wrapper`).children(".up-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
             if (curr_pos == 0) {
                 return;
             }
-            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
-            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent());
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos);
             $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
             $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1);
             $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
+        });
         $(`#response_${count}_wrapper`).children(".down-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
             if (curr_pos == $(".poll_response").length - 1) {
                 return;
             }
-            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
-            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos);
             $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
             $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1);
             $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
+        });
         $(`#response_${count}_wrapper`).children(".delete-btn").on("click", function() {
-            let count = $(".poll_response").length
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            let count = $(".poll_response").length;
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
+            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1]);
             for(let i=curr_pos + 1; i < count; i++) {
-                $(".order-" + i).attr("value", i - 1)
+                $(".order-" + i).attr("value", i - 1);
                 $(".order-" + i).addClass("order-" + (i - 1));
                 $(".order-" + i).removeClass("order-" + i);
             }
             for(let i=wrapper_id + 1; i < count; i++) {
-                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
-                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1));
+                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1));
+                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1));
+                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1));
+                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper");
             }
-            $(this).parent().remove()
-            count -= 1
-            $("#response-count").val("" + count)
-        })
-        count += 1
-        $("#response-count").val("" + count)
+            $(this).parent().remove();
+            count -= 1;
+            $("#response-count").val("" + count);
+        });
+        count += 1;
+        $("#response-count").val("" + count);
     }
 
     function removeResponse() {
-        let count = $(".poll_response").length
-        count -= 1
-        $(`#response_${count}_wrapper`).remove()
-        $("#response-count").val("" + count)
+        let count = $(".poll_response").length;
+        count -= 1;
+        $(`#response_${count}_wrapper`).remove();
+        $("#response-count").val("" + count);
     }
 
     function submitErrorChecks() {
@@ -244,7 +244,7 @@
         } else if ($("#poll-date").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
-            $("#empty-date-error").show()
+            $("#empty-date-error").show();
         } else if (parseInt($("#response-count").val()) === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -262,57 +262,81 @@
 
     $(document).ready(function() {
         $(".up-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
             if (curr_pos == 0) {
                 return;
             }
-            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
-            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent());
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos);
             $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
             $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1);
             $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
+        });
         $(".down-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
             if (curr_pos == $(".poll_response").length - 1) {
                 return;
             }
-            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
-            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos);
             $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
             $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1);
             $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
+        });
         $(".delete-btn").on("click", function() {
-            let count = $(".poll_response").length
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            let count = $(".poll_response").length;
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
+            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1]);
             for(let i=curr_pos + 1; i < count; i++) {
-                $(".order-" + i).attr("value", i - 1)
+                $(".order-" + i).attr("value", i - 1);
                 $(".order-" + i).addClass("order-" + (i - 1));
                 $(".order-" + i).removeClass("order-" + i);
             }
             for(let i=wrapper_id + 1; i < count; i++) {
-                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
-                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1));
+                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1));
+                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1));
+                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1));
+                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper");
             }
-            $(this).parent().remove()
-            count -= 1
-            $("#response-count").val("" + count)
-        })
+            $(this).parent().remove();
+            count -= 1;
+            $("#response-count").val("" + count);
+        });
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
     });
     
     function previewPoll(){
         $('#poll-preview').css('display', 'block');
+        $('#poll-preview-name').text($('#poll-name').val());
+        $('#poll-preview-question').text($('#poll-question').val());
+        let count = 0;
+        $('#poll-preview-answers').html("");
+        $('#poll-preview-answers').append(`
+            <legend>
+                <h2> Possible responses: </h2>
+            </legend>
+            <div class = "radio">
+                <input type="radio" value="-1" name="answer" checked/>No response<br/><br/>
+            </div>
+        `);
+        // while an element with the id response_count exists
+        while ($("#response_"+count).length) {
+            $("#poll-preview-answers").append(`
+                <div class = "radio">
+                    <input type="radio" name="answer"/>`+
+                        $("#response_"+count).val()+`
+                    <br/>
+                    <br/>
+                </div>
+            `);
+            count++;
+        }
     }
 
 </script>
