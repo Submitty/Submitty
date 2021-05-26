@@ -1486,7 +1486,11 @@ end of styles used in the admin gradeable page
 }
 
 .ta-grading-setting-list tr:nth-child(even) {
-    background-color: var(--standard-pale-gray);
+    background-color: var(--standard-hover-light-gray);
+}
+
+.ta-grading-setting-list tr:nth-child(odd) {
+    background-color: var(--default-white);
 }
 
 .ta-grading-setting-list td {
