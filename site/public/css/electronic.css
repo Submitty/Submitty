@@ -49,6 +49,12 @@ aside {
     padding: 6px 0;
 }
 
+#bar_banner{
+    position: relative;
+    float: right;
+    margin-right: 10%;
+}
+
 .navigation-box {
     margin: 0 auto;
     display: flex;
