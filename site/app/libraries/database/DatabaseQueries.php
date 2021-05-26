@@ -6151,7 +6151,7 @@ AND gc_id IN (
               LEFT JOIN (SELECT
                 user_id,"
                 . $this->getInnerQueueSelect() .
-               "SUM(CASE
+               ",SUM(CASE
                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                   ELSE 0
                 END) AS not_helped_count
