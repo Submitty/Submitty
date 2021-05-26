@@ -641,9 +641,11 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="edit_team_team_id"]', form).val("");
 
         title_div.append('Create New Team: ' + who_id);
-        members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
+        members_div.append('<label for="user_id_0" style="display:none;">Team Member 1</label>');
+        members_div.append('<input id="user_id_0" class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
         for (var i = 1; i < 3; i++) {
-            members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            members_div.append('<label for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
+            members_div.append('<input id="user_id_' + i + '" type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
@@ -658,19 +660,23 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
-            members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
+            members_div.append('<label for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
+            members_div.append('<input id="user_id_' + i + '" class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
+                <label for="remove_member_' + i + '" style="display:none;">Remove Member ' + (i+1) + '</label>\
                 <input id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;"></input><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
             if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
-            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
+            members_div.append('<label for="pending_user_id_' + i + '" style="display:none;">Pending Team Member ' + (i+1) + '</label>');
+            members_div.append('<input id="pending_user_id_' + i + '" class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
                 name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
                 <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;"></input><br />');
         }
         for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
-            members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            members_div.append('<label for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
+            members_div.append('<input id="user_id_' + i + '" type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
