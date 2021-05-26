@@ -1315,6 +1315,8 @@ function newEditPeerComponentsForm() {
 
 function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submission") {
   let iframe = $('#file_viewer_' + num);
+  if (!$(iframe).parent().parent().hasClass("open"))
+    return false;
   let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
     let iframeId = "file_viewer_" + num + "_iframe";
