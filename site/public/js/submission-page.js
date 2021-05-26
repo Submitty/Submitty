@@ -63,7 +63,7 @@ function syncWithServer(criticalSync) {
             if (!criticalSync) {
                 updateTime();
             }
-            else{
+            else {
                 if (document.getElementById('gradeable-time-remaining-text') !== null) {
                     document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
                 }
