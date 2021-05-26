@@ -451,14 +451,14 @@ HTML;
         if ($peer || $anon_mode) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
             if ($gradeable->isTeamAssignment()) {
-                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING || $anon_mode) {
                     $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
                 }
                 else {
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 }
             }
-            elseif ($gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
+            elseif ($gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING && !$anon_mode) {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
             }
             else {
