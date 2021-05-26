@@ -495,6 +495,11 @@ input[type="button"].btn-block {
     border-color: var(--alert-border-danger-red);
 }
 
+.alert-danger a,
+.alert-error a {
+    color: var(--alert-danger-red);
+}
+
 .alert-danger h4,
 .alert-error h4 {
     color: var(--gray-red);
