@@ -336,8 +336,8 @@ CREATE TABLE public.emails (
     created timestamp without time zone NOT NULL,
     sent timestamp without time zone,
     error character varying DEFAULT ''::character varying NOT NULL,
-    course character varying,
-    semester character varying
+    semester character varying,
+    course character varying
 );
 
 
