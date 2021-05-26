@@ -160,6 +160,7 @@
             size_is_valid = false;
         } else {
             size_is_valid = true;
+            document.getElementById('poll-preview-image').src = window.URL.createObjectURL(uploadedFile.files[0]);
         }
         submitErrorChecks();
     };
@@ -333,7 +334,9 @@
         $('#poll-preview').css('display', 'block');
         $('#poll-preview-name').text($('#poll-name').val());
         $('#poll-preview-question').text($('#poll-question').val());
-        let count = 0;
+        if ($('#poll-preview-image').attr('src') != "") {
+            $('#poll-preview-image-wrapper').show();
+        }
         $('#poll-preview-answers').html("");
         $('#poll-preview-answers').append(`
             <legend>
@@ -343,6 +346,7 @@
                 <input type="radio" value="-1" name="answer" checked/><p> No response</p><br/><br/>
             </div>
         `);
+        let count = 0;
         // while an element with the id response_count exists
         while ($("#response_"+count).length) {
             $("#poll-preview-answers").append(`

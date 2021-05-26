@@ -6,12 +6,9 @@
     <div class="content">
         <h1 id="poll-preview-name"></h1>
         <div id="poll-preview-question"></div>
-        {% if file_data is not null %}
-            <br/>
-            <img src="{{ file_data }}">
-            <br/>
-        {% endif %}
-        <br/>
+        <div id="poll-preview-image-wrapper">
+            <img id="poll-preview-image" src="{{ file_data }}">
+        </div>
         <form>
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>

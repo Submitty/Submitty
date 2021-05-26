@@ -95,7 +95,7 @@ class PollView extends AbstractView {
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
-            'file_data' => $file_data
+            'file_data' => $file_data,
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize'))
           ]);
     }

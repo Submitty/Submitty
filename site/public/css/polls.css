@@ -58,3 +58,7 @@
 .active {
     background: var(--always-default-white);
 }
+
+#poll-preview-image-wrapper {
+    display: none;
+}
