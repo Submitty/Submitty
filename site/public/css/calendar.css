@@ -164,7 +164,6 @@ h2.cal-month-title {
 
  /* each item in the day cell */
 .cal-gradeable-item {
-    color: var(--btn-text-white);
     margin:1px;
     text-decoration: none;
     white-space: normal;
@@ -184,11 +183,9 @@ h2.cal-month-title {
 
  /* each item in the day cell as a button */
 a.cal-gradeable-item {
-    color: var(--btn-text-white);
 }
 
 a.cal-gradeable-item:hover {
-    color: var(--btn-text-white);
     cursor:pointer;
 }
 
@@ -269,66 +266,18 @@ a.cal-gradeable-status-link:focus {
 
 /* OPEN TO SUBMIT */
 .cal-gradeable-status-2 {
-    background-color: var(--actionable-blue);
-}
-
-.cal-gradeable-status-2:hover {
-    background-color: var(--hover-actionable-blue);
-}
-
-.cal-gradeable-status-2:focus {
-    background-color: var(--focus-actionable-blue);
 }
 
 /* PAST DUE / LATE SUBMIT */
 .cal-gradeable-status-3 {
-    background-color: var(--danger-red);
-}
-
-.cal-gradeable-status-3:hover {
-    background-color: var(--hover-active-danger-red);
-    border: var(--hover-active-danger-red);
-}
-
-.cal-gradeable-status-3:focus {
-    background-color: var(--focus-danger-red);
-    border: var(--focus-danger-red);
 }
 
 /* CLOSED  being graded by TA/Instructor */
 a.cal-gradeable-status-4 {
-    color: var(--btn-text-black);
-    background-color: var(--btn-default-white);
-}
-
-a.cal-gradeable-status-4:hover {
-    color: var(--btn-text-black);
-    background-color: var(--btn-default-hover);
-    border: var(--btn-default-hover);
-}
-
-a.cal-gradeable-status-4:focus {
-    color: var(--btn-text-black);
-    background-color: var(--btn-default-active);
-    border: var(--btn-default-active);
 }
 
 /* GRADES AVAILABLE */
 a.cal-gradeable-status-5 {
-    color: var(--btn-text-black);
-    background-color: var(--good-green);
-}
-
-a.cal-gradeable-status-5:hover {
-    color: var(--btn-text-black);
-    background-color: var(--hover-good-green);
-    border: var(--hover-good-green);
-}
-
-a.cal-gradeable-status-5:focus {
-    color: var(--btn-text-black);
-    background-color: var(--disabled-good-green);
-    border: var(--disabled-good-green);
 }
 
 @media (max-width: 800px) {

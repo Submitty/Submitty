@@ -234,6 +234,7 @@ class AdminGradeableController extends AbstractController {
             'regrade_allowed' => $gradeable->isRegradeAllowed(),
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
+            'electronic' => $gradeable->getType() === GradeableType::ELECTRONIC_FILE,
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,

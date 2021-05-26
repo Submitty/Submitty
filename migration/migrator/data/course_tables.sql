@@ -1225,6 +1225,14 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 
 --
+-- Name: gradeable_data g_id_gd_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_data
+    ADD CONSTRAINT g_id_gd_team_id_unique UNIQUE (g_id, gd_team_id);
+
+
+--
 -- Name: grade_override grade_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
