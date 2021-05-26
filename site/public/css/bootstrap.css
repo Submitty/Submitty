@@ -496,8 +496,9 @@ input[type="button"].btn-block {
 }
 
 .alert-danger a,
-.alert-error a {
-    color: var(--alert-danger-red);
+.alert-error a,
+.alert-success a {
+    color: inherit;
 }
 
 .alert-danger h4,
