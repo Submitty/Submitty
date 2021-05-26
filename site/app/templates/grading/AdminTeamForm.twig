@@ -29,11 +29,26 @@
         </select>
     </div>
     <br />
-    <br />
-    <h4 id="admin-team-history-title"></h4>
-    <div id="admin-team-history-left"></div>
-    <div id="admin-team-history-right"></div>
-    <div id="admin-team-history-bottom" class="red-message" style="margin-top:3px;"></div>
+
+    {# This is a data table #}
+    <table id="admin_team_history_table" class="table table-striped table-bordered persist-area">
+        <caption>Team History</caption>
+        {# Table header #}
+        <thead>
+            <tr>
+                <th> User </th>
+                <th> Action </th>
+                <th> Date </th>
+            </tr>
+        </thead>
+        {# /Table header #}
+        <tbody></tbody>
+        <tfoot style="display:none;">
+            <tr>
+                <td colspan="3">Rows highlighted in pink/red indicate actions performed after the team lock date.</td>
+            </tr>
+        </tfoot>
+    </table>
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ team_submit_url }}">
