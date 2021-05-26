@@ -521,7 +521,7 @@ class ElectronicGraderController extends AbstractController {
         $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
-        $total_users_who_submitted = 0;
+        $total_users_who_submitted = [];
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
@@ -635,7 +635,7 @@ class ElectronicGraderController extends AbstractController {
                 $total_submissions += $value;
             }
             foreach ($total_users_who_submitted as $key => $value) {
-                if ($key == 'NULL') {
+                if ($key === 'NULL') {
                     continue;
                 }
                 $total_who_submitted += $value;
