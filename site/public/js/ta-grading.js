@@ -1315,9 +1315,6 @@ function newEditPeerComponentsForm() {
 
 function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submission") {
   let iframe = $('#file_viewer_' + num);
-  if (!$(iframe).parent().parent().hasClass("open")){
-    return false;
-  }
   let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
     let iframeId = "file_viewer_" + num + "_iframe";
@@ -1342,6 +1339,8 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       });
     }
     else {
+      if (!iframe.parent().parent().hasClass("open"))
+        return false;
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
