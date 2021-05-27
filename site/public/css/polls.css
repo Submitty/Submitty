@@ -21,6 +21,10 @@
     float: right;
 }
 
+.option-title {
+    font-weight: bold;
+}
+
 .move-btn {
     background: transparent;
     padding: 10px;

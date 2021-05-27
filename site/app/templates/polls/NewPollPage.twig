@@ -7,13 +7,13 @@
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
             <label for="poll-name">
-                Poll Name:
+                <span class="option-title">Poll Name:</span>
                 <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             </label>
             <br/> <br/>
 
             <label for="poll-question">
-                Question:
+                <span class="option-title">Question:</span>
                 <textarea
                     id="poll-question"
                     name="question"
@@ -24,14 +24,21 @@
             </label>
             <br/><br/>
 
+            <label for="poll-question-type">
+                <span class="option-title">Question Type:</span>
+                <input type="radio" id="poll-type-single-response" name="answer">Single reponse (radio buttons)</input>
+                <input type="radio" id="poll-type-multiple-response" name="answer">Multiple response (checkboxes)</input>
+            </label>
+            <br/><br/>
+
             <label for="image-file">
-                Optional Image:
+                <span class="option-title">Optional Image:</span>
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
   	    <br/><br/>
 
             <label for="poll-date">
-                Expected release date:
+                <span class="option-title">Expected release date:</span>
                 <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
             <br/>
@@ -48,6 +55,7 @@
 
             <span id="empty-name-error" class="red-message polls-submit-error">Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+            <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
@@ -63,13 +71,13 @@
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
             <label for="poll-name">
-                Poll Name:
+                <span class="option-title">Poll Name:</span>
                 <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             </label>
             <br/> <br/>
 
             <label for="poll-question">
-                Question:
+                <span class="option-title">Question:</span>
                 <textarea
                     id="poll-question"
                     name="question"
@@ -79,8 +87,15 @@
             </label>
             <br/><br/>
 
+            <label for="poll-question-type">
+                <span class="option-title">Question Type:</span>
+                <input type="radio" id="poll-type-single-response" name="answer">Single reponse (radio buttons)</input>
+                <input type="radio" id="poll-type-multiple-response" name="answer">Multiple response (checkboxes)</input>
+            </label>
+            <br/><br/>
+
             <label for="image-file">
-                Optional Image:
+                <span class="option-title">Optional Image:</span>
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
             <br />
@@ -95,7 +110,7 @@
             <br/>
 
             <label for="poll-date">
-                Expected release date:
+                <span class="option-title">Expected release date:</span>
                 <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
             <br/>
@@ -131,6 +146,7 @@
 
             <span id="empty-name-error" class="red-message polls-submit-error" hidden>Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+            <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
@@ -253,6 +269,11 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-question-error").show();
+        } else if (!$('#poll-type-single-response').is(':checked') 
+                   && !$('#poll-type-multiple-response').is(':checked')) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#question-type-error").show();
         } else if (!size_is_valid) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
