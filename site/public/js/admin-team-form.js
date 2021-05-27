@@ -1,15 +1,18 @@
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, 
+/* exported adminTeamForm */
+/* global captureTabInModal */
+
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members,
     pending_members, multiple_invite_members, max_members, lock_date) {
     $('.popup-form').css('display', 'none');
-    const form = $("#admin-team-form");
-    form.css("display", "block");
-    captureTabInModal("admin-team-form");
+    const form = $('#admin-team-form');
+    form.css('display", "block');
+    captureTabInModal('admin-team-form');
 
     form.find('.form-body').scrollTop(0);
-    $("#admin-team-form-submit").prop('disabled',false);
+    $('#admin-team-form-submit').prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
-    $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
-    $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
+    $(`[name="reg_section"] option[value="${reg_section}"]`, form).prop('selected', true);
+    $(`[name="rot_section"] option[value="${rot_section}"]`, form).prop('selected', true);
     if(new_team) {
         $('[name="num_users"]', form).val(3);
     }
@@ -17,12 +20,12 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="num_users"]', form).val(members.length+pending_members.length+2);
     }
 
-    const title_div = $("#admin-team-title");
+    const title_div = $('#admin-team-title');
     title_div.empty();
-    const members_div = $("#admin-team-members");
+    const members_div = $('#admin-team-members');
     members_div.empty();
 
-    const team_history_tbody = $("#admin_team_history_table > tbody");
+    const team_history_tbody = $('#admin_team_history_table > tbody');
     team_history_tbody.empty();
 
     //add nav button to skip to submit button
