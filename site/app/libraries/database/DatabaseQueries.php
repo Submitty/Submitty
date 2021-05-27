@@ -5130,9 +5130,10 @@ AND gc_id IN (
               g_ta_view_start_date,
               g_grade_start_date,
               g_grade_due_date,
+              g_grade_released_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
