@@ -214,11 +214,16 @@ function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclic
 }
 
 function removeTeamMemberInput(i) {
-    const form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
+    const removed_member_element = $(`#user_id_${i}`);
+    //remove the Remove button associated with this member;
     $("#remove_member_"+i).remove();
+
+    //clear removed_member's input field and change it to writeable
+    removed_member_element.removeClass('readonly').prop('readonly', false).val("");
+
+    //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
+    removed_member_element.autocomplete({
         source: student_full
     });
 }
