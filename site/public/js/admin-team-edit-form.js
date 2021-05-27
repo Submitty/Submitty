@@ -160,12 +160,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     });
 
-    const param = (new_team ? 3 : members.length+2);
-    members_div.append('<button onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</button>');
+    const next_user_num = (new_team ? 3 : members.length+2);
+    members_div.append(getTeamFormAddMoreUsersButtonString(next_user_num));
     if (exists_multiple_invite_member) {
-        members_div.append('<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:90%">\
-        *Pending members highlighted in pink/red have invites to multiple teams.');
+        members_div.append(getTeamFormMultipleInvitesWarningString());
     }
 }
 
@@ -213,6 +211,24 @@ function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclic
             </button>`;
 }
 
+function getTeamFormAddMoreUsersButtonString(user_num){
+    return `<button 
+                id="admin_team_form_add_more_users_button"
+                onclick="addTeamMemberInput(this, ${user_num});" 
+                aria-label="Add More Users"
+                class="btn btn-primary"
+            >
+                <i class="fas fa-plus-square"></i>
+                Add More Users
+            </button>`
+}
+
+function getTeamFormMultipleInvitesWarningString(){
+    return `<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:90%">
+                *Pending members highlighted in pink/red have invites to multiple teams.
+            </div>`;
+}
+
 function removeTeamMemberInput(i) {
     const removed_member_element = $(`#user_id_${i}`);
     //remove the Remove button associated with this member;
@@ -253,16 +269,28 @@ function approveTeamMemberInput(i) {
 }
 
 function addTeamMemberInput(old, i) {
-    old.remove()
+    //insert new input before "Add New Users" button
+    $(getTeamFormLabelString("user_id_", "Team Member", i)).insertBefore(old);
+    $(getTeamFormInputString("user_id_", "user_id_", i)).insertBefore(old);
+    $("<br/>").insertBefore(old);
+
+    //remove old "Add More Users" button so we can update it 
+    old.remove();
+    //remove the multiple invites warning so we can add it back at the bottom later
     $('#multiple-invites-warning').remove();
+    
+    //increment num_users
     const form = $("#admin-team-form");
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
+
+    //put button and warning back
     const members_div = $("#admin-team-members");
-    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</span>');
+    members_div.append(getTeamFormAddMoreUsersButtonString(i+1));
+    members_div.append(getTeamFormMultipleInvitesWarningString());
+
+    //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
+    $(`#user_id_${i}`).autocomplete({
         source: student_full
     });
 }
