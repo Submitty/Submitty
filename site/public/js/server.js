@@ -683,16 +683,13 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[0].time, "N/A", "Team Formed"));
             team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[team_history_len-1].time, "N/A", "Last Edited"));
             let past_lock_date = false;
-            let style_string = "";
             for (var j = 0; j <=team_history_len-1; j++) {
                 let curr_json_entry = user_assignment_setting_json.team_history[j];
                 if (!past_lock_date && curr_json_entry.time > lock_date) {
                     past_lock_date = true;
-                    style_string += "background-color:var(--alert-invalid-entry-pink);";
                 }
 
-                var getRowBound = getTeamHistoryTableRowString.bind(null, style_string, curr_json_entry.time);
-                console.log(curr_json_entry);
+                var getRowBound = getTeamHistoryTableRowString.bind(null, past_lock_date, curr_json_entry.time);
 
                 if(curr_json_entry.action == "admin_create" && curr_json_entry.first_user != undefined) {
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, "Created Team"));
@@ -729,7 +726,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     $(":text",form).change(function() {
         var found = false;
         for (var i = 0; i < student_full.length; i++) {
-            if (student_full[i]['value'] == $(this).val()) {
+            if (student_full[i]['value'] === $(this).val()) {
                 found = true;
                 break;
             }
@@ -740,20 +737,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         else {
             $(this)[0].setCustomValidity("Invalid user_id");
         }
-
-        var invalid_entry = false;
-        $(":text",form).each( function() {
-            if (!this.checkValidity())  {
-                invalid_entry = true;
-            }
-        });
-        if (invalid_entry) {
-            $("#admin-team-form-submit").prop('disabled',true);
-        }
-        else {
-            $("#admin-team-form-submit").prop('disabled',false);
-        }
     });
+    
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
@@ -763,8 +748,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     }
 }
 
-function getTeamHistoryTableRowString(style_string, date, user, action){
-    return `<tr style="${style_string}"><td>${user}</td><td>${action}</td><td>${date}</td></tr>`;
+function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
+    return `<tr class="admin-team-history-after-lock" tabIndex="0"><td tabIndex="0">${user}</td><td tabIndex="0">${action}</td><td tabIndex="0">${date}</td></tr>`;
 }
 
 function removeTeamMemberInput(i) {

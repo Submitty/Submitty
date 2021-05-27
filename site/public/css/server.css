@@ -1334,16 +1334,6 @@ div.full_height {
     vertical-align: top;
 }
 
-#admin-team-history-left {
-    width:35%;
-    display: inline-block;
-    margin-right: 10px;
-}
-
-#admin-team-history-right {
-    width:55%;
-    display: inline-block;
-}
 
 [name^="grader-warning-popup"] {
     background:var(--danger-red);
@@ -1609,13 +1599,26 @@ end of styles used in the admin gradeable page
     font-size: 1.5em;
 }
 
-[name^="user_id_"]:valid {
-    background-color: transparent;
-}
-
-[name^="user_id_"] {
+[name^="user_id_"]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
+
+[data-theme="dark"] [name^="user_id_"]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] [name^="user_id_"]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}
+
+.admin-team-history-after-lock {
+    background-color: var(--alert-invalid-entry-pink) !important;
+}
+
+[data-theme="dark"] .admin-team-history-after-lock {
+    background-color: var(--alert-danger-red) !important;
+}
+
 
 /* color for nav page edit button for rebuild error on gradeable */
 .edit-build-error {
