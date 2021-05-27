@@ -738,7 +738,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             $(this)[0].setCustomValidity("Invalid user_id");
         }
     });
-    
+
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
@@ -749,7 +749,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 }
 
 function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
-    return `<tr class="admin-team-history-after-lock" tabIndex="0"><td tabIndex="0">${user}</td><td tabIndex="0">${action}</td><td tabIndex="0">${date}</td></tr>`;
+    return `<tr ${isAfterLockDate ? 'class="admin-team-history-after-lock"' : ''} tabIndex="0"><td tabIndex="0">${user}</td><td tabIndex="0">${action}</td><td tabIndex="0">${date}</td></tr>`;
 }
 
 function removeTeamMemberInput(i) {
