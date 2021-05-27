@@ -680,8 +680,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
         if (user_assignment_setting_json != false) {
             var team_history_len = user_assignment_setting_json.team_history.length;
-            team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[0].time, "", "Team Formed"));
-            team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[team_history_len-1].time, "", "Last Edited"));
+            team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[0].time, "N/A", "Team Formed"));
+            team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[team_history_len-1].time, "N/A", "Last Edited"));
             let past_lock_date = false;
             let style_string = "";
             for (var j = 0; j <=team_history_len-1; j++) {
@@ -692,13 +692,14 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 }
 
                 var getRowBound = getTeamHistoryTableRowString.bind(null, style_string, curr_json_entry.time);
+                console.log(curr_json_entry);
 
                 if(curr_json_entry.action == "admin_create" && curr_json_entry.first_user != undefined) {
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, "Created Team"));
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, 'Added ' + curr_json_entry.first_user));
                 } 
                 else if(curr_json_entry.action == "admin_create" || curr_json_entry.action == "admin_add_user"){
-                    team_history_tbody.append(getRowBound(curr_json_entry.admin_user, curr_json_entry.added_user))
+                    team_history_tbody.append(getRowBound(curr_json_entry.admin_user, "Added " + curr_json_entry.added_user))
                 } 
                 else if (user_assignment_setting_json.team_history[j].action == "create") {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, "Created Team"));
