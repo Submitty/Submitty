@@ -73,7 +73,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             if (multiple_invite_members[i-members.length]) {
                 exists_multiple_invite_member = true;
             }
-            members_div.append(getTeamFormLabelString("pending_user_id", "Pending Team Member", i));
+            members_div.append(getTeamFormLabelString("pending_user_id_", "Pending Team Member", i));
             members_div.append(
                 getTeamFormReadOnlyInputString(
                     "pending_user_id_", 
