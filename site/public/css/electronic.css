@@ -204,7 +204,6 @@ progress::-webkit-progress-value {
 
 .panel-header-box {
     display: flex;
-    margin: auto;
 }
 
 .grade-panel {
