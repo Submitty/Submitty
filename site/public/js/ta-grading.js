@@ -92,7 +92,7 @@ $(function () {
     if(storageCode) {
       localStorage.setItem(storageCode, this.value);
       if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
-        settingsCallbacks[storageCode](data);
+        settingsCallbacks[storageCode](this.value);
       }
     }
   })
@@ -181,9 +181,10 @@ $(function () {
 });
 
 function changeStudentArrowTooltips(data) {
-  let component_id = getFirstOpenComponentId();
+  let component_id = NO_COMPONENT_ID;
   switch(data) {
     case "ungraded":
+      component_id = getFirstOpenComponentId(false);
       if(component_id === NO_COMPONENT_ID) {
         $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
         $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
@@ -193,21 +194,24 @@ function changeStudentArrowTooltips(data) {
       }
       break;
     case "itempool":
-      if(component_id === NO_COMPONENT_ID || false) {
-        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (first open component not an item)");
-        $('#next-student-navlink').find("i").first().attr("title", "Next student (first open component not an item)");
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (no itempool component open)");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (no itempool component open)");
       } else {
-        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (component " + component_id + ")");
-        $('#next-student-navlink').find("i").first().attr("title", "Next student (component " + component_id + ")");
+        
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (component " + component_id + ", item " + $('#component-' + component_id).attr('data-itempool_id') + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (component " + component_id + ", item " + $('#component-' + component_id).attr('data-itempool_id') + ")");
       }
       break;
     case "ungraded-itempool":
-      if(component_id === NO_COMPONENT_ID || false) {
-        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (first open component not an item)");
-        $('#next-student-navlink').find("i").first().attr("title", "Next student (first open component not an item)");
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (no itempool component open)");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (no itempool component open)");
       } else {
-        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (component " + component_id + ")");
-        $('#next-student-navlink').find("i").first().attr("title", "Next student (component " + component_id + ")");
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (component " + component_id + ", item " + $('#component-' + component_id).attr('data-itempool_id') + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (component " + component_id + ", item " + $('#component-' + component_id).attr('data-itempool_id') + ")");
       }
       break;
     default:
@@ -220,8 +224,9 @@ function changeStudentArrowTooltips(data) {
 let orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function(component_id, saveChanges) {
   let ret = orig_toggleComponent(component_id, saveChanges);
-  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
-  return ret;
+  return ret.then(function() {
+    changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  });
 }
 
 function checkNotebookScroll() {
@@ -561,7 +566,7 @@ function gotoMainPage() {
 
 function gotoPrevStudent(to_ungraded = false) {
 
-  let selector = "#next-student";
+  let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href;
 
   let switchType = localStorage.getItem("general-setting-arrow-function") || "default";
@@ -574,13 +579,13 @@ function gotoPrevStudent(to_ungraded = false) {
       break;
     case "itempool":
       window_location += "&to_ungraded=false";
-      window_location += "to_same_itempool=true";
-      window_location += "&component_id=" + getFirstOpenComponentId();
+      window_location += "&to_same_itempool=true";
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
       break;
-    case "ungraded_itempool":
+    case "ungraded-itempool":
       window_location += "&to_ungraded=true";
       window_location += "&to_same_itempool=true";
-      window_location += "&component_id=" + getFirstOpenComponentId();
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
       break;
     default:
       window_location += "&to_ungraded=false";
@@ -617,13 +622,13 @@ function gotoNextStudent(to_ungraded = false) {
       break;
     case "itempool":
       window_location += "&to_ungraded=false";
-      window_location += "to_same_itempool=true";
-      window_location += "&component_id=" + getFirstOpenComponentId();
+      window_location += "&to_same_itempool=true";
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
       break;
-    case "ungraded_itempool":
+    case "ungraded-itempool":
       window_location += "&to_ungraded=true";
       window_location += "&to_same_itempool=true";
-      window_location += "&component_id=" + getFirstOpenComponentId();
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
       break;
     default:
       window_location += "&to_ungraded=false";
