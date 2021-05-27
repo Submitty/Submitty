@@ -6,14 +6,14 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
-            <label for="poll-name">
-                <span class="option-title">Poll Name:</span>
+            <label for="poll-name-label">
+                <span class="option-title" id="poll-name-label">Poll Name:</span>
                 <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                <span class="option-title">Question:</span>
+            <label for="poll-question-label">
+                <span class="option-title" id="poll-question-label">Question:</span>
                 <textarea
                     id="poll-question"
                     name="question"
@@ -24,21 +24,21 @@
             </label>
             <br/><br/>
 
-            <label for="poll-question-type">
-                <span class="option-title">Question Type:</span>
-                <input type="radio" id="poll-type-single-response" name="answer">Single reponse (radio buttons)</input>
-                <input type="radio" id="poll-type-multiple-response" name="answer">Multiple response (checkboxes)</input>
-            </label>
+            <label for="poll-question-type-label">
+                <span class="option-title" id="poll-question-type-label">Question Type:</span>
+            </label>    
+            <input type="radio" id="poll-type-single-response" name="question-type" value="single-response" checked>Single reponse (radio buttons)</input>
+            <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response">Multiple response (checkboxes)</input>
             <br/><br/>
 
-            <label for="image-file">
-                <span class="option-title">Optional Image:</span>
+            <label for="image-file-label">
+                <span class="option-title" id="image-file-label">Optional Image:</span>
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
   	    <br/><br/>
 
-            <label for="poll-date">
-                <span class="option-title">Expected release date:</span>
+            <label for="poll-date-label">
+                <span class="option-title" id="poll-date-label">Expected release date:</span>
                 <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
             <br/>
@@ -70,14 +70,14 @@
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
-            <label for="poll-name">
-                <span class="option-title">Poll Name:</span>
+            <label for="poll-name-label">
+                <span class="option-title" id="poll-name-label">Poll Name:</span>
                 <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                <span class="option-title">Question:</span>
+            <label for="poll-question-label">
+                <span class="option-title" id="poll-question-label">Question:</span>
                 <textarea
                     id="poll-question"
                     name="question"
@@ -87,15 +87,15 @@
             </label>
             <br/><br/>
 
-            <label for="poll-question-type">
-                <span class="option-title">Question Type:</span>
-                <input type="radio" id="poll-type-single-response" name="answer">Single reponse (radio buttons)</input>
-                <input type="radio" id="poll-type-multiple-response" name="answer">Multiple response (checkboxes)</input>
+            <label for="poll-question-type-label">
+                <span class="option-title" id="poll-question-type-label">Question Type:</span>
             </label>
+            <input type="radio" id="poll-type-single-response" name="question-type" value="single-response" checked="">Single reponse (radio buttons)</input>
+            <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response">Multiple response (checkboxes)</input>
             <br/><br/>
 
-            <label for="image-file">
-                <span class="option-title">Optional Image:</span>
+            <label for="image-file-label">
+                <span class="option-title" id="image-file-label">Optional Image:</span>
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
             <br />
@@ -109,8 +109,8 @@
             {% endif %}
             <br/>
 
-            <label for="poll-date">
-                <span class="option-title">Expected release date:</span>
+            <label for="poll-date-label">
+                <span class="option-title" id="poll-date-label">Expected release date:</span>
                 <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
             <br/>

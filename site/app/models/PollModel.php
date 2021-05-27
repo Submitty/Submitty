@@ -23,6 +23,7 @@ class PollModel extends AbstractModel {
     protected $name;
     /** @prop-read string */
     protected $question;
+    protected $question_type; //can hold the value "single-response" or "multilple-response"
     protected $responses;
     /** @prop-read array */
     protected $answers;
@@ -33,11 +34,12 @@ class PollModel extends AbstractModel {
     /** @prop-read string|null */
     protected $image_path;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path) {
+    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
         $this->question = $question;
+        $this->question_type = $question_type;
         $this->responses = $responses;
         $this->answers = $answers;
         $this->status = $status;
@@ -56,6 +58,10 @@ class PollModel extends AbstractModel {
 
     public function getAnswers() {
         return $this->answers;
+    }
+
+    public function getQuestionType() {
+        return $this->question_type;
     }
 
     public function isOpen() {
