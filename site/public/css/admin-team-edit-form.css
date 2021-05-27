@@ -1,0 +1,23 @@
+[name^="user_id_"]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+[data-theme="dark"] [name^="user_id_"]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] [name^="user_id_"]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}
+
+.admin-team-history-after-lock {
+    background-color: var(--alert-invalid-entry-pink) !important;
+}
+
+[data-theme="dark"] .admin-team-history-after-lock {
+    background-color: var(--alert-danger-red) !important;
+}
+
+.admin-team-history-td:focus {
+    outline: solid;
+}

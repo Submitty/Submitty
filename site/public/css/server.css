@@ -1599,31 +1599,6 @@ end of styles used in the admin gradeable page
     font-size: 1.5em;
 }
 
-[name^="user_id_"]:invalid {
-    background-color: var(--alert-invalid-entry-pink);
-}
-
-[data-theme="dark"] [name^="user_id_"]:invalid {
-    background-color: var(--alert-danger-red);
-}
-
-[data-theme="dark"] [name^="user_id_"]:invalid::placeholder {
-    color: var(--alert-invalid-entry-pink);
-}
-
-.admin-team-history-after-lock {
-    background-color: var(--alert-invalid-entry-pink) !important;
-}
-
-[data-theme="dark"] .admin-team-history-after-lock {
-    background-color: var(--alert-danger-red) !important;
-}
-
-.admin-team-history-td:focus {
-    outline: solid;
-}
-
-
 /* color for nav page edit button for rebuild error on gradeable */
 .edit-build-error {
     color: var(--badge-backgroud-red);
