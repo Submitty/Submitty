@@ -238,13 +238,24 @@ class GradeableList extends AbstractModel {
         elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
             // Filter out gradeables with no due date
             if ($gradeable->isStudentSubmit()) {
-                if ($gradeable->getGradeStartDate() < $core->getDateTimeNow() && $core->getUser()->accessGrading()) {
+                if ($gradeable->getSubmissionOpenDate() >= $now) {
+                    if ($gradeable->getTaViewStartDate() >= $now) {
+                        return self::FUTURE;
+                    }
+                    else {
+                        return self::BETA;
+                    }
+                }
+                else {
+                    return self::OPEN;
+                }
+                /*if ($gradeable->getGradeStartDate() < $core->getDateTimeNow() && $core->getUser()->accessGrading()) {
                     // Put in 'grading' category only if user is a grader
                     return self::GRADING;
                 }
                 else {
                     return self::OPEN;
-                }
+                }*/
             }
             else {
                 // If there is no due date and no student submission, it should

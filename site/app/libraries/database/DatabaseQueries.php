@@ -5268,8 +5268,10 @@ AND gc_id IN (
                 $gradeable->getType(),
                 $gradeable->getGraderAssignmentMethod(),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
-                DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
-                DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
+                $gradeable->getGradeStartDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getGradeStartDate()) : null,
+                $gradeable->getGradeDueDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getGradeDueDate()) : null,
                 $gradeable->getGradeReleasedDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
                 $gradeable->getGradeLockedDate() !== null ?

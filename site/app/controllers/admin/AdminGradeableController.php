@@ -1043,8 +1043,15 @@ class AdminGradeableController extends AbstractController {
         ];
 
         $toggle_dates = [
-            'has_due_date' => 'submission_due_date',
-            'has_release_date' => 'grade_released_date'
+            'has_due_date' => [
+                'submission_due_date',
+                'grade_start_date',
+                'grade_due_date',
+                'grade_released_date'
+            ],
+            'has_release_date' => [
+                'grade_released_date'
+            ]
         ];
 
         $discussion_ids = 'discussion_thread_id';
@@ -1080,7 +1087,9 @@ class AdminGradeableController extends AbstractController {
                 //Check boolean properties that disable dates
                 if (isset($toggle_dates[$prop])) {
                     if (!$post_val) {
-                        unset($dates[$toggle_dates[$prop]]);
+                        foreach ($toggle_dates[$prop] as $val) {
+                            unset($dates[$val]);
+                        }
                     }
                     continue;
                 }
@@ -1351,13 +1360,19 @@ class AdminGradeableController extends AbstractController {
         $success = null;
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
-            if ($dates['grade_released_date'] > $now) {
-                $this->shiftDates($dates, 'grade_released_date', $now);
-                $message .= "Released grades for ";
-                $success = true;
+            if ($gradeable->hasReleaseDate()) {
+                if ($dates['grade_released_date'] > $now) {
+                    $this->shiftDates($dates, 'grade_released_date', $now);
+                    $message .= "Released grades for ";
+                    $success = true;
+                }
+                else {
+                    $message .= "Grades already released for ";
+                    $success = false;
+                }
             }
             else {
-                $message .= "Grades already released for";
+                $message .= "Can't release grades for ";
                 $success = false;
             }
         }
@@ -1395,13 +1410,19 @@ class AdminGradeableController extends AbstractController {
             }
         }
         elseif ($action === "close_submissions") {
-            if ($dates['submission_due_date'] > $now) {
-                $this->shiftDates($dates, 'submission_due_date', $now);
-                $message .= "Closed assignment ";
-                $success = true;
+            if ($gradeable->hasDueDate()) {
+                if ($dates['submission_due_date'] > $now) {
+                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $message .= "Closed assignment ";
+                    $success = true;
+                }
+                else {
+                    $message .= "Grading already closed for ";
+                    $success = false;
+                }
             }
             else {
-                $message .= "Grading already closed for ";
+                $message .= "Can't close submissions for ";
                 $success = false;
             }
         }
