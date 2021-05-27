@@ -1262,7 +1262,6 @@ function getGradedComponentFromDOM(component_id) {
     if (gradedVersion === '') {
         gradedVersion = getDisplayVersion();
     }
-    ///alert(CUSTOM_MARK_ID);
     return {
         score: score,
         comment: comment,
@@ -1272,7 +1271,7 @@ function getGradedComponentFromDOM(component_id) {
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
         verifier_id: dataDOMElement.attr('data-verifier_id'),
-        ///custom_mark_enabled: customMarksAllowed,
+        custom_mark_enabled: CUSTOM_MARK_ID,
     };
 }
 
