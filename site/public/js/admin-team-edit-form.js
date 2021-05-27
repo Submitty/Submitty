@@ -31,6 +31,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
     const student_full = JSON.parse($('#student_full_id').val());
     let exists_multiple_invite_member = false;
+
+    //if a new team is being created
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
@@ -49,20 +51,26 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         members_div.find('[name="reg_section"]').val(reg_section);
         members_div.find('[name="rot_section"]').val(rot_section);
     }
+    //a team is being edited
     else {
         $('[name="new_team_user_id"]', form).val("");
         $('[name="edit_team_team_id"]', form).val(who_id);
 
         title_div.append('Edit Team: ' + who_id);
+        //append current members in the team to members_div
         for (let i = 0; i < members.length; i++) {
-            members_div.append('<label tabIndex="0" for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
-            members_div.append('<input tabIndex="0" id="user_id_' + i + '" class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <label tabIndex="0" for="remove_member_' + i + '" style="display:none;">Remove Member ' + (i+1) + '</label>\
-                <button tabIndex="0" id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;">Remove</button><br />');
+            members_div.append(getTeamFormLabelString("user_id_", "Team Member", i));
+            members_div.append(getTeamFormReadOnlyInputString("user_id_", "user_id_", members[i], i));
+            members_div.append(getTeamFormLabelString("remove_member_", "Remove Member", i));
+            members_div.append(getTeamFormButtonString("remove_member_", "btn-danger", "Remove", i, removeTeamMemberInput, i));
+            members_div.append('<br/>');
         }
-        for (let i = members.length; i < members.length+pending_members.length; i++) {
-            if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
+        //append pending members to members_div
+        for (let i = members.length; i < members.length + pending_members.length; i++) {
+            //if this member has been invited to multiple teams, set flag
+            if (multiple_invite_members[i-members.length]) {
+                exists_multiple_invite_member = true;
+            }
             members_div.append('<label tabIndex="0" for="pending_user_id_' + i + '" style="display:none;">Pending Team Member ' + (i+1) + '</label>');
             members_div.append('<input tabIndex="0" id="pending_user_id_' + i + '" class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
                 name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
@@ -153,6 +161,34 @@ function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
         <td class="admin-team-history-td" tabIndex="0">${action}</td>
         <td class="admin-team-history-td" tabIndex="0">${date}</td>
     </tr>`;
+}
+
+function getTeamFormLabelString(for_prefix, text, user_num ){
+    return `<label tabIndex="0" for="${for_prefix + user_num}" style="display:none;">${text + " " + user_num}</label>`;
+}
+
+function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num){
+    return `<input 
+                tabIndex="0" 
+                id="${id_prefix + user_num}" 
+                class="readonly" 
+                type="text" 
+                name="${name_prefix + user_num}"
+                readonly="readonly" 
+                value="${value}"
+            />`;
+}
+
+function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclick, ...onclickArgs){
+    return `<button 
+                tabIndex="0"
+                id="${id_prefix + user_num}" 
+                class="btn ${button_class}" 
+                onclick="${onclick.name}(${onclickArgs.join(', ')})" 
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;"
+            >
+                ${text}
+            </button>`;
 }
 
 function removeTeamMemberInput(i) {
