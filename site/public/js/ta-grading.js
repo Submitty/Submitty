@@ -1112,7 +1112,7 @@ function openAll(click_class, class_modifier) {
   $("."+click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
     //console.log($(this).attr('id'));
-    if ($(this).parent().parent().parent().hasClass("open") || $(this).parent().hasClass("open")){
+    if ($(this).parent().parent().parent().hasClass("open")){
       let innerText = Object.values($(this))[0].innerText;
       if (innerText.slice(-4) !== ".pdf") {
         $(this).click();
