@@ -5,7 +5,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     pending_members, multiple_invite_members, max_members, lock_date) {
     $('.popup-form').css('display', 'none');
     const form = $('#admin-team-form');
-    form.css('display", "block');
+    form.css('display', 'block');
     captureTabInModal('admin-team-form');
 
     form.find('.form-body').scrollTop(0);
@@ -43,14 +43,14 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         title_div.append(`Create New Team: ${who_id}`);
         members_div.append(getTeamFormLabelString('user_id_', 'user_id_', 0));
         members_div.append(getTeamFormReadOnlyInputString('user_id_', 'user_id_', who_id, 0));
-       
+
         //add 2 more inputs
         for (let i = 1; i < 3; i++) {
             members_div.append(getTeamFormLabelString('user_id_', 'Team Member', i));
             members_div.append(getTeamFormInputString('user_id_', 'user_id_', i));
             members_div.append('<br/>');
             $(`#user_id_${i}`).autocomplete({
-                source: student_full
+                source: student_full,
             });
             $(`#user_id_${i}`).autocomplete('option', 'appendTo', form);
         }
@@ -62,7 +62,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="new_team_user_id"]', form).val('');
         $('[name="edit_team_team_id"]', form).val(who_id);
 
-        title_div.append('Edit Team: ' + who_id);
+        title_div.append(`Edit Team: ${who_id}`);
 
         //append current members in the team to members_div
         for (let i = 0; i < members.length; i++) {
@@ -82,15 +82,15 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             members_div.append(getTeamFormLabelString('pending_user_id_', 'Pending Team Member', i));
             members_div.append(
                 getTeamFormReadOnlyInputString(
-                    'pending_user_id_', 
-                    'pending_user_id_', 
-                    'Pending: ' + pending_members[i-members.length],
+                    'pending_user_id_',
+                    'pending_user_id_',
+                    `Pending: ${pending_members[i-members.length]}`,
                     i,
-                    `admin-team-form-pending ${multiple_invite_members[i-members.length] ? 'admin-team-form-pending-conflict' : ''}`
-                )
+                    `admin-team-form-pending ${multiple_invite_members[i-members.length] ? 'admin-team-form-pending-conflict' : ''}`,
+                ),
             );
             members_div.append(getTeamFormLabelString('approve_member_', 'approve_member_', i));
-            members_div.append(getTeamFormButtonString('approve_member_', 'btn-success', 'Accept', i, approveTeamMemberInput, i))
+            members_div.append(getTeamFormButtonString('approve_member_', 'btn-success', 'Accept', i, approveTeamMemberInput, i));
             members_div.append('<br/>');
         }
 
@@ -100,7 +100,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             members_div.append(getTeamFormInputString('user_id_', 'user_id_', i));
             members_div.append('<br/>');
             $(`#user_id_${i}`, form).autocomplete({
-                source: student_full
+                source: student_full,
             });
             $(`#user_id_${i}`).autocomplete('option', 'appendTo', form);
         }
@@ -123,7 +123,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.first_user}`));
                 } 
                 else if(curr_json_entry.action == 'admin_create' || curr_json_entry.action == 'admin_add_user'){
-                    team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.first_user}`))
+                    team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.added_user}`));
                 } 
                 else if (user_assignment_setting_json.team_history[j].action == 'create') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Created Team'));
@@ -246,7 +246,7 @@ function removeTeamMemberInput(i) {
     //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     removed_member_element.autocomplete({
-        source: student_full
+        source: student_full,
     });
 }
 
@@ -270,7 +270,7 @@ function approveTeamMemberInput(i) {
     //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     new_member_element.autocomplete({
-        source: student_full
+        source: student_full,
     });
 }
 
@@ -297,7 +297,7 @@ function addTeamMemberInput(old, i) {
     //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     $(`#user_id_${i}`).autocomplete({
-        source: student_full
+        source: student_full,
     });
 }
 
