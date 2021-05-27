@@ -4,10 +4,18 @@
 {% block body %}
 <div>
     <div class="content">
-        <h1 id="poll-preview-name"></h1>
-        <div id="poll-preview-question"></div>
+        <h1 id="poll-preview-name">Poll Name</h1>
+        <div>
+            <p id="poll-preview-question"></p>
+            </br>
+        </div>
         <div id="poll-preview-image-wrapper">
-            <img id="poll-preview-image" src="{{ file_data }}">
+            {% if file_data is not null %}
+                <img id="poll-preview-image" src="{{ file_data }}" alt="Uploaded image preview">
+            {% else %}
+                {# scr has to be set to something if file_data is null (when there is no saved file path), for accessiblity #}
+                <img id="poll-preview-image" src="placeholder/link" alt="Uploaded image preview">
+            {% endif %}
         </div>
         <form>
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

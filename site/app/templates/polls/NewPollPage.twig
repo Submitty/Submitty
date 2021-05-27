@@ -334,7 +334,7 @@
         $('#poll-preview').css('display', 'block');
         $('#poll-preview-name').text($('#poll-name').val());
         $('#poll-preview-question').text($('#poll-question').val());
-        if ($('#poll-preview-image').attr('src') != "") {
+        if ($('#poll-preview-image').attr('src') != "placeholder/link") {
             $('#poll-preview-image-wrapper').show();
         }
         $('#poll-preview-answers').html("");
