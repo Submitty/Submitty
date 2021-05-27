@@ -107,8 +107,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
         if (user_assignment_setting_json != false) {
             const team_history_len = user_assignment_setting_json.team_history.length;
-            team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[0].time, 'N/A', 'Team Formed'));
-            team_history_tbody.append(getTeamHistoryTableRowString("", user_assignment_setting_json.team_history[team_history_len-1].time, 'N/A', 'Last Edited'));
+            team_history_tbody.append(getTeamHistoryTableRowString('', user_assignment_setting_json.team_history[0].time, 'N/A', 'Team Formed'));
+            team_history_tbody.append(getTeamHistoryTableRowString('', user_assignment_setting_json.team_history[team_history_len-1].time, 'N/A', 'Last Edited'));
             let past_lock_date = false;
             for (let j = 0; j <=team_history_len-1; j++) {
                 const curr_json_entry = user_assignment_setting_json.team_history[j];
@@ -118,17 +118,17 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
                 const getRowBound = getTeamHistoryTableRowString.bind(null, past_lock_date, curr_json_entry.time);
 
-                if(curr_json_entry.action == 'admin_create' && curr_json_entry.first_user != undefined) {
+                if (curr_json_entry.action == 'admin_create' && curr_json_entry.first_user != undefined) {
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, 'Created Team'));
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.first_user}`));
-                } 
-                else if(curr_json_entry.action == 'admin_create' || curr_json_entry.action == 'admin_add_user'){
+                }
+                else if (curr_json_entry.action == 'admin_create' || curr_json_entry.action == 'admin_add_user'){
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.added_user}`));
-                } 
+                }
                 else if (user_assignment_setting_json.team_history[j].action == 'create') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Created Team'));
-                } 
-                else if(user_assignment_setting_json.team_history[j].action == 'admin_remove_user'){
+                }
+                else if (user_assignment_setting_json.team_history[j].action == 'admin_remove_user'){
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Removed ${curr_json_entry.removed_user}`));
                 }
                 else if (user_assignment_setting_json.team_history[j].action == 'leave') {
@@ -182,10 +182,10 @@ function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
 }
 
 function getTeamFormLabelString(for_prefix, text, user_num ){
-    return `<label tabIndex="0" for="${for_prefix + user_num}" style="display:none;">${text + " " + user_num}</label>`;
+    return `<label tabIndex="0" for="${for_prefix + user_num}" style="display:none;">${`${text} ${user_num}`}</label>`;
 }
 
-function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num, class_string=""){
+function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num, class_string=''){
     return `<input 
                 tabIndex="0" 
                 id="${id_prefix + user_num}" 
