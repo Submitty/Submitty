@@ -629,6 +629,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var team_history_tbody = $("#admin_team_history_table > tbody");
     team_history_tbody.empty();
 
+    members_div.append('<a id="skip-nav" class="skip-btn" href="#admin-team-form-submit">Skip to Submit Button</a>');
     members_div.append('Team Member IDs:<br />');
     var student_full = JSON.parse($('#student_full_id').val());
     let exists_multiple_invite_member = false;
@@ -637,11 +638,11 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="edit_team_team_id"]', form).val("");
 
         title_div.append('Create New Team: ' + who_id);
-        members_div.append('<label for="user_id_0" style="display:none;">Team Member 1</label>');
-        members_div.append('<input id="user_id_0" class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
+        members_div.append('<label tabIndex="0" for="user_id_0" style="display:none;">Team Member 1</label>');
+        members_div.append('<input tabIndex="0" id="user_id_0" class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
         for (var i = 1; i < 3; i++) {
-            members_div.append('<label for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
-            members_div.append('<input id="user_id_' + i + '" type="text" name="user_id_' + i + '" /><br />');
+            members_div.append('<label tabIndex="0" for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
+            members_div.append('<input tabIndex="0" id="user_id_' + i + '" type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
@@ -656,23 +657,23 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
-            members_div.append('<label for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
-            members_div.append('<input id="user_id_' + i + '" class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <label for="remove_member_' + i + '" style="display:none;">Remove Member ' + (i+1) + '</label>\
-                <input id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;"></input><br />');
+            members_div.append('<label tabIndex="0" for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
+            members_div.append('<input tabIndex="0" id="user_id_' + i + '" class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
+                <label tabIndex="0" for="remove_member_' + i + '" style="display:none;">Remove Member ' + (i+1) + '</label>\
+                <button tabIndex="0" id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;">Remove</button><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
             if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
-            members_div.append('<label for="pending_user_id_' + i + '" style="display:none;">Pending Team Member ' + (i+1) + '</label>');
-            members_div.append('<input id="pending_user_id_' + i + '" class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
+            members_div.append('<label tabIndex="0" for="pending_user_id_' + i + '" style="display:none;">Pending Team Member ' + (i+1) + '</label>');
+            members_div.append('<input tabIndex="0" id="pending_user_id_' + i + '" class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
                 name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
-                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
+                <input tabIndex="0" id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;"></input><br />');
         }
         for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
-            members_div.append('<label for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
-            members_div.append('<input id="user_id_' + i + '" type="text" name="user_id_' + i + '" /><br />');
+            members_div.append('<label tabIndex="0" for="user_id_' + i + '" style="display:none;">Team Member ' + (i+1) + '</label>');
+            members_div.append('<input tabIndex="0" id="user_id_' + i + '" type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
@@ -740,8 +741,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     });
 
     var param = (new_team ? 3 : members.length+2);
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</span>');
+    members_div.append('<button onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
+        Add More Users</button>');
     if (exists_multiple_invite_member) {
         members_div.append('<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:75%">\
         *Pending members highlighted in red have invites to multiple teams.');
@@ -749,7 +750,11 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 }
 
 function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
-    return `<tr ${isAfterLockDate ? 'class="admin-team-history-after-lock"' : ''} tabIndex="0"><td tabIndex="0">${user}</td><td tabIndex="0">${action}</td><td tabIndex="0">${date}</td></tr>`;
+    return `<tr ${isAfterLockDate ? 'class="admin-team-history-after-lock"' : ''} tabIndex="-1">
+        <td class="admin-team-history-td" tabIndex="0">${user}</td>
+        <td class="admin-team-history-td" tabIndex="0">${action}</td>
+        <td class="admin-team-history-td" tabIndex="0">${date}</td>
+    </tr>`;
 }
 
 function removeTeamMemberInput(i) {

@@ -11,8 +11,8 @@
     {% if view %}
         <input type="hidden" name="view" value="{{ view }}" />
     {% endif %}
-    <div id="admin-team-members" class="left-panel"></div>
-    <div class="right-panel">
+    <div id="admin-team-members" class="left-panel" tabIndex="-1"></div>
+    <div class="right-panel" tabIndex="-1">
         Registration Section:<br />
         <select name="reg_section">
             {% for section in all_reg_sections %}

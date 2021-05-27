@@ -1619,6 +1619,10 @@ end of styles used in the admin gradeable page
     background-color: var(--alert-danger-red) !important;
 }
 
+.admin-team-history-td:focus {
+    outline: solid;
+}
+
 
 /* color for nav page edit button for rebuild error on gradeable */
 .edit-build-error {
