@@ -13,15 +13,15 @@
     {% endif %}
     <div id="admin-team-members" class="left-panel" tabIndex="-1"></div>
     <div class="right-panel" tabIndex="-1">
-        Registration Section:<br />
-        <select name="reg_section">
+        <label for="admin_team_reg_section" tabIndex="-1">Registration Section:</label><br />
+        <select id="admin_team_reg_section" name="reg_section" tabIndex="0">
             {% for section in all_reg_sections %}
                 <option value="{{ section }}">Section {{ section }}</option>
             {% endfor %}
             <option value="NULL">Section NULL</option>
         </select><br /><br />
-        Rotating Section:<br />
-        <select name="rot_section">
+        <label for="admin_team_rot_section" tabIndex="-1">Rotating Section:</label><br />
+        <select id="admin_team_rot_section" name="rot_section" tabIndex="0">
             {% for section in all_rot_sections %}
                 <option value="{{ section }}">Section {{ section }}</option>
             {% endfor %}
