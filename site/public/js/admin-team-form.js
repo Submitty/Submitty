@@ -1,4 +1,4 @@
-/* exported adminTeamForm */
+/* exported adminTeamForm importTeamForm randomizeRotatingGroupsButton addTeamMemberInput*/
 /* global captureTabInModal */
 
 function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members,
@@ -226,7 +226,7 @@ function getTeamFormAddMoreUsersButtonString(user_num){
             >
                 <i class="fas fa-plus-square"></i>
                 Add More Users
-            </button>`
+            </button>`;
 }
 
 function getTeamFormMultipleInvitesWarningString(){
@@ -238,7 +238,7 @@ function getTeamFormMultipleInvitesWarningString(){
 function removeTeamMemberInput(i) {
     const removed_member_element = $(`#user_id_${i}`);
     //remove the Remove button associated with this member;
-    $('#remove_member_'+i).remove();
+    $(`#remove_member_${i}`).remove();
 
     //clear removed_member's input field and change it to writeable
     removed_member_element.removeClass('readonly').prop('readonly', false).val('');
@@ -280,11 +280,11 @@ function addTeamMemberInput(old, i) {
     $(getTeamFormInputString('user_id_', 'user_id_', i)).insertBefore(old);
     $('<br/>').insertBefore(old);
 
-    //remove old "Add More Users" button so we can update it 
+    //remove old "Add More Users" button so we can update it
     old.remove();
     //remove the multiple invites warning so we can add it back at the bottom later
     $('#multiple-invites-warning').remove();
-    
+
     //increment num_users
     const form = $('#admin-team-form');
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
@@ -293,7 +293,7 @@ function addTeamMemberInput(old, i) {
     const members_div = $('#admin-team-members');
     members_div.append(getTeamFormAddMoreUsersButtonString(i+1));
     members_div.append(getTeamFormMultipleInvitesWarningString());
-    
+
     //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     $(`#user_id_${i}`).autocomplete({
