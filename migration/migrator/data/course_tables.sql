@@ -187,7 +187,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
     eg_student_submit boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
-    eg_submission_due_date timestamp(6) with time zone NOT NULL,
+    eg_submission_due_date timestamp(6) with time zone,
     eg_has_due_date boolean DEFAULT true NOT NULL,
     eg_late_days integer DEFAULT '-1'::integer NOT NULL,
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
@@ -280,13 +280,10 @@ CREATE TABLE public.gradeable (
     g_ta_view_start_date timestamp(6) with time zone NOT NULL,
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
-    g_grade_released_date timestamp(6) with time zone NOT NULL,
-    g_grade_locked_date timestamp(6) with time zone,
+    g_grade_released_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
 );
