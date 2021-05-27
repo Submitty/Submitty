@@ -1,5 +1,4 @@
 {% import _self as self %} {# Required to use macros in same template #}
-
 <div class="content">
     {#
         Default is viewing your sections
@@ -48,8 +47,8 @@
                     {{ sort == 'random' ? "Default Order" : "Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
-                <a class="btn btn-default"
-                   href="{{ toggle_anon_mode_url }}">
+                <a class="btn btn-default" id="toggle-anon-button"
+                   href="" onclick="changeAnon()">
                     {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
                 </a>
                 {% endif %}
@@ -687,3 +686,16 @@
 {% endmacro %}
 
 {# /Column functions #}
+<script>
+    function changeAnon() {
+        const status = {{ anon_mode ? 1 : 0}};
+        if (status) {
+            document.cookie = 'anon_mode=off;';
+        }
+        else {
+            document.cookie = 'anon_mode=on;';
+        }
+        location.reload();
+    }
+</script>
+
