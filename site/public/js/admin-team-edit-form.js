@@ -224,14 +224,25 @@ function removeTeamMemberInput(i) {
 }
 
 function approveTeamMemberInput(i) {
-    const form = $("#admin-team-form");
+    const new_member_element = $(`#pending_user_id_${i}`);
+
+    //remove accept button associated with pending member
     $("#approve_member_"+i).remove();
-    $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
-    $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
-    const user_id = ($('[name="user_id_'+i+'"]', form).val()).substring(9);
-    $('[name="user_id_'+i+'"]', form).attr("value", user_id);
+
+    //remove pending from the name of the readonly input
+    new_member_element.attr("name", "user_id_"+i);
+
+    //remove pending classes from the associated input
+    new_member_element.removeClass("admin-team-form-pending");
+    new_member_element.removeClass("admin-team-form-pending-conflict");
+
+    //remove "Pending: "" from input value
+    const user_id = (new_member_element.val()).substring(9);
+    new_member_element.attr("value", user_id);
+
+    //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
+    new_member_element.autocomplete({
         source: student_full
     });
 }
