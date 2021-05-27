@@ -129,6 +129,11 @@ input.readonly {
     color: var(--btn-text-black);
 }
 
+[data-theme="dark"] input[type=text].readonly{
+    background-color: var(--standard-deep-dark-gray);
+    color: var(--text-black);
+}
+
 select {
     padding: 5px 35px 5px 10px;
     font-size: 16px;
