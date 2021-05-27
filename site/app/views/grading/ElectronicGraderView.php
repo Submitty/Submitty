@@ -793,8 +793,8 @@ HTML;
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalJs('details.js');
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
-        $this->core->getOutput()->addInternalCss('admin-team-edit-form.css');
-        $this->core->getOutput()->addInternalJs('admin-team-edit-form.js');
+        $this->core->getOutput()->addInternalCss('admin-team-form.css');
+        $this->core->getOutput()->addInternalJs('admin-team-form.js');
 
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
