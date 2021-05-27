@@ -275,3 +275,8 @@ select[name="component-itempool"] {
     margin-bottom: 15px;
     padding-right: 0;
 }
+
+.drop-down-box{
+    border: 1px black solid;
+    padding: 1vh;
+}

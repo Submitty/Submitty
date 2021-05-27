@@ -44,15 +44,25 @@
         {% endif %}
 
     <div class="settings">
-        <input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+        {#<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
             autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
         <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
         <datalist id="path_data" style="display:none" >
         {% for path in all_config_paths %}
             <option class="path_autofill_option" data-name="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
         {% endfor %}
-        </datalist>
-
+        </datalist>#}
+        <div class="drop-down" id="config-drop-down">
+            <input class="config_search ignore drop-down-box" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+                autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" id="config-box"/>
+            <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
+            <div class="drop-down-options" style="display: none;" id="config-options">
+                <option class="drop-down-option"> hi </option>
+                {% for path in all_config_paths %}
+                    <option class="path_autofill_option drop-down-option" data-name="{{path.0}}" data-value="{{path.1}}">{{path.0}}</option>
+                {% endfor %}
+            </div>
+        </div>
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
         <br />
 
@@ -203,6 +213,25 @@
         no_due_date.change();
     }
 
+    function dropDownBoxOnClick() {
+        let options = $(this).parent().find(".drop-down-options");
+        if ($(options).is(":visible")) {
+            $(options).hide();
+        }
+        else {
+            $(options).show();
+        }
+    }
+
+    function dropDownOptionOnClick() {
+        let options = $(this).parent();
+        $(options).hide();
+        let box = $(options).parent().find(".drop-down-box");
+        // set the box's value to the text of the option
+        console.log($(box).attr("id"));
+        $(box).val($(this).text());
+    }
+
     $(document).ready(function() {
 
         // Hide PDF settings if not in use
@@ -232,5 +261,8 @@
             sub.prop('checked', true);
             sub.change();
         });
+
+        $('.drop-down-box').on("click", dropDownBoxOnClick);
+        $('.drop-down-option').on("click",dropDownOptionOnClick);
     });
 </script>
