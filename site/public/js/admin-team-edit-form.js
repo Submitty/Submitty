@@ -287,7 +287,7 @@ function addTeamMemberInput(old, i) {
     const members_div = $("#admin-team-members");
     members_div.append(getTeamFormAddMoreUsersButtonString(i+1));
     members_div.append(getTeamFormMultipleInvitesWarningString());
-
+    
     //update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     $(`#user_id_${i}`).autocomplete({
