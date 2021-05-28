@@ -7055,7 +7055,7 @@ AND gc_id IN (
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
         // FIXME: properly modify database to store the question_type variable, and all of the student answers
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], "single-response", $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], "multiple-response", $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7080,6 +7080,7 @@ AND gc_id IN (
     }
 
     public function submitResponse($poll_id, $response) {
+        // FIXME: make this work for response array
         $user = $this->core->getUser()->getId();
         $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
         if (count($this->course_db->rows()) <= 0) {

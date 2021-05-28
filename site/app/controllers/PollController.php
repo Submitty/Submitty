@@ -257,14 +257,10 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function submitResponse() {
+        //var_dump($_POST);
+        //die();
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
-        }
-        if (!isset($_POST["answer"])) {
-            $this->core->addErrorMessage("No answer given");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
@@ -276,13 +272,37 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+        if (!array_key_exists("answers", $_POST) && $poll->getQuestionType() == "single-response") {
+            // Answer must be given for single-response ("no response" counts as a reponse)
+            $this->core->addErrorMessage("No answer given");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        if ($poll->getQuestionType() != "single-response" && $poll->getQuestionType() != "multiple-response") {
+            $this->core->addErrorMessage("Invalid poll question type");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
         if ($poll->isOpen()) {
-            // FIXME: make this work for when we have only one answer, and also for when we have multiple
-            if ($_POST["answer"] == "-1") {
-                $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+            // FIXME: make this work for when we have only one answer, and also for when we have multiple responses
+            if ($poll->getQuestionType() == "single-response") {
+                if ($_POST["answers"][0] == "-1") {
+                    $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+                }
+                else {
+                    $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answers"]);
+                }
             }
             else {
-                $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answer"]);
+                // $poll->getQuestionType() == "multiple-response"
+                if (!array_key_exists("answers", $_POST)) {
+                    $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+                }
+                else {
+                    $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answers"]);
+                }
             }
         }
         else {
@@ -500,15 +520,14 @@ class PollController extends AbstractController {
             }
             $name = $poll["name"];
             $question = $poll["question"];
-            
-            /*  Polls that were exported before this feature was 
-                implemented don't have this data. At the time, there 
+            /*  Polls that were exported before this feature was
+                implemented don't have this data. At the time, there
                 only existed questions of type single reponse. */
             if (array_key_exists("question-type", $poll)) {
                 $question_type = $poll["question-type"];
-            } 
+            }
             else {
-                question_type = "single-response";
+                $question_type = "single-response";
             }
 
             $responses = [];
