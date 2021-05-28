@@ -1388,6 +1388,17 @@ tr.is_publish {
     padding: 10px;
 }
 
+input[type="radio"][disabled=""]:checked:before {
+    content: "";
+    display: block;
+    position: relative;
+    top: 3px;
+    left: 3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 100%;
+    background: var(--standard-medium-dark-gray);
+}
 
 /* Media queries */
 @media (max-width: 540px) {
