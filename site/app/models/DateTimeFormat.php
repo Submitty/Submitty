@@ -20,7 +20,7 @@ class DateTimeFormat extends AbstractModel {
         'office_hours_queue',
         'date_time_picker',
         'late_days_allowed',
-        'poll'
+        'poll',
     ];
 
     // Internationalized DateTime formatting strings
@@ -34,7 +34,7 @@ class DateTimeFormat extends AbstractModel {
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
             'late_days_allowed' => 'm/d/Y h:i:s A T',
-            'poll' => 'm/d/Y'
+            'poll' => 'm/d/Y',
         ],
         'DMY' => [
             'gradeable' => 'd/m/Y @ h:i A T',
@@ -45,7 +45,7 @@ class DateTimeFormat extends AbstractModel {
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
             'late_days_allowed' => 'm/d/Y h:i:s A T',
-            'poll' => 'd/m/Y'
+            'poll' => 'd/m/Y',
         ]
     ];
 
