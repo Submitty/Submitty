@@ -67,7 +67,7 @@
         <br />
         
         {# text box with the path to the current config file, hidden but still used in js #}
-        <input style='width: 83%' id='input-provide-full-path' name='autograding_config_path'
+        <input style='width: 83%' id='input-provide-full-path' type="hidden" name='autograding_config_path'
             value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
 
