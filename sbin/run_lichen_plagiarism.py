@@ -61,9 +61,8 @@ def main():
         log_json = open(log_path, 'w+')
 
     start_time = time.time()
-    if (previous_hash == None or (previous_hash != config_hash and config_regex_changed)):
-        concat_res = subprocess.call(['/usr/local/submitty/Lichen/bin/concatenate_all.py', config_path ])
-        tok_res = subprocess.call(['/usr/local/submitty/Lichen/bin/tokenize_all.py', config_path ])
+    concat_res = subprocess.call(['/usr/local/submitty/Lichen/bin/concatenate_all.py', config_path ])
+    tok_res = subprocess.call(['/usr/local/submitty/Lichen/bin/tokenize_all.py', config_path ])
     hash_res = subprocess.call(['/usr/local/submitty/Lichen/bin/hash_all.py', config_path ])
     compare_res = subprocess.call(['/usr/local/submitty/Lichen/bin/compare_hashes.out', config_path ])
     end_time = time.time()
