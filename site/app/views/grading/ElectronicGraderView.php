@@ -443,7 +443,6 @@ HTML;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
         // title => displayed title in the table header
@@ -796,7 +795,6 @@ HTML;
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
 
         $this->core->getOutput()->enableMobileViewport();
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -821,8 +819,6 @@ HTML;
                 http_build_query(['view' => $view_all ? null : 'all', 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => $anon_mode]),
             "order_toggle_url" => $details_base_url . '?' .
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
-            "toggle_anon_mode_url" => $details_base_url . '?' .
-                http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => !$anon_mode]),
             "sort" => $sort,
             "direction" => $direction
         ]);
@@ -918,6 +914,7 @@ HTML;
 
             $return .= <<<HTML
                 <div class="panels-container">
+                    <h3 id="panel-instructions">Click above to select a panel for display</h3>
                     <div class="two-panel-cont">
                          <div class="two-panel-item two-panel-left active">
                             <div class="panel-item-section left-top"></div>
@@ -1098,7 +1095,6 @@ HTML;
         if ($peer && $this->core->getUser()->getGroup() == 4) {
             $i_am_a_peer = true;
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,

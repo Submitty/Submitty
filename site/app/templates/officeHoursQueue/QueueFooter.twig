@@ -258,8 +258,7 @@
 
   function updateAnnouncement() {
       $.get("{{base_url}}/new_announcement", function(newAnnouncement) {
-          if ($('#announcement').length > 0){
-              $('#announcement').next().remove();
+          if ($('#announcement').length > 0) {
               $('#announcement').replaceWith(newAnnouncement);
           }
           else $(newAnnouncement).insertAfter($('h1').next());

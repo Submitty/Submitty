@@ -2634,6 +2634,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    /**
+     * Gets the date for a specified gradeable
+     *
+     * @param string $id
+     * @return \DateTime
+     */
+    public function getDateForGradeableById($id) {
+        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
+        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    }
+
     public function getAllGradeablesIds() {
         $this->course_db->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->course_db->rows();
@@ -3238,6 +3249,34 @@ ORDER BY gt.{$section_key}",
             $return[] = new SimpleLateUser($this->core, $row);
         }
         return $return;
+    }
+
+    /**
+     * Gets the number of late days for a specific user at a specified time
+     *
+     * @param string $user_id
+     * @param \DateTime $since_timestamp
+     * @return SimpleLateUser|null
+     */
+    public function getLateDaysForUserOnTimestamp(string $user_id, \DateTime $since_timestamp): ?SimpleLateUser {
+        $this->course_db->query(
+            "
+        SELECT u.user_id, user_firstname, user_preferred_firstname,
+          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp
+        FROM users AS u
+        FULL OUTER JOIN late_days AS l
+          ON u.user_id=l.user_id
+        WHERE allowed_late_days IS NOT NULL
+          AND u.user_id = ?
+          AND since_timestamp = ?
+        ORDER BY
+          user_email ASC, since_timestamp DESC;",
+            [$user_id, $since_timestamp]
+        );
+
+        return $this->course_db->getRowCount() === 1
+            ? new SimpleLateUser($this->core, $this->course_db->row())
+            : null;
     }
 
     /**
@@ -6994,7 +7033,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date DESC, name ASC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 

@@ -162,10 +162,23 @@ class PollController extends AbstractController {
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
-            $file = $_FILES["image_file"];
-            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $_FILES["image_file"]["name"]);
-            move_uploaded_file($file["tmp_name"], $file_path);
-            $this->core->getQueries()->setPollImage($poll_id, $file_path);
+            // validate the uploaded file size
+            $status = FileUtils::validateUploadedFiles($_FILES["image_file"]);
+            if (!$status[0]["success"]) {
+                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["error"], false);
+            }
+            else {
+                $file = $_FILES["image_file"];
+                // validate the uploaded file type is indeed an image
+                if (!FileUtils::isValidImage($file["tmp_name"])) {
+                    $this->core->getOutput()->renderResultMessage("Error: " . $file["name"] . " is not a valid image file. File was not successfully attached to poll '" . $_POST["name"] . "'.", false);
+                }
+                else {
+                    $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $poll_id . "_" . $file["name"]);
+                    move_uploaded_file($file["tmp_name"], $file_path);
+                    $this->core->getQueries()->setPollImage($poll_id, $file_path);
+                }
+            }
         }
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -344,12 +357,25 @@ class PollController extends AbstractController {
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
-            $current_file_path = $poll->getImagePath();
-            if ($current_file_path !== null) {
-                unlink($current_file_path);
+            // validate file size
+            $status = FileUtils::validateUploadedFiles($file);
+            if (!$status[0]["success"]) {
+                $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status[0]["error"], false);
             }
-            $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
-            move_uploaded_file($file["tmp_name"], $file_path);
+            elseif (!FileUtils::isValidImage($file["tmp_name"])) {
+                // validate file type
+                $this->core->getOutput()->renderResultMessage("Error: " . $file["name"] . " is not a valid image file. Image was not successfully updated in poll '" . $_POST["name"] . "'.", false);
+                // reject the new image, but keep the old one
+                $file_path = $poll->getImagePath();
+            }
+            else {
+                $current_file_path = $poll->getImagePath();
+                if ($current_file_path !== null) {
+                    unlink($current_file_path);
+                }
+                $file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "polls", "poll_image_" . $_POST["poll_id"] . "_" . $_FILES["image_file"]["name"]);
+                move_uploaded_file($file["tmp_name"], $file_path);
+            }
         }
         elseif (isset($_POST['keep_image'])) {
             $file_path = $poll->getImagePath();

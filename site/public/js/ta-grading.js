@@ -655,6 +655,7 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities () {
+    $("#panel-instructions").hide();
     panelElements.forEach((panel) => {
       let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
 
@@ -689,6 +690,12 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
+      }
+      if (taLayoutDet.currentOpenPanel === null) {
+        $("#panel-instructions").show();
+      }
+      else {
+        $("#panel-instructions").hide();
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
@@ -758,6 +765,12 @@ function togglePanelLayoutModes(forceVal = false) {
   const twoPanelCont = $('.two-panel-cont');
   if (!forceVal) {
     taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
+  }
+  if (taLayoutDet.currentOpenPanel === null) {
+    $("#panel-instructions").show();
+  }
+  else {
+    $("#panel-instructions").hide();
   }
 
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {

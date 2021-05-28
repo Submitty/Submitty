@@ -4,6 +4,7 @@ namespace app\views;
 
 use app\models\User;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\models\PollModel;
 
 class PollView extends AbstractView {
@@ -51,7 +52,8 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('poll')
+            'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('poll'),
+            'max_size' => Utils::returnBytes(ini_get('upload_max_filesize'))
           ]);
     }
 
@@ -87,7 +89,8 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'poll' => $poll
+            'poll' => $poll,
+            'max_size' => Utils::returnBytes(ini_get('upload_max_filesize'))
           ]);
     }
 

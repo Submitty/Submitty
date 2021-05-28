@@ -254,26 +254,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$course\\)\\: Unexpected token \"\\$course\", expected type at offset 484$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$semester\\)\\: Unexpected token \"\\$semester\", expected type at offset 460$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 22$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$status_code$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected type at offset 230$#"
 			count: 1
 			path: app/libraries/DateUtils.php
@@ -307,41 +287,6 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 18$#"
 			count: 1
 			path: app/libraries/GradeableType.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:renderTemplate\\(\\) should return string but returns null\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$json\\)\\: Unexpected token \"\\$json\", expected type at offset 223$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\)\\: Unexpected token \"\\$message\", expected type at offset 79$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$view$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:displayOutput\\(\\) should return string but return statement is missing\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Cannot call method exceptionPage\\(\\) on string\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
-			count: 1
-			path: app/libraries/Output.php
 
 		-
 			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"

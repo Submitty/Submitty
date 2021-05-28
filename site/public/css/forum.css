@@ -131,6 +131,18 @@
     padding: 0;
 }
 
+.catergory-item-box {
+    background-color: var(--standard-pale-gray) !important;
+}
+
+.edit-category-button {
+    color: var(--standard-gray-black) !important;
+}
+
+.edit-catergoty-name {
+    background-color: var(--always-default-white) !important;
+}
+
 .create-post-head{
     max-width: 95%;
     display: inline-block;
@@ -592,6 +604,10 @@
 [data-theme="dark"] .create_thread_button,
 [data-theme="dark"] .well {
   box-shadow: none;
+}
+
+[data-theme="dark"] .post_box:not(.important) {
+    border: 1px solid #bbb;
 }
 
 .thread-box-full {
