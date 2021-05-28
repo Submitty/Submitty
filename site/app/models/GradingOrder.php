@@ -65,17 +65,17 @@ class GradingOrder extends AbstractModel {
     protected $skip_component_itempool;
 
     /**
-     * @var int $itempool_size
+     * @var int|null $itempool_size
      */
     protected $itempool_size;
 
     /**
-     * @var int $itempool_hash_index
+     * @var int|null $itempool_hash_index
      */
     protected $itempool_hash_index;
 
     /**
-     * @var int $itempool_from_pool_index
+     * @var int|null $itempool_from_pool_index
      */
     protected $itempool_from_pool_index;
 
@@ -133,9 +133,9 @@ class GradingOrder extends AbstractModel {
         $this->to_ungraded = false;
         $this->skip_component_itempool = true;
 
-        $this->itempool_size = -1;
-        $this->itempool_hash_index = -1;
-        $this->itempool_from_pool_index = -1;
+        $this->itempool_size = null;
+        $this->itempool_hash_index = null;
+        $this->itempool_from_pool_index = null;
     }
 
     /**
