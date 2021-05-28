@@ -21,3 +21,26 @@
 .sticky-top label, .sticky-top .not-sticky {
     display: none !important;
 }
+
+.simple-full-credit {
+    color: #149bdf;
+}
+
+.simple-half-credit {
+    color: #88d0f4;
+}
+
+.simple-save-error {
+    color: #DA4F49;
+}
+
+.simple-icon {
+    transform: scaleX(3);
+    width: 20px;
+    margin-left: 20px;
+}
+
+#details-legend li {
+    margin-right: 6px;
+    font-size: 0.9em;
+}
