@@ -53,8 +53,8 @@
         {% endfor %}
         </datalist>#}
         <div class="drop-down" id="config-drop-down">
-            <input class="config_search ignore drop-down-box" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-                autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" id="config-box"/>
+            <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+                autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration"/>
             <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
             <div class="drop-down-options" style="display: none;" id="config-options">
                 <option class="drop-down-option"> hi </option>
@@ -65,9 +65,9 @@
         </div>
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
         <br />
-
+        
         {# text box with the path to the current config file, hidden but still used in js #}
-        <input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path'
+        <input style='width: 83%' id='input-provide-full-path' name='autograding_config_path'
             value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
 
@@ -143,6 +143,7 @@
     }
 
     function onConfigPathChange() {
+        console.log("changed!");
         data=getConfigData();
         let full_path_obj = $('#input-provide-full-path');
         let current_val = $('#config_search').val();
@@ -228,8 +229,8 @@
         $(options).hide();
         let box = $(options).parent().find(".drop-down-box");
         // set the box's value to the text of the option
-        console.log($(box).attr("id"));
         $(box).val($(this).text());
+        $(box).change();
     }
 
     $(document).ready(function() {
