@@ -38,6 +38,7 @@
     transform: scaleX(3);
     width: 20px;
     margin-left: 20px;
+    z-index: 2;
 }
 
 #details-legend li {
