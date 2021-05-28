@@ -276,7 +276,13 @@ select[name="component-itempool"] {
     padding-right: 0;
 }
 
-.drop-down-box{
-    border: 1px black solid;
+#config_search{
+    width: 80%;
+}
+
+.drop-down-options{
+    border: 0.5px black solid;
     padding: 1vh;
+    position: relative;
+    width: 80%;
 }

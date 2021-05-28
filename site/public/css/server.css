@@ -460,12 +460,11 @@ td>a.active-sort {
 }
 
 #config_search {
-    padding-right: 20px;
+    padding-right: 45px;
 }
 
 #clear_search_button {
-    margin-left: -20px;
-    padding-right: 20px;
+    padding-right: 6px;
     color: red;
 }
 

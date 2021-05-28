@@ -54,10 +54,13 @@
         </datalist>#}
         <div class="drop-down" id="config-drop-down">
             <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-                autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration"/>
-            <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
+                autocomplete="off" autocapitalize="off" spellcheck="false" style="" aria-label="autograding configuration">
+            <div style="margin-left: -45px; position: relative; display: inline-block; width: auto;">
+                <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
+                <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
+            </div>
+            </input>
             <div class="drop-down-options" style="display: none;" id="config-options">
-                <option class="drop-down-option"> hi </option>
                 {% for path in all_config_paths %}
                     <option class="path_autofill_option drop-down-option" data-name="{{path.0}}" data-value="{{path.1}}">{{path.0}}</option>
                 {% endfor %}
@@ -143,10 +146,20 @@
     }
 
     function onConfigPathChange() {
-        console.log("changed!");
         data=getConfigData();
         let full_path_obj = $('#input-provide-full-path');
         let current_val = $('#config_search').val();
+
+        // Filters the autograding configs displayed based on the values in the box
+        $(".path_autofill_option").each(function() {
+            if ($(this).attr("data-name").toLowerCase().includes(current_val.toLowerCase()) ||
+                    $(this).attr("data-value").toLowerCase().includes(current_val.toLowerCase())) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
 
         //if a name is entered change to the path
 
@@ -181,6 +194,7 @@
 
     function clearButtonPress() {
         $('#config_search').val('');
+        $('.drop-down-box').trigger("input");
     }
 
     function onStudentViewChange() {
@@ -223,6 +237,16 @@
             $(options).show();
         }
     }
+    
+    function dropDownArrowOnClick() {
+        let options = $(this).parent().parent().find(".drop-down-options");
+        if ($(options).is(":visible")) {
+            $(options).hide();
+        }
+        else {
+            $(options).show();
+        }
+    }
 
     function dropDownOptionOnClick() {
         let options = $(this).parent();
@@ -230,7 +254,7 @@
         let box = $(options).parent().find(".drop-down-box");
         // set the box's value to the text of the option
         $(box).val($(this).text());
-        $(box).change();
+        $(box).trigger("input");
     }
 
     $(document).ready(function() {
@@ -252,7 +276,7 @@
 
         // Update the text box when the path config changes
         onConfigPathChange();
-        $('#config_search').change(onConfigPathChange);
+        $('#config_search').on("input", onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
@@ -264,6 +288,7 @@
         });
 
         $('.drop-down-box').on("click", dropDownBoxOnClick);
+        $('#drop-down-arrow').on("click", dropDownArrowOnClick);
         $('.drop-down-option').on("click",dropDownOptionOnClick);
     });
 </script>
