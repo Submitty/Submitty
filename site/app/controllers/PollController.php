@@ -129,7 +129,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        $date = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat()->getFormat('poll'), $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return MultiResponse::RedirectOnlyResponse(
@@ -159,7 +159,6 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
@@ -181,7 +180,6 @@ class PollController extends AbstractController {
                 }
             }
         }
-
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
         );
@@ -351,7 +349,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
             return new RedirectResponse($returnUrl);
         }
-        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        $date = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat()->getFormat('poll'), $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
