@@ -117,7 +117,7 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewPoll() {
-        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"])  || !isset($_POST["question-type"]) || !isset($_POST["release_date"])) {
+        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["question-type"]) || !isset($_POST["release_date"])) {
             $this->core->addErrorMessage("Error occured in adding poll");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
