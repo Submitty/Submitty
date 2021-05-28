@@ -10,8 +10,9 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("ALTER TABLE users ADD COLUMN user_email_secondary character varying(255) NOT NULL DEFAULT '';")
-    database.execute("ALTER TABLE users ADD COLUMN user_email_secondary_notify boolean DEFAULT false;")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_email_secondary character varying(255) NOT NULL DEFAULT '';")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_email_secondary_notify boolean DEFAULT false;")
+    database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS email_address character varying(255) NOT NULL DEFAULT '';")
 
 def down(config, database):
     """

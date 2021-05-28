@@ -85,6 +85,7 @@ try:
     EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
     EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
     EMAIL_REPLY_TO = EMAIL_CONFIG['email_reply_to']
+    EMAIL_INTERNAL_FORMAT = EMAIL_CONFIG['email_internal_format']
 
     DB_HOST = DATABASE_CONFIG['database_host']
     DB_USER = DATABASE_CONFIG['database_user']
@@ -132,27 +133,47 @@ def construct_mail_client():
 
 
 def get_email_queue(db):
-    """Get an active queue of emails waiting to be sent."""
-    result = db.execute(
-        "SELECT emails.id, emails.user_id, users.user_email, emails.subject," +
-        " emails.body, users.user_email_secondary, users.user_email_secondary_notify" +
-        " FROM emails INNER JOIN users ON" +
-        " emails.user_id = users.user_id WHERE" +
-        " emails.sent is NULL AND emails.error = ''" +
-        " ORDER BY id LIMIT 100;")
-
+    """Get an active queue of internal emails waiting to be sent."""
+    query = """SELECT id, user_id, email_address, subject, body FROM emails
+    WHERE email_address SIMILAR TO '%%@(%%.{}|{})' AND sent is NULL AND
+    error = '' ORDER BY id LIMIT 100;"""
+    query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT)
+    result = db.execute(query)
     queued_emails = []
     for row in result:
         queued_emails.append({
             'id': row[0],
             'user_id': row[1],
-            'send_to': [row[2], row[5]] if row[6] else [row[2]],
+            'send_to': row[2],
             'subject': row[3],
             'body': row[4]
             })
 
     return queued_emails
 
+def get_external_queue(db, num):
+    """Get an active queue of external emails waiting to be sent."""
+    query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
+    email_address NOT SIMILAR TO '%%@(%%.{}|{})'"""
+    query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT)
+    result = db.execute(query)
+    query = """SELECT id, user_id, email_address, subject, body FROM emails
+    WHERE sent is NULL AND email_address NOT SIMILAR TO '%%@(%%.{}|{})' AND
+    error = '' ORDER BY id LIMIT {};"""
+    #Guarenteed to be size 1
+    for row in result:
+        query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT, min(500-int(row[0]), num))
+    result = db.execute(query)
+    queued_emails = []
+    for row in result:
+        queued_emails.append({
+            'id': row[0],
+            'user_id': row[1],
+            'send_to': row[2],
+            'subject': row[3],
+            'body': row[4]
+            })
+    return queued_emails
 
 def mark_sent(email_id, db):
     """Mark an email as sent in the database."""
@@ -173,7 +194,7 @@ def construct_mail_string(send_to, subject, body):
     """Format an email string."""
     headers = [
         ('Content-Type', 'text/plain; charset=utf-8'),
-        ('TO', ', '.join(send_to)),
+        ('TO', send_to),
         ('From', EMAIL_SENDER),
         ('reply-to', EMAIL_REPLY_TO),
         ('Subject', subject)
@@ -191,39 +212,45 @@ def send_email():
     """Send queued emails."""
     db, metadata = setup_db()
     queued_emails = get_email_queue(db)
-    if len(queued_emails) == 0:
-        return
+    #if len(queued_emails) == 0:
+    #    return
     mail_client = construct_mail_client()
 
     success_count = 0
 
-    for email_data in queued_emails:
-        if email_data["send_to"] == "":
-            store_error(email_data["id"], db, metadata, "WARNING: empty email address")
-            e = "[{}] WARNING: empty email address for recipient {}".format(
-                str(datetime.datetime.now()), email_data["user_id"])
-            LOG_FILE.write(e+"\n")
-            continue
+    while success_count <= 100:
+        for email_data in queued_emails:
+            if email_data["send_to"] == "":
+                store_error(email_data["id"], db, metadata, "WARNING: empty email address")
+                e = "[{}] WARNING: empty email address for recipient {}".format(
+                    str(datetime.datetime.now()), email_data["user_id"])
+                LOG_FILE.write(e+"\n")
+                continue
 
-        email = construct_mail_string(
-            email_data["send_to"], email_data["subject"], email_data["body"])
+            email = construct_mail_string(
+                email_data["send_to"], email_data["subject"], email_data["body"])
 
-        try:
-            mail_client.sendmail(EMAIL_SENDER,
-                                 email_data["send_to"], email.encode('utf8'))
-            mark_sent(email_data["id"], db)
-            success_count += 1
+            try:
+                mail_client.sendmail(EMAIL_SENDER,
+                                     email_data["send_to"], email.encode('utf8'))
+                mark_sent(email_data["id"], db)
+                success_count += 1
 
-        except Exception as email_send_error:
-            store_error(email_data["id"], db, metadata, "ERROR: sending email "
-                        + str(email_send_error))
-            e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
-                str(datetime.datetime.now()),
-                email_data["user_id"],
-                email_data["send_to"],
-                str(email_send_error))
-            LOG_FILE.write(e+"\n")
-            print(e)
+            except Exception as email_send_error:
+                store_error(email_data["id"], db, metadata, "ERROR: sending email "
+                            + str(email_send_error))
+                e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
+                    str(datetime.datetime.now()),
+                    email_data["user_id"],
+                    email_data["send_to"],
+                    str(email_send_error))
+                LOG_FILE.write(e+"\n")
+                print(e)
+
+        if success_count <= 100:
+            queued_emails = get_external_queue(db, 100-success_count)
+            if len(queued_emails) == 0:
+                break
 
     e = "[{}] Sucessfully Emailed {} Users".format(
         str(datetime.datetime.now()), success_count)
