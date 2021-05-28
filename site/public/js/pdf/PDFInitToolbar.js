@@ -57,6 +57,7 @@ function renderPDFToolbar() {
                 case 'eraser':
                     currentTool = 'eraser';
                     PDFAnnotate.UI.enableEraser();
+                    PDFAnnotate.UI.disableEdit();
                     break;
                 case 'cursor':
                     currentTool = 'cursor';
