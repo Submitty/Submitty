@@ -10,6 +10,7 @@ Required inputs:
 
      {{ functions.getBadgeStyle(graded_component.total_score, component.max_value) }}
 #}
+{% set peer_grading = peer_panel %}
 
 {% set show_verify_grader = can_verify_graders and graded_component is defined and graded_component.grader_id|length != 0 and grader_id != graded_component.grader_id and graded_component.verifier_id is not defined %}
 
@@ -53,7 +54,7 @@ Required inputs:
     {% endfor %}
 {% endblock %}
 
-{% if custom_mark_enabled %}
+{% if custom_mark_enabled or is_TA_grading_peer %}
     {% block extra_mark_rows %}
         {# Custom mark (only display in non-edit mode #}
         {% set f_mark = component.marks|first %}
