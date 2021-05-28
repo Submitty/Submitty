@@ -188,7 +188,7 @@ function renderPDFToolbar() {
         document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
         let init_color = localStorage.getItem('main_color');
-        setColor(init_color ? init_color : "#000000");
+        setColor(init_color ? init_color : '#000000');
     }
 
     function colorMenuToggle(e){
