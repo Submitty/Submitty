@@ -44,14 +44,6 @@
         {% endif %}
 
     <div class="settings">
-        {#<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-            autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
-        <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
-        <datalist id="path_data" style="display:none" >
-        {% for path in all_config_paths %}
-            <option class="path_autofill_option" data-name="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
-        {% endfor %}
-        </datalist>#}
         <div class="drop-down" id="config-drop-down">
             <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
                 autocomplete="off" autocapitalize="off" spellcheck="false" style="" aria-label="autograding configuration">
