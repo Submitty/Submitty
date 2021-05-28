@@ -282,7 +282,15 @@ select[name="component-itempool"] {
 
 .drop-down-options{
     border: 0.5px black solid;
-    padding: 1vh;
     position: relative;
     width: 80%;
+}
+
+.drop-down-option{
+    padding: 1vh;
+    text-overflow: ellipsis;
+}
+
+.drop-down-option:hover{
+    background-color: var(--hover-active-all-info-blue);
 }
