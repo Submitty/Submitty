@@ -1474,17 +1474,7 @@ end of styles used in the admin gradeable page
     overflow-y: auto;
 }
 
-.ta-grading-setting-list {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.ta-grading-setting-list tr {
-    border: 1px solid var(--standard-light-gray);
-    border-left: none;
-    border-right: none;
-}
-
+/* NOTE TO SELF, NEED TO MERGE AND PULL #6516 FIRST BECAUSE IT CHANGES THESE LINES THAT IM MOVING */
 .ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--standard-pale-gray);
 }

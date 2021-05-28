@@ -823,13 +823,13 @@ tr.is_publish {
 }
 
 .ta-grading-setting-list tr {
-    border: 1px solid #ddd;
+    border: 1px solid var(--standard-light-gray);
     border-left: none;
     border-right: none;
 }
 
 .ta-grading-setting-list tr:nth-child(even) {
-    background-color: var(--alternating-row-color-light);
+    background-color: var(--default-white);
 }
 
 .ta-grading-setting-list td {
