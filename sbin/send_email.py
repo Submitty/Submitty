@@ -151,6 +151,7 @@ def get_email_queue(db):
 
     return queued_emails
 
+
 def get_external_queue(db, num):
     """Get an active queue of external emails waiting to be sent."""
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
@@ -160,9 +161,10 @@ def get_external_queue(db, num):
     query = """SELECT id, user_id, email_address, subject, body FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO '%%@(%%.{}|{})' AND
     error = '' ORDER BY id LIMIT {};"""
-    #Guarenteed to be size 1
+    # Guarenteed to be size 1
     for row in result:
-        query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT, min(500-int(row[0]), num))
+        query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT,
+                             min(500-int(row[0]), num))
     result = db.execute(query)
     queued_emails = []
     for row in result:
@@ -174,6 +176,7 @@ def get_external_queue(db, num):
             'body': row[4]
             })
     return queued_emails
+
 
 def mark_sent(email_id, db):
     """Mark an email as sent in the database."""
@@ -212,8 +215,8 @@ def send_email():
     """Send queued emails."""
     db, metadata = setup_db()
     queued_emails = get_email_queue(db)
-    #if len(queued_emails) == 0:
-    #    return
+    if len(queued_emails) == 0:
+        return
     mail_client = construct_mail_client()
 
     success_count = 0
