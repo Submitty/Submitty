@@ -1715,7 +1715,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         // Check if we want to exlcude grade overridden gradeables
         if (!$is_team && $override == 'include') {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
-                        WHERE u.user_id = grade_override.user_id 
+                        WHERE u.user_id = grade_override.user_id
                         AND grade_override.g_id=gc.g_id)";
         }
 
@@ -7214,10 +7214,5 @@ SQL;
       END) AS not_helped_count
 
 SQL;
-    }
-
-    public function getCourseSchemaTables(): array {
-        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
-        return $this->course_db->rows();
     }
 }

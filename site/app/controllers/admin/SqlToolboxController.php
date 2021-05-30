@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\db\Table;
 use app\exceptions\DatabaseException;
 use app\libraries\database\QueryIdentifier;
 use app\libraries\response\JsonResponse;
@@ -24,15 +25,11 @@ class SqlToolboxController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"GET"})
      */
     public function showToolbox(): WebResponse {
-        $organizedTables = [];
-        //Loop through and create a 2d array that holds all columns for each table name.
-        foreach ($this->core->getQueries()->getCourseSchemaTables() as $table) {
-            $organizedTables[$table['table_name']][] = [
-                'name' => $table['column_name'],
-                'type' => $table['data_type']
-            ];
-        }
-        return new WebResponse(SqlToolboxView::class, 'showToolbox', $organizedTables);
+        $tables = $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
+            ['schema' => 'public'],
+            ['name' => 'ASC']
+        );
+        return new WebResponse(SqlToolboxView::class, 'showToolbox', $tables);
     }
 
     /**

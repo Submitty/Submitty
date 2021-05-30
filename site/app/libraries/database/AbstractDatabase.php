@@ -66,6 +66,13 @@ abstract class AbstractDatabase {
 
     abstract public function getDSN();
 
+    public function getPdo(): \PDO {
+        if ($this->link === null) {
+            throw new DatabaseException("Database not yet connected");
+        }
+        return $this->link;
+    }
+
     /**
      * Given a string representation of an array from the database, convert it to a PHP
      * array.

@@ -11,6 +11,8 @@ use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -30,6 +32,12 @@ class Core {
 
     /** @var AbstractDatabase */
     private $course_db = null;
+
+    /** @var EntityManager */
+    private $submitty_entity_manager;
+
+    /** @var EntityManager */
+    private $course_entity_manager;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -181,23 +189,58 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
+
+        $config = Setup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'app')],
+            false,
+            null,
+            null,
+            false
+        );
+        $conn = [
+            'driver' => 'pdo_pgsql',
+            'pdo' => $this->submitty_db->getPdo(),
+        ];
+        $this->submitty_entity_manager = EntityManager::create($conn, $config);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
         $this->submitty_db = $database;
     }
 
-    public function loadCourseDatabase(): void {
-        if ($this->config->isCourseLoaded()) {
-            $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
-            $this->course_db->connect();
+    public function getSubmittyEntityManager(): EntityManager {
+        return $this->submitty_entity_manager;
+    }
 
-            $this->database_queries = $this->database_factory->getQueries($this);
+    public function loadCourseDatabase(): void {
+        if (!$this->config->isCourseLoaded()) {
+            return;
         }
+        $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
+        $this->course_db->connect();
+
+        $this->database_queries = $this->database_factory->getQueries($this);
+
+        $config = Setup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'app')],
+            false,
+            null,
+            null,
+            false
+        );
+        $conn = [
+            'driver' => 'pdo_pgsql',
+            'pdo' => $this->course_db->getPdo(),
+        ];
+        $this->course_entity_manager = EntityManager::create($conn, $config);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
         $this->course_db = $database;
+    }
+
+    public function getCourseEntityManager(): EntityManager {
+        return $this->course_entity_manager;
     }
 
     public function loadForum() {
