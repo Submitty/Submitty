@@ -13,7 +13,7 @@
         <div  onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['today'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
+                <i class="dropdown-arrow{{dropdown_states['today'] ? ' down'}} fa fa-chevron-right"></i>
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
