@@ -6968,8 +6968,7 @@ AND gc_id IN (
     //// BEGIN ONLINE POLLING QUERIES ////
 
     public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders) {
-        // FIXME: put $question_type in the database
-        $this->course_db->query("INSERT INTO polls(name, question, status, release_date, image_path) VALUES (?, ?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date, null]);
+        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path) VALUES (?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -7054,8 +7053,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        // FIXME: properly modify database to store the question_type variable, and all of the student answers
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], "multiple-response", $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7081,6 +7079,7 @@ AND gc_id IN (
 
     public function submitResponse($poll_id, $response) {
         // FIXME: make this work for response array
+        // how do I save the response array to the DB?
         $user = $this->core->getUser()->getId();
         $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
         if (count($this->course_db->rows()) <= 0) {
@@ -7103,7 +7102,7 @@ AND gc_id IN (
     public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
         // FIXME: write new $question_type
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $release_date, $image_path, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -7119,6 +7118,8 @@ AND gc_id IN (
     }
 
     public function getResults($poll_id) {
+        // FIXME: make this work for option_id as an array?
+        // where poll_id = ? and $answer = ANY (option_id)
         $results = [];
         foreach ($this->getResponses($poll_id) as $option_id => $answer) {
             $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);

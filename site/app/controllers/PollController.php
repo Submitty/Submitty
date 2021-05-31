@@ -507,6 +507,7 @@ class PollController extends AbstractController {
         }
         $num_imported = 0;
         $num_errors = 0;
+        $question_type = null;
         foreach ($polls as $poll) {
             if (
                 !array_key_exists("name", $poll)
@@ -541,7 +542,7 @@ class PollController extends AbstractController {
             }
             $answers = $poll["correct_responses"];
             $release_date = $poll["release_date"];
-            $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
+            $this->core->getQueries()->addNewPoll($name, $question, $question_type, $responses, $answers, $release_date, $orders);
             $num_imported = $num_imported + 1;
         }
         if ($num_errors === 0) {
