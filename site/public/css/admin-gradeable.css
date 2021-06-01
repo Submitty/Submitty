@@ -284,6 +284,17 @@ select[name="component-itempool"] {
     border: 0.5px black solid;
     position: relative;
     width: 80%;
+    max-height: 30vh;
+    overflow-y: scroll;
+}
+
+.drop-down-options::-webkit-scrollbar{
+    width: 0.7vh;
+}
+
+.drop-down-options::-webkit-scrollbar-thumb {
+    background-color: var(--hover-actionable-blue);
+    outline: 1px solid slategrey;
 }
 
 .drop-down-option{

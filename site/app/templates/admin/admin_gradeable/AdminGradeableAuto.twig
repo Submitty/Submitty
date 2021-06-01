@@ -222,10 +222,7 @@
 
     function dropDownBoxOnClick() {
         let options = $(this).parent().find(".drop-down-options");
-        if ($(options).is(":visible")) {
-            $(options).hide();
-        }
-        else {
+        if (!$(options).is(":visible")) {
             $(options).show();
         }
     }
@@ -247,6 +244,13 @@
         // set the box's value to the text of the option
         $(box).val($(this).text());
         $(box).trigger("input");
+    }
+
+    function hideDropDownOptions(){
+        let options = $(".drop-down-options");
+        if ($(options).is(":visible")) {
+            $(options).hide();
+        }
     }
 
     $(document).ready(function() {
@@ -279,6 +283,10 @@
             sub.change();
         });
 
+        $('.drop-down').on("click", function(event){
+            event.stopPropagation();
+        });
+        $(document).on("click", hideDropDownOptions);
         $('.drop-down-box').on("click", dropDownBoxOnClick);
         $('#drop-down-arrow').on("click", dropDownArrowOnClick);
         $('.drop-down-option').on("click",dropDownOptionOnClick);
