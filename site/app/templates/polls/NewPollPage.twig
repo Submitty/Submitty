@@ -27,8 +27,8 @@
             <label for="image-file">
                 Optional Image:
             </label>
-            <input type="file" id="image-file" name="image_file"/>
-            <br/><br/>
+            <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+  	    <br/><br/>
 
             <label for="poll-date">
                 Expected release date:
@@ -51,6 +51,7 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+  	    <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -81,7 +82,7 @@
             <label for="image-file">
                 Optional Image:
             </label>
-            <input type="file" id="image-file" name="image_file"/>
+            <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
             <br />
             {% if poll.getImagePath() != null %}
                 Current Image: {{ poll.getImagePath() }}
@@ -133,6 +134,7 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
@@ -140,13 +142,25 @@
 
 
 <script>
+    let MAX_SIZE = {{ max_size }};
+    let size_is_valid = true;
+	
     flatpickr('.poll-date', {
         allowInput: true,
-        dateFormat: "Y-m-d",
+        dateFormat: "{{ date_format }}",
         onReady: (a, b, fp) => {
           fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
         }
     });
+	
+    function checkSize(uploadedFile) {
+        if (uploadedFile.files[0].size > MAX_SIZE) {
+            size_is_valid = false;
+        } else {
+            size_is_valid = true;
+        }
+        submitErrorChecks();
+    };
 
     function addResponse() {
         let count = $(".poll_response").length
@@ -239,6 +253,10 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-question-error").show();
+        } else if (!size_is_valid) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#file-size-error").show();
         } else if ($("#poll-date").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
