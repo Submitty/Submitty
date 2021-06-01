@@ -569,6 +569,11 @@
     font-size: 1.8em;
 }
 
+.thread-unread {
+    color: var(--submitty-logo-blue);
+    font-size: 2.0em;
+}
+
 .post_content li {
     white-space: normal;
 }
