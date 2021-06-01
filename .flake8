@@ -28,7 +28,6 @@ exclude=
     sbin/check_everything.py,
     sbin/compare_reuploads.py,
     sbin/count_autograding_logs.py,
-    sbin/run_lichen_plagiarism.py,
     sbin/untrusted_canary.py,
     tests
 
