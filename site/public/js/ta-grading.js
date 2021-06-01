@@ -309,6 +309,7 @@ function initializeTaLayout() {
   }
   updateLayoutDimensions();
   updatePanelOptions();
+  readCookies();
 }
 
 function updateLayoutDimensions() {
@@ -432,6 +433,7 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
+    $('#autoscroll_id')[0].checked = true;
     let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
       let file_path = element.split('#$SPLIT#$');
