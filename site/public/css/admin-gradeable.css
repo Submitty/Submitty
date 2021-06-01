@@ -315,3 +315,8 @@ body::-webkit-scrollbar-track {
 .drop-down-option:hover{
     background-color: var(--hover-active-all-info-blue);
 }
+
+[data-theme="dark"] .drop-down-options{
+    background-color: var(--standard-medium-dark-gray);
+    border: 1px solid var(--standard-focus-cornflowe-blue);
+}
