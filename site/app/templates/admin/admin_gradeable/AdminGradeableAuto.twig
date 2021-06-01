@@ -30,32 +30,34 @@
         </div>
 <br><br>
 
-        <div class="option-title">Choose an autograding configuration:</div>
-                <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
-                    "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
-                    from the Course Settings Page. </p>
-                <p> Manually type the full path to a configuration file, or select from the list below. </p>
-        <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
-        {% for error_message in repository_error_messages %}
-            <div class="config_search_error">({{error_message}})</div>
-        {% endfor %}
-        {% if not currently_valid_repository %}
-            <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
-        {% endif %}
+    <div class="option-title">Choose an autograding configuration:</div>
+            <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
+                "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
+                from the Course Settings Page. </p>
+            <p> Manually type the full path to a configuration file, or select from the list below. </p>
+    <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
+    {% for error_message in repository_error_messages %}
+        <div class="config_search_error">({{error_message}})</div>
+    {% endfor %}
+    {% if not currently_valid_repository %}
+        <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
+    {% endif %}
 
     <div class="settings">
-        <div class="drop-down" id="config-drop-down">
-            <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-                autocomplete="off" autocapitalize="off" spellcheck="false" style="" aria-label="autograding configuration">
-            <div style="margin-left: -45px; position: relative; display: inline-block; width: auto;">
-                <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
-                <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
-            </div>
-            </input>
-            <div class="drop-down-options" style="display: none;" id="config-options">
-                {% for path in all_config_paths %}
-                    <div class="path_autofill_option drop-down-option" data-name="{{path.0}}" data-value="{{path.1}}">{{path.0}}</div>
-                {% endfor %}
+        <div>
+            <div class="drop-down" id="config-drop-down">
+                <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration">
+                    <div style="margin-left: -45px; position: relative; display: inline-block; width: auto;">
+                        <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
+                        <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
+                    </div>
+                </input>
+                <div class="drop-down-options" style="display: none;" id="config-options">
+                    {% for path in all_config_paths %}
+                        <div class="path_autofill_option drop-down-option" data-name="{{path.0}}" data-value="{{path.1}}">{{path.0}}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
@@ -223,7 +225,7 @@
     function dropDownBoxOnClick() {
         let options = $(this).parent().find(".drop-down-options");
         if (!$(options).is(":visible")) {
-            $(options).show();
+            $(options).hide();
         }
     }
     
