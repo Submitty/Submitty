@@ -829,6 +829,10 @@ tr.is_publish {
     border-right: none;
 }
 
+.ta-grading-setting-list tr:nth-child(odd) {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .ta-grading-setting-list tr:nth-child(even) {
     background-color: var(--default-white);
 }
