@@ -131,6 +131,18 @@
     padding: 0;
 }
 
+.catergory-item-box {
+    background-color: var(--standard-pale-gray) !important;
+}
+
+.edit-category-button {
+    color: var(--standard-gray-black) !important;
+}
+
+.edit-catergoty-name {
+    background-color: var(--always-default-white) !important;
+}
+
 .create-post-head{
     max-width: 95%;
     display: inline-block;
