@@ -149,6 +149,7 @@
     /*discussion forum*/
     --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
+    --viewed-content: #e8f0f7;
     --important-post: #ffd700; /*is also for star color*/
     --attachment-box-color: #f5f5f5;
     --file-upload-table-hover: #d1d1d1;
@@ -356,6 +357,7 @@
       /*discussion forum*/
       --viewed-discussion-post-blue: #e8f0f7;
       --deleted-discussion-post-grey: #dcdcdc;
+      --viewed-content: #292a2b;
       --important-post: #ffd700; /*is also for star color*/
       --attachment-box-color: #4a4a4a;
       --file-upload-table-hover: #4a4a4a;
