@@ -196,6 +196,9 @@ class GradingOrder extends AbstractModel {
      * Given the current submitter, get the previous submitter to grade.
      * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
+     * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
+     * @param string|int $component_id Component ID to check (for ungraded/itempool)
+     * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
      * @return Submitter Previous submitter to grade
      */
     public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = null) {
@@ -219,14 +222,17 @@ class GradingOrder extends AbstractModel {
      * Given the current submitter, get the next submitter to grade.
      * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
+     * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
+     * @param string|int $component_id Component ID to check (for ungraded/itempool)
+     * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
      * @return Submitter Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = false) {
+    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", bool $to_same_itempool = false) {
         $this->to_ungraded = $to_ungraded;
         if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
         }
-
+        error_log(gettype($component_id));
         $this->skip_component_itempool = true;
         if ($to_same_itempool && $component_id !== "-1" && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
             $this->skip_component_itempool = false;
@@ -468,6 +474,11 @@ class GradingOrder extends AbstractModel {
         return array_merge($gg_idx, $unsorted);
     }
 
+    /**
+     * Check if the submitter has the same itempool item for the same component as the one previously identified by getItempoolIndicesForSubmitter
+     * @param Submitter $submitter The submitter to check
+     * @return bool If the submitter has the same itempool item as the one identified by getItempoolIndicesForSubmitter
+     */
     public function isSameItempool(Submitter $submitter): bool {
         $que_idx = 0;
 
@@ -482,7 +493,8 @@ class GradingOrder extends AbstractModel {
                     $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
                 }
                 return $selected_idx % count($item['from_pool']) === $this->itempool_selected_idx;
-            } else if (isset($item['type']) && $item['type'] === 'item') {
+            }
+            elseif (isset($item['type']) && $item['type'] === 'item') {
                 $selected_idx = $item["user_item_map"][$submitter->getId()] ?? null;
                 if (is_null($selected_idx)) {
                     $que_idx++;
@@ -492,6 +504,12 @@ class GradingOrder extends AbstractModel {
         return false;
     }
 
+    /**
+     * Search for the itempool item for the specified component in the notebook config and save data about the location and submitter's itempool if found
+     * @param Submitter $submitter The submitter to store the itempool item index for
+     * @param int $component_id The ID of the component that is linked to the target itempool
+     * @return bool If the itempool item was found and if the data was saved
+     */
     public function getItempoolIndicesForSubmitter(Submitter $submitter, int $component_id): bool {
         $que_idx = 0;
 
@@ -507,7 +525,7 @@ class GradingOrder extends AbstractModel {
                 if (is_null($selected_idx)) {
                     $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
                     $que_idx++;
-                } 
+                }
                 if ($item_label === $item['item_label']) {
                     $this->notebook_item_index = $key;
                     $this->itempool_selected_idx = $selected_idx;
