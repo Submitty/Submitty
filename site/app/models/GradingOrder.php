@@ -65,19 +65,14 @@ class GradingOrder extends AbstractModel {
     protected $skip_component_itempool;
 
     /**
-     * @var int|null $itempool_size
+     * @var int|null $notebook_item_index
      */
-    protected $itempool_size;
+    protected $notebook_item_index;
 
     /**
-     * @var int|null $itempool_hash_index
+     * @var int|null $itempool_selected_idx
      */
-    protected $itempool_hash_index;
-
-    /**
-     * @var int|null $itempool_from_pool_index
-     */
-    protected $itempool_from_pool_index;
+    protected $itempool_selected_idx;
 
     /**
      * GradingOrder constructor.
@@ -133,9 +128,8 @@ class GradingOrder extends AbstractModel {
         $this->to_ungraded = false;
         $this->skip_component_itempool = true;
 
-        $this->itempool_size = null;
-        $this->itempool_hash_index = null;
-        $this->itempool_from_pool_index = null;
+        $this->notebook_item_index = null;
+        $this->itempool_selected_idx = null;
     }
 
     /**
@@ -206,19 +200,18 @@ class GradingOrder extends AbstractModel {
      */
     public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = null) {
         $this->to_ungraded = $to_ungraded;
-
-        $this->skip_component_itempool = true;
         if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
         }
 
-        if ($to_same_itempool && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+        $this->skip_component_itempool = true;
+        if ($to_same_itempool && $component_id !== "-1" && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
             $this->skip_component_itempool = false;
         }
 
         return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
             return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
-             && ($this->skip_component_itempool || $this->gradeable->getAutogradingConfig()->getUserSpecificNotebook($sub->getId())->getHashes()[$this->itempool_hash_index] % $this->itempool_size === $this->itempool_from_pool_index);
+             && ($this->skip_component_itempool || $this->isSameItempool($sub));
         });
     }
 
@@ -230,19 +223,18 @@ class GradingOrder extends AbstractModel {
      */
     public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = false) {
         $this->to_ungraded = $to_ungraded;
-
-        $this->skip_component_itempool = true;
         if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
         }
 
-        if ($to_same_itempool && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+        $this->skip_component_itempool = true;
+        if ($to_same_itempool && $component_id !== "-1" && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
             $this->skip_component_itempool = false;
         }
 
         return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
             return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
-             && ($this->skip_component_itempool || $this->gradeable->getAutogradingConfig()->getUserSpecificNotebook($sub->getId())->getHashes()[$this->itempool_hash_index] % $this->itempool_size === $this->itempool_from_pool_index);
+             && ($this->skip_component_itempool || $this->isSameItempool($sub));
         });
     }
 
@@ -476,8 +468,31 @@ class GradingOrder extends AbstractModel {
         return array_merge($gg_idx, $unsorted);
     }
 
+    public function isSameItempool(Submitter $submitter): bool {
+        $que_idx = 0;
+
+        $gradeable_config = $this->gradeable->getAutogradingConfig();
+
+        $notebook_config = $gradeable_config->getNotebookConfig();
+        $hashes = $gradeable_config->getUserSpecificNotebook($submitter->getId())->getHashes();
+        foreach ($notebook_config as $key => $item) {
+            if ($key === $this->notebook_item_index) {
+                $selected_idx = $item["user_item_map"][$submitter->getId()] ?? null;
+                if (is_null($selected_idx)) {
+                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                }
+                return $selected_idx % count($item['from_pool']) === $this->itempool_selected_idx;
+            } else if (isset($item['type']) && $item['type'] === 'item') {
+                $selected_idx = $item["user_item_map"][$submitter->getId()] ?? null;
+                if (is_null($selected_idx)) {
+                    $que_idx++;
+                }
+            }
+        }
+        return false;
+    }
+
     public function getItempoolIndicesForSubmitter(Submitter $submitter, int $component_id): bool {
-        $user_item_map = [];
         $que_idx = 0;
 
         $item_label = $this->gradeable->getComponent($component_id)->getItempool();
@@ -488,20 +503,16 @@ class GradingOrder extends AbstractModel {
         $hashes = $gradeable_config->getUserSpecificNotebook($submitter->getId())->getHashes();
         foreach ($notebook_config as $key => $item) {
             if (isset($item['type']) && $item['type'] === 'item') {
-                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
-                $item_id = isset($user_item_map[$item_id]) ? $item_id . '_' . $key : $item_id;
                 $selected_idx = $item["user_item_map"][$submitter->getId()] ?? null;
                 if (is_null($selected_idx)) {
                     $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
-                    if ($item_label === $item['item_label']) { //not unique, also item_label?
-                        $this->itempool_size = count($item['from_pool']);
-                        $this->itempool_hash_index = $que_idx;
-                        $this->itempool_from_pool_index = $selected_idx;
-                        return true;
-                    }
                     $que_idx++;
+                } 
+                if ($item_label === $item['item_label']) {
+                    $this->notebook_item_index = $key;
+                    $this->itempool_selected_idx = $selected_idx;
+                    return true;
                 }
-                $user_item_map[$item_id] = $item['from_pool'][$selected_idx];
             }
         }
         return false;
