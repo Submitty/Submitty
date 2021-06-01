@@ -123,6 +123,27 @@ input[type="color"] {
     width: auto;
 }
 
+[data-theme="dark"]
+select,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"] {
+    color: var(--text-black);
+}
+
+
 input.readonly {
     background-color: var(--standard-pale-gray);
     cursor: not-allowed;
@@ -1474,9 +1495,23 @@ end of styles used in the admin gradeable page
     overflow-y: auto;
 }
 
-/* NOTE TO SELF, NEED TO MERGE AND PULL #6516 FIRST BECAUSE IT CHANGES THESE LINES THAT IM MOVING */
+.ta-grading-setting-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ta-grading-setting-list tr {
+    border: 1px solid var(--standard-light-gray);
+    border-left: none;
+    border-right: none;
+}
+
+.ta-grading-setting-list tr:nth-child(odd) {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .ta-grading-setting-list tr:nth-child(even) {
-    background-color: var(--standard-pale-gray);
+    background-color: var(--default-white);
 }
 
 .ta-grading-setting-list td {
