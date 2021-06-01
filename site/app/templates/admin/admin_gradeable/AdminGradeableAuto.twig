@@ -1,33 +1,33 @@
 <div class="electronic_file">
 
-        <div class="option-title">
-            What are students allowed to do?
-        </div>
-        <div>
-            <fieldset>
-                <legend>View the gradeable on the course home page and download submitted files?</legend>
-                <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
-                        {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
-                <input type="radio" id="no_student_view" name="student_view" value="false"
-                        {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
-                <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                        {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
-                <div hidden>
-                    <input type="radio" id="yes_student_view" name="student_view" value="true"
-                        {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
-                </div>
-            </fieldset>
-        </div>
-
-        <div id="student_submit_view">
-            <div>
-                <fieldset><legend>Make new submissions and access all prior versions?</legend>
-                <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
-                <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="no_student_submit">No</label></fieldset>
+    <div class="option-title">
+        What are students allowed to do?
+    </div>
+    <div>
+        <fieldset>
+            <legend>View the gradeable on the course home page and download submitted files?</legend>
+            <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
+                    {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
+            <input type="radio" id="no_student_view" name="student_view" value="false"
+                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
+            <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
+                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
+            <div hidden>
+                <input type="radio" id="yes_student_view" name="student_view" value="true"
+                    {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
             </div>
+        </fieldset>
+    </div>
+
+    <div id="student_submit_view">
+        <div>
+            <fieldset><legend>Make new submissions and access all prior versions?</legend>
+            <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
+            <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="no_student_submit">No</label></fieldset>
         </div>
+    </div>
 <br><br>
 
     <div class="option-title">Choose an autograding configuration:</div>
