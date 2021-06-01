@@ -202,6 +202,7 @@ progress::-webkit-progress-value {
 
 .panel-header-box {
     display: flex;
+    margin: auto;
 }
 
 .grade-panel {
@@ -550,14 +551,14 @@ progress::-webkit-progress-value {
     border: solid 6px var(--important-post);
     position:relative;
     display: block;
-    width: 400px;
-    height: 25px;
+    width: fit-content;
+    padding: 0.5vh 0.5vw 0.5vh 0.5vw;
+    height: fit-content;
     top: 2px;
-    left: 120px;
+    margin: auto;
     padding-top:3px;
     padding-bottom:3px;
     text-align: center;
-    vertical-align: middle;
     line-height: 25px;
     font-weight:    bold;
     background-color: var(--badge-backgroud-red);
