@@ -12,7 +12,8 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
-  
+  NODE_VERSION: 10
+
 jobs:
     eslint:
         runs-on: ubuntu-18.04
@@ -21,9 +22,9 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2.1.2
+            - uses: actions/setup-node@v2
               with:
-                node-version: '10'
+                node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
               uses: actions/cache@v2
               with:
@@ -34,6 +35,32 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
+
+
+    js-unit:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
 
 
     php-lint-static:
@@ -111,9 +138,9 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip
@@ -133,17 +160,17 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip setuptools wheel
             python3 -m pip install "SQLAlchemy<1.4.0" jsonschema jsonref pytz tzlocal
             python3 -m pip install coverage
-            python3 -m pip install paramiko 
-            python3 -m pip install docker 
-            python3 -m pip install python-dateutil 
+            python3 -m pip install paramiko
+            python3 -m pip install docker
+            python3 -m pip install python-dateutil
         - name: Run migrator python unit tests
           working-directory: migration
           run : |
@@ -179,12 +206,12 @@ jobs:
 
 
     e2e:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+        needs: [eslint, js-unit, php-lint-static, php-unit, python-lint, python-unit]
         runs-on: ubuntu-18.04
         services:
           postgres:
             image: postgres
-            env: 
+            env:
               POSTGRES_PASSWORD: submitty_dbuser
               POSTGRES_USER: postgres
             options: >-
@@ -222,12 +249,12 @@ jobs:
             uses: actions/cache@v2
             with:
               path: path ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/requirements.txt') }}
               restore-keys: |
-                ${{ runner.os }}-py-pip
+                ${{ runner.os }}-${{ github.job }}-pip-
           - name: Install python dependencies
             run: |
-              python3 -m pip install --upgrade pip setuptools wheel  
+              python3 -m pip install --upgrade pip setuptools wheel
               sudo python3 -m pip install --upgrade pip setuptools wheel
               pip3 -V
               sudo pip3 -V
@@ -337,7 +364,7 @@ jobs:
 
           - name: Set up test suite
             run: |
-              cd $SUBMITTY_REPOSITORY 
+              cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
           - name: Set up apache

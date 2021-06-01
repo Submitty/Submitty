@@ -2634,6 +2634,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    /**
+     * Gets the date for a specified gradeable
+     *
+     * @param string $id
+     * @return \DateTime
+     */
+    public function getDateForGradeableById($id) {
+        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
+        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    }
+
     public function getAllGradeablesIds() {
         $this->course_db->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->course_db->rows();
@@ -6994,7 +7005,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date DESC, name ASC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -7014,7 +7025,8 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        $date = new \Datetime($row['release_date']);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('poll')), $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
