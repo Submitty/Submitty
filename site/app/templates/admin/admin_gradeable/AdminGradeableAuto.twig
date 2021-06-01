@@ -231,10 +231,7 @@
     
     function dropDownArrowOnClick() {
         let options = $(this).parent().parent().find(".drop-down-options");
-        if ($(options).is(":visible")) {
-            $(options).hide();
-        }
-        else {
+        if (!$(options).is(":visible")) {
             $(options).show();
         }
     }
