@@ -66,6 +66,41 @@ class PlagiarismController extends AbstractController {
         }
         return $return;
     }
+
+
+    private function getRankings($gradeable_id) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
+        if (!file_exists($file_path)) {
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        if (file_get_contents($file_path) == "") {
+            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        $content = file_get_contents($file_path);
+        $content = trim(str_replace(["\r", "\n"], ' ', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings, 3);
+        return $rankings;
+    }
+
+    /**
+     * Returns a string containing the concatenated contents of the specified user's submission
+     *
+     * @return string
+     */
+    private function getConcatenatedSubmission($user_id, $gradeable_id, $version) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id . "/" . $version . "/submission.concatenated";
+
+        if (!file_exists($file_name) || !$this->core->getUser()->accessAdmin()) {
+            return 'error';
+        }
+        return file_get_contents($file_name);
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism")
      */
@@ -135,21 +170,8 @@ class PlagiarismController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_title = ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
-        $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
-        $file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id . ".txt";
-        if (!file_exists($file_path)) {
-            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
-            $this->core->redirect($return_url);
-        }
-        if (file_get_contents($file_path) == "") {
-            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            $this->core->redirect($return_url);
-        }
-        $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
-        $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+        $rankings = $this->getRankings($gradeable_id);
         foreach ($rankings as $i => $ranking) {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
@@ -538,23 +560,15 @@ class PlagiarismController extends AbstractController {
 
         $return = "";
         $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
-        if (!file_exists($file_path)) {
-            $return = ['error' => 'Ranking file not exists.'];
-            $return = json_encode($return);
-            echo($return);
-            return;
-        }
-        $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
-        $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+
+        $rankings = $this->getRankings($gradeable_id);
+
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
             }
         }
-        if ($version_user_1 == "max_matching") {
+        if ($version_user_1 == "max_matching" || $version_user_1 == "") {
             $version_user_1 = $max_matching_version;
         }
         $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), [".", ".."]);
@@ -695,17 +709,9 @@ class PlagiarismController extends AbstractController {
 
         $return = [];
         $error = "";
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
-        if (!file_exists($file_path)) {
-            $return = ['error' => 'Ranking file not exists.'];
-            $return = json_encode($return);
-            echo($return);
-            return;
-        }
-        $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], '', $content));
-        $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+
+        $rankings = $this->getRankings($gradeable_id);
+
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
@@ -724,8 +730,8 @@ class PlagiarismController extends AbstractController {
             foreach ($content as $match) {
                 if ($match["type"] == "match") {
                     foreach ($match["others"] as $match_info) {
-                        if (!in_array([$match_info["username"],$match_info["version"]], $return)) {
-                            array_push($return, [$match_info["username"],$match_info["version"]]);
+                        if (!in_array([$match_info["username"], $match_info["version"]], $return)) {
+                            array_push($return, [$match_info["username"], $match_info["version"]]);
                         }
                     }
                 }
@@ -755,7 +761,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
         if (!file_exists($file_path)) {
-            echo(json_encode(["error" => "user 1 matches.json does not exists"]));
+            echo(json_encode(["error" => "user 1 matches.json does not exist"]));
         }
         else {
             $content = json_decode(file_get_contents($file_path), true);
