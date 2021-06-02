@@ -217,7 +217,6 @@ class PlagiarismController extends AbstractController {
         if ($new_or_edit == "new") {
             $gradeable_id = $_POST['gradeable_id'];
         }
-
         if ($new_or_edit == "edit") {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . '?' . http_build_query(['gradeable_id' => $gradeable_id]);
         }
@@ -255,18 +254,19 @@ class PlagiarismController extends AbstractController {
         }
 
         $language = $_POST['language'];
-        if (isset($_POST['threshold']) && $_POST['threshold'] !== '') {
+        if (isset($_POST['threshold']) && $_POST['threshold'] !== '' && is_numeric($_POST['threshold']) && $_POST['threshold'] >= 0) {
             $threshold = $_POST['threshold'];
         }
         else {
-            $this->core->addErrorMessage("No input provided for threshold");
+            $this->core->addErrorMessage("Invalid input provided for threshold");
             $this->core->redirect($return_url);
         }
-        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '') {
+
+        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && is_numeric($_POST['sequence_length']) && $_POST['sequence_length'] > 0) {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
-            $this->core->addErrorMessage("No input provided for sequence length");
+            $this->core->addErrorMessage("Invalid input provided for sequence length");
             $this->core->redirect($return_url);
         }
 
