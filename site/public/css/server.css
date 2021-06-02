@@ -115,10 +115,36 @@ input[type="color"] {
     width: auto;
 }
 
+[data-theme="dark"]
+select,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"] {
+    color: var(--text-black);
+}
+
+
 input.readonly {
     background-color: var(--standard-pale-gray);
     cursor: not-allowed;
     color: var(--btn-text-black);
+}
+
+[data-theme="dark"] input[type=text].readonly{
+    background-color: var(--standard-deep-dark-gray);
+    color: var(--text-black);
 }
 
 select {
@@ -1291,16 +1317,6 @@ div.full_height {
     vertical-align: top;
 }
 
-#admin-team-history-left {
-    width:35%;
-    display: inline-block;
-    margin-right: 10px;
-}
-
-#admin-team-history-right {
-    width:55%;
-    display: inline-block;
-}
 
 [name^="grader-warning-popup"] {
     background:var(--danger-red);
@@ -1442,8 +1458,12 @@ end of styles used in the admin gradeable page
     border-right: none;
 }
 
+.ta-grading-setting-list tr:nth-child(odd) {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .ta-grading-setting-list tr:nth-child(even) {
-    background-color: var(--standard-pale-gray);
+    background-color: var(--default-white);
 }
 
 .ta-grading-setting-list td {
@@ -1564,14 +1584,6 @@ end of styles used in the admin gradeable page
 .viewed-red-x {
     color: var(--badge-backgroud-red);
     font-size: 1.5em;
-}
-
-[name^="user_id_"]:valid {
-    background-color: transparent;
-}
-
-[name^="user_id_"] {
-    background-color: var(--alert-invalid-entry-pink);
 }
 
 /* color for nav page edit button for rebuild error on gradeable */

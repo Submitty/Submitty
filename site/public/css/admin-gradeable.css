@@ -236,14 +236,14 @@ div.btn-container {
 
 #zip_link_limited {
     text-decoration:none;
-    color:white;
+    color: var(--text-black);
     padding:10px;
     padding-left:0px;
 }
 
 #zip_link_full {
     text-decoration:none;
-    color:black;
+    color: var(--text-black);
     padding:10px;
     padding-left:0px;
 }

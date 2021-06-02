@@ -40,6 +40,18 @@ input[type="text"], select {
     width: 100%;
 }
 
+input[type=text]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+[data-theme="dark"] input[type=text]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] input[type=text]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}
+
 #prev_gradeable_div {
     display: flex;
     justify-content: space-between;

@@ -574,6 +574,10 @@
     font-size: 2.0em;
 }
 
+.post_content p {
+    white-space: pre-wrap;
+}
+
 .post_content li {
     white-space: normal;
 }

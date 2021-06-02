@@ -309,6 +309,7 @@ function initializeTaLayout() {
   }
   updateLayoutDimensions();
   updatePanelOptions();
+  readCookies();
 }
 
 function updateLayoutDimensions() {
@@ -432,6 +433,7 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
+    $('#autoscroll_id')[0].checked = true;
     let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
       let file_path = element.split('#$SPLIT#$');
@@ -1111,9 +1113,12 @@ function checkOpenComponentMark(index) {
 function openAll(click_class, class_modifier) {
   $("."+click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
-    let innerText = Object.values($(this))[0].innerText;
-    if (innerText.slice(-4) !== ".pdf") {
-      $(this).click();
+    //console.log($(this).attr('id'));
+    if ($(this).parent().parent().parent().hasClass("open")){
+      let innerText = Object.values($(this))[0].innerText;
+      if (innerText.slice(-4) !== ".pdf") {
+        $(this).click();
+      }
     }
   });
 }
@@ -1339,6 +1344,8 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       });
     }
     else {
+      if (!iframe.parent().parent().hasClass("open"))
+        return false;
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
