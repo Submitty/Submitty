@@ -47,6 +47,13 @@ MARK_ID_COUNTER = 0;
 EDIT_MODE_ENABLED = false;
 
 /**
+ * True if a TA is grading a Peer assignment
+ * this allows differentiation between what peers and TA's are allowed to
+ * do with the rubric for a peer assignment
+ */
+TA_GRADING_PEER = false;
+
+/**
  * Count directions for components
  * @type {int}
  */
@@ -2258,6 +2265,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
  * @return {Promise}
  */
 function reloadPeerRubric(gradeable_id, anon_id) {
+    TA_GRADING_PEER = true;
     let gradeable_tmp = null;
     return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
@@ -3126,7 +3134,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), TA_GRADING_PEER)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
