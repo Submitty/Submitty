@@ -525,6 +525,15 @@ class NavigationView extends AbstractView {
                 $title = "SUBMIT";
                 $class = "btn-default";
             }
+            elseif ($gradeable->isStudentSubmit() && !$gradeable->hasDueDate() && $list_section == GradeableList::OPEN && $graded_gradeable->isTaGradingComplete()) {
+                if ($ta_graded_gradeable->getUserViewedDate() === null) {
+                    $class = "btn-success";
+                }
+                else {
+                    $class = "btn-default";
+                }
+                $title = "VIEW GRADE OR RESUBMIT";
+            }
             elseif ($gradeable->isStudentSubmit() && $graded_gradeable->isTaGradingComplete() && $ta_graded_gradeable->getUserViewedDate() === null) {
                 $title = "RESUBMIT";
                 $class = "btn-success";
@@ -645,11 +654,18 @@ class NavigationView extends AbstractView {
             }
 
             if (!$gradeable->hasDueDate()) {
+                $progress_bar = $gradeable->getGradingProgress($this->core->getUser());
+                if ($progress_bar === 0) {
+                    $progress_bar = 0.01;
+                }
+                if (!$gradeable->anySubmissions()) {
+                    $progress_bar = 0;
+                }
                 return new Button($this->core, [
                     "title" => "GRADE",
                     "class" => "btn btn-nav btn-nav-grade btn-default",
                     "href" => $href,
-                    "progress" => 100 * $gradeable->getGradingProgress($this->core->getUser())
+                    "progress" => 100 * $progress_bar
                 ]);
             }
         }
