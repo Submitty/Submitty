@@ -2,24 +2,25 @@ const YELLOW = "#ffff00";
 const ORANGE = "#ffa500";
 const RED    = "#ff0000";
 const BLUE   = "#89CFF0";
-var editor0 = null;
-var editor1 = null;
-var form = null;
-var si = null;
-var gradeableId = null;
-var blueClickedMark = null;
+let editor0 = null;
+let editor1 = null;
+let form = null;
+let si = null;
+let gradeableId = null;
+let blueClickedMark = null;
+
 
 function isColoredMarker(marker, color) {
-    return marker.css.toLowerCase().indexOf(color) != -1;
+    return marker.css.toLowerCase().indexOf(color) !== -1;
 }
 
 function colorEditors(data) {
     window.si = data.si;
-    for(var users_color in data.ci) {
-    	var editor = users_color == 1 ? editor0 : editor1;
+    for(let users_color in data.ci) {
+    	let editor = parseInt(users_color) === 1 ? editor0 : editor1;
     	editor.operation(() => {
-        	for(var pos in data.ci[users_color]) {
-            	var element = data.ci[users_color][pos];
+        	for(let pos in data.ci[users_color]) {
+            	let element = data.ci[users_color][pos];
             	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "background: " + element[4]});
         	}
     	});
@@ -27,11 +28,11 @@ function colorEditors(data) {
 }
 
 function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
-    var marks_editor2 = editor1.getAllMarks();
+    let marks_editor2 = editor1.getAllMarks();
     editor1.operation( () => {
     	marks_editor2.forEach(mark => {
-	        var rightMarkerData = mark.find();
-	        if(mark.attributes.data_start == leftClickedMarker.attributes.data_start && mark.attributes.data_end == leftClickedMarker.attributes.data_end) {
+	        let rightMarkerData = mark.find();
+	        if(mark.attributes.data_start === leftClickedMarker.attributes.data_start && mark.attributes.data_end === leftClickedMarker.attributes.data_end) {
 	            mark.css = "background: #FF0000";
 	            mark.attributes = {"data_color_prev": ORANGE, "data_current_color": RED};
 	        }
@@ -44,19 +45,19 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
 
 function setUpLeftPane() {
     editor0.getWrapperElement().onmouseup = function(e) {
-        var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
-        var markers = editor0.findMarksAt(lineCh);
+        let lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
+        let markers = editor0.findMarksAt(lineCh);
         // Did not select a marker
         if (markers.length === 0) {
             return;
         }
 
         // Only grab the first one if there is overlap...
-        var lineData = markers[0].find();
-        var clickedMark = markers[0];
+        let lineData = markers[0].find();
+        let clickedMark = markers[0];
         if(isColoredMarker(clickedMark, YELLOW)) {
-            var user_id_1 = $('[name="user_id_1"]', form).val();
-            var user_1_version = $('[name="version_user_1"]', form).val();
+            let user_id_1 = $('[name="user_id_1"]', form).val();
+            let user_1_version = $('[name="version_user_1"]', form).val();
             clickedMark.css = "background: " + BLUE;
             blueClickedMark = clickedMark;
             getMatchesListForClick(user_id_1, user_1_version, lineData.from);
@@ -78,17 +79,17 @@ function setUpLeftPane() {
 }
 
 function getUserData() {
-    var user_id_2_data = $('[name="user_id_2"]', form).val();
+    let user_id_2_data = $('[name="user_id_2"]', form).val();
     const user_id_2_parsed = JSON.parse(user_id_2_data);
-    var user_id_2 = user_id_2_parsed['user_id'];
-    var version_user_2 = user_id_2_parsed['version'];
-    var user_id_1 = $('[name="user_id_1"]', form).val();
-    var version_user_1 = $('[name="version_user_1"]', form).val();
+    let user_id_2 = user_id_2_parsed['user_id'];
+    let version_user_2 = user_id_2_parsed['version'];
+    let user_id_1 = $('[name="user_id_1"]', form).val();
+    let version_user_1 = $('[name="version_user_1"]', form).val();
     return {'user_id_1': user_id_1, 'version_user_1': version_user_1, 'user_id_2': user_id_2, 'version_user_2': version_user_2};
 }
 
 function toggle() {
-    var data = getUserData();
+    let data = getUserData();
     updateRightUserLists(data['user_id_2'], data['version_user_2'], data['user_id_1']);
     clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
     $('[name="user_id_1"]', form).val(data['user_id_2']);
@@ -104,10 +105,10 @@ $(document).ready(() => {
 });
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
-    var user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
-    var to_append = '';
+    let user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
+    let to_append = '';
     $.each(user_matches, function(i, match) {
-        var res = match.split('_');
+        let res = match.split('_');
         to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>';
     });
     to_append = $.parseHTML(to_append);
@@ -157,6 +158,7 @@ function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
         success: function(data) {
+            //$("#test_").html(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
@@ -171,11 +173,11 @@ function requestAjaxData(url, f, es) {
 }
 
 function createRightUsersList(data, select = null) {
-    var position = 0;
-    var append_options;
+    let position = 0;
+    let append_options;
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
-        if (select == users[0]) {
+        if (select === users[0]) {
             position = i;
             append_options += ' selected>';
         } else {
@@ -189,19 +191,19 @@ function createRightUsersList(data, select = null) {
 }
 
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
-    var append_options;
+    let append_options;
     $.each(version_data, function(i,version_to_append){
-        if(version_to_append == active_version_user_1 && version_to_append == max_matching_version){
+        if(version_to_append === active_version_user_1 && version_to_append === max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
         }
-        if(version_to_append == active_version_user_1 && version_to_append != max_matching_version){
+        if(version_to_append === active_version_user_1 && version_to_append !== max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)</option>';
         }
-        if(version_to_append != active_version_user_1 && version_to_append == max_matching_version){
+        if(version_to_append !== active_version_user_1 && version_to_append === max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Max Match)</option>';
         }
 
-        if(version_to_append != active_version_user_1 && version_to_append != max_matching_version){
+        if(version_to_append !== active_version_user_1 && version_to_append !== max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
         }
     });
@@ -210,7 +212,7 @@ function createLeftUserVersionDropdown(version_data, active_version_user_1, max_
 }
 
 function updateRightUserLists(user_id_1, version_id_1, select = null) {
-    var url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    let url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
     const f2 = function(data, select) {
         createRightUsersList(data, select);
     }
@@ -230,8 +232,8 @@ function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 =
         }
         colorEditors(data);
     };
-    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
-    var es = false;
+    let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    let es = false;
     if (user_id_2 != null) {
         url += `&user_id_2=${user_id_2}&version_user_2=${version_id_2}`;
         es = true;
@@ -242,30 +244,30 @@ function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 =
 }
 
 function setCodeInEditor(changed) {
-    var user_id_1 = $('[name="user_id_1"]', form).val();
-    var version_user_1 = $('[name="version_user_1"]', form).val();
-    var user_id_2_data = $('[name="user_id_2"]', form).val();
+    let user_id_1 = $('[name="user_id_1"]', form).val();
+    let version_user_1 = $('[name="version_user_1"]', form).val();
+    let user_id_2_data = $('[name="user_id_2"]', form).val();
 
     // Empty lists and code (this should never happen)
-    if((changed == "user_id_1" && user_id_1 == "") || (changed == "version_user_1" && version_user_1 == "")){
+    if((changed === "user_id_1" && user_id_1 === "") || (changed === "version_user_1" && version_user_1 === "")){
         $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         editor0.getDoc().setValue('');
         editor1.getDoc().setValue('');
-    } else if (changed == "user_id_2" && user_id_2_data == "") {
+    } else if (changed === "user_id_2" && user_id_2_data === "") {
         editor1.getDoc().setValue('');
     } else {
         // First check if left side changed... Clean up this...
-        if (changed == 'user_id_1' || changed == 'version_user_1') {
-            if(version_user_1 == "" || changed == 'user_id_1') { // If user 1 was changed or no user has been selected yet, set the version to max matching
+        if (changed === 'user_id_1' || changed === 'version_user_1') {
+            if(version_user_1 === "" || changed === 'user_id_1') { // If user 1 was changed or no user has been selected yet, set the version to max matching
                 version_user_1 = "max_matching";
             }
             clearCodeEditorsAndUpdateSelection(user_id_1, version_user_1);
         } else {
             // We know that our right side changed
             const user_id_2_parsed = JSON.parse(user_id_2_data);
-            var user_id_2 = user_id_2_parsed['user_id'];
-            var version_user_2 = user_id_2_parsed['version'];
+            let user_id_2 = user_id_2_parsed['user_id'];
+            let version_user_2 = user_id_2_parsed['version'];
             clearCodeEditorsAndUpdateSelection(user_id_1, version_user_1, user_id_2, version_user_2);
         }
     }
