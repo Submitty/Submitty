@@ -1591,6 +1591,27 @@ function addMarkdownCode(type, divTitle){
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
+function previewMarkdown(enablePreview){
+  console.log(enablePreview);
+  const url = buildCourseUrl(['forum', 'threads', 'preview']);
+  if(enablePreview){
+    // $.ajax({
+    //   url: url,
+    //   type: "POST",
+    //   data: {
+    //       enablePreview: enablePreview,
+    //       csrf_token: csrfToken
+    //   },
+    //   success: function(data){
+    //       console.log(data);
+    //   },
+    //   error: function() {
+    //       window.alert("Something went wrong while trying to preview new thread. Please try again.");
+    //   }
+    // });
+  }
+}
+
 function checkInputMaxLength(obj){
     if($(obj).val().length == $(obj).attr('maxLength')){
         alert('Maximum input length reached!');

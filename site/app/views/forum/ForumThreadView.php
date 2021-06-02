@@ -1138,7 +1138,7 @@ class ForumThreadView extends AbstractView {
         }
     }
 
-    public function createThread($category_colors) {
+    public function createThread($category_colors, $enablePreview = false) {
         if (!$this->forumAccess()) {
             $this->core->redirect($this->core->buildCourseUrl());
             return;
@@ -1191,7 +1191,8 @@ class ForumThreadView extends AbstractView {
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "enablePreview" => $enablePreview
         ]);
     }
 
