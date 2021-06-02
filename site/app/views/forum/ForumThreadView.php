@@ -1138,6 +1138,15 @@ class ForumThreadView extends AbstractView {
         }
     }
 
+    // public function showMarkdownPreview($enablePreview) {
+    //     $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
+    //     $email_enabled = $this->core->getConfig()->isEmailEnabled();
+
+    //     return $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", {
+
+    //     })
+    // }
+
     public function createThread($category_colors, $enablePreview = false) {
         if (!$this->forumAccess()) {
             $this->core->redirect($this->core->buildCourseUrl());
@@ -1180,6 +1189,10 @@ class ForumThreadView extends AbstractView {
 
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
+
+        if($enablePreview){
+            $this->core->getOutput()->disableRender();
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,

@@ -29,8 +29,8 @@
             <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
             <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
             <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-            <button title="Preview Markdown" type="button" onclick="previewMarkdown(true)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
-            <p>{{ enablePreview ? "True" : "False" }}</p>
+            <button title="Preview Markdown" type="button" onclick="previewMarkdown({{ not enablePreview }})" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+            <p id="showMarkdownP">{{ enablePreview ? "True" : "False" }}</p>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>

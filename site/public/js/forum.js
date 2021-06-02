@@ -1593,23 +1593,24 @@ function addMarkdownCode(type, divTitle){
 
 function previewMarkdown(enablePreview){
   console.log(enablePreview);
+  if(!enablePreview) enablePreview = false;
   const url = buildCourseUrl(['forum', 'threads', 'preview']);
-  if(enablePreview){
-    // $.ajax({
-    //   url: url,
-    //   type: "POST",
-    //   data: {
-    //       enablePreview: enablePreview,
-    //       csrf_token: csrfToken
-    //   },
-    //   success: function(data){
-    //       console.log(data);
-    //   },
-    //   error: function() {
-    //       window.alert("Something went wrong while trying to preview new thread. Please try again.");
-    //   }
-    // });
-  }
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: {
+        enablePreview: enablePreview,
+        csrf_token: csrfToken
+    },
+    success: function(data){
+      console.log($.parseHTML(data));
+      $('#main').empty();
+      $('#main').append(data);
+    },
+    error: function() {
+        window.alert("Something went wrong while trying to preview new thread. Please try again.");
+    }
+  });
 }
 
 function checkInputMaxLength(obj){
