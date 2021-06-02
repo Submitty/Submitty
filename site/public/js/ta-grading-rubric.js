@@ -3126,9 +3126,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
     student_grader = $("#student-grader").attr("is-student-grader"); 
-    precision = getPointPrecision();
-    displayParam = [precision, editable, showMarkList, student_grader];
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getComponentVersionConflict(graded_component), displayParam)
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
