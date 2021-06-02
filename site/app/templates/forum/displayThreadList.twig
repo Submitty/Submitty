@@ -26,9 +26,6 @@
                         {% if thread.merged_thread_id != -1 %}
                             <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
                         {% endif %}
-                        {% if "new_thread" in thread.class %}
-                            <i class="fas fa-exclamation thread-unread"></i>
-                        {% endif %}
 
                         {% if thread.status != 0 %}
                             <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status"
