@@ -284,6 +284,7 @@ CREATE TABLE public.gradeable (
     g_grade_locked_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
+    g_allow_custom_marks boolean NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
     CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),

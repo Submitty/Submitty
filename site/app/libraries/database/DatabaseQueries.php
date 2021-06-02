@@ -4466,6 +4466,7 @@ AND gc_id IN (
               g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
+              g_allow_custom_marks AS allow_custom_marks,     
               eg.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
