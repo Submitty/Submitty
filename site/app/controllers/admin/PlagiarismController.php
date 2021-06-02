@@ -788,7 +788,8 @@ class PlagiarismController extends AbstractController {
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
         foreach ($gradeable_ids_titles as $gradeable_id_title) {
-            if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+            if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") ||
+                    file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 $this->core->getOutput()->renderString("REFRESH_ME");
                 return;
             }
