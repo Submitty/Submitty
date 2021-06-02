@@ -11,7 +11,6 @@ import shutil
 import string
 import tzlocal
 import tempfile
-import readline
 
 
 def get_uid(user):
@@ -45,14 +44,23 @@ if os.getuid() != 0:
 
 parser = argparse.ArgumentParser(description='Submitty configuration script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty to be in debug mode. '
-                                                                        'This should not be used in production!')
+
+parser.add_argument('--debug', action='store_true', default=False,
+                    help='Configure Submitty to be in debug mode.\
+                          This should not be used in production!')
+
 parser.add_argument('--setup-for-sample-courses', action='store_true', default=False,
-                    help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
-                         "flag and should not be used in production!")
-parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
-parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
-parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
+                    help="Sets up Submitty for use with the sample courses. This is a\
+                          Vagrant convenience flag and should not be used in production!")
+
+parser.add_argument('--worker', action='store_true', default=False,
+                    help='Configure Submitty with autograding only')
+
+parser.add_argument('--install-dir', default='/usr/local/submitty',
+                    help='Set the install directory for Submitty')
+
+parser.add_argument('--data-dir', default='/var/local/submitty',
+                    help='Set the data directory for Submitty')
 
 args = parser.parse_args()
 
@@ -66,11 +74,13 @@ SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
 # FIXME: Check that directories exist and are readable/writeable?
 SUBMITTY_INSTALL_DIR = args.install_dir
 if not os.path.isdir(SUBMITTY_INSTALL_DIR) or not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK):
-    raise SystemExit('Install directory {} does not exist or is not accessible'.format(SUBMITTY_INSTALL_DIR))
+    raise SystemExit('Install directory {} does not exist or is not accessible'
+                     .format(SUBMITTY_INSTALL_DIR))
 
 SUBMITTY_DATA_DIR = args.data_dir
 if not os.path.isdir(SUBMITTY_DATA_DIR) or not os.access(SUBMITTY_DATA_DIR, os.R_OK | os.W_OK):
-    raise SystemExit('Data directory {} does not exist or is not accessible'.format(SUBMITTY_DATA_DIR))
+    raise SystemExit('Data directory {} does not exist or is not accessible'
+                     .format(SUBMITTY_DATA_DIR))
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
@@ -152,10 +162,17 @@ defaults = {
     'supervisor_user': 'submitty',
     'vcs_url': '',
     'authentication_method': 1,
-    'institution_name' : '',
-    'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
-    'institution_homepage' : '',
-    'timezone' : tzlocal.get_localzone().zone,
+    'institution_name': '',
+    'username_change_text': 'Submitty welcomes individuals of all ages, backgrounds,\
+                             citizenships, disabilities, sex, education, ethnicities,\
+                             family statuses, genders, gender identities, geographical\
+                             locations, languages, military experience, political views,\
+                             races, religions, sexual orientations, socioeconomic statuses,\
+                             and work experiences. In an effort to create an inclusive\
+                             environment, you may specify a preferred name to be used\
+                             instead of what was provided on the registration roster.',
+    'institution_homepage': '',
+    'timezone': tzlocal.get_localzone().zone,
     'submitty_admin_username': '',
     'submitty_admin_password': '',
     'email_user': '',
@@ -180,11 +197,11 @@ if os.path.isfile(EMAIL_JSON):
     with open(EMAIL_JSON) as email_file:
         loaded_defaults.update(json.load(email_file))
 
-
-    #no need to authenticate on a worker machine (no website)
+    # no need to authenticate on a worker machine (no website)
     if not args.worker:
         if 'authentication_method' in loaded_defaults:
-            loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+            loaded_defaults['authentication_method'] =\
+                1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
         else:
             loaded_defaults['authentication_method'] = 2
 
@@ -209,54 +226,70 @@ print('Hit enter to use default in []')
 print()
 
 if args.worker:
-    SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
+    SUPERVISOR_USER = get_input('What is the id for your submitty user?',
+                                defaults['supervisor_user'])
 else:
-    DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
+    DATABASE_HOST = get_input('What is the database host?',
+                              defaults['database_host'])
     print()
 
     if not os.path.isdir(DATABASE_HOST):
-        DATABASE_PORT = int(get_input('What is the database port?', defaults['database_port']))
+        DATABASE_PORT = int(get_input('What is the database port?',
+                                      defaults['database_port']))
         print()
     else:
         DATABASE_PORT = defaults['database_port']
 
-    DATABASE_USER = get_input('What is the database user/role?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the database user/role?',
+                              defaults['database_user'])
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the password for the database user/role {}? {}'.format(DATABASE_USER, default))
+
+    DATABASE_PASS = get_input('What is the password for the database user/role {}? {}'
+                              .format(DATABASE_USER, default))
+
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
     print()
 
-    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
+    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of\
+                          supported timezones see http://php.net/manual/en/timezones.php)',
+                         defaults['timezone'])
     print()
 
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
-                               'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+                               'https://submitty.cs.rpi.edu)',
+                               defaults['submission_url']).rstrip('/')
     print()
 
-    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type}) (ex: http://192.168.56.101/{$vcs_type} or https://submitty-vcs.cs.rpi.edu/{$vcs_type}', defaults['vcs_url']).rstrip('/')
+    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type})\
+                         (ex: http://192.168.56.101/{$vcs_type} or\
+                         https://submitty-vcs.cs.rpi.edu/{$vcs_type}',
+                        defaults['vcs_url']).rstrip('/')
     print()
 
-    INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
-                             defaults['institution_name'])
+    INSTITUTION_NAME = get_input('What is the name of your institution?\
+                                 (Leave blank/type "none" if not desired)',
+                                 defaults['institution_name'])
     print()
 
     if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
         INSTITUTION_HOMEPAGE = ''
     else:
         INSTITUTION_HOMEPAGE = get_input("What is the url of your institution\'s homepage? "
-                                     '(Leave blank/type "none" if not desired)', defaults['institution_homepage'])
+                                         '(Leave blank/type "none" if not desired)',
+                                         defaults['institution_homepage'])
         if INSTITUTION_HOMEPAGE.lower() == "none":
             INSTITUTION_HOMEPAGE = ''
         print()
 
-
-    SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
-    SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
+    SYS_ADMIN_EMAIL = get_input("What is the email for system administration?",
+                                defaults['sys_admin_email'])
+    SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?",
+                              defaults['sys_admin_url'])
 
     USERNAME_TEXT = defaults['username_change_text']
 
@@ -278,9 +311,11 @@ else:
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
-    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'])
+    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?",
+                                        defaults['submitty_admin_username'])
     while True:
-        SUBMITTY_ADMIN_PASSWORD = get_input("What is the submitty admin password", defaults['submitty_admin_password'])
+        SUBMITTY_ADMIN_PASSWORD = get_input("What is the submitty admin password",
+                                            defaults['submitty_admin_password'])
         if SUBMITTY_ADMIN_USERNAME != '' and SUBMITTY_ADMIN_PASSWORD == '':
             continue
         break
@@ -290,12 +325,17 @@ else:
         if (is_email_enabled.lower() in ['yes', 'y']):
             EMAIL_ENABLED = True
             EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
-            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
-            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
-            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
-            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
+            EMAIL_PASSWORD = get_input("What is the email password", defaults['email_password'])
+            EMAIL_SENDER = get_input("What is the email sender address\
+                                      (the address that will appear in the From: line)?",
+                                     defaults['email_sender'])
+            EMAIL_REPLY_TO = get_input("What is the email reply to address?",
+                                       defaults['email_reply_to'])
+            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?",
+                                              defaults['email_server_hostname'])
             try:
-                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
+                EMAIL_SERVER_PORT = int(get_input("What is the email server port?",
+                                                  defaults['email_server_port']))
             except ValueError:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
             break
@@ -310,7 +350,6 @@ else:
             EMAIL_SERVER_PORT = defaults['email_server_port']
             break
     print()
-
 
 
 ##############################################################################
@@ -420,13 +459,14 @@ WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 
-#Rescue the autograding_workers and _containers files if they exist.
+# Rescue the autograding_workers and _containers files if they exist.
 rescued = list()
 tmp_folder = tempfile.mkdtemp()
 if not args.worker:
-    for full_file_name, file_name in [(WORKERS_JSON, 'autograding_workers.json'), (CONTAINERS_JSON, 'autograding_containers.json')]:
+    for full_file_name, file_name in [(WORKERS_JSON, 'autograding_workers.json'),
+                                      (CONTAINERS_JSON, 'autograding_containers.json')]:
         if os.path.isfile(full_file_name):
-            #make a tmp folder and copy autograding workers to it
+            # make a tmp folder and copy autograding workers to it
             tmp_file = os.path.join(tmp_folder, file_name)
             shutil.move(full_file_name, tmp_file)
             rescued.append((full_file_name, tmp_file))
@@ -439,13 +479,13 @@ os.chmod(CONFIG_INSTALL_DIR, 0o755)
 
 # Finish rescuing files.
 for full_file_name, tmp_file_name in rescued:
-    #copy autograding workers back
+    # copy autograding workers back
     shutil.move(tmp_file_name, full_file_name)
-    #make sure the permissions are correct.
-    shutil.chown(full_file_name, 'root',DAEMON_GID)
+    # make sure the permissions are correct.
+    shutil.chown(full_file_name, 'root', DAEMON_GID)
     os.chmod(full_file_name, 0o460)
 
-#remove the tmp folder
+# remove the tmp folder
 os.removedirs(tmp_folder)
 
 ##############################################################################
@@ -459,7 +499,7 @@ if not args.worker:
                 "address": "localhost",
                 "username": "",
                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                "enabled" : True
+                "enabled": True
             }
         }
 
@@ -490,8 +530,8 @@ if not args.worker:
             json.dump(container_dict, container_file, indent=4)
 
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
-      shutil.chown(file, 'root',DAEMON_GID)
-      os.chmod(file, 0o460)
+        shutil.chown(file, 'root', DAEMON_GID)
+        os.chmod(file, 0o460)
 
     shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 

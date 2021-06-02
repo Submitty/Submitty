@@ -1,17 +1,19 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import sys
 import os
 import csv
 import argparse
 
-# Given a directory mirroring a submission directory (see arguments), this script will generate 
+# Given a directory mirroring a submission directory (see arguments), this script will generate
 # a csv userlist for upload to submitty.
 #
 # ARGUMENTS
-# 1) The path to the top level of the old assignment's directory tree. This folder's subdirectories should mirror 
-#    a /var/local/submitty/courses/<semester>/<course>/submissions/<assignment_name> folder. 
+# 1) The path to the top level of the old assignment's directory tree. This folder's subdirectories should mirror
+#    a /var/local/submitty/courses/<semester>/<course>/submissions/<assignment_name> folder.
 # OUTPUT:
 # 1) A csv of the form: username, LastName, FirstName, email, RegistrationSection
+
+
 def main():
     parser = argparse.ArgumentParser(description='Given a directory mirroring a submission directory (see arguments),\
      this script will generate a csv userlist for upload to submitty.')
@@ -21,13 +23,13 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(args.archived_directory):
-        raise SystemExit("The provided directory (" + args.archived_directory + ") does not exist.") 
+        raise SystemExit("The provided directory (" + args.archived_directory + ") does not exist.")
     course_name = sys.argv[1].split('/')[-2]
     csv_name = course_name + ".csv"
 
-    print ("WRITING TO ",csv_name)
-    
-    #make a list of students
+    print("WRITING TO ", csv_name)
+
+    # make a list of students
     student_list = list()
     for student_name in os.listdir(args.archived_directory):
         student_dir = os.path.join(args.archived_directory, student_name)
@@ -42,12 +44,11 @@ def main():
         with open(os.path.join(os.getcwd(), csv_name), "w") as out_file:
             writer = csv.writer(out_file)
             for student in student_list:
-                #TODO: Do something clever with the name/last name/email/section.
+                # TODO: Do something clever with the name/last name/email/section.
                 writer.writerow((student, "a", "b", "c@email.com", "null"))
     finally:
         f.close()
 
-  
 
 if __name__ == '__main__':
     main()

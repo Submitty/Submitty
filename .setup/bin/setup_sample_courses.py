@@ -30,16 +30,12 @@ import subprocess
 import uuid
 import os.path
 import string
-import sys
-import configparser
-import csv
-import pdb
 import docker
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select
 import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -52,7 +48,7 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as database_config:
+with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
     database_config_json = json.load(database_config)
     DB_USER = database_config_json["database_user"]
     DB_PASS = database_config_json["database_password"]
@@ -87,7 +83,7 @@ def main():
     # permission errors exist) which ends up with just having a ton of
     # build failures. Better to wait on grading any homeworks until
     # we've done all steps of setting up a course.
-    print ("pausing the autograding and jobs hander daemons")
+    print("pausing the autograding and jobs hander daemons")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
@@ -105,7 +101,8 @@ def main():
 
     for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
-        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
+        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi',
+                       'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
             continue
         user.create()
@@ -127,8 +124,7 @@ def main():
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
         tmp = course.registered_students + course.unregistered_students + \
-              course.no_rotating_students + \
-              course.no_registration_students
+            course.no_rotating_students + course.no_registration_students
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
@@ -140,7 +136,7 @@ def main():
         user = users[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
-                              user_numeric_id = user.numeric_id,
+                              user_numeric_id=user.numeric_id,
                               user_password=get_php_db_password(user.password),
                               user_firstname=user.firstname,
                               user_preferred_firstname=user.preferred_firstname,
@@ -150,13 +146,13 @@ def main():
                               user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
-    #Sort alphabetically extra students. Shouldn't affect randomness....
+    # Sort alphabetically extra students. Shouldn't affect randomness....
     extra_students.sort(key=lambda x: x.id)
 
     for user in extra_students:
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
-                              user_numeric_id = user.numeric_id,
+                              user_numeric_id=user.numeric_id,
                               user_password=get_php_db_password(user.password),
                               user_firstname=user.firstname,
                               user_preferred_firstname=user.preferred_firstname,
@@ -190,34 +186,38 @@ def main():
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
-        students = random.sample(extra_students, course.registered_students + course.no_registration_students +
-                                 course.no_rotating_students + course.unregistered_students)
+        students = random.sample(extra_students, course.registered_students +
+                                 course.no_registration_students +
+                                 course.no_rotating_students +
+                                 course.unregistered_students)
         key = 0
         for i in range(course.registered_students):
             reg_section = (i % course.registration_sections) + 1
             rot_section = (i % course.rotating_sections) + 1
-            students[key].courses[course.code] = {"registration_section": reg_section, "rotating_section": rot_section}
+            students[key].courses[course.code] = {"registration_section": reg_section,
+                                                  "rotating_section": rot_section}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_rotating_students):
             reg_section = (i % course.registration_sections) + 1
-            students[key].courses[course.code] = {"registration_section": reg_section, "rotating_section": None}
+            students[key].courses[course.code] = {"registration_section": reg_section,
+                                                  "rotating_section": None}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_registration_students):
             rot_section = (i % course.rotating_sections) + 1
-            students[key].courses[course.code] = {"registration_section": None, "rotating_section": rot_section}
+            students[key].courses[course.code] = {"registration_section": None,
+                                                  "rotating_section": rot_section}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.unregistered_students):
-            students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
+            students[key].courses[course.code] = {"registration_section": None,
+                                                  "rotating_section": None}
             course.users.append(students[key])
             key += 1
-
-
 
     for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]
@@ -247,7 +247,8 @@ def get_random_text_from_file(filename):
 
 
 def generate_random_user_id(length=15):
-    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(length))
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase
+                                 + string.digits) for _ in range(length))
 
 
 def generate_random_ta_comment():
@@ -275,6 +276,7 @@ def generate_random_marks(default_value, max_value):
         marks.append(Mark(mark_list[i], i))
     return marks
 
+
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
         return original_value
@@ -283,7 +285,8 @@ def generate_versions_to_submit(num=3, original_value=3):
     else:
         return original_value-(num-1)
 
-def generate_probability_space(probability_dict, default = 0):
+
+def generate_probability_space(probability_dict, default=0):
     """
     This function takes in a dictionary whose key is the probability (decimal less than 1),
     and the value is the outcome (whatever the outcome is).
@@ -298,6 +301,7 @@ def generate_probability_space(probability_dict, default = 0):
             return value
         prev_random_counter = probability_counter
     return default
+
 
 def generate_random_users(total, real_users):
     """
@@ -327,7 +331,7 @@ def generate_random_users(total, real_users):
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
-            #create a binary string for the numeric ID
+            #c reate a binary string for the numeric ID
             numeric_id = '{0:09b}'.format(i)
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
@@ -337,7 +341,7 @@ def generate_random_users(total, real_users):
             if anon_id in anon_ids:
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
-                             "user_numeric_id" : numeric_id,
+                             "user_numeric_id": numeric_id,
                              "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
@@ -476,15 +480,16 @@ def parse_args():
     parser.add_argument("--db_only", action='store_true', default=False)
     parser.add_argument("--no_submissions", action='store_true', default=False)
     parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
-                        help="Path to folder that contains .yml files to use for user creation. Defaults to "
-                             "../data/users")
-    parser.add_argument("--submission_url", type=str, default="",help="top level url for the website")
+                        help="Path to folder that contains .yml files to use for user creation.\
+                        Defaults to ../data/users")
+    parser.add_argument("--submission_url", type=str, default="",
+                        help="top level url for the website")
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
-                        help="Path to the folder that contains .yml files to use for course creation. Defaults to "
-                             "../data/courses")
+                        help="Path to the folder that contains .yml files to use for course\
+                             creation. Defaults to ../data/courses")
     parser.add_argument("course", nargs="*",
-                        help="course code to build. If no courses are passed in, then it'll use "
-                             "all courses in courses.json")
+                        help="course code to build. If no courses are passed in, then it'll\
+                        use all courses in courses.json")
     return parser.parse_args()
 
 
@@ -499,15 +504,18 @@ def create_user(user_id):
 
 def create_gradeable_submission(src, dst):
     """
-    Given a source and a destination, copy the files from the source to the destination. First, before
-    copying, we check if the source is a directory, if it is, then we zip the contents of this to a temp
-    zip file (stored in /tmp) and store the path to this newly created zip as our new source.
+    Given a source and a destination, copy the files from the source to the destination. First,
+    before copying, we check if the source is a directory, if it is, then we zip the contents
+    of this to a temp zip file (stored in /tmp) and store the path to this newly created zip
+    as our new source.
 
-    At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
-    a .zip), then we will extract the contents of the source (using Shutil) to the destination, else we
-    just do a simple copy operation of the source file to the destination location.
+    At this point, (for all uploads), we check if our source is a zip (by just checking file
+    extension is a .zip), then we will extract the contents of the source (using Shutil) to
+    the destination, else we just do a simple copy operation of the source file to the
+    destination location.
 
-    At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
+    At this point, if we created a zip file (as part of that first step), we remove it
+    from the /tmp directory.
 
     :param src: path of the file or directory we want to use for this submission
     :type src: str
@@ -527,6 +535,7 @@ def create_gradeable_submission(src, dst):
 
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
+
 
 class User(object):
     """
@@ -579,11 +588,13 @@ class User(object):
         if 'user_group' in user:
             self.group = user['user_group']
         if self.group < 1 or 4 < self.group:
-            raise SystemExit("ASSERT: user {}, user_group is not between 1 - 4. Check YML file.".format(self.id))
+            raise SystemExit("ASSERT: user {}, user_group is not between 1 - 4. Check YML file."
+                             .format(self.id))
         if 'user_access_level' in user:
             self.access_level = user['user_access_level']
         if self.access_level < 1 or 3 < self.access_level:
-            raise SystemExit("ASSERT: user {}, user_access_level is not between 1 - 3. Check YML file.".format(self.id))
+            raise SystemExit("ASSERT: user {}, user_access_level is not between 1 - 3.\
+                              Check YML file.".format(self.id))
         if 'registration_section' in user:
             self.registration_section = int(user['registration_section'])
         if 'rotating_section' in user:
@@ -625,7 +636,8 @@ class User(object):
     def _create_ssh(self):
         if not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
+            os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}"
+                      .format(self.id))
             self.set_password()
 
     def _create_non_ssh(self):
@@ -699,6 +711,7 @@ class Course(object):
         if 'make_customization' in course:
             self.make_customization = course['make_customization']
 
+
     def create(self):
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
@@ -729,12 +742,14 @@ class Course(object):
         database = "submitty_" + self.semester + "_" + self.code
         print("Database created, now populating ", end="")
 
-        submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+        submitty_engine = create_engine("postgresql://{}:{}@{}/submitty"
+                                        .format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
         print("(Master DB connection made, metadata bound)...")
 
-        engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST, database))
+        engine = create_engine("postgresql://{}:{}@{}/{}"
+                               .format(DB_USER, DB_PASS, DB_HOST, database))
         self.conn = engine.connect()
         self.metadata = MetaData(bind=engine)
         print("(Course DB connection made, metadata bound)...")
@@ -744,7 +759,8 @@ class Course(object):
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            submitty_conn.execute(table.insert(), semester=self.semester, course=self.code, registration_section_id=str(section))
+            submitty_conn.execute(table.insert(), semester=self.semester,
+                                  course=self.code, registration_section_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
@@ -769,7 +785,7 @@ class Course(object):
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
             if reg_section is not None:
-                reg_section=str(reg_section)
+                reg_section = str(reg_section)
             # We already have a row in submitty.users for this user,
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
@@ -785,17 +801,18 @@ class Course(object):
                 users_table.c.anon_id: bindparam('anon_id')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            self.conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
+            self.conn.execute(update, rotating_section=rot_section,
+                              anon_id=user.anon_id, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
-                    grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
+                    grading_registration_sections = str(user.get_detail(self.code, "grading_registration_section"))
                     grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
                 except ValueError:
                     grading_registration_sections = []
                 for grading_registration_section in grading_registration_sections:
                     self.conn.execute(reg_table.insert(),
-                                 user_id=user.get_detail(self.code, "id"),
-                                 sections_registration_id=str(grading_registration_section))
+                                      user_id=user.get_detail(self.code, "id"),
+                                      sections_registration_id=str(grading_registration_section))
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
@@ -841,30 +858,33 @@ class Course(object):
             #create_teams
             if gradeable.team_assignment is True:
                 json_team_history = self.make_sample_teams(gradeable)
-            if gradeable.type == 0 and \
-                (len(gradeable.submissions) == 0 or
-                 gradeable.sample_path is None or
-                 gradeable.config_path is None):
+            if gradeable.type == 0 and (len(gradeable.submissions) == 0 or
+               gradeable.sample_path is None or gradeable.config_path is None):
                 #  Make sure the electronic gradeable is valid
-                    continue
+                continue
 
-            #creating the folder containing all the submissions
+            # creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
             # makes a section be ungraded if the gradeable is not electronic
-            ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
+            ungraded_section = random.randint(1, max(1, self.registration_sections
+                                              if gradeable.grade_by_registration
+                                              else self.rotating_sections))
             #This for loop adds submissions for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 for user in self.users:
                     submitted = False
                     team_id = None
                     if gradeable.team_assignment is True:
-                        #If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                        res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
-                        ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
+                        # If gradeable is team assignment, then make sure to make a
+                        # team_id and don't over submit
+                        res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN\
+                        gradeable_teams ON teams.team_id = gradeable_teams.team_id where\
+                        user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
+
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
@@ -882,11 +902,13 @@ class Course(object):
 
                     if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                         if user.id in gradeable.plagiarized_user:
-                            #If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to
-                            # be the same as the number of assignments defined in users.yml in the lichen_submissions folder.
+                            # If the user is a bad and unethical student(plagiarized_user),
+                            # then the version to submit is going to be the same as the number
+                            # of assignments defined in users.yml in the lichen_submissions folder.
                             versions_to_submit = len(gradeable.plagiarized_user[user.id])
                         else:
-                            versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
+                            versions_to_submit = generate_versions_to_submit(max_individual_submissions,
+                                                                             max_individual_submissions)
                         if (gradeable.gradeable_config is not None and
                            (gradeable.submission_due_date < NOW or random.random() < 0.5)
                            and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
@@ -901,16 +923,17 @@ class Course(object):
                             version_population = []
                             for version in range(1, versions_to_submit+1):
                                 version_population.append((version, 3))
-                            version_population = [(0,1)] + version_population
+                            version_population = [(0, 1)] + version_population
                             version_population = [ver for ver, freq in version_population for i in range(freq)]
                             active_version = random.choice(version_population)
                             if team_id is not None:
-                                json_history = {"active_version": active_version, "history": [], "team_history": []}
+                                json_history = {"active_version": active_version,
+                                                "history": [], "team_history": []}
                             else:
                                 json_history = {"active_version": active_version, "history": []}
                             random_days = 1
                             if random.random() < 0.3:
-                                random_days = random.choice(range(-3,2))
+                                random_days = random.choice(range(-3, 2))
                             for version in range(1, versions_to_submit+1):
                                 os.system("mkdir -p " + os.path.join(submission_path, str(version)))
                                 submitted = True
@@ -1572,7 +1595,7 @@ class Gradeable(object):
                 length=len(graders)
                 for i in range(length):
                     conn.execute(peer_assign.insert(), g_id=self.id, grader_id=graders[i], user_id=students[i])
-            
+
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,

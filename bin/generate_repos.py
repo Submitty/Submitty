@@ -38,8 +38,9 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     JSON = json.load(open_file)
 VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs', 'git')
 
+
 # =======================================================================
-def add_empty_commit(folder,which_branch):
+def add_empty_commit(folder, which_branch):
 
     assert (os.path.isdir(folder))
     os.chdir(folder)
@@ -84,19 +85,19 @@ def create_new_repo(folder, which_branch):
 
     # and explicitly add an empty commit to the specified branch
     # so that the repository is not empty
-    add_empty_commit(folder,which_branch)
+    add_empty_commit(folder, which_branch)
 
     print(f'Created new repo {folder}')
 
 
 # =======================================================================
 def create_or_update_repo(folder, which_branch):
-    print ('--------------------------------------------')
-    print (f'Create or update repo {folder}')
+    print('--------------------------------------------')
+    print(f'Create or update repo {folder}')
 
     if not os.path.isdir(folder):
         # if the repo doesn't already exist, create it
-        create_new_repo(folder,which_branch)
+        create_new_repo(folder, which_branch)
 
     else:
         os.chdir(folder)
@@ -108,9 +109,8 @@ def create_or_update_repo(folder, which_branch):
         # if this repo has no branches with valid commits, add an
         # empty commit to the specified branch so that the repository
         # is not empty
-        add_empty_commit(folder,which_branch)
-        
-        
+        add_empty_commit(folder, which_branch)
+
     # set/correct the permissions of all files
     os.chdir(folder)
     for root, dirs, files in os.walk(folder):
@@ -120,7 +120,8 @@ def create_or_update_repo(folder, which_branch):
 
 # =======================================================================
 
-parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
+parser = argparse.ArgumentParser(description="Generate git repositories for a\
+                                              specific course and homework")
 parser.add_argument("--non-interactive", action='store_true', default=False)
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
@@ -140,7 +141,8 @@ connection = engine.connect()
 metadata = MetaData(bind=engine)
 
 courses_table = Table('courses', metadata, autoload=True)
-select = courses_table.select().where(courses_table.c.semester == bindparam('semester')).where(courses_table.c.course == bindparam('course'))
+select = courses_table.select().where(courses_table.c.semester == bindparam('semester'))\
+                               .where(courses_table.c.course == bindparam('course'))
 course = connection.execute(select, semester=args.semester, course=args.course).fetchone()
 
 if course is None:
@@ -187,10 +189,12 @@ is_team = False
 if eg is not None:
     is_team = eg.eg_team_assignment
 elif not args.non_interactive:
-    print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
-    response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
+    print("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'."
+          .format(args.semester, args.course, args.repo_name))
+    response = input(f"Should we continue and make individual repositories \
+                      named '{args.repo_name}' for each student? (y/n) ")
     if not response.lower() == 'y':
-        print ("exiting");
+        print("exiting")
         sys.exit()
 
 
@@ -202,10 +206,10 @@ with open(course_config_file) as open_file:
     COURSE_JSON = json.load(open_file)
 course_git_autograding_branch = COURSE_JSON['course_details']['git_autograding_branch']
 # verify that the branch only contains alphabetic characters a-z
-if not re.match('^[a-z]+$',course_git_autograding_branch):
-    print (f"Invalid course git autograding branch '{course_git_autograding_branch}'")
+if not re.match('^[a-z]+$', course_git_autograding_branch):
+    print(f"Invalid course git autograding branch '{course_git_autograding_branch}'")
     course_git_autograding_branch = 'main'
-print ("The git autograding branch for this course is: " + course_git_autograding_branch)
+print("The git autograding branch for this course is: " + course_git_autograding_branch)
 
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
@@ -214,16 +218,21 @@ if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
 
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)
-    select = teams_table.select().where(teams_table.c.g_id == bindparam('gradeable_id')).order_by(teams_table.c.team_id)
+    select = teams_table.select().where(teams_table.c.g_id == bindparam('gradeable_id'))\
+                                 .order_by(teams_table.c.team_id)
     teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), course_git_autograding_branch)
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name,
+                                           team.team_id), course_git_autograding_branch)
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
+    select = users_table.select().where(users_table.c.semester == bindparam('semester'))\
+                                 .where(users_table.c.course == bindparam('course'))\
+                                 .order_by(users_table.c.user_id)
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), course_git_autograding_branch)
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id),
+                              course_git_autograding_branch)

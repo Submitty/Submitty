@@ -99,8 +99,8 @@ def main():
     remove_file("/etc/motd")
 
     # Scrub out the network interfaces that were created for Vagrant
-    #subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
-    #remove_file("/etc/network/interfaces.d/enp0s8.cfg")
+    # subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
+    # remove_file("/etc/network/interfaces.d/enp0s8.cfg")
 
     # Remove the data directories for submitty
     shutil.rmtree('/usr/local/submitty/.setup', True)
@@ -141,7 +141,7 @@ def main():
                 file_path = os.path.join(folder, the_file)
                 remove_file(file_path)
 
-    #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
+    # remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
     shutil.rmtree('/root/bin', True)
 
@@ -162,6 +162,7 @@ def main():
 
     for group in groups:
         os.system('groupdel ' + group)
+
 
 if __name__ == '__main__':
     main()

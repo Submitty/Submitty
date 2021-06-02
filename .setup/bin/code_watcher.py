@@ -60,7 +60,7 @@ def main():
         raise SystemExit("ERROR: this script should be run as root")
 
     parser = ArgumentParser(description='Watch a directory and install the code')
-    args = parser.parse_args()
+    parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
     setup_path = Path(current_path, '..').resolve()

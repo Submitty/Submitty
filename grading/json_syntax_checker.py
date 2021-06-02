@@ -7,7 +7,8 @@ import traceback
 import sys
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Preprocess a instructor config json to prepare it for main_configure.cpp")
+    parser = argparse.ArgumentParser(description="Preprocess a instructor config\
+                                                  json to prepare it for main_configure.cpp")
     parser.add_argument("file", metavar="file_name", type=str,
                         help="File name of JSON file to validate")
     args = parser.parse_args()
