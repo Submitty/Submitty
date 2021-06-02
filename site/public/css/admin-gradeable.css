@@ -320,3 +320,12 @@ body::-webkit-scrollbar-track {
     background-color: var(--standard-medium-dark-gray);
     border: 1px solid var(--standard-focus-cornflowe-blue);
 }
+
+#config_search {
+    padding-right: 45px;
+}
+
+#clear_search_button {
+    padding-right: 6px;
+    color: red;
+}
