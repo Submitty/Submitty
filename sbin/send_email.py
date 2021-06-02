@@ -215,45 +215,42 @@ def send_email():
     """Send queued emails."""
     db, metadata = setup_db()
     queued_emails = get_email_queue(db)
-    if len(queued_emails) == 0:
-        return
     mail_client = construct_mail_client()
 
     success_count = 0
 
-    while success_count <= 100:
-        for email_data in queued_emails:
-            if email_data["send_to"] == "":
-                store_error(email_data["id"], db, metadata, "WARNING: empty email address")
-                e = "[{}] WARNING: empty email address for recipient {}".format(
-                    str(datetime.datetime.now()), email_data["user_id"])
-                LOG_FILE.write(e+"\n")
-                continue
+    queued_emails = queued_emails + get_external_queue(db, 100-len(queued_emails))
 
-            email = construct_mail_string(
-                email_data["send_to"], email_data["subject"], email_data["body"])
+    if len(queued_emails) == 0:
+        return
 
-            try:
-                mail_client.sendmail(EMAIL_SENDER,
-                                     email_data["send_to"], email.encode('utf8'))
-                mark_sent(email_data["id"], db)
-                success_count += 1
+    for email_data in queued_emails:
+        if email_data["send_to"] == "":
+            store_error(email_data["id"], db, metadata, "WARNING: empty email address")
+            e = "[{}] WARNING: empty email address for recipient {}".format(
+                str(datetime.datetime.now()), email_data["user_id"])
+            LOG_FILE.write(e+"\n")
+            continue
 
-            except Exception as email_send_error:
-                store_error(email_data["id"], db, metadata, "ERROR: sending email "
-                            + str(email_send_error))
-                e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
-                    str(datetime.datetime.now()),
-                    email_data["user_id"],
-                    email_data["send_to"],
-                    str(email_send_error))
-                LOG_FILE.write(e+"\n")
-                print(e)
+        email = construct_mail_string(
+            email_data["send_to"], email_data["subject"], email_data["body"])
 
-        if success_count <= 100:
-            queued_emails = get_external_queue(db, 100-success_count)
-            if len(queued_emails) == 0:
-                break
+        try:
+            mail_client.sendmail(EMAIL_SENDER,
+                                 email_data["send_to"], email.encode('utf8'))
+            mark_sent(email_data["id"], db)
+            success_count += 1
+
+        except Exception as email_send_error:
+            store_error(email_data["id"], db, metadata, "ERROR: sending email "
+                        + str(email_send_error))
+            e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
+                str(datetime.datetime.now()),
+                email_data["user_id"],
+                email_data["send_to"],
+                str(email_send_error))
+            LOG_FILE.write(e+"\n")
+            print(e)
 
     e = "[{}] Sucessfully Emailed {} Users".format(
         str(datetime.datetime.now()), success_count)
