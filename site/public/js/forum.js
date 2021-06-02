@@ -1594,18 +1594,31 @@ function addMarkdownCode(type, divTitle){
 function previewMarkdown(enablePreview){
   console.log(enablePreview);
   if(!enablePreview) enablePreview = false;
+
+  const post_content = $('textarea#reply_box_1').val();
+  console.log(post_content);
+
   const url = buildCourseUrl(['forum', 'threads', 'preview']);
   $.ajax({
     url: url,
     type: "POST",
     data: {
         enablePreview: enablePreview,
+        post_content: post_content,
         csrf_token: csrfToken
     },
     success: function(data){
-      console.log($.parseHTML(data));
-      $('#main').empty();
-      $('#main').append(data);
+      $('#preview_box_1').empty();
+      $('#preview_box_1').append(data);
+      $('#preview_box_1').show();
+      $('#reply_box_1').hide();
+      console.log(data);
+      // const span = $.parseHTML(data);
+      // span.innerHTML = $('#reply_box_1').val();
+      // //$('#reply_box_1').insertAfter(span);
+      // console.log(span);
+      // $('#reply_box_1').parent().append(span);
+      
     },
     error: function() {
         window.alert("Something went wrong while trying to preview new thread. Please try again.");

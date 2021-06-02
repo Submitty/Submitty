@@ -1147,6 +1147,14 @@ class ForumThreadView extends AbstractView {
     //     })
     // }
 
+    public function previewPost($enablePreview, $post_content) {
+        $this->core->getOutput()->disableRender();
+        return $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "render_markdown" => $enablePreview,
+                "post_content" => $post_content
+        ]);
+    }
+
     public function createThread($category_colors, $enablePreview = false) {
         if (!$this->forumAccess()) {
             $this->core->redirect($this->core->buildCourseUrl());
@@ -1192,6 +1200,9 @@ class ForumThreadView extends AbstractView {
 
         if($enablePreview){
             $this->core->getOutput()->disableRender();
+            return $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "render_markdown" => $enablePreview
+            ]);
         }
 
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [

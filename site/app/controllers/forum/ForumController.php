@@ -1115,7 +1115,7 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/threads/preview", methods={"POST"})
      */
     public function showMarkdownPreview(){
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor(), $_POST['enablePreview']);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'previewPost', $_POST['enablePreview'], $_POST['post_content']);
     }
 
     /**
