@@ -3188,3 +3188,10 @@ function addItempoolOptions(componentId) {
   select_ele.html(itempool_options);
   select_ele.val(selected_value).change();
 }
+
+$(document).ready(function(){
+    $(window).on('beforeunload', function(e){
+        closeAllComponents(true);
+    });
+}
+);
