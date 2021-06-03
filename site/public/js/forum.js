@@ -1591,12 +1591,20 @@ function addMarkdownCode(type, divTitle){
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
-function previewMarkdown(enablePreview){
-  console.log(enablePreview);
-  if(!enablePreview) enablePreview = false;
+function previewMarkdown(){
 
-  const post_content = $('textarea#reply_box_1').val();
+  console.log('this', $(this));
+  console.log('closest', $(this).closest($('.thread-post-form')));
+  
+  const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
+  console.log(post_box_num);
+  const reply_box = $(`textarea#reply_box_${post_box_num}`);
+  const preview_box = $(`#preview_box_${post_box_num}`);
+  const post_content = reply_box.val();
+  console.log(reply_box);
   console.log(post_content);
+
+  const enablePreview = preview_box.is(':hidden');
 
   const url = buildCourseUrl(['forum', 'threads', 'preview']);
   $.ajax({
@@ -1608,17 +1616,17 @@ function previewMarkdown(enablePreview){
         csrf_token: csrfToken
     },
     success: function(data){
-      $('#preview_box_1').empty();
-      $('#preview_box_1').append(data);
-      $('#preview_box_1').show();
-      $('#reply_box_1').hide();
-      console.log(data);
-      // const span = $.parseHTML(data);
-      // span.innerHTML = $('#reply_box_1').val();
-      // //$('#reply_box_1').insertAfter(span);
-      // console.log(span);
-      // $('#reply_box_1').parent().append(span);
-      
+      if (enablePreview) {
+        preview_box.empty();
+        preview_box.append(data);
+        preview_box.show();
+        reply_box.hide();
+      }
+      else {
+        preview_box.hide();
+        reply_box.show();
+      }
+      console.log(data);    
     },
     error: function() {
         window.alert("Something went wrong while trying to preview new thread. Please try again.");
