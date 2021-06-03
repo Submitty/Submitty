@@ -1652,3 +1652,33 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, url
         }
     });
 }
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param type Number representing the type of markdown preset to insert
+ *             0: code
+ *             1: link
+ *             2: bold text
+ *             3: italic text
+ * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ */
+function addMarkdownCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[display text](url)";
+    }
+    else if(type == 0){
+        insert = "```" +
+            "\ncode\n```";
+    }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+}

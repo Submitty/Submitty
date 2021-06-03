@@ -519,4 +519,11 @@ class PollController extends AbstractController {
         }
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/preview", methods={"POST"})
+     */
+    public function showMarkdownPreview() {
+        $this->core->getOutput()->renderOutput('Poll', 'previewPollQuestion', $_POST['enablePreview'], $_POST['content']);
+    }
 }

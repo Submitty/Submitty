@@ -44,6 +44,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("New Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -81,6 +82,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("Edit Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -106,5 +108,16 @@ class PollView extends AbstractView {
             'poll' => $poll,
             'results' => $results
           ]);
+    }
+
+    public function previewPollQuestion($enablePreview, $content){
+        $this->core->getOutput()->disableRender();
+        if(!$enablePreview){
+            return;
+        }
+        return $this->core->getOutput()->renderTwigTemplate("generic/Markdown.twig", [
+                "style" => "white-space: normal; font-family: 'Source Sans Pro', sans-serif;",
+                "content" => $content
+        ]);
     }
 }

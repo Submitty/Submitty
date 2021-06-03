@@ -26,10 +26,25 @@
 .markdown ol,
 .markdown ul {
     margin-bottom: 12px;
+    white-space: normal;
 }
 
 .markdown li {
     margin-left: 25px;
+    white-space: normal;
+}
+
+.markdown table {
+    border-collapse: collapse;
+    border: 1px solid var(--text-black);
+}
+
+.markdown th {
+    border: 1px solid var(--text-black);
+}
+
+.markdown td {
+    border: 1px solid var(--text-black);
 }
 
 .markdown-preview {
@@ -39,4 +54,8 @@
     padding: 4px 6px;
     height: auto !important;
     overflow: scroll;
+}
+
+.btn-markdown {
+    margin: 5px;
 }

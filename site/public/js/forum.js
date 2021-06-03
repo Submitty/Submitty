@@ -1570,27 +1570,6 @@ function bookmarkThread(thread_id, type){
     });
 }
 
-
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
-    }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
-}
-
 function previewForumMarkdown(){
   const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
   const reply_box = $(`textarea#reply_box_${post_box_num}`);

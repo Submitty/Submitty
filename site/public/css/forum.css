@@ -152,10 +152,6 @@
     font-size: 1.17em;
 }
 
-.btn-markdown {
-    margin-right:10px;
-}
-
 .active-thread-remove-announcement{
     display: inline-block;
     color: orange;
@@ -567,37 +563,6 @@
     color: var(--standard-tangerine-yellow);
     margin-right: 5px;
     font-size: 1.8em;
-}
-
-.post_content p {
-    white-space: pre-wrap;
-}
-
-.post_content li {
-    white-space: normal;
-}
-
-.post_content ol {
-    white-space: normal;
-    padding-left: 15px;
-}
-
-.post_content ul {
-    white-space: normal;
-    padding-left: 15px;
-}
-
-.post_content table {
-    border-collapse: collapse;
-    border: 1px solid black;
-}
-
-.post_content th {
-    border: 1px solid black;
-}
-
-.post_content td {
-    border: 1px solid black;
 }
 
 .category-sortable {

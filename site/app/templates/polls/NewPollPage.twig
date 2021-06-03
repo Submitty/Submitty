@@ -14,6 +14,15 @@
 
             <label for="poll-question">
                 Question:
+                <span id="markdown_buttons">
+                    <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+                    &nbsp;&nbsp;
+                    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+                    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+                    <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+                    <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+                    <button title="Preview Markdown" type="button" onclick="previewPollMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+                </span>
                 <textarea
                     id="poll-question"
                     name="question"
@@ -21,6 +30,7 @@
                     rows="10" cols="30"
                     placeholder="Enter question here..."
                     maxlength="5000"></textarea>
+                <div id="poll_preview_new" name="poll_preview_new" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
             </label>
             <br/><br/>
 
@@ -68,14 +78,25 @@
             </label>
             <br/> <br/>
 
+            
             <label for="poll-question">
                 Question:
+                <span id="markdown_buttons">
+                    <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+                    &nbsp;&nbsp;
+                    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+                    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+                    <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+                    <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+                    <button title="Preview Markdown" type="button" onclick="previewPollMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+                </span>
                 <textarea
                     id="poll-question"
                     name="question"
                     style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
                     rows="10" cols="30"
                     maxlength="5000">{{ poll.getQuestion() }}</textarea>
+                <pre id="poll_preview_edit" name="poll_preview_edit" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></pre>
             </label>
             <br/><br/>
 
