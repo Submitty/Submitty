@@ -199,9 +199,9 @@ class GradingOrder extends AbstractModel {
      * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
      * @param string|int $component_id Component ID to check (for ungraded/itempool)
      * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
-     * @return Submitter Previous submitter to grade
+     * @return Submitter|null Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = null) {
+    public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", $to_same_itempool = null): ?Submitter {
         $this->to_ungraded = $to_ungraded;
         if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
@@ -225,9 +225,9 @@ class GradingOrder extends AbstractModel {
      * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
      * @param string|int $component_id Component ID to check (for ungraded/itempool)
      * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
-     * @return Submitter Next submitter to grade
+     * @return Submitter|null Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", bool $to_same_itempool = false) {
+    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, $component_id = "-1", bool $to_same_itempool = false): ?Submitter {
         $this->to_ungraded = $to_ungraded;
         if ($to_ungraded) {
             $this->initUsersNotFullyGraded($component_id);
