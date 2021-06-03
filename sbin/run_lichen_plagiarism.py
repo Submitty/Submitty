@@ -32,11 +32,10 @@ def main():
     course = sys.argv[2]
     gradeable = sys.argv[3]
     config_hash = ""
-    config_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/config/\
-                    lichen_{semester}_{course}_{gradeable}.json"
+    
+    config_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/config/lichen_{semester}_{course}_{gradeable}.json"
 
-    log_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/logs/\
-                 {gradeable}/run_results.json"
+    log_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/logs/{gradeable}/run_results.json"
     log_json = open(log_path, 'w+')
 
     rank_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/ranking/{gradeable}.txt"
