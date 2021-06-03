@@ -253,7 +253,6 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
-            'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
 
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
@@ -791,7 +790,7 @@ class AdminGradeableController extends AbstractController {
             'student_view_after_grades',
             'student_submit',
             'late_days',
-            'precision'
+            'precision',
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
@@ -819,7 +818,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view_after_grades' => false,
                 'student_submit' => true,
                 'late_days' => $default_late_days,
-                'precision' => 0.5
+                'precision' => 0.5,
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
         }
@@ -1014,7 +1013,6 @@ class AdminGradeableController extends AbstractController {
 
     private function updateGradeable(Gradeable $gradeable, $details) {
         $errors = [];
-
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
 
@@ -1039,7 +1037,7 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date'
+            'has_due_date',
         ];
 
         $discussion_ids = 'discussion_thread_id';
@@ -1048,7 +1046,6 @@ class AdminGradeableController extends AbstractController {
             'precision',
             'grader_assignment_method'
         ];
-
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;

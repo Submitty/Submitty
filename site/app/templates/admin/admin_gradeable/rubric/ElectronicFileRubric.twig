@@ -15,9 +15,9 @@
     <legend>
     Will graders be allowed to use custom marks ?
     </legend>
-    <input type="radio" id="yes_custom_marks" name="custom_marks" value="true" onchange=""
+    <input type="radio" id="yes_custom_marks" name="custom_marks" value="true" onchange="onAllowCustomChange()"
             {{ allow_custom_marks ? 'checked' : '' }} /> <label for="yes_custom_marks">Yes</label>
-    <input type="radio" id="no_custom_marks" name="custom_marks" value="false" onchange=""
+    <input type="radio" id="no_custom_marks" name="custom_marks" value="false" onchange="onAllowCustomChange()"
             {{ not allow_custom_marks ? 'checked' : '' }} /> <label for="no_custom_marks">No</label>
 </fieldset>
 <br>
