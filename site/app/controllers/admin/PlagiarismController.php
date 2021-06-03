@@ -88,9 +88,9 @@ class PlagiarismController extends AbstractController {
 
     /**
      * Returns a ranking of users by percent match with user 1 (used for determining the rightmost dropdown list)
-     * @param $gradeable_id
-     * @param $user_1_username
-     * @param $user_1_version
+     * @param string
+     * @param string
+     * @param string
      * @return array
      */
     private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version) {
@@ -575,6 +575,7 @@ class PlagiarismController extends AbstractController {
 
         $rankings = $this->getOverallRankings($gradeable_id);
 
+        $max_matching_version = 1;
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
