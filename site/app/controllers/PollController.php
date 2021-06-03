@@ -257,8 +257,6 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function submitResponse() {
-        //var_dump($_POST);
-        //die();
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(

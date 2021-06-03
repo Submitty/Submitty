@@ -7053,7 +7053,8 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        // FIXME: add col to db to save the question type
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], "multiple-response", $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7063,7 +7064,6 @@ AND gc_id IN (
         foreach ($responses_rows as $rep_row) {
             $responses[$rep_row["option_id"]] = $rep_row["response"];
         }
-
         return $responses;
     }
 
@@ -7072,21 +7072,24 @@ AND gc_id IN (
         $rows = $this->course_db->rows();
         $responses = [];
         foreach ($rows as $row) {
-            $responses[$row["student_id"]] = $row["option_id"];
+            if (!isset($responses[$row["student_id"]])) {
+                $responses[$row["student_id"]] = [];
+            }
+            array_push($responses[$row["student_id"]], $row["option_id"]);
         }
         return $responses;
     }
 
-    public function submitResponse($poll_id, $response) {
-        // FIXME: make this work for response array
-        // how do I save the response array to the DB?
+    public function submitResponse($poll_id, $responses) {
         $user = $this->core->getUser()->getId();
         $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
-        if (count($this->course_db->rows()) <= 0) {
-            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response]);
-        }
-        else {
-            $this->course_db->query("UPDATE poll_responses SET option_id=? where poll_id = ? and student_id = ?", [$response, $poll_id, $user]);
+        foreach ($responses as $response_id => $response) {
+            if (count($this->course_db->rows()) <= 0) {
+                $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response_id]);
+            }
+            else {
+                $this->course_db->query("UPDATE poll_responses SET option_id=? where poll_id = ? and student_id = ?", [$response_id, $poll_id, $user]);
+            }
         }
     }
 

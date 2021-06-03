@@ -77,7 +77,7 @@ class PollModel extends AbstractModel {
     }
 
     public function getUserResponse($user_id) {
-        if (!isset($this->user_responses[$user_id])) {
+        if (!isset($this->user_responses[$user_id][0])) {
             return null;
         }
         return $this->user_responses[$user_id];
@@ -88,6 +88,28 @@ class PollModel extends AbstractModel {
             return $this->responses[$response_id];
         }
         return "No Response";
+    }
+
+    public function getAllResponsesString($response_id) {
+        if (count($this->responses) == 1) {
+            return $this->responses[$response_id][0];
+        }
+        else {
+            $ret_string = "";
+            $first_answer = true;
+            foreach ($this->responses as $id => $response) {
+                if (array_key_exists($id, $response_id)) {
+                    if (!$first_answer) {
+                        $ret_string .= ", " . $response;
+                    }
+                    else {
+                        $first_answer = false;
+                        $ret_string .= $response;
+                    }
+                }
+            }
+            return $ret_string;
+        }
     }
 
     public function getReleaseDate() {
