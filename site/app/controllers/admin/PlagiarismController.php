@@ -88,9 +88,9 @@ class PlagiarismController extends AbstractController {
 
     /**
      * Returns a ranking of users by percent match with user 1 (used for determining the rightmost dropdown list)
-     * @param string
-     * @param string
-     * @param string
+     * @param string $gradeable_id
+     * @param string $user_1_username
+     * @param string $user_1_version
      * @return array
      */
     private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version) {
