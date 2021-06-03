@@ -642,12 +642,3 @@
 .thread-left-cont {
     flex: 3;
 }
-
-.markdown-preview {
-    border: 1px solid var(--standard-light-gray);
-    background-color: var(--standard-input-background);
-    border-radius: 4px;
-    padding: 4px 6px;
-    height: auto !important;
-    overflow: scroll;
-}
