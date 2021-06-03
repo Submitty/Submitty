@@ -344,7 +344,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $config_dir = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/";
-        $json_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json";
+        $json_file = $config_dir . "lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json";
         $json_data = [
             "semester" =>    $semester,
             "course" =>     $course,
@@ -359,25 +359,11 @@ class PlagiarismController extends AbstractController {
             "ignore_submissions" =>   $ignore_submissions,
             "instructor_provided_code" =>   $instructor_provided_code,
         ];
+
         if ($file_option == "matching_regex") {
             $json_data["regex"] = $regex_for_selecting_files;
         }
-        $old_config = file_get_contents($json_file);
-        if ($old_config !== false) {
-            $old_array = json_decode($old_config, true);
-            $regex_in_old = in_array("regex", $old_array);
-            $regex_in_new = in_array("regex", $json_data);
-            $json_data["regex_updated"] = false;
-            if (
-                ($regex_in_old
-                && !$regex_in_new)
-                 || (!$regex_in_old
-                 && $regex_in_new)
-                 || ($old_array['regex'] != $json_data['regex'])
-            ) {
-                    $json_data["regex_updated"] = true;
-            }
-        }
+
         if ($instructor_provided_code == true) {
             $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;
         }
@@ -388,7 +374,7 @@ class PlagiarismController extends AbstractController {
         }
 
 
-        // if fails at following step, still provided code and cnfiguration get saved
+        // if fails at following step, provided code and configuration still get saved
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
@@ -398,7 +384,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        // if fails at following step, still provided code, cnfiguration, timestamp file get saved
+        // if fails at following step, provided code, configuration, and timestamp file still get saved
 
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if ($ret !== null) {
