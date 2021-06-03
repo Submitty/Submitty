@@ -195,10 +195,11 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @param {boolean} componentVersionConflict
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict) {
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict,allowCustomMarks) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
+
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
             'component': component,
@@ -212,6 +213,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'grader_id': grader_id,
             'component_version_conflict': componentVersionConflict,
             'peer_component' : component.peer,
+            'allow_custom_marks' : allowCustomMarks,
         }));
     });
 }

@@ -9,6 +9,18 @@
   <option value="5" {{ gradeable.getPrecision() == 5 ? 'selected' : '' }}>5</option>
   <option value="10" {{ gradeable.getPrecision() == 10 ? 'selected' : '' }}>10</option>
 </select>
+<br>
+<br>
+<fieldset>
+    <legend>
+    Will graders be allowed to use custom marks ?
+    </legend>
+    <input type="radio" id="yes_custom_marks" name="custom_marks" value="true" onchange=""
+            {{ allow_custom_marks ? 'checked' : '' }} /> <label for="yes_custom_marks">Yes</label>
+    <input type="radio" id="no_custom_marks" name="custom_marks" value="false" onchange=""
+            {{ not allow_custom_marks ? 'checked' : '' }} /> <label for="no_custom_marks">No</label>
+</fieldset>
+<br>
 <div class="electronic_file ignore" id="gradeable_rubric" data-itempool-available="{{ itempool_available}}" data-itempool-options="{{ itempool_options }}">
     <fieldset>
         <legend>

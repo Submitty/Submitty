@@ -1421,6 +1421,7 @@ HTML;
                 "show_silent_edit" => $show_silent_edit,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
+                "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
             ]);
     }
 

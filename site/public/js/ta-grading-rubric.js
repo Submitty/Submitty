@@ -834,6 +834,10 @@ function getPointPrecision() {
     return parseFloat($('#point_precision_id').val());
 }
 
+function getAllowCustomMarks() {
+    return $('#allow_custom_marks').attr('data-gradeable_custom_marks');
+}
+
 /**
  * Used to determine if the mark list should be displayed in 'edit' mode
  *  @return {boolean}
@@ -3125,7 +3129,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component),getAllowCustomMarks())
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })

@@ -54,9 +54,9 @@ Required inputs:
 {% endblock %}
 
 {% block extra_mark_rows %}
-    {# Custom mark (only display in non-edit mode #}
+    {# Custom mark (only display in non-edit mode and custom marks are enabled #}
     {% set f_mark = component.marks|first %}
-    {% if not edit_marks_enabled %}
+    {% if not edit_marks_enabled and allow_custom_marks %}
         <div class="custom-mark-container mark-container row"
              data-mark_id="0">
             <span class="mark-selector-container">
