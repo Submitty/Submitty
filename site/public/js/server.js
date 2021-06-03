@@ -1606,3 +1606,49 @@ function getFocusableElements() {
     let focusable_elements = $(':focusable:tabbable');
     return Array.from(focusable_elements);
 }
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
+ * @param preview_element JQuery element of the span the markdown will be inserted into
+ * @param preview_button JQuery element of the "Preview Markdown" button
+ *                       Should have title="Preview Markdown"
+ * @param url url to send ajax request to
+ * @param data Object whose properties will get sent through a POST request
+ */
+function previewMarkdown(markdown_textarea, preview_element, preview_button, url, data) {
+    const enablePreview = preview_element.is(':hidden');
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            enablePreview: enablePreview,
+            ...data,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            if (enablePreview) {
+                preview_element.empty();
+                preview_element.append(data);
+                preview_element.show();
+                markdown_textarea.hide();
+
+                preview_button.empty();
+                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+
+            }
+            else {
+                preview_element.hide();
+                markdown_textarea.show();
+
+                preview_button.empty();
+                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}

@@ -1591,47 +1591,15 @@ function addMarkdownCode(type, divTitle){
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
-function previewMarkdown(){
+function previewForumMarkdown(){
   const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
   const reply_box = $(`textarea#reply_box_${post_box_num}`);
   const preview_box = $(`#preview_box_${post_box_num}`);
   const preview_button = $(`#markdown_buttons_${post_box_num}`).find('[title="Preview Markdown"]');
   const post_content = reply_box.val();
-
-  const enablePreview = preview_box.is(':hidden');
-
   const url = buildCourseUrl(['forum', 'threads', 'preview']);
-  $.ajax({
-    url: url,
-    type: "POST",
-    data: {
-        enablePreview: enablePreview,
-        post_content: post_content,
-        csrf_token: csrfToken
-    },
-    success: function(data){
-      if (enablePreview) {
-        preview_box.empty();
-        preview_box.append(data);
-        preview_box.parent().show();
-        reply_box.hide();
 
-        preview_button.empty();
-        preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
-
-      }
-      else {
-        preview_box.parent().hide();
-        reply_box.show();
-
-        preview_button.empty();
-        preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
-      }
-    },
-    error: function() {
-        window.alert("Something went wrong while trying to preview new thread. Please try again.");
-    }
-  });
+  previewMarkdown(reply_box, preview_box, preview_button, url, { post_content: post_content });
 }
 
 function checkInputMaxLength(obj){

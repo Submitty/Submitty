@@ -588,4 +588,12 @@ class OfficeHoursQueueController extends AbstractController {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/preview", methods={"POST"})
+     */
+    public function showMarkdownPreview(){
+        return $this->core->getOutput()->renderOutput('OfficeHoursQueue', 'previewAnnouncement', $_POST['enablePreview'], $_POST['content']);
+    }
+
 }
