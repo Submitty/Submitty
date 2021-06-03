@@ -16,7 +16,13 @@
     </span>
   </label>
   <br/>
-  <button title="Preview Markdown" type="button" onclick="previewQueueMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+  <span id="markdown_buttons">
+    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+    <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+    <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+    <button title="Preview Markdown" type="button" onclick="previewQueueMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+  </span>
   <textarea class="announcement-setting" name="queue_announcement_message" id="queue-announcement-message">{{viewer.getQueueAnnouncementMessage()}}</textarea>
   <pre id="queue_announcement_message_preview" name="queue_announcement_message_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></pre>
 {% endblock %}

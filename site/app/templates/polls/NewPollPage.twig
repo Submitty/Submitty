@@ -15,13 +15,15 @@
             <label for="poll-question">
                 Question:
                 <span id="markdown_buttons">
-                    <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
-                    &nbsp;&nbsp;
                     <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
                     <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
                     <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
                     <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
                     <button title="Preview Markdown" type="button" onclick="previewPollMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+                    <a target="_blank" href="https://submitty.org/student/communication/markdown">
+                        Supports Markdown
+                        <i style="font-style:normal;" class="fa-question-circle"></i>
+                    </a>
                 </span>
                 <textarea
                     id="poll-question"
@@ -82,14 +84,17 @@
             <label for="poll-question">
                 Question:
                 <span id="markdown_buttons">
-                    <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
-                    &nbsp;&nbsp;
                     <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
                     <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
                     <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
                     <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
                     <button title="Preview Markdown" type="button" onclick="previewPollMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+                     <a target="_blank" href="https://submitty.org/student/communication/markdown">
+                        Supports Markdown
+                        <i style="font-style:normal;" class="fa-question-circle"></i>
+                    </a>
                 </span>
+               
                 <textarea
                     id="poll-question"
                     name="question"
