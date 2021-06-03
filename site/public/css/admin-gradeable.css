@@ -287,3 +287,57 @@ select[name="component-itempool"] {
     margin-bottom: 15px;
     padding-right: 0;
 }
+
+#config_search{
+    width: 100%;
+}
+
+.drop-down{
+    display: inline-block;
+    width: 64%
+}
+
+.drop-down-options{
+    border: 0.5px black solid;
+    position: relative;
+    width: 100%;
+    max-height: 30vh;
+    overflow-y: scroll;
+}
+
+.drop-down-options::-webkit-scrollbar{
+    width: 0.7vh;
+}
+
+body::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 3px black;
+    box-shadow: inset 0 0 3px black;
+}
+
+.drop-down-options::-webkit-scrollbar-thumb {
+    background-color: var(--hover-actionable-blue);
+    outline: 1px solid slategrey;
+}
+
+.drop-down-option{
+    padding: 1vh;
+    text-overflow: ellipsis;
+}
+
+.drop-down-option:hover{
+    background-color: var(--hover-active-all-info-blue);
+}
+
+[data-theme="dark"] .drop-down-options{
+    background-color: var(--standard-medium-dark-gray);
+    border: 1px solid var(--standard-focus-cornflowe-blue);
+}
+
+#config_search {
+    padding-right: 45px;
+}
+
+#clear_search_button {
+    padding-right: 6px;
+    color: red;
+}
