@@ -171,7 +171,6 @@ class UserProfileController extends AbstractController {
     /**
      * @Route("/user_profile/change_secondary_email", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changeSecondaryEmail() {
         $user = $this->core->getUser();
@@ -183,7 +182,6 @@ class UserProfileController extends AbstractController {
             if ($user->validateUserData('user_email_secondary', $secondaryEmail) === true) {
                 $user->setSecondaryEmail($secondaryEmail);
                 $user->setEmailBoth($secondaryEmailNotify === "true");
-                $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => 'Secondary email address updated successfully',

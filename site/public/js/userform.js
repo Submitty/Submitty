@@ -173,13 +173,6 @@ function checkValidEntries() {
             setRedOrTransparent(input, valid_expression);
             break;
         case "user_email":
-            if (input.val() == '') {
-                input.css("background-color", "transparent");
-                break;
-            }
-            var valid_expression = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$/;
-            setRedOrTransparent(input, valid_expression);
-            break;
         case "user_email_secondary":
             if (input.val() == '') {
                 input.css("background-color", "transparent");

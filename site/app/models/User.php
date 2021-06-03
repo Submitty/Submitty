@@ -96,7 +96,7 @@ class User extends AbstractModel {
     protected $email;
     /** @prop @var string The secondary email of the user */
     protected $secondary_email;
-    /** @prop @var string The secondary email of the user */
+    /** @prop @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
     /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
@@ -487,16 +487,8 @@ class User extends AbstractModel {
                 //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
-                // emails are allowed to be the empty string...
-                if ($data === "") {
-                    return true;
-                }
-                // -- or ---
-                // validate email address against email RFCs
-                $validator = new EmailValidator();
-                return $validator->isValid($data, new RFCValidation());
             case 'user_email_secondary':
-                // secondary emails are allowed to be the empty string...
+                // emails are allowed to be the empty string...
                 if ($data === "") {
                     return true;
                 }

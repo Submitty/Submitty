@@ -85,7 +85,7 @@ try:
     EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
     EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
     EMAIL_REPLY_TO = EMAIL_CONFIG['email_reply_to']
-    EMAIL_INTERNAL_FORMAT = EMAIL_CONFIG['email_internal_format']
+    EMAIL_INTERNAL_DOMAIN = EMAIL_CONFIG['email_internal_domain']
 
     DB_HOST = DATABASE_CONFIG['database_host']
     DB_USER = DATABASE_CONFIG['database_user']
@@ -137,7 +137,7 @@ def get_email_queue(db):
     query = """SELECT id, user_id, email_address, subject, body FROM emails
     WHERE email_address SIMILAR TO '%%@(%%.{}|{})' AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
-    query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT)
+    query = query.format(EMAIL_INTERNAL_DOMAIN, EMAIL_INTERNAL_DOMAIN)
     result = db.execute(query)
     queued_emails = []
     for row in result:
@@ -156,14 +156,14 @@ def get_external_queue(db, num):
     """Get an active queue of external emails waiting to be sent."""
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
     email_address NOT SIMILAR TO '%%@(%%.{}|{})'"""
-    query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT)
+    query = query.format(EMAIL_INTERNAL_DOMAIN, EMAIL_INTERNAL_DOMAIN)
     result = db.execute(query)
     query = """SELECT id, user_id, email_address, subject, body FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO '%%@(%%.{}|{})' AND
     error = '' ORDER BY id LIMIT {};"""
     # Guarenteed to be size 1
     for row in result:
-        query = query.format(EMAIL_INTERNAL_FORMAT, EMAIL_INTERNAL_FORMAT,
+        query = query.format(EMAIL_INTERNAL_DOMAIN, EMAIL_INTERNAL_DOMAIN,
                              min(500-int(row[0]), num))
     result = db.execute(query)
     queued_emails = []
