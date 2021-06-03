@@ -1149,7 +1149,7 @@ class ForumThreadView extends AbstractView {
         ]);
     }
 
-    public function createThread($category_colors, $enablePreview = false) {
+    public function createThread($category_colors) {
         if (!$this->forumAccess()) {
             $this->core->redirect($this->core->buildCourseUrl());
             return;
@@ -1192,13 +1192,6 @@ class ForumThreadView extends AbstractView {
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
 
-        if($enablePreview){
-            $this->core->getOutput()->disableRender();
-            return $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
-                "render_markdown" => $enablePreview
-            ]);
-        }
-
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
@@ -1209,8 +1202,7 @@ class ForumThreadView extends AbstractView {
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
-            "enablePreview" => $enablePreview
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
         ]);
     }
 
