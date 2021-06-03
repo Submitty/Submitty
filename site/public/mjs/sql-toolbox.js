@@ -115,6 +115,18 @@ export async function downloadSqlResult(id){
 
 export function init() {
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
+    document.getElementById('sql-database-schema').addEventListener('click', () => {
+        document.getElementById('sql-database-schema-content').style.display =
+            document.getElementById('sql-database-schema-content').style.display === 'block'
+                ? 'none' : 'block';
+    });
+    document.querySelectorAll('.sql-database-table').forEach((elem) => {
+        elem.addEventListener('click', (e) => {
+            e.target.nextElementSibling.style.display =
+                e.target.nextElementSibling.style.display === 'block'
+                    ? 'none' : 'block';
+        });
+    });
     document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult('query-results'));
 }
 

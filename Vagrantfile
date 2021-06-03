@@ -38,7 +38,7 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
-unless Vagrant.has_plugin?('vagrant-vbguest')
+unless Vagrant.has_plugin?('vagrant-vbguest') || ENV.has_key?('SKIP_VBGUEST')
   raise 'vagrant-vbguest is not installed! To install, run: vagrant plugin install vagrant-vbguest'
 end
 
