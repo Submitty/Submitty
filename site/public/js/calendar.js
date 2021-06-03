@@ -79,15 +79,27 @@ function generateCalendarItem(item) {
     if (item['submission'] !== '') {
         due_string = `Due: ${item['submission']}`;
     }
+
     // Put detail in the tooltip
-    const tooltip = `Course: ${item['course']}&#10;` +
-        `Title: ${item['title']}&#10;` +
-        `Status: ${item['status_note']}&#10;` +
-        `${due_string}`;
+    let tooltip = `Course: ${item['course']}&#10;` +
+                  `Title: ${item['title']}&#10;`;
+    if (item['status_note'] !== '') {
+        tooltip += `Status: ${item['status_note']}&#10;`;
+    }
+    if (due_string !== '') {
+        tooltip += `${due_string}`;
+    }
     // Put the item in the day cell
-    return `<a class="cal-gradeable-status-${item['status']} cal-gradeable-item"
-           title="${tooltip}"
-           href="${item['url']}">
+    const link = (!item['disabled']) ? item['url'] : '';
+    const onclick = item['onclick'];
+    const icon = item['icon'];
+    const disabled = item['disabled'] ? 'disabled' : '';
+    return `<a class="btn ${item['class']} cal-gradeable-status-${item['status']} cal-gradeable-item"
+           title="${tooltip}" 
+           ${(link !== '') ? `href="${link}"` : ''} 
+           ${(onclick !== '') ? `onclick="${onclick}"` : ''} 
+           ${disabled}>
+          ${(icon !== '') ? `<i class="fas ${icon} cal-icon"></i>` : ''} 
           ${item['title']}
         </a>`;
 }

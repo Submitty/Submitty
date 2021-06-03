@@ -21,6 +21,10 @@
     border: none;
 }
 
+.no-assignments-message {
+    padding-bottom: 30px;
+}
+
 .course-main {
     display: flex;
     align-items: center;

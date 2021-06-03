@@ -792,7 +792,6 @@ class GradeableListTester extends BaseUnitTest {
             'grade_start_date' => new \DateTime($grade_start_date, $timezone),
             'grade_due_date' => new \DateTime($grade_start_date, $timezone),
             'grade_released_date' => new \DateTime($grade_released_date, $timezone),
-            'grade_locked_date' => new \DateTime($grade_released_date, $timezone),
             'team_lock_date' => new \DateTime($submission_due_date, $timezone),
             'submission_open_date' => new \DateTime($submission_open_date, $timezone),
             'submission_due_date' => new \DateTime($submission_due_date, $timezone),
