@@ -485,16 +485,6 @@ td>a.active-sort {
     font-size: 18px;
 }
 
-#config_search {
-    padding-right: 20px;
-}
-
-#clear_search_button {
-    margin-left: -20px;
-    padding-right: 20px;
-    color: red;
-}
-
 .option-alt {
     font-style: italic;
 }
