@@ -187,6 +187,8 @@ class Gradeable extends AbstractModel {
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
+    /** @prop @var vool if graders will be allowed to use custom marks */
+    protected $allow_custom_marks = true;
     /** @prop @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed
      */
@@ -289,6 +291,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            $this->setAllowCustomMarks($details['allow_custom_marks']);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }
@@ -1997,6 +2000,17 @@ class Gradeable extends AbstractModel {
         return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
     }
 
+    public function setAllowCustomMarks(bool $allow): void {
+        $this->allow_custom_marks = $allow;
+    }
+
+    /**
+     * returns true if custom marks are enabled
+     * @return bool
+     */
+    public function getAllowCustomMarks(): bool {
+        return $this->allow_custom_marks;
+    }
     /**
      * Can a given user view this gradeable
      */
