@@ -13,7 +13,7 @@
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id">
                             {% for gradeable_id_title in gradeable_ids_titles %}
-                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }}</option>
+                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} (Due {{ gradeable_id_title['g_grade_due_date'] }})</option>
                             {% endfor %}
                         </select>
                     {% else %}
@@ -83,13 +83,13 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Threshold/Maximum number of students (more than this number of students with matching code will be considered common code):</div>
                 <div class="plag-data">
-                    <input type="text" name="threshold" value="{{ threshold }}" />
+                    <input type="text" name="threshold" value="{{ threshold }}" placeholder="(Required)"/>
                 </div>
             </div>
             <div class="plag-data-group">
                 <div class="plag-data-label">Sequence Length:</div>
                 <div class="plag-data">
-                    <input type="text" name="sequence_length" value="{{ sequence_length }}"/>
+                    <input type="text" name="sequence_length" value="{{ sequence_length }}" placeholder="(Required)"/>
                 </div>
             </div>
             <div class="plag-data-group">
@@ -205,5 +205,16 @@
         const ignore_submission_number = $('[name="ignore_submission_number"]', form).val();
         $('#ignore_submission_div', form).append('<br /><input type="text" name="ignore_submission_'+ ignore_submission_number +'" class="low-margin-top"/>');
         $('[name="ignore_submission_number"]', form).val(parseInt(ignore_submission_number)+1);
+    });
+
+    $('[name="threshold"], [name="sequence_length"]').change(function(){
+        if($(this).val().length === 0){
+            $(this)[0].setCustomValidity('Input is required');
+        }
+        else if(!(/^[\d]+$/g).test($(this).val())){
+            $(this)[0].setCustomValidity('Input must only contain numeric characters');
+        } else {
+            $(this)[0].setCustomValidity('');
+        }
     });
 </script>

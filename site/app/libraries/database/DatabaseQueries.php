@@ -2636,6 +2636,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    /**
+     * Gets the date for a specified gradeable
+     *
+     * @param string $id
+     * @return \DateTime
+     */
+    public function getDateForGradeableById($id) {
+        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
+        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    }
+
     public function getAllGradeablesIds() {
         $this->course_db->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->course_db->rows();
@@ -4426,7 +4437,6 @@ AND gc_id IN (
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,
               g_grade_released_date AS grade_released_date,
-              g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               eg.*,
@@ -5079,8 +5089,6 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-            $gradeable->getGradeLockedDate() !== null ?
-                DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket()
         ];
@@ -5097,10 +5105,9 @@ AND gc_id IN (
               g_grade_start_date,
               g_grade_due_date,
               g_grade_released_date,
-              g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5232,8 +5239,6 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-                $gradeable->getGradeLockedDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getId()
@@ -5250,7 +5255,6 @@ AND gc_id IN (
                   g_grade_start_date=?,
                   g_grade_due_date=?,
                   g_grade_released_date=?,
-                  g_grade_locked_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?
                 WHERE g_id=?",
@@ -6114,7 +6118,7 @@ AND gc_id IN (
               LEFT JOIN (SELECT
                 user_id,"
                 . $this->getInnerQueueSelect() .
-               "SUM(CASE
+               ",SUM(CASE
                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                   ELSE 0
                 END) AS not_helped_count
@@ -7004,7 +7008,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date DESC, name ASC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -7024,7 +7028,8 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        $date = new \Datetime($row['release_date']);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('poll')), $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7185,5 +7190,10 @@ SQL;
       END) AS not_helped_count
 
 SQL;
+    }
+
+    public function getCourseSchemaTables(): array {
+        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
+        return $this->course_db->rows();
     }
 }

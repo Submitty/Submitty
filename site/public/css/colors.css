@@ -67,7 +67,7 @@
     --standard-light-medium-gray: #bbbbbb;
     --standard-medium-gray: #888888;
     --standard-medium-dark-gray: #666666;
-    --standard-dark-gray: #5555555;
+    --standard-dark-gray: #555555;
     --standard-deep-dark-gray: #2e2e2e;
 
     --standard-gray-black: #111111;
@@ -183,6 +183,11 @@
     --date-picker-yellow: #ffeb54;
     --date-picker-red: #f76c6c;
 
+    /* simple gradeables */
+    --simple-full-credit-dark-blue: #149bdf;
+    --simple-half-credit-light-blue: #88d0f4;
+    --simple-save-error-red: #da4f49;
+
     /* other */
     --box-shadow-very-transparent: rgba(0,0,0,0.12);
     --box-shadow-slightly-transparent: rgba(0,0,0,0.20);
@@ -274,7 +279,7 @@
       --standard-light-medium-gray: #bbbbbb;
       --standard-medium-gray: #A3A3A3;
       --standard-medium-dark-gray: #666666;
-      --standard-dark-gray: #5555555;
+      --standard-dark-gray: #555555;
       --standard-deep-dark-gray: #2e2e2e;
 
       --standard-gray-black: #111111;

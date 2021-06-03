@@ -87,54 +87,25 @@ class GradeableList extends AbstractModel {
         $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $id => $gradeable) {
-            if ($gradeable->getGradeReleasedDate() <= $this->now) {
-                $this->graded_gradeables[$id] = $gradeable;
-            }
-            elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
-                // Filter out gradeables with no due date
-                if ($gradeable->isStudentSubmit()) {
-                    if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
-                        // Put in 'grading' category only if user is a grader
-                        $this->grading_gradeables[$id] = $gradeable;
-                    }
-                    else {
-                        $this->open_gradeables[$id] = $gradeable;
-                    }
-                }
-                else {
-                    // If there is no due date and no student submission, it should
-                    //  automatically show up in the 'Grading' category
+            switch (self::getGradeableSection($this->core, $gradeable)) {
+                case self::FUTURE:
+                    $this->future_gradeables[$id] = $gradeable;
+                    break;
+                case self::BETA:
+                    $this->beta_gradeables[$id] = $gradeable;
+                    break;
+                case self::OPEN:
+                    $this->open_gradeables[$id] = $gradeable;
+                    break;
+                case self::CLOSED:
+                    $this->closed_gradeables[$id] = $gradeable;
+                    break;
+                case self::GRADING:
                     $this->grading_gradeables[$id] = $gradeable;
-                }
-            }
-            elseif (
-                (
-                    ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading())
-                    || $gradeable->getType() !== GradeableType::ELECTRONIC_FILE
-                )
-                && $gradeable->getGradeStartDate() <= $this->now
-            ) {
-                $this->grading_gradeables[$id] = $gradeable;
-            }
-            elseif (
-                $gradeable->getType() === GradeableType::ELECTRONIC_FILE
-                && $gradeable->getSubmissionOpenDate() <= $this->now
-                && $gradeable->getSubmissionDueDate() <= $this->now
-            ) {
-                $this->closed_gradeables[$id] = $gradeable;
-            }
-            elseif (
-                $gradeable->getType() === GradeableType::ELECTRONIC_FILE
-                && $gradeable->getSubmissionOpenDate() <= $this->now
-                && $gradeable->getTaViewStartDate() <= $this->now
-            ) {
-                $this->open_gradeables[$id] = $gradeable;
-            }
-            elseif ($this->core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $this->now) {
-                $this->beta_gradeables[$id] = $gradeable;
-            }
-            elseif ($this->core->getUser()->accessAdmin()) {
-                $this->future_gradeables[$id] = $gradeable;
+                    break;
+                case self::GRADED:
+                    $this->graded_gradeables[$id] = $gradeable;
+                    break;
             }
         }
         $sort_array = [
@@ -253,32 +224,63 @@ class GradeableList extends AbstractModel {
     }
 
     /**
-     * A static factory method to create a new GradeableList object that contains
-     * all gradeables in all courses of a single user.
-     * The method loads from the database of all courses and get all gradeables information.
-     * Only load once unless the user refreshes the page.
+     * A static function to get the section of a gradeable.
      *
      * @param Core $core
-     * @param User $user The user to filter gradeables by
-     * @return GradeableList
-     * @throws \Exception if a Gradeable failed to load from the database
+     * @param Gradeable $gradeable
+     * @return int the section number; or -1 if not categorized
      */
-    public static function getAllGradeableListFromUserId(Core $core, User $user): GradeableList {
-        $gradeables = [];
-        // Load the gradeable information for each course
-        $courses = $core->getQueries()->getCourseForUserId($user->getId());
-        foreach ($courses as $course) {
-            /** @var \app\models\Course $course */
-            $core->loadCourseConfig($course->getSemester(), $course->getTitle());
-            $core->loadCourseDatabase();
-            foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
-                /** @var Gradeable $gradeable */
-                $gradeables[serialize([$course->getSemester(), $course->getTitle(), $gradeable->getId()])] = $gradeable;
-            }
-            $core->getCourseDB()->disconnect();
+    public static function getGradeableSection(Core $core, Gradeable $gradeable): int {
+        $now = $core->getDateTimeNow();
+        if ($gradeable->getGradeReleasedDate() <= $now) {
+            return self::GRADED;
         }
-
-        $core->getConfig()->setCourseLoaded(false);
-        return new GradeableList($core, $user, $gradeables);
+        elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
+            // Filter out gradeables with no due date
+            if ($gradeable->isStudentSubmit()) {
+                if ($gradeable->getGradeStartDate() < $core->getDateTimeNow() && $core->getUser()->accessGrading()) {
+                    // Put in 'grading' category only if user is a grader
+                    return self::GRADING;
+                }
+                else {
+                    return self::OPEN;
+                }
+            }
+            else {
+                // If there is no due date and no student submission, it should
+                //  automatically show up in the 'Grading' category
+                return self::GRADING;
+            }
+        }
+        elseif (
+            (
+                ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading())
+                || $gradeable->getType() !== GradeableType::ELECTRONIC_FILE
+            )
+            && $gradeable->getGradeStartDate() <= $now
+        ) {
+            return self::GRADING;
+        }
+        elseif (
+            $gradeable->getType() === GradeableType::ELECTRONIC_FILE
+            && $gradeable->getSubmissionOpenDate() <= $now
+            && $gradeable->getSubmissionDueDate() <= $now
+        ) {
+            return self::CLOSED;
+        }
+        elseif (
+            $gradeable->getType() === GradeableType::ELECTRONIC_FILE
+            && $gradeable->getSubmissionOpenDate() <= $now
+            && $gradeable->getTaViewStartDate() <= $now
+        ) {
+            return self::OPEN;
+        }
+        elseif ($core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $now) {
+            return self::BETA;
+        }
+        elseif ($core->getUser()->accessAdmin()) {
+            return self::FUTURE;
+        }
+        return -1;
     }
 }
