@@ -7181,4 +7181,9 @@ SQL;
 
 SQL;
     }
+
+    public function getCourseSchemaTables(): array {
+        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
+        return $this->course_db->rows();
+    }
 }
