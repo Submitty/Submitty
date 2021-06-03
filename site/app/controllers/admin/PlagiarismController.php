@@ -70,7 +70,7 @@ class PlagiarismController extends AbstractController {
 
     private function getRankings($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
+        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/overall_ranking.txt";
         if (!file_exists($file_path)) {
             $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
@@ -110,7 +110,7 @@ class PlagiarismController extends AbstractController {
 
         $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id_title['g_id'] . ".txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+            if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id_title['g_id'] . "/overall_ranking.txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeables_with_plagiarism_result[$i]);
                 continue;
             }
