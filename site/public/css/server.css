@@ -150,6 +150,11 @@ input.readonly {
     color: var(--btn-text-black);
 }
 
+[data-theme="dark"] input[type=text].readonly{
+    background-color: var(--standard-deep-dark-gray);
+    color: var(--text-black);
+}
+
 select {
     padding: 5px 35px 5px 10px;
     font-size: 16px;
@@ -1355,16 +1360,6 @@ div.full_height {
     vertical-align: top;
 }
 
-#admin-team-history-left {
-    width:35%;
-    display: inline-block;
-    margin-right: 10px;
-}
-
-#admin-team-history-right {
-    width:55%;
-    display: inline-block;
-}
 
 [name^="grader-warning-popup"] {
     background:var(--danger-red);
@@ -1632,14 +1627,6 @@ end of styles used in the admin gradeable page
 .viewed-red-x {
     color: var(--badge-backgroud-red);
     font-size: 1.5em;
-}
-
-[name^="user_id_"]:valid {
-    background-color: transparent;
-}
-
-[name^="user_id_"] {
-    background-color: var(--alert-invalid-entry-pink);
 }
 
 /* color for nav page edit button for rebuild error on gradeable */

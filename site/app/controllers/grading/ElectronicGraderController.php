@@ -521,10 +521,11 @@ class ElectronicGraderController extends AbstractController {
         $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
+        $total_users_who_submitted = [];
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
-            $total_who_submitted = $this->core->getQueries()->getTotalSubmissions($gradeable_id);
+            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $student_array = [];
@@ -632,6 +633,12 @@ class ElectronicGraderController extends AbstractController {
                     continue;
                 }
                 $total_submissions += $value;
+            }
+            foreach ($total_users_who_submitted as $key => $value) {
+                if ($key === 'NULL') {
+                    continue;
+                }
+                $total_who_submitted += $value;
             }
             if (!$gradeable->isTeamAssignment() && $isPeerGradeable) {
                 $sections['peer_stu_grad'] = [

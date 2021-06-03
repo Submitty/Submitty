@@ -183,6 +183,11 @@
     --date-picker-yellow: #ffeb54;
     --date-picker-red: #f76c6c;
 
+    /* simple gradeables */
+    --simple-full-credit-dark-blue: #149bdf;
+    --simple-half-credit-light-blue: #88d0f4;
+    --simple-save-error-red: #da4f49;
+
     /* other */
     --box-shadow-very-transparent: rgba(0,0,0,0.12);
     --box-shadow-slightly-transparent: rgba(0,0,0,0.20);
