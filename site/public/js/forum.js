@@ -1592,19 +1592,11 @@ function addMarkdownCode(type, divTitle){
 }
 
 function previewMarkdown(){
-
-  console.log('this', $(this));
-  console.log('closest', $(this).closest($('.thread-post-form')));
-  
   const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
-  console.log(post_box_num);
   const reply_box = $(`textarea#reply_box_${post_box_num}`);
   const preview_box = $(`#preview_box_${post_box_num}`);
   const preview_button = $(`#markdown_buttons_${post_box_num}`).find('[title="Preview Markdown"]');
   const post_content = reply_box.val();
-  console.log("reply_box", reply_box);
-  console.log("post_content", post_content);
-  console.log("preview_box", preview_box);
 
   const enablePreview = preview_box.is(':hidden');
 
@@ -1635,7 +1627,6 @@ function previewMarkdown(){
         preview_button.empty();
         preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
       }
-      console.log(data);    
     },
     error: function() {
         window.alert("Something went wrong while trying to preview new thread. Please try again.");
