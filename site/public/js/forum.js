@@ -1600,9 +1600,11 @@ function previewMarkdown(){
   console.log(post_box_num);
   const reply_box = $(`textarea#reply_box_${post_box_num}`);
   const preview_box = $(`#preview_box_${post_box_num}`);
+  const preview_button = $(`#markdown_buttons_${post_box_num}`).find('[title="Preview Markdown"]');
   const post_content = reply_box.val();
-  console.log(reply_box);
-  console.log(post_content);
+  console.log("reply_box", reply_box);
+  console.log("post_content", post_content);
+  console.log("preview_box", preview_box);
 
   const enablePreview = preview_box.is(':hidden');
 
@@ -1619,12 +1621,19 @@ function previewMarkdown(){
       if (enablePreview) {
         preview_box.empty();
         preview_box.append(data);
-        preview_box.show();
+        preview_box.parent().show();
         reply_box.hide();
+
+        preview_button.empty();
+        preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+
       }
       else {
-        preview_box.hide();
+        preview_box.parent().hide();
         reply_box.show();
+
+        preview_button.empty();
+        preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
       }
       console.log(data);    
     },

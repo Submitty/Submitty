@@ -30,7 +30,6 @@
             <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
             <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
             <button title="Preview Markdown" type="button" onclick="previewMarkdown.call(this, {{ not enablePreview }})" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
-            <p id="showMarkdownP">{{ enablePreview ? "True" : "False" }}</p>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
@@ -86,7 +85,7 @@
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
         <textarea id="reply_box_{{ post_box_id }}" name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" aria-label="{{post_content_placeholder}}" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
         onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
-        <pre id="preview_box_{{ post_box_id }}" name="thread_post_content_preview" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" hidden></pre>
+        <pre name="thread_post_content_preview" class="fill-available pre_forum markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden><span id="preview_box_{{ post_box_id }}" class="post_content pre-wrap"></span></pre>
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
 <br/>
