@@ -1138,20 +1138,14 @@ class ForumThreadView extends AbstractView {
         }
     }
 
-    // public function showMarkdownPreview($enablePreview) {
-    //     $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
-    //     $email_enabled = $this->core->getConfig()->isEmailEnabled();
-
-    //     return $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", {
-
-    //     })
-    // }
-
     public function previewPost($enablePreview, $post_content) {
         $this->core->getOutput()->disableRender();
-        return $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
-                "render_markdown" => $enablePreview,
-                "post_content" => $post_content
+        if(!$enablePreview){
+            return;
+        }
+        return $this->core->getOutput()->renderTwigTemplate("generic/Markdown.twig", [
+                "style" => "white-space: normal;",
+                "content" => $post_content
         ]);
     }
 
