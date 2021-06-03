@@ -24,7 +24,7 @@
     <button title="Preview Markdown" type="button" onclick="previewQueueMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
   </span>
   <textarea class="announcement-setting" name="queue_announcement_message" id="queue-announcement-message">{{viewer.getQueueAnnouncementMessage()}}</textarea>
-  <pre id="queue_announcement_message_preview" name="queue_announcement_message_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></pre>
+  <div id="queue_announcement_message_preview" name="queue_announcement_message_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
 {% endblock %}
 {% block form %}
   <form method="post" id="announcement_form" action="{{base_url}}/update_announcement">

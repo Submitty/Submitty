@@ -85,7 +85,7 @@
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
         <textarea id="reply_box_{{ post_box_id }}" name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" aria-label="{{post_content_placeholder}}" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
         onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
-        <pre id="preview_box_{{ post_box_id }}" name="thread_post_content_preview" class="fill-available pre_forum markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></pre>
+        <div id="preview_box_{{ post_box_id }}" name="thread_post_content_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
 <br/>
