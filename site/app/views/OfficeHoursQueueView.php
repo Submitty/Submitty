@@ -69,7 +69,7 @@ class OfficeHoursQueueView extends AbstractView {
             return;
         }
         return $this->core->getOutput()->renderTwigTemplate("generic/Markdown.twig", [
-                "style" => "white-space: normal; font-family: 'Source Sans Pro', sans-serif;",
+                "style" => "font-family: 'Source Sans Pro', sans-serif;",
                 "content" => $content
         ]);
     }

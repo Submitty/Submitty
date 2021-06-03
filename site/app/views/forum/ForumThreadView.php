@@ -1144,7 +1144,6 @@ class ForumThreadView extends AbstractView {
             return;
         }
         return $this->core->getOutput()->renderTwigTemplate("generic/Markdown.twig", [
-                "style" => "white-space: normal;",
                 "content" => $post_content
         ]);
     }
