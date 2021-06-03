@@ -4435,7 +4435,6 @@ AND gc_id IN (
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,
               g_grade_released_date AS grade_released_date,
-              g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               eg.*,
@@ -5089,8 +5088,6 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             $gradeable->getGradeReleasedDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
-            $gradeable->getGradeLockedDate() !== null ?
-                DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket()
         ];
@@ -5107,10 +5104,9 @@ AND gc_id IN (
               g_grade_start_date,
               g_grade_due_date,
               g_grade_released_date,
-              g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5246,8 +5242,6 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeDueDate()) : null,
                 $gradeable->getGradeReleasedDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
-                $gradeable->getGradeLockedDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getId()
@@ -5264,7 +5258,6 @@ AND gc_id IN (
                   g_grade_start_date=?,
                   g_grade_due_date=?,
                   g_grade_released_date=?,
-                  g_grade_locked_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?
                 WHERE g_id=?",
@@ -6129,7 +6122,7 @@ AND gc_id IN (
               LEFT JOIN (SELECT
                 user_id,"
                 . $this->getInnerQueueSelect() .
-               "SUM(CASE
+               ",SUM(CASE
                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                   ELSE 0
                 END) AS not_helped_count
@@ -7193,5 +7186,10 @@ SQL;
       END) AS not_helped_count
 
 SQL;
+    }
+
+    public function getCourseSchemaTables(): array {
+        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
+        return $this->course_db->rows();
     }
 }

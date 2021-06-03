@@ -24,7 +24,15 @@ class SqlToolboxController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"GET"})
      */
     public function showToolbox(): WebResponse {
-        return new WebResponse(SqlToolboxView::class, 'showToolbox');
+        $organizedTables = [];
+        //Loop through and create a 2d array that holds all columns for each table name.
+        foreach ($this->core->getQueries()->getCourseSchemaTables() as $table) {
+            $organizedTables[$table['table_name']][] = [
+                'name' => $table['column_name'],
+                'type' => $table['data_type']
+            ];
+        }
+        return new WebResponse(SqlToolboxView::class, 'showToolbox', $organizedTables);
     }
 
     /**
