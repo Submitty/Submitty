@@ -790,7 +790,7 @@ class AdminGradeableController extends AbstractController {
             'student_view_after_grades',
             'student_submit',
             'late_days',
-            'precision',
+            'precision'
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
@@ -818,7 +818,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view_after_grades' => false,
                 'student_submit' => true,
                 'late_days' => $default_late_days,
-                'precision' => 0.5,
+                'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
         }
@@ -1037,7 +1037,7 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date',
+            'has_due_date'
         ];
 
         $discussion_ids = 'discussion_thread_id';

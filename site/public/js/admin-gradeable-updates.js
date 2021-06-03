@@ -71,7 +71,6 @@ function onItemPoolOptionChange(componentId) {
 function onPrecisionChange() {
     ajaxUpdateGradeableProperty(getGradeableId(), {
         'precision': $('#point_precision_id').val(),
-        'allow_custom_marks': false,
         'csrf_token': csrfToken
     }, function () {
         // Clear errors by just removing red background
