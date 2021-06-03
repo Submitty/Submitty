@@ -27,6 +27,7 @@
 .markdown ul {
     margin-bottom: 12px;
     white-space: normal;
+    padding-left: 15px;
 }
 
 .markdown li {
