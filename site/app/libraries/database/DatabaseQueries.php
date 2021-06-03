@@ -4435,7 +4435,6 @@ AND gc_id IN (
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,
               g_grade_released_date AS grade_released_date,
-              g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               eg.*,
@@ -5088,8 +5087,6 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-            $gradeable->getGradeLockedDate() !== null ?
-                DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket()
         ];
@@ -5106,10 +5103,9 @@ AND gc_id IN (
               g_grade_start_date,
               g_grade_due_date,
               g_grade_released_date,
-              g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5241,8 +5237,6 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-                $gradeable->getGradeLockedDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getId()
@@ -5259,7 +5253,6 @@ AND gc_id IN (
                   g_grade_start_date=?,
                   g_grade_due_date=?,
                   g_grade_released_date=?,
-                  g_grade_locked_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?
                 WHERE g_id=?",
