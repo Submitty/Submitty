@@ -18,6 +18,18 @@ input.readonly.peerstudents {
     width: 200px;
 }
 
+input[type=text]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+[data-theme="dark"] input[type=text]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] input[type=text]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}
+
 select {
     margin-top:7px;
     width: -webkit-fill-available;
@@ -236,14 +248,14 @@ div.btn-container {
 
 #zip_link_limited {
     text-decoration:none;
-    color:white;
+    color: var(--text-black);
     padding:10px;
     padding-left:0px;
 }
 
 #zip_link_full {
     text-decoration:none;
-    color:black;
+    color: var(--text-black);
     padding:10px;
     padding-left:0px;
 }
