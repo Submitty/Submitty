@@ -1,63 +1,70 @@
 <div class="electronic_file">
 
-        <div class="option-title">
-            What are students allowed to do?
-        </div>
-        <div>
-            <fieldset>
-                <legend>View the gradeable on the course home page and download submitted files?</legend>
-                <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
-                        {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
-                <input type="radio" id="no_student_view" name="student_view" value="false"
-                        {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
-                <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                        {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
-                <div hidden>
-                    <input type="radio" id="yes_student_view" name="student_view" value="true"
-                        {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
-                </div>
-            </fieldset>
-        </div>
-
-        <div id="student_submit_view">
-            <div>
-                <fieldset><legend>Make new submissions and access all prior versions?</legend>
-                <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
-                <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="no_student_submit">No</label></fieldset>
+    <div class="option-title">
+        What are students allowed to do?
+    </div>
+    <div>
+        <fieldset>
+            <legend>View the gradeable on the course home page and download submitted files?</legend>
+            <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
+                    {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
+            <input type="radio" id="no_student_view" name="student_view" value="false"
+                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
+            <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
+                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
+            <div hidden>
+                <input type="radio" id="yes_student_view" name="student_view" value="true"
+                    {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
             </div>
+        </fieldset>
+    </div>
+
+    <div id="student_submit_view">
+        <div>
+            <fieldset><legend>Make new submissions and access all prior versions?</legend>
+            <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
+            <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="no_student_submit">No</label></fieldset>
         </div>
+    </div>
 <br><br>
 
-        <div class="option-title">Choose an autograding configuration:</div>
-                <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
-                    "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
-                    from the Course Settings Page. </p>
-                <p> Manually type the full path to a configuration file, or select from the list below. </p>
-        <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
-        {% for error_message in repository_error_messages %}
-            <div class="config_search_error">({{error_message}})</div>
-        {% endfor %}
-        {% if not currently_valid_repository %}
-            <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
-        {% endif %}
+    <div class="option-title">Choose an autograding configuration:</div>
+            <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
+                "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
+                from the Course Settings Page. </p>
+            <p> Manually type the full path to a configuration file, or select from the list below. </p>
+    <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
+    {% for error_message in repository_error_messages %}
+        <div class="config_search_error">({{error_message}})</div>
+    {% endfor %}
+    {% if not currently_valid_repository %}
+        <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
+    {% endif %}
 
     <div class="settings">
-        <input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-            autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
-        <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
-        <datalist id="path_data" style="display:none" >
-        {% for path in all_config_paths %}
-            <option class="path_autofill_option" data-name="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
-        {% endfor %}
-        </datalist>
-
+        <div>
+            <div class="drop-down" id="config-drop-down">
+                <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration">
+                    <div style="margin-left: -45px; position: absolute; display: inline-block; width: auto; transform: translate(0, 25%);">
+                        <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
+                        <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
+                    </div>
+                </input>
+                <div class="drop-down-options" style="display: none;" id="config-options">
+                    {% for path in all_config_paths %}
+                        <div class="path_autofill_option drop-down-option" data-name="{{path.0}}" data-value="{{path.1}}">{{path.0}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
         <br />
-
+        
         {# text box with the path to the current config file, hidden but still used in js #}
-        <input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path'
+        <input style='width: 83%' id='input-provide-full-path' type="hidden" name='autograding_config_path'
             value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
 
@@ -137,6 +144,17 @@
         let full_path_obj = $('#input-provide-full-path');
         let current_val = $('#config_search').val();
 
+        // Filters the autograding configs displayed based on the values in the box
+        $(".path_autofill_option").each(function() {
+            if ($(this).attr("data-name").toLowerCase().includes(current_val.toLowerCase()) ||
+                    $(this).attr("data-value").toLowerCase().includes(current_val.toLowerCase())) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
+
         //if a name is entered change to the path
 
         let index=-1;
@@ -170,6 +188,7 @@
 
     function clearButtonPress() {
         $('#config_search').val('');
+        $('.drop-down-box').trigger("input");
     }
 
     function onStudentViewChange() {
@@ -203,6 +222,39 @@
         no_due_date.change();
     }
 
+    function dropDownBoxOnClick() {
+        let options = $(this).parent().find(".drop-down-options");
+        if (!$(options).is(":visible")) {
+            $(options).hide();
+        }
+    }
+    
+    function dropDownArrowOnClick() {
+        let options = $(this).parent().parent().find(".drop-down-options");
+        if ($(options).is(":visible")) {
+            $(options).hide();
+        }
+        else {
+            $(options).show();
+        }
+    }
+
+    function dropDownOptionOnClick() {
+        let options = $(this).parent();
+        $(options).hide();
+        let box = $(options).parent().find(".drop-down-box");
+        // set the box's value to the text of the option
+        $(box).val($(this).text());
+        $(box).trigger("input");
+    }
+
+    function hideDropDownOptions(){
+        let options = $(".drop-down-options");
+        if ($(options).is(":visible")) {
+            $(options).hide();
+        }
+    }
+
     $(document).ready(function() {
 
         // Hide PDF settings if not in use
@@ -222,7 +274,7 @@
 
         // Update the text box when the path config changes
         onConfigPathChange();
-        $('#config_search').change(onConfigPathChange);
+        $('#config_search').on("input", onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
@@ -232,5 +284,13 @@
             sub.prop('checked', true);
             sub.change();
         });
+
+        $('.drop-down').on("click", function(event){
+            event.stopPropagation();
+        });
+        $(document).on("click", hideDropDownOptions);
+        $('.drop-down-box').on("click", dropDownBoxOnClick);
+        $('#drop-down-arrow').on("click", dropDownArrowOnClick);
+        $('.drop-down-option').on("click",dropDownOptionOnClick);
     });
 </script>
