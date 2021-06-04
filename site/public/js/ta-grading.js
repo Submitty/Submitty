@@ -743,15 +743,8 @@ function toggleFullLeftColumnMode (forceVal = false) {
 
   panelsContSelector = newPanelsContSelector;
 
-  if (!taLayoutDet.isFullScreenMode) {
-    $("#grading-panel-student-name").hide();
-  }
+  $("#grading-panel-student-name").hide();
 
-  if(taLayoutDet.isFullLeftColumnMode){
-      $('.navigation-box').css({'margin-left':'10%'});
-  }else{
-      $('.navigation-box').css({'margin-left':'20%'});
-  }
 }
 
 /**
