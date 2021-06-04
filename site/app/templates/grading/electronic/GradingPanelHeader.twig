@@ -90,7 +90,7 @@
             {{ self.renderPanelPositionSelector('discussion_browser') }}
             </span>
         {% endif %}
-        {% if isRegradePanel %}
+        {% if isRegradePanel and not student_grader %}
             <span class="grade-panel" id="regrade_info_btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn key_to_click"
