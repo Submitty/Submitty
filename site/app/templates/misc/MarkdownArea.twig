@@ -5,6 +5,7 @@
                         when converting forms to use this template otherwise they might not work
     markdown_area_query: optional, a JQuery expression that will return the markdown_area such as $('#my_id')
     markdown_area_value: optional, initial value for markdown_area to have
+    markdown_buttons_id: optional, id for the span holding the markdown_buttons
     other_textarea_attributes: optional, string containing any custom attributes you want the textarea to have.
                                The string should not have attribute values wrapped in quotes
                                 ex. "other_textarea_attributes": "required onkeyup='doSomething()'" <----- BAD
@@ -14,8 +15,8 @@
     preview_div_id: technically optional, but giving an id makes getting the div in JS much easier
     preview_div_name: optional
 #}
-<div class="markdown-area">
-    <span id="markdown_buttons" style="display:{{ render_buttons ? "block" : "none" }}">
+<div class="markdown-area fill-available">
+    <div id="{{ markdown_buttons_id ? markdown_buttons_id : "markdown_buttons" }}" style="display:{{ render_buttons ? "block" : "none" }}">
         {% if markdown_area_query %}
             <button type="button" title="Insert a link" onclick="addMarkdownCode(1, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
             <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
@@ -32,7 +33,8 @@
             Supports Markdown
             <i style="font-style:normal;" class="fa-question-circle"></i>
         </a>
-    </span>
+    </div>
+    <label for="{{ markdown_area_id }}" tabindex="0" hidden>{{ markdown_area_id }}</label>
     <textarea
         id="{{ markdown_area_id }}"
         name="{{ markdown_area_name }}"

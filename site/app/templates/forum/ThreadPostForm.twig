@@ -17,20 +17,14 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row position-relative">
-        <div role="button" id="markdown_toggle_{{ post_box_id }}"
-        class="markdown-toggle {{ render_markdown?"markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
-        style="margin-right:10px;padding: unset;cursor: pointer; "
-        title="Render markdown" onclick="$('#markdown_buttons_{{ post_box_id }}').toggle(); $(this).toggleClass('markdown-active'); $('#markdown_input_{{ post_box_id }}').val($('#markdown_input_{{ post_box_id }}').val() == 0? '1':'0');$('#markdown-info-{{ post_box_id }}').toggleClass('disabled');"><i class="fab fa-markdown fa-2x"></i></div>
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown?1:0 }}" />
-        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
-        &nbsp;&nbsp;
-        <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
+        {# <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
             <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
             <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
             <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
             <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
             <button title="Preview Markdown" type="button" onclick="previewForumMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
-        </span>
+        </span> #}
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
@@ -82,10 +76,31 @@
     {% endif %}
     </div>
     <div class="form-group row">
-        {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea id="reply_box_{{ post_box_id }}" name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" aria-label="{{post_content_placeholder}}" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
-        onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
-        <div id="preview_box_{{ post_box_id }}" name="thread_post_content_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
+        {% set min_height = (post_textarea_large ? "40vmin":"100px") %}
+        <div role="button" id="markdown_toggle_{{ post_box_id }}"
+             class="markdown-toggle {{ render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
+             style="margin-right:10px; padding:unset; cursor:pointer;"
+             title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
+        >
+            <i class="fab fa-markdown fa-2x"></i>
+        </div>
+        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "reply_box_" ~ post_box_id,
+            "markdown_area_query" : "$('#reply_box_" ~ post_box_id ~ "')",
+            "markdown_area_name" : "thread_post_content",
+            "markdown_area_value" : "",
+            "placeholder" : post_content_placeholder,
+            "preview_div_id" : "preview_box_" ~ post_box_id,
+            "preview_div_name" : "preview_box_" ~ post_box_id,
+            "onclick" : "previewForumMarkdown.call(this)",
+            "render_buttons" : render_markdown, 
+            "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
+            "min_height" : min_height,
+            "other_textarea_attributes" : "required maxlength=" ~ (post_content_limit ? post_content_limit : "") ~ " onkeydown=submitNearestForm(event,$(this)) onpaste=pasteImageFromClipboard(event,$(this), " ~ post_box_id  ~ ")"
+        } only %}
+        {# <textarea id="reply_box_{{ post_box_id }}" name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" aria-label="{{post_content_placeholder}}" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %} onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
+        <div id="preview_box_{{ post_box_id }}" name="thread_post_content_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div> #}
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
 <br/>
