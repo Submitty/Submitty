@@ -153,6 +153,10 @@
     --attachment-box-color: #f5f5f5;
     --file-upload-table-hover: #d1d1d1;
 
+    /*notebook builder*/
+    --notebook-builder-form-options-orange: #F7D8BA;
+    --notebook-builder-itempool-green: #CAF1DE;
+
 
         /*these differ from the colors on the posts for some reason?
         so I will put them here for reference
@@ -394,6 +398,10 @@
       --date-picker-green: #446f44;
       --date-picker-yellow: #9d9131;
       --date-picker-red: #953d3d;
+
+      /*notebook builder*/
+      --notebook-builder-form-options-orange: #7b6148;
+      --notebook-builder-itempool-green: #50826a;
 
       /* other */
       --box-shadow-very-transparent: rgba(255,255,255,0);
