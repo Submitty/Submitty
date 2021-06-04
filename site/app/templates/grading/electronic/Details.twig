@@ -114,7 +114,7 @@
                             </a>
                         </th>
                     {% else %}
-                        <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">{{ column.title }}</th>
+                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>
@@ -329,7 +329,7 @@
 
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(self, context, section, graded_gradeable, index, info, column) %}
-    <td>
+    <td style="text-align: center">
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
             {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
