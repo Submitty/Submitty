@@ -15,7 +15,7 @@ function updateErrorMessage() {
 function setError(name, err) {
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = err;
-        elem.style.backgroundColor = '#FDD';
+        elem.setCustomValidity("Invalid field.");
     });
     errors[name] = err;
 }
@@ -23,7 +23,7 @@ function setError(name, err) {
 function clearError(name, update) {
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
-        elem.style.backgroundColor = '';
+        elem.setCustomValidity('');
 
         // Update the value if provided
         if(update !== undefined) {
@@ -222,7 +222,7 @@ $(document).ready(function () {
                         clearError(key, response_data[key]);
                     }
                 }
-                // Clear errors by just removing red background
+                // Clear errors by setting custom validity to ''
                 for (let key in data) {
                     if (data.hasOwnProperty(key)) {
                         clearError(key);

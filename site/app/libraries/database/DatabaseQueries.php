@@ -3252,34 +3252,6 @@ ORDER BY gt.{$section_key}",
     }
 
     /**
-     * Gets the number of late days for a specific user at a specified time
-     *
-     * @param string $user_id
-     * @param \DateTime $since_timestamp
-     * @return SimpleLateUser|null
-     */
-    public function getLateDaysForUserOnTimestamp(string $user_id, \DateTime $since_timestamp): ?SimpleLateUser {
-        $this->course_db->query(
-            "
-        SELECT u.user_id, user_firstname, user_preferred_firstname,
-          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp
-        FROM users AS u
-        FULL OUTER JOIN late_days AS l
-          ON u.user_id=l.user_id
-        WHERE allowed_late_days IS NOT NULL
-          AND u.user_id = ?
-          AND since_timestamp = ?
-        ORDER BY
-          user_email ASC, since_timestamp DESC;",
-            [$user_id, $since_timestamp]
-        );
-
-        return $this->course_db->getRowCount() === 1
-            ? new SimpleLateUser($this->core, $this->course_db->row())
-            : null;
-    }
-
-    /**
      * Return an array of users with extensions
      *
      * @param  string $gradeable_id
@@ -4463,10 +4435,10 @@ AND gc_id IN (
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,
               g_grade_released_date AS grade_released_date,
-              g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
-              g_allow_custom_marks AS allow_custom_marks,     
+              g_allow_custom_marks AS allow_custom_marks,
+              g_allowed_minutes AS allowed_minutes,
               eg.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
@@ -4558,6 +4530,7 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
+            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
 
             // Construct the components
             $component_properties = [
@@ -5117,8 +5090,6 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-            $gradeable->getGradeLockedDate() !== null ?
-                DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket(),
             $gradeable->getAllowCustomMarks()
@@ -5136,11 +5107,10 @@ AND gc_id IN (
               g_grade_start_date,
               g_grade_due_date,
               g_grade_released_date,
-              g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket,
               g_allow_custom_marks)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5272,8 +5242,6 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-                $gradeable->getGradeLockedDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
@@ -5291,7 +5259,6 @@ AND gc_id IN (
                   g_grade_start_date=?,
                   g_grade_due_date=?,
                   g_grade_released_date=?,
-                  g_grade_locked_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
                   g_allow_custom_marks=?,
@@ -6156,7 +6123,7 @@ AND gc_id IN (
               LEFT JOIN (SELECT
                 user_id,"
                 . $this->getInnerQueueSelect() .
-               "SUM(CASE
+               ",SUM(CASE
                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                   ELSE 0
                 END) AS not_helped_count
@@ -7058,7 +7025,8 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        $date = new \Datetime($row['release_date']);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('poll')), $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7219,5 +7187,15 @@ SQL;
       END) AS not_helped_count
 
 SQL;
+    }
+
+    private function getGradeableMinutesOverride(string $gradeable_id): array {
+        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows();
+    }
+
+    public function getCourseSchemaTables(): array {
+        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
+        return $this->course_db->rows();
     }
 }
