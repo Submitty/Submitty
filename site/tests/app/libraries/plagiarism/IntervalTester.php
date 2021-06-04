@@ -9,7 +9,7 @@ use app\libraries\plagiarism\Submission;
 
 class IntervalTester extends \PHPUnit\Framework\TestCase {
     public function testInterval() {
-        $interval = new Interval(1, 2);
+        $interval = new Interval(1, 2, "match");
         $this->assertSame(1, $interval->getStart());
         $this->assertSame(2, $interval->getEnd());
         $this->assertEmpty($interval->getUsers());
