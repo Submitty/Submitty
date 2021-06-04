@@ -9,22 +9,20 @@
     <span class="option-alt">
       Messages typed here will appear to all students.<br>
       Leave it empty to hide the announcement.<br>
-      <a target="_blank" href="https://submitty.org/student/communication/markdown">
-        Supports Markdown
-        <i style="font-style:normal;" class="fa-question-circle"></i>
-      </a>
     </span>
   </label>
   <br/>
-  <span id="markdown_buttons">
-    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-    <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-    <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#queue-announcement-message'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-    <button title="Preview Markdown" type="button" onclick="previewQueueMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
-  </span>
-  <textarea class="announcement-setting" name="queue_announcement_message" id="queue-announcement-message">{{viewer.getQueueAnnouncementMessage()}}</textarea>
-  <div id="queue_announcement_message_preview" name="queue_announcement_message_preview" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
+  {% include "misc/MarkdownArea.twig" with {
+    "markdown_area_id" : "queue-announcement-message",
+    "markdown_area_query" : "$('#queue-announcement-message')",
+    "markdown_area_name" : "queue_announcement_message",
+    "markdown_area_value" : viewer.getQueueAnnouncementMessage(),
+    "preview_div_id" : "queue_announcement_message_preview",
+    "preview_div_name" : "queue_announcement_message_preview",
+    "onclick" : "previewQueueMarkdown.call(this)",
+    "render_buttons" : true
+    "min_height" : min_height,
+  } only %}
 {% endblock %}
 {% block form %}
   <form method="post" id="announcement_form" action="{{base_url}}/update_announcement">

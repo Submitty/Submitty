@@ -14,25 +14,18 @@
 
             <label for="poll-question">
                 Question:
-                <span id="markdown_buttons">
-                    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-                    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-                    <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-                    <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-                    <button title="Preview Markdown" type="button" onclick="previewPollMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
-                    <a target="_blank" href="https://submitty.org/student/communication/markdown">
-                        Supports Markdown
-                        <i style="font-style:normal;" class="fa-question-circle"></i>
-                    </a>
-                </span>
-                <textarea
-                    id="poll-question"
-                    name="question"
-                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                    rows="10" cols="30"
-                    placeholder="Enter question here..."
-                    maxlength="5000"></textarea>
-                <div id="poll_preview_new" name="poll_preview_new" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
+                {% include "misc/MarkdownArea.twig" with {
+                    "markdown_area_id" : "poll-question",
+                    "markdown_area_query" : "$('#poll-question')",
+                    "markdown_area_name" : "question",
+                    "markdown_area_value" : "",
+                    "placeholder" : "Enter question here...",
+                    "preview_div_id" : "poll_preview_new",
+                    "preview_div_name" : "poll_preview_new",
+                    "onclick" : "previewPollMarkdown.call(this)",
+                    "render_buttons" : true,
+                    "min_height" : min_height
+                } only %}
             </label>
             <br/><br/>
 
@@ -83,25 +76,17 @@
             
             <label for="poll-question">
                 Question:
-                <span id="markdown_buttons">
-                    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-                    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-                    <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-                    <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#poll-question'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-                    <button title="Preview Markdown" type="button" onclick="previewPollMarkdown.call(this)" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
-                     <a target="_blank" href="https://submitty.org/student/communication/markdown">
-                        Supports Markdown
-                        <i style="font-style:normal;" class="fa-question-circle"></i>
-                    </a>
-                </span>
-               
-                <textarea
-                    id="poll-question"
-                    name="question"
-                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                    rows="10" cols="30"
-                    maxlength="5000">{{ poll.getQuestion() }}</textarea>
-                <div id="poll_preview_edit" name="poll_preview_edit" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
+                {% include "misc/MarkdownArea.twig" with {
+                    "markdown_area_id" : "poll-question",
+                    "markdown_area_query" : "$('#poll-question')",
+                    "markdown_area_name" : "question",
+                    "markdown_area_value" : poll.getQuestion(),
+                    "preview_div_id" : "poll_preview_edit",
+                    "preview_div_name" : "poll_preview_edit",
+                    "onclick" : "previewPollMarkdown.call(this)",
+                    "render_buttons" : true,
+                    "min_height" : min_height
+                } only %}
             </label>
             <br/><br/>
 

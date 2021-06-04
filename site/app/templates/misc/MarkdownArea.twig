@@ -1,0 +1,21 @@
+<div class="markdown-area">
+    <span id="markdown_buttons" style="display:{{ render_buttons ? "block" : "none" }}">
+        <button type="button" title="Insert a link" onclick="addMarkdownCode(1, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+        <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+        <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+        <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+        <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+        <a target="_blank" href="https://submitty.org/student/communication/markdown">
+            Supports Markdown
+            <i style="font-style:normal;" class="fa-question-circle"></i>
+        </a>
+    </span>
+    <textarea
+        id="{{ markdown_area_id }}"
+        name="{{ markdown_area_name }}"
+        style="resize: none; min-height: 100px; max-height: 300px; width: -webkit-fill-available;"
+        placeholder="{{placeholder ? placeholder : "" }}"
+        rows="10" cols="30"
+        maxlength="5000">{{ markdown_area_value }}</textarea>
+    <div id="{{ preview_div_id }}" name="{{ preview_div_name }}" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
+</div>
