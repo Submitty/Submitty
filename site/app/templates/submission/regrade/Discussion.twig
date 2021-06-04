@@ -58,8 +58,7 @@
                         {% endif %}
                         <label for="reply-text-area">{{ text_area_label_text }}</label>
                         {% include "misc/MarkdownArea.twig" with {
-                            "markdown_area_id" : "reply-text-area-",
-                            "markdown_area_id_suffix" : component.id,
+                            "markdown_area_id" : "reply-text-area-" ~ component.id,
                             "markdown_area_name" : "replyTextArea",
                             "markdown_area_value" : "",
                             "placeholder" : "Enter response here...",
