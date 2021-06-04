@@ -3190,25 +3190,13 @@ function addItempoolOptions(componentId) {
   select_ele.val(selected_value).change();
 }
 
-function errorReceiver(event) {
-    console.log(event.message, event.filename, event.lineno);
-}
-
-$(document).ready(function(){
+$(document).ready(async function(){
     $(window).on('beforeunload', function(e){
-        // Attempt to save before unloading the page by passing neccessary details to webworker
-        let components = getOpenComponentIds().map(function(componentId){
-            component = getComponentFromDOM(componentId);
-            component.graded_version = getDisplayVersion();
-            return component;
+        getOpenComponentIds().forEach(function(id){
+            closeComponent(id, true);
+            saveMarkList(id);
+            setTimeout(null, 10000);
         });
-        let markList = getOpenComponentIds().map(componentId => getMarkListFromDOM(componentId));
-        var worker = new Worker('save-rubric-worker.js');
-        worker.onmessage = function(){
-            console.log("message received");
-        }
-        worker.onerror = errorReceiver;
-        worker.postMessage([components, OLD_MARK_LIST, markList, isEditModeEnabled(), getGradeableId()]);
-        console.log("message posted\n");
+        
     });
 });

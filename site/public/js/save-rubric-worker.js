@@ -50,8 +50,7 @@ function saveMarkList(component_id, old_mark_list, mark_list, gradeable_id) {
 }
 
 self.onmessage = function(e){
-    console.log("hi!");
-    alert("what");
+    self.postMessage("hi");
     let components = e.data[0];
     let old_mark_list = e.data[1];
     let mark_list = e.data[2];
