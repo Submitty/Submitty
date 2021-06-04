@@ -669,7 +669,6 @@ class PlagiarismController extends AbstractController {
                     $segment_info["{$start_line}_{$start_pos}"] = [];
 
                     foreach ($match->getUsers() as $i => $other) {
-
                         $segment_info["{$start_line}_{$start_pos}"][] = $other->getUserId() . "_" . $other->getVersion();
                         if ($other->getUserId() == $user_id_2) {
                             $is_general_match = true;
