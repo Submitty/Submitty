@@ -338,7 +338,7 @@
 
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) %}
-    <td class="td-graded-questions">
+    <td class="td-graded-questions" style="text-align: center">
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
