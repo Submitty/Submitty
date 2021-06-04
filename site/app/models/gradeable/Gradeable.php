@@ -92,7 +92,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setInstructorBlind($peer_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
- * @method void setAllowCustomMarks
+ * @method void setAllowCustomMarks($allow_custom_marks)
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */

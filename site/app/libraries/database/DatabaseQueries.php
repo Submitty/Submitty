@@ -5140,7 +5140,7 @@ AND gc_id IN (
               g_min_grading_group,
               g_syllabus_bucket,
               g_allow_custom_marks)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5276,8 +5276,8 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
-                $gradeable->getId(),
-                $gradeable->getAllowCustomMarks()
+                $gradeable->getAllowCustomMarks(),
+                $gradeable->getId()
             ];
             $this->course_db->query(
                 "
@@ -5294,7 +5294,7 @@ AND gc_id IN (
                   g_grade_locked_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?
+                  g_allow_custom_marks=?,
                 WHERE g_id=?",
                 $params
             );
