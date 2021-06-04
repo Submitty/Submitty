@@ -4467,6 +4467,7 @@ AND gc_id IN (
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
+                  eg_has_release_date as has_release_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
                   eg_precision AS precision,
@@ -5236,12 +5237,9 @@ AND gc_id IN (
                 $gradeable->getType(),
                 $gradeable->getGraderAssignmentMethod(),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
-                $gradeable->getGradeStartDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeStartDate()) : null,
-                $gradeable->getGradeDueDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeDueDate()) : null,
-                $gradeable->getGradeReleasedDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
+                DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getId()
@@ -5266,8 +5264,7 @@ AND gc_id IN (
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 $params = [
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                    $gradeable->getSubmissionDueDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
+                    DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $gradeable->isVcs(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsHostType(),
@@ -5280,6 +5277,7 @@ AND gc_id IN (
                     $gradeable->isStudentViewAfterGrades(),
                     $gradeable->isStudentSubmit(),
                     $gradeable->hasDueDate(),
+                    $gradeable->hasReleaseDate(),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
@@ -5312,6 +5310,7 @@ AND gc_id IN (
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
                       eg_has_due_date=?,
+                      eg_has_release_date=?,            
                       eg_config_path=?,
                       eg_late_days=?,
                       eg_allow_late_submission=?,

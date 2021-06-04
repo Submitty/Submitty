@@ -1042,18 +1042,6 @@ class AdminGradeableController extends AbstractController {
             'has_release_date'
         ];
 
-        $toggle_dates = [
-            'has_due_date' => [
-                'submission_due_date',
-                'grade_start_date',
-                'grade_due_date',
-                'grade_released_date'
-            ],
-            'has_release_date' => [
-                'grade_released_date'
-            ]
-        ];
-
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
@@ -1083,16 +1071,6 @@ class AdminGradeableController extends AbstractController {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties)) {
                 $post_val = $post_val === 'true';
-
-                //Check boolean properties that disable dates
-                if (isset($toggle_dates[$prop])) {
-                    if (!$post_val) {
-                        foreach ($toggle_dates[$prop] as $val) {
-                            unset($dates[$val]);
-                        }
-                    }
-                    continue;
-                }
             }
 
             if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {

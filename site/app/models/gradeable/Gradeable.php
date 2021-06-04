@@ -80,6 +80,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
+ * @method void setHasReleaseDate($has_release_date)
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
@@ -194,6 +195,8 @@ class Gradeable extends AbstractModel {
     protected $precision = 0.0;
     /** @prop @var bool If this gradeable has a due date or not */
     protected $has_due_date = false;
+    /** @prop @var bool If this gradeable has a grade release date or not */
+    protected $has_release_date = false;
 
     /* Dates for all types of gradeables */
 
@@ -280,6 +283,7 @@ class Gradeable extends AbstractModel {
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
+            $this->setHasReleaseDate($details['has_release_date']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
@@ -847,7 +851,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function hasDueDate() {
-        return $this->submission_due_date != null;
+        return $this->has_due_date;
     }
 
     /**
@@ -855,7 +859,10 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function hasReleaseDate() {
-        return $this->grade_released_date != null;
+        if (!$this->hasDueDate()) {
+            return false;
+        }
+        return $this->has_release_date;
     }
 
     /**
@@ -1824,7 +1831,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && ($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
