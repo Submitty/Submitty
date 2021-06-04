@@ -94,16 +94,9 @@ function onAllowCustomChange(){
     }, function () {
         // Clear errors by just removing red background
         updateErrorMessage();
-
-        closeAllComponents(true)
-            .then(function () {
-                return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
-            })
-            .catch(function (err) {
-                alert('Failed to reload the gradeable rubric! ' + err.message);
-            });
     }, updateGradeableErrorCallback);
 }
+
 function updateGradeableErrorCallback(message, response_data) {
     for (let key in response_data) {
         if (response_data.hasOwnProperty(key)) {

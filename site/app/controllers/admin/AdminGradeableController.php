@@ -1020,11 +1020,9 @@ class AdminGradeableController extends AbstractController {
         if (count($details) === 0) {
             throw new \InvalidArgumentException('Request contained no properties, perhaps the name was blank?');
         }
-
         // Trigger a rebuild if the config changes
         $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
-
         $boolean_properties = [
             'ta_grading',
             'scanned_exam',
@@ -1037,7 +1035,8 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date'
+            'has_due_date',
+            'allow_custom_marks'
         ];
 
         $discussion_ids = 'discussion_thread_id';

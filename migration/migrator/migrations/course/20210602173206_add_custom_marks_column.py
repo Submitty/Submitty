@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    sql = "ALTER TABLE gradeable ADD COLUMN g_allow_custom_marks BOOLEAN NOT NULL DEFAULT TRUE;"
+    sql = "ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_allow_custom_marks BOOLEAN NOT NULL DEFAULT TRUE;"
     database.execute(sql)
 
 

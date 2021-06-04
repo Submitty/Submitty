@@ -91,6 +91,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getPeerBlind()
  * @method void setInstructorBlind($peer_blind)
  * @method int getInstructorBlind()
+ * @method bool getAllowCustomMarks()
+ * @method void setAllowCustomMarks
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -2000,17 +2002,6 @@ class Gradeable extends AbstractModel {
         return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
     }
 
-    public function setAllowCustomMarks(bool $allow): void {
-        $this->allow_custom_marks = $allow;
-    }
-
-    /**
-     * returns true if custom marks are enabled
-     * @return bool
-     */
-    public function getAllowCustomMarks(): bool {
-        return $this->allow_custom_marks;
-    }
     /**
      * Can a given user view this gradeable
      */

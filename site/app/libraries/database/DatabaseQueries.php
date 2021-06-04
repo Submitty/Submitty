@@ -5120,7 +5120,8 @@ AND gc_id IN (
             $gradeable->getGradeLockedDate() !== null ?
                 DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
-            $gradeable->getSyllabusBucket()
+            $gradeable->getSyllabusBucket(),
+            $gradeable->getAllowCustomMarks()
         ];
         $this->course_db->query(
             "
@@ -5137,7 +5138,8 @@ AND gc_id IN (
               g_grade_released_date,
               g_grade_locked_date,
               g_min_grading_group,
-              g_syllabus_bucket)
+              g_syllabus_bucket,
+              g_allow_custom_marks)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
@@ -5274,7 +5276,8 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
-                $gradeable->getId()
+                $gradeable->getId(),
+                $gradeable->getAllowCustomMarks()
             ];
             $this->course_db->query(
                 "
@@ -5290,7 +5293,8 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_grade_locked_date=?,
                   g_min_grading_group=?,
-                  g_syllabus_bucket=?
+                  g_syllabus_bucket=?,
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );
