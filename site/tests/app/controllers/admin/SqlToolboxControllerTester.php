@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
 use app\exceptions\DatabaseException;
@@ -41,11 +42,60 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     public function testShowToolbox(): void {
+        $tables = [
+        [
+            'table_name' => 'gradeable',
+            'column_name' => 'g_title',
+            'data_type' => 'character varying'
+        ],
+        [
+            'table_name' => 'gradeable',
+            'column_name' => 'g_gradeable_type',
+            'data_type' => 'integer'
+        ],
+        [
+            'table_name' => 'threads',
+            'column_name' => 'title',
+            'data_type' => 'character varying'
+        ],
+        [
+            'table_name' => 'threads',
+            'column_name' => 'is_visible',
+            'data_type' => 'boolean'
+        ]
+        ];
+        $mock_queries = $this->createMock(DatabaseQueries::class);
+        $mock_queries->expects($this->once())->method('getCourseSchemaTables')->willReturn($tables);
+        $this->core->setQueries($mock_queries);
+
+        $organizedTables = [
+            'gradeable' => [
+                [
+                    'name' => 'g_title',
+                    'type' => 'character varying'
+                ],
+                [
+                    'name' => 'g_gradeable_type',
+                    'type' => 'integer'
+                ]
+            ],
+            'threads' => [
+                [
+                    'name' => 'title',
+                    'type' => 'character varying'
+                ],
+                [
+                    'name' => 'is_visible',
+                    'type' => 'boolean'
+                ]
+            ]
+        ];
+
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertEmpty($response->parameters);
+        $this->assertSame($response->parameters, [$organizedTables]);
     }
 
     public function testRunQuery(): void {

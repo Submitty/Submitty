@@ -281,13 +281,10 @@ CREATE TABLE public.gradeable (
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
     g_grade_released_date timestamp(6) with time zone NOT NULL,
-    g_grade_locked_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
 );
@@ -1222,6 +1219,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_data g_id_gd_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_data
+    ADD CONSTRAINT g_id_gd_team_id_unique UNIQUE (g_id, gd_team_id);
 
 
 --
