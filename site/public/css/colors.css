@@ -199,7 +199,7 @@
     --grading-note: #777;
     --file-browser-blue: #2627ee;
     --extra-credit-blue: #0a6495;
-
+    --viewed-content: #e8f0f7;
 
 
 }
@@ -406,4 +406,5 @@
       --grading-note: #A8A8A8;
       --file-browser-blue: #ffffff;
       --extra-credit-blue: #2DACF0;
+      --viewed-content: #50535a;
 }

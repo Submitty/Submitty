@@ -2,8 +2,8 @@
  * Styles common to multiple notebook builder widgets
  */
 .notebook-builder-widget {
-    border: 3px solid var(--viewed_content);
-    background-color: var(--viewed_content);
+    border: 3px solid var(--viewed-content);
+    background-color: var(--viewed-content);
     border-radius: 25px;
     margin-top: 10px;
     margin-bottom: 10px;
