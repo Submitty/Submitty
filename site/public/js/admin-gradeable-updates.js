@@ -87,16 +87,6 @@ function onPrecisionChange() {
     }, updateGradeableErrorCallback);
 }
 
-function onAllowCustomChange(){
-    ajaxUpdateGradeableProperty(getGradeableId(), {
-        'allow_custom_marks': $("input:radio[name=custom_marks]:checked").val(),
-        'csrf_token': csrfToken
-    }, function () {
-        // Clear errors by just removing red background
-        updateErrorMessage();
-    }, updateGradeableErrorCallback);
-}
-
 function updateGradeableErrorCallback(message, response_data) {
     for (let key in response_data) {
         if (response_data.hasOwnProperty(key)) {

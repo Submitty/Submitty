@@ -267,7 +267,8 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $gradeable->getHiddenFiles()
+            'hidden_files' => $gradeable->getHiddenFiles(),
+            'allow_custom_marks' => $gradeable->getAllowCustomMarks()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');

@@ -5261,7 +5261,7 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?,
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );
