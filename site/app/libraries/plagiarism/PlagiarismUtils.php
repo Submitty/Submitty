@@ -13,7 +13,7 @@ class PlagiarismUtils {
         $arr = json_decode($content, true);
         $resultArray = [];
         foreach ($arr as $match) {
-            $interval = new Interval($match['start'], $match['end'], $match['type']);
+            $interval = new Interval($match['start'], $match['end']);
             foreach ($match['others'] as $o) {
                 $interval->addUser(new Submission(
                     $o['username'],

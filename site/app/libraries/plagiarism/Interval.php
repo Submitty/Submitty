@@ -7,15 +7,12 @@ class Interval {
     private $start;
     /** @var int */
     private $end;
-    /** @var string */
-    private $type;
     /** @var Submission[] */
     private $user_matches = [];
 
-    public function __construct(int $start, int $end, string $type) {
+    public function __construct(int $start, int $end) {
         $this->start = $start;
         $this->end = $end;
-        $this->type = $type;
     }
 
     public function getEnd(): int {
@@ -24,10 +21,6 @@ class Interval {
 
     public function getStart(): int {
         return $this->start;
-    }
-
-    public function getType(): string {
-        return $this->type;
     }
 
     public function addUser(Submission $sub): void {

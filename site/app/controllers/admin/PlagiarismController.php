@@ -75,10 +75,9 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
         }
-        $test = file_get_contents($file_path);
         if (file_get_contents($file_path) == "") {
             $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            //$this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
         }
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], ' ', $content));
@@ -658,15 +657,13 @@ class PlagiarismController extends AbstractController {
                 $end_value = $tokens_user_1[$e_pos - 1]["value"];
                 $userMatchesStarts = [];
                 $userMatchesEnds = [];
-
-                $is_general_match = false;
-                if ($match->getType() === "match") {
+                // if (match['type'] == "match") {
                     $segment_info["{$start_line}_{$start_pos}"] = [];
-                }
+                    $orange_color = false;
                 foreach ($match->getUsers() as $i => $other) {
                     $segment_info["{$start_line}_{$start_pos}"][] = $other->getUserId() . "_" . $other->getVersion();
                     if ($other->getUserId() == $user_id_2) {
-                        $is_general_match = true;
+                        $orange_color = true;
                         if ($codebox == "2" && $user_id_2 != "") {
                             foreach ($other->getMatchingPositions() as $pos) {
                                 $matchPosStart = $pos['start'];
@@ -686,22 +683,23 @@ class PlagiarismController extends AbstractController {
                     }
                 }
 
-                if ($is_general_match) {
+                if ($orange_color) {
                     //Color is orange -- general match from selected match
                     $color = '#ffa500';
                 }
-                elseif ($match->getType() === "match") {
-                    //Color is yellow -- matches other students but not general match between students...
+                elseif (!$orange_color) {
+                    //Color is yellow -- matches other students...
                     $color = '#ffff00';
                 }
-                elseif ($match["type"] == "common") {
-                    //Color is grey -- common matches among all students
-                    $color = '#cccccc';
-                }
-                elseif ($match["type"] == "provided") {
-                    //Color is green -- instructor provided code #b5e3b5
-                    $color = '#b5e3b5';
-                }
+                // }
+                // elseif ($match["type"] == "common") {
+                //     //Color is grey -- common matches among all students
+                //     $color = '#cccccc';
+                // }
+                // elseif ($match["type"] == "provided") {
+                //     //Color is green -- instructor provided code #b5e3b5
+                //     $color = '#b5e3b5';
+                // }
 
                 array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
                 $matches->pop();
