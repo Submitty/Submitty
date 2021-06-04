@@ -37,6 +37,7 @@
     <label for="{{ markdown_area_id }}" tabindex="0" hidden>{{ markdown_area_id }}</label>
     <textarea
         id="{{ markdown_area_id }}"
+        class="fill-available thread_post_content"
         name="{{ markdown_area_name }}"
         style="resize: vertical; min-height: 100px; max-height: 300px; width: -webkit-fill-available;"
         placeholder="{{ placeholder }}"
@@ -45,3 +46,9 @@
         {{ other_textarea_attributes }}>{{ markdown_area_value }}</textarea>
     <div id="{{ preview_div_id }}" name="{{ preview_div_name }}" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
 </div>
+
+<script>
+    $('#{{markdown_area_id}}').ready(function() {
+        enableTabsInTextArea({{markdown_area_id}});
+    })
+</script>
