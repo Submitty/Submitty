@@ -659,46 +659,49 @@ class PlagiarismController extends AbstractController {
                 $userMatchesStarts = [];
                 $userMatchesEnds = [];
 
-                $is_general_match = false;
-                if ($match->getType() === "match") {
-                    $segment_info["{$start_line}_{$start_pos}"] = [];
-                }
-                foreach ($match->getUsers() as $i => $other) {
-                    $segment_info["{$start_line}_{$start_pos}"][] = $other->getUserId() . "_" . $other->getVersion();
-                    if ($other->getUserId() == $user_id_2) {
-                        $is_general_match = true;
-                        if ($codebox == "2" && $user_id_2 != "") {
-                            foreach ($other->getMatchingPositions() as $pos) {
-                                $matchPosStart = $pos['start'];
-                                $matchPosEnd =  $pos['end'];
-                                $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
-                                $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
-                                $end_pos_2 = $tokens_user_2[$matchPosEnd - 1]["char"] - 1;
-                                $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
-                                $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
-                                $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
+                $color = ""; // placeholder
 
-                                $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $matchPosStart, $matchPosEnd];
-                                $userMatchesStarts[] = $matchPosStart;
-                                $userMatchesEnds[] = $matchPosEnd;
+                if ($match->getType() === "match") {
+                    //Color is yellow -- matches other students but not general match between students...
+                    $color = '#ffff00';
+                     $is_general_match = false;
+
+                    $segment_info["{$start_line}_{$start_pos}"] = [];
+
+                    foreach ($match->getUsers() as $i => $other) {
+
+                        $segment_info["{$start_line}_{$start_pos}"][] = $other->getUserId() . "_" . $other->getVersion();
+                        if ($other->getUserId() == $user_id_2) {
+                            $is_general_match = true;
+                            if ($codebox == "2" && $user_id_2 != "") {
+                                foreach ($other->getMatchingPositions() as $pos) {
+                                    $matchPosStart = $pos['start'];
+                                    $matchPosEnd =  $pos['end'];
+                                    $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
+                                    $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
+                                    $end_pos_2 = $tokens_user_2[$matchPosEnd - 1]["char"] - 1;
+                                    $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
+                                    $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
+                                    $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
+
+                                    $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $matchPosStart, $matchPosEnd];
+                                    $userMatchesStarts[] = $matchPosStart;
+                                    $userMatchesEnds[] = $matchPosEnd;
+                                }
                             }
                         }
                     }
-                }
 
-                if ($is_general_match) {
-                    //Color is orange -- general match from selected match
-                    $color = '#ffa500';
+                    if ($is_general_match) {
+                        //Color is orange -- general match from selected match
+                        $color = '#ffa500';
+                    }
                 }
-                elseif ($match->getType() === "match") {
-                    //Color is yellow -- matches other students but not general match between students...
-                    $color = '#ffff00';
-                }
-                elseif ($match["type"] == "common") {
+                elseif ($match->getType() === "common") { // common code does not show up on user 2
                     //Color is grey -- common matches among all students
                     $color = '#cccccc';
                 }
-                elseif ($match["type"] == "provided") {
+                elseif ($match->getType() === "provided") { // provided code does not show up on user 2
                     //Color is green -- instructor provided code #b5e3b5
                     $color = '#b5e3b5';
                 }
