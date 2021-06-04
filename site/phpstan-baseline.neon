@@ -66,11 +66,6 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Variable \\$color might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$gg in PHPDoc tag @var does not match any variable in the foreach loop\\: \\$user_id$#"
 			count: 1
 			path: app/controllers/admin/ReportController.php
