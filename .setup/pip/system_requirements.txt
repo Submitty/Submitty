@@ -37,10 +37,12 @@ parso==0.8.2
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 clang==11.0
 
-#python libraries for QR bulk upload
+# Python libraries for QR bulk upload
 pyzbar==0.1.8
 pdf2image==1.14.0
-opencv-python==4.5.1.48
+# The use of this older version of `opencv-python` is deliberate
+# This allows a clean install on older versions of Ubuntu (18.04).
+opencv-python==3.4.9.33
 numpy==1.19.5
 
 #python libraries for OCR for digit recognition
