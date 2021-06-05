@@ -184,6 +184,10 @@ apt-get install libzbar0 --yes
 
 pip3 install -r ${CURRENT_DIR}/.setup/pip/system_requirements.txt
 
+if [ ${VAGRANT} == 1 ]; then
+    pip3 install -r ${CURRENT_DIR}/.setup/pip/vagrant_requirements.txt
+fi
+
 #################################################################
 # Node Package Setup
 ####################

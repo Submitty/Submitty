@@ -33,4 +33,13 @@ updates:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
-      prefix-development: "[DevDependency]"
+  - package-ecosystem: pip
+    directory: "/.setup/pip/vagrant_requirements.txt"
+    schedule:
+      interval: daily
+      time: "10:00"
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "[Dependency] "

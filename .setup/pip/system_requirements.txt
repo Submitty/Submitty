@@ -45,6 +45,3 @@ numpy==1.19.5
 
 #python libraries for OCR for digit recognition
 onnxruntime==1.7.0
-
-# Email catcher
-nullsmtpd==0.5.0
