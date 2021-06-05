@@ -131,6 +131,18 @@
     padding: 0;
 }
 
+.catergory-item-box {
+    background-color: var(--standard-pale-gray) !important;
+}
+
+.edit-category-button {
+    color: var(--standard-gray-black) !important;
+}
+
+.edit-catergoty-name {
+    background-color: var(--always-default-white) !important;
+}
+
 .create-post-head{
     max-width: 95%;
     display: inline-block;
@@ -557,6 +569,10 @@
     font-size: 1.8em;
 }
 
+.post_content p {
+    white-space: pre-wrap;
+}
+
 .post_content li {
     white-space: normal;
 }
@@ -594,6 +610,10 @@
   box-shadow: none;
 }
 
+[data-theme="dark"] .post_box:not(.important) {
+    border: 1px solid #bbb;
+}
+
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
@@ -621,4 +641,39 @@
 
 .thread-left-cont {
     flex: 3;
+}
+
+.viewed_post{
+    background-color: var(--default-white);
+}
+
+/* TODO: MAKE THIS CASCADE */
+.deleted {
+    background-color: var(--deleted-discussion-post-grey);
+}
+
+.deleted.active {
+    background-color: var(--deleted-discussion-post-grey);
+}
+
+.new_post {
+    background-color: var(--viewed-content);
+}
+
+.important {
+    /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
+    border-style: solid;
+    border-width: 4px;
+    border-color: var(--important-post); /* gold */
+}
+
+.active {
+    background-color: var(--default-white);
+    /*    color: #4a4a4a;*/
+    border: 4px solid var(--submitty-logo-blue);
+}
+
+.new_thread{
+    background-color: var(--viewed-content);
+    color: var(--text-black)
 }

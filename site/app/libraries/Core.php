@@ -114,8 +114,8 @@ class Core {
      *
      * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
      * @throws \Exception
      */
     public function loadCourseConfig($semester, $course) {
@@ -534,8 +534,8 @@ class Core {
     }
 
     /**
-     * @param     $url
-     * @param int $status_code
+     * @param string $url
+     * @param int $http_response_code
      */
     public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
