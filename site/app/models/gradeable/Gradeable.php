@@ -627,24 +627,44 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $date_values array of \DateTime objects indexed by $date_properties
      * @return string[] Array of error messages indexed by $date_properties
      */
-    private static function validateDateSet(array $date_properties, array $date_values) {
+    private static function validateDateSet(array $date_properties, array $date_values, bool $hasDueDate, bool $hasReleaseDate) {
         // A message to set if the date is null, which happens when: the provided date is null,
         //  or the parsing failed.  In either case, this is an appropriate message
         $invalid_format_message = 'Invalid date-time value!';
         $errors = [];
 
+        $no_due_date_reqs = [
+            'ta_view_start_date',
+            'submission_open_date',
+            'grade_inquiry_start_date',
+            'grade_inquiry_due_date'
+        ];
+
+        $no_release_date_reqs = [
+            'ta_view_start_date',
+            'submission_open_date',
+            'submission_due_date',
+            'grade_start_date',
+            'grade_due_date',
+            'grade_inquiry_start_date',
+            'grade_inquiry_due_date'
+        ];
+
         // Now, check if they are in increasing order
         $prev_property = null;
         foreach ($date_properties as $property) {
-            if ($prev_property !== null) {
+            if ($prev_property !== null && ($hasDueDate || in_array($property, $no_due_date_reqs)) && ($hasReleaseDate || in_array($property, $no_release_date_reqs))) {
                 if ($date_values[$prev_property] !== null && $date_values[$property] !== null) {
                     if ($date_values[$prev_property] > $date_values[$property]) {
                         $errors[$prev_property] = self::date_display_names[$prev_property] . ' Date must come before '
                             . self::date_display_names[$property] . ' Date';
                     }
                 }
+                $prev_property = $property;
             }
-            $prev_property = $property;
+            if ($prev_property === null) {
+                $prev_property = $property;
+            }
         }
 
         return $errors;
@@ -699,7 +719,7 @@ class Gradeable extends AbstractModel {
         $date_set = $this->getDateValidationSet();
 
         // Get the validation errors
-        $errors = self::validateDateSet($date_set, $dates);
+        $errors = self::validateDateSet($date_set, $dates, $this->hasDueDate(), $this->hasReleaseDate());
 
         // Put any special exceptions to the normal validation rules here...
 
