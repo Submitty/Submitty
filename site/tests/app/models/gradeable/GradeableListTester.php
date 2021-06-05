@@ -739,6 +739,7 @@ class GradeableListTester extends BaseUnitTest {
      * @param $ta_grading
      * @param $student_submit
      * @param $has_due_date
+     * @param $has_release_date
      * @param $has_submission, from perspective of the user
      *
      * @return Gradeable
@@ -754,7 +755,8 @@ class GradeableListTester extends BaseUnitTest {
         $grade_released_date,
         $ta_grading = true,
         $student_submit = true,
-        $has_due_date = true
+        $has_due_date = true,
+        $has_release_date = true
     ) {
         $timezone = new \DateTimeZone('America/New_York');
         $details = [
@@ -778,6 +780,7 @@ class GradeableListTester extends BaseUnitTest {
             'student_view_after_grades' => false,
             'student_submit' => $student_submit,
             'has_due_date' => $has_due_date,
+            'has_release_date' => $has_release_date,
             'peer_grading' => false,
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
