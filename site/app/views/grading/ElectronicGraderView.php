@@ -1131,7 +1131,8 @@ HTML;
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
             'isRegradePanel' => $isRegradePanel,
-            'is_notebook' => $is_notebook
+            'is_notebook' => $is_notebook,
+            "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
         ]);
     }
 
@@ -1434,6 +1435,7 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
+                "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
             ]);
@@ -1447,26 +1449,28 @@ HTML;
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
-
+        $is_student = $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
-            $id = $value->getId();
-            $solution_components[] = [
-                'id' => $id,
-                'title' => $value->getTitle(),
-                'is_first_edit' => !isset($solution_array[$id]),
-                'author' => isset($solution_array[$id]) ? $solution_array[$id]['author'] : '',
-                'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
-                'edited_at' => isset($solution_array[$id])
-                    ? DateUtils::convertTimeStamp(
-                        $this->core->getUser(),
-                        $solution_array[$id]['edited_at'],
-                        $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
-                    ) : null,
-                'is_itempool_linked' => $value->getIsItempoolLinked(),
-                'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
-            ];
+            if ($value->isPeer() || !$is_student) {
+                $id = $value->getId();
+                $solution_components[] = [
+                    'id' => $id,
+                    'title' => $value->getTitle(),
+                    'is_first_edit' => !isset($solution_array[$id]),
+                    'author' => isset($solution_array[$id]) ? $solution_array[$id]['author'] : '',
+                    'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
+                    'edited_at' => isset($solution_array[$id])
+                        ? DateUtils::convertTimeStamp(
+                            $this->core->getUser(),
+                            $solution_array[$id]['edited_at'],
+                            $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
+                        ) : null,
+                    'is_itempool_linked' => $value->getIsItempoolLinked(),
+                    'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
+                ];
+            }
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),
