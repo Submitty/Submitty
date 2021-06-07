@@ -196,8 +196,8 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @param {boolean} is_student False if the grader is a TA, True if peer grader
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student) {
-    
+
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -219,6 +219,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'grader_id': grader_id,
             'component_version_conflict': componentVersionConflict,
             'peer_component' : component.peer,
+            'ta_grading_peer': taGradingPeer,
         }));
     });
 }
