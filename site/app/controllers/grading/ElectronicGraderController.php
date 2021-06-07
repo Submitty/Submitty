@@ -1777,13 +1777,12 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
         //don't allow peer graders to save custom marks
-        if ($custom_message || $custom_points) {
-            if (!$this->core->getAccess()->canI("grading.electronic.peer_panel", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+        if (($custom_message != NULL || $custom_points != NULL) && $gradeable->isPeerGrading()) {
+            if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
                 return;
             }
         }
-
         // Check if the user can silently edit assigned marks
         if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
             $silent_edit = false;
