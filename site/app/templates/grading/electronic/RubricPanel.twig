@@ -42,6 +42,7 @@
                     {% endif %}
                 </div>
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id}}" data-can_verify="{{ can_verify }}" hidden></div>
+                <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>
                 <div class="inner-container" id="grading-box">
                     {% if has_active_version %}
                         <script>
