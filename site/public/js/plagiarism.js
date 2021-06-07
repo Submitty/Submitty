@@ -66,7 +66,7 @@ function setUpLeftPane() {
             // Needs work...
             //updatePanesOnOrangeClick(clickedMark, editor0, editor1);
         } else {
-            if($('#popup_to_show_matches_id').css('display') == 'block'){
+            if($('#popup_to_show_matches_id').css('display') === 'block'){
                 $('#popup_to_show_matches_id').css('display', 'none');
                 blueClickedMark.css = "background: " + YELLOW;
                 blueClickedMark = null;
@@ -150,6 +150,7 @@ function setUpPlagView(gradeable_id) {
         setCodeInEditor('user_id_2');
     });
     setUpLeftPane();
+    setCodeInEditor('user_id_1'); // Automatically load the user with the highest % match
 }
 
 function requestAjaxData(url, f, es) {
@@ -171,7 +172,7 @@ function requestAjaxData(url, f, es) {
 
 function createRightUsersList(data, select = null) {
     var position = 0;
-    var append_options='<option value="">None</option>';
+    var append_options;
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select == users[0]) {
@@ -180,14 +181,15 @@ function createRightUsersList(data, select = null) {
         } else {
             append_options += '>';
         }
-        append_options += users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
+        append_options += '(' + users[4] + ' Match) ' + users[2] + ' '+ users[3] + ' &lt;' + users[0] + '&gt; (version:'+users[1] + ')</option>';
     });
     $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
     $('[name="user_id_2"] option', form).eq(position).prop('selected', true);
+    $('[name="user_id_2"]', form).change();
 }
 
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
-    var append_options='<option value="">None</option>';
+    var append_options;
     $.each(version_data, function(i,version_to_append){
         if(version_to_append == active_version_user_1 && version_to_append == max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
@@ -244,7 +246,7 @@ function setCodeInEditor(changed) {
     var version_user_1 = $('[name="version_user_1"]', form).val();
     var user_id_2_data = $('[name="user_id_2"]', form).val();
 
-    // Empty lists and code
+    // Empty lists and code (this should never happen)
     if((changed == "user_id_1" && user_id_1 == "") || (changed == "version_user_1" && version_user_1 == "")){
         $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
@@ -254,8 +256,8 @@ function setCodeInEditor(changed) {
         editor1.getDoc().setValue('');
     } else {
         // First check if left side changed... Clean up this...
-        if (changed === 'user_id_1' || changed === 'version_user_1') {
-            if(version_user_1 == "") {
+        if (changed == 'user_id_1' || changed == 'version_user_1') {
+            if(version_user_1 == "" || changed == 'user_id_1') { // If user 1 was changed or no user has been selected yet, set the version to max matching
                 version_user_1 = "max_matching";
             }
             clearCodeEditorsAndUpdateSelection(user_id_1, version_user_1);

@@ -35,7 +35,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
  * @method \DateTime getGradeReleasedDate()
- * @method \DateTime getGradeLockedDate()
  * @method int getMinGradingGroup()
  * @method \DateTime getGradeInquiryStartDate()
  * @method \DateTime getGradeInquiryDueDate()
@@ -72,6 +71,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method Component[] getComponents()
+ * @method void setAllowedMinutes($minutes)
  * @method bool isRegradeAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -195,6 +195,10 @@ class Gradeable extends AbstractModel {
     protected $precision = 0.0;
     /** @prop @var bool If this gradeable has a due date or not */
     protected $has_due_date = false;
+    /** @prop @var int The amount of time given to a default student to complete assignment */
+    protected $allowed_minutes = null;
+    /** @prop @var array Contains all of the allowed time overrides */
+    protected $allowed_minutes_overrides = [];
 
     /* Dates for all types of gradeables */
 
@@ -206,8 +210,6 @@ class Gradeable extends AbstractModel {
     protected $grade_due_date = null;
     /** @prop @var \DateTime The date that grades will be released to students */
     protected $grade_released_date = null;
-    /** @prop @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
-    protected $grade_locked_date = null;
 
     /* Dates for electronic gradeables*/
 
@@ -289,6 +291,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            $this->setAllowedMinutes($details['allowed_minutes']);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }
@@ -324,7 +327,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_locked_date',
         'team_lock_date',
         'grade_inquiry_start_date',
         'grade_inquiry_due_date'
@@ -340,7 +342,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date' => 'Grading Open',
         'grade_due_date' => 'Grading Due',
         'grade_released_date' => 'Grades Released',
-        'grade_locked_date' => 'Grades Locked',
         'team_lock_date' => 'Teams Locked',
         'late_days' => 'Late Days',
         'grade_inquiry_start_date' => 'Grade Inquiries Open',
@@ -357,7 +358,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_locked_date',
         'grade_inquiry_start_date',
         'grade_inquiry_due_date'
     ];
@@ -801,7 +801,6 @@ class Gradeable extends AbstractModel {
         $this->grade_start_date = $dates['grade_start_date'];
         $this->grade_due_date = $dates['grade_due_date'];
         $this->grade_released_date = $dates['grade_released_date'];
-        $this->grade_locked_date = $dates['grade_locked_date'];
 
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             // Set team lock date even if not team assignment because it is NOT NULL in the db
@@ -904,11 +903,6 @@ class Gradeable extends AbstractModel {
 
     /** @internal */
     public function setGradeReleasedDate($date) {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-
-    /** @internal */
-    public function setGradeLockedDate($date) {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
@@ -2077,5 +2071,45 @@ class Gradeable extends AbstractModel {
         );
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
+    }
+
+    /**
+     * Determine if $this gradeable has an allowed time.
+     *
+     * @return bool True if has allowed, false otherwise.
+     */
+    public function hasAllowedTime(): bool {
+        return $this->allowed_minutes !== null;
+    }
+
+    /**
+     * Retrieve users allowed time for this exam
+     *
+     * @return int Number of minutes allowed
+     */
+    public function getUserAllowedTime(User $user): ?int {
+        if ($this->allowed_minutes === null) {
+            return null;
+        }
+        if (empty($this->allowed_minutes_overrides) || $this->allowed_minutes_overrides === null) {
+            return $this->allowed_minutes;
+        }
+        if (isset($this->allowed_minutes_overrides[$user->getId()])) {
+            return $this->allowed_minutes_overrides[$user->getId()];
+        }
+        else {
+            return $this->allowed_minutes;
+        }
+    }
+
+    /**
+     * Setup the allowed time overrides array
+     *
+     * @return void
+     */
+    public function setAllowedMinutesOverrides(array $overrides): void {
+        foreach ($overrides as $override) {
+            $this->allowed_minutes_overrides[$override['user_id']] = $override['allowed_minutes'];
+        }
     }
 }

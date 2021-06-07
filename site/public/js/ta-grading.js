@@ -224,7 +224,7 @@ function notebookScrollSave() {
     var notebookTop = $('#notebook-view').offset().top;
     var element = $('#content_0');
     if(notebookView.scrollTop() + notebookView.innerHeight() + 1 > notebookView[0].scrollHeight) {
-      element = $('[id^=content_').last();
+      element = $('[id^=content_]').last();
     } else {
       while (element.length !== 0) {
         if (element.offset().top > notebookTop) {
@@ -309,6 +309,7 @@ function initializeTaLayout() {
   }
   updateLayoutDimensions();
   updatePanelOptions();
+  readCookies();
 }
 
 function updateLayoutDimensions() {
@@ -432,6 +433,7 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
+    $('#autoscroll_id')[0].checked = true;
     let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
       let file_path = element.split('#$SPLIT#$');
@@ -740,6 +742,10 @@ function toggleFullLeftColumnMode (forceVal = false) {
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   panelsContSelector = newPanelsContSelector;
+
+  if (!taLayoutDet.isFullScreenMode) {
+    $("#grading-panel-student-name").hide();
+  }
 }
 
 /**
@@ -759,6 +765,9 @@ function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
   initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
   initializeHorizontalTwoPanelDrag();
   togglePanelSelectorModal(false);
+  if (!taLayoutDet.isFullLeftColumnMode) {
+    $("#grading-panel-student-name").show();
+  }
 }
 
 function togglePanelLayoutModes(forceVal = false) {
@@ -1111,9 +1120,12 @@ function checkOpenComponentMark(index) {
 function openAll(click_class, class_modifier) {
   $("."+click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
-    let innerText = Object.values($(this))[0].innerText;
-    if (innerText.slice(-4) !== ".pdf") {
-      $(this).click();
+    //console.log($(this).attr('id'));
+    if ($(this).parent().parent().parent().hasClass("open")){
+      let innerText = Object.values($(this))[0].innerText;
+      if (innerText.slice(-4) !== ".pdf") {
+        $(this).click();
+      }
     }
   });
 }
@@ -1339,6 +1351,8 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       });
     }
     else {
+      if (!iframe.parent().parent().hasClass("open"))
+        return false;
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
