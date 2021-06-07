@@ -1653,6 +1653,25 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, url
     });
 }
 
+function renderMarkdown(markdownContainer, url, content) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            enablePreview: true,
+            content: content,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            markdownContainer.empty();
+            markdownContainer.append(data);
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
 /**
  * Function to toggle markdown rendering preview
  *

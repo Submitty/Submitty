@@ -2400,10 +2400,41 @@ function toggleComponent(component_id, saveChanges) {
 }
 
 function open_overall_comment_tab(user) {
+    const textarea = $(`#overall-comment-${user}`);
+    const content = textarea.html();
+
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    $('#overall-comment-' + user ).show();
+    textarea.parent().show();
+    textarea.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
+
+    if(!textarea.find('.markdown').length){
+        const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
+        renderMarkdown($(`#overall-comment-${user}`), url, content);
+    }
+}
+
+
+
+Twig.twig({
+    id: "MarkdownArea",
+    href: "/templates/misc/MarkdownArea.twig",
+    async: true
+});
+
+
+function previewOverallCommentMarkdown(user){
+    console.log(user);
+    const markdown_area = $(`#overall-comment-${user}`);
+    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
+    const preview_button = $(this);
+    const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
+    const markdown_content = markdown_area.val();
+
+    console.log(markdown_area, preview_element, preview_button, url, markdown_content);
+
+    previewMarkdown(markdown_area, preview_element, preview_button, url, { content: markdown_content });
 }
 
 /**
