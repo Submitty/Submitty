@@ -1,0 +1,11 @@
+.email-content {
+    margin-top: 2vh;
+    min-height:50vh;
+    resize: none;
+    padding: 1%;
+}
+
+.btn {
+    margin-top: 2vh;
+    float: right;
+}
