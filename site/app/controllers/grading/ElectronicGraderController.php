@@ -1784,6 +1784,14 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        //don't allow custom marks if they are disabled
+        if ($custom_message != NULL || $custom_points != NULL) {
+            if (!$gradeable->getAllowCustomMarks()) {
+                $this->core->getOutput()->renderJsonFail('Custom marks are disabled for this assignment');
+                return;
+            }
+        }
+
         // Check if the user can silently edit assigned marks
         if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
             $silent_edit = false;
