@@ -68,18 +68,17 @@ class PlagiarismController extends AbstractController {
     }
 
 
-    private function getOverallRankings($gradeable_id): array {
+    /**
+     * @param string $gradeable_id
+     * @return array|null
+     */
+    private function getOverallRankings(string $gradeable_id): ?array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/overall_ranking.txt";
         if (!file_exists($file_path)) {
-            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
-            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+            return null;
         }
-        $test = file_get_contents($file_path);
-        if (file_get_contents($file_path) == "") {
-            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            // No redirect since we're already on the plagiarism page.  A redirect would cause an infinite loop.
-        }
+
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], ' ', $content));
         $rankings = preg_split('/ +/', $content);
@@ -94,17 +93,13 @@ class PlagiarismController extends AbstractController {
      * @param string $user_1_version
      * @return array
      */
-    private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version): array {
+    private function getRankingsForUser(string $gradeable_id, string $user_id_1, string $user_1_version): ?array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/" . $user_1_version . "/" . $user_id_1 . "_" . $user_1_version . ".txt";
         if (!file_exists($file_path)) {
-            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
-            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+            return null;
         }
-        if (file_get_contents($file_path) == "") {
-            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
-        }
+
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], ' ', $content));
         $rankings = preg_split('/ +/', $content);
@@ -115,10 +110,12 @@ class PlagiarismController extends AbstractController {
 
     /**
      * Returns a string containing the concatenated contents of the specified user's submission
-     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param string $version
      * @return string
      */
-    private function getConcatenatedSubmission($user_id, $gradeable_id, $version): string {
+    private function getConcatenatedSubmission(string $user_id, string $gradeable_id, string $version): string {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id . "/" . $version . "/submission.concatenated";
 
@@ -199,6 +196,15 @@ class PlagiarismController extends AbstractController {
         $gradeable_title = ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
 
         $rankings = $this->getOverallRankings($gradeable_id);
+        if ($rankings === null) {
+            // This should theoretically never happen from the UI but we check it anyway.
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        elseif (count($rankings) === 0) {
+            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
+        }
+
         foreach ($rankings as $i => $ranking) {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
@@ -576,6 +582,13 @@ class PlagiarismController extends AbstractController {
 
         $rankings = $this->getOverallRankings($gradeable_id);
 
+        if (count($rankings) === 0 or $rankings === null) {
+            $return = ['error' => 'Rankings file not found or no matches found for selected user'];
+            $return = json_encode($return);
+            echo($return);
+            return;
+        }
+
         $max_matching_version = 1;
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
@@ -729,8 +742,14 @@ class PlagiarismController extends AbstractController {
         $i = 1;
         $max_matching_version = 1;
         $max_matching_percent = 0;
-        while (is_dir($file_path . strval($i))) {
+        while (is_dir($file_path . $i)) {
             $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($i));
+
+            if ($ranking === null or count($ranking) === 0) {
+                echo "";
+                return;
+            }
+
             if ($ranking[0][0] > $max_matching_percent) {
                 $max_matching_percent = $ranking[0][0];
                 $max_matching_version = $i;
@@ -738,6 +757,7 @@ class PlagiarismController extends AbstractController {
             $i++;
         }
 
+        // we shouldn't need any error checking here because we just loaded the file above
         $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($max_matching_version));
 
         $return = [];
