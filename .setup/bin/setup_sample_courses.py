@@ -1385,6 +1385,7 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.allow_custom_marks = True
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1555,6 +1556,7 @@ class Gradeable(object):
                      g_grade_due_date=self.grade_due_date,
                      g_grade_released_date=self.grade_released_date,
                      g_syllabus_bucket=self.syllabus_bucket,
+                     g_allow_custom_marks=self.allow_custom_marks,
                      g_min_grading_group=self.min_grading_group,
                      g_closed_date=None)
 
