@@ -36,7 +36,7 @@ input[type="radio"] {
    flex: 1;
 }
 
-input[type="text"], select {
+input[type="text"]{
     width: 100%;
 }
 
@@ -119,21 +119,6 @@ main#main.full-screen-mode .plagiarism-result-cont {
     margin-left: 10px;
 }
 
-.plag-flex {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.plag-flex-item {
-    margin-top: 5px;
-    flex: 1;
-    white-space: nowrap;
-}
-
 .plagiarism-result-cont.content hr {
     margin: 1px 0;
 }
@@ -191,6 +176,10 @@ main#main.full-screen-mode .plagiarism-result-cont {
     filter: blur(5px);
 }
 
+.plag-results-header-right {
+    float: right;
+}
+
 @media (max-width: 660px) {
     .nav-buttons a {
         width: 100%;
@@ -205,26 +194,45 @@ main#main.full-screen-mode .plagiarism-result-cont {
 }
 
 @media (min-width: 660px) {
+
     #save-configuration-form {
         width: 80%;
     }
-    .plag-flex {
+
+    .plag-flex-row {
+        width: 100%;
+        display: flex;
         flex-direction: row;
+        margin-top: 10px;
     }
 
-    td .plag-action-btn-cont a:not(:last-child) {
-        margin-right: 20px;
+    .plag-flex-row:last-of-type {
+        margin-bottom: 10px;
     }
 
-    .plag-data-group {
-        flex-direction: row;
+    .plag-flex-row .user1-select {
+        width: calc(100% - 10px);
     }
 
-    .plag-flex-item select {
-        width: initial;
+    .plag-flex-row .user2-select {
+        width: calc(100% - 10px);
+        margin-left: 10px;
     }
 
-    select[name="user_id_1"], a.toggle {
-        max-width: 150px;
+    .plag-flex-item {
+        flex: 1;
+        white-space: nowrap;
     }
+
+    /*td .plag-action-btn-cont a:not(:last-child) {*/
+    /*    margin-right: 20px;*/
+    /*}*/
+
+    /*.plag-data-group {*/
+    /*    flex-direction: row;*/
+    /*}*/
+
+    /*select[name="user_id_1"], a.toggle {*/
+    /*    max-width: 150px;*/
+    /*}*/
 }

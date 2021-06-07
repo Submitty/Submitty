@@ -28,9 +28,9 @@ exclude=
     sbin/check_everything.py,
     sbin/compare_reuploads.py,
     sbin/count_autograding_logs.py,
-    sbin/run_lichen_plagiarism.py,
     sbin/untrusted_canary.py,
     tests
 
 per-file-ignores =
     .github/workflows/pr_title_tester.py:E501,W605
+    sbin/run_lichen_plagiarism.py:E501
