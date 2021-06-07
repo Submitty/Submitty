@@ -2406,10 +2406,19 @@ function open_overall_comment_tab(user) {
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
     textarea.parent().show();
-    textarea.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
 
-    if(!textarea.find('.markdown').length){
+    //if the tab is for the main user of the page
+    if(!textarea.hasClass('markdown-preview')){
+        if($(`#overall-comment-markdown-preview-${user}`).is(':hidden')){
+            textarea.show();
+        }
+    } else {
+        textarea.show();
+    }
+
+    //if it is someone not the current user's comment and it hasn't been rendered yet
+    if(textarea.hasClass('markdown-preview') && !textarea.find('.markdown').length){
         const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
         renderMarkdown($(`#overall-comment-${user}`), url, content);
     }
@@ -2425,14 +2434,11 @@ Twig.twig({
 
 
 function previewOverallCommentMarkdown(user){
-    console.log(user);
     const markdown_area = $(`#overall-comment-${user}`);
     const preview_element = $(`#overall-comment-markdown-preview-${user}`);
     const preview_button = $(this);
     const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
     const markdown_content = markdown_area.val();
-
-    console.log(markdown_area, preview_element, preview_button, url, markdown_content);
 
     previewMarkdown(markdown_area, preview_element, preview_button, url, { content: markdown_content });
 }
