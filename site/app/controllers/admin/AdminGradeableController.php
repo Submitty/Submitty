@@ -905,6 +905,7 @@ class AdminGradeableController extends AbstractController {
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
+                'allow_custom_marks' => true,
 
                 //For discussion component
                 'discussion_based' => $discussion_clicked,

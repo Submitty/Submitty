@@ -2933,7 +2933,7 @@ function saveComponent(component_id) {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         let gradedComponent = getGradedComponentFromDOM(component_id);
-        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected && getAllowCustomMarks()) {
             if (!confirm("Are you sure you want to delete the custom mark?")) {
                 return Promise.reject();
             }
