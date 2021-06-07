@@ -1140,7 +1140,7 @@ class ForumThreadView extends AbstractView {
 
     public function previewPost($enablePreview, $post_content) {
         $this->core->getOutput()->disableRender();
-        if(!$enablePreview){
+        if (!$enablePreview) {
             return;
         }
         return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
