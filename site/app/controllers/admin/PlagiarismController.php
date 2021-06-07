@@ -582,7 +582,7 @@ class PlagiarismController extends AbstractController {
 
         $rankings = $this->getOverallRankings($gradeable_id);
 
-        if (count($rankings) === 0 or $rankings === null) {
+        if (count($rankings) === 0 || $rankings === null) {
             $return = ['error' => 'Rankings file not found or no matches found for selected user'];
             $return = json_encode($return);
             echo($return);
@@ -745,7 +745,7 @@ class PlagiarismController extends AbstractController {
         while (is_dir($file_path . $i)) {
             $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($i));
 
-            if ($ranking === null or count($ranking) === 0) {
+            if ($ranking === null || count($ranking) === 0) {
                 echo "";
                 return;
             }
