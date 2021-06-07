@@ -136,7 +136,7 @@ function updateUserSecondaryEmail () {
     }
     else {
         let data = new FormData();
-        data.append('csrf_token', $("#user-secondary-email-csrf").val());
+        data.append('csrf_token', csrfToken);
         data.append('secondary_email', second_email.val());
         data.append('secondary_email_notify', second_email_notify.get(0).checked);
         let url = buildUrl(['user_profile', 'change_secondary_email']);
@@ -156,6 +156,14 @@ function updateUserSecondaryEmail () {
                     second_email.data('current-second-email', data.secondary_email);
                     second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "true" ? 1 : 0);
                 }
+                else if (response.status === "error") {
+                    displayErrorMessage("Some went wrong while updating secondary email address!");
+                    second_email.val(second_email.data('current-second-email'));
+                }
+            },
+            error: function() {
+                // display error message
+                displayErrorMessage("Some went wrong while updating secondary email address!");
             }
         });
     }
