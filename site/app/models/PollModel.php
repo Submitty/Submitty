@@ -98,7 +98,7 @@ class PollModel extends AbstractModel {
             $ret_string = "";
             $first_answer = true;
             foreach ($this->responses as $id => $response) {
-                if (array_key_exists($id, $response_id)) {
+                if (in_array($id, $response_id)) {
                     if (!$first_answer) {
                         $ret_string .= ", " . $response;
                     }

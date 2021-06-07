@@ -51,7 +51,7 @@
                         <br/>
                         <br/>
                     </div>
-                {% set index = index + 1%}
+                    {% set index = index + 1%}
                 {% endfor %}
                 
                 
@@ -59,16 +59,16 @@
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
                     <div class = "radio">
-                        {% if response is same as(poll.getUserResponse(user_id)) %}
+                        {% if response in poll.getUserResponse(user_id) %}
                             {% if poll.isOpen() %}
-                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ poll.getResponseString(response) }}" name="answers[]" id="answer-{{index}}" checked/>
+                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked/>
                             {% else %}
-                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ poll.getResponseString(response) }}" name="answers[]" id="answer-{{index}}" checked disabled/>
+                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked disabled/>
                             {% endif %}
                         {% elseif poll.isOpen() %}
-                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ poll.getResponseString(response) }}" name="answers[]" id="answer-{{index}}"/>
+                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}"/>
                         {% else %}
-                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ poll.getResponseString(response) }}" name="answers[]" id="answer-{{index}}" disabled/>
+                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" disabled/>
                         {% endif %}
                         {{ poll.getResponseString(response) | markdown}}
                         <br/>
