@@ -7,7 +7,7 @@ use app\libraries\DateUtils;
 
 /**
  * Class EmailStatusModel
- * 
+ *
  * @method array     getSubjects()
  * @method array     getPending()
  * @method array     getSuccesses()
