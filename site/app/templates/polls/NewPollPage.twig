@@ -90,8 +90,13 @@
             <label for="poll-question-type-label">
                 <span class="option-title" id="poll-question-type-label">Question Type:</span>
             </label>
-            <input type="radio" id="poll-type-single-response" name="question-type" value="single-response" checked="">Single reponse (radio buttons)</input>
-            <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response">Multiple response (checkboxes)</input>
+            {% if poll.getQuestionType() == 'single-response'%}
+                <input type="radio" id="poll-type-single-response" name="question-type" value="single-response" checked>Single response (radio buttons)</input>
+                <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response">Multiple response (checkboxes)</input>
+            {% else %}
+                <input type="radio" id="poll-type-single-response" name="question-type" value="single-response">Single response (radio buttons)</input>
+                <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response" checked>Multiple response (checkboxes)</input>
+            {% endif %}
             <br/><br/>
 
             <label for="image-file-label">
