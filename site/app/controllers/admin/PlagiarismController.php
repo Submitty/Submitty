@@ -78,7 +78,7 @@ class PlagiarismController extends AbstractController {
         $test = file_get_contents($file_path);
         if (file_get_contents($file_path) == "") {
             $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            //$this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+            // No redirect since we're already on the plagiarism page.  A redirect would cause an infinite loop.
         }
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], ' ', $content));
