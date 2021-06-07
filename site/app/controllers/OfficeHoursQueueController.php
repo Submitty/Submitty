@@ -591,6 +591,7 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/preview", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function showMarkdownPreview(){
         return $this->core->getOutput()->renderOutput('OfficeHoursQueue', 'previewAnnouncement', $_POST['enablePreview'], $_POST['content']);
