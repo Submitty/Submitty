@@ -1653,6 +1653,13 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, url
     });
 }
 
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdownContainer JQuery element of the textarea where the markdown should be rendered
+ * @param url url to send ajax request to
+ * @param content Text content of the unrendered markdown
+ */
 function renderMarkdown(markdownContainer, url, content) {
     $.ajax({
         url: url,

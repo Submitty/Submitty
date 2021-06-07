@@ -1,3 +1,6 @@
+/* global previewMarkdown buildCourseUrl */
+/* exported previewPollMarkdown */
+
 function previewPollMarkdown() {
     const markdown_textarea = $('#poll-question');
     const preview_element = $('[id^="poll_preview_"]');

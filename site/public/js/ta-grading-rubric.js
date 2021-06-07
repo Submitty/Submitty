@@ -2424,15 +2424,6 @@ function open_overall_comment_tab(user) {
     }
 }
 
-
-
-Twig.twig({
-    id: "MarkdownArea",
-    href: "/templates/misc/MarkdownArea.twig",
-    async: true
-});
-
-
 function previewOverallCommentMarkdown(user){
     const markdown_area = $(`#overall-comment-${user}`);
     const preview_element = $(`#overall-comment-markdown-preview-${user}`);
