@@ -68,7 +68,7 @@ class PlagiarismController extends AbstractController {
     }
 
 
-    private function getOverallRankings($gradeable_id) {
+    private function getOverallRankings($gradeable_id) : array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/overall_ranking.txt";
         if (!file_exists($file_path)) {
@@ -94,7 +94,7 @@ class PlagiarismController extends AbstractController {
      * @param string $user_1_version
      * @return array
      */
-    private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version) {
+    private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version) : array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/" . $user_1_version . "/" . $user_id_1 . "_" . $user_1_version . ".txt";
         if (!file_exists($file_path)) {
@@ -118,7 +118,7 @@ class PlagiarismController extends AbstractController {
      *
      * @return string
      */
-    private function getConcatenatedSubmission($user_id, $gradeable_id, $version) {
+    private function getConcatenatedSubmission($user_id, $gradeable_id, $version) : string {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id . "/" . $version . "/submission.concatenated";
 
