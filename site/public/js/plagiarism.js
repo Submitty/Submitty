@@ -174,9 +174,7 @@ function requestAjaxData(url, f, es) {
 function createRightUsersList(data, select = null) {
     let position = 0;
     let append_options;
-    console.log(data);
     data = JSON.parse(data);
-    console.log(data);
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select === users[0]) {
