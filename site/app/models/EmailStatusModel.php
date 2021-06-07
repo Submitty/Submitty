@@ -5,6 +5,14 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 
+/**
+ * Class EmailStatusModel
+ * 
+ * @method array     getSubjects()
+ * @method array     getPending()
+ * @method array     getSuccesses()
+ * @method array     getError()
+ */
 class EmailStatusModel extends AbstractModel {
     // A map of all unique subjects of emails to the time created
     /** @prop-read Set */
@@ -39,17 +47,5 @@ class EmailStatusModel extends AbstractModel {
                 $this->pending[$row["subject"]][] = $row;
             }
         }
-    }
-    public function getSubjects() {
-        return $this->subjects;
-    }
-    public function getPending() {
-        return $this->pending;
-    }
-    public function getSuccesses() {
-        return $this->successes;
-    }
-    public function getErrors() {
-        return $this->errors;
     }
 }
