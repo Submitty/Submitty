@@ -1785,7 +1785,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         //don't allow custom marks if they are disabled
-        if ($custom_message != NULL || $custom_points != NULL) {
+        if ($custom_message != null || $custom_points != null) {
             if (!$gradeable->getAllowCustomMarks()) {
                 $this->core->getOutput()->renderJsonFail('Custom marks are disabled for this assignment');
                 return;
