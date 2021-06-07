@@ -1776,10 +1776,9 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
-        
         //don't allow peer graders to save custom marks
-        if($custom_message || $custom_points) {
-            if(!$this->core->getAccess()->canI("grading.electronic.peer_panel", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+        if ($custom_message || $custom_points) {
+            if (!$this->core->getAccess()->canI("grading.electronic.peer_panel", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
                 return;
             }
