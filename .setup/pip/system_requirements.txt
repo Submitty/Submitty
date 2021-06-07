@@ -18,10 +18,10 @@
 # It should be noted that we do not directly rely on cryptography, but pin it
 # as a transitive dependency of our actual dependencies. This line can be removed
 # once we move to a newer pip.
-pip3 install cryptography==3.3.2
+cryptography==3.3.2
 
 # For QR bulk upload
-pip3 install opencv-python==3.4.9.33
+opencv-python==3.4.9.33
 
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2021.1 # Submitty-util specific.
