@@ -1,1 +1,1 @@
-{% if render_markdown %}{{ post_content | markdown }}{% else %}{{ post_content }}{% endif %}
+{% if render_markdown %}<span class="markdown" style="white-space: normal;">{{ post_content | markdown }}</span>{% else %}{{ post_content }}{% endif %}

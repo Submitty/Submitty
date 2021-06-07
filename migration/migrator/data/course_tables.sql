@@ -283,7 +283,7 @@ CREATE TABLE public.gradeable (
     g_grade_released_date timestamp(6) with time zone NOT NULL,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
-    g_grade_locked_date timestamp with time zone,
+    g_allowed_minutes integer,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
@@ -323,6 +323,17 @@ CREATE SEQUENCE public.gradeable_access_id_seq
 --
 
 ALTER SEQUENCE public.gradeable_access_id_seq OWNED BY public.gradeable_access.id;
+
+
+--
+-- Name: gradeable_allowed_minutes_override; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_allowed_minutes_override (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    allowed_minutes integer NOT NULL
+);
 
 
 --

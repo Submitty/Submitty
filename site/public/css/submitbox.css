@@ -10,6 +10,7 @@
 
 #gradeable-info-due-dates {
     text-align: right;
+    margin-left: auto;
 }
 
 #submission-form > * {
@@ -71,6 +72,25 @@
 
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
+}
+
+#gradeable-info h1 {
+    margin-right: auto;
+}
+
+#gradeable-progress-bar{
+    width: 5%;
+    height: 20px;
+    background-color: var(--standard-dark-green);
+    border-radius: 10px;
+}
+
+#gradeable-progress{
+    width: 100%;
+    background-color: var(--standard-medium-gray);
+    padding: 3px;
+    border-radius: 13px;
+
 }
 
 @media (max-width: 401px) {

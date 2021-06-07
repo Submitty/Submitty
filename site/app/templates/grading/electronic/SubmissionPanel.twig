@@ -35,7 +35,7 @@
             </span>
             <br />
             {# Files #}
-            <div class="inner-container" id="file-container" style="padding-top: 10px;">
+            <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ self.display_files(self, submissions, "s", 0, "submissions") }}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ self.display_files(self, checkout, "c", 0, "checkout") }}

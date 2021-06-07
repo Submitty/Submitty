@@ -1,0 +1,43 @@
+[name^="user_id_"]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+[data-theme="dark"] [name^="user_id_"]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] [name^="user_id_"]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}
+
+.admin-team-history-after-lock {
+    background-color: var(--alert-invalid-entry-pink) !important;
+}
+
+[data-theme="dark"] .admin-team-history-after-lock {
+    background-color: var(--alert-danger-red) !important;
+}
+
+.admin-team-history-td:focus {
+    outline: solid;
+}
+
+.admin-team-form-button {
+    width: 80px; 
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-left: 3px;
+}
+
+.admin-team-form-pending {
+    font-style: italic;
+    color: var(--text-black);
+}
+
+.admin-team-form-pending-conflict {
+    background-color: var(--alert-invalid-entry-pink) !important;
+}
+
+[data-theme="dark"] .admin-team-form-pending-conflict {
+    background-color: var(--alert-danger-red) !important;
+}
