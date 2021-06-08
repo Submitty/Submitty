@@ -197,7 +197,7 @@ class GradingOrder extends AbstractModel {
      * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
      * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
-     * @param string|int $component_id Component ID to check (for ungraded/itempool)
+     * @param int $component_id Component ID to check (for ungraded/itempool)
      * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
      * @return Submitter|null Previous submitter to grade
      */
@@ -223,7 +223,7 @@ class GradingOrder extends AbstractModel {
      * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
      * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
-     * @param string|int $component_id Component ID to check (for ungraded/itempool)
+     * @param int $component_id Component ID to check (for ungraded/itempool)
      * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
      * @return Submitter|null Next submitter to grade
      */
