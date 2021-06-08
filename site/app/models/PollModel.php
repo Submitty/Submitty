@@ -12,6 +12,7 @@ use app\libraries\DateUtils;
  * @method int getId()
  * @method string getName()
  * @method string getQuestion()
+ * @method string getQuestionType()
  * @method array getAnswers()
  * @method array getUserResponses()
  * @method string|null getImagePath()
@@ -23,7 +24,8 @@ class PollModel extends AbstractModel {
     protected $name;
     /** @prop-read string */
     protected $question;
-    protected $question_type; //can hold the value "single-response" or "multilple-response"
+    /** @prop-read string */
+    protected $question_type;
     protected $responses;
     /** @prop-read array */
     protected $answers;
@@ -58,10 +60,6 @@ class PollModel extends AbstractModel {
 
     public function getAnswers() {
         return $this->answers;
-    }
-
-    public function getQuestionType() {
-        return $this->question_type;
     }
 
     public function isOpen() {
