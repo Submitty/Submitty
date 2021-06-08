@@ -115,7 +115,7 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if ($gradeable->isLocked($this->core->getUser())) {
+        if ($gradeable->isLocked($this->core->getUser()->getId())) {
             $this->core->addErrorMessage('You have not unlocked this gradeable yet');
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'You have not completed the pre-requisite gradeable'];

@@ -796,7 +796,9 @@ class GradeableListTester extends BaseUnitTest {
             'late_days' => 2,
             'grade_inquiry_start_date' => new \DateTime($grade_released_date, $timezone),
             'grade_inquiry_due_date' => new \DateTime($grade_released_date, $timezone),
-            'allowed_minutes' => null
+            'allowed_minutes' => null,
+            'depends_on' => null,
+            'depends_on_points' => null
         ];
 
         return new Gradeable($core, $details);
