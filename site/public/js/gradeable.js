@@ -197,7 +197,8 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @returns {Promise<string>} the html for the graded component
  */
 
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, allowCustomMarks) {
+
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer, allowCustomMarks) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -220,6 +221,8 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'component_version_conflict': componentVersionConflict,
             'peer_component' : component.peer,
             'allow_custom_marks' : allowCustomMarks,
+            'ta_grading_peer': taGradingPeer,
+
         }));
     });
 }

@@ -36,9 +36,11 @@
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
+                    {% if not is_peer_grading %}
                     <div class="col-no-gutters">
                         <input id="edit-mode-enabled" class="key_to_click" tabindex="0" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
                     </div>
+                    {% endif %}
                 </div>
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id}}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>

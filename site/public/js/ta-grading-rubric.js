@@ -47,6 +47,13 @@ MARK_ID_COUNTER = 0;
 EDIT_MODE_ENABLED = false;
 
 /**
+ * True if a TA is grading a Peer assignment
+ * this allows differentiation between what peers and TA's are allowed to
+ * do with the rubric for a peer assignment
+ */
+TA_GRADING_PEER = false;
+
+/**
  * Count directions for components
  * @type {int}
  */
@@ -1271,7 +1278,8 @@ function getGradedComponentFromDOM(component_id) {
         graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
-        verifier_id: dataDOMElement.attr('data-verifier_id')
+        verifier_id: dataDOMElement.attr('data-verifier_id'),
+        custom_mark_enabled: CUSTOM_MARK_ID,
     };
 }
 
@@ -2261,6 +2269,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
  * @return {Promise}
  */
 function reloadPeerRubric(gradeable_id, anon_id) {
+    TA_GRADING_PEER = true;
     let gradeable_tmp = null;
     return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
@@ -2933,7 +2942,9 @@ function saveComponent(component_id) {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         let gradedComponent = getGradedComponentFromDOM(component_id);
-        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected && getAllowCustomMarks()) {
+        //only show error if custom marks are allowed
+        if (gradedComponent.custom_mark_enabled && gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected && getAllowCustomMarks()) {
+
             if (!confirm("Are you sure you want to delete the custom mark?")) {
                 return Promise.reject();
             }
@@ -3129,8 +3140,8 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    student_grader = $("#student-grader").attr("is-student-grader");
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, getAllowCustomMarks())
+    student_grader = $("#student-grader").attr("is-student-grader"); 
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks())
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
