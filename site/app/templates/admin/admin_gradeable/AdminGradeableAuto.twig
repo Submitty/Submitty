@@ -44,9 +44,11 @@
                     {% endfor %}
                 </select>
             </div>
+        </fieldset>
+        <fieldset>
             <legend>Points Required to Unlock:</legend>
             <input type="number" name="depends_on_points" value="{{ gradeable.getDependsOnPoints() }}">
-            <legend {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ max_points }} for {{ gradeable.getDependsOn() }}</legend>
+            <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ max_points }} for {{ gradeable.getDependsOn() }}</p>
         </fieldset>
     </div>
 <br><br>
