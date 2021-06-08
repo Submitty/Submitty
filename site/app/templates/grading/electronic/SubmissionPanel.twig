@@ -74,7 +74,7 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|e('js') }}", "{{ path|e('js') }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
