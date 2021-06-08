@@ -3,6 +3,7 @@
 
 which_test_dir=$1
 SUBMITTY_INSTALL_DIR=$2
+CONFIGURE_AGENT=$3
 
 config_directory=${which_test_dir}/assignment_config
 GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
@@ -23,16 +24,7 @@ if (( $py_res != 0 )); then
     exit 1
 fi
 
-# Create the complete/build config using main_configure
-g++ ${GRADINGCODE}/main_configure.cpp ${GRADINGCODE}/load_config_json.cpp ${GRADINGCODE}/execute.cpp \
-    ${GRADINGCODE}/TestCase.cpp ${GRADINGCODE}/error_message.cpp ${GRADINGCODE}/window_utils.cpp \
-    ${GRADINGCODE}/dispatch.cpp ${GRADINGCODE}/change.cpp ${GRADINGCODE}/difference.cpp \
-    ${GRADINGCODE}/tokenSearch.cpp ${GRADINGCODE}/tokens.cpp ${GRADINGCODE}/clean.cpp \
-    ${GRADINGCODE}/execute_limits.cpp ${GRADINGCODE}/seccomp_functions.cpp \
-    ${GRADINGCODE}/empty_custom_function.cpp -pthread -g -std=c++11 -lseccomp -o configure.out
-
-
-./configure.out ${config_directory}/complete_config.json ${which_test_dir}/data/build_config.json test_assignment
+${CONFIGURE_AGENT} ${config_directory}/complete_config.json ${which_test_dir}/data/build_config.json test_assignment
 configure_res=$?
 
 if (( $configure_res != 0 )); then
@@ -46,3 +38,4 @@ rm ${config_directory}/complete_config.json
 # Copy the build config into the config directory
 cp ${which_test_dir}/data/build_config.json ${config_directory}
 cp ${which_test_dir}/data/build_config.json ${config_directory}/complete_config.json
+
