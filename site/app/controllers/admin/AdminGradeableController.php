@@ -208,6 +208,16 @@ class AdminGradeableController extends AbstractController {
             }
         }
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
+        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+        $max_points = 0;
+        if ($gradeable->getDependsOn() !== null) {
+            $depend_gradeable = $this->tryGetGradeable($gradeable->getDependsOn());
+            if ($depend_gradeable !== false) {
+                $depend_auto = $depend_gradeable->getAutogradingConfig();
+                $max_points = $depend_auto->getTotalHiddenNonExtraCredit() + $depend_auto->getTotalNonHidden();
+            }
+        }
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
@@ -267,7 +277,9 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $gradeable->getHiddenFiles()
+            'hidden_files' => $gradeable->getHiddenFiles(),
+            'template_list' => $template_list,
+            'max_points' =>  $max_points
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -915,7 +927,9 @@ class AdminGradeableController extends AbstractController {
                 'late_submission_allowed' => true,
                 'hidden_files' => "",
                 'limited_access_blind' => 1,
-                'peer_blind' => 3
+                'peer_blind' => 3,
+                'depends_on' => null,
+                'depends_on_points' => null
             ]);
         }
         else {
@@ -1026,6 +1040,11 @@ class AdminGradeableController extends AbstractController {
         $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
+        $depend_props = [
+            'depends_on',
+            'depends_on_points'
+        ];
+
         $boolean_properties = [
             'ta_grading',
             'scanned_exam',
@@ -1075,6 +1094,12 @@ class AdminGradeableController extends AbstractController {
             if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
                 $errors[$prop] = "{$prop} must be a number";
                 continue;
+            }
+
+            if (in_array($prop, $depend_props)) {
+                if ($post_val === "") {
+                    $post_val = null;
+                }
             }
 
             // Converts string array sep by ',' to json
@@ -1477,5 +1502,19 @@ class AdminGradeableController extends AbstractController {
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/max_points")
+     */
+    public function maxPoints($gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable !== false) {
+            $autogradingConfig = $gradeable->getAutogradingConfig();
+            $points = $autogradingConfig->getTotalHiddenNonExtraCredit() + $autogradingConfig->getTotalNonHidden();
+            $this->core->getOutput()->renderJsonSuccess($points);
+            return;
+        }
+        $this->core->getOutput()->renderJsonError("Unknown gradeable");
     }
 }
