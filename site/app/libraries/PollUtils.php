@@ -26,7 +26,7 @@ class PollUtils {
                 "id" => $poll->getId(),
                 "name" => $poll->getName(),
                 "question" => $poll->getQuestion(),
-                "question-type" => $poll->getQuestionType(),
+                "question_type" => $poll->getQuestionType(),
                 "responses" => $responses,
                 "correct_responses" => $poll->getAnswers(),
                 "release_date" => $poll->getReleaseDate(),

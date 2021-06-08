@@ -26,10 +26,10 @@
 
             <span class="option-title" id="poll-question-type-label">Question Type:</span>
             <label for="poll-type-single-response">
-                <input type="radio" id="poll-type-single-response" name="question-type" value="single-response" checked="">Single reponse (radio buttons)</input>
+                <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" checked>Single reponse (radio buttons)</input>
             </label>
             <label for="poll-type-multiple-response">
-                <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response">Multiple response (checkboxes)</input>
+                <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response">Multiple response (checkboxes)</input>
             </label>
             <br/><br/>
 
@@ -92,16 +92,16 @@
             <span class="option-title" id="poll-question-type-label">Question Type:</span>
             <label for="poll-type-single-response">
                 {% if poll.getQuestionType() == 'single-response'%}
-                    <input type="radio" id="poll-type-single-response" name="question-type" value="single-response" checked="">Single response (radio buttons)</input>
+                    <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" checked>Single response (radio buttons)</input>
                 {% else %}
-                    <input type="radio" id="poll-type-single-response" name="question-type" value="single-response">Single response (radio buttons)</input>
+                    <input type="radio" id="poll-type-single-response" name="question_type" value="single-response">Single response (radio buttons)</input>
                 {% endif %}
             </label>
             <label for="poll-type-multiple-response">
                 {% if poll.getQuestionType() == 'single-response'%}
-                    <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response">Multiple response (checkboxes)</input>
+                    <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response">Multiple response (checkboxes)</input>
                 {% else %}
-                    <input type="radio" id="poll-type-multiple-response" name="question-type" value="multiple-response" checked="">Multiple response (checkboxes)</input>
+                    <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response" checked>Multiple response (checkboxes)</input>
                 {% endif %}
             </label>
             <br/><br/>
@@ -115,7 +115,7 @@
                 Current Image: {{ poll.getImagePath() }}
                 <br/>
                 <label for="keep-image">
-                    Keep Image:<input type="checkbox" id="keep-image" name="keep_image" checked="" />
+                    Keep Image:<input type="checkbox" id="keep-image" name="keep_image" checked />
                 </label>
             {% endif %}
             <br/>
