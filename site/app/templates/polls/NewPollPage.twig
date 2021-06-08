@@ -8,20 +8,20 @@
 
             <label for="poll-name-label">
                 <span class="option-title" id="poll-name-label">Poll Name:</span>
-                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             </label>
+            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             <br/> <br/>
 
             <label for="poll-question-label">
-                <span class="option-title" id="poll-question-label">Question:</span>
-                <textarea
+                <span class="option-title" id="poll-question-label">Question:</span>\
+            </label>
+            <textarea
                     id="poll-question"
                     name="question"
                     style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
                     rows="10" cols="30"
                     placeholder="Enter question here..."
                     maxlength="5000"></textarea>
-            </label>
             <br/><br/>
 
             <label for="poll-question-type-label">
@@ -39,8 +39,8 @@
 
             <label for="poll-date-label">
                 <span class="option-title" id="poll-date-label">Expected release date:</span>
-                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             <br/>
 
             <hr>
@@ -72,19 +72,19 @@
 
             <label for="poll-name-label">
                 <span class="option-title" id="poll-name-label">Poll Name:</span>
-                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             </label>
+            <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             <br/> <br/>
 
             <label for="poll-question-label">
                 <span class="option-title" id="poll-question-label">Question:</span>
-                <textarea
+            </label>
+            <textarea
                     id="poll-question"
                     name="question"
                     style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
                     rows="10" cols="30"
                     maxlength="5000">{{ poll.getQuestion() }}</textarea>
-            </label>
             <br/><br/>
 
             <label for="poll-question-type-label">
@@ -116,8 +116,8 @@
 
             <label for="poll-date-label">
                 <span class="option-title" id="poll-date-label">Expected release date:</span>
-                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             <br/>
             <hr>
             <h2> Responses: </h2>
