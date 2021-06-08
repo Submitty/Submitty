@@ -91,18 +91,9 @@
 
             <span class="option-title" id="poll-question-type-label">Question Type:</span>
             <label for="poll-type-single-response">
-                {% if poll.getQuestionType() == 'single-response'%}
-                    <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" checked>Single response (radio buttons)</input>
-                {% else %}
-                    <input type="radio" id="poll-type-single-response" name="question_type" value="single-response">Single response (radio buttons)</input>
-                {% endif %}
-            </label>
+                <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" {% if poll.getQuestionType() == 'single-response' %} checked {% endif %}>Single response (radio buttons)</input>
             <label for="poll-type-multiple-response">
-                {% if poll.getQuestionType() == 'single-response'%}
-                    <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response">Multiple response (checkboxes)</input>
-                {% else %}
-                    <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response" checked>Multiple response (checkboxes)</input>
-                {% endif %}
+                <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response" {% if poll.getQuestionType() == 'multiple-response' %} checked {% endif %}>Multiple response (checkboxes)</input>
             </label>
             <br/><br/>
 
