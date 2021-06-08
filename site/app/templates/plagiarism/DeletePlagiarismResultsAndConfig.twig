@@ -8,8 +8,7 @@
                 <div class="form-body">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <p>Note: Deleting plagiarism results will also delete the saved configuration for the gradeable.</p><br>
-                    Are you sure to delete Plagiarism Results for
-                    <div name="gradeable_title"></div>
+                    Are you sure you wish to delete Plagiarism Results for "<span name="gradeable_title"></span>"?
                     <div class="form-buttons">
                         <div class="form-button-container">
                             <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
