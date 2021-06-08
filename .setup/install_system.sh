@@ -182,10 +182,11 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
-pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+pip install --upgrade pip
+pip3 install -r ${CURRENT_DIR}/.setup/pip/system_requirements.txt
 
 if [ ${VAGRANT} == 1 ]; then
-    pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/vagrant_requirements.txt
+    pip3 install -r ${CURRENT_DIR}/.setup/pip/vagrant_requirements.txt
 fi
 
 #################################################################
