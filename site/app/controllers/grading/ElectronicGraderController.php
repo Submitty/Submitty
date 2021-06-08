@@ -1307,16 +1307,16 @@ class ElectronicGraderController extends AbstractController {
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
             if ($to === 'prev' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', $component_id, $to_same_itempool === "true");
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
             elseif ($to === 'prev') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', $component_id, $to_same_itempool === "true");
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
             elseif ($to === 'next' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id, $to_ungraded === 'true', $component_id, $to_same_itempool === "true");
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
             elseif ($to === 'next') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, $to_ungraded === 'true', $component_id, $to_same_itempool === "true");
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
             // Reassign who_id
             if (!is_null($goToStudent)) {
