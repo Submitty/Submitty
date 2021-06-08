@@ -27,7 +27,7 @@ Required Parameters:
         </div>
     </div>
     <div class="row" id="overall-comments">
-        <label for="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}" tabIndex="0" style="display:none;">Overall Comment From {{overall_comment["logged_in_user"]["user_id"]|escape}}</label>
+        <label for="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}" tabIndex="0" class="screen-reader">Overall Comment From {{overall_comment["logged_in_user"]["user_id"]|escape}}</label>
         <textarea
                 id="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}"
                 rows="5"
@@ -37,7 +37,7 @@ Required Parameters:
                 onchange="{{ grading_disabled ? '' : 'onChangeOverallComment()'}}"
                 placeholder="Overall message for student about the gradeable...">{{overall_comment["logged_in_user"]["comment"]|escape }}</textarea>
         {% for user, comment in overall_comment["other_graders"] %}
-            <label for="overall-comment-{{user | escape }}" tabIndex="0" style="display:none;">Overall Comment From {{user|escape}}</label>
+            <label for="overall-comment-{{user | escape }}" tabIndex="0" class="screen-reader">Overall Comment From {{user|escape}}</label>
             <textarea disabled
                     id="overall-comment-{{user | escape }}"
                     style="display:none;"
