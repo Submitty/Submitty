@@ -27,20 +27,40 @@ function colorEditors(data) {
     }
 }
 
-function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
-    let marks_editor2 = editor1.getAllMarks();
-    editor1.operation( () => {
+function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
+    // Remove existing red region and add new one
+    let marks_editor2 = editor2.getAllMarks();
+    editor2.operation( () => {
     	marks_editor2.forEach(mark => {
-	        let rightMarkerData = mark.find();
-	        if(mark.attributes.data_start === leftClickedMarker.attributes.data_start && mark.attributes.data_end === leftClickedMarker.attributes.data_end) {
-	            mark.css = "background: #FF0000";
-	            mark.attributes = {"data_color_prev": ORANGE, "data_current_color": RED};
+	        if(mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end)) {
+                console.log(leftClickedMarker.attributes.data_start + ", " + leftClickedMarker.attributes.data_end + ", " + mark.attributes.data_start + ", " + mark.attributes.data_end);
+	            mark.css = "background: " + RED
+	            mark.attributes.data_current_color = RED;
 	        }
+	        else if (mark.attributes.data_current_color === RED) {
+                mark.css = "background: " + ORANGE;
+                mark.attributes.data_current_color = ORANGE;
+            }
     	});
 	});
-	leftClickedMarker.css = "background:#FF0000";
-	leftClickedMarker.attributes = {"data_prev_color": ORANGE, "data_current_color": RED};
-	editor0.refresh();
+
+    // Remove existing red regions on editor1
+    editor2.operation( () => {
+        editor1.getAllMarks().forEach(mark => {
+            if (mark.attributes.data_current_color === RED) {
+                mark.css = "background: " + ORANGE;
+                mark.attributes.data_current_color = ORANGE;
+            }
+        });
+    });
+
+    // Color the clicked region in editor1
+	leftClickedMarker.css = "background: " + RED;
+	leftClickedMarker.attributes.data_current_color = RED;
+
+	// Refresh editors
+	editor1.refresh();
+    editor2.refresh();
 }
 
 function setUpLeftPane() {
@@ -63,9 +83,7 @@ function setUpLeftPane() {
             getMatchesListForClick(user_id_1, user_1_version, lineData.from);
             editor0.refresh();
         } else if(isColoredMarker(clickedMark, ORANGE)) {
-            // In this case we want to update the right side as well...
-            // Needs work...
-            //updatePanesOnOrangeClick(clickedMark, editor0, editor1);
+            updatePanesOnOrangeClick(clickedMark, editor0, editor1);
         } else {
             if($('#popup_to_show_matches_id').css('display') === 'block'){
                 $('#popup_to_show_matches_id').css('display', 'none');
@@ -192,8 +210,7 @@ function createRightUsersList(data, select = null) {
 
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
     let append_options;
-    $.each(version_data, function(i,version_to_append){
-        console.log(version_to_append);
+    $.each(version_data, function(i,version_to_append) {
         if(version_to_append === active_version_user_1 && version_to_append === max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
         }
