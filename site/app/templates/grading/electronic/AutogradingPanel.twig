@@ -1,5 +1,6 @@
 <div id="autograding_results" class="rubric_panel">
     <div>
+        {{ files }}
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
@@ -34,7 +35,8 @@
                 {{ component_names|length }},
                 false,
                 false,
-                true
+                true,
+                {{ files }}
         )
     }
 </script>

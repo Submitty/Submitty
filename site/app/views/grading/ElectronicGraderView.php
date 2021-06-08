@@ -936,7 +936,7 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $graded_gradeable, $gradeable);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $graded_gradeable, $gradeable, $display_version);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
@@ -1143,9 +1143,16 @@ HTML;
      * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, $graded_gradeable, $gradeable) {
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, $graded_gradeable, $gradeable, $display_version) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+
+        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        if ($display_version_instance !==  null) {
+            $files = $display_version_instance->getFiles();
+        }
+
+        var_dump($files['submissions']);
         $config = $gradeable->getAutogradingConfig();
         $notebook = null;
         $notebook_inputs = [];
@@ -1193,6 +1200,7 @@ HTML;
             "user_id" => 'aphacker',
             "student_page" => $gradeable->isStudentPdfUpload(),
             "component_names" => $component_names,
+            "files" => $files['submissions']
         ]);
     }
 

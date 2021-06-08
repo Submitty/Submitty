@@ -866,7 +866,7 @@ class SubmissionController extends AbstractController {
         }
 
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
-
+        $regrade = $_POST['regrade'];
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
         if ($gradeable === null) {
@@ -1082,8 +1082,7 @@ class SubmissionController extends AbstractController {
                 }
             }
 
-
-            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs && !$regrade ) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
 
@@ -1385,7 +1384,7 @@ class SubmissionController extends AbstractController {
         }
 
         // create json file...
-        if ($_POST['regrade'] === true) {
+        if ($regrade) {
             $queue_data = [
                 "semester" => $this->core->getConfig()->getSemester(),
                 "course" => $this->core->getConfig()->getCourse(),

@@ -862,11 +862,10 @@ function gatherInputAnswersByType(type){
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false, files) {
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
     var return_url = buildCourseUrl(['gradeable', gradeable_id]);
-
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
@@ -907,7 +906,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             window.location.reload();
             return;
         }
-
+        //alert(files.length);
         // Files selected
         for (var i = 0; i < file_array.length; i++) {
             for (var j = 0; j < file_array[i].length; j++) {
@@ -934,7 +933,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
     }
-
+    ///formData.append('files', JSON.stringify(files));
 
     //check if filesize greater than 1,25 MB, then turn on the progressbar
     if(filesize > 1250000){
