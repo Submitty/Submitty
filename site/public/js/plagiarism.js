@@ -174,9 +174,7 @@ function requestAjaxData(url, f, es) {
 function createRightUsersList(data, select = null) {
     let position = 0;
     let append_options;
-    console.log(data);
     data = JSON.parse(data);
-    console.log(data);
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select === users[0]) {
@@ -195,7 +193,6 @@ function createRightUsersList(data, select = null) {
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
     let append_options;
     $.each(version_data, function(i,version_to_append){
-        console.log(version_to_append);
         if(version_to_append === active_version_user_1 && version_to_append === max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
         }
