@@ -15,6 +15,26 @@
 </div>
 <script>
     function regrade() {
-        
+        var git_user_id = "";
+        var git_repo_id = "";
+        if ({{ is_vcs ? "true" : "false" }}) {
+            git_user_id = $("#github-user-id").val();
+            git_repo_id = $("#github-repo-id").val();
+        }
+        handleSubmission(0,0,0,{{ highest_version }},
+                {{ max_submissions }},
+                "{{ csrf_token }}",
+                {{ is_vcs ? "true" : "false" }},
+                {{ num_inputs }},
+                "{{ gradeable_id }}",
+                "aphacker",
+                git_user_id,
+                git_repo_id,
+                {{ student_page ? "true" : "false" }},
+                {{ component_names|length }},
+                false,
+                false,
+                true
+        )
     }
 </script>

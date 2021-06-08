@@ -1385,20 +1385,40 @@ class SubmissionController extends AbstractController {
         }
 
         // create json file...
-        $queue_data = [
-            "semester" => $this->core->getConfig()->getSemester(),
-            "course" => $this->core->getConfig()->getCourse(),
-            "gradeable" => $gradeable->getId(),
-            "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-            "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
-            "queue_time" => $current_time,
-            "user" => $user_id,
-            "team" => $team_id,
-            "who" => $who_id,
-            "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version,
-            "vcs_checkout" => $vcs_checkout
-        ];
+        if ($_POST['regrade'] === true) {
+            $queue_data = [
+                "semester" => $this->core->getConfig()->getSemester(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                'regrade' => true,
+                "queue_time" => $current_time,
+                "user" => $user_id,
+                "team" => $team_id,
+                "who" => $who_id,
+                "is_team" => $gradeable->isTeamAssignment(),
+                "version" => $new_version,
+                "vcs_checkout" => $vcs_checkout
+            ];
+        }
+        else {
+            $queue_data = [
+                "semester" => $this->core->getConfig()->getSemester(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                "queue_time" => $current_time,
+                "user" => $user_id,
+                "team" => $team_id,
+                "who" => $who_id,
+                "is_team" => $gradeable->isTeamAssignment(),
+                "version" => $new_version,
+                "vcs_checkout" => $vcs_checkout
+            ];
+        }
+
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();

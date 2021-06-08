@@ -6,6 +6,7 @@ use app\controllers\student\LateDaysTableController;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
@@ -935,7 +936,7 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $graded_gradeable, $gradeable);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
@@ -1142,11 +1143,56 @@ HTML;
      * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, $graded_gradeable, $gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $config = $gradeable->getAutogradingConfig();
+        $notebook = null;
+        $notebook_inputs = [];
+        $num_parts = $config->getNumParts();
+        $notebook_file_submissions = [];
+        $notebook_model = null;
+        if ($config->isNotebookGradeable()) {
+            //maybe switch to gradeable->getuserid
+            $notebook_model = $config->getUserSpecificNotebook($this->core->getUser()->getId());
+            $notebook = $notebook_model->getNotebook();
+            $num_parts = $notebook_model->getNumParts();
+            $warning = $notebook_model->getWarning();
+            if (isset($warning) && $this->core->getUser()->accessGrading()) {
+                $output = $this->core->getOutput()->renderTwigTemplate(
+                    'generic/Banner.twig',
+                    [
+                        'message' => $warning,
+                        'error' => true
+                    ]
+                );
+            }
+            if ($graded_gradeable !== null) {
+                $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                    $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                    $notebook,
+                    $this->core->getUser()->getId()
+                );
+            }
+            $notebook_inputs = $notebook_model->getInputs();
+        }
+
+        $component_names = array_map(function (Component $component) {
+            return $component->getTitle();
+        }, $gradeable->getComponents());
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+            "highest_version" =>  $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+            "max_submissions" => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
+            "csrf_token" => $this->core->getCsrfToken(),
+            "is_vcs" => $gradeable->isVcs(),
+            "num_inputs" => isset($notebook_inputs) ? count($notebook_inputs) : 0,
+            "gradeable_id" => $gradeable->getId(),
+            "user_id" => 'aphacker',
+            "student_page" => $gradeable->isStudentPdfUpload(),
+            "component_names" => $component_names,
         ]);
     }
 
