@@ -20,7 +20,10 @@
 .markdown p {
     margin-top: 12px;
     margin-bottom: 12px;
-    white-space: pre-wrap;
+}
+
+.markdown .CodeMirror {
+    height: auto;
 }
 
 .markdown ol,

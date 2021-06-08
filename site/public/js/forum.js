@@ -1586,9 +1586,9 @@ function previewForumMarkdown(){
   const post_content = reply_box.val();
   const url = buildCourseUrl(['forum', 'threads', 'preview']);
 
-  console.log(post_box_num, reply_box, preview_box, preview_button, post_content);
-
   previewMarkdown(reply_box, preview_box, preview_button, url, { post_content: post_content });
+
+  console.log(preview_box[0]);
 }
 
 function checkInputMaxLength(obj){

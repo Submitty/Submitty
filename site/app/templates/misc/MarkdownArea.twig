@@ -51,6 +51,7 @@
         maxlength="5000"
         onchange="{{ textarea_onchange }}"
         onkeydown="{{ textarea_onkeydown }}"
+        onpaste="{{ textarea_onpaste }}"
         data-previous-comment="{{ data_previous_comment }}"
         {{ other_textarea_attributes }}>{{ markdown_area_value }}</textarea>
     <div id="{{ preview_div_id }}" name="{{ preview_div_name }}" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
