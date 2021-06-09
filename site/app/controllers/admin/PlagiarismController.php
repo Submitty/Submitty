@@ -68,7 +68,7 @@ class PlagiarismController extends AbstractController {
     }
 
 
-    private function getRankings($gradeable_id) {
+    private function getOverallRankings($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/overall_ranking.txt";
         if (!file_exists($file_path)) {
@@ -85,6 +85,32 @@ class PlagiarismController extends AbstractController {
         $rankings = array_chunk($rankings, 3);
         return $rankings;
     }
+
+    /**
+     * Returns a ranking of users by percent match with user 1 (used for determining the rightmost dropdown list)
+     * @param string $gradeable_id
+     * @param string $user_id_1
+     * @param string $user_1_version
+     * @return array
+     */
+    private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/" . $user_1_version . "/" . $user_id_1 . "_" . $user_1_version . ".txt";
+        if (!file_exists($file_path)) {
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        if (file_get_contents($file_path) == "") {
+            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        $content = file_get_contents($file_path);
+        $content = trim(str_replace(["\r", "\n"], ' ', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings, 3);
+        return $rankings;
+    }
+
 
     /**
      * Returns a string containing the concatenated contents of the specified user's submission
@@ -171,7 +197,7 @@ class PlagiarismController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $gradeable_title = ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
 
-        $rankings = $this->getRankings($gradeable_id);
+        $rankings = $this->getOverallRankings($gradeable_id);
         foreach ($rankings as $i => $ranking) {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
@@ -547,8 +573,9 @@ class PlagiarismController extends AbstractController {
         $return = "";
         $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
-        $rankings = $this->getRankings($gradeable_id);
+        $rankings = $this->getOverallRankings($gradeable_id);
 
+        $max_matching_version = 1;
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
@@ -689,46 +716,39 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
      */
     public function ajaxGetMatchingUsers($gradeable_id, $user_id_1, $version_user_1) {
-        $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/";
+
+        $i = 1;
+        $max_matching_version = 1;
+        $max_matching_percent = 0;
+        while (is_dir($file_path . strval($i))) {
+            $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($i));
+            if ($ranking[0][0] > $max_matching_percent) {
+                $max_matching_percent = $ranking[0][0];
+                $max_matching_version = $i;
+            }
+            $i++;
+        }
+
+        $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($max_matching_version));
+
         $return = [];
-        $error = "";
+        foreach ($ranking as $item) {
+            $temp = [];
+            array_push($temp, $item[1]);
+            array_push($temp, $item[2]);
+            array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
+            array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            array_push($temp, $item[0]);
+            array_push($return, $temp);
+        }
 
-        $rankings = $this->getRankings($gradeable_id);
-
-        foreach ($rankings as $ranking) {
-            if ($ranking[1] == $user_id_1) {
-                $max_matching_version = $ranking[2];
-            }
-        }
-        $version = $version_user_1;
-        if ($version_user_1 == "max_matching") {
-            $version = $max_matching_version;
-        }
-        $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version . "/matches.json";
-        if (!file_exists($file_path)) {
-            echo("no_match_for_this_version");
-        }
-        else {
-            $content = json_decode(file_get_contents($file_path), true);
-            foreach ($content as $match) {
-                if ($match["type"] == "match") {
-                    foreach ($match["others"] as $match_info) {
-                        if (!in_array([$match_info["username"], $match_info["version"]], $return)) {
-                            array_push($return, [$match_info["username"], $match_info["version"]]);
-                        }
-                    }
-                }
-            }
-            foreach ($return as $i => $match_user) {
-                array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());
-                array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedLastName());
-            }
-            $return = json_encode($return);
-            echo($return);
-        }
+        $return = json_encode($return);
+        echo json_encode($return);
     }
 
     /**
