@@ -642,3 +642,9 @@
     background-color: var(--viewed-content);
     color: var(--text-black)
 }
+
+.markdown-toggle {
+    margin-right:10px; 
+    padding:unset; 
+    cursor:pointer;
+}

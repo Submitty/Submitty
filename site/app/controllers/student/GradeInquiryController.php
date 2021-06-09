@@ -293,7 +293,7 @@ class GradeInquiryController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/grade_inquiry/preview", methods={"POST"})
      */
     public function showMarkdownPreview() {
-        return $this->core->getOutput()->renderOutput('submission\Homework', 'previewInquiry', $_POST['enablePreview'], $_POST['content']);
+        $this->core->getOutput()->renderOutput('submission\Homework', 'previewInquiry', $_POST['enablePreview'], $_POST['content']);
     }
 
     /**
