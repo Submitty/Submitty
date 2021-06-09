@@ -1117,10 +1117,14 @@ function checkOpenComponentMark(index) {
 
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
-  $("."+click_class + class_modifier).each(function(){
+
+  let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
+  
+  $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
-    //console.log($(this).attr('id'));
-    if ($(this).parent().parent().parent().hasClass("open")){
+    let viewerID = $(this).attr("data-viewer_id");
+    if(($(this).parent().hasClass("file-viewer") && $("#file_viewer_" + viewerID).hasClass("shown") === toClose) ||
+        ($(this).parent().hasClass("div-viewer") && $("#div_viewer_" + viewerID).hasClass("open") === toClose)) {
       let innerText = Object.values($(this))[0].innerText;
       if (innerText.slice(-4) !== ".pdf") {
         $(this).click();
@@ -1350,8 +1354,6 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       });
     }
     else {
-      if (!iframe.parent().parent().hasClass("open"))
-        return false;
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
