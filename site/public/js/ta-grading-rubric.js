@@ -1387,11 +1387,20 @@ function getOverallCommentFromDOM(user) {
  * Gets the ids of all open components
  * @return {Array}
  */
-function getOpenComponentIds() {
+function getOpenComponentIds(itempool_only=false) {
     let component_ids = [];
-    $('.ta-rubric-table:visible').each(function () {
-        component_ids.push(parseInt($(this).attr('data-component_id')));
-    });
+    if(itempool_only) {
+        $('.ta-rubric-table:visible').each(function () {
+            let component = $('#component-' + $(this).attr('data-component_id'));
+            if(component && component.attr('data-itempool_id')) {
+                component_ids.push(parseInt($(this).attr('data-component_id')));
+            }
+        });
+    } else {
+        $('.ta-rubric-table:visible').each(function () {
+            component_ids.push(parseInt($(this).attr('data-component_id')));
+        });
+    }
     return component_ids;
 }
 
@@ -1439,8 +1448,8 @@ function getPrevComponentId(component_id) {
  * Gets the first open component on the page
  * @return {int}
  */
-function getFirstOpenComponentId() {
-    let component_ids = getOpenComponentIds();
+function getFirstOpenComponentId(itempool_only=false) {
+    let component_ids = getOpenComponentIds(itempool_only);
     if (component_ids.length === 0) {
         return NO_COMPONENT_ID;
     }

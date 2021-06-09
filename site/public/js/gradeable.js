@@ -4,6 +4,8 @@
  */
 DECIMAL_PRECISION = 3;
 
+var itempool_items = {};
+
 /**
  * Asynchronously load all of the templates
  * @return {Promise}
@@ -124,6 +126,10 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         graded_gradeable.graded_components[component.id]
             = prepGradedComponent(component, graded_gradeable.graded_components[component.id]);
     });
+    if (graded_gradeable.itempool_items !== undefined) {
+        itempool_items = {...itempool_items, ...graded_gradeable.itempool_items};
+    }
+
     // TODO: i don't think this is async
     return Twig.twig({ref: "GradingGradeable"}).render({
         'gradeable': gradeable,
@@ -222,7 +228,8 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'peer_component' : component.peer,
             'allow_custom_marks' : allowCustomMarks,
             'ta_grading_peer': taGradingPeer,
-
+            'itempool_id': itempool_items.hasOwnProperty(component.id) ? itempool_items[component.id] : '',
+            'ta_grading_peer': taGradingPeer
         }));
     });
 }
