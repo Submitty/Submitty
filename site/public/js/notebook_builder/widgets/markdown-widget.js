@@ -77,8 +77,5 @@ function previewNotebookBuilderMarkdown(markdown_num) {
     const url = buildCourseUrl(['notebook_builder', 'preview']);
     const markdown_content = markdown_area.val();
 
-
-    console.log(markdown_num, markdown_area, preview_element, preview_button, url, markdown_content);
-
     previewMarkdown(markdown_area, preview_element, preview_button, url, { content: markdown_content });
 }

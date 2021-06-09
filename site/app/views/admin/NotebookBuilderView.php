@@ -12,7 +12,7 @@ class NotebookBuilderView extends AbstractView {
         if (!$enablePreview) {
             return;
         }
-        return $this->core->getOutput()->renderTwigTemplate("generic/Markdown.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
                 "content" => $content
         ]);
     }
