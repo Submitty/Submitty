@@ -45,7 +45,6 @@ class SuperuserEmailController extends AbstractController {
             $activeUserIds = $this->core->getQueries()->getActiveUserIds($_POST['semester']);
             # Set up email here
         }
-        echo(json_encode(["error" => "received"]));
-         
+        return JsonResponse::getSuccessResponse('Success?');
     }
 }

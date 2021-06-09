@@ -15,7 +15,8 @@ function sendEmail(url){
         type: 'POST',
         data: {
             "emailContent": emailContent,
-            "semester": getCurrentSemester()
+            "semester": getCurrentSemester(),
+            csrf_token: csrfToken
         },
         cache: false,
         beforesend: function(){
