@@ -1767,6 +1767,10 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        if ($custom_message != null && $custom_points != null ) {
+            $gradeable->setHasCustomMarks(true);
+        }
+
         // get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
         if ($component === false) {
@@ -1801,7 +1805,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        //don't allow peer graders to save custom marks no matter hoe gradeable is configured
+        //don't allow peer graders to save custom marks no matter how gradeable is configured
         if (($custom_message != null || $custom_points != null) && $gradeable->isPeerGrading()) {
             if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');

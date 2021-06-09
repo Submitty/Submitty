@@ -13,7 +13,10 @@
 <br>
 <fieldset>
     <legend>
-    Will graders be allowed to use custom marks ?
+    Will graders be allowed to use custom marks {{ has_custom_marks }}?
+        {% if has_custom_marks %}
+        <h3>Submissions have started</h3>
+        {% endif %}
     </legend>
     <input type="radio" id="yes_custom_marks" name="allow_custom_marks" value="true"
             {{ allow_custom_marks ? 'checked' : '' }} /> <label for="yes_custom_marks">Yes</label>
