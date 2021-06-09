@@ -231,20 +231,22 @@ class NotificationFactory {
         }
         // parametrize email array
         $current_user = $this->core->getUser();
-        $flattened_emails = [];
+        $flattened_params = [];
         foreach ($emails as $email) {
             // check if user is in the null section
             if (!$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
                 continue;
             }
             if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
-                $flattened_emails[] = $email->getSubject();
-                $flattened_emails[] = $email->getBody();
-                $flattened_emails[] = $email->getUserId();
+                $flattened_params[] = $email->getSubject();
+                $flattened_params[] = $email->getBody();
+                $flattened_params[] = $email->getUserId();
+                $flattened_params[] = $this->core->getConfig()->getSemester();
+                $flattened_params[] = $this->core->getConfig()->getCourse();
             }
         }
-        if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 3);
+        if (!empty($flattened_params)) {
+            $this->core->getQueries()->insertEmails($flattened_params, count($flattened_params) / 5);
         }
     }
 }

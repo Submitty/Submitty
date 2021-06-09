@@ -109,6 +109,32 @@ class PlagiarismController extends AbstractController {
 
 
     /**
+     * Returns a ranking of users by percent match with user 1 (used for determining the rightmost dropdown list)
+     * @param string $gradeable_id
+     * @param string $user_id_1
+     * @param string $user_1_version
+     * @return array
+     */
+    private function getRankingsForUser($gradeable_id, $user_id_1, $user_1_version) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/" . $user_1_version . "/" . $user_id_1 . "_" . $user_1_version . ".txt";
+        if (!file_exists($file_path)) {
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        if (file_get_contents($file_path) == "") {
+            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
+            $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
+        }
+        $content = file_get_contents($file_path);
+        $content = trim(str_replace(["\r", "\n"], ' ', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings, 3);
+        return $rankings;
+    }
+
+
+    /**
      * Returns a string containing the concatenated contents of the specified user's submission
      * @param string $user_id
      * @param string $gradeable_id
@@ -581,7 +607,6 @@ class PlagiarismController extends AbstractController {
         $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $rankings = $this->getOverallRankings($gradeable_id);
-
         if (count($rankings) === 0 || $rankings === null) {
             $return = ['error' => 'Rankings file not found or no matches found for selected user'];
             $return = json_encode($return);
@@ -742,6 +767,7 @@ class PlagiarismController extends AbstractController {
         $i = 1;
         $max_matching_version = 1;
         $max_matching_percent = 0;
+      
         while (is_dir($file_path . $i)) {
             $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($i));
 
@@ -749,7 +775,7 @@ class PlagiarismController extends AbstractController {
                 echo "";
                 return;
             }
-
+          
             if ($ranking[0][0] > $max_matching_percent) {
                 $max_matching_percent = $ranking[0][0];
                 $max_matching_version = $i;
