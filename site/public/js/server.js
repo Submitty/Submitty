@@ -980,7 +980,6 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
     }
     if(!visible) {
         const observer = new IntersectionObserver(function(entries, observer) {
-            console.log("observing...");
             if($("iframe#" + id).is(":visible")) {
                 $("iframe#" + id).removeAttr("height");
                 let iframeFunc = $("iframe#" + id)[0].contentWindow.iFrameInit;
