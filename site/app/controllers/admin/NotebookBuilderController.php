@@ -171,7 +171,7 @@ class NotebookBuilderController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function showMarkdownPreview() {
-        return $this->core->getOutput()->renderOutput('admin\NotebookBuilder', 'previewNotebookMarkdown', $_POST['enablePreview'], $_POST['content']);
+        $this->core->getOutput()->renderOutput('admin\NotebookBuilder', 'previewNotebookMarkdown', $_POST['enablePreview'], $_POST['content']);
     }
 
     /**

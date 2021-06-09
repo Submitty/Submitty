@@ -72,7 +72,6 @@
         {% set min_height = (post_textarea_large ? "40vmin":"100px") %}
         <div role="button" id="markdown_toggle_{{ post_box_id }}"
              class="markdown-toggle {{ render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
-             style="margin-right:10px; padding:unset; cursor:pointer;"
              title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
         >
             <i class="fab fa-markdown fa-2x"></i>

@@ -1,5 +1,5 @@
 {#
-    --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/app/templates/misc/MarkdownArea.twig ---
+    --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/public/templates/misc/MarkdownArea.twig ---
     
     markdown_area_id: required
     class: optional, a string with classes separated by a space to be applied to the markdown_area
@@ -40,12 +40,11 @@
             <i style="font-style:normal;" class="fa-question-circle"></i>
         </a>
     </div>
-    <label for="{{ markdown_area_id }}" tabindex="0" hidden>{{ markdown_area_id }}</label>
+    <label for="{{ markdown_area_id }}" tabindex="0" class="screen-reader">{{ markdown_area_id }}</label>
     <textarea
         id="{{ markdown_area_id }}"
         class="fill-available {{ class }}"
         name="{{ markdown_area_name }}"
-        style="resize: vertical; min-height: 100px; max-height: 300px; width: -webkit-fill-available;"
         placeholder="{{ placeholder }}"
         rows="10" cols="30"
         maxlength="5000"
@@ -54,7 +53,7 @@
         onpaste="{{ textarea_onpaste }}"
         data-previous-comment="{{ data_previous_comment }}"
         {{ other_textarea_attributes }}>{{ markdown_area_value }}</textarea>
-    <div id="{{ preview_div_id }}" name="{{ preview_div_name }}" class="fill-available markdown-preview" style="resize:none;min-height:{{ min_height }};max-height:300px;" hidden></div>
+    <div id="{{ preview_div_id }}" name="{{ preview_div_name }}" class="fill-available markdown-preview" style="min-height:{{ min_height }};" hidden></div>
 </div>
 
 <script>

@@ -58,6 +58,15 @@
     padding: 4px 6px;
     height: auto !important;
     overflow: scroll;
+    resize:none;
+    max-height:300px;
+}
+
+.markdown-area textarea {
+    resize: vertical; 
+    min-height: 100px; 
+    max-height: 300px; 
+    width: -webkit-fill-available;
 }
 
 .btn-markdown {
