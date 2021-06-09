@@ -4,15 +4,39 @@
     $('.markdown code').parent().css('padding', '5px');
     $('.markdown code').parent().css('white-space', 'pre');
     $('.markdown code').parent().css('overflow-x', 'scroll');
+    $('.markdown code').parent().addClass('markdown-code');
 
     $('.markdown code').each( function(index, code_area) {
         const textarea = document.createElement('textarea');
+        //get the first matching group from this regex, or the from the backup array (plain)
+        const language = (code_area.className.match(/\blanguage-(.+)/) || ['', 'plain'])[1];
+
+        //match language to a CodeMirror mimeMode
+        let mime_matches = Object.keys(CodeMirror.mimeModes).filter(mimeMode => {
+            return (
+                mimeMode.indexOf(`text/x-${language}`) === 0 ||
+                mimeMode.indexOf(`text/${language}`) === 0 ||
+                mimeMode.indexOf(`application/x-${language}`) === 0 ||
+                mimeMode.indexOf(`application/${language}`) === 0
+            );
+        });
+
+        let mode;
+        if(!mime_matches.length){
+            mode = CodeMirror.mimeModes['text/plain'];
+        }
+        else {
+            mode = mime_matches[0];
+        }
+
         textarea.innerHTML = code_area.innerHTML;
         $(textarea).insertAfter(code_area);
         $(code_area).remove();
         const editor = CodeMirror.fromTextArea(textarea, {
             lineNumbers: true,
-            mode: "text/x-c++src",
+            theme: localStorage.theme ? (localStorage.theme === 'light' ? 'eclipse' : 'monokai') : 'eclipse',
+            readOnly: true,
+            mode: mode,
         });
 
         //set timeout to ensure refresh happens after new content has been set

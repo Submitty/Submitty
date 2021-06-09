@@ -16,7 +16,6 @@
                 Question:
                 {% include "misc/MarkdownArea.twig" with {
                     "markdown_area_id" : "poll-question",
-                    "markdown_area_query" : "$('#poll-question')",
                     "markdown_area_name" : "question",
                     "markdown_area_value" : "",
                     "placeholder" : "Enter question here...",
@@ -78,7 +77,6 @@
                 Question:
                 {% include "misc/MarkdownArea.twig" with {
                     "markdown_area_id" : "poll-question",
-                    "markdown_area_query" : "$('#poll-question')",
                     "markdown_area_name" : "question",
                     "markdown_area_value" : poll.getQuestion(),
                     "preview_div_id" : "poll_preview_edit",

@@ -49,6 +49,17 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+
+        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/monokai.css');
+        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/javascript/javascript.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/sql/sql.js');
+
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
@@ -62,6 +73,17 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+
+        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/monokai.css');
+        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/javascript/javascript.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/sql/sql.js');
+
         $this->core->getOutput()->enableMobileViewport();
         $image_path = $poll->getImagePath();
         $file_data = null;
@@ -83,6 +105,17 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Edit Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls.js');
+
+        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/monokai.css');
+        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/javascript/javascript.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/sql/sql.js');
+        
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));

@@ -1,12 +1,11 @@
-{# 
-     --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/app/templates/misc/MarkdownArea.twig ---
+{#
+    --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/public/templates/misc/MarkdownArea.twig ---
     
     markdown_area_id: required
     class: optional, a string with classes separated by a space to be applied to the markdown_area
     onclick: required, onclick event string for the preview_button
     markdown_area_name: optional, but be careful make sure to maintain preexisting names 
                         when converting forms to use this template otherwise they might not work
-    markdown_area_query: optional, a JQuery expression that will return the markdown_area such as $('#my_id')
     markdown_area_value: optional, initial value for markdown_area to have
     markdown_buttons_id: optional, id for the span holding the markdown_buttons
     other_textarea_attributes: optional, string containing any custom attributes you want the textarea to have. (doesn't work very reliably, consider just adding more variables)
@@ -23,17 +22,21 @@
 #}
 <div class="markdown-area fill-available">
     <div id="{{ markdown_buttons_id ? markdown_buttons_id : "markdown_buttons" }}" style="display:{{ render_buttons ? "block" : "none" }}">
-        {% if markdown_area_query %}
-            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-        {% else %}
-            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button> 
-        {% endif %}
+        <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+        <span id="{{markdown_area_id}}_code_button" style="position:relative;">
+            <button style="position:relative" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">
+                Codeeeee <i class="fas fa-code fa-1x"></i>
+            </button>
+            <div class="dropdown-menu" hidden>
+                <li onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'), 'python')"><a>Python</a></li>
+                <li onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'), 'c')"><a>C/C++</a></li>
+                <li onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'), 'java')"><a>Java</a></li>
+                <hr></hr>
+                <li><a style="color: var(--external-link-blue);" href="https://codemirror.net/mode/" target="_blank">Other</a></li>
+            </div>
+        </span>
+        <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+        <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
         <a target="_blank" href="https://submitty.org/student/communication/markdown">
             Supports Markdown
@@ -50,6 +53,7 @@
         maxlength="5000"
         onchange="{{ textarea_onchange }}"
         onkeydown="{{ textarea_onkeydown }}"
+        onpaste="{{ textarea_onpaste }}"
         data-previous-comment="{{ data_previous_comment }}"
         {{ other_textarea_attributes }}>{{ markdown_area_value }}</textarea>
     <div id="{{ preview_div_id }}" name="{{ preview_div_name }}" class="fill-available markdown-preview" style="min-height:{{ min_height }};" hidden></div>
@@ -57,6 +61,15 @@
 
 <script>
     $('#{{markdown_area_id}}').ready(function() {
-        enableTabsInTextArea( "#{{markdown_area_id }}");
-    })
+        enableTabsInTextArea("#{{markdown_area_id}}");
+    });
+    
+    $('#{{markdown_area_id}}_code_button').ready(function() {
+        $('#{{markdown_area_id}}_code_button').on('mouseover', function() {
+            $(this).parent().find('.dropdown-menu').show();
+        });
+        $('#{{markdown_area_id}}_code_button').on('mouseleave', function() {
+            $(this).parent().find('.dropdown-menu').hide();
+        });
+    }); 
 </script>

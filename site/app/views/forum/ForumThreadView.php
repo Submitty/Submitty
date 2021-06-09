@@ -161,6 +161,7 @@ class ForumThreadView extends AbstractView {
             //Body Style is necessary to make sure that the forum is still readable...
             $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
             $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+            $this->core->getOutput()->addVendorCss('codemirror/theme/monokai.css');
             $this->core->getOutput()->addInternalCss('forum.css');
             $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');

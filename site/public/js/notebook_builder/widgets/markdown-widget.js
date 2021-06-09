@@ -19,7 +19,6 @@ class MarkdownWidget extends Widget {
             ref: "MarkdownArea"
         }).render ({
             markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
-            markdown_area_query : `$('#notebook-builder-markdown-${NUM_MARKDOWN}')`,
             markdown_area_name : '',
             markdown_area_value : this.state.markdown_string,
             placeholder : 'Enter text or markdown...',
@@ -72,12 +71,16 @@ Twig.twig({
 });
 
 function previewNotebookBuilderMarkdown() {
+    console.log('previewing notebook markdown...');
     const markdown_num = this.id[this.id.length-1];
     const markdown_area = $(`#notebook-builder-markdown-${markdown_num}`);
     const preview_element = $(`#notebook-builder-markdown-preview-${markdown_num}`);
     const preview_button = $(this);
     const url = buildCourseUrl(['notebook_builder', 'preview']);
     const markdown_content = markdown_area.val();
+
+
+    console.log(markdown_num, markdown_area, preview_element, preview_button, url, markdown_content);
 
     previewMarkdown(markdown_area, preview_element, preview_button, url, { content: markdown_content });
 }

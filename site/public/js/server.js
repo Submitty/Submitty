@@ -1689,7 +1689,7 @@ function renderMarkdown(markdownContainer, url, content) {
  *             3: italic text
  * @param divTitle JQuery compatible identifier for where to add the markdown presets
  */
-function addMarkdownCode(type, divTitle){
+function addMarkdownCode(type, divTitle, language=''){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
@@ -1697,8 +1697,7 @@ function addMarkdownCode(type, divTitle){
         insert = "[display text](url)";
     }
     else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
+        insert = `\`\`\`${language}\ncode\n\`\`\`\n`;
     }
     else if(type == 2){
         insert = "__bold text__ ";
