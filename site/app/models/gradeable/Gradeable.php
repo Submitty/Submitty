@@ -189,7 +189,7 @@ class Gradeable extends AbstractModel {
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
-    /** @prop @var vool if graders will be allowed to use custom marks */
+    /** @prop @var bool if graders will be allowed to use custom marks */
     protected $allow_custom_marks = true;
     /** @prop @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed

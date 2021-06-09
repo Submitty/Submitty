@@ -1268,7 +1268,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
         $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
@@ -1715,7 +1714,6 @@ class ElectronicGraderController extends AbstractController {
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
-
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
@@ -1766,11 +1764,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
-        if ($custom_message != null && $custom_points != null ) {
-            $gradeable->setHasCustomMarks(true);
-        }
-
         // get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
         if ($component === false) {

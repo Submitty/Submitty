@@ -269,7 +269,7 @@ class AdminGradeableController extends AbstractController {
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
             'hidden_files' => $gradeable->getHiddenFiles(),
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
-            'has_custom_marks' => $gradeable->getHasCustomMarks()
+            'grading_started' => $gradeable->isSubmissionClosed() && $gradeable->isTaViewOpen()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
