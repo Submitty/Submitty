@@ -136,7 +136,12 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-
+        if ($_POST["question_type"] != "single-response" && $_POST["question_type"] != "multiple-response") {
+            $this->core->addErrorMessage("Invalid poll question type");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
@@ -282,7 +287,6 @@ class PollController extends AbstractController {
             );
         }
         if ($poll->isOpen()) {
-            // FIXME: make this work for when we have only one answer, and also for when we have multiple responses
             if ($poll->getQuestionType() == "single-response") {
                 if ($_POST["answers"][0] == "-1") {
                     $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
