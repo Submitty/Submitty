@@ -13,16 +13,21 @@ class PlagiarismUtils {
         $arr = json_decode($content, true);
         $resultArray = [];
         foreach ($arr as $match) {
-            $interval = new Interval($match['start'], $match['end']);
-            foreach ($match['others'] as $o) {
-                $interval->addUser(new Submission(
-                    $o['username'],
-                    $o['version'],
-                    $o['matchingpositions'],
-                    $match['start'],
-                    $match['end']
-                ));
+            $interval = new Interval($match['start'], $match['end'], $match['type']);
+
+            // common code and provided code don't have an "others" array
+            if (isset($match['others'])) {
+                foreach ($match['others'] as $o) {
+                    $interval->addUser(new Submission(
+                        $o['username'],
+                        $o['version'],
+                        $o['matchingpositions'],
+                        $match['start'],
+                        $match['end']
+                    ));
+                }
             }
+
             $resultArray[] = $interval;
         }
         usort($resultArray, function (Interval $a, Interval $b) {

@@ -93,10 +93,10 @@ class PlagiarismUtilsTester extends \PHPUnit\Framework\TestCase {
             FileUtils::writeJsonFile($testFile, $testData);
 
             $expected = [
-                new Interval(1, 5),
-                new Interval(2, 6),
-                new Interval(3, 7),
-                new Interval(23, 27)
+                new Interval(1, 5, "match"),
+                new Interval(2, 6, "match"),
+                new Interval(3, 7, "match"),
+                new Interval(23, 27, "match")
             ];
             $expected[0]->addUser(new Submission(
                 'persona',
@@ -152,10 +152,10 @@ class PlagiarismUtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testMergeIntervals(): void {
         $intervalArray = [
-            new Interval(1, 5),
-            new Interval(2, 6),
-            new Interval(3, 7),
-            new Interval(23, 27)
+            new Interval(1, 5, "match"),
+            new Interval(2, 6, "match"),
+            new Interval(3, 7, "match"),
+            new Interval(23, 27, "match")
         ];
         $intervalArray[0]->addUser(new Submission(
             'persona',
@@ -202,7 +202,7 @@ class PlagiarismUtilsTester extends \PHPUnit\Framework\TestCase {
 
         $expected = [];
         $expected[] = $intervalArray[3];
-        $interval = new Interval(1, 7);
+        $interval = new Interval(1, 7, "match");
         $interval->addUser(new Submission(
             'persona',
             2,
