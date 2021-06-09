@@ -15,6 +15,17 @@ class OfficeHoursQueueView extends AbstractView {
         $this->core->getOutput()->addInternalJs('officeHoursQueue.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('notification-sound.js');
+
+        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/monokai.css');
+        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/javascript/javascript.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/sql/sql.js');
+        
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");

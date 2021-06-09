@@ -1083,6 +1083,17 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
+
+        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+        $this->core->getOutput()->addVendorCss('codemirror/theme/monokai.css');
+        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/javascript/javascript.js');
+        $this->core->getOutput()->addVendorJs('codemirror/mode/sql/sql.js');
+
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();

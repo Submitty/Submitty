@@ -1,6 +1,8 @@
 {% if viewer.getQueueAnnouncementMessage() | length > 0 %}
     <div id="announcement" class="markdown">
         <h2>Office Hours Queue Announcements:</h2>
-        <p>{{viewer.getQueueAnnouncementMessage() | markdown}}</p>
+        {% include "misc/Markdown.twig" with {
+            "content" : viewer.getQueueAnnouncementMessage()
+        } only %}
     </div>
 {% endif %}

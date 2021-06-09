@@ -1,4 +1,4 @@
-<div class="markdown" style="{{ style ? style : '' }}">{{ content | markdown }}</div>
+<div id="{{ id }}" class="markdown {{ class }}" style="{{ style ? style : '' }}">{{ content | markdown }}</div>
 <script>
     $('.markdown code').parent().css('background-color', 'var(--standard-hover-light-gray');
     $('.markdown code').parent().css('padding', '5px');
@@ -40,10 +40,10 @@
         });
 
         //set timeout to ensure refresh happens after new content has been set
-        //using 1 ms works, but 10 ms is used to be safe
+        //using 1 ms works, but 100 ms is used to be safe
         setTimeout(function() {
             editor.refresh();
-        },10);
+        },100);
     });
 
 </script>
