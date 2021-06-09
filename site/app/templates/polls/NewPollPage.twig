@@ -162,6 +162,7 @@
 <script>
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
+    let poll_type = "{{ poll.getQuestionType() }}";
 	
     flatpickr('.poll-date', {
         allowInput: true,
@@ -347,6 +348,20 @@
         })
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
+        let submit_form = false;
+        $("#edit-poll-form").submit(function(event) {
+            if (!submit_form
+                && ( (poll_type != "single-response" && $("#poll-type-single-response").is(":checked")) 
+                     || (poll_type != "multiple-response" && $("#poll-type-multiple-response").is(":checked")) )) {
+                // don't submit yet
+                event.preventDefault();
+                // send warning
+                if (confirm("Changing the poll question type may lead to data of students' answers being lost if students have already begun submitting responses to this poll. Are you sure you want to change the type of this poll?")) {
+                    submit_form = true;
+                    $("#edit-poll-form").submit();
+                }
+            }
+        });
     });
 
 </script>
