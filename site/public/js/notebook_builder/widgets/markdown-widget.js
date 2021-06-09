@@ -26,7 +26,7 @@ class MarkdownWidget extends Widget {
             preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
             preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
             preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
-            onclick : `previewNotebookBuilderMarkdown.call(this)`,
+            onclick : `previewNotebookBuilderMarkdown.call(this, ${NUM_MARKDOWN})`,
             render_buttons : true,
             min_height : "100px",
         }));
@@ -71,8 +71,7 @@ Twig.twig({
     async: true
 });
 
-function previewNotebookBuilderMarkdown() {
-    const markdown_num = this.id[this.id.length-1];
+function previewNotebookBuilderMarkdown(markdown_num) {
     const markdown_area = $(`#notebook-builder-markdown-${markdown_num}`);
     const preview_element = $(`#notebook-builder-markdown-preview-${markdown_num}`);
     const preview_button = $(this);
