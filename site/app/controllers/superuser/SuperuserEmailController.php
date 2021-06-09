@@ -32,7 +32,7 @@ class SuperuserEmailController extends AbstractController {
         );
     }
     /**
-     * @Route("/superuser/email/send")
+     * @Route("/superuser/email/send", methods={"POST"})
      */
     public function sendEmail(){
         $this->core->addSuccessMessage($_POST);
@@ -45,10 +45,7 @@ class SuperuserEmailController extends AbstractController {
             $activeUserIds = $this->core->getQueries()->getActiveUserIds($_POST['semester']);
             # Set up email here
         }
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse('Empty Email content'),
-            null,
-            new RedirectResponse($this->core->buildUrl(['home']))
-        );
+        echo(json_encode(["error" => "received"]));
+         
     }
 }
