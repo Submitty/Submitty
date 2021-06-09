@@ -1240,7 +1240,19 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
+    public function showGrading(
+        $gradeable_id,
+        $who_id = '',
+        $from = "",
+        $to = null,
+        $gradeable_version = null,
+        $sort = "id",
+        $direction = "ASC",
+        $to_ungraded = null,
+        $component_id = "-1",
+        $anon_mode = false,
+        $to_same_itempool = false
+    ) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
@@ -1294,31 +1306,18 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
-            if ($to === 'prev' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id);
+            if ($to === 'prev' && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'prev' && $to_ungraded === 'false') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id);
+            elseif ($to === 'prev') {
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id);
+            elseif ($to === 'next' && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'next' && $to_ungraded === 'false') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
+            elseif ($to === 'next') {
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'prev' && $to_ungraded === 'true' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevUngradedSubmitter($from_id, $component_id);
-            }
-            elseif ($to === 'prev' && $to_ungraded === 'true') {
-                $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
-            }
-            elseif ($to === 'next' && $to_ungraded === 'true' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextUngradedSubmitter($from_id, $component_id);
-            }
-            elseif ($to === 'next' && $to_ungraded === 'true') {
-                $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
-            }
-
             // Reassign who_id
             if (!is_null($goToStudent)) {
                 $who_id = $goToStudent->getId();
@@ -1695,6 +1694,14 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
+
+        $response_data['itempool_items'] = [];
+        $components = $gradeable->getComponents();
+        $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $submitter);
+        foreach ($components as $key => $value) {
+            $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
+        }
+
         return $response_data;
     }
 
