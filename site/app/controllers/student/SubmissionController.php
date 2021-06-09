@@ -867,6 +867,12 @@ class SubmissionController extends AbstractController {
 
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         $regrade = $_POST['regrade'];
+        $regrade_all = $_POST['regrade_all'];
+
+        if ($regrade_all) {
+            $version_to_regrade = $_POST['version_to_regrade'];
+        }
+
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
         if ($gradeable === null) {
@@ -1082,7 +1088,7 @@ class SubmissionController extends AbstractController {
                 }
             }
 
-            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs && !$regrade ) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs && !$regrade && !$regrade_all ) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
 
@@ -1365,8 +1371,19 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-                                   $gradeable->getId(), $who_id, $new_version];
+        if ($regrade) {
+            $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $gradeable->getId(), $who_id, $graded_gradeable->getAutoGradedGradeable()->getActiveVersion()];
+        }
+        else if ($regrade_all) {
+            $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $gradeable->getId(), $who_id, $version_to_regrade];
+        }
+        else {
+            $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $gradeable->getId(), $who_id, $new_version];
+        }
+
         $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
@@ -1386,19 +1403,36 @@ class SubmissionController extends AbstractController {
         // create json file...
         if ($regrade) {
             $queue_data = [
-                "semester" => $this->core->getConfig()->getSemester(),
                 "course" => $this->core->getConfig()->getCourse(),
                 "gradeable" => $gradeable->getId(),
-                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
-                'regrade' => true,
-                "queue_time" => $current_time,
-                "user" => $user_id,
-                "team" => $team_id,
-                "who" => $who_id,
                 "is_team" => $gradeable->isTeamAssignment(),
-                "version" => $new_version,
-                "vcs_checkout" => $vcs_checkout
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                "queue_time" => $current_time,
+                'regrade' => true,
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "semester" => $this->core->getConfig()->getSemester(),
+                "team" => $team_id,
+                "user" => $user_id,
+                "vcs_checkout" => $vcs_checkout,
+                "version" => $graded_gradeable->getAutoGradedGradeable()->getActiveVersion(),
+                "who" => $who_id
+            ];
+        }
+        else if ($regrade_all) {
+            $queue_data = [
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "is_team" => $gradeable->isTeamAssignment(),
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                "queue_time" => $current_time,
+                'regrade' => true,
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "semester" => $this->core->getConfig()->getSemester(),
+                "team" => $team_id,
+                "user" => $user_id,
+                "vcs_checkout" => $vcs_checkout,
+                "version" => $version_to_regrade,
+                "who" => $who_id
             ];
         }
         else {
@@ -1436,7 +1470,12 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to create file for grading queue.", false);
             }
         }
-
+        //don't make new submission if regrading
+        if ($regrade || $regrade_all) {
+            $msg = "submission added to queue for regrading";
+            $this->core->getOutput()->renderResultMessage($msg, true);
+            return;
+        }
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],

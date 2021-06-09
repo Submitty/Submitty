@@ -1152,7 +1152,6 @@ HTML;
             $files = $display_version_instance->getFiles();
         }
 
-        var_dump($files['submissions']);
         $config = $gradeable->getAutogradingConfig();
         $notebook = null;
         $notebook_inputs = [];
@@ -1187,7 +1186,7 @@ HTML;
         $component_names = array_map(function (Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
-
+        $submitter = $graded_gradeable->getSubmitter()->getID();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
@@ -1197,10 +1196,9 @@ HTML;
             "is_vcs" => $gradeable->isVcs(),
             "num_inputs" => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             "gradeable_id" => $gradeable->getId(),
-            "user_id" => 'aphacker',
+            "user_id" => $submitter,
             "student_page" => $gradeable->isStudentPdfUpload(),
             "component_names" => $component_names,
-            "files" => $files['submissions']
         ]);
     }
 

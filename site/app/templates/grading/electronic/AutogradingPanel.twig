@@ -4,7 +4,8 @@
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
-        <button class="btn btn-primary key_to_click"  id="regrade_button" tabindex="0" onclick="regrade()">Regrade</button>
+        <button class="btn btn-primary key_to_click"  id="regrade_button" tabindex="0" onclick="regrade()">Regrade Active Submission</button>
+        <button class="btn btn-danger key_to_click"  id="regrade_all_button" tabindex="0" onclick="regradeAll()">Regrade All Submissions</button>
         <div class="inner-container">
             {% if version_instance is null %}
                 <h4>No Submission</h4>
@@ -28,7 +29,7 @@
                 {{ is_vcs ? "true" : "false" }},
                 {{ num_inputs }},
                 "{{ gradeable_id }}",
-                "aphacker",
+                "{{ user_id }}",
                 git_user_id,
                 git_repo_id,
                 {{ student_page ? "true" : "false" }},
@@ -36,7 +37,36 @@
                 false,
                 false,
                 true,
-                {{ files }}
         )
     }
+
+    function regradeAll() {
+        var git_user_id = "";
+        var git_repo_id = "";
+        if ({{ is_vcs ? "true" : "false" }}) {
+            git_user_id = $("#github-user-id").val();
+            git_repo_id = $("#github-repo-id").val();
+        }
+        for(var i = 1; i < {{ highest_version }}; i++){
+            alert(i);
+            handleSubmission(0,0,0,i,
+                    {{ max_submissions }},
+                    "{{ csrf_token }}",
+                    {{ is_vcs ? "true" : "false" }},
+                    {{ num_inputs }},
+                    "{{ gradeable_id }}",
+                    "{{ user_id }}",
+                    git_user_id,
+                    git_repo_id,
+                    {{ student_page ? "true" : "false" }},
+                    {{ component_names|length }},
+                    false,
+                    false,
+                    false,
+                    true
+            )
+        }
+
+    }
+
 </script>

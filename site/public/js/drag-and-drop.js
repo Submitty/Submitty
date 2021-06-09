@@ -862,10 +862,16 @@ function gatherInputAnswersByType(type){
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false, files) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false, regrade_all=false) {
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
-    var return_url = buildCourseUrl(['gradeable', gradeable_id]);
+    //don't redirect if it is a regrade request
+    if (!regrade && !regrade_all) {
+        var return_url = buildCourseUrl(['gradeable', gradeable_id]);
+    }
+    else {
+        var return_url = '';
+    }
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
@@ -897,11 +903,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('git_repo_id', git_repo_id);
     formData.append('student_page', student_page);
     formData.append('regrade', regrade)
+    formData.append('regrade_all', regrade_all)
+    formData.append('version_to_regrade', versions_used)
     let filesize = 0;
 
     if (!vcs_checkout) {
         // Check if new submission
-        if (!isValidSubmission() && empty_inputs && !regrade) {
+        if (!isValidSubmission() && empty_inputs && !regrade && !regrade_all) {
             alert("Not a new submission.");
             window.location.reload();
             return;
@@ -999,9 +1007,11 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
                 }
             }
             catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
+                if(!regrade && !regrade_all){
+                    alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                        "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                    console.log(data);
+                }
             }
         },
         error: function(error) {
