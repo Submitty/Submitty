@@ -1040,6 +1040,17 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Gets all active users in courses_users, active users are users enrolled in a course in the current semester
+     *
+     * @param string $semester
+     * @return array - array of userids active in the specified semester
+     */
+    public function getActiveUserIds($semester) {
+        $this->submitty_db->query("SELECT user_id FROM courses_users WHERE semester = ?", [$semester]);
+        return $this->submitty_db->row()['user_id'];
+    }
+
+    /**
      * Gets whether a gradeable exists already
      *
      * @param string $g_id the gradeable id to check for

@@ -8,6 +8,9 @@ class SuperuserEmailView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addBreadcrumb("Send System Wide Email");
         $this->core->getOutput()->addInternalCss('superuser-email.css');
-        return $this->core->getOutput()->renderTwigTemplate("superuser/Email.twig");
+        $this->core->getOutput()->addInternalModuleJs('superuser-email.js');
+        return $this->core->getOutput()->renderTwigTemplate("superuser/Email.twig", [
+            "sendUrl" => $this->core->buildUrl(["superuser", "email", "send"])
+        ]);
     }
 }
