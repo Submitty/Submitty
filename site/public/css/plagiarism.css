@@ -101,6 +101,11 @@ input[type=text]:invalid {
     margin: 0 20px 0 0;
 }
 
+.plag-table-no-cont {
+    padding-top: 20px;
+    padding-left: 5px;
+}
+
 main#main.full-screen-mode {
     position: absolute;
     top: 0;
