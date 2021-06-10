@@ -175,18 +175,18 @@ class UserProfileController extends AbstractController {
     public function changeSecondaryEmail() {
         $user = $this->core->getUser();
 
-        if (!empty($_POST['secondary_email']) && !empty($_POST['secondary_email_notify'])) {
+        if (isset($_POST['secondary_email']) && isset($_POST['secondary_email_notify'])) {
             $secondaryEmail = trim($_POST['secondary_email']);
-            $secondaryEmailNotify = trim($_POST['secondary_email_notify']);
+            $secondaryEmailNotify = trim($_POST['secondary_email_notify']) === "true";
 
-            if ($user->validateUserData('user_email_secondary', $secondaryEmail) === true) {
+            if ((!$secondaryEmailNotify && $secondaryEmail == "") || $user->validateUserData('user_email_secondary', $secondaryEmail) === true) {
                 $user->setSecondaryEmail($secondaryEmail);
-                $user->setEmailBoth($secondaryEmailNotify === "true");
+                $user->setEmailBoth($secondaryEmailNotify);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => 'Secondary email address updated successfully',
                     'secondary_email' => $secondaryEmail,
-                    'secondary_email_notify' => $secondaryEmailNotify
+                    'secondary_email_notify' => $secondaryEmailNotify ? 'True' : 'False'
                 ]);
             }
             else {

@@ -152,13 +152,14 @@ function updateUserSecondaryEmail () {
                     const { data } = response;
                     displaySuccessMessage(data.message);
                     $('#secondary-email-row .value').text(data.secondary_email);
-                    $('#secondary-email-notify-row .value').text(data.secondary_email_notify.charAt(0).toUpperCase() + data.secondary_email_notify.slice(1));
+                    $('#secondary-email-notify-row .value').text(data.secondary_email_notify);
                     second_email.data('current-second-email', data.secondary_email);
-                    second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "true" ? 1 : 0);
+                    second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
                 }
                 else if (response.status === "error") {
                     displayErrorMessage("Some went wrong while updating secondary email address!");
                     second_email.val(second_email.data('current-second-email'));
+                    second_email_notify.prop('checked', second_email_notify.data('current-second-email-notify'));
                 }
             },
             error: function() {
