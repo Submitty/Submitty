@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e718dca16a242bdc97b26a02af5f8ab",
+    "content-hash": "187255720d77ab25c17efd4b42f83560",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2448,16 +2448,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.4.24",
+            "version": "v4.4.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "b42c3631fd9e3511610afb2ba081ea7e38d9fa38"
+                "reference": "3a3c2f197ad0846ac6413225fc78868ba1c61434"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/b42c3631fd9e3511610afb2ba081ea7e38d9fa38",
-                "reference": "b42c3631fd9e3511610afb2ba081ea7e38d9fa38",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/3a3c2f197ad0846ac6413225fc78868ba1c61434",
+                "reference": "3a3c2f197ad0846ac6413225fc78868ba1c61434",
                 "shasum": ""
             },
             "require": {
@@ -2516,7 +2516,7 @@
                 "url"
             ],
             "support": {
-                "source": "https://github.com/symfony/routing/tree/v4.4.24"
+                "source": "https://github.com/symfony/routing/tree/v4.4.25"
             },
             "funding": [
                 {
@@ -2532,7 +2532,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-16T09:52:47+00:00"
+            "time": "2021-05-26T17:39:37+00:00"
         },
         {
             "name": "textalk/websocket",
