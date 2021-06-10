@@ -6,56 +6,74 @@ use Ds\Stack;
 
 class PlagiarismUtils {
     /**
-     * @return Interval[]
+     * @param string $filename
+     * @param string $user_id_2
+     * @param int $version_user_2
+     * @return array
      */
-    public static function constructIntervals($filename): array {
+    public static function constructIntervalsForUserPair(string $filename, string $user_id_2, int $version_user_2): array {
         $content = file_get_contents($filename);
-        $arr = json_decode($content, true);
+        $content = json_decode($content, true);
+
         $resultArray = [];
-        foreach ($arr as $match) {
+        foreach ($content as $match) {
             $interval = new Interval($match['start'], $match['end'], $match['type']);
 
-            // common code and provided code don't have an "others" array
-            if (isset($match['others'])) {
-                foreach ($match['others'] as $o) {
-                    $interval->addUser(new Submission(
-                        $o['username'],
-                        $o['version'],
-                        $o['matchingpositions'],
-                        $match['start'],
-                        $match['end']
-                    ));
+            // loop through, checking to see if this is a specific match between the two users
+            if ($match['type'] == "match") {
+                foreach ($match['others'] as $other) {
+                    if ($other["username"] === $user_id_2 && $other["version"] === $version_user_2) {
+                        $interval->updateType("specific-match");
+                        foreach ($other["matchingpositions"] as $mp) {
+                            $interval->addOther($user_id_2, $version_user_2, $mp["start"], $mp["end"]);
+                        }
+                        // this user+version pair will only every occur once so we break
+                        break;
+                    }
                 }
             }
 
+            // append interval to result array
             $resultArray[] = $interval;
         }
+
+        // sort array before we merge
         usort($resultArray, function (Interval $a, Interval $b) {
             return $a->getStart() > $b->getStart();
         });
-        return $resultArray;
-    }
 
-    /**
-     * @param Interval[] $intervalArray
-     */
-    public static function mergeIntervals(array $intervalArray): Stack {
-        $stack = new Stack();
-        $stack->push($intervalArray[0]);
-        for ($i = 1; $i < count($intervalArray); $i++) {
-            $current = $stack->peek();
-            if ($current->getEnd() < $intervalArray[$i]->getStart()) {
-                $stack->push($intervalArray[$i]);
+        // merge regions if possible
+        for ($i = 1; $i < count($resultArray); $i++) {
+            $prevOthers = $resultArray[$i - 1]->getOthers();
+            $currOthers = $resultArray[$i]->getOthers();
+
+            if ($resultArray[$i]->getType() !== $resultArray[$i - 1]->getType() ||
+                $resultArray[$i]->getStart() > $resultArray[$i - 1]->getEnd() ||
+                count($currOthers) !== count($prevOthers)) {
+                continue;
             }
-            elseif ($current->getEnd() < $intervalArray[$i]->getEnd()) {
-                $current->updateEnd($intervalArray[$i]->getEnd());
-                foreach ($intervalArray[$i]->getUsers() as $user) {
-                    $current->addUser($user);
+
+            // check to make sure the matchingpositions arrays are the same, merge if so
+            $matchingPosCanBeMerged = true;
+            $difference = $resultArray[$i]->getEnd() - $resultArray[$i - 1]->getEnd();
+            for ($j = 0; $j < count($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"]); $j++) {
+                if (intval($currOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) !== intval($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) - $difference) {
+                    // we cannot merge these two regions so move on
+                    $matchingPosCanBeMerged = false;
+                    break;
                 }
-                $stack->pop();
-                $stack->push($current);
+            }
+            if ($matchingPosCanBeMerged) {
+                $resultArray[$i - 1]->updateEnd($resultArray[$i]->getEnd());
+
+                $resultArray[$i - 1]->updateOthersEndPositions($user_id_2, $version_user_2, $difference);
+                unset($resultArray[$i]);
+
+                // we merged these two so we have to check the newly merged interval against the next one
+                $i--;
             }
         }
-        return $stack;
+
+        return $resultArray;
     }
 }

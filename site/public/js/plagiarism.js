@@ -33,7 +33,6 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
     editor2.operation( () => {
     	marks_editor2.forEach(mark => {
 	        if(mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end)) {
-                console.log(leftClickedMarker.attributes.data_start + ", " + leftClickedMarker.attributes.data_end + ", " + mark.attributes.data_start + ", " + mark.attributes.data_end);
 	            mark.css = "background: " + RED
 	            mark.attributes.data_current_color = RED;
 	        }
@@ -115,11 +114,11 @@ function toggle() {
 }
 
 function toggleFullScreenMode() {
-  $('main#main').toggleClass("full-screen-mode");
+    $('main#main').toggleClass("full-screen-mode");
 }
 
 $(document).ready(() => {
-  initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
+    initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
 });
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
@@ -136,7 +135,7 @@ function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
 }
 
 function showPlagiarismHighKey() {
-  $('#Plagiarism-Highlighting-Key').css('display', 'block');
+    $('#Plagiarism-Highlighting-Key').css('display', 'block');
 }
 
 function setUpPlagView(gradeable_id) {
