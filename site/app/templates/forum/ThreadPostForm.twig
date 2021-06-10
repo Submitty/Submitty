@@ -89,7 +89,7 @@
             "render_buttons" : render_markdown, 
             "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
             "min_height" : min_height,
-            "other_textarea_attributes" : "required maxlength=" ~ (post_content_limit ? post_content_limit : "") ~ " onkeydown=submitNearestForm(event,$(this)) onpaste=pasteImageFromClipboard(event,$(this), " ~ post_box_id  ~ ")"
+            "other_textarea_attributes" : "required maxlength=" ~ (post_content_limit ? post_content_limit : "") ~ " onkeydown=submitNearestForm(event,$(this)) onpaste=pasteImageFromClipboard(event,$(this), '" ~ post_box_id  ~ "')"
         } only %}
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>

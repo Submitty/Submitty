@@ -12,21 +12,19 @@
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                Question:
-                {% include "misc/MarkdownArea.twig" with {
-                    "markdown_area_id" : "poll-question",
-                    "markdown_area_query" : "$('#poll-question')",
-                    "markdown_area_name" : "question",
-                    "markdown_area_value" : "",
-                    "placeholder" : "Enter question here...",
-                    "preview_div_id" : "poll_preview_new",
-                    "preview_div_name" : "poll_preview_new",
-                    "onclick" : "previewPollMarkdown.call(this)",
-                    "render_buttons" : true,
-                    "min_height" : min_height
-                } only %}
-            </label>
+            <p>Question:</p>
+            {% include "misc/MarkdownArea.twig" with {
+                "markdown_area_id" : "poll-question",
+                "markdown_area_query" : "$('#poll-question')",
+                "markdown_area_name" : "question",
+                "markdown_area_value" : "",
+                "placeholder" : "Enter question here...",
+                "preview_div_id" : "poll_preview_new",
+                "preview_div_name" : "poll_preview_new",
+                "onclick" : "previewPollMarkdown.call(this)",
+                "render_buttons" : true,
+                "min_height" : min_height
+            } only %}
             <br/><br/>
 
             <label for="image-file">
@@ -74,20 +72,17 @@
             <br/> <br/>
 
             
-            <label for="poll-question">
-                Question:
-                {% include "misc/MarkdownArea.twig" with {
-                    "markdown_area_id" : "poll-question",
-                    "markdown_area_query" : "$('#poll-question')",
-                    "markdown_area_name" : "question",
-                    "markdown_area_value" : poll.getQuestion(),
-                    "preview_div_id" : "poll_preview_edit",
-                    "preview_div_name" : "poll_preview_edit",
-                    "onclick" : "previewPollMarkdown.call(this)",
-                    "render_buttons" : true,
-                    "min_height" : min_height
-                } only %}
-            </label>
+            <p>Question:</p>
+            {% include "misc/MarkdownArea.twig" with {
+                "markdown_area_id" : "poll-question",
+                "markdown_area_query" : "$('#poll-question')",
+                "markdown_area_name" : "question",
+                "markdown_area_value" : poll.getQuestion(),
+                "preview_div_id" : "poll_preview_edit",
+                "onclick" : "previewPollMarkdown.call(this)",
+                "render_buttons" : true,
+                "min_height" : min_height
+            } only %}
             <br/><br/>
 
             <label for="image-file">
