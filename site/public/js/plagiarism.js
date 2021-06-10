@@ -193,7 +193,6 @@ function createRightUsersList(data, select = null) {
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
     let append_options;
     $.each(version_data, function(i,version_to_append){
-        console.log(version_to_append);
         if(version_to_append === active_version_user_1 && version_to_append === max_matching_version){
             append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
         }

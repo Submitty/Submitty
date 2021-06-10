@@ -255,8 +255,8 @@ class PlagiarismController extends AbstractController {
         }
 
         if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
-                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
-                $this->core->redirect($return_url);
+            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+            $this->core->redirect($return_url);
         }
 
         $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
@@ -461,8 +461,8 @@ class PlagiarismController extends AbstractController {
 
         # Re run only if following checks are passed.
         if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
-                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
-                $this->core->redirect($return_url);
+            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+            $this->core->redirect($return_url);
         }
 
         if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json")) {
@@ -521,8 +521,8 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
-                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
-                $this->core->redirect($return_url);
+            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+            $this->core->redirect($return_url);
         }
 
         if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json")) {
@@ -677,7 +677,7 @@ class PlagiarismController extends AbstractController {
                 if ($match->getType() === "match") {
                     //Color is yellow -- matches other students but not general match between students...
                     $color = '#ffff00';
-                     $is_general_match = false;
+                    $is_general_match = false;
 
                     $segment_info["{$start_line}_{$start_pos}"] = [];
 
@@ -803,7 +803,7 @@ class PlagiarismController extends AbstractController {
                         $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
                         foreach ($match_info['matchingpositions'] as $matchingpos) {
                             array_push($matchingpositions, ["start_line" => $tokens_user_2[$matchingpos["start"] - 1]["line"] - 1 , "start_ch" => $tokens_user_2[$matchingpos["start"] - 1]["char"] - 1,
-                                 "end_line" => $tokens_user_2[$matchingpos["end"] - 1]["line"] - 1, "end_ch" => $tokens_user_2[$matchingpos["end"] - 1]["char"] - 1 ]);
+                                "end_line" => $tokens_user_2[$matchingpos["end"] - 1]["line"] - 1, "end_ch" => $tokens_user_2[$matchingpos["end"] - 1]["char"] - 1 ]);
                         }
                         $first_name = $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
                         $last_name = $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedLastName();
