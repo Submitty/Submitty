@@ -32,7 +32,7 @@
 
     {% endif %}
 
-    <div class='pre_forum'><span class="post_content">{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></div>
+    <div class='pre_forum'><span class="post_content" style="white-space:{{ render_markdown ? "normal" : "pre" }}">{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></div>
 
     <hr style="margin-bottom: 3px;">
 

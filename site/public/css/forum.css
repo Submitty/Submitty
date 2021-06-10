@@ -40,6 +40,11 @@
 .post_content {
     margin-right: 5px;
 }
+
+.post_content:first-child:nth-last-child(1){
+    white-space: pre;
+}
+
 .post_viewed_btn {
     background-color: #dcdcdcb5 !important;
 }
