@@ -41,7 +41,7 @@ class SuperuserEmailController extends AbstractController {
         else {
             $notificationFactory = $this->core->getNotificationFactory();
             # getRecipients
-            $activeUserIds = $this->core->getQueries()->getActiveUserIds($_POST['semester']);
+            $activeUserIds = json_encode($this->core->getQueries()->getActiveUserIds($_POST['semester']));
             # Set up email here
             
             return JsonResponse::getSuccessResponse([

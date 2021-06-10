@@ -10,6 +10,7 @@ function sendEmail(url) {
     let emailContent = $('#email-content').val();
     $('#email-content').prop('disabled', true);
     console.log(url);
+    console.log(getCurrentSemester());
     let request = $.ajax({
         url: url,
         type: 'POST',
@@ -19,9 +20,6 @@ function sendEmail(url) {
             csrf_token: csrfToken
         },
         cache: false,
-        beforesend: function() {
-            console.log(this.url)
-        },
         error: function(err) {
             window.alert("Something went wrong. Please try again.");
         },
