@@ -115,7 +115,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
         $this->core->getOutput()->addVendorJs('codemirror/mode/javascript/javascript.js');
         $this->core->getOutput()->addVendorJs('codemirror/mode/sql/sql.js');
-        
+
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
