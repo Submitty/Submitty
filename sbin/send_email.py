@@ -219,6 +219,9 @@ def send_email():
 
     success_count = 0
 
+    if "'" in EMAIL_INTERNAL_DOMAIN:
+        return
+
     queued_emails = queued_emails + get_external_queue(db, 100-len(queued_emails))
 
     if len(queued_emails) == 0:
