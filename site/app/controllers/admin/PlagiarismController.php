@@ -651,6 +651,10 @@ class PlagiarismController extends AbstractController {
             return $color_info;
         }
         else {
+            // Used to prevent an out of bounds error on the tokens arrays
+            $dummyToken = [];
+            $dummyToken["char"] = 99999999999; // set it to a big number of negligible significance
+
             $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, $version_user_2);
 
             $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/tokens.json";
@@ -658,14 +662,21 @@ class PlagiarismController extends AbstractController {
             if ($user_id_2 != "") {
                 $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/tokens.json";
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
+                array_push($tokens_user_2, $dummyToken);
             }
 
+            array_push($tokens_user_1, $dummyToken);
+
+            $i = 0;
             foreach ($matches as $match) {
+                // count the number of tokens iterated through
+                $i++;
+
                 $s_pos = $match->getStart();
                 $e_pos = $match->getEnd();
                 $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
                 $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
-                $end_pos = $tokens_user_1[$e_pos - 1]["char"];
+                $end_pos = $tokens_user_1[$e_pos]["char"] - 1;
                 $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
                 $start_value = $tokens_user_1[$s_pos - 1]["value"];
                 $end_value = $tokens_user_1[$e_pos - 1]["value"];
@@ -689,7 +700,7 @@ class PlagiarismController extends AbstractController {
                             $matchPosEnd =  $pos['end'];
                             $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
                             $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
-                            $end_pos_2 = $tokens_user_2[$matchPosEnd - 1]["char"];
+                            $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
                             $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
                             $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
                             $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
