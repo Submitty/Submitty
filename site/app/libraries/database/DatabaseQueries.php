@@ -1045,9 +1045,25 @@ WHERE semester=? AND course=? AND user_id=?",
      * @param string $semester
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds($semester) {
-        $this->submitty_db->query("SELECT user_id FROM courses_users WHERE semester = ?", [$semester]);
-        return $this->submitty_db->row()['user_id'];
+    public function getActiveUserIds($semester, $instructor, $fullAccess, $limitedAccess, $student) {
+        $result_rows = [];
+        if ($instructor) {
+            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 1", [$semester]);
+            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
+        }
+        if ($fullAccess) {
+            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 2", [$semester]);
+            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
+        }
+        if ($limitedAccess) {
+            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 3", [$semester]);
+            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
+        }
+        if ($student) {
+            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 4", [$semester]);
+            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
+        }
+        return array_unique($result_rows);
     }
 
     /**

@@ -35,17 +35,27 @@ class SuperuserEmailController extends AbstractController {
      * @Route("/superuser/email/send", methods={"POST"})
      */
     public function sendEmail(){
-        if (!isset($_POST['emailContent']) || $_POST['emailContent'] == ''){
+        if (!isset($_POST['emailContent']) || $_POST['emailContent'] == '') {
             return JsonResponse::getFailResponse("Email content is empty.");
         }
+        else if (!isset($_POST['emailSubject']) || $_POST['emailSubject'] == '') {
+            return JsonResponse::getFailResponse("Email subject is empty.");
+        }
         else {
-            $notificationFactory = $this->core->getNotificationFactory();
+            $semester = $_POST['semester'];
+            // Because AJAX stringifies everthing
+            $emailInstructor = $_POST['emailInstructor'] == "true";
+            $emailFullAccess = $_POST['emailFullAccess'] == "true";
+            $emailLimitedAccess = $_POST['emailLimitedAccess'] == "true";
+            $emailStudent = $_POST['emailStudent'] == "true";
+            $emailToSecondary = $_POST['emailToSecondary'] == "true";
             # getRecipients
-            $activeUserIds = json_encode($this->core->getQueries()->getActiveUserIds($_POST['semester']));
+            $activeUserIds = json_encode($this->core->getQueries()->getActiveUserIds($semester, $emailInstructor, $emailFullAccess,
+                $emailLimitedAccess, $emailStudent));
             # Set up email here
-            
+            $notificationFactory = $this->core->getNotificationFactory();
             return JsonResponse::getSuccessResponse([
-                "message" => "Email Sent!",
+                "message" => "Email queued to be sent!",
                 "data" => $activeUserIds
             ]);
         }
