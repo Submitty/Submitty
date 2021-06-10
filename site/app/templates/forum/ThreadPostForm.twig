@@ -81,6 +81,7 @@
             "markdown_area_id" : "reply_box_" ~ post_box_id,
             "markdown_area_name" : "thread_post_content",
             "markdown_area_value" : "",
+            "class" : "post_content_reply thread_post_content",
             "placeholder" : post_content_placeholder,
             "preview_div_id" : "preview_box_" ~ post_box_id,
             "preview_div_name" : "preview_box_" ~ post_box_id,
@@ -88,9 +89,9 @@
             "render_buttons" : render_markdown, 
             "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
             "min_height" : min_height,
-            "other_textarea_attributes" : "required maxlength=" ~ (post_content_limit ? post_content_limit : ""),
-            "textarea_onkeydown" : "submitNearestForm(event,$(this))" ,
-            "textarea_onpaste" : "onpaste=pasteImageFromClipboard(event,$(this), " ~ post_box_id  ~ ")"
+            "textarea_maxlength" : post_content_limit,
+            "textarea_onkeydown" : "submitNearestForm(event,$(this))",
+            "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
         } only %}
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
