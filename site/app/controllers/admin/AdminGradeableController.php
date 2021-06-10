@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\GradeableList;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -212,7 +213,7 @@ class AdminGradeableController extends AbstractController {
 
         $max_points = 0;
         if ($gradeable->getDependsOn() !== null) {
-            $depend_gradeable = $this->tryGetGradeable($gradeable->getDependsOn());
+            $depend_gradeable = $this->tryGetGradeable($gradeable->getDependsOn(), false);
             if ($depend_gradeable !== false) {
                 $depend_auto = $depend_gradeable->getAutogradingConfig();
                 $max_points = $depend_auto->getTotalHiddenNonExtraCredit() + $depend_auto->getTotalNonHidden();
@@ -1102,6 +1103,18 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
+            if ($prop === "depends_on") {
+                try {
+                    $gradeables = new GradeableList($this->core);
+                    if ($gradeables->getGradeable($post_val) == null) {
+                        $post_val = null;
+                    }
+                }
+                catch (\Exception $e) {
+                    $post_val = null;
+                    $errors[$prop] = $e->getMessage();
+                }
+            }
             // Converts string array sep by ',' to json
             if ($prop === $discussion_ids) {
                 $post_val = array_map('intval', explode(',', $post_val));
