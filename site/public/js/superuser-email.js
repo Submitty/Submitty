@@ -1,4 +1,4 @@
-function getCurrentSemester(){
+function getCurrentSemester() {
     const today = new Date();
     const year = today.getFullYear().toString().slice(2,4);	//get last two digits
     const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
@@ -6,7 +6,7 @@ function getCurrentSemester(){
     return semester + year;
 }
 
-function sendEmail(url){
+function sendEmail(url) {
     let emailContent = $('#email-content').val();
     $('#email-content').prop('disabled', true);
     console.log(url);
@@ -19,17 +19,23 @@ function sendEmail(url){
             csrf_token: csrfToken
         },
         cache: false,
-        beforesend: function(){
+        beforesend: function() {
             console.log(this.url)
         },
         error: function(err) {
-            console.error(err);
             window.alert("Something went wrong. Please try again.");
         },
         success: function(data){
             console.log(data);
+            let parsedData = JSON.parse(data);
             $('#email-content').val("");
             $('#email-content').prop('disabled', false);
+            if (parsedData["status"] == "success") {
+                displaySuccessMessage(parsedData["data"]["message"]);
+            }
+            else {
+                displayErrorMessage(parsedData["message"]);
+            }
         }
     });
     console.log(emailContent);

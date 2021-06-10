@@ -35,16 +35,19 @@ class SuperuserEmailController extends AbstractController {
      * @Route("/superuser/email/send", methods={"POST"})
      */
     public function sendEmail(){
-        $this->core->addSuccessMessage($_POST);
         if (!isset($_POST['emailContent']) || $_POST['emailContent'] == ''){
-            $this->core->addErrorMessage('Empty Email content');
+            return JsonResponse::getFailResponse("Email content is empty.");
         }
         else {
             $notificationFactory = $this->core->getNotificationFactory();
             # getRecipients
             $activeUserIds = $this->core->getQueries()->getActiveUserIds($_POST['semester']);
             # Set up email here
+            
+            return JsonResponse::getSuccessResponse([
+                "message" => "Email Sent!",
+                "data" => $activeUserIds
+            ]);
         }
-        return JsonResponse::getSuccessResponse('Success?');
     }
 }
