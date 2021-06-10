@@ -244,15 +244,19 @@ class NotificationFactory {
                     $flattened_emails[] = $email->getBody();
                     $flattened_emails[] = $email->getUserId();
                     $flattened_emails[] = $user->getSecondaryEmail();
+                    $flattened_emails[] = $this->core->getConfig()->getSemester();
+                    $flattened_emails[] = $this->core->getConfig()->getCourse();
                 }
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
                 $flattened_emails[] = $user->getEmail();
+                $flattened_emails[] = $this->core->getConfig()->getSemester();
+                $flattened_emails[] = $this->core->getConfig()->getCourse();
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 4);
+            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 6);
         }
     }
 }

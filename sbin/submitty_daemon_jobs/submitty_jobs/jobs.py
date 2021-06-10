@@ -197,16 +197,16 @@ class DeleteLichenResult(CourseGradeableJob):
 
         with log_file.open('w') as open_file:
             lichen_json = 'lichen_{}_{}_{}.json'.format(semester, course, gradeable)
+
             config = Path(lichen_dir, 'config', lichen_json)
             if config.exists():
                 config.unlink()
-            ranking = Path(lichen_dir, 'ranking', '{}.txt'.format(gradeable))
-            if ranking.exists():
-                ranking.unlink()
-            for folder in ['provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
+
+            for folder in ['ranking', 'provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
             open_file.write(msg)
+
 
 class BulkUpload(CourseJob):
     required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
