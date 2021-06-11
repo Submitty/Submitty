@@ -47,26 +47,23 @@
             git_user_id = $("#github-user-id").val();
             git_repo_id = $("#github-repo-id").val();
         }
-        for(var i = 1; i < {{ highest_version }}; i++){
-            alert(i);
-            handleSubmission(0,0,0,i,
-                    {{ max_submissions }},
-                    "{{ csrf_token }}",
-                    {{ is_vcs ? "true" : "false" }},
-                    {{ num_inputs }},
-                    "{{ gradeable_id }}",
-                    "{{ user_id }}",
-                    git_user_id,
-                    git_repo_id,
-                    {{ student_page ? "true" : "false" }},
-                    {{ component_names|length }},
-                    false,
-                    false,
-                    false,
-                    true
-            )
-        }
 
+        handleSubmission(0,0,0,{{ highest_version }},
+            {{ max_submissions }},
+            "{{ csrf_token }}",
+            {{ is_vcs ? "true" : "false" }},
+            {{ num_inputs }},
+            "{{ gradeable_id }}",
+            "{{ user_id }}",
+            git_user_id,
+            git_repo_id,
+            {{ student_page ? "true" : "false" }},
+            {{ component_names|length }},
+            false,
+            false,
+            false,
+            true
+            )
     }
 
 </script>
