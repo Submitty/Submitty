@@ -119,12 +119,12 @@ class PollController extends AbstractController {
     public function addNewPoll() {
         $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
         foreach ($fields as $field) {
-          if (!isset($_POST[$field])) {
-            $this->core->addErrorMessage("Error occured in adding poll");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
-          }
+            if (!isset($_POST[$field])) {
+                $this->core->addErrorMessage("Error occured in adding poll");
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildCourseUrl(['polls']))
+                );
+            }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
@@ -369,10 +369,10 @@ class PollController extends AbstractController {
         }
         $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
         foreach ($fields as $field) {
-          if (!isset($_POST[$field])) {
-            $this->core->addErrorMessage("Error occured in editing poll");
-            return new RedirectResponse($returnUrl);
-          }
+            if (!isset($_POST[$field])) {
+                $this->core->addErrorMessage("Error occured in editing poll");
+                return new RedirectResponse($returnUrl);
+            }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
