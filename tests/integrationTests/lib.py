@@ -18,15 +18,23 @@ SUBMITTY_INSTALL_DIR = os.path.realpath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
 )
 
+INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "/test_suite/integrationTests/"
+)
+
 COMPILE_CONFIGURATION_AGENT_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
+    INTEGRATION_TEST_ROOT_FOLDER,
     'compile_configure_agent.sh'
 )
 
-CONFIGURE_AGENT_PATH = os.path.join(os.getcwd(), "configure.out")
+CONFIGURE_BIN_PATH = os.path.join(
+    INTEGRATION_TEST_ROOT_FOLDER, 
+    "configure.out"
+)
 
 BUILD_MAIN_CONFIGUE_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
+    INTEGRATION_TEST_ROOT_FOLDER,
     'build_main_configure.sh'
 )
 
@@ -35,11 +43,21 @@ BUILD_MAIN_CONFIGUE_PATH = os.path.join(
 if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
     raise SystemExit('You must install the test suite before being able to run it.')
 
-SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
-GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
+SUBMITTY_TUTORIAL_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "/GIT_CHECKOUT/Tutorial"
+)
+
+GRADING_SOURCE_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "/src/grading"
+)
 
 LOG_FILE = None
-LOG_DIR = SUBMITTY_INSTALL_DIR + "/test_suite/log"
+LOG_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "/test_suite/log"
+)
 
 
 def print(*args, **kwargs):
