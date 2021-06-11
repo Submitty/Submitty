@@ -10,7 +10,7 @@ use app\libraries\DateUtils;
  *
  * @method integer getId()
  * @method void setId($id)
- * @method string getType()
+ * @method int getType()
  * @method void setType($type)
  * @method string getUrl()
  * @method void setUrl($url)
@@ -31,9 +31,12 @@ use app\libraries\DateUtils;
  */
 
 class CourseMaterial extends AbstractModel {
+    const FILE = 0;
+    const LINK = 1;
+
     /** @prop @var integer The id of the material in the DB */
     protected $id;
-    /** @prop @var string Type of the course material (file or link) */
+    /** @prop @var int Type of the course material (0->file or 1->link) */
     protected $type;
     /** @prop @var string URL of the course material if this is a file */
     protected $url;
@@ -66,5 +69,19 @@ class CourseMaterial extends AbstractModel {
         if (isset($details['sections']) && $details['sections'][0] != null) {
             $this->setSections($details['sections']);
         }
+    }
+
+    public function isFile(): bool {
+        if ($this->getType() === self::FILE) {
+            return true;
+        }
+        return false;
+    }
+
+    public function isLink(): bool {
+        if ($this->getType() === self::LINK) {
+            return true;
+        }
+        return false;
     }
 }

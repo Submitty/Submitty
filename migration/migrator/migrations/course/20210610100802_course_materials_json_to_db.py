@@ -18,13 +18,11 @@ def up(config, database, semester, course):
     :type course: str
     """
     # create tables here
-    database.execute("DROP TYPE IF EXISTS course_material_type;")
-    database.execute("CREATE TYPE course_material_type AS ENUM ('file', 'link');")
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS course_materials (
             id SERIAL NOT NULL PRIMARY KEY,
-            type course_material_type NOT NULL,
+            type smallint NOT NULL,
             url TEXT,
             link_title varchar(255) DEFAULT NULL,
             link_url TEXT DEFAULT NULL,
@@ -70,12 +68,12 @@ def up(config, database, semester, course):
             data = json.load(file)
             if type(data) is dict:
                 for itemkey, itemvalue in data.items():
-                    material_type = 'file'
+                    material_type = 0
                     link_title = None
                     link_url = None
                     url = itemkey
                     if itemvalue['external_link'] is True:
-                        material_type = 'link'
+                        material_type = 1
                         url = None
                         link_file = Path(itemkey)
                         with link_file.open('r') as link:
