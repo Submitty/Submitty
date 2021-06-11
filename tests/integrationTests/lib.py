@@ -23,14 +23,14 @@ INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
     "/test_suite/integrationTests/"
 )
 
-COMPILE_CONFIGURATION_AGENT_PATH = os.path.join(
+COMPILE_CONFIGURE_BIN_PATH = os.path.join(
     INTEGRATION_TEST_ROOT_FOLDER,
-    'compile_configure_agent.sh'
+    'compile_configure_bin.sh'
 )
 
 CONFIGURE_BIN_PATH = os.path.join(
     INTEGRATION_TEST_ROOT_FOLDER, 
-    "configure.out"
+    "configure.bin"
 )
 
 BUILD_MAIN_CONFIGUE_PATH = os.path.join(
@@ -153,9 +153,9 @@ def run_tests(names):
 def __setup():
     return_code = subprocess.call([
         "/bin/bash", 
-        COMPILE_CONFIGURATION_AGENT_PATH,
+        COMPILE_CONFIGURE_BIN_PATH,
         SUBMITTY_INSTALL_DIR, 
-        CONFIGURE_AGENT_PATH
+        CONFIGURE_BIN_PATH
     ])
     if return_code != 0:
         raise RuntimeError(f"Failed to generate main configure: {return_code}")
@@ -323,7 +323,7 @@ class TestcaseWrapper:
 
         # First, we need to compile and run configure.out
         with open(os.path.join(self.testcase_path, "log", "main_configure_build.txt"), "w") as configure_output:
-            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR, CONFIGURE_AGENT_PATH],
+            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR, CONFIGURE_BIN_PATH],
                                           cwd=os.path.join(self.testcase_path, "build"), stdout=configure_output, stderr=configure_output)
             if return_code != 0:
                 raise RuntimeError(f"Failed to generate main configure: {return_code}")

@@ -3,7 +3,7 @@
 
 which_test_dir=$1
 SUBMITTY_INSTALL_DIR=$2
-CONFIGURE_AGENT=$3
+CONFIGURE_BIN=$3
 
 config_directory=${which_test_dir}/assignment_config
 GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
@@ -24,7 +24,7 @@ if (( $py_res != 0 )); then
     exit 1
 fi
 
-${CONFIGURE_AGENT} ${config_directory}/complete_config.json ${which_test_dir}/data/build_config.json test_assignment
+${CONFIGURE_BIN} ${config_directory}/complete_config.json ${which_test_dir}/data/build_config.json test_assignment
 configure_res=$?
 
 if (( $configure_res != 0 )); then
