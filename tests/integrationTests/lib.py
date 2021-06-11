@@ -151,14 +151,14 @@ def run_tests(names):
             print(f"All {len(names)} modules passed")
 
 def __setup():
-    return_code = subprocess.call([
-        "/bin/bash", 
-        COMPILE_CONFIGURE_BIN_PATH,
-        SUBMITTY_INSTALL_DIR, 
-        CONFIGURE_BIN_PATH
-    ])
-    if return_code != 0:
-        raise RuntimeError(f"Failed to generate main configure: {return_code}")
+    subprocess.check_output([
+            "/bin/bash", 
+            COMPILE_CONFIGURE_BIN_PATH,
+            SUBMITTY_INSTALL_DIR, 
+            CONFIGURE_BIN_PATH
+        ],
+        stderr=subprocess.STDOUT
+    )
     pass
 
 
