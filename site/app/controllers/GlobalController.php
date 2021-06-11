@@ -417,7 +417,7 @@ class GlobalController extends AbstractController {
             ]);	
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['superuser','email-status']),
+                "href" => $this->core->buildUrl(['superuser','email_status']),
                 "title" => "Email Status",
                 "icon" => "fas fa-mail-bulk"
             ]);

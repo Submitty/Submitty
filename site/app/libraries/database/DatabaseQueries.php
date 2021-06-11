@@ -5793,12 +5793,21 @@ AND gc_id IN (
      *
      * @param string $course
      * @param string $semester
+     * @return EmailStatusModel
      */
     public function getEmailStatusWithCourse($semester, $course) {
         $parameters = [$course, $semester];
         $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
         $details = $this->submitty_db->rows();
         return new EmailStatusModel($this->core, $details);
+    }
+
+    /**
+     * Get the list of courses
+     */
+    public function getAllCourses() {
+        $this->submitty_db->query('SELECT semester, courses FROM courses');
+        return $this->submitty_db->rows();
     }
 
     /**
