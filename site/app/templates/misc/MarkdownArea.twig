@@ -22,7 +22,7 @@
 <div class="markdown-area fill-available">
     <div id="{{ markdown_buttons_id ? markdown_buttons_id : "markdown_buttons" }}" style="display:{{ render_buttons ? "block" : "none" }}">
         <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-        <span id="{{markdown_area_id}}_code_button" style="position:relative;">
+        <div id="{{markdown_area_id}}_code_button" style="position:relative; display:inline-block">
             <button style="position:relative" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">
                 Code <i class="fas fa-code fa-1x"></i>
             </button>
@@ -33,7 +33,7 @@
                 <hr></hr>
                 <li><a style="color: var(--external-link-blue);" href="https://codemirror.net/mode/" target="_blank">Other</a></li>
             </div>
-        </span>
+        </div>
         <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
         <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
