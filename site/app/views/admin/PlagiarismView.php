@@ -25,7 +25,7 @@ class PlagiarismView extends AbstractView {
                 'delete'
             ]);
             if (file_exists($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt")) {
-                $timestamp = date("F d Y H:i:s", filemtime($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt"));
+                $timestamp = date("F d Y H:i:s", filemtime($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt"));
                 $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $plagiarism_row['id']), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
@@ -56,7 +56,7 @@ class PlagiarismView extends AbstractView {
             }
             else {
                 // no lichen job
-                $ranking_file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt";
+                $ranking_file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt";
                 if (file_get_contents($ranking_file_path) == "") {
                     $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
                 }
