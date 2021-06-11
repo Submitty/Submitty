@@ -5693,8 +5693,10 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
+
     /**
      * checks if there are any custom marks saved for the provided gradeable
+     *
      * @param $gradeable_id
      * @return bool
      */
@@ -5717,13 +5719,14 @@ AND gc_id IN (
         }
         return false;
     }
+
     /**
-      * Gets if the provied submitter has a submission for a particular gradeable
-      *
-      * @param  \app\models\gradeable\Gradeable $gradeable
-      * @param  String                     $userid
-      * @return bool
-      */
+     * Gets if the provied submitter has a submission for a particular gradeable
+     *
+     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param  String                     $userid
+     * @return bool
+     */
     public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
 
         return $this->course_db->query(
