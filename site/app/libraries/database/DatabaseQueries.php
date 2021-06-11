@@ -5697,7 +5697,7 @@ AND gc_id IN (
     /**
      * checks if there are any custom marks saved for the provided gradeable
      *
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @return bool
      */
     public function getHasCustomMarks($gradeable_id) {
