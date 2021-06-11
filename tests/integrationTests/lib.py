@@ -45,18 +45,18 @@ if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.jso
 
 SUBMITTY_TUTORIAL_DIR = os.path.join(
     SUBMITTY_INSTALL_DIR,
-    "/GIT_CHECKOUT/Tutorial"
+    "./GIT_CHECKOUT/Tutorial"
 )
 
 GRADING_SOURCE_DIR = os.path.join(
     SUBMITTY_INSTALL_DIR,
-    "/src/grading"
+    "./src/grading"
 )
 
 LOG_FILE = None
 LOG_DIR = os.path.join(
     SUBMITTY_INSTALL_DIR,
-    "/test_suite/log"
+    "./test_suite/log"
 )
 
 
