@@ -13,9 +13,9 @@
 <br>
 <fieldset>
     <legend>
-    Will graders be allowed to use custom marks ?
-        {% if grading_started %}
-            <h5 id="custom_marks_warning">WARNING: Grading has begun and custom marks may have been used.</h5>
+    Will graders be allowed to use custom marks?
+        {% if has_custom_marks %}
+            <h5 id="custom_marks_warning">WARNING: Grading has begun and custom marks have already been used.</h5>
         {% endif %}
     </legend>
     <input type="radio" id="yes_custom_marks" name="allow_custom_marks" value="true"

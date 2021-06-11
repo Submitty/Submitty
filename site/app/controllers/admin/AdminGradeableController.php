@@ -208,7 +208,7 @@ class AdminGradeableController extends AbstractController {
             }
         }
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
-
+        $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
@@ -269,7 +269,7 @@ class AdminGradeableController extends AbstractController {
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
             'hidden_files' => $gradeable->getHiddenFiles(),
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
-            'grading_started' => $gradeable->isSubmissionClosed() && $gradeable->isTaViewOpen()
+            'has_custom_marks' => $hasCustomMarks
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');

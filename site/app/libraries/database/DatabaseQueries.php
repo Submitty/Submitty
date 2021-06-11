@@ -5693,7 +5693,31 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
-     /**
+
+    /**
+     * checks if there are any custom marks saved for the provided gradeable
+     * @param $gradeable_id
+     * @return bool
+     */
+    public function getHasCustomMarks($gradeable_id) {
+        //first get the gc_id's for all components associated with the gradeable
+        $this->course_db->query(
+            'SELECT gc_id FROM gradeable_component WHERE g_id=?', [$gradeable_id]
+        );
+        $rows = $this->course_db->rows();
+        //then check each component for a custom mark
+        foreach ($rows as $row) {
+            $this->course_db->query(
+                'SELECT * FROM gradeable_component_data WHERE gc_id=?', [$row['gc_id']]
+            );
+            if ($this->course_db->row()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
       * Gets if the provied submitter has a submission for a particular gradeable
       *
       * @param  \app\models\gradeable\Gradeable $gradeable
