@@ -24,7 +24,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $folders, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link, &$authorized_by_allow_list) {
+        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $folders, $start_dir_name, $user_group, &$in_dir/*, $fp*/, &$file_sections, &$hide_from_students, &$external_link, &$authorized_by_allow_list) {
             $files[$start_dir_name] = [];
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
@@ -59,34 +59,37 @@ class CourseMaterialsView extends AbstractView {
                     if (isset($json[$expected_file_path])) {
                         $isMaterialReleased = '1';
 
-                        if (isset($json[$expected_file_path]['sections'])) {
-                            $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
+                        if ($json[$expected_file_path]->getSections() !== null) {
+                            $file_sections[$expected_file_path] = $json[$expected_file_path]->getSections();
                         }
-                        $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
-                        if (isset($json[$expected_file_path]['hide_from_students'])) {
-                            $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
+                        //$release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
+                        $release_date = $json[$expected_file_path]->getReleaseDate();
+                        //var_dump($json[$expected_file_path]['id']);
+                        if ($json[$expected_file_path]->getHiddenFromStudents() !== null) {
+                            $hide_from_students[$expected_file_path] = $json[$expected_file_path]->getHiddenFromStudents();
                         }
 
                         // Determine file authorization based on this file 'user_allow_list'
                         $authorized_by_allow_list[$expected_file_path] = CourseMaterialsUtils::isUserAllowedByAllowList($json, $this->core->getUser()->getId(), $expected_file_path);
 
-                        if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
-                            $contents = json_decode(file_get_contents($expected_file_path));
-                            $external_link[$expected_file_path] = [$contents->url, $contents->name];
+                        if ($json[$expected_file_path]->getType() === 'link') {
+                            //$contents = json_decode(file_get_contents($expected_file_path));
+                            //$external_link[$expected_file_path] = [$contents->url, $contents->name];
+                            $contents = [$json[$expected_file_path]->getLinkTitle(), $json[$expected_file_path]->getLinkUrl()];
                         }
 
                         if ($release_date > $now_date_time) {
                             $isMaterialReleased = '0';
                         }
 
-                        $releaseData  = $json[$expected_file_path]['release_datetime'];
+                        $releaseData  = $json[$expected_file_path]->getReleaseDate();
                     }
                     else {
                         //fill with upload time for new files add all files to json when uploaded
                         $isMaterialReleased = '1';
                         $release_date = $json['release_time'];
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
-                            $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
+                            $hide_from_students[$expected_file_path] = $json[$expected_file_path]->getHiddenFromStudents();
                         }
                         if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
                             $contents = json_decode(file_get_contents($expected_file_path));
@@ -136,16 +139,17 @@ class CourseMaterialsView extends AbstractView {
                 if ($releaseData === null) {
                     $releaseData = '9998-01-01 00:00:00-000';
                 }
-                $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
+                //$file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
+                $file_release_dates[$expected_file_path] = $releaseData->format("Y-m-d H:i:s");
             }
 
-            if ($json == false) {
+            /*if ($json == false) {
                 FileUtils::writeJsonFile($fp, $no_json);
             }
             $can_write = is_writable($fp);
             if (!$can_write) {
                 $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
-            }
+            }*/
         };
 
         $submissions = [];
@@ -163,8 +167,12 @@ class CourseMaterialsView extends AbstractView {
         $path_length = strlen($expected_path) + 1;
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
-        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-        $json = FileUtils::readJsonFile($fp);
+        //$fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        //$json = FileUtils::readJsonFile($fp);
+        $json = [];
+        foreach ($this->core->getQueries()->getCourseMaterials(null) as $courseMaterial) {
+            $json[$courseMaterial->getUrl()] = $courseMaterial;
+        }
         $sort_default = 0;
 
         //Compound the priorities of directories inside of folders to preserve order
@@ -176,12 +184,12 @@ class CourseMaterialsView extends AbstractView {
                 $priorities[$material] = 0.0;
             }
             $path = FileUtils::joinPaths($expected_path, $material);
-            $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+            $priorities[$material] += /*isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] :*/ $sort_default;
 
             foreach ($dirs as $dir) {
                 $curr_path = $curr_path . $dir;
                 $path = FileUtils::joinPaths($expected_path, $curr_path);
-                    $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+                    $priorities[$material] += /*isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] :*/ $sort_default;
                 if (!in_array($curr_path, $course_materials_array)) {
                     array_push($course_materials_array, $curr_path);
                     array_push($folders, $curr_path);
@@ -213,11 +221,11 @@ class CourseMaterialsView extends AbstractView {
         //Restore the priorities for each file/folder
         foreach ($priorities as $key => &$priority) {
             $path = FileUtils::joinPaths($expected_path, $key);
-            $restored["/course_materials/" . $key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+            $restored["/course_materials/" . $key] = /*isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] :*/ $sort_default;
         }
         $priorities = $restored;
 
-        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
+        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, /*$fp,*/ $file_sections, $hide_from_students, $external_link, $authorized_by_allow_list);
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view

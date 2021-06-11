@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -7174,6 +7175,49 @@ SQL;
         );
         return $this->course_db->rows();
     }
+
+    public function getCourseMaterials($ids) {
+        if ($ids === []) {
+            return new \EmptyIterator();
+        }
+        if ($ids === null) {
+            $ids = [];
+        }
+        $query = 'SELECT 
+                    cm.id,
+                    cm.type,
+                    cm.url,
+                    cm.link_title,
+                    cm.link_url,
+                    cm.release_date,
+                    cm.hidden_from_students,
+                    cm.priority,
+                    cm.section_lock,
+                    json_agg(cms.section_id) AS sections
+                        FROM course_materials AS cm
+                        LEFT JOIN course_materials_sections AS cms ON cm.id = cms.course_material_id
+                    GROUP BY cm.id;';
+        $course_material_constructor = function ($row) {
+            $row['sections'] = json_decode($row['sections']);
+            $course_material = new CourseMaterial($this->core, $row);
+            return $course_material;
+        };
+        return $this->course_db->queryIterator(
+            $query,
+            $ids,
+            $course_material_constructor
+        );
+    }
+
+    /*public function deleteCourseMaterial(string $path, bool $isFile) {
+        if ($isFile) {
+            $this->course_db->query('DELETE FROM course_materials WHERE url=?', [$path]);
+        }
+        else {
+            $this->course_db->query('')
+        }
+
+    }*/
 
     private function getInnerQueueSelect(): string {
         return <<<SQL
