@@ -865,6 +865,7 @@ HTML;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
         $isRegradePanel = false;
+        $is_peer_grading = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->isPeerGrading()) {
@@ -876,6 +877,7 @@ HTML;
             else {
                 $isPeerPanel = false;
                 $isStudentInfoPanel = false;
+                $is_peer_grading = true;
             }
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
@@ -938,7 +940,7 @@ HTML;
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grading);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
 
         if ($isPeerPanel) {
@@ -1093,12 +1095,8 @@ HTML;
         $studentBaseUrl = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']);
 
         // Setup urls for prev and next students
-        $prev_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'false' ]);
-        $next_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'false' ]);
-
-        // Setup urls for prev and next ungraded students
-        $prev_ungraded_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'true']);
-        $next_ungraded_student_url =  $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'true']);
+        $prev_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev']);
+        $next_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next']);
 
         $i_am_a_peer = false;
         if ($peer && $this->core->getUser()->getGroup() == 4) {
@@ -1112,9 +1110,7 @@ HTML;
             "i_am_a_peer" => $i_am_a_peer,
             "limited_access_blind" => $limited_access_blind,
             "prev_student_url" => $prev_student_url,
-            "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
-            "next_ungraded_student_url" => $next_ungraded_student_url,
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4,
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
@@ -1388,7 +1384,7 @@ HTML;
      * @param bool $show_silent_edit
      * @return string
      */
-    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grading) {
         $return = "";
         $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
@@ -1438,6 +1434,7 @@ HTML;
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
+                "is_peer_grading" => $is_peer_grading
             ]);
     }
 
