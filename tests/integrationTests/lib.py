@@ -20,7 +20,7 @@ SUBMITTY_INSTALL_DIR = os.path.realpath(
 
 INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
     SUBMITTY_INSTALL_DIR,
-    "/test_suite/integrationTests/"
+    "./test_suite/integrationTests/"
 )
 
 COMPILE_CONFIGURE_BIN_PATH = os.path.join(
