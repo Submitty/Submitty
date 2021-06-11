@@ -943,11 +943,12 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
 
 function resizeFrame(id, max_height = 500, force_height=-1) {
     let img = undefined;
+    let visible = $("iframe#" + id).is(":visible");
     img = $("iframe#" + id).contents().find("img");
     if($("iframe#" + id).contents().find("html").length !== 0) {
         $("iframe#" + id).contents().find("html").css("height", "inherit");
         img = $("iframe#" + id).contents().find("img");
-        if(img) {
+        if(img.length !== 0) {
             img.removeAttr("width");
             img.removeAttr("height");
             img.css("width", "");
@@ -967,7 +968,7 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         document.getElementById(id).height = (height+18) + "px";
     }
     //Workarounds for FireFox changing height/width of img sometime after this code runs
-    if(img) {
+    if(img.length !== 0) {
         const observer = new ResizeObserver(function(mutationsList, observer) {
             img.removeAttr("width");
             img.removeAttr("height");
@@ -976,6 +977,20 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
             observer.disconnect();
         })
         observer.observe(img[0]);
+    }
+    if(!visible) {
+        const observer = new IntersectionObserver(function(entries, observer) {
+            if($("iframe#" + id).is(":visible")) {
+                $("iframe#" + id).removeAttr("height");
+                let iframeFunc = $("iframe#" + id)[0].contentWindow.iFrameInit;
+                if(typeof(iframeFunc) === "function") {
+                    iframeFunc();
+                }
+                observer.disconnect();
+                resizeFrame(id, max_height, force_height);
+            }
+        });
+        observer.observe($("iframe#" + id)[0]);
     }
 }
 
