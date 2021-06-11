@@ -1040,9 +1040,14 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Gets all active users in courses_users, active users are users enrolled in a course in the current semester
+     * Gets an unique array of active users in courses_users, active users are users enrolled in a course in the current semester
+     * Allows the filtering the group of users returned by this function
      *
-     * @param string $semester
+     * @param string $semester The current semester
+     * @param bool $instructor To include instructors or not
+     * @param bool $fullAccess To include full access graders or not
+     * @param bool $limitedAccess To include limited access graders or not
+     * @param bool $student To include students or not
      * @return array - array of userids active in the specified semester
      */
     public function getActiveUserIds($semester, $instructor, $fullAccess, $limitedAccess, $student) {
