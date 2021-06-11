@@ -20,7 +20,7 @@ class PlagiarismUtils {
             $interval = new Interval($match['start'], $match['end'], $match['type']);
 
             // loop through, checking to see if this is a specific match between the two users
-            if ($match['type'] == "match") {
+            if ($match['type'] === "match" && $user_id_2 != "") {
                 foreach ($match['others'] as $other) {
                     if ($other["username"] === $user_id_2 && $other["version"] === $version_user_2) {
                         $interval->updateType("specific-match");
@@ -44,30 +44,41 @@ class PlagiarismUtils {
 
         // merge regions if possible
         for ($i = 1; $i < count($resultArray); $i++) {
-            $prevOthers = $resultArray[$i - 1]->getOthers();
-            $currOthers = $resultArray[$i]->getOthers();
-
             if ($resultArray[$i]->getType() !== $resultArray[$i - 1]->getType() ||
-                $resultArray[$i]->getStart() > $resultArray[$i - 1]->getEnd() ||
-                count($currOthers) !== count($prevOthers)) {
+                $resultArray[$i]->getStart() > $resultArray[$i - 1]->getEnd()) {
                 continue;
             }
 
             // check to make sure the matchingpositions arrays are the same, merge if so
             $matchingPosCanBeMerged = true;
             $difference = $resultArray[$i]->getEnd() - $resultArray[$i - 1]->getEnd();
-            for ($j = 0; $j < count($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"]); $j++) {
-                if (intval($currOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) !== intval($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) - $difference) {
-                    // we cannot merge these two regions so move on
-                    $matchingPosCanBeMerged = false;
-                    break;
+
+            // if there is no user 2, there are no matching positions
+            if ($user_id_2 != "") {
+                $prevOthers = $resultArray[$i - 1]->getOthers();
+                $currOthers = $resultArray[$i]->getOthers();
+
+                if (count($currOthers) !== count($prevOthers)) {
+                    continue;
+                }
+
+                for ($j = 0; $j < count($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"]); $j++) {
+                    if (intval($currOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) !== intval($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) - $difference) {
+                        // we cannot merge these two regions so move on
+                        $matchingPosCanBeMerged = false;
+                        break;
+                    }
                 }
             }
             if ($matchingPosCanBeMerged) {
                 $resultArray[$i - 1]->updateEnd($resultArray[$i]->getEnd());
 
-                $resultArray[$i - 1]->updateOthersEndPositions($user_id_2, $version_user_2, $difference);
-                unset($resultArray[$i]);
+                if ($user_id_2 != "") {
+                    $resultArray[$i - 1]->updateOthersEndPositions($user_id_2, $version_user_2, $difference);
+                }
+
+                // delete next interval
+                array_splice($resultArray, $i, 1);
 
                 // we merged these two so we have to check the newly merged interval against the next one
                 $i--;

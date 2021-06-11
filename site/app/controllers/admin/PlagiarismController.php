@@ -655,7 +655,7 @@ class PlagiarismController extends AbstractController {
             $dummyToken = [];
             $dummyToken["char"] = 99999999999; // set it to a big number of negligible significance
 
-            $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, $version_user_2);
+            $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2));
 
             $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/tokens.json";
             $tokens_user_1 = json_decode(file_get_contents($file_path), true);
@@ -678,8 +678,6 @@ class PlagiarismController extends AbstractController {
                 $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
                 $end_pos = $tokens_user_1[$e_pos]["char"] - 1;
                 $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
-                $start_value = $tokens_user_1[$s_pos - 1]["value"];
-                $end_value = $tokens_user_1[$e_pos - 1]["value"];
                 $userMatchesStarts = [];
                 $userMatchesEnds = [];
 
@@ -702,10 +700,8 @@ class PlagiarismController extends AbstractController {
                             $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
                             $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
                             $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
-                            $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
-                            $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
 
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $matchPosStart, $matchPosEnd];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $matchPosStart, $matchPosEnd];
                             $userMatchesStarts[] = $matchPosStart;
                             $userMatchesEnds[] = $matchPosEnd;
                         }
@@ -720,7 +716,7 @@ class PlagiarismController extends AbstractController {
                     $color = '#b5e3b5';
                 }
 
-                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
             }
         }
         return [$color_info, $segment_info];

@@ -21,7 +21,7 @@ function colorEditors(data) {
     	editor.operation(() => {
         	for(let pos in data.ci[users_color]) {
             	let element = data.ci[users_color][pos];
-            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "background: " + element[4]});
+            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6]}, css: "background: " + element[4]});
         	}
     	});
     }
