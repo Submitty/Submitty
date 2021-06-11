@@ -117,11 +117,14 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewPoll() {
-        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["question_type"]) || !isset($_POST["release_date"])) {
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
+        foreach ($fields as $field) {
+          if (!isset($_POST[$field])) {
             $this->core->addErrorMessage("Error occured in adding poll");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
+          }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
@@ -364,9 +367,12 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
         }
-        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["question_type"]) || !isset($_POST["release_date"])) {
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
+        foreach ($fields as $field) {
+          if (!isset($_POST[$field])) {
             $this->core->addErrorMessage("Error occured in editing poll");
             return new RedirectResponse($returnUrl);
+          }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
@@ -524,13 +530,7 @@ class PollController extends AbstractController {
             /*  Polls that were exported before this feature was
                 implemented don't have this data. At the time, there
                 only existed questions of type single reponse. */
-            if (array_key_exists("question_type", $poll)) {
-                $question_type = $poll["question_type"];
-            }
-            else {
-                $question_type = "single-response";
-            }
-
+            $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response';
             $responses = [];
             $orders = [];
             $i = 0;

@@ -6,43 +6,45 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
-            <span class="option-title" id="poll-name-label">Poll Name:</span>
-            <label for="poll-name">
-                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            <label for="poll-name" class="option-title">
+                Poll Name:
             </label>
+            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             <br/> <br/>
 
-            <span class="option-title" id="poll-question-label">Question:</span>
-            <label for="poll-question">
-                <textarea
+            <label for="poll-question" class="option-title">
+                Question:
+            </label>
+            <textarea
                     id="poll-question"
                     name="question"
                     style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
                     rows="10" cols="30"
                     placeholder="Enter question here..."
                     maxlength="5000"></textarea>
-            </label>
             <br/><br/>
 
-            <span class="option-title" id="poll-question-type-label">Question Type:</span>
-            <label for="poll-type-single-response">
-                <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" checked>Single reponse (radio buttons)</input>
-            </label>
-            <label for="poll-type-multiple-response">
-                <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response">Multiple response (checkboxes)</input>
-            </label>
+            <span class="option-title">
+                Question Type:
+            </span>
+
+            <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" checked></input>
+            <label for="poll-type-single-response">Single reponse (radio buttons)</label>
+            
+            <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response"></input>
+            <label for="poll-type-multiple-response">Multiple response (checkboxes)</label>
             <br/><br/>
 
-            <span class="option-title" id="image-file-label">Optional Image:</span>
-            <label for="image-file">
-                <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+            <label for="image-file" class="option-title">
+                Optional Image:
             </label>
-  	    <br/><br/>
-
-            <span class="option-title" id="poll-date-label">Expected release date:</span>
-            <label for="poll-date">
-                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+            <br/><br/>
+            
+            <label for="poll-date" class="option-title">
+                Expected release date:
             </label>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             <br/>
 
             <hr>
@@ -61,7 +63,7 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
-  	    <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
+            <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -72,49 +74,53 @@
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
-            <span class="option-title" id="poll-name-label">Poll Name:</span>
-            <label for="poll-name">
-                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
+            <label for="poll-name" class="option-title">
+                Poll Name:
             </label>
+            <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             <br/> <br/>
 
-            <span class="option-title" id="poll-question-label">Question:</span>
-            <label for="poll-question">
-                <textarea
+            <label for="poll-question" class="option-title">
+                Question:
+            </label>
+            <textarea
                     id="poll-question"
                     name="question"
                     style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
                     rows="10" cols="30"
                     maxlength="5000">{{ poll.getQuestion() }}</textarea>
-            </label>
             <br/><br/>
 
-            <span class="option-title" id="poll-question-type-label">Question Type:</span>
-            <label for="poll-type-single-response">
-                <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" {% if poll.getQuestionType() == 'single-response' %} checked {% endif %}>Single response (radio buttons)</input>
-            <label for="poll-type-multiple-response">
-                <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response" {% if poll.getQuestionType() == 'multiple-response' %} checked {% endif %}>Multiple response (checkboxes)</input>
-            </label>
+            <span class="option-title" >
+                Question Type:
+            </span>
+            
+            <input type="radio" id="poll-type-single-response" name="question_type" value="single-response" {% if poll.getQuestionType() == 'single-response' %} checked {% endif %}></input>
+            <label for="poll-type-single-response">Single response (radio buttons)</label>
+            
+            <input type="radio" id="poll-type-multiple-response" name="question_type" value="multiple-response" {% if poll.getQuestionType() == 'multiple-response' %} checked {% endif %}></input>
+            <label for="poll-type-multiple-response">Multiple response (checkboxes)</label>
             <br/><br/>
 
-            <span class="option-title" id="image-file-label">Optional Image:</span>
-            <label for="image-file">
-                <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+            <label for="image-file" class="option-title">
+                Optional Image:
             </label>
+            <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
             <br />
             {% if poll.getImagePath() != null %}
                 Current Image: {{ poll.getImagePath() }}
                 <br/>
                 <label for="keep-image">
-                    Keep Image:<input type="checkbox" id="keep-image" name="keep_image" checked />
+                    Keep Image:
                 </label>
+                <input type="checkbox" id="keep-image" name="keep_image" checked />
             {% endif %}
             <br/>
 
-            <span class="option-title" id="poll-date-label">Expected release date:</span>
-            <label for="poll-date">
-                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            <label for="poll-date" class="option-title">
+                Expected release date:
             </label>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             <br/>
             <hr>
             <h2> Responses: </h2>
