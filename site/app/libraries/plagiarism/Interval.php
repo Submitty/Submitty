@@ -66,9 +66,9 @@ class Interval {
     /**
      * @param string $user_id
      * @param int $version
-     * @param $endIncrement
+     * @param int $endIncrement
      */
-    public function updateOthersEndPositions(string $user_id, int $version, $endIncrement): void {
+    public function updateOthersEndPositions(string $user_id, int $version, int $endIncrement): void {
         foreach ($this->others[$user_id . "_" . $version]["matchingpositions"] as $i) {
             $i += $endIncrement;
         }

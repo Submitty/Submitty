@@ -21,7 +21,7 @@ function colorEditors(data) {
     	editor.operation(() => {
         	for(let pos in data.ci[users_color]) {
             	let element = data.ci[users_color][pos];
-            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6]}, css: "background: " + element[4]});
+            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6]}, css: "background: " + element[4] + ";" + (parseInt(users_color) === 1 ? "border: solid black 1px;" : "")});
         	}
     	});
     }
@@ -31,14 +31,21 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
     // Remove existing red region and add new one
     let marks_editor2 = editor2.getAllMarks();
     editor2.operation( () => {
-    	marks_editor2.forEach(mark => {
-	        if(mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end)) {
-	            mark.css = "background: " + RED
-	            mark.attributes.data_current_color = RED;
-	        }
-	        else if (mark.attributes.data_current_color === RED) {
-                mark.css = "background: " + ORANGE;
+        // remove existing marks
+        marks_editor2.forEach(mark => {
+            if (mark.attributes.data_current_color === RED) {
+                mark.css = "background: " + ORANGE + ";";
                 mark.attributes.data_current_color = ORANGE;
+            }
+        });
+
+        //add new red colored marks
+    	marks_editor2.forEach(mark => {
+    	    for (let i=0; i < leftClickedMarker.attributes.data_start.length; i++) {
+                if (mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start[i]) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end[i])) {
+                    mark.css = "background: " + RED + ";";
+                    mark.attributes.data_current_color = RED;
+                }
             }
     	});
 	});
@@ -47,14 +54,14 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
     editor2.operation( () => {
         editor1.getAllMarks().forEach(mark => {
             if (mark.attributes.data_current_color === RED) {
-                mark.css = "background: " + ORANGE;
+                mark.css = "background: " + ORANGE + "; border: solid black 1px;";
                 mark.attributes.data_current_color = ORANGE;
             }
         });
     });
 
     // Color the clicked region in editor1
-	leftClickedMarker.css = "background: " + RED;
+	leftClickedMarker.css = "background: " + RED + "; border: solid black 1px;";
 	leftClickedMarker.attributes.data_current_color = RED;
 
 	// Refresh editors
@@ -65,7 +72,9 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
 function setUpLeftPane() {
     editor0.getWrapperElement().onmouseup = function(e) {
         let lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
+        lineCh["ch"] = lineCh["ch"] + 1;
         let markers = editor0.findMarksAt(lineCh);
+
         // Did not select a marker
         if (markers.length === 0) {
             return;

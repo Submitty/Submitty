@@ -674,10 +674,22 @@ class PlagiarismController extends AbstractController {
 
                 $s_pos = $match->getStart();
                 $e_pos = $match->getEnd();
+
+                $next_start = 99999999999;
+                if ($i < count($matches)) {
+                    next($matches);
+                    $next_start = current($matches)->getStart();
+                }
+
                 $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
                 $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
+
+                if ($e_pos > $next_start) {
+                    $e_pos = $next_start - 1;
+                }
                 $end_pos = $tokens_user_1[$e_pos]["char"] - 1;
                 $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
+
                 $userMatchesStarts = [];
                 $userMatchesEnds = [];
 
@@ -689,7 +701,7 @@ class PlagiarismController extends AbstractController {
                 }
                 else if ($match->getType() === "specific-match") {
                     //Color is orange -- general match from selected match
-                    $color = '#ffa500';
+                    $color = '#ffa500;';
 
                     $segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
                     if ($codebox == "2" && $user_id_2 != "") {
@@ -701,7 +713,7 @@ class PlagiarismController extends AbstractController {
                             $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
                             $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
 
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $matchPosStart, $matchPosEnd];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500;', $matchPosStart, $matchPosEnd];
                             $userMatchesStarts[] = $matchPosStart;
                             $userMatchesEnds[] = $matchPosEnd;
                         }

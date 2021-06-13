@@ -20,7 +20,7 @@ class PlagiarismUtils {
             $interval = new Interval($match['start'], $match['end'], $match['type']);
 
             // loop through, checking to see if this is a specific match between the two users
-            if ($match['type'] === "match" && $user_id_2 != "") {
+            if ($match['type'] === "match" && $user_id_2 !== "") {
                 foreach ($match['others'] as $other) {
                     if ($other["username"] === $user_id_2 && $other["version"] === $version_user_2) {
                         $interval->updateType("specific-match");
@@ -54,7 +54,7 @@ class PlagiarismUtils {
             $difference = $resultArray[$i]->getEnd() - $resultArray[$i - 1]->getEnd();
 
             // if there is no user 2, there are no matching positions
-            if ($user_id_2 != "") {
+            if ($user_id_2 !== "") {
                 $prevOthers = $resultArray[$i - 1]->getOthers();
                 $currOthers = $resultArray[$i]->getOthers();
 
@@ -70,6 +70,7 @@ class PlagiarismUtils {
                     }
                 }
             }
+
             if ($matchingPosCanBeMerged) {
                 $resultArray[$i - 1]->updateEnd($resultArray[$i]->getEnd());
 
