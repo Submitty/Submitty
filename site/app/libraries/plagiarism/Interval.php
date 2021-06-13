@@ -79,7 +79,7 @@ class Interval {
      * @param int $version
      * @return array
      */
-    public function getMatchingPositions(string $user_id, int $version): array  {
+    public function getMatchingPositions(string $user_id, int $version): array {
         return $this->others[$user_id . "_" . $version]["matchingpositions"];
     }
 
