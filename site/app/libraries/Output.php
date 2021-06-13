@@ -7,7 +7,14 @@ use app\exceptions\OutputException;
 use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
-use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
+use League\CommonMark\Extension\Autolink\AutolinkExtension;
+use League\CommonMark\Block\Element\FencedCode;
+use League\CommonMark\Block\Element\IndentedCode;
+use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\Environment;
+use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
+use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
+use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
 use Ds\Set;
 
@@ -127,8 +134,15 @@ HTML;
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
-        $engine = new ParsedownEngine();
-        $engine->setSafeMode(true);
+
+        $environment = Environment::createCommonMarkEnvironment();
+        $environment->addExtension(new AutolinkExtension());
+        $environment->addBlockRenderer(FencedCode::class, new FencedCodeRenderer());
+        $environment->addBlockRenderer(IndentedCode::class, new IndentedCodeRenderer());
+        $environment->mergeConfig([]);
+
+        $converter = new CommonMarkConverter([], $environment);
+        $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
 
