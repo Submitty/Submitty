@@ -11,8 +11,7 @@ use app\libraries\plagiarism\Stack;
 use app\libraries\Utils;
 
 class PlagiarismUtilsTester extends \PHPUnit\Framework\TestCase {
-    public function testConstructIntervals(): void
-    {
+    public function testConstructIntervals(): void {
         // TODO: Write *correct* tests for the PlagiarismUtils file
         $testData = [
             [
