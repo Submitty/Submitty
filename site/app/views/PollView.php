@@ -116,7 +116,6 @@ class PollView extends AbstractView {
             return;
         }
         return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
-                "style" => "font-family: 'Source Sans Pro', sans-serif;",
                 "content" => $content
         ]);
     }
