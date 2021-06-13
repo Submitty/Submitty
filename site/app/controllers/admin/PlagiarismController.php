@@ -699,7 +699,7 @@ class PlagiarismController extends AbstractController {
                     //Color is yellow -- matches other students but not general match between students...
                     $color = '#ffff00';
                 }
-                else if ($match->getType() === "specific-match") {
+                elseif ($match->getType() === "specific-match") {
                     //Color is orange -- general match from selected match
                     $color = '#ffa500;';
 
