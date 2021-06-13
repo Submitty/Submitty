@@ -44,8 +44,7 @@ class PlagiarismUtils {
 
         // merge regions if possible
         for ($i = 1; $i < count($resultArray); $i++) {
-            if ($resultArray[$i]->getType() !== $resultArray[$i - 1]->getType()
-                || $resultArray[$i]->getStart() > $resultArray[$i - 1]->getEnd()) {
+            if ($resultArray[$i]->getType() !== $resultArray[$i - 1]->getType() || $resultArray[$i]->getStart() > $resultArray[$i - 1]->getEnd()) {
                 continue;
             }
 
