@@ -11,7 +11,7 @@ class IntervalTester extends \PHPUnit\Framework\TestCase {
         $interval = new Interval(1, 2, "match");
         $this->assertSame(1, $interval->getStart());
         $this->assertSame(2, $interval->getEnd());
-        $this->assertEmpty($interval->getUsers());
+        $this->assertEmpty($interval->getOthers());
         $interval->updateStart(3);
         $interval->updateEnd(5);
         $this->assertSame(3, $interval->getStart());
