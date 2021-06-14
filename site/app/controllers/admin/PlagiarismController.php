@@ -5,6 +5,7 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
+use app\libraries\plagiarism\Interval;
 use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
@@ -582,7 +583,7 @@ class PlagiarismController extends AbstractController {
 
         $rankings = $this->getOverallRankings($gradeable_id);
 
-        if (count($rankings) === 0 || $rankings === null) {
+        if ($rankings === null || count($rankings) === 0) {
             $return = ['error' => 'Rankings file not found or no matches found for selected user'];
             $return = json_encode($return);
             echo($return);
@@ -650,25 +651,45 @@ class PlagiarismController extends AbstractController {
             return $color_info;
         }
         else {
-            $matches = PlagiarismUtils::mergeIntervals(PlagiarismUtils::constructIntervals($file_path));
-            //$matches = json_decode(file_get_contents($file_path), true);
+            // Used to prevent an out of bounds error on the tokens arrays
+            $dummyToken = [];
+            $dummyToken["char"] = 99999999999; // set it to a big number of negligible significance
+
+            $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2));
+
             $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/tokens.json";
             $tokens_user_1 = json_decode(file_get_contents($file_path), true);
             if ($user_id_2 != "") {
                 $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/tokens.json";
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
+                array_push($tokens_user_2, $dummyToken);
             }
-            while (!$matches->isEmpty()) {
-                /** @var \app\libraries\plagiarism\Interval $match */
-                $match = $matches->peek();
+
+            array_push($tokens_user_1, $dummyToken);
+
+            $i = 0;
+            foreach ($matches as $match) {
+                // count the number of tokens iterated through
+                $i++;
+
                 $s_pos = $match->getStart();
                 $e_pos = $match->getEnd();
+
+                $next_start = 99999999999;
+                if ($i < count($matches)) {
+                    next($matches);
+                    $next_start = current($matches)->getStart();
+                }
+
                 $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
                 $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
-                $end_pos = $tokens_user_1[$e_pos - 1]["char"] - 1;
+
+                if ($e_pos > $next_start) {
+                    $e_pos = $next_start - 1;
+                }
+                $end_pos = $tokens_user_1[$e_pos]["char"] - 1;
                 $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
-                $start_value = $tokens_user_1[$s_pos - 1]["value"];
-                $end_value = $tokens_user_1[$e_pos - 1]["value"];
+
                 $userMatchesStarts = [];
                 $userMatchesEnds = [];
 
@@ -677,36 +698,25 @@ class PlagiarismController extends AbstractController {
                 if ($match->getType() === "match") {
                     //Color is yellow -- matches other students but not general match between students...
                     $color = '#ffff00';
-                    $is_general_match = false;
+                }
+                elseif ($match->getType() === "specific-match") {
+                    //Color is orange -- general match from selected match
+                    $color = '#ffa500;';
 
-                    $segment_info["{$start_line}_{$start_pos}"] = [];
+                    $segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
+                    if ($codebox == "2" && $user_id_2 != "") {
+                        foreach ($match->getMatchingPositions($user_id_2, $version_user_2) as $pos) {
+                            $matchPosStart = $pos['start'];
+                            $matchPosEnd =  $pos['end'];
+                            $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
+                            $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
+                            $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
+                            $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
 
-                    foreach ($match->getUsers() as $i => $other) {
-                        $segment_info["{$start_line}_{$start_pos}"][] = $other->getUserId() . "_" . $other->getVersion();
-                        if ($other->getUserId() == $user_id_2) {
-                            $is_general_match = true;
-                            if ($codebox == "2" && $user_id_2 != "") {
-                                foreach ($other->getMatchingPositions() as $pos) {
-                                    $matchPosStart = $pos['start'];
-                                    $matchPosEnd =  $pos['end'];
-                                    $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
-                                    $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
-                                    $end_pos_2 = $tokens_user_2[$matchPosEnd - 1]["char"] - 1;
-                                    $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
-                                    $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
-                                    $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
-
-                                    $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $matchPosStart, $matchPosEnd];
-                                    $userMatchesStarts[] = $matchPosStart;
-                                    $userMatchesEnds[] = $matchPosEnd;
-                                }
-                            }
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500;', $matchPosStart, $matchPosEnd];
+                            $userMatchesStarts[] = $matchPosStart;
+                            $userMatchesEnds[] = $matchPosEnd;
                         }
-                    }
-
-                    if ($is_general_match) {
-                        //Color is orange -- general match from selected match
-                        $color = '#ffa500';
                     }
                 }
                 elseif ($match->getType() === "common") { // common code does not show up on user 2
@@ -718,8 +728,7 @@ class PlagiarismController extends AbstractController {
                     $color = '#b5e3b5';
                 }
 
-                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
-                $matches->pop();
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
             }
         }
         return [$color_info, $segment_info];
