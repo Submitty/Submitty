@@ -74,18 +74,11 @@ class MarkdownWidget extends Widget {
     }
 }
 
-Twig.twig({
-    id: "MarkdownArea",
-    href: "/templates/misc/MarkdownArea.twig",
-    async: true
-});
-
 function previewNotebookBuilderMarkdown(markdown_num) {
     const markdown_area = $(`#notebook-builder-markdown-${markdown_num}`);
     const preview_element = $(`#notebook-builder-markdown-preview-${markdown_num}`);
     const preview_button = $(this);
-    const url = buildCourseUrl(['notebook_builder', 'preview']);
     const markdown_content = markdown_area.val();
 
-    previewMarkdown(markdown_area, preview_element, preview_button, url, { content: markdown_content });
+    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }

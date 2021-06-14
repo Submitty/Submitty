@@ -2428,10 +2428,9 @@ function previewOverallCommentMarkdown(user){
     const markdown_area = $(`#overall-comment-${user}`);
     const preview_element = $(`#overall-comment-markdown-preview-${user}`);
     const preview_button = $(this);
-    const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
     const markdown_content = markdown_area.val();
 
-    previewMarkdown(markdown_area, preview_element, preview_button, url, { content: markdown_content });
+    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**

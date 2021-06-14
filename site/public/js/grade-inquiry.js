@@ -209,8 +209,7 @@ function previewInquiryMarkdown() {
     const markdown_textarea = $(this).closest('.markdown-area').find('[name="replyTextArea"]');
     const preview_element = $('#inquiry_preview');
     const preview_button = $(this);
-    const url = buildCourseUrl(['gradeable', 'grade_inquiry', 'preview']);
     const inquiry_content = markdown_textarea.val();
 
-    previewMarkdown(markdown_textarea, preview_element, preview_button, url, { content: inquiry_content });
+    previewMarkdown(markdown_textarea, preview_element, preview_button, { content: inquiry_content });
 }

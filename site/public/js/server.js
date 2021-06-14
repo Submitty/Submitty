@@ -1614,10 +1614,9 @@ function getFocusableElements() {
  * @param preview_element JQuery element of the span the markdown will be inserted into
  * @param preview_button JQuery element of the "Preview Markdown" button
  *                       Should have title="Preview Markdown"
- * @param url url to send ajax request to
  * @param data Object whose properties will get sent through a POST request
  */
-function previewMarkdown(markdown_textarea, preview_element, preview_button, url, data) {
+function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
     const enablePreview = preview_element.is(':hidden');
 
     $.ajax({
