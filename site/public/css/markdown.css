@@ -30,3 +30,18 @@
 .markdown li {
     margin-left: 25px;
 }
+
+.markdown pre {
+    background: var(--code-box-background-light-gray);
+    color: var(--code-box-font-color-dark-gray);
+}
+
+.markdown pre + pre {
+    border-top: 1px dashed var(--text-black);
+}
+
+.markdown code {
+    display: block;
+    padding: 1em;
+    overflow-x: scroll;
+}

@@ -204,6 +204,8 @@
     --file-browser-blue: #2627ee;
     --extra-credit-blue: #0a6495;
     --viewed-content: #e8f0f7;
+    --code-box-background-light-gray: #fafafa;
+    --code-box-font-color-dark-gray: #343a42;
 
 
 }
@@ -415,4 +417,6 @@
       --file-browser-blue: #ffffff;
       --extra-credit-blue: #2DACF0;
       --viewed-content: #50535a;
+      --code-box-background-light-gray: #282c34;
+      --code-box-font-color-dark-gray: #abb2bf;
 }
