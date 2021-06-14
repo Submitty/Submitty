@@ -25,30 +25,30 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">
                     Instructor Provided Code:
-                    {% if new_or_edit == "edit" and saved_config['instructor_provided_code'] %}
-                        <br><span>Current Provided Code: {{ provided_code_filename }}</span>
-                    {% endif %}
                 </div>
                 <div class="plag-data">
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {{ no_provided_code }} >
                         <label for="no_code_provided_id">No</label>
                     </span>
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {{ provided_code }}>
                         <label for="code_provided_id">Yes</label>
                     </span>
-                    <input type="file" name="provided_code_file">
                 </div>
+                <div class="low-margin-top"><input id="provided_code_file" type="file" name="provided_code_file"></div>
+                {% if new_or_edit == "edit" and saved_config['instructor_provided_code'] %}
+                    <div id="current_code_file">Current Provided Code: {{ provided_code_filename }}</div>
+                {% endif %}
             </div>
             <div class="plag-data-group">
                 <div class="plag-data-label">Version:</div>
                 <div class="plag-data">
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="all_version_id" value="all_version" name="version_option" {{ all_version }} >
-                        <label for="all_version_id">All Version</label>
+                        <label for="all_version_id">All Versions</label>
                     </span>
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="active_version_id" value="active_version" name="version_option" {{ active_version }}>
                         <label for="active_version_id">Only Active Version</label>
                     </span>
@@ -57,11 +57,11 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Files to be Compared:</div>
                 <div class="plag-data">
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="all_files_id" value="all_files" name="file_option" {{ all_files }}>
                         <label for="all_files_id">All Files</label>
                     </span>
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {{ regex_matching_files }}>
                         <label for="regex_matching_files_id">Regex matching files</label>
                     </span>
@@ -72,10 +72,10 @@
                 <div class="plag-data-label">Language:</div>
                 <div class="plag-data">
                     <select name="language">
+                        <option value="plaintext" {{ language["plaintext"] }}>Plain Text</option>
                         <option value="python" {{ language["python"] }}>Python</option>
                         <option value="cpp" {{ language["cpp"] }}>C++</option>
                         <option value="java" {{ language["java"] }}>Java</option>
-                        <option value="plaintext" {{ language["plaintext"] }}>Plain Text</option>
                         <option value="mips" {{ language["mips"] }}>MIPS Assembly</option>
                     </select>
                 </div>
@@ -164,23 +164,34 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Are there any submissions that should be ignored?</div>
                 <div id="ignore_submission_div" class="plag-data">
-                    <div id="add_more_ignore" class="add-more" aria-label="Add more">
-                        <i class="fas fa-plus-square"></i>Add more
-                    </div>
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {{ no_ignore }}>
                         <label for="ignore_none_id">No</label>
                     </span>
-                    <span>
+                    <span class="radio-label-pair">
                         <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {{ ignore }}>
                         <label for="ignore_id">Yes</label>
                     </span>
-                    {% if new_or_edit == "edit" %}
-                        {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
-                            <input type="text" name="ignore_submission_{{ loop.index0 }}" class="low-margin-top" value="{{ saved_ignore_submission }}"/><br />
-                        {% endfor %}
-                    {% endif %}
-                    <input type="text" name="ignore_submission_{{ saved_config['ignore_submissions'].length }}" class="low-margin-top"/>
+
+                    <div id="add_more_ignore" class="add-more" aria-label="Add more">
+                        <i class="fas fa-plus-square"></i>Add more
+                    </div>
+
+                    <div id="text_ignore_submission">
+                        {% if new_or_edit == "edit" %}
+                            {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
+                                <div name="wrapper_ignore_submission_{{ loop.index0 }}">
+                                    <input type="text" name="ignore_submission_{{ loop.index0 }}" class="low-margin-top deletable-text" value="{{ saved_ignore_submission }}"/>
+                                    <i class="fa fa-trash delete-btn"></i>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div name="wrapper_ignore_submission_0">
+                                <input type="text" name="ignore_submission_0" class="low-margin-top deletable-text"/>
+                                <i class="fa fa-trash delete-btn"></i>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             <div>
@@ -198,14 +209,60 @@
         const select_element_name = $(this).attr("name");
         configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
     });
+
+    // PROVIDED CODE ///////////////////////////////////////////////////////////
+    $("#no_code_provided_id").change(function() {
+        $("#current_code_file").hide();
+        $("#provided_code_file").hide();
+    });
+
+    $("#code_provided_id").change(function() {
+        $("#current_code_file").show();
+        $("#provided_code_file").show();
+    });
+
+    // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
+
     $('#add_more_prev_gradeable', form).on('click', function(){
         addMorePriorTermGradeable(prior_term_gradeables);
     });
+
+    // IGNORED SUBMISSIONS /////////////////////////////////////////////////////
+    $("#ignore_none_id").change(function() {
+        if ($("#ignore_none_id").is(":checked")) {
+            $("#text_ignore_submission").hide();
+            $("#add_more_ignore").hide();
+        }
+    });
+
+    $("#ignore_id").change(function() {
+        if ($("#ignore_id").is(":checked")) {
+            $("#text_ignore_submission").show();
+        }
+    });
+
     $('#add_more_ignore', form).on('click', function(){
         const ignore_submission_number = $('[name="ignore_submission_number"]', form).val();
-        $('#ignore_submission_div', form).append('<br /><input type="text" name="ignore_submission_'+ ignore_submission_number +'" class="low-margin-top"/>');
+        $('#text_ignore_submission', form).append(`
+            <div name="wrapper_ignore_submission_` + ignore_submission_number + `">
+                <input type="text" name="ignore_submission_` + ignore_submission_number + `" class="low-margin-top deletable-text"/>
+                <i class="fa fa-trash delete-btn"></i>
+            </div>
+        `);
         $('[name="ignore_submission_number"]', form).val(parseInt(ignore_submission_number)+1);
     });
+
+    $(".delete-btn").on("click", function() {
+        // delete the div with the text field whose delete icon was clicked
+        $(this).parent().remove();
+        // renumber all other fields
+        $(".deletable-text").each(function(index) {
+            $(this).attr("name", "ignore_submission_"+index);
+            $(this).parent().attr("name", "wrapper_ignore_submission_"+index);
+        });
+    });
+
+    // OTHER CRAP //////////////////////////////////////////////////////////////
 
     $('[name="threshold"], [name="sequence_length"]').change(function(){
         if($(this).val().length === 0){

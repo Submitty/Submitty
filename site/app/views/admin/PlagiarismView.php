@@ -118,7 +118,7 @@ class PlagiarismView extends AbstractView {
         $all_files = "checked";
         $regex_matching_files = "";
         $regex = "";
-        $language = ["python" => "selected", "java" => "", "plaintext" => "", "cpp" => "", "mips" => ""];
+        $language = ["plaintext" => "selected", "python" => "", "java" => "", "cpp" => "", "mips" => ""];
         $provided_code = "";
         $no_provided_code = "checked";
         $provided_code_filename = "";
