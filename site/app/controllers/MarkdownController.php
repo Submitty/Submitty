@@ -7,7 +7,7 @@ use app\views\MarkdownView;
 use Symfony\Component\Routing\Annotation\Route;
 
 class MarkdownController extends AbstractController {
-    
+
     /**
      * @Route("/courses/{_semester}/{_course}/markdown/preview", methods={"POST"})
      * @return WebResponse
