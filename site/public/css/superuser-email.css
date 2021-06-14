@@ -1,10 +1,11 @@
-.email-content {
+.email-content{
     margin-top: 2vh;
     min-height:50vh;
     resize: none;
     padding: 1%;
 }
-.email-subject {
+
+.email-subject{
     margin-top:2vh;
     margin-bottom: 2vh;
     min-height:6vh;
@@ -13,23 +14,31 @@
     padding: 1%;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+.custom-scrollbar::-webkit-scrollbar{
     background-color: var(--hover-dark-border-actionable-blue);
     width: 5px;
     height: 8px;
 }
 
-::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb{
     background-color: var(--actionable-blue);
     border-radius: 5px; 
     height: 10%px;
 }
 
-.btn {
+.btn{
     margin-top: 2vh;
     float: right;
 }
 
-.checkbox-options {
-    margin: 2vh 0 2vh 0 ;
+.checkbox-options{
+    margin: 2vh 0 2vh 0;
+}
+
+.course-title{
+    font-size:x-large;
+}
+
+.course-email{
+    padding: 1em;
 }

@@ -24,17 +24,12 @@ class EmailStatusView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Superuser Email Statuses", $this->core->buildUrl(["superuser","email"]));
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalCss('email-status.css');
-        $courseToEmailStatus = [];
-        foreach ($emailStatuses as $course => $emailStatus) {
-            $courseToEmailStatus[$course] = [
-                "subjects" => $emailStatus->getSubjects(),
-                "pending" => $emailStatus->getPending(),
-                "successes" => $emailStatus->getSuccesses(),
-                "errors" => $emailStatus->getErrors()
-            ];
-        }
         return $this->core->getOutput()->renderTwigTemplate("superuser/SuperuserEmailStatus.twig", [
-            "courseToEmailStatus" => $courseToEmailStatus 
+            "subjects" => $emailStatuses->getSubjects(),
+            "pending" => $emailStatuses->getPending(),
+            "successes" => $emailStatuses->getSuccesses(),
+            "errors" => $emailStatuses->getErrors(),
+            "courses" => $emailStatuses->getCourses()
         ]);
     }
 }

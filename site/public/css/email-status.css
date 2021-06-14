@@ -5,36 +5,45 @@
     top: 0px;
     right: 0px;
 }
+
 .button-container{
     position: relative;
-    height: 5vh;
     margin: auto;
     display: inline-flexbox;
 }
+
 .expand{
     display: none;
     padding: 1vh;
+    margin-top: 0.5em;
 }
+
 .status{
     list-style: none;
-    border: 1px solid black;
+    border: 1px solid var(--main-body-white);
 }
+
 .status-error{
     background-color: var(--danger-red);
 }
+
 .status-warning{
     background-color: transparent;
 }
+
 .status-success{
     background-color: var(--good-green);
 }
+
 .status-container{
-    margin-top: 1vh;
-    margin-bottom: 1vh;
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
+
 .status-message{
     word-wrap: break-word;
 }
+
 .divider{
-    border-top: 1px solid black;
+    border-top: 3px solid var(--standard-deep-dark-gray);
 }

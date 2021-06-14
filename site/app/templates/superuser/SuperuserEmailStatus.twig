@@ -1,16 +1,10 @@
-<div id="emailStatus" class="content">
-    <h1>Email Statuses</h1>
-    {% if not courseToEmailStatus|length == 0 %}
-        {% for course in courseToEmailStatus|keys %}
-            <div>{{course}}</div>
-            {% include "EmailStatus.twig" with {
-                "subjects": courseToEmailStatus[course][{"subjects"}],
-                "errors": courseToEmailStatus[course][{"errors"}],
-                "pending": courseToEmailStatus[course][{"pending"}],
-                "successes": courseToEmailStatus[course][{"successes"}]
-            } %}
-        {% endfor %}
-    {% else %}
-        <div>No courses with email sent</div>
-    {% endif %}
+<div id="email" class="content">
+    <h1>Email Status</h1>
+    {% include "EmailStatus.twig" with {
+        "subjects": subjects,
+        "errors": errors,
+        "pending": pending,
+        "successes": successes,
+        "courses": courses
+    } %}
 </div>

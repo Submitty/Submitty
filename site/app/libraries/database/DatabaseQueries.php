@@ -5802,12 +5802,10 @@ AND gc_id IN (
         return new EmailStatusModel($this->core, $details);
     }
 
-    /**
-     * Get the list of courses
-     */
-    public function getAllCourses() {
-        $this->submitty_db->query('SELECT semester, courses FROM courses');
-        return $this->submitty_db->rows();
+    public function getAllEmailStatuses() {
+        $this->submitty_db->query('SELECT * FROM emails ORDER BY created DESC');
+        $details = $this->submitty_db->rows();
+        return new EmailStatusModel($this->core, $details);
     }
 
     /**
