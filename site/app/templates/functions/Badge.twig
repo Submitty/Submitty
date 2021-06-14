@@ -81,16 +81,14 @@
         {% elseif max > 0 %}
             {# Normal case always shows #}
             true
-        {% elseif max < 0 %}
+        {% else %}
             {# Negaitve points only show if you got it #}
             {% if earned < 0 %}
                 true
             {% else %}
+                {# Otherwise it's worth <= 0 points and no points were earned, so don't show #}
                 false
             {% endif %}
-        {% else %}
-            {# Otherwise it's worth zero points, don't show #}
-            false
         {% endif %}
     {%- endapply -%}
 {%- endmacro -%}
