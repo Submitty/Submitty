@@ -7176,51 +7176,54 @@ SQL;
         return $this->course_db->rows();
     }
 
-    public function getCourseMaterials($ids) {
-        if ($ids === []) {
+    public function getCourseMaterials($paths): \Iterator {
+        if ($paths === []) {
             return new \EmptyIterator();
         }
-        if ($ids === null) {
-            $ids = [];
+        if ($paths === null) {
+            $paths = [];
         }
-        $query = 'SELECT 
-                    cm.id,
-                    cm.type,
+
+        // Generate the selector statement
+        $selector = '';
+        if (count($paths) > 0) {
+            $place_holders = implode(',', array_fill(0, count($paths), '?'));
+            $selector = "WHERE cm.url IN ($place_holders)";
+        }
+
+        $query = "SELECT 
                     cm.url,
-                    cm.link_title,
-                    cm.link_url,
+                    cm.type,
                     cm.release_date,
                     cm.hidden_from_students,
                     cm.priority,
                     cm.section_lock,
                     json_agg(cms.section_id) AS sections
                         FROM course_materials AS cm
-                        LEFT JOIN course_materials_sections AS cms ON cm.id = cms.course_material_id
-                    GROUP BY cm.id;';
+                        LEFT JOIN course_materials_sections AS cms ON cm.url = cms.course_material_id
+                    $selector GROUP BY cm.url;";
         $course_material_constructor = function ($row) {
             $row['sections'] = json_decode($row['sections']);
             return new CourseMaterial($this->core, $row);
         };
         return $this->course_db->queryIterator(
             $query,
-            $ids,
+            $paths,
             $course_material_constructor
         );
     }
 
-    public function getCourseMaterial($id) {
-        foreach ($this->getCourseMaterials([$id]) as $course_material) {
+    public function getCourseMaterial($path): CourseMaterial {
+        foreach ($this->getCourseMaterials([$path]) as $course_material) {
             return $course_material;
         }
         throw new \InvalidArgumentException('Course material does not exist');
     }
 
-    public function createCourseMaterial(CourseMaterial $course_material) {
+    public function createCourseMaterial(CourseMaterial $course_material): void {
         $params = [
             $course_material->getType(),
             $course_material->getUrl(),
-            $course_material->getLinkTitle(),
-            $course_material->getLinkUrl(),
             $course_material->getReleaseDate(),
             $course_material->getHiddenFromStudents(),
             $course_material->getPriority(),
@@ -7231,79 +7234,82 @@ SQL;
             INSERT INTO course_materials(
               type,
               url,
-              link_title,
-              link_url,
               release_date,
               hidden_from_students,
               priority,
               section_lock)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?)",
             $params
         );
-        $course_material_id = $this->course_db->getLastInsertId();
-        foreach ($course_material->getSections() as $section) {
-            $params = [
-                $course_material_id,
-                $section
-            ];
-            $this->course_db->query(
-                "
+        if ($course_material->getSectionLock()) {
+            foreach ($course_material->getSections() as $section) {
+                $params = [
+                    $course_material->getUrl(),
+                    $section
+                ];
+                $this->course_db->query(
+                    "
                 INSERT INTO course_materials_sections(
                   course_material_id,
                   section_id)
                 VALUES (?, ?)",
-                $params
-            );
+                    $params
+                );
+            }
         }
     }
 
-    public function updateCourseMaterial(CourseMaterial $course_material) {
+    public function updateCourseMaterial(CourseMaterial $course_material): void {
         $params = [
             $course_material->getType(),
-            $course_material->getUrl(),
-            $course_material->getLinkTitle(),
-            $course_material->getLinkUrl(),
             $course_material->getReleaseDate(),
             $course_material->getHiddenFromStudents(),
             $course_material->getPriority(),
-            $course_material->getSectionLock()
+            $course_material->getSectionLock(),
+            $course_material->getUrl()
         ];
         $this->course_db->query(
             "
             UPDATE course_materials SET
                 type=?,
-                url=?,
-                link_title=?,
-                link_url=?,
                 release_date=?,
                 hidden_from_students=?,
                 priority=?,
                 section_lock=?
-            WHERE id=?",
+            WHERE url=?",
             $params
         );
         $this->course_db->query(
             "DELETE FROM course_materials_sections WHERE course_material_id=?",
-            [$course_material->getId()]
+            [$course_material->getUrl()]
         );
-        foreach ($course_material->getSections() as $section) {
-            $params = [
-                $course_material->getId(),
-                $section
-            ];
-            $this->course_db->query(
-                "
+        if ($course_material->getSectionLock()) {
+            foreach ($course_material->getSections() as $section) {
+                $params = [
+                    $course_material->getUrl(),
+                    $section
+                ];
+                $this->course_db->query(
+                    "
                 INSERT INTO course_materials_sections(
                   course_material_id,
                   section_id)
                 VALUES (?, ?)",
-                $params
-            );
+                    $params
+                );
+            }
         }
     }
 
-    public function deleteCourseMaterial($id) {
-        $this->course_db->query("DELETE FROM course_materials WHERE id=?", [$id]);
+    public function deleteCourseMaterial(string $path): void {
+        $this->course_db->query("DELETE FROM course_materials WHERE url=?", [$path]);
+    }
+
+    public function deleteCourseMaterialSections(string $path): void {
+        $this->course_db->query(
+            "DELETE FROM course_materials_sections WHERE course_material_id=?",
+            [$path]
+        );
     }
 
     private function getInnerQueueSelect(): string {
