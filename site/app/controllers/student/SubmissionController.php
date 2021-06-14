@@ -852,6 +852,7 @@ class SubmissionController extends AbstractController {
 
         if($_POST['regrade_all_students'] === 'true' || $_POST['regrade_all_students_all'] === 'true') {
             $submissions= json_decode($_POST['submissions'], true);
+            $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
             foreach ($submissions as $submission) {
                 if($_POST['regrade_all_students_all'] === 'true') {
                     $limit = $submission['highest_version'];
@@ -878,10 +879,10 @@ class SubmissionController extends AbstractController {
                         "course" => $this->core->getConfig()->getCourse(),
                         "gradeable" => $gradeable_id,
                         "is_team" => false,
-                        "max_possible_grading_time" => 0,
+                        "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
                         "queue_time" => 54,
                         'regrade' => true,
-                        "required_capabilities" => python,
+                        "required_capabilities" =>$gradeable->getAutogradingConfig()->getRequiredCapabilities(),
                         "semester" => $this->core->getConfig()->getSemester(),
                         "team" => '',
                         "user" => $submitter,
