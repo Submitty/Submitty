@@ -21,11 +21,15 @@ td .plag-action-btn-cont a:not(:last-child) {
     margin: 26px 0;
 }
 
-.plag-data-group .plag-data-label{
+.plag-data-label {
     flex: 1;
     font-weight: bold;
     font-size: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 0.2rem;
+}
+
+.past-terms-wrapper {
+    display: none;
 }
 
 input[type="radio"] {
@@ -86,7 +90,8 @@ input[type=text]:invalid {
     padding-bottom: 30px;
 }
 
-#text_ignore_submission, #current_code_file, #provided_code_file {
+#text_ignore_submission, #current_code_file, #provided_code_file,
+#add_more_ignore, #regex_to_select_files {
     display: none;
 }
 
