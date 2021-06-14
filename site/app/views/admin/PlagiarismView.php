@@ -128,7 +128,8 @@ class PlagiarismView extends AbstractView {
         $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions']) + 1 : 1;
         $ignore = "";
         $no_ignore = "checked";
-
+        $no_past_terms = "checked";
+        $past_terms = "";
 
         #values which are in saved configuration
         if ($new_or_edit == "edit") {
@@ -158,6 +159,11 @@ class PlagiarismView extends AbstractView {
                 $ignore = "checked";
                 $no_ignore = "";
             }
+
+            if ($prior_term_gradeables_number > 1) {
+                $no_past_terms = "";
+                $past_terms = "checked";
+            }
         }
         $this->core->getOutput()->addInternalCss("plagiarism.css");
         $this->core->getOutput()->enableMobileViewport();
@@ -182,6 +188,8 @@ class PlagiarismView extends AbstractView {
             "sequence_length" => $sequence_length,
             "no_ignore" => $no_ignore,
             "ignore" => $ignore,
+            "no_past_terms" => $no_past_terms,
+            "past_terms" => $past_terms,
             "provided_code_filename" => $provided_code_filename,
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
             "prior_term_gradeables" => $prior_term_gradeables,

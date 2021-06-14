@@ -28,10 +28,6 @@ td .plag-action-btn-cont a:not(:last-child) {
     margin-bottom: 0.2rem;
 }
 
-.past-terms-wrapper {
-    display: none;
-}
-
 input[type="radio"] {
     margin-left: 0;
 }
@@ -91,7 +87,7 @@ input[type=text]:invalid {
 }
 
 #text_ignore_submission, #current_code_file, #provided_code_file,
-#add_more_ignore, #regex_to_select_files {
+#add_more_ignore, #files_to_be_compared, #prev_gradeable_div {
     display: none;
 }
 
@@ -103,6 +99,18 @@ input[type=text]:invalid {
 
 .radio-label-pair:first-of-type {
     margin-left: 0;
+}
+
+.regex-table td {
+    padding-left: .2rem;
+}
+
+.regex-table td:first-of-type {
+    padding-left: 0;
+}
+
+.regex-table td:last-of-type {
+    width: 100%;
 }
 
 .low-margin-top {
