@@ -1,4 +1,13 @@
 {% import _self as self %} {# Required to use macros in same template #}
+{% set submission = [] %}
+    {% for section in sections %}
+        {% for row in section.rows %}
+            {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
+                {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getUser().getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+<input type="hidden" id="submission" value="{{ submission|json_encode }}">
 <div class="content">
     {#
         Default is viewing your sections
@@ -55,6 +64,8 @@
             </div>
         </div>
     </div>
+    <button class="btn btn-primary key_to_click"  id="regrade_button" tabindex="0" onclick="regradeAllStudents()">Regrade All Active Submissions</button>
+    <button class="btn btn-primary key_to_click"  id="regrade_button" tabindex="0" onclick="regradeAllStudentsAll()">Regrade All Submissions</button>
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
@@ -696,6 +707,53 @@
             document.cookie = 'anon_mode=on;';
         }
         location.reload();
+    }
+
+    function regradeAllStudents() {
+        var array = document.getElementById('submission').value;
+        var submissions = JSON.parse(array);
+        handleSubmission(0,0,0,0,
+                0,
+                "{{ csrf_token }}",
+                false,
+                0,
+                "{{ gradeable.getId }}",
+                '',
+                '',
+                '',
+                false,
+                1,
+                false,
+                false,
+                false,
+                false,
+                submissions,
+                true
+        )
+    }
+
+    function regradeAllStudentsAll() {
+        var array = document.getElementById('submission').value;
+        var submissions = JSON.parse(array);
+        handleSubmission(0,0,0,0,
+                0,
+                "{{ csrf_token }}",
+                false,
+                0,
+                "{{ gradeable.getId }}",
+                '',
+                '',
+                '',
+                false,
+                1,
+                false,
+                false,
+                false,
+                false,
+                submissions,
+                false,
+                true
+        )
     }
 </script>
 

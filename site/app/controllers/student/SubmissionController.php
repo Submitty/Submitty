@@ -850,6 +850,56 @@ class SubmissionController extends AbstractController {
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
 
+        if($_POST['regrade_all_students'] === 'true' || $_POST['regrade_all_students_all'] === 'true') {
+            $submissions= json_decode($_POST['submissions'], true);
+            foreach ($submissions as $submission) {
+                if($_POST['regrade_all_students_all'] === 'true') {
+                    $limit = $submission['highest_version'];
+                }else{
+                    $limit = 1;
+                }
+                for($i = 1; $i < $limit+1; $i++) {
+                    $submitter = $submission['submitter'];
+                    if($_POST['regrade_all_students_all'] === 'true') {
+                        $active_version = $i;
+                    }else{
+                        $active_version = $submission['active_version'];
+                    }
+                    $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                        $gradeable_id, $submitter, $active_version];
+                    $queue_file_helper = implode("__", $queue_file_helper);
+                    $queue_file = FileUtils::joinPaths(
+                        $this->core->getConfig()->getSubmittyPath(),
+                        "to_be_graded_queue",
+                        $queue_file_helper
+                    );
+                    //create json file
+                    $queue_data = [
+                        "course" => $this->core->getConfig()->getCourse(),
+                        "gradeable" => $gradeable_id,
+                        "is_team" => false,
+                        "max_possible_grading_time" => 0,
+                        "queue_time" => 54,
+                        'regrade' => true,
+                        "required_capabilities" => python,
+                        "semester" => $this->core->getConfig()->getSemester(),
+                        "team" => '',
+                        "user" => $submitter,
+                        "vcs_checkout" => false,
+                        "version" => $active_version,
+                        "who" => $submitter
+                    ];
+                    //add file to directory
+                    if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                        return $this->uploadResult("Failed to create file for grading queue.", false);
+                    }
+                }
+            }
+            $msg = "submission(s) added to queue for regrading";
+            $this->core->getOutput()->renderResultMessage($msg, true);
+            return;
+        }
+
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
         $merge_previous = isset($merge) && $merge === 'true';
@@ -868,7 +918,13 @@ class SubmissionController extends AbstractController {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         $regrade = $_POST['regrade'];
         $regrade_all = $_POST['regrade_all'];
-
+        $regrade_all_students = $_POST['regrade_all_students'];
+        $submissions = $_POST['submissions'];
+        if($regrade_all === true){
+            $hi = 'hi';
+        }else{
+            $hi = 'bye';
+        }
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
         if ($gradeable === null) {
@@ -1368,17 +1424,17 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        if ($regrade) {
+        if ($regrade === 'true') {
             $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
                 $gradeable->getId(), $who_id, $graded_gradeable->getAutoGradedGradeable()->getActiveVersion()];
         }
-        else {
+        else if($regrade_all === 'false') {
             $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
                 $gradeable->getId(), $who_id, $new_version];
         }
 
         //don't create file name yet if regrading all submissions
-        if(!$regrade_all){
+        if($regrade_all === 'false'){
             $queue_file_helper = implode("__", $queue_file_helper);
             $queue_file = FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
@@ -1398,7 +1454,7 @@ class SubmissionController extends AbstractController {
         }
 
         // create json file... unless regrading all submissions, do that later
-        if ($regrade) {
+        if ($regrade === 'true') {
             $queue_data = [
                 "course" => $this->core->getConfig()->getCourse(),
                 "gradeable" => $gradeable->getId(),
@@ -1415,7 +1471,7 @@ class SubmissionController extends AbstractController {
                 "who" => $who_id
             ];
         }
-        else {
+        else if($regrade_all === 'false') {
             $queue_data = [
                 "semester" => $this->core->getConfig()->getSemester(),
                 "course" => $this->core->getConfig()->getCourse(),
@@ -1446,7 +1502,7 @@ class SubmissionController extends AbstractController {
         }
         else {
             // Then create the file that will trigger autograding, if regrading all, loop through all submissions
-            if($regrade_all) {
+            if($regrade_all === 'true') {
                 for($i = 1; $i < $highest_version + 1; $i++){
                     //create file name
                     $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
