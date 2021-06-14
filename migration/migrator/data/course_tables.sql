@@ -1658,6 +1658,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
+-- Name: electronic_gradeable fk_depends_on; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.electronic_gradeable
+    ADD CONSTRAINT fk_depends_on FOREIGN KEY (eg_depends_on) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
 -- Name: forum_posts_history forum_posts_history_edit_author_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 

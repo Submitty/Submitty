@@ -1097,16 +1097,10 @@ class AdminGradeableController extends AbstractController {
                 continue;
             }
 
-            if (in_array($prop, $depend_props)) {
-                if ($post_val === "") {
-                    $post_val = null;
-                }
-            }
-
             if ($prop === "depends_on") {
                 try {
-                    $gradeables = new GradeableList($this->core);
-                    if ($gradeables->getGradeable($post_val) == null) {
+                    $temp_gradeable = $this->tryGetGradeable($post_val, false);
+                    if ($temp_gradeable == false) {
                         $post_val = null;
                     }
                 }

@@ -15,6 +15,7 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("ALTER TABLE electronic_gradeable ADD COLUMN IF NOT EXISTS eg_depends_on varchar(255) DEFAULT NULL;")
+    database.execute("ALTER TABLE electronic_gradeable ADD CONSTRAINT fk_depends_on FOREIGN KEY(eg_depends_on) REFERENCES electronic_gradeable(g_id);")
     database.execute("ALTER TABLE electronic_gradeable ADD COLUMN IF NOT EXISTS eg_depends_on_points integer DEFAULT NULL; ")
 
 
