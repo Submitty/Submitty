@@ -1138,16 +1138,6 @@ class ForumThreadView extends AbstractView {
         }
     }
 
-    public function previewPost($enablePreview, $post_content) {
-        $this->core->getOutput()->disableRender();
-        if (!$enablePreview) {
-            return;
-        }
-        return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
-                "content" => $post_content
-        ]);
-    }
-
     public function createThread($category_colors) {
         if (!$this->forumAccess()) {
             $this->core->redirect($this->core->buildCourseUrl());

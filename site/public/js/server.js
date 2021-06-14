@@ -1621,7 +1621,7 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, url
     const enablePreview = preview_element.is(':hidden');
 
     $.ajax({
-        url: url,
+        url: buildCourseUrl(['markdown', 'preview']),
         type: 'POST',
         data: {
             enablePreview: enablePreview,

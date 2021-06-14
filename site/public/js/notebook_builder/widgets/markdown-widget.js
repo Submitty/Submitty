@@ -15,22 +15,6 @@ class MarkdownWidget extends Widget {
         const container = this.getContainer('Markdown');
         container.classList.add('markdown-widget');
 
-        const markdownArea = $(Twig.twig({
-            ref: "MarkdownArea"
-        }).render ({
-            markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
-            markdown_area_query : `$('#notebook-builder-markdown-${NUM_MARKDOWN}')`,
-            markdown_area_name : '',
-            markdown_area_value : this.state.markdown_string,
-            placeholder : 'Enter text or markdown...',
-            preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
-            preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
-            preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
-            onclick : `previewNotebookBuilderMarkdown.call(this, ${NUM_MARKDOWN})`,
-            render_buttons : true,
-            min_height : "100px",
-        }));
-
         //Add hidden label for screen reader
         const label = document.createElement('label');
         label.setAttribute('for', `notebook-builder-markdown-${NUM_MARKDOWN}`);
@@ -41,7 +25,32 @@ class MarkdownWidget extends Widget {
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
         interactive_area.appendChild(label);
-        $(interactive_area).append(markdownArea);
+
+        $.ajax({
+            url: buildCourseUrl(['markdown', 'area']),
+            type: "POST",
+            data: {
+                data: {
+                    markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
+                    markdown_area_name : '',
+                    markdown_area_value : this.state.markdown_string,
+                    placeholder : 'Enter text or markdown...',
+                    preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+                    preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+                    preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
+                    onclick : `previewNotebookBuilderMarkdown.call(this, ${NUM_MARKDOWN})`,
+                    render_buttons : true,
+                    min_height : "100px",
+                },
+                csrf_token: csrfToken
+            },
+            success: function(data) {
+                $(interactive_area).append(data);
+            },
+            error: function() {
+                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+            }
+        });
 
         this.dom_pointer = container;
         return container;

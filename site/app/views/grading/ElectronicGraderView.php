@@ -1621,14 +1621,4 @@ HTML;
             ]
         );
     }
-
-    public function previewOverallComment($enablePreview, $content) {
-        $this->core->getOutput()->disableRender();
-        if (!$enablePreview) {
-            return;
-        }
-        return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
-                "content" => $content
-        ]);
-    }
 }

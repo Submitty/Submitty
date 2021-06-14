@@ -1588,7 +1588,7 @@ function previewForumMarkdown(){
 
   console.log(post_box_num, reply_box, preview_box, preview_button, post_content);
 
-  previewMarkdown(reply_box, preview_box, preview_button, url, { post_content: post_content });
+  previewMarkdown(reply_box, preview_box, preview_button, url, { content: post_content });
 }
 
 function checkInputMaxLength(obj){

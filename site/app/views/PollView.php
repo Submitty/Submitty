@@ -109,14 +109,4 @@ class PollView extends AbstractView {
             'results' => $results
           ]);
     }
-
-    public function previewPollQuestion($enablePreview, $content) {
-        $this->core->getOutput()->disableRender();
-        if (!$enablePreview) {
-            return;
-        }
-        return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
-                "content" => $content
-        ]);
-    }
 }

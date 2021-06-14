@@ -63,16 +63,6 @@ class OfficeHoursQueueView extends AbstractView {
         ]);
     }
 
-    public function previewAnnouncement($enablePreview, $content) {
-        $this->core->getOutput()->disableRender();
-        if (!$enablePreview) {
-            return;
-        }
-        return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
-                "content" => $content
-        ]);
-    }
-
     public function renderNewAnnouncement($viewer) {
         return $this->renderPart($viewer, "officeHoursQueue/AnnouncementMsg.twig");
     }

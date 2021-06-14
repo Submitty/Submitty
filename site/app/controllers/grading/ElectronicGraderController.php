@@ -2966,11 +2966,4 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess("Marks removed successfully!");
         return true;
     }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/overall_comment/preview", methods={"POST"})
-     */
-    public function showMarkdownPreview() {
-        $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'previewOverallComment', $_POST['enablePreview'], $_POST['content']);
-    }
 }
