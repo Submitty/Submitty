@@ -1,4 +1,4 @@
-/* global previewMarkdown buildCourseUrl */
+/* global previewMarkdown */
 /* exported previewPollMarkdown */
 
 function previewPollMarkdown() {
