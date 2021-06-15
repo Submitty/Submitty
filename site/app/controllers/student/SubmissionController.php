@@ -853,6 +853,7 @@ class SubmissionController extends AbstractController {
         if($_POST['regrade_all_students'] === 'true' || $_POST['regrade_all_students_all'] === 'true') {
             $submissions= json_decode($_POST['submissions'], true);
             $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+            $count = 0;
             foreach ($submissions as $submission) {
                 if($_POST['regrade_all_students_all'] === 'true') {
                     $limit = $submission['highest_version'];
@@ -894,9 +895,10 @@ class SubmissionController extends AbstractController {
                     if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
                         return $this->uploadResult("Failed to create file for grading queue.", false);
                     }
+                    $count+=1;
                 }
             }
-            $msg = "submission(s) added to queue for regrading";
+            $msg = $count." submissions added to queue for regrading";
             $this->core->getOutput()->renderResultMessage($msg, true);
             return;
         }
@@ -1501,50 +1503,54 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to create vcs file for grading queue.", false);
             }
         }
-        else {
-            // Then create the file that will trigger autograding, if regrading all, loop through all submissions
-            if($regrade_all === 'true') {
-                for($i = 1; $i < $highest_version + 1; $i++){
-                    //create file name
-                    $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-                        $gradeable->getId(), $who_id, $i];
-                    $queue_file_helper = implode("__", $queue_file_helper);
-                    $queue_file = FileUtils::joinPaths(
-                        $this->core->getConfig()->getSubmittyPath(),
-                        "to_be_graded_queue",
-                        $queue_file_helper
-                    );
-                    //create json file
-                    $queue_data = [
-                        "course" => $this->core->getConfig()->getCourse(),
-                        "gradeable" => $gradeable->getId(),
-                        "is_team" => $gradeable->isTeamAssignment(),
-                        "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
-                        "queue_time" => $current_time,
-                        'regrade' => true,
-                        "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                        "semester" => $this->core->getConfig()->getSemester(),
-                        "team" => $team_id,
-                        "user" => $user_id,
-                        "vcs_checkout" => $vcs_checkout,
-                        "version" => $i,
-                        "who" => $who_id
-                    ];
-                    //add file to directory
-                    if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-                        return $this->uploadResult("Failed to create file for grading queue.", false);
-                    }
-                }
-            }else{
+        // Then create the file that will trigger autograding, if regrading all, loop through all submissions
+        if($regrade_all === 'true') {
+            for($i = 1; $i < $highest_version + 1; $i++){
+                //create file name
+                $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                    $gradeable->getId(), $who_id, $i];
+                $queue_file_helper = implode("__", $queue_file_helper);
+                $queue_file = FileUtils::joinPaths(
+                    $this->core->getConfig()->getSubmittyPath(),
+                    "to_be_graded_queue",
+                    $queue_file_helper
+                );
+                //create json file
+                $queue_data = [
+                    "course" => $this->core->getConfig()->getCourse(),
+                    "gradeable" => $gradeable->getId(),
+                    "is_team" => $gradeable->isTeamAssignment(),
+                    "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                    "queue_time" => $current_time,
+                    'regrade' => true,
+                    "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                    "semester" => $this->core->getConfig()->getSemester(),
+                    "team" => $team_id,
+                    "user" => $user_id,
+                    "vcs_checkout" => $vcs_checkout,
+                    "version" => $i,
+                    "who" => $who_id
+                ];
+                //add file to directory
                 if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
                     return $this->uploadResult("Failed to create file for grading queue.", false);
                 }
             }
-
+        }else{
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
         }
-        //don't make new submission if regrading
+
+
+        //don't make new submission if regrading, just return success message
         if ($regrade || $regrade_all) {
-            $msg = "submission(s) added to queue for regrading";
+            if($regrade === 'true') {
+                $msg = "1 submission from ".$who_id." added to queue for regrading";
+            }
+            else {
+                $msg = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion()." submissions from ".$who_id." added to queue for regrading";
+            }
             $this->core->getOutput()->renderResultMessage($msg, true);
             return;
         }

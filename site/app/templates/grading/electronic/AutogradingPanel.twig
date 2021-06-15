@@ -11,7 +11,7 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="regrade-dropContent">
-                <button class="btn btn-primary" onclick="regradeAll">Regrade All Versions</button>
+                <button class="btn btn-primary" onclick="regradeAll()">Regrade All Versions</button>
             </div>
         </div>
         <div class="inner-container">
@@ -21,7 +21,7 @@
                 {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true) }}
             {% endif %}
         </div>
-
+    </div>
 </div>
 <script>
     function regrade() {

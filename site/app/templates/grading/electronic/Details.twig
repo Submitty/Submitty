@@ -1,12 +1,12 @@
 {% import _self as self %} {# Required to use macros in same template #}
 {% set submission = [] %}
-    {% for section in sections %}
-        {% for row in section.rows %}
-            {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
-                {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getUser().getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
-            {% endif %}
-        {% endfor %}
+{% for section in sections %}
+    {% for row in section.rows %}
+        {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
+            {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getUser().getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
+        {% endif %}
     {% endfor %}
+{% endfor %}
 <input type="hidden" id="submission" value="{{ submission|json_encode }}">
 <div class="content">
     {#
@@ -65,12 +65,12 @@
         </div>
     </div>
     <div class="regrade-dropMenu" style="position: relative; float: right; margin-bottom: 3%">
-        <button class="btn btn-primary" onclick="regradeAllStudents()">Regrade All Active Versions for All students</button>
+        <button class="btn btn-primary regrade-btn">Regrade All Active Versions for All students</button>
         <button class="btn btn-primary regrade-drop-btn">
             <i class="fa fa-caret-down"></i>
         </button>
         <div class="regrade-dropContent">
-            <button class="btn btn-primary" onclick="regradeAllStudentsAll()">Regrade All Versions for All students</button>
+            <button class="btn btn-primary regrade-btn-all">Regrade All Versions for All students</button>
         </div>
     </div>
     <div class="details-action-box">
@@ -705,6 +705,36 @@
 
 {# /Column functions #}
 <script>
+    $(function() {
+        $('.regrade-btn').click(function(e) {
+            var array = document.getElementById('submission').value;
+            var submissions = JSON.parse(array);
+            if(submissions.length > 50) {
+                e.preventDefault();
+                if (window.confirm("Are you sure you want to add " + submissions.length + " submissions to the queue ?")) {
+                    regradeAllStudents(submissions);
+                }
+            }
+        });
+    });
+
+    $(function() {
+        $('.regrade-btn-all').click(function(e) {
+            var array = document.getElementById('submission').value;
+            var submissions = JSON.parse(array);
+            var count = 0;
+            for(var i = 0; i<submissions.length; i++){
+                count+=submissions[i]['highest_version'];
+            }
+            if(count > 50) {
+                e.preventDefault();
+                if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
+                    regradeAllStudentsAll(submissions);
+                }
+            }
+        });
+    });
+
     function changeAnon() {
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
@@ -716,51 +746,12 @@
         location.reload();
     }
 
-    function regradeAllStudents() {
-        var array = document.getElementById('submission').value;
-        var submissions = JSON.parse(array);
-        handleSubmission(0,0,0,0,
-                0,
-                "{{ csrf_token }}",
-                false,
-                0,
-                "{{ gradeable.getId }}",
-                '',
-                '',
-                '',
-                false,
-                1,
-                false,
-                false,
-                false,
-                false,
-                submissions,
-                true
-        )
+    function regradeAllStudents(submissions) {
+        handleSubmission(0, 0, 0, 0, 0, "{{ csrf_token }}", false, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, true)
     }
 
-    function regradeAllStudentsAll() {
-        var array = document.getElementById('submission').value;
-        var submissions = JSON.parse(array);
-        handleSubmission(0,0,0,0,
-                0,
-                "{{ csrf_token }}",
-                false,
-                0,
-                "{{ gradeable.getId }}",
-                '',
-                '',
-                '',
-                false,
-                1,
-                false,
-                false,
-                false,
-                false,
-                submissions,
-                false,
-                true
-        )
+    function regradeAllStudentsAll(submissions) {
+        handleSubmission(0,0,0,0, 0, "{{ csrf_token }}", false, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, false, true)
     }
 </script>
 
