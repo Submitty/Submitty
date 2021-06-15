@@ -136,9 +136,9 @@ class ForumThreadView extends AbstractView {
     }
 
     /** Shows Forums thread splash page, including all posts
-        for a specific thread, in addition to head of the threads
-        that have been created after applying filter and to be
-        displayed in the left panel.
+     * for a specific thread, in addition to head of the threads
+     * that have been created after applying filter and to be
+     * displayed in the left panel.
      */
 
     public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax = false) {
@@ -271,7 +271,8 @@ class ForumThreadView extends AbstractView {
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => $post_content_limit
+                "post_content_limit" => $post_content_limit,
+                "recent" => TRUE
             ]);
         }
         else {
