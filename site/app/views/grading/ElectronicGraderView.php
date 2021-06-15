@@ -792,6 +792,7 @@ HTML;
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('details.css');
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('details.js');
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
         $this->core->getOutput()->addInternalCss('admin-team-form.css');

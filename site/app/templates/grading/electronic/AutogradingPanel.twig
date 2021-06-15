@@ -5,12 +5,15 @@
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
-        <a href="#" class="button split">Split Button <span data-dropdown="drop"></span></a><br>
-        <ul id="drop" class="f-dropdown" data-dropdown-content>
-            <li><a href="#">This is a link</a></li>
-            <li><a href="#">This is another</a></li>
-            <li><a href="#">Yet another</a></li>
-        </ul>
+        <div class="regrade-dropMenu" style="margin-left: 3px">
+            <button class="btn btn-primary" onclick="regrade()">Regrade Active Version</button>
+            <button class="btn btn-primary regrade-drop-btn">
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="regrade-dropContent">
+                <button class="btn btn-primary" onclick="regradeAll">Regrade All Versions</button>
+            </div>
+        </div>
         <div class="inner-container">
             {% if version_instance is null %}
                 <h4>No Submission</h4>
@@ -18,7 +21,7 @@
                 {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true) }}
             {% endif %}
         </div>
-    </div>
+
 </div>
 <script>
     function regrade() {

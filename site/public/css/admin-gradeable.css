@@ -292,48 +292,36 @@ select[name="component-itempool"] {
     width: 100%;
 }
 
-#regrade-button {
-    background-color: #2196F3;
-    color: white;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-    outline: none;
-}
-
-/* The container <div> - needed to position the dropdown content */
-#regrade-dropdown{
+.regrade-dropMenu {
+    margin-top: 10px;
     position: absolute;
     display: inline-block;
 }
 
-/* Dropdown Content (Hidden by Default) */
-#regrade-dropdown-content {
+.regrade-dropContent {
     display: none;
     position: absolute;
-    background-color: #f1f1f1;
     min-width: 160px;
     z-index: 1;
 }
 
-/* Links inside the dropdown */
-#regrade-dropdown-content a {
-    color: black;
+.regrade-dropContent a {
     padding: 12px 16px;
     text-decoration: none;
     display: block;
+    min-width: 160px;
 }
 
-/* Change color of dropdown links on hover */
-#regrade-dropdown-content a:hover {background-color: #ddd}
-
-/* Show the dropdown menu on hover */
-#regrade-dropdown:hover #regrade-dropdown-content {
+.regrade-dropMenu:hover .regrade-dropContent {
     display: block;
 }
 
-/* Change the background color of the dropdown button when the dropdown content is shown */
-#regrade-button:hover, .dropdown:hover .btn  {
+.regrade-drop-btn {
+    margin-left: -4%;
+}
+
+.regrade-drop-btn:hover,
+.regrade-dropMenu:hover .regrade-drop-btn {
     background-color: #0b7dda;
 }
 
