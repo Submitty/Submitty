@@ -826,7 +826,8 @@ HTML;
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "sort" => $sort,
             "direction" => $direction,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "can_regrade"=>$this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR
         ]);
     }
 
@@ -1202,6 +1203,7 @@ HTML;
             "user_id" => $submitter,
             "student_page" => $gradeable->isStudentPdfUpload(),
             "component_names" => $component_names,
+            "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR
         ]);
     }
 

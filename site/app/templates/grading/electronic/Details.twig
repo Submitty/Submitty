@@ -64,15 +64,17 @@
             </div>
         </div>
     </div>
+    {% if can_regrade %}
     <div class="regrade-dropMenu" style="position: relative; float: right; margin-bottom: 3%">
-        <button class="btn btn-primary regrade-btn">Regrade All Active Versions for All students</button>
+        <button class="btn btn-primary regrade-btn regrade-option">Regrade All Active Versions for All students</button>
         <button class="btn btn-primary regrade-drop-btn">
             <i class="fa fa-caret-down"></i>
         </button>
         <div class="regrade-dropContent">
-            <button class="btn btn-primary regrade-btn-all">Regrade All Versions for All students</button>
+            <button class="btn btn-primary regrade-btn-all regrade-option">Regrade All Versions for All students</button>
         </div>
     </div>
+    {% endif %}
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}

@@ -5,15 +5,17 @@
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
+        {% if can_regrade %}
         <div class="regrade-dropMenu" style="margin-left: 3px">
-            <button class="btn btn-primary" onclick="regrade(1)">Regrade Active Version</button>
+            <button class="btn btn-primary regrade-option" onclick="regrade(1)">Regrade Active Version</button>
             <button class="btn btn-primary regrade-drop-btn">
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="regrade-dropContent">
-                <button class="btn btn-primary" onclick="regrade(0)">Regrade All Versions</button>
+                <button class="btn btn-primary regrade-option" onclick="regrade(0)">Regrade All Versions</button>
             </div>
         </div>
+        {% endif %}
         <div class="inner-container">
             {% if version_instance is null %}
                 <h4>No Submission</h4>
@@ -24,54 +26,55 @@
     </div>
 </div>
 <script>
-    function regrade(choice) {
+    function regrade(single_regrade) {
         var git_user_id = "";
         var git_repo_id = "";
         if ({{ is_vcs ? "true" : "false" }}) {
             git_user_id = $("#github-user-id").val();
             git_repo_id = $("#github-repo-id").val();
         }
-        if(choice) {
+        //if only regrading one version
+        if(single_regrade) {
             handleSubmission(
-                    0,
-                    0,
-                    0,
-                    {{ highest_version }},
-                    {{ max_submissions }},
-                    "{{ csrf_token }}",
-                    {{ is_vcs ? "true" : "false" }},
-                    {{ num_inputs }},
-                    "{{ gradeable_id }}",
-                    "{{ user_id }}",
-                    git_user_id,
-                    git_repo_id,
-                    {{ student_page ? "true" : "false" }},
-                    {{ component_names|length }},
-                    false,
-                    false,
-                    true,
+                0,
+                0,
+                0,
+                {{ highest_version }},
+                {{ max_submissions }},
+                "{{ csrf_token }}",
+                {{ is_vcs ? "true" : "false" }},
+                {{ num_inputs }},
+                "{{ gradeable_id }}",
+                "{{ user_id }}",
+                git_user_id,
+                git_repo_id,
+                {{ student_page ? "true" : "false" }},
+                {{ component_names|length }},
+                false,
+                false,
+                true,
             )
         }
         else {
             handleSubmission(
-                    0,
-                    0,
-                    0,
-                    {{ highest_version }},
-                    {{ max_submissions }},
-                    "{{ csrf_token }}",
-                    {{ is_vcs ? "true" : "false" }},
-                    {{ num_inputs }},
-                    "{{ gradeable_id }}",
-                    "{{ user_id }}",
-                    git_user_id,
-                    git_repo_id,
-                    {{ student_page ? "true" : "false" }},
-                    {{ component_names|length }},
-                    false,
-                    false,
-                    false,
-                    true
+                0,
+                0,
+                0,
+                {{ highest_version }},
+                {{ max_submissions }},
+                "{{ csrf_token }}",
+                {{ is_vcs ? "true" : "false" }},
+                {{ num_inputs }},
+                "{{ gradeable_id }}",
+                "{{ user_id }}",
+                git_user_id,
+                git_repo_id,
+                {{ student_page ? "true" : "false" }},
+                {{ component_names|length }},
+                false,
+                false,
+                false,
+                true
             )
         }
     }

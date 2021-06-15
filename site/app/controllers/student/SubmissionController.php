@@ -923,11 +923,6 @@ class SubmissionController extends AbstractController {
         $regrade_all = $_POST['regrade_all'];
         $regrade_all_students = $_POST['regrade_all_students'];
         $submissions = $_POST['submissions'];
-        if($regrade_all === true){
-            $hi = 'hi';
-        }else{
-            $hi = 'bye';
-        }
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
         if ($gradeable === null) {
