@@ -2104,3 +2104,15 @@ $(() => {
 function scrollThreadListTo(element){
   $(element).get(0).scrollIntoView({behavior: "smooth", block: "center"});
 }
+
+//Only used by the posters and only on recent posts (60 minutes since posted)
+function sendAnnouncement(title, thread_post_content, id){
+  $.ajax({
+    type: 'POST',
+    url: buildCourseUrl(['forum', 'make_announcement']),
+    data: {'title': title, "thread_post_content": thread_post_content, 'csrf_token': window.csrfToken},
+    success: function(data){
+      alterAnnouncement(id, "Are you sure you want to pin this thread to the top?", 1, window.csrfToken);
+    },
+  });
+}

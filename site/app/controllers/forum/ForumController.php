@@ -368,6 +368,22 @@ class ForumController extends AbstractController {
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
+    
+    /**
+     * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
+     * @AccessControl(permission="forum.publish")
+     */
+    public function makeAnnouncement(){
+        $full_course_name = $this->core->getFullCourseName();
+        $thread_title = trim($_POST["title"]);
+        $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
+        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
+
+        $subject = "New Announcement: " . Notification::textShortner($thread_title);
+        $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
+        $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
+        $this->core->getNotificationFactory()->onNewAnnouncement($event);
+    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/forum/search", methods={"POST"})

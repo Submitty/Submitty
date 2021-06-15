@@ -272,7 +272,7 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit,
-                "recent" => TRUE
+                "current_time" => new \DateTime("now", $this->core->getConfig()->getTimezone())
             ]);
         }
         else {
@@ -303,6 +303,10 @@ class ForumThreadView extends AbstractView {
         }
 
         return $return;
+    }
+
+    public function isRecent(){
+
     }
 
     // Returns the set of buttons with the corresponding attributes
