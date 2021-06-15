@@ -303,8 +303,8 @@ class PlagiarismController extends AbstractController {
         }
 
         // Check if Lichen job is already running
-        if (file_exists(FileUtils::joinPaths($this->core->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id}.json"))
-            || file_exists(FileUtils::joinPaths($this->core->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))) {
+        if (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id}.json"))
+            || file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))) {
 
             $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
             $this->core->redirect($return_url);
@@ -314,17 +314,17 @@ class PlagiarismController extends AbstractController {
         // Upload instructor provided code
         if ($new_or_edit == "edit") {
             // delete the old provided code
-            deleteExistingProvidedCode($gradeable_id);
+            $this->deleteExistingProvidedCode($gradeable_id);
         }
         if ($_POST['provided_code_option'] == "code_provided") {
             // error checking
-            if (empty($_FILES) || !isset($_FILES['provided_code_file']
-                || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] == "")) {
+            if (empty($_FILES) || !isset($_FILES['provided_code_file'])
+                || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] == "") {
                 $this->core->addErrorMessage("Upload failed: Instructor code not provided");
                 $this->core->redirect($return_url);
             }
             // save the code
-            $ret_str = saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id);
+            $ret_str = $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id);
             if ($ret_str !== "") {
                 $this->core->addErrorMessage("ERROR: could not upload instructor provided code");
                 $this->core->redirect($return_url);
