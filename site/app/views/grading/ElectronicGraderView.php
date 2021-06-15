@@ -864,7 +864,6 @@ HTML;
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
-
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
@@ -1190,7 +1189,15 @@ HTML;
         $component_names = array_map(function (Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
-        $submitter = $graded_gradeable->getSubmitter()->getID();
+
+        //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
+        if($gradeable->isTeamAssignment()) {
+            $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();
+        }
+        else {
+            $id = $graded_gradeable->getSubmitter()->getId();
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
@@ -1200,7 +1207,7 @@ HTML;
             "is_vcs" => $gradeable->isVcs(),
             "num_inputs" => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             "gradeable_id" => $gradeable->getId(),
-            "user_id" => $submitter,
+            "user_id" => $id,
             "student_page" => $gradeable->isStudentPdfUpload(),
             "component_names" => $component_names,
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR
