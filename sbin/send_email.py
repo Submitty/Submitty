@@ -11,7 +11,7 @@ import smtplib
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData, Table, bindparam
+from sqlalchemy import create_engine, MetaData, Table, bindparam, text
 import sys
 import psutil
 
@@ -135,10 +135,10 @@ def construct_mail_client():
 def get_email_queue(db):
     """Get an active queue of internal emails waiting to be sent."""
     query = """SELECT id, user_id, email_address, subject, body FROM emails
-    WHERE email_address SIMILAR TO '%%@(%%.{}|{})' AND sent is NULL AND
+    WHERE email_address SIMILAR TO :format AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
-    query = query.format(EMAIL_INTERNAL_DOMAIN, EMAIL_INTERNAL_DOMAIN)
-    result = db.execute(query)
+    domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
+    result = db.execute(text(query), format = domain_format)
     queued_emails = []
     for row in result:
         queued_emails.append({
@@ -155,17 +155,13 @@ def get_email_queue(db):
 def get_external_queue(db, num):
     """Get an active queue of external emails waiting to be sent."""
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
-    email_address NOT SIMILAR TO '%%@(%%.{}|{})'"""
-    query = query.format(EMAIL_INTERNAL_DOMAIN, EMAIL_INTERNAL_DOMAIN)
-    result = db.execute(query)
+    email_address NOT SIMILAR TO :format"""
+    domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
+    result = db.execute(text(query), format = domain_format)
     query = """SELECT id, user_id, email_address, subject, body FROM emails
-    WHERE sent is NULL AND email_address NOT SIMILAR TO '%%@(%%.{}|{})' AND
-    error = '' ORDER BY id LIMIT {};"""
-    # Guarenteed to be size 1
-    for row in result:
-        query = query.format(EMAIL_INTERNAL_DOMAIN, EMAIL_INTERNAL_DOMAIN,
-                             min(500-int(row[0]), num))
-    result = db.execute(query)
+    WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
+    error = '' ORDER BY id LIMIT :lim;"""
+    result = db.execute(text(query), format = domain_format, lim = min(500-int(result.fetchone()[0]), num))
     queued_emails = []
     for row in result:
         queued_emails.append({
