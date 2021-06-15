@@ -51,16 +51,6 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Variable \\$regex_for_selecting_files might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$instructor_provided_code_path might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
 			count: 4
 			path: app/controllers/admin/PlagiarismController.php

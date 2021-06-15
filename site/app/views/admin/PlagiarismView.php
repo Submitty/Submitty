@@ -158,7 +158,6 @@ class PlagiarismView extends AbstractView {
             "provided_code" => $provided_code,
             "gradeable_ids_titles" => $gradeable_ids_titles,
             "title" => $title,
-            "provided_code" => $provided_code,
             "provided_code_filenames" => $provided_code_filenames,
             "version" => $version,
             "regex" => $regex,

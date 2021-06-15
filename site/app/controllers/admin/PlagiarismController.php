@@ -279,9 +279,10 @@ class PlagiarismController extends AbstractController {
         }
 
         // Check if Lichen job is already running
-        if (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id}.json"))
-                || file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))
-            ) {
+        if (
+            file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id}.json"))
+            || file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))
+        ) {
             $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
             $this->core->redirect($return_url);
         }
@@ -343,7 +344,7 @@ class PlagiarismController extends AbstractController {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
-            $this->core->addErrorMessage("Invalid input provided for sequence length");
+            $this->core->addErrorMessage("Invalid input provided for sequence length. The minimum allowed threshold value is 2");
             $this->core->redirect($return_url);
         }
 
