@@ -170,8 +170,6 @@ class NotebookBuilderController extends AbstractController {
      * Helper function which handles loading all the js / css dependencies notebook builder needs
      */
     private function loadDependencies(): void {
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-
         // Builders
         $this->core->getOutput()->addInternalJs('notebook_builder/builders/abstract-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/builders/root-builder.js');
