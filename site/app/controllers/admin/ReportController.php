@@ -581,6 +581,7 @@ class ReportController extends AbstractController {
             }
         }
         else {
+            var_dump($customization->getCustomizationData());
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
 

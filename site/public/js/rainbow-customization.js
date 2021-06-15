@@ -154,20 +154,24 @@ function getGradeableBuckets()
             var type = $('#' + this.id + ' h3');
             type = type[0].innerHTML.toLowerCase();
             bucket.type = type;
+            console.log('type', type);
 
             // Extract count
             var count = $('#config-count-' + type).val();
             bucket.count = parseInt(count);
+            console.log('count', count);
 
             // Extract percent
             var percent = $('#percent-' + type).val();
             percent = percent / 100;
             bucket.percent = percent;
+            console.log('percent', percent);
 
             // Extract each independent gradeable in the bucket
             var ids = [];
             var selector = `#gradeables-list-${type}`;
             $(selector).children('.gradeable-li').each(function() {
+                console.log('selector child', $(this));
 
                 var gradeable = {};
 
@@ -232,6 +236,7 @@ function getGradeableBuckets()
                 }
 
                 ids.push(gradeable);
+                console.log('gradeable', gradeable);
             });
 
             // Add gradeable buckets to gradeables array

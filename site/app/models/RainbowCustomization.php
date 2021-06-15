@@ -104,10 +104,10 @@ class RainbowCustomization extends AbstractModel {
             ];
         }
 
+        $json_buckets = $this->RCJSON->getGradeables();
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
             $json_buckets = $this->RCJSON->getGradeables();
-
             foreach ($json_buckets as $json_bucket) {
                 // Place those buckets in $this->used_buckets
                 $this->used_buckets[] = $json_bucket->type;
@@ -126,6 +126,36 @@ class RainbowCustomization extends AbstractModel {
         // Reorder buckets
         $this->reorderBuckets();
 
+        //Now that the buckets are ordered and the customization has been initialized, we can
+        //loop through to find differences between the max_values from the database vs the customization JSON
+        if(!is_null($this->RCJSON)){
+            //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
+            //has all buckets (even empty ones) while the JSON only has buckets with content in it.
+            $c_bucket = 0;
+            $j_bucket = 0;
+            while($c_bucket < count($this->customization_data)){
+                //if there are no gradeables in this bucket, skip it
+                if(count($this->customization_data[self::syllabus_buckets[$c_bucket]]) === 0) {
+                    $c_bucket++;
+                    continue;
+                }
+
+                //loop through all gradeables in bucket and compare them
+                $j_index = 0;
+                foreach($this->customization_data[self::syllabus_buckets[$c_bucket]] as &$c_gradeable){
+                    if($c_gradeable['max_score'] !== (float) $json_buckets[$j_bucket]->ids[$j_index]->max){
+                        var_dump($c_gradeable['max_score']);
+                        var_dump($json_buckets[$j_bucket]->ids[$j_index]);
+                        $c_gradeable['max_score'] = $json_buckets[$j_bucket]->ids[$j_index]->max;
+                        var_dump($c_gradeable);
+                    }
+                    $j_index++;
+                }
+
+                $c_bucket++;
+                $j_bucket++;
+            }
+        }
         //XXX: Assuming that the contents of these buckets will be lowercase
         $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
     }

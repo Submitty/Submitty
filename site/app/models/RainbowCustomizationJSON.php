@@ -155,6 +155,7 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
+            //var_dump($json->gradeables['1']);
         }
     }
 
