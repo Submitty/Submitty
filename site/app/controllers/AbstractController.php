@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\libraries\Core;
+use app\models\CourseMaterial;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
@@ -282,10 +283,10 @@ abstract class AbstractController {
     }
 
     /**
-     * Gets a gradeable config from its id.
-     * @param string $gradeable_id
+     * Gets a course material from its path.
+     * @param string $path
      * @param bool $render_json true to render a JSEND response to the output in the failure/error case
-     * @return Gradeable|bool false in the fail/error case
+     * @return CourseMaterial|bool false in the fail/error case
      */
     public function tryGetCourseMaterial(string $path, bool $render_json = true) {
         if ($path === '') {
