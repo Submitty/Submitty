@@ -261,31 +261,6 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
-     */
-    public function configureNewGradeableForPlagiarismForm() {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), ['.', '..']);
-        $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
-            if (!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id_title['g_id'] . ".json")) {
-                unset($gradeable_ids_titles[$i]);
-                continue;
-            }
-            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
-            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
-        }
-
-        usort($gradeable_ids_titles, function ($a, $b) {
-            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
-        });
-
-        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
-    }
-
-    /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
     public function saveNewPlagiarismConfiguration($new_or_edit, $gradeable_id = null) {
@@ -498,6 +473,33 @@ class PlagiarismController extends AbstractController {
         $this->core->redirect($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
     }
 
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
+     */
+    public function configureNewGradeableForPlagiarismForm() {
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), ['.', '..']);
+        $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
+            if (!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id_title['g_id'] . ".json")) {
+                unset($gradeable_ids_titles[$i]);
+                continue;
+            }
+            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
+            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
+        }
+
+        usort($gradeable_ids_titles, function ($a, $b) {
+            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+        });
+
+        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
+    }
+
+
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
      */
@@ -521,6 +523,7 @@ class PlagiarismController extends AbstractController {
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config, $title);
     }
+
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})

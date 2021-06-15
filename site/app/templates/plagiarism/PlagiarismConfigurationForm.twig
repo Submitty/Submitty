@@ -30,17 +30,22 @@
                 </div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {{ no_provided_code }} >
+                        <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {{ provided_code ? "" : "checked" }} >
                         <label for="no_code_provided_id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {{ provided_code }}>
+                        <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {{ provided_code ? "checked" : "" }}>
                         <label for="code_provided_id">Yes</label>
                     </span>
                 </div>
                 <div class="low-margin-top"><input id="provided_code_file" type="file" name="provided_code_file"></div>
-                {% if new_or_edit == "edit" and saved_config['instructor_provided_code'] %}
-                    <div id="current_code_file">Current Provided Code: {{ provided_code_filename }}</div>
+                {% if new_or_edit == "edit" and provided_code %}
+                    <div id="current_code_file">
+                        <div>Current Provided Code:</div>
+                        {% for file_name in provided_code_filenames %}
+                            <div>{{ file_name }}</div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
             </div>
             {##################################################################}
@@ -48,11 +53,11 @@
                 <div class="plag-data-label">Version:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="all_version_id" value="all_versions" name="version_option" {{ all_version }} >
+                        <input type="radio" id="all_version_id" value="all_versions" name="version_option" {{ version == "all_versions" ? "checked" : "" }} >
                         <label for="all_version_id">All Versions</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="active_version_id" value="active_version" name="version_option" {{ active_version }}>
+                        <input type="radio" id="active_version_id" value="active_version" name="version_option" {{ version == "all_versions" ? "" : "checked" }}>
                         <label for="active_version_id">Only Active Version</label>
                     </span>
                 </div>
@@ -69,15 +74,15 @@
                         </span>
                         <span class="right">
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_submissions_dir" name="regex_dir[]" value="submissions">
+                                <input type="checkbox" id="regex_submissions_dir" name="regex_dir[]" value="submissions" {{ "submissions" in regex_dirs ? "checked" : ""}} />
                                 <label for="regex_submissions_dir">Submissions</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_results_dir" name="regex_dir[]" value="results">
+                                <input type="checkbox" id="regex_results_dir" name="regex_dir[]" value="results" {{ "results" in regex_dirs ? "checked" : "" }} />
                                 <label for="regex_results_dir">Results</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_checkout_dir" name="regex_dir[]" value="checkout">
+                                <input type="checkbox" id="regex_checkout_dir" name="regex_dir[]" value="checkout" {{ "checkout" in regex_dirs ? "checked" : "" }} />
                                 <label for="regex_checkout_dir">Checkout</label>
                             </span>
                         </span>
@@ -118,18 +123,18 @@
                 <div class="plag-data-label">Prior Terms Gradeables:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="no_past_terms_id" value="no_past_terms" name="past_terms_option" {{ no_past_terms }}>
+                        <input type="radio" id="no_past_terms_id" value="no_past_terms" name="past_terms_option" {{ prior_terms ? "" : "checked" }}>
                         <label for="no_past_terms_id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="past_terms_id" value="past_terms" name="past_terms_option" {{ past_terms }}>
+                        <input type="radio" id="past_terms_id" value="past_terms" name="past_terms_option" {{ prior_terms ? "checked" : "" }}>
                         <label for="past_terms_id">Yes</label>
                     </span>
                     <div class="past-terms-wrapper" id="prev_gradeable_div">
                         <div id="add_more_prev_gradeable" class="add-more" aria-label="Add more">
                             <i class="fas fa-plus-square"></i>Add more
                         </div>
-                        {% if new_or_edit == "edit" %}
+                        {# {% if new_or_edit == "edit" %}
                             {% for saved_prev_term_gradeable_path in saved_config['prev_term_gradeables'] %}
                                 {% set reversed_per_term_grad_path = saved_prev_term_gradeable_path|reverse %}
                                 {% set exploded_reversed_per_term = reversed_per_term_grad_path|split('/') %}
@@ -175,8 +180,8 @@
                                 </select>
                                 <br />
                             {% endfor %}
-                        {% endif %}
-                        {% set saved_prev_term_grad_length = saved_config['prev_term_gradeables']|length %}
+                        {% endif %} #}
+                        {#{% set saved_prev_term_grad_length = saved_config['prev_term_gradeables']|length %}
                         <select name="prev_sem_{{ saved_prev_term_grad_length }}">
                             <option value="">None</option>
                             {% for sem, sem_courses in prior_term_gradeables %}
@@ -189,20 +194,20 @@
                         </select>
                         <select name="prev_gradeable_{{ saved_prev_term_grad_length }}">
                             <option value="">None</option>
-                        </select>
+                        </select>#}
                     </div>
                 </div>
             </div>
             {##################################################################}
             <div class="plag-data-group">
-                <div class="plag-data-label">Submissions to be Ignored:</div>
+                <div class="plag-data-label">Users to be Ignored:</div>
                 <div id="ignore_submission_div" class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {{ no_ignore }}>
+                        <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {{ ignore_submissions ? "" : "checked" }}>
                         <label for="ignore_none_id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {{ ignore }}>
+                        <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {{ ignore_submissions ? "checked" : "" }}>
                         <label for="ignore_id">Yes</label>
                     </span>
 
@@ -212,12 +217,12 @@
 
                     <div id="text_ignore_submission">
                         {% if new_or_edit == "edit" %}
-                            {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
+                            {# {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
                                 <div name="wrapper_ignore_submission_{{ loop.index0 }}">
                                     <input type="text" name="ignore_submission_{{ loop.index0 }}" class="low-margin-top deletable-text" value="{{ saved_ignore_submission }}"/>
                                     <i class="fa fa-trash delete-btn"></i>
                                 </div>
-                            {% endfor %}
+                            {% endfor %} #}
                         {% else %}
                             <div name="wrapper_ignore_submission_0">
                                 <input type="text" name="ignore_submission_0" class="low-margin-top deletable-text"/>
@@ -353,7 +358,7 @@
             //
 
             if ($('[name="language"]', form).val() == "python") {
-                $('[name="sequence_length"]', form).val('1');
+                $('[name="sequence_length"]', form).val('10');
             }
             else if ($('[name="language"]', form).val() == "cpp") {
                 $('[name="sequence_length"]', form).val('2');
