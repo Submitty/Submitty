@@ -147,6 +147,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id);
+        FileUtils::createDir($target_dir); // creates dir if not yet exists
 
         if (mime_content_type($temporary_file_path) == "application/zip") {
             $zip = new \ZipArchive();
