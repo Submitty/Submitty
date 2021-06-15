@@ -289,6 +289,10 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
     public function saveNewPlagiarismConfiguration($new_or_edit, $gradeable_id = null) {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
         // Determine whether this is a new config or an existing config
         $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']);
         if ($new_or_edit == "new") {
@@ -299,8 +303,6 @@ class PlagiarismController extends AbstractController {
         }
 
         // Check if Lichen job is already running
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
         if (file_exists(FileUtils::joinPaths($this->core->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id}.json"))
             || file_exists(FileUtils::joinPaths($this->core->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))) {
 
@@ -376,7 +378,7 @@ class PlagiarismController extends AbstractController {
         $prev_term_gradeables = [];
         for ($i = 0; $i < $prev_gradeable_number; $i++) {
             if ($_POST['prev_sem_' . $i] != "" && $_POST['prev_course_' . $i] != "" && $_POST['prev_gradeable_' . $i] != "") {
-                array_push($prev_term_gradeables, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $_POST['prev_sem_' . $i], $_POST['prev_course_' . $i], "submissions", $_POST['prev_gradeable_' . $i]));
+                array_push($prev_term_gradeables, FileUtils::joinPaths($course_path, $_POST['prev_sem_' . $i], $_POST['prev_course_' . $i], "submissions", $_POST['prev_gradeable_' . $i]));
             }
         }
 
@@ -393,54 +395,43 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        // =====================================================================
+
         // Save the config.json
-        $config_dir = FileUtils::joinPaths($this->core->getCoursePath(), "lichen", "config");
-        $json_file = FileUtils::joinPaths($config_dir, "lichen_{$semester}_{$course}_{$gradeable_id}.json");
+        $json_file = FileUtils::joinPaths($course_path, "lichen", "config", "lichen_{$semester}_{$course}_{$gradeable_id}.json");
         $json_data = [
-            "semester" =>    $semester,
-            "course" =>     $course,
-            "gradeable" =>  $gradeable_id,
-            "version" =>    $version_option,
-            "file_option" => $file_option,
-            "language" =>   $language,
-            "threshold" =>  $threshold,
-            "hash" => bin2hex(random_bytes(8)),
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable_id,
+            "version" => $version_option,
+            "regex" => $regex_for_selecting_files,
+            "regex_dirs" => $regex_directories,
+            "language" => $language,
+            "threshold" => $threshold,
+            // "hash" => bin2hex(random_bytes(8)),
             "sequence_length" => $sequence_length,
             "prev_term_gradeables" => $prev_term_gradeables,
-            "ignore_submissions" =>   $ignore_submissions,
-            "instructor_provided_code" =>   $instructor_provided_code,
+            "ignore_submissions" => $ignore_submissions
         ];
 
-        if ($file_option == "matching_regex") {
-            $json_data["regex"] = $regex_for_selecting_files;
-        }
-
-        if ($instructor_provided_code == true) {
-            $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;
-        }
-
-        if (file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT)) === false) {
+        if (!@file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT))) {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
             $this->core->redirect($return_url);
         }
 
 
-        // if fails at following step, provided code and configuration still get saved
-
+        // Save the Lichen run timestamp file
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
-        $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", "." . $gradeable_id . ".lichenrun.timestamp"), $current_time_string_tz . "\n")) {
             $this->core->addErrorMessage("Failed to save timestamp file for this Lichen Run. Create the configuration again.");
             $this->core->redirect($return_url);
         }
 
-        // if fails at following step, provided code, configuration, and timestamp file still get saved
 
+        // Create the Lichen job
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if ($ret !== null) {
-            $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
+            $this->core->addErrorMessage("Failed to add configuration to Lichen queue. Create the configuration again.");
             $this->core->redirect($return_url);
         }
 
