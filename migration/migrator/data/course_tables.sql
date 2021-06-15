@@ -183,38 +183,6 @@ CREATE TABLE public.course_materials (
 
 
 --
--- Name: course_materials_access; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.course_materials_access (
-    id integer NOT NULL,
-    course_material_id text NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
-    user_id character varying(255) NOT NULL
-);
-
-
---
--- Name: course_materials_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.course_materials_access_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: course_materials_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.course_materials_access_id_seq OWNED BY public.course_materials_access.id;
-
-
---
 -- Name: course_materials_sections; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1142,13 +1110,6 @@ ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nex
 
 
 --
--- Name: course_materials_access id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT nextval('public.course_materials_access_id_seq'::regclass);
-
-
---
 -- Name: gradeable_access id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1260,14 +1221,6 @@ ALTER TABLE ONLY public.categories_list
 
 ALTER TABLE ONLY public.categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
-
-
---
--- Name: course_materials_access course_materials_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_access
-    ADD CONSTRAINT course_materials_access_pkey PRIMARY KEY (id);
 
 
 --

@@ -280,4 +280,35 @@ abstract class AbstractController {
             return false;
         }
     }
+
+    /**
+     * Gets a gradeable config from its id.
+     * @param string $gradeable_id
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
+     * @return Gradeable|bool false in the fail/error case
+     */
+    public function tryGetCourseMaterial(string $path, bool $render_json = true) {
+        if ($path === '') {
+            if ($render_json) {
+                $this->core->getOutput()->renderJsonFail('Missing path parameter');
+            }
+            return false;
+        }
+
+        // Get the gradeable
+        try {
+            return $this->core->getQueries()->getCourseMaterial($path);
+        }
+        catch (\InvalidArgumentException $e) {
+            if ($render_json) {
+                $this->core->getOutput()->renderJsonFail('Invalid path parameter');
+            }
+        }
+        catch (\Exception $e) {
+            if ($render_json) {
+                $this->core->getOutput()->renderJsonError('Failed to load gradeable');
+            }
+        }
+        return false;
+    }
 }

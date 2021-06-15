@@ -32,16 +32,6 @@ def up(config, database, semester, course):
     )
     database.execute(
         """
-        CREATE TABLE IF NOT EXISTS course_materials_access (
-            id SERIAL NOT NULL PRIMARY KEY,
-            course_material_id TEXT NOT NULL,
-            timestamp timestamptz NOT NULL,
-            user_id varchar(255) NOT NULL
-        );
-        """
-    )
-    database.execute(
-        """
         CREATE TABLE IF NOT EXISTS course_materials_sections (
             course_material_id TEXT NOT NULL,
             section_id varchar(255) NOT NULL,

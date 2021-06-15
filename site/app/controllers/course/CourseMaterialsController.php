@@ -89,10 +89,6 @@ class CourseMaterialsController extends AbstractController {
         // Always delete the zip file after script execution
         register_shutdown_function('unlink', $zip_name);
 
-        // getting the meta-data of the course-material in '$json' variable
-        //$file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-        //$json = FileUtils::readJsonFile($file_data);
-
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $isFolderEmptyForMe = true;
@@ -104,7 +100,7 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $file_path = $file->getRealPath();
-                $course_material = $this->core->getQueries()->getCourseMaterial($file_path);
+                $course_material = $this->tryGetCourseMaterial($file_path, false);
                 if ($course_material != false) {
                     if (!$this->core->getUser()->accessGrading()) {
                         // only add the file if the section of student is allowed and course material is released!
@@ -166,17 +162,27 @@ class CourseMaterialsController extends AbstractController {
             $data = [$data];
         }
 
+        $has_error = false;
+
         foreach ($data as $filename) {
             if (!isset($filename)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
-            $course_material = $this->core->getQueries()->getCourseMaterial($file_name);
-            $course_material->setReleaseDate($new_data_time);
-            $this->core->getQueries()->updateCourseMaterial($course_material);
+            $course_material = $this->tryGetCourseMaterial($file_name, false);
+            if ($course_material != false) {
+                $course_material->setReleaseDate($new_data_time);
+                $this->core->getQueries()->updateCourseMaterial($course_material);
+            }
+            else {
+                $has_error = true;
+            }
         }
 
+        if ($has_error) {
+            return JsonResponse::getErrorResponse("Failed to find one of the gradeables.");
+        }
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
 
@@ -192,7 +198,10 @@ class CourseMaterialsController extends AbstractController {
         if ($requested_path === '') {
             return JsonResponse::getErrorResponse("Requested path cannot be empty");
         }
-        $course_material = $this->core->getQueries()->getCourseMaterial($requested_path);
+        $course_material = $this->tryGetCourseMaterial($requested_path, false);
+        if ($course_material == false) {
+            return JsonResponse::getErrorResponse("Course material not found");
+        }
 
         //handle sections here
 
