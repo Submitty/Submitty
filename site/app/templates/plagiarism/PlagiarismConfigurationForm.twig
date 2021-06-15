@@ -48,7 +48,7 @@
                 <div class="plag-data-label">Version:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="all_version_id" value="all_version" name="version_option" {{ all_version }} >
+                        <input type="radio" id="all_version_id" value="all_versions" name="version_option" {{ all_version }} >
                         <label for="all_version_id">All Versions</label>
                     </span>
                     <span class="radio-label-pair">
@@ -69,15 +69,15 @@
                         </span>
                         <span class="right">
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_submissions_dir" name="regex_submissions_dir">
+                                <input type="checkbox" id="regex_submissions_dir" name="regex_dir" value="submissions">
                                 <label for="regex_submissions_dir">Submissions</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_results_dir" name="regex_results_dir">
+                                <input type="checkbox" id="regex_results_dir" name="regex_dir" value="results">
                                 <label for="regex_results_dir">Results</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_checkout_dir" name="regex_checkout_dir">
+                                <input type="checkbox" id="regex_checkout_dir" name="regex_dir" value="checkout">
                                 <label for="regex_checkout_dir">Checkout</label>
                             </span>
                         </span>

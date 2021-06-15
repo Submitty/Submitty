@@ -87,4 +87,11 @@ class PlagiarismUtils {
 
         return $resultArray;
     }
+
+    /**
+     * @return string[]
+     */
+    public static function getSupportedLanguages(): array {
+        return ["plaintext", "python", "java", "cpp", "mips"];
+    }
 }
