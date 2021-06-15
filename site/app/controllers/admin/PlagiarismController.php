@@ -343,7 +343,7 @@ class PlagiarismController extends AbstractController {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
-            $this->core->addErrorMessage("Invalid input provided for sequence length");
+            $this->core->addErrorMessage("Invalid input provided for sequence length. The minimum allowed threshold value is 2");
             $this->core->redirect($return_url);
         }
 
