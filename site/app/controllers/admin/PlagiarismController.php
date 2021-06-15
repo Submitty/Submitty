@@ -279,8 +279,8 @@ class PlagiarismController extends AbstractController {
 
         // Check if Lichen job is already running
         if (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id}.json"))
-            || file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))) {
-
+                || file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}.json"))
+            ) {
             $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
             $this->core->redirect($return_url);
         }
@@ -293,8 +293,7 @@ class PlagiarismController extends AbstractController {
         }
         if ($_POST['provided_code_option'] == "code_provided") {
             // error checking
-            if (empty($_FILES) || !isset($_FILES['provided_code_file'])
-                || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] == "") {
+            if (empty($_FILES) || !isset($_FILES['provided_code_file']) || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] == "") {
                 $this->core->addErrorMessage("Upload failed: Instructor code not provided");
                 $this->core->redirect($return_url);
             }
