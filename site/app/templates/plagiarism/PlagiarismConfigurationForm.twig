@@ -61,38 +61,27 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Files to be Compared:</div>
                 <div class="plag-data">
-                    <span class="radio-label-pair">
-                        <input type="radio" id="all_files_id" value="all_files" name="file_option" {{ all_files }}>
-                        <label for="all_files_id">All Files</label>
-                    </span>
-                    <span class="radio-label-pair">
-                        <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {{ regex_matching_files }}>
-                        <label for="regex_matching_files_id">Regex matching files</label>
-                    </span>
-
                     <div id="files_to_be_compared">
                         <span class="option-alt">
                             <a target=_blank href="https://https://submitty.org/instructor/course_management/plagiarism">How do I specify a regex expression?
                                 <i style="font-style: normal;" class="fa-question-circle"></i>
                             </a>
                         </span>
-                        <table class="regex-table">
-                            <tr>
-                                <td><input type="checkbox"></input></td>
-                                <td>Submissions:</td>
-                                <td><input type="text" id="regex_to_select_files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}"/></td>{# id's and name should change #}
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox"></input></td>
-                                <td>Results:</td>
-                                <td><input type="text" id="regex_to_select_files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}"/></td>{# id's and name should change #}
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox"></input></td>
-                                <td>Checkout:</td>
-                                <td><input type="text" id="regex_to_select_files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}"/></td>{# id's and name should change #}
-                            </tr>
-                        </table>
+                        <span class="right">
+                            <span class="radio-label-pair">
+                                <input type="checkbox" id="regex_submissions_dir" name="regex_submissions_dir">
+                                <label for="regex_submissions_dir">Submissions</label>
+                            </span>
+                            <span class="radio-label-pair">
+                                <input type="checkbox" id="regex_results_dir" name="regex_results_dir">
+                                <label for="regex_results_dir">Results</label>
+                            </span>
+                            <span class="radio-label-pair">
+                                <input type="checkbox" id="regex_checkout_dir" name="regex_checkout_dir">
+                                <label for="regex_checkout_dir">Checkout</label>
+                            </span>
+                        </span>
+                        <input type="text" id="regex_to_select_files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}"/>
                     </div>
                 </div>
             </div>

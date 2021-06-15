@@ -87,7 +87,7 @@ input[type=text]:invalid {
 }
 
 #text_ignore_submission, #current_code_file, #provided_code_file,
-#add_more_ignore, #files_to_be_compared, #prev_gradeable_div {
+#add_more_ignore, #prev_gradeable_div {
     display: none;
 }
 
@@ -101,16 +101,8 @@ input[type=text]:invalid {
     margin-left: 0;
 }
 
-.regex-table td {
-    padding-left: .2rem;
-}
-
-.regex-table td:first-of-type {
-    padding-left: 0;
-}
-
-.regex-table td:last-of-type {
-    width: 100%;
+.right {
+    float: right;
 }
 
 .low-margin-top {
