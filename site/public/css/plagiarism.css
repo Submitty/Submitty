@@ -189,6 +189,10 @@ main#main.full-screen-mode .plagiarism-result-cont {
     border: 1px solid var(--text-black);
 }
 
+[data-theme="dark"] .plag-legend {
+    border: 1px solid transparent;
+}
+
 @media (max-width: 660px) {
     .nav-buttons a {
         width: 100%;
