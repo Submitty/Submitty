@@ -41,6 +41,7 @@
                 <div class="low-margin-top"><input id="provided_code_file" type="file" name="provided_code_file"></div>
                 {% if new_or_edit == "edit" and provided_code %}
                     <div id="current_code_file">
+                        <br />
                         <div>Current Provided Code:</div>
                         {% for file_name in provided_code_filenames %}
                             <div>{{ file_name }}</div>
@@ -249,13 +250,12 @@
         configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 
-    // FILES TO BE COMPARED ////////////////////////////////////////////////////
-    $("#all_files_id").change(function() {
-        $("#files_to_be_compared").hide();
-    });
-
-    $("#regex_matching_files_id").change(function() {
-        $("#files_to_be_compared").show();
+    // INITIALIZATION //////////////////////////////////////////////////////////
+    $(document).ready(function() {
+        if ({{ provided_code ? "true" : "false" }}) {
+            $("#current_code_file").show();
+            $("#provided_code_file").show();
+        }
     });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////

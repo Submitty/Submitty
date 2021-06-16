@@ -289,13 +289,13 @@ class PlagiarismController extends AbstractController {
 
 
         // Upload instructor provided code
-        if ($new_or_edit == "edit") {
+        if ($new_or_edit === "edit" && ($_POST['provided_code_option'] !== "code_provided" || $_FILES['provided_code_file']['tmp_name'] !== "")) {
             // delete the old provided code
             $this->deleteExistingProvidedCode($gradeable_id);
         }
-        if ($_POST['provided_code_option'] == "code_provided") {
+        if ($_POST['provided_code_option'] === "code_provided" && $_FILES['provided_code_file']['tmp_name'] !== "") {
             // error checking
-            if (empty($_FILES) || !isset($_FILES['provided_code_file']) || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] == "") {
+            if (empty($_FILES) || !isset($_FILES['provided_code_file']) || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] === "") {
                 $this->core->addErrorMessage("Upload failed: Instructor code not provided");
                 $this->core->redirect($return_url);
             }
