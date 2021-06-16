@@ -129,22 +129,22 @@ class RainbowCustomization extends AbstractModel {
 
         //Now that the buckets are ordered and the customization has been initialized, we can
         //loop through to find differences between the max_values from the database vs the customization JSON
-        if(!is_null($this->RCJSON)){
+        if (!is_null($this->RCJSON)) {
             //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
             //has all buckets (even empty ones) while the JSON only has buckets with content in it.
             $c_bucket = 0;
             $j_bucket = 0;
-            while($c_bucket < count($this->customization_data)){
+            while ($c_bucket < count($this->customization_data)) {
                 //if there are no gradeables in this bucket, skip it
-                if(count($this->customization_data[self::syllabus_buckets[$c_bucket]]) === 0) {
+                if (count($this->customization_data[self::syllabus_buckets[$c_bucket]]) === 0) {
                     $c_bucket++;
                     continue;
                 }
 
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
-                foreach($this->customization_data[self::syllabus_buckets[$c_bucket]] as &$c_gradeable){
-                    if($c_gradeable['max_score'] !== (float) $json_buckets[$j_bucket]->ids[$j_index]->max){
+                foreach ($this->customization_data[self::syllabus_buckets[$c_bucket]] as &$c_gradeable) {
+                    if ($c_gradeable['max_score'] !== (float) $json_buckets[$j_bucket]->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_buckets[$j_bucket]->ids[$j_index]->max;
                     }
