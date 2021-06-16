@@ -63,7 +63,7 @@ class SimpleLateUser extends AbstractModel {
 
         if (isset($details['allowed_late_days']) && isset($details['since_timestamp'])) {
             $this->allowed_late_days = $details['allowed_late_days'];
-            $this->since_timestamp = DateUtils::parseDateTime($details['since_timestamp'], $this->core->getUser()->getUsableTimeZone());
+            $this->since_timestamp = DateUtils::parseDateTime($details['since_timestamp'], $this->core->getDateTimeNow()->getTimezone());
         }
         if (isset($details['late_day_exceptions'])) {
             $this->late_day_exceptions = $details['late_day_exceptions'];
