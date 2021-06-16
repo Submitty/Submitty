@@ -24,6 +24,7 @@ td .plag-action-btn-cont a:not(:last-child) {
 .run-log-data {
     text-align: left;
     width: inherit;
+    background-color: var(--table-info);
 }
 
 .run-log-data pre {
