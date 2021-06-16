@@ -89,4 +89,11 @@
         </div>
     </div>
 </div>
-
+<script>
+    //if student/team name(s) are being displayed
+    if ({{ not anon_mode and not isBlind and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) }}) {
+        $('.navigation-box').css({'position':'relative'});
+        $('.navigation-box').css({'float':'left'});
+        $('.navigation-box').css({'margin-left':'20%'});
+    }
+</script>

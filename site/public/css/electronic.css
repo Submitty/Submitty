@@ -491,8 +491,9 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name{
-    display: flex;
-    margin: auto;
+    position: relative;
+    float: left;
+    padding-left: 5px;
 }
 
 #regrade_inner_info .inner-container {
