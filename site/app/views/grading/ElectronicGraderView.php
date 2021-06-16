@@ -827,7 +827,7 @@ HTML;
             "sort" => $sort,
             "direction" => $direction,
             "csrf_token" => $this->core->getCsrfToken(),
-            "can_regrade"=>$this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "is_team" => $gradeable->isTeamAssignment(),
             "is_vcs" => $gradeable->isVcs()
         ]);
@@ -1193,7 +1193,7 @@ HTML;
         }, $gradeable->getComponents());
 
         //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
-        if($gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment()) {
             $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();
         }
         else {

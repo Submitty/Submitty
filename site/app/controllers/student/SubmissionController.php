@@ -870,7 +870,8 @@ class SubmissionController extends AbstractController {
             foreach ($submissions as $submission) {
                 if ($regrade_all_students_all === 'true') {
                     $limit = $submission['highest_version'];
-                } else {
+                }
+                else {
                     $limit = 1;
                 }
                 for ($i = 1; $i < $limit + 1; $i++) {
@@ -886,13 +887,15 @@ class SubmissionController extends AbstractController {
                             $who_id = $team_id;
                             $user_id = "";
                             $is_team = true;
-                        } else {
+                        }
+                        else {
                             return $this->uploadResult("Must be on a team to access submission.", false);
                         }
                     }
                     if ($regrade_all_students_all === 'true') {
                         $active_version = $i;
-                    } else {
+                    }
+                    else {
                         $active_version = $submission['active_version'];
                     }
                     //create file name
@@ -941,21 +944,24 @@ class SubmissionController extends AbstractController {
                     $team_id = $team->getId();
                     $who_id = $team_id;
                     $user_id = "";
-                } else {
+                }
+                else {
                     return $this->uploadResult("Must be on a team to access submission.", false);
                 }
             }
             if ($regrade_all === 'true') {
                 $limit = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-            } else {
+            }
+            else {
                 $limit = 1;
             }
-            for($i = 1; $i < $limit + 1; $i++){
+            for ($i = 1; $i < $limit + 1; $i++) {
                 $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
                 $vcs_checkout = $_POST['vcs_checkout'];
                 if ($regrade_all === 'true') {
                     $active_version = $i;
-                } else {
+                }
+                else {
                     $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
                 }
                 $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
@@ -988,7 +994,8 @@ class SubmissionController extends AbstractController {
 
             if ($regrade === 'true') {
                 $msg = "1 submission from " . $who_id . " added to queue for regrading";
-            } else {
+            }
+            else {
                 $msg = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() . " submissions from " . $who_id . " added to queue for regrading";
             }
             return $this->core->getOutput()->renderResultMessage($msg, true);
