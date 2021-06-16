@@ -294,7 +294,6 @@ select[name="component-itempool"] {
 
 .regrade-dropMenu {
     margin-top: 10px;
-    position: absolute;
     display: inline-block;
 }
 
@@ -311,6 +310,12 @@ select[name="component-itempool"] {
 
 .regrade-option {
     border: 1px solid var(--standard-pale-gray);
+    width: 210px !important;
+}
+
+.regrade-option-details {
+    border: 1px solid var(--standard-pale-gray);
+    width: 320px !important;
 }
 
 .regrade-drop-btn {
@@ -320,7 +325,6 @@ select[name="component-itempool"] {
 
 .regrade-drop-btn:hover,
 .regrade-dropMenu:hover .regrade-drop-btn {
-    border: 1px solid var(--standard-pale-gray);
     background-color: var(--standard-medium-blue);
 }
 

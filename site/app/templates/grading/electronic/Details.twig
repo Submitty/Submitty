@@ -3,7 +3,11 @@
 {% for section in sections %}
     {% for row in section.rows %}
         {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
-            {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getUser().getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
+            {% if is_team %}
+                {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getTeam().getMemberUsers()[0].getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
+            {% else %}
+                {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getUser().getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
+            {% endif %}
         {% endif %}
     {% endfor %}
 {% endfor %}
@@ -66,12 +70,12 @@
     </div>
     {% if can_regrade %}
     <div class="regrade-dropMenu" style="position: relative; float: right; margin-bottom: 3%">
-        <button class="btn btn-primary regrade-btn regrade-option">Regrade All Active Versions for All students</button>
+        <button class="btn btn-primary regrade-btn regrade-option-details">Regrade All Active Versions for All students</button>
         <button class="btn btn-primary regrade-drop-btn">
             <i class="fa fa-caret-down"></i>
         </button>
         <div class="regrade-dropContent">
-            <button class="btn btn-primary regrade-btn-all regrade-option">Regrade All Versions for All students</button>
+            <button class="btn btn-primary regrade-btn-all regrade-option-details">Regrade All Versions for All students</button>
         </div>
     </div>
     {% endif %}
@@ -711,11 +715,15 @@
         $('.regrade-btn').click(function(e) {
             var array = document.getElementById('submission').value;
             var submissions = JSON.parse(array);
+            console.log(submissions);
             if(submissions.length > 50) {
                 e.preventDefault();
                 if (window.confirm("Are you sure you want to add " + submissions.length + " submissions to the queue ?")) {
                     regradeAllStudents(submissions);
                 }
+            }
+            else {
+                regradeAllStudents(submissions);
             }
         });
     });
@@ -731,8 +739,11 @@
             if(count > 50) {
                 e.preventDefault();
                 if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
-                    regradeAllStudentsAll(submissions);
+
                 }
+            }
+            else {
+                regradeAllStudentsAll(submissions);
             }
         });
     });
@@ -747,13 +758,13 @@
         }
         location.reload();
     }
-
+    //some fields are left 0 or blank because it will be determined later for each specific graded gradeable
     function regradeAllStudents(submissions) {
-        handleSubmission(0, 0, 0, 0, 0, "{{ csrf_token }}", false, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, true)
+        handleSubmission(0, 0, 0, 0, 0, "{{ csrf_token }}", {{ is_vcs ? "true" : "false" }}, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, true)
     }
 
     function regradeAllStudentsAll(submissions) {
-        handleSubmission(0,0,0,0, 0, "{{ csrf_token }}", false, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, false, true)
+        handleSubmission(0,0,0,0, 0, "{{ csrf_token }}", {{ is_vcs ? "true" : "false" }}, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, false, true)
     }
 </script>
 

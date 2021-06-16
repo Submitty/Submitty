@@ -827,7 +827,9 @@ HTML;
             "sort" => $sort,
             "direction" => $direction,
             "csrf_token" => $this->core->getCsrfToken(),
-            "can_regrade"=>$this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR
+            "can_regrade"=>$this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "is_team" => $gradeable->isTeamAssignment(),
+            "is_vcs" => $gradeable->isVcs()
         ]);
     }
 

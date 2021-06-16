@@ -849,7 +849,6 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
-
         if($_POST['regrade_all_students'] === 'true' || $_POST['regrade_all_students_all'] === 'true') {
             $submissions= json_decode($_POST['submissions'], true);
             $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -861,14 +860,30 @@ class SubmissionController extends AbstractController {
                     $limit = 1;
                 }
                 for($i = 1; $i < $limit+1; $i++) {
-                    $submitter = $submission['submitter'];
+                    $user_id = $submission['submitter'];
+                    $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+                    $who_id = $user_id;
+                    $team_id = "";
+                    $is_team = false;
+                    if ($gradeable->isTeamAssignment()) {
+                        if ($graded_gradeable !== null) {
+                            $team = $graded_gradeable->getSubmitter()->getTeam();
+                            $team_id = $team->getId();
+                            $who_id = $team_id;
+                            $user_id = "";
+                            $is_team = true;
+                        }
+                        else {
+                            return $this->uploadResult("Must be on a team to access submission.", false);
+                        }
+                    }
                     if($_POST['regrade_all_students_all'] === 'true') {
                         $active_version = $i;
                     }else{
                         $active_version = $submission['active_version'];
                     }
                     $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-                        $gradeable_id, $submitter, $active_version];
+                        $gradeable_id, $who_id, $active_version];
                     $queue_file_helper = implode("__", $queue_file_helper);
                     $queue_file = FileUtils::joinPaths(
                         $this->core->getConfig()->getSubmittyPath(),
@@ -879,17 +894,17 @@ class SubmissionController extends AbstractController {
                     $queue_data = [
                         "course" => $this->core->getConfig()->getCourse(),
                         "gradeable" => $gradeable_id,
-                        "is_team" => false,
+                        "is_team" => $is_team,
                         "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
-                        "queue_time" => 54,
+                        "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                         'regrade' => true,
                         "required_capabilities" =>$gradeable->getAutogradingConfig()->getRequiredCapabilities(),
                         "semester" => $this->core->getConfig()->getSemester(),
-                        "team" => '',
-                        "user" => $submitter,
+                        "team" => $team_id,
+                        "user" => $user_id,
                         "vcs_checkout" => false,
                         "version" => $active_version,
-                        "who" => $submitter
+                        "who" => $who_id
                     ];
                     //add file to directory
                     if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
@@ -1486,8 +1501,8 @@ class SubmissionController extends AbstractController {
             ];
         }
 
-
-        if ($gradeable->isTeamAssignment()) {
+        //this is not necessary for regrading
+        if ($gradeable->isTeamAssignment() && $regrade === 'false' && $regrade_all === 'false') {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
 
@@ -1539,7 +1554,7 @@ class SubmissionController extends AbstractController {
 
 
         //don't make new submission if regrading, just return success message
-        if ($regrade || $regrade_all) {
+        if ($regrade === 'true' || $regrade_all === 'true') {
             if($regrade === 'true') {
                 $msg = "1 submission from ".$who_id." added to queue for regrading";
             }

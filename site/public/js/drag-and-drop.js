@@ -893,7 +893,6 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             return;
         }
     }
-
     var formData = new FormData();
     var json_submissions = JSON.stringify(submissions);
     formData.append('csrf_token', csrf_token);
