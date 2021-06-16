@@ -2110,9 +2110,27 @@ function sendAnnouncement(title, thread_post_content, id){
   $.ajax({
     type: 'POST',
     url: buildCourseUrl(['forum', 'make_announcement']),
-    data: {'title': title, "thread_post_content": thread_post_content, 'csrf_token': window.csrfToken},
+    data: {'title': title, "thread_post_content": thread_post_content, "id": id, 'csrf_token': window.csrfToken},
     success: function(data){
       alterAnnouncement(id, "Are you sure you want to pin this thread to the top?", 1, window.csrfToken);
     },
+  });
+}
+
+function checkIfAnnounced(id){
+  //$('.pin-and-email-message').hide();
+  console.log("yeet");
+  $.ajax({
+    type: 'GET',
+    url: buildUrl(['email', 'check_announcemnt']),
+    data: {'thread_id': id, csrfToken: csrfToken},
+    success: function(res) {
+      console.log(res);
+      console.log(buildUrl(['email', 'check_announcemnt']));
+      const response = JSON.parse(res);
+      if (response.status === "success" && response.exists === "true"){
+        $('.pin-and-email-message').show();
+      }
+    }
   });
 }

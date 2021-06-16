@@ -373,7 +373,20 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
-    public function makeAnnouncement(){
+    public function makeAnnouncement() {
+        // add check here
+        // check that it's the first post
+        // check that it hasn't been an hour
+        if (!isset($_POST['id'])) {
+            return;
+        }
+        $thread_info = $this->core->getQueries()->findPost($_POST['id']);
+        if ($thread_info["parent_id"] != -1) {
+            return;
+        }
+        $dateTime = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat('forum'), $thread_info['timestamp']);
+        $now = $this->core->getDateTimeNow();
+        
         $full_course_name = $this->core->getFullCourseName();
         $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);

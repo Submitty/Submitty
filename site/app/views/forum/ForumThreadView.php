@@ -271,8 +271,7 @@ class ForumThreadView extends AbstractView {
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => $post_content_limit,
-                "current_time" => new \DateTime("now", $this->core->getConfig()->getTimezone())
+                "post_content_limit" => $post_content_limit
             ]);
         }
         else {
@@ -303,10 +302,6 @@ class ForumThreadView extends AbstractView {
         }
 
         return $return;
-    }
-
-    public function isRecent(){
-
     }
 
     // Returns the set of buttons with the corresponding attributes

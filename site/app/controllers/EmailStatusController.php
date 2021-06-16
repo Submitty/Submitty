@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\views\email\EmailStatusView;
 use app\libraries\routers\AccessControl;
@@ -32,5 +33,19 @@ class EmailStatusController extends AbstractController {
                 $result
             )
         );
+    }
+
+    /**
+     * @Route("email/check_announcemnt", methods={"GET"})
+     * @return JsonResponse
+     */
+    public function checkAnnouncement(){
+        if ($_GET["id"]) {
+            $exists = $this->core->getQueries()->existsAnnouncementsId($_GET["id"]);
+            return JsonResponse::getSuccessResponse([
+                "exists" => $exists
+            ]);
+        }
+        return JsonResponse::getFailResponse("No id provided");
     }
 }

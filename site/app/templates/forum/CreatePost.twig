@@ -67,15 +67,15 @@
         <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
     {% endif %}
 
+    {% if post.author_user_id == current_user and first and date() < date(post_date)|date_modify("+1hour") and userGroup <= 1%}
+        <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{"\"" ~ activeThreadTitle ~ "\""}}, {{"\"" ~ post_content ~ "\""}}, {{ activeThread.id }});"> Pin &amp; email this thread </a>
+    {% endif %}
+
     <span class="post-action-container">
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}
             <a class="post-email-toggle key_to_click" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
             <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
-        {% endif %}
-        
-        {% if post.author_user_id == current_user and first and date() < date(post_date)|date_modify("+1hour") %}
-            <a class="pin-and-email-message btn btn-primary" onclick="sendAnnouncement({{"\"" ~ activeThreadTitle ~ "\""}}, {{"\"" ~ post_content ~ "\""}}, {{ activeThread.id }})"> Pin &amp; email this thread </a>
         {% endif %}
         
         {% if userGroup <= 2 %}
@@ -134,3 +134,9 @@
 
     </form>
 {% endif %}
+
+<script>
+    $(document).ready(function() {
+        checkIfAnnounced({{ activeThread.id }});
+    });
+</script>
