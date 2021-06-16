@@ -55,14 +55,9 @@ class GradingOrder extends AbstractModel {
     protected $not_fully_graded;
 
     /**
-     * @var bool to_ungraded
+     * @var string[] $grade_inquiry_users
      */
-    protected $to_ungraded;
-
-    /**
-     * @var bool $skip_component_itempool
-     */
-    protected $skip_component_itempool;
+    protected $grade_inquiry_users;
 
     /**
      * @var int|null $notebook_item_index
@@ -124,9 +119,6 @@ class GradingOrder extends AbstractModel {
             /* @var GradedGradeable $graded_gradeable */
             $this->has_submission[$id] = $version > 0;
         }
-
-        $this->to_ungraded = false;
-        $this->skip_component_itempool = true;
 
         $this->notebook_item_index = null;
         $this->itempool_selected_idx = null;
@@ -201,21 +193,8 @@ class GradingOrder extends AbstractModel {
      * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
      * @return Submitter|null Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter, bool $to_ungraded = false, int $component_id = -1, bool $to_same_itempool = false): ?Submitter {
-        $this->to_ungraded = $to_ungraded;
-        if ($to_ungraded) {
-            $this->initUsersNotFullyGraded($component_id);
-        }
-
-        $this->skip_component_itempool = true;
-        if ($to_same_itempool && $component_id !== "-1" && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
-            $this->skip_component_itempool = false;
-        }
-
-        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
-            return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
-             && ($this->skip_component_itempool || $this->isSameItempool($sub));
-        });
+    public function getPrevSubmitter(Submitter $submitter,  int $component_id = -1, string $filter = 'default'): ?Submitter {
+        return $this->getPrevSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
     }
 
     /**
@@ -227,21 +206,8 @@ class GradingOrder extends AbstractModel {
      * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
      * @return Submitter|null Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter, bool $to_ungraded = false, int $component_id = -1, bool $to_same_itempool = false): ?Submitter {
-        $this->to_ungraded = $to_ungraded;
-        if ($to_ungraded) {
-            $this->initUsersNotFullyGraded($component_id);
-        }
-
-        $this->skip_component_itempool = true;
-        if ($to_same_itempool && $component_id !== "-1" && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
-            $this->skip_component_itempool = false;
-        }
-
-        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
-            return (!$this->to_ungraded || in_array($sub->getId(), $this->not_fully_graded)) && $this->getHasSubmission($sub)
-             && ($this->skip_component_itempool || $this->isSameItempool($sub));
-        });
+    public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
+        return $this->getNextSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
     }
 
     /**
@@ -253,6 +219,58 @@ class GradingOrder extends AbstractModel {
         if (is_null($this->not_fully_graded)) {
             $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
         }
+    }
+
+    private function initUsersGradeInquiry(bool $ungraded, int $component_id) {
+        if (is_null($this->grade_inquiry_users)) {
+            $this->grade_inquiry_users = $this->core->getQueries()->getRegradeRequestsUsers($this->gradeable->getId(), $ungraded, $component_id);
+        }
+    }
+    
+    private function getFilterFunction(Submitter $submitter, int $component_id = -1, string $filter) {
+        if($filter === 'default') {
+            return function (Submitter $sub) {
+                return $this->getHasSubmission($sub);
+            };
+        }
+        if($filter === 'ungraded') {
+            return function(Submitter $sub) {
+                return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
+            };
+        }
+        elseif($filter === 'itempool') {
+            if($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+                return function (Submitter $sub) {
+                    return $this->getHasSubmission($sub) && $this->isSameItempool($sub);
+                };
+            }
+            return $this->getFilterFunction($submitter, $component_id, 'default');
+        }
+        elseif($filter === 'ungraded-itempool') {
+            $this->initUsersNotFullyGraded($component_id);
+            if($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+                return function (Submitter $sub) {
+                    return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub) && $this->isSameItempool($sub);
+                };
+            }
+            return $this->getFilterFunction($submitter, $component_id, 'ungraded');
+        }
+        elseif($filter === 'inquiry') {
+            $this->initUsersGradeInquiry(false, $component_id);
+            return function (Submitter $sub) {
+                return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
+            };
+        }
+        elseif($filter === 'ungraded-inquiry') {
+            $this->initUsersGradeInquiry(true, $component_id);
+            return function (Submitter $sub) {
+                return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
+            };
+        }
+        return function (Submitter $sub) {
+            return $this->getHasSubmission($sub);
+        };
+
     }
 
     /**

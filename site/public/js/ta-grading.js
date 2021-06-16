@@ -572,34 +572,29 @@ function gotoMainPage() {
 
 function gotoPrevStudent() {
 
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+
   let selector = "#prev-student";
-  let window_location = $(selector)[0].dataset.href;
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-  let switchType = localStorage.getItem("general-setting-arrow-function") || "default";
-
-  switch(switchType) {
+  switch(filter) {
     case "ungraded":
-      window_location += "&to_ungraded=true";
-      window_location += "&to_same_itempool=false";
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
     case "itempool":
-      window_location += "&to_ungraded=false";
-      window_location += "&to_same_itempool=true";
       window_location += "&component_id=" + getFirstOpenComponentId(true);
       break;
     case "ungraded-itempool":
-      window_location += "&to_ungraded=true";
-      window_location += "&to_same_itempool=true";
       component_id = getFirstOpenComponentId(true);
       if(component_id === NO_COMPONENT_ID) {
         component_id = getFirstOpenComponentId();
       }
-      window_location += "&component_id=" + component_id;
       break;
-    default:
-      window_location += "&to_ungraded=false";
-      window_location += "&to_same_itempool=false";
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "ungraded-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
       break;
   }
 
@@ -619,36 +614,29 @@ function gotoPrevStudent() {
 
 function gotoNextStudent() {
 
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+
   let selector = "#next-student";
-  let window_location = $(selector)[0].dataset.href;
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-  let switchType = localStorage.getItem("general-setting-arrow-function") || "default";
-
-  let component_id = NO_COMPONENT_ID;
-
-  switch(switchType) {
+  switch(filter) {
     case "ungraded":
-      window_location += "&to_ungraded=true";
-      window_location += "&to_same_itempool=false";
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
     case "itempool":
-      window_location += "&to_ungraded=false";
-      window_location += "&to_same_itempool=true";
       window_location += "&component_id=" + getFirstOpenComponentId(true);
       break;
     case "ungraded-itempool":
-      window_location += "&to_ungraded=true";
-      window_location += "&to_same_itempool=true";
       component_id = getFirstOpenComponentId(true);
       if(component_id === NO_COMPONENT_ID) {
         component_id = getFirstOpenComponentId();
       }
-      window_location += "&component_id=" + component_id;
       break;
-    default:
-      window_location += "&to_ungraded=false";
-      window_location += "&to_same_itempool=false";
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "ungraded-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
       break;
   }
 

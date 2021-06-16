@@ -4303,6 +4303,24 @@ AND gc_id IN (
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
     }
 
+    public function getRegradeRequestsUsers(string $gradeable_id, bool $ungraded_only = false, int $component_id = -1) {
+        $parameters = [];
+        $parameters[] = $gradeable_id;
+        $ungraded_query = "";
+        if($ungraded_only) {
+            $ungraded_query = "AND status = ? ";
+            $parameters[] = RegradeRequest::STATUS_ACTIVE;
+        }
+        $component_query = "";
+        if($component_id !== -1) {
+            $component_query = "AND gc_id = ? ";
+            $parameters[] = $component_id;
+        }
+        
+        $this->course_db->query("SELECT user_id FROM regrade_requests WHERE g_id = ? " . $ungraded_query . $component_query, $parameters);
+        return $this->rowsToArray($this->course_db->rows());
+    }
+
 
     /**
      * insert a new grade inquiry for a submitter
