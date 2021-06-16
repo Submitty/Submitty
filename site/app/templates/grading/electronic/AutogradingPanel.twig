@@ -33,12 +33,9 @@
             git_user_id = $("#github-user-id").val();
             git_repo_id = $("#github-repo-id").val();
         }
-        //if only regrading one version
+        //if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
         if(single_regrade) {
-            handleSubmission(
-                0,
-                0,
-                0,
+            handleRegrade(
                 {{ highest_version }},
                 {{ max_submissions }},
                 "{{ csrf_token }}",
@@ -55,11 +52,9 @@
                 true,
             )
         }
+        //regrading all versions
         else {
-            handleSubmission(
-                0,
-                0,
-                0,
+            handleRegrade(
                 {{ highest_version }},
                 {{ max_submissions }},
                 "{{ csrf_token }}",

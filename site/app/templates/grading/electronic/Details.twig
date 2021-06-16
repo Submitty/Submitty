@@ -1,4 +1,7 @@
 {% import _self as self %} {# Required to use macros in same template #}
+{#
+creates an array of submissions so that they can all be passed into the javascript and then the submission controller for regrading
+#}
 {% set submission = [] %}
 {% for section in sections %}
     {% for row in section.rows %}
@@ -739,7 +742,7 @@
             if(count > 50) {
                 e.preventDefault();
                 if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
-
+                    regradeAllStudentsAll(submissions);
                 }
             }
             else {
@@ -760,11 +763,11 @@
     }
     //some fields are left 0 or blank because it will be determined later for each specific graded gradeable
     function regradeAllStudents(submissions) {
-        handleSubmission(0, 0, 0, 0, 0, "{{ csrf_token }}", {{ is_vcs ? "true" : "false" }}, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, true)
+        handleRegrade(0, 0, "{{ csrf_token }}", {{ is_vcs ? "true" : "false" }}, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, true)
     }
 
     function regradeAllStudentsAll(submissions) {
-        handleSubmission(0,0,0,0, 0, "{{ csrf_token }}", {{ is_vcs ? "true" : "false" }}, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, false, true)
+        handleRegrade(0, 0, "{{ csrf_token }}", {{ is_vcs ? "true" : "false" }}, 0, "{{ gradeable.getId }}", '', '', '', false, 1, false, false, false, false, submissions, false, true)
     }
 </script>
 

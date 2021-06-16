@@ -848,6 +848,72 @@ function gatherInputAnswersByType(type){
     return input_answers;
 }
 
+function handleRegrade(versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false, regrade_all=false, submissions = [], regrade_all_students = false, regrade_all_students_all = false) {
+    var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
+    var return_url = ''
+    var formData = new FormData();
+    var json_submissions = JSON.stringify(submissions);
+    formData.append('csrf_token', csrf_token);
+    formData.append('vcs_checkout', vcs_checkout);
+    formData.append('user_id', user_id);
+    formData.append('git_user_id', git_user_id);
+    formData.append('git_repo_id', git_repo_id);
+    formData.append('student_page', student_page);
+    formData.append('regrade', regrade);
+    formData.append('regrade_all', regrade_all);
+    formData.append('version_to_regrade', versions_used);
+    formData.append('regrade_all_students', regrade_all_students);
+    formData.append('submissions', json_submissions);
+    formData.append('regrade_all_students_all', regrade_all_students_all);
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        xhr: function() {
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){
+                myXhr.upload.addEventListener('progress',progress, false);
+            }
+            return myXhr;
+        },
+        headers : {
+            Accept: "application/json"
+        },
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                console.log(data);
+                if (data['status'] === 'success') {
+                    window.location.href = return_url;
+                }
+                else {
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else if(typeof data['code'] !== undefined && data['code'] === 302){
+
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function(error) {
+            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
 /**
  * @param days_late
  * @param late_days_allowed
@@ -953,7 +1019,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
-    if (student_page) {
+    if (student_page && !regrade && !regrade_all && !regrade_all_students && !regrade_all_students_all) {
         var pages = [];
         for (var i = 0; i < num_components; i++) {
             pages[i] = $("#page_"+i).val();
