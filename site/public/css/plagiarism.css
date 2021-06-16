@@ -5,6 +5,12 @@
 
 .plag-table-cont {
     margin-top: 24px;
+    width: 100%;
+}
+
+.plag-table-cont table {
+    table-layout: fixed;
+    width: 100%;
 }
 
 td .plag-action-btn-cont {
