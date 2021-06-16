@@ -3,7 +3,7 @@
     <div class="nav-buttons">
         <a class="btn btn-primary"
            href="{{ new_plagiarism_config_link }}"
-        ><i class="fas fa-plus"></i> Configure New Gradeable for Plagiarism Detection</a>
+        ><i class="fas fa-plus"></i><span style="margin-left:0.5em;"></span>Configure New Gradeable for Plagiarism Detection</a>
     </div>
     {% if plagiarism_results_info|length > 0 %}
         <div class="plag-table-cont">
@@ -103,6 +103,13 @@
 {% endmacro %}
 
 <script>
+    // This is a hacky way to ensure that the run log is set to the width of the original table.
+    //  Otherwise, the run log row will expand to contain the text within and make the table bigger because there isn't a fixed width on the table.
+    let originalTableWidth;
+    $(document).ready(function() {
+        originalTableWidth = $(".plag-table-cont").width();
+    });
+
     function viewRunLog(gradeable_id) {
         if ($("#" + gradeable_id + "_table_row").next().hasClass("run-log-results")) {
             $("#" + gradeable_id + "_table_row").next().remove();
@@ -112,7 +119,7 @@
             $.get(url, function (data) {
                 $(`<tr class="run-log-results">
                 <td colspan="7" class="run-log-data">
-                    <pre>` + data + `</pre>
+                    <pre style="width:` + originalTableWidth + `px">` + data + `</pre>
                 </td>
             </tr>`).insertAfter("#" + gradeable_id + "_table_row");
             });

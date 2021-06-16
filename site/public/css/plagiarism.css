@@ -8,11 +8,6 @@
     width: 100%;
 }
 
-.plag-table-cont table {
-    table-layout: fixed;
-    width: 100%;
-}
-
 td .plag-action-btn-cont {
     display: flex;
 }
@@ -28,9 +23,11 @@ td .plag-action-btn-cont a:not(:last-child) {
 }
 
 .run-log-data pre {
-    white-space:pre-wrap;
+    white-space: pre-wrap;
     word-wrap: break-word;
-    overflow: scroll;
+    overflow: auto;
+    max-height: 20em;
+    max-width: 100%;
 }
 
 /* Configuration form page */
