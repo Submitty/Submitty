@@ -111,8 +111,8 @@
             const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}`;
             $.get(url, function (data) {
                 $(`<tr class="run-log-results">
-                <td colspan="7" style="text-align: left; width: inherit;">
-                    <pre style="width: 100%; white-space:pre-wrap; word-wrap: break-word; overflow: scroll;">` + data + `</pre>
+                <td colspan="7" class="run-log-data">
+                    <pre>` + data + `</pre>
                 </td>
             </tr>`).insertAfter("#" + gradeable_id + "_table_row");
             });

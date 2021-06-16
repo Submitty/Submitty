@@ -20,6 +20,18 @@ td .plag-action-btn-cont {
 td .plag-action-btn-cont a:not(:last-child) {
     margin-right: 40px;
 }
+
+.run-log-data {
+    text-align: left;
+    width: inherit;
+}
+
+.run-log-data pre {
+    white-space:pre-wrap;
+    word-wrap: break-word;
+    overflow: scroll;
+}
+
 /* Configuration form page */
 .plag-data-group {
     display: flex;
