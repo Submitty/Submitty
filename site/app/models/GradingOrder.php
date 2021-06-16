@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\exceptions\DatabaseException;
 use app\libraries\Core;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
@@ -188,9 +189,8 @@ class GradingOrder extends AbstractModel {
      * Given the current submitter, get the previous submitter to grade.
      * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
-     * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
      * @param int $component_id Component ID to check (for ungraded/itempool)
-     * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
+     * @param string $filter The filter to use when checking submitters
      * @return Submitter|null Previous submitter to grade
      */
     public function getPrevSubmitter(Submitter $submitter,  int $component_id = -1, string $filter = 'default'): ?Submitter {
@@ -201,9 +201,8 @@ class GradingOrder extends AbstractModel {
      * Given the current submitter, get the next submitter to grade.
      * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
-     * @param bool $to_ungraded If the next submitter should be a submitter that is ungraded
      * @param int $component_id Component ID to check (for ungraded/itempool)
-     * @param bool $to_same_itempool If the next submitter should have the same itempool item as the current submitter for the targeted component
+     * @param string $filter The filter to use when checking submitters
      * @return Submitter|null Next submitter to grade
      */
     public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
@@ -221,19 +220,34 @@ class GradingOrder extends AbstractModel {
         }
     }
 
+    /**
+     * Queries the database to populate $this->grade_inquiry_users
+     * @param bool $ungraded If it should only find active grade inquiries
+     * @param int $component_id The component ID in the gradeable
+     * @return void 
+     */
     private function initUsersGradeInquiry(bool $ungraded, int $component_id) {
         if (is_null($this->grade_inquiry_users)) {
             $this->grade_inquiry_users = $this->core->getQueries()->getRegradeRequestsUsers($this->gradeable->getId(), $ungraded, $component_id);
         }
     }
     
-    private function getFilterFunction(Submitter $submitter, int $component_id = -1, string $filter) {
+    /**
+     * Given the selected filter, returns a function that can be used to filter students in getSubmitterMatching
+     * @param Submitter $submitter Current grading submitter
+     * @param int $component_id The component ID selected; -1 if no component was selected
+     * @param string $filter The name of the filter.
+     * @return callable Args: (Submitter) Returns: bool, true if the submitter should be included
+     */
+    private function getFilterFunction(Submitter $submitter, int $component_id, string $filter) {
         if($filter === 'default') {
             return function (Submitter $sub) {
                 return $this->getHasSubmission($sub);
             };
         }
-        if($filter === 'ungraded') {
+        elseif($filter === 'ungraded') {
+            $this->initUsersNotFullyGraded($component_id);
+
             return function(Submitter $sub) {
                 return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
             };
@@ -248,6 +262,7 @@ class GradingOrder extends AbstractModel {
         }
         elseif($filter === 'ungraded-itempool') {
             $this->initUsersNotFullyGraded($component_id);
+
             if($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
                 return function (Submitter $sub) {
                     return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub) && $this->isSameItempool($sub);
@@ -257,12 +272,14 @@ class GradingOrder extends AbstractModel {
         }
         elseif($filter === 'inquiry') {
             $this->initUsersGradeInquiry(false, $component_id);
+
             return function (Submitter $sub) {
                 return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
             };
         }
-        elseif($filter === 'ungraded-inquiry') {
+        elseif($filter === 'active-inquiry') {
             $this->initUsersGradeInquiry(true, $component_id);
+
             return function (Submitter $sub) {
                 return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
             };

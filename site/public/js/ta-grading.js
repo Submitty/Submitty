@@ -593,7 +593,7 @@ function gotoPrevStudent() {
     case "inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
-    case "ungraded-inquiry":
+    case "active-inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
   }
@@ -635,7 +635,7 @@ function gotoNextStudent() {
     case "inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
-    case "ungraded-inquiry":
+    case "active-inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
   }
