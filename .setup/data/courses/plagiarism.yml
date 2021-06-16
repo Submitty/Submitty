@@ -1,0 +1,158 @@
+code: plagiarism
+instructor: instructor
+registration_sections: 10
+registered_students: 400
+no_registration_students: 15
+no_rotating_students: 15
+unregistered_students: 15
+gradeables:
+# small -- 2-3 submissions
+# can be debugged by hand, human can look at output json files
+- g_id: two_identical_files
+  g_title: Two Identical Files (Small)
+- g_id: two_overlapping_files
+  g_title: Two Overlapping Files (Small)
+- g_id: no_matches
+  g_title: No Matches (Small)
+- g_id: repeated_sequences
+  g_title: Repeated Sequences (Small)
+- g_id: two_large_files
+  g_title: Two Large Files (Small) # thousands of lines
+- g_id: plagiarism_test_small
+  g_title: Plagiarism Test (Small)
+# medium -- 3-10 submissions
+# can be debugged from the UI by a human
+- g_id: multiple_matches
+  g_title: Multiple Matches (Medium) # 5 users, 7 submissions -- users match several other users
+- g_id: provided_code
+  g_title: Provided Code (Medium) # 10 submissions
+- g_id: common_code
+  g_title: Common Code (Medium) # 10 submissions
+- g_id: regex_selected_files
+  g_title: Regex Selected Files (Medium) # pdf2text + cat_{number}.cpp --> cat_*.cpp + one other random file
+- g_id: plagiarism_test_medium
+  g_title: Plagiarism Test (Medium)
+# large -- 10+ submissions
+# stress-testing (probably challenging/impossible to debug)
+- g_id: average_class_single_submission
+  g_title: Average Class Single Submission (Large) # 75 students, 1 submission per student, ~100-line files
+- g_id: average_assignment
+  g_title: Average Class Assignment (Large) # 75 students, 5-20? submissions per student, ~400-line files
+- g_id: large_class_test
+  g_title: Large Class Test (Large) # 400 students, one submission each, ~100-line files
+- g_id: large_class_large_assignment
+  g_title: Large Class Large Assignment (Large) # 400 students, 0-20 submissions each, ~600-line files
+
+
+#   registration_sections: int for number of registration sections the course should have. Default is 10.
+#
+#   rotating_sections: int for number of rotating sections the course should have. Default is 5.
+#
+#   registered_students: int for number of students to have that are both in rotating sections and registration
+#     sections. The default for this is 300.
+#
+#   no_registration_students: int for number of students to have that are not in a registration section (but in a
+#     rotating section). The default for this is 75.
+#
+#   no_rotating_students: int for number of students to have that are not in a rotating section (but in a registration
+#     section). The default for this is 75.
+#
+#   unregistered_students: int for number of students to have that are not in either rotating or registration sections.
+#     The default for this is 50.
+#
+#   make_customization: if set to true the script will make a customization_X.json where X is the course code.
+#     The default is false.
+#
+#
+#   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
+#
+#     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
+#         filename of the gradeable_config, otherwise this is required to be defined.
+#
+#     g_title: [optional] what is the title for this gradeable. Defaults to a capitalized version of g_id with
+#         underscores converted to spaces.
+#
+#     gradeable_config [optional]: what config to use out of more_autograding_examples or tutorial examples
+#         for this gradeable.   this should be omitted if this is not an electronic gradeable.
+#
+#     sample_path [optional]: path for where to get submissions for a given gradeable. If no path is given, then
+#         just use /usr/local/submitty/GIT_CHECKOUT/Submitty/more_autograding_examples/<gradeable_id>/submissions or
+#         just use /usr/local/submitty/GIT_CHECKOUT/Tutorial/examples/<gradeable_id>/submissions
+#
+#     g_type: integer between 0-2 inclusive, where 0 is for electronic gradeable, 1 is for Checkpoint and 2 is for
+#         Numeric-Text. This can be omitted if it's an electronic gradeable (as anything with gradeable_config defined
+#         will always be assumed to be g_type 0).
+#
+#     g_instructions_url: [optional] string for URL to use as link for submission on navigation page. Defaults to .
+#
+#     g_overall_ta_instructions: [optional] string for additional details to TA for grading. Defaults to .
+#
+#     g_grader_assignment_method: [optional] integer between 0-2 inclusive, where 0 is grade by rotating section, 1 is grade by
+#         by registration section, and 2 is all access grading.  Defaults to 1: grade by registration section.
+#
+#     g_ta_view_start_date: when are TAs allowed to view this gradeable on the navigation page (before grading has started).
+#         This should be before grading start date and submission open date (if electronic gradeable). Only instructors
+#         can view gradeables before this date has happened (then TAs are allowed).
+#
+#     g_grade_start_date: when should grading start for the gradeable
+#
+#     g_grade_released_date: when are the grades are going to be available to the student via interface and rainbow
+#         grades. This should happen after the grading start date.
+#
+#     g_syllabus_bucket: [optional] what bucket should the gradeable be a part of for rainbox grades. Defaults to None.
+#
+#     g_min_grading_group: [optional] integer for what groups (and above) are allowed to submit grades. Defaults to 3.
+#
+# These next fields are only if the gradeable is of type 0 (electronic gradeable) and can be ignored otherwise):
+#
+#     eg_submission_open_date: Timestamp on when does the gradeable open to students for submission. Should be before
+#         grading start date and submission due date, but after the TA view date.
+#
+#     eg_submission_due_date: Timestamp when is the due date for the gradeable. Should be after submission open date.
+#
+#     eg_team_assignment: Boolean for if electronic gradeable is a team assignment. Defaults to False
+#
+#     eg_max_team_size: Integer for maximum team size (instructors can manually create larger teams). Defaults to 1
+#
+#     eg_team_lock_date: Timestamp on when teams lock (students can no longer leave their team or send invitations). Defaults to due date
+#
+#     eg_is_repository: [optional] Boolean for if this gradeable using version control (TRUE) or not (FALSE).
+#         Defaults to FALSE.
+#
+#     eg_subdirectory: String for where to look for version control repository. Only needed if above setting is TRUE.
+#
+#     eg_use_ta_grading: [optional] Boolean for whether or not to have any TA grading (regardless if there are defined
+#         components). Defaults to TRUE
+#
+#     eg_student_view: [optional] Boolean for whether or not student can view submissions. Defaults to TRUE.
+#
+#     eg_student_submit: [optional] Boolean for whether or not student can make submissions. Defaults to TRUE.
+#
+#     eg_late_days: [optional] integer for how many late days are allowed for this gradeable. Defaults to 2.
+#
+#     eg_precision: [optional] what is the precision to be used on the rubric page per item when grading.
+#         Defaults to 0.5.
+#
+#     eg_max_random_submissions: [optional] integer limiting how many random submissions should be generated.
+#         Defaults to no limit.
+#
+# To make how the order of the time fields work more explicit:
+# g_ta_view_start_date < eg_submission_open_date < eg_submission_due_date < g_grade_start_date < g_grade_released_date
+#
+#     components: this is a list of dictionaries for each component to be added for the gradeable. Each entry uses:
+#
+#       gc_title: string for component title.
+#       gc_ta_comment: [optional] string for comment to be given to TA on grading. Only for electronic gradeables.
+#       gc_student_comment: [optional] string for comment to be given to student on grade report. Only for electronic
+#             gradeables.
+#       gc_max_value: numeric for max value allowed for this component. If for g_type 1, can be omitted (and will
+#             always be 1).
+#       gc_is_text: [optional] boolean for if this is a text field or not. Only needed if gradeabe is of type
+#             Numeric/Text. Defaults to FALSE. If this is true, then you do not need gc_max_value or gc_is_extra_credit.
+#       gc_is_extra_credit: [optional] boolean for if this is extra credit or not. Defaults to FALSE.
+#
+# Any field that uses a timestamp allows for strings in four formats (if the time is omitted, it defaults to 23:59:59).
+#   - YEAR-MONTH-DAY                      (Ex: 2016-10-13)
+#   - YEAR-MONTH-DAY HOUR:MINUTE:SECOND   (Ex: 2016-10-13 22:45:59)
+#   - (+/-)# day(s)                       (Ex: +2 days)
+#   - (+/-)# day(s) at HOUR:MINUTE:SECOND (Ex: -1 day at 11:40:11)
