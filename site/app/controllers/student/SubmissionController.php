@@ -957,7 +957,6 @@ class SubmissionController extends AbstractController {
             }
             for ($i = 1; $i < $limit + 1; $i++) {
                 $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
-                $vcs_checkout = $_POST['vcs_checkout'];
                 if ($regrade_all === 'true') {
                     $active_version = $i;
                 }
@@ -983,7 +982,7 @@ class SubmissionController extends AbstractController {
                     "semester" => $this->core->getConfig()->getSemester(),
                     "team" => $team_id,
                     "user" => $user_id,
-                    "vcs_checkout" => $vcs_checkout,
+                    "vcs_checkout" => false,
                     "version" => $active_version,
                     "who" => $who_id
                 ];
@@ -1558,7 +1557,6 @@ class SubmissionController extends AbstractController {
             "vcs_checkout" => $vcs_checkout
         ];
 
-        //this is not necessary for regrading
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
@@ -1570,9 +1568,10 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to create vcs file for grading queue.", false);
             }
         }
-
-        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
+        else {
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
         }
 
         Logger::logAccess(

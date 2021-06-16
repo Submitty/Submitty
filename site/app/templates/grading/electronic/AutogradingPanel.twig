@@ -1,11 +1,9 @@
-
 <div id="autograding_results" class="rubric_panel">
     <div>
-        {{ files }}
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
-        {% if can_regrade %}
+        {% if can_regrade and not is_vcs%}
         <div class="regrade-dropMenu" style="margin-left: 3px;">
             <button class="btn btn-primary regrade-option" onclick="regrade(1)">Regrade Active Version</button>
             <button class="btn btn-primary regrade-drop-btn">
@@ -27,50 +25,13 @@
 </div>
 <script>
     function regrade(single_regrade) {
-        var git_user_id = "";
-        var git_repo_id = "";
-        if ({{ is_vcs ? "true" : "false" }}) {
-            git_user_id = $("#github-user-id").val();
-            git_repo_id = $("#github-repo-id").val();
-        }
         //if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
         if(single_regrade) {
-            handleRegrade(
-                {{ highest_version }},
-                {{ max_submissions }},
-                "{{ csrf_token }}",
-                {{ is_vcs ? "true" : "false" }},
-                {{ num_inputs }},
-                "{{ gradeable_id }}",
-                "{{ user_id }}",
-                git_user_id,
-                git_repo_id,
-                {{ student_page ? "true" : "false" }},
-                {{ component_names|length }},
-                false,
-                false,
-                true,
-            )
+            handleRegrade({{ highest_version }}, {{ max_submissions }}, "{{ csrf_token }}", "{{ gradeable_id }}", "{{ user_id }}", true)
         }
         //regrading all versions
         else {
-            handleRegrade(
-                {{ highest_version }},
-                {{ max_submissions }},
-                "{{ csrf_token }}",
-                {{ is_vcs ? "true" : "false" }},
-                {{ num_inputs }},
-                "{{ gradeable_id }}",
-                "{{ user_id }}",
-                git_user_id,
-                git_repo_id,
-                {{ student_page ? "true" : "false" }},
-                {{ component_names|length }},
-                false,
-                false,
-                false,
-                true
-            )
+            handleRegrade({{ highest_version }}, {{ max_submissions }}, "{{ csrf_token }}", "{{ gradeable_id }}", "{{ user_id }}", false, true)
         }
     }
 

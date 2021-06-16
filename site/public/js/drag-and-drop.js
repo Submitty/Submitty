@@ -848,17 +848,30 @@ function gatherInputAnswersByType(type){
     return input_answers;
 }
 
-function handleRegrade(versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false, regrade_all=false, submissions = [], regrade_all_students = false, regrade_all_students_all = false) {
+/**
+ * @param versions_used
+ * @param versions_allowed
+ * @param csrf_token
+ * @param gradeable_id
+ * @param user_id
+ * @param regrade
+ * @param regrade_all
+ * @param submissions
+ * @param regrade_all_students
+ * @param regrade_all_students_all
+ * differences between regrade, regrade_all, regrade_all_students and regrade_all_students_all
+ * regrade - regrade the active version for one selected student who submitted a certain gradeable
+ * regrade_all - regrade every version for one selected student who submitted a certain gradeable
+ * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
+ * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
+ */
+function handleRegrade(versions_used, versions_allowed, csrf_token, gradeable_id, user_id, regrade = false, regrade_all=false, submissions = [], regrade_all_students = false, regrade_all_students_all = false) {
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     var return_url = ''
     var formData = new FormData();
     var json_submissions = JSON.stringify(submissions);
     formData.append('csrf_token', csrf_token);
-    formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
-    formData.append('git_user_id', git_user_id);
-    formData.append('git_repo_id', git_repo_id);
-    formData.append('student_page', student_page);
     formData.append('regrade', regrade);
     formData.append('regrade_all', regrade_all);
     formData.append('version_to_regrade', versions_used);
@@ -928,19 +941,13 @@ function handleRegrade(versions_used, versions_allowed, csrf_token, vcs_checkout
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, regrade = false, regrade_all=false, submissions = [], regrade_all_students = false, regrade_all_students_all = false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
-    //don't redirect if it is a regrade request
-    if (!regrade && !regrade_all && !regrade_all_students && !regrade_all_students_all) {
-        var return_url = buildCourseUrl(['gradeable', gradeable_id]);
-    }
-    else {
-        var return_url = '';
-    }
+    var return_url = buildCourseUrl(['gradeable', gradeable_id]);
     var message = "";
     // check versions used
-    if(versions_used >= versions_allowed && !regrade_all_students && !regrade_all_students_all) {
+    if(versions_used >= versions_allowed) {
         message = "You have already made " + versions_used + " submissions.  You are allowed " + versions_allowed + " submissions before a small point penalty will be applied. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
@@ -960,24 +967,16 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         }
     }
     var formData = new FormData();
-    var json_submissions = JSON.stringify(submissions);
     formData.append('csrf_token', csrf_token);
     formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
     formData.append('git_user_id', git_user_id);
     formData.append('git_repo_id', git_repo_id);
-    formData.append('student_page', student_page);
-    formData.append('regrade', regrade);
-    formData.append('regrade_all', regrade_all);
-    formData.append('version_to_regrade', versions_used);
-    formData.append('regrade_all_students', regrade_all_students);
-    formData.append('submissions', json_submissions);
-    formData.append('regrade_all_students_all', regrade_all_students_all);
     let filesize = 0;
 
     if (!vcs_checkout) {
         // Check if new submission
-        if (!isValidSubmission() && empty_inputs && !regrade && !regrade_all && !regrade_all_students && !regrade_all_students_all) {
+        if (!isValidSubmission() && empty_inputs) {
             alert("Not a new submission.");
             window.location.reload();
             return;
@@ -1019,7 +1018,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
-    if (student_page && !regrade && !regrade_all && !regrade_all_students && !regrade_all_students_all) {
+    if (student_page) {
         var pages = [];
         for (var i = 0; i < num_components; i++) {
             pages[i] = $("#page_"+i).val();
@@ -1073,11 +1072,10 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
                 }
             }
             catch (e) {
-                if(!regrade && !regrade_all && !regrade_all_students){
-                    alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                        "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                    console.log(data);
-                }
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+
             }
         },
         error: function(error) {

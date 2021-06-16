@@ -624,7 +624,7 @@ HTML;
                 $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
                 $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}');";
-                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
+                $team_history = $row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable)["team_history"];
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
                 $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
                 $info["edited_past_lock_date"] = $edited_past_lock_date;
@@ -1152,46 +1152,6 @@ HTML;
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
 
-        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
-        if ($display_version_instance !==  null) {
-            $files = $display_version_instance->getFiles();
-        }
-
-        $config = $gradeable->getAutogradingConfig();
-        $notebook = null;
-        $notebook_inputs = [];
-        $num_parts = $config->getNumParts();
-        $notebook_file_submissions = [];
-        $notebook_model = null;
-        if ($config->isNotebookGradeable()) {
-            //maybe switch to gradeable->getuserid
-            $notebook_model = $config->getUserSpecificNotebook($this->core->getUser()->getId());
-            $notebook = $notebook_model->getNotebook();
-            $num_parts = $notebook_model->getNumParts();
-            $warning = $notebook_model->getWarning();
-            if (isset($warning) && $this->core->getUser()->accessGrading()) {
-                $output = $this->core->getOutput()->renderTwigTemplate(
-                    'generic/Banner.twig',
-                    [
-                        'message' => $warning,
-                        'error' => true
-                    ]
-                );
-            }
-            if ($graded_gradeable !== null) {
-                $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                    $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                    $notebook,
-                    $this->core->getUser()->getId()
-                );
-            }
-            $notebook_inputs = $notebook_model->getInputs();
-        }
-
-        $component_names = array_map(function (Component $component) {
-            return $component->getTitle();
-        }, $gradeable->getComponents());
-
         //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
         if ($gradeable->isTeamAssignment()) {
             $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();
@@ -1207,11 +1167,8 @@ HTML;
             "max_submissions" => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             "csrf_token" => $this->core->getCsrfToken(),
             "is_vcs" => $gradeable->isVcs(),
-            "num_inputs" => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             "gradeable_id" => $gradeable->getId(),
             "user_id" => $id,
-            "student_page" => $gradeable->isStudentPdfUpload(),
-            "component_names" => $component_names,
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR
         ]);
     }
