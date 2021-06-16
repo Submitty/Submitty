@@ -106,7 +106,6 @@ class RainbowCustomization extends AbstractModel {
             ];
         }
 
-        $json_buckets = $this->RCJSON->getGradeables();
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
             $json_buckets = $this->RCJSON->getGradeables();

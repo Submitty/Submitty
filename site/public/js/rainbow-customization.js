@@ -166,24 +166,20 @@ function getGradeableBuckets()
             var type = $('#' + this.id + ' h3');
             type = type[0].innerHTML.toLowerCase();
             bucket.type = type;
-            console.log('type', type);
 
             // Extract count
             var count = $('#config-count-' + type).val();
             bucket.count = parseInt(count);
-            console.log('count', count);
 
             // Extract percent
             var percent = $('#percent-' + type).val();
             percent = percent / 100;
             bucket.percent = percent;
-            console.log('percent', percent);
 
             // Extract each independent gradeable in the bucket
             var ids = [];
             var selector = `#gradeables-list-${type}`;
             $(selector).children('.gradeable-li').each(function() {
-                console.log('selector child', $(this));
 
                 var gradeable = {};
 
@@ -224,7 +220,7 @@ function getGradeableBuckets()
                     }
 
                     var previous = gradeable.max;
-                    gradeable.curve.forEach(function(elem, num) {
+                    gradeable.curve.forEach(function(elem) {
 
                         elem = parseFloat(elem);
 
@@ -238,8 +234,8 @@ function getGradeableBuckets()
                             throw "All curve inputs for gradeable " + gradeable.id + " must be greater than or equal to 0";
                         }
 
-                        // Each value (not the first) is less than the previous (the first one can be any value)
-                        if(elem > previous && num != 0) {
+                        // Each value is less than the previous
+                        if(elem > previous) {
                             throw "All curve inputs for gradeable " + gradeable.id + " must be less than or equal to the maximum points for the gradeable and also less than or equal to the previous input"
                         }
 
@@ -248,7 +244,6 @@ function getGradeableBuckets()
                 }
 
                 ids.push(gradeable);
-                console.log('gradeable', gradeable);
             });
 
             // Add gradeable buckets to gradeables array
