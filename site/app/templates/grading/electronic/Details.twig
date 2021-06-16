@@ -329,7 +329,7 @@
 
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(self, context, section, graded_gradeable, index, info, column) %}
-    <td style="text-align: center">
+    <td>
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
             {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
@@ -338,7 +338,7 @@
 
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) %}
-    <td class="td-graded-questions" style="text-align: center">
+    <td class="td-graded-questions">
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
