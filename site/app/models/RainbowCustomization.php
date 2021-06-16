@@ -100,7 +100,9 @@ class RainbowCustomization extends AbstractModel {
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
                 "max_score" => $max_score,
-                "grade_release_date" => DateUtils::dateTimeToString($gradeable->getGradeReleasedDate())
+                "grade_release_date" => DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
+                "override" => false,
+                "override_max" => $max_score
             ];
         }
 
@@ -144,10 +146,8 @@ class RainbowCustomization extends AbstractModel {
                 $j_index = 0;
                 foreach($this->customization_data[self::syllabus_buckets[$c_bucket]] as &$c_gradeable){
                     if($c_gradeable['max_score'] !== (float) $json_buckets[$j_bucket]->ids[$j_index]->max){
-                        var_dump($c_gradeable['max_score']);
-                        var_dump($json_buckets[$j_bucket]->ids[$j_index]);
-                        $c_gradeable['max_score'] = $json_buckets[$j_bucket]->ids[$j_index]->max;
-                        var_dump($c_gradeable);
+                        $c_gradeable['override'] = true;
+                        $c_gradeable['override_max'] = $json_buckets[$j_bucket]->ids[$j_index]->max;
                     }
                     $j_index++;
                 }

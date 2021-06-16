@@ -13,7 +13,19 @@ function ExtractBuckets(){
 
 //Forces element's value to be non-negative
 function ClampPoints(el){
+    if(el.value === ""){
+        el.value = el.placeholder;
+        el.classList.remove("override");
+    }
     el.value = Math.max(0.0,el.value);
+}
+
+function DetectMaxOverride(el) {
+    if(el.value !== el.placeholder){
+        el.classList.add("override");
+    } else {
+        el.classList.remove("override");
+    }
 }
 
 function ExtractBucketName(s,offset){
@@ -212,7 +224,7 @@ function getGradeableBuckets()
                     }
 
                     var previous = gradeable.max;
-                    gradeable.curve.forEach(function(elem) {
+                    gradeable.curve.forEach(function(elem, num) {
 
                         elem = parseFloat(elem);
 
@@ -226,8 +238,8 @@ function getGradeableBuckets()
                             throw "All curve inputs for gradeable " + gradeable.id + " must be greater than or equal to 0";
                         }
 
-                        // Each value is less than the previous
-                        if(elem > previous) {
+                        // Each value (not the first) is less than the previous (the first one can be any value)
+                        if(elem > previous && num != 0) {
                             throw "All curve inputs for gradeable " + gradeable.id + " must be less than or equal to the maximum points for the gradeable and also less than or equal to the previous input"
                         }
 

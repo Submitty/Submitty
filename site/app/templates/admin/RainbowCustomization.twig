@@ -125,13 +125,25 @@
                                                 <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                     <input type="text"
                                                            aria-label="{{gradeable["title"]}} max score"
-                                                           value="{{ gradeable["max_score"] }}"
+                                                           class="{{ gradeable["override"] ? "override" : "" }}"
+                                                           placeholder="{{ gradeable["max_score"] }}"
+                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
                                                            id="maxscore-{{ gradeable["id"] }}"
                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
                                                            style="margin-right: 10px;"
-                                                           onblur="ClampPoints(this);">
+                                                           onblur="ClampPoints(this);"
+                                                           onkeyup="DetectMaxOverride(this);">
                                                     <div class="gradeable-li-right-of-input">
-                                                        <div class="gradeable-li-info">
+                                                            <div class="gradeable-li-info">
+                                                            <i class="fas fa-exclamation-triangle fa-rb tooltip">
+                                                                <span class="tooltiptext tooltipbottom">
+                                                                    WARNING: Max Score has been overridden in Rainbow Grades
+                                                                    <br><br>
+                                                                    Actual Max Score: {{ gradeable["max_score"] }}
+                                                                    <br>
+                                                                    Override Max Score: {{ gradeable["override_max"] }}
+                                                                </span>
+                                                            </i>
                                                             <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                             {{ gradeable["title"] }}
                                                             <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
