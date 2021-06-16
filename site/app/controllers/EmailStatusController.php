@@ -40,7 +40,7 @@ class EmailStatusController extends AbstractController {
      * @return JsonResponse
      */
     public function checkAnnouncement(){
-        if ($_GET["id"]) {
+        if (isset($_GET["id"])) {
             $exists = $this->core->getQueries()->existsAnnouncementsId($_GET["id"]);
             return JsonResponse::getSuccessResponse([
                 "exists" => $exists
