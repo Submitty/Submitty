@@ -42,7 +42,7 @@ gradeables:
   g_title: Large Class Test (Large) # 400 students, one submission each, ~100-line files
 - g_id: large_class_large_assignment
   g_title: Large Class Large Assignment (Large) # 400 students, 0-20 submissions each, ~600-line files
-
+# TODO: (future) test submissions with teams
 
 #   registration_sections: int for number of registration sections the course should have. Default is 10.
 #
