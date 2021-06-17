@@ -630,18 +630,26 @@ input[type="button"].btn-block {
   padding: 0.5rem 0;
   margin: 0.125rem 0 0;
   font-size: 1rem;
-  color: #212529;
   text-align: left;
   list-style: none;
-  background-color: #fff;
-  background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 0.25rem;
+  background-color: var(--default-white);
+  -webkit-background-clip: padding-box;
+          background-clip: padding-box;
+  border: 1px solid var(--standard-light-gray);
+  border: 1px solid rgba(0, 0, 0, .15);
+  border-radius: 4px;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 }
 
 .dropdown-menu-right {
   right: 0;
   left: auto;
+}
+
+.dropdown-menu-left {
+  right: auto;
+  left: 0;
 }
 
 .dropup .dropdown-menu {
@@ -747,7 +755,7 @@ input[type="button"].btn-block {
   height: 0;
   margin: 0.5rem 0;
   overflow: hidden;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--standard-hover-light-gray);
 }
 
 .dropdown-item {
@@ -756,7 +764,7 @@ input[type="button"].btn-block {
   padding: 0.25rem 1.5rem;
   clear: both;
   font-weight: 400;
-  color: #212529;
+  color: var(--text-black);
   text-align: inherit;
   white-space: nowrap;
   background-color: transparent;
@@ -764,19 +772,19 @@ input[type="button"].btn-block {
 }
 
 .dropdown-item:hover, .dropdown-item:focus {
-  color: #16181b;
+  color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: #f8f9fa;
+  background-color: var(--standard-pale-blue-gray);
 }
 
 .dropdown-item.active, .dropdown-item:active {
-  color: #fff;
+  color: var(--default-white);
   text-decoration: none;
-  background-color: #007bff;
+  background-color: var(--actionable-blue);
 }
 
 .dropdown-item.disabled, .dropdown-item:disabled {
-  color: #6c757d;
+  color: var(--standard-medium-dark-gray);
   background-color: transparent;
 }
 
@@ -789,14 +797,14 @@ input[type="button"].btn-block {
   padding: 0.5rem 1.5rem;
   margin-bottom: 0;
   font-size: 0.875rem;
-  color: #6c757d;
+  color: var(--standard-medium-dark-gray);
   white-space: nowrap;
 }
 
 .dropdown-item-text {
   display: block;
   padding: 0.25rem 1.5rem;
-  color: #212529;
+  color: var(--standard-deep-dark-gray);
 }
 
 .btn-group,

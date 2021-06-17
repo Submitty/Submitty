@@ -814,7 +814,8 @@ tbody.collapse.in {
     margin: 0;
     padding: 0;
 }
-.dropdown-menu li a {
+
+.dropdown-menu a {
   display: block;
   padding: 3px 20px;
   text-decoration: none;
@@ -824,8 +825,9 @@ tbody.collapse.in {
   color: var(--text-black);
   white-space: nowrap;
 }
-.dropdown-menu li > a:hover,
-.dropdown-menu li > a:focus {
+
+.dropdown-menu a:hover,
+.dropdown-menu a:focus {
   color: var(--standard-deep-dark-gray);
   text-decoration: none;
   background-color: var(--btn-standard-pale-blue-gray);
@@ -836,6 +838,7 @@ tbody.collapse.in {
 .dropdown-menu .disabled > a:focus {
   color: var(--standard-medium-gray);
 }
+
 .dropdown-menu .disabled > a:hover,
 .dropdown-menu .disabled > a:focus {
   text-decoration: none;
