@@ -30,6 +30,46 @@
     {% endif %}
 </div>
 <script>
+    function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+        $('.popup-form').css('display', 'none');
+        var form = $("#delete-plagiarism-result-and-config-form");
+        $('[name="gradeable_title"]', form).html('');
+        $('[name="gradeable_title"]', form).append(gradeable_title);
+        $('[name="delete"]', form).attr('action', form_action);
+        form.css("display", "block");
+        form.find('.form-body').scrollTop(0);
+        captureTabInModal("delete-plagiarism-result-and-config-form");
+    }
+
+    function checkRefreshLichenMainPage(url, semester, course) {
+        // refresh time for lichen main page
+        var refresh_time = 5000;
+        setTimeout(function() {
+            check_lichen_jobs(url, semester, course);
+        }, refresh_time);
+    }
+
+    function check_lichen_jobs(url, semester, course) {
+        $.get(url,
+            function(data) {
+                var last_data = localStorage.getItem("last_data");
+                if (data === "REFRESH_ME") {
+                    last_data= "REFRESH_ME";
+                    localStorage.setItem("last_data", last_data);
+                    window.location.href = buildCourseUrl(['plagiarism']);
+                }
+                else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
+                    last_data= "NO_REFRESH";
+                    localStorage.setItem("last_data", last_data);
+                    window.location.href = buildCourseUrl(['plagiarism']);
+                }
+                else {
+                    checkRefreshLichenMainPage(url, semester, course);
+                }
+            }
+        );
+    }
+
     checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
 </script>
 

@@ -21,11 +21,11 @@ td .plag-action-btn-cont a:not(:last-child) {
     margin: 26px 0;
 }
 
-.plag-data-group .plag-data-label{
+.plag-data-label {
     flex: 1;
     font-weight: bold;
     font-size: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 0.2rem;
 }
 
 input[type="radio"] {
@@ -36,8 +36,16 @@ input[type="radio"] {
    flex: 1;
 }
 
-input[type="text"]{
+input[type="text"] {
     width: 100%;
+}
+
+.deletable-text {
+    width: calc(100% - 2em) !important;
+}
+
+.delete-btn {
+    padding-left: 5px;
 }
 
 input[type=text]:invalid {
@@ -76,6 +84,25 @@ input[type=text]:invalid {
 #ignore_submission_div {
     position: relative;
     padding-bottom: 30px;
+}
+
+#text_ignore_submission, #current_code_file, #provided_code_file,
+#add_more_ignore, #prev_gradeable_div {
+    display: none;
+}
+
+.radio-label-pair {
+    margin-left: 0.5em;
+    display: inline-flex;
+    align-items: center;
+}
+
+.radio-label-pair:first-of-type {
+    margin-left: 0;
+}
+
+.right {
+    float: right;
 }
 
 .low-margin-top {
