@@ -1007,7 +1007,8 @@ class HomeworkView extends AbstractView {
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'csrf_token' => $this->core->getCsrfToken(),
-            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds')
+            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
+            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow()
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
