@@ -636,15 +636,15 @@ SQL;
         return $this->course_db->rows()[0]["max_id"];
     }
 
-    public function findPost($thread_id){
+    public function findPost($thread_id) {
         $this->course_db->query("SELECT * from posts where thread_id = ?", [$thread_id]);
         return $this->course_db->row();
     }
 
-    public function existsAnnouncementsId($thread_id){
+    public function existsAnnouncementsId($thread_id) {
         $this->course_db->query("SELECT title from threads where id = ?", [$thread_id]);
         $title = $this->course_db->row()['title'];
-        $announcement_subject = "[Submitty ".$this->core->getConfig()->getCourse()."]: New Announcement: (". $thread_id. ") ".$title;
+        $announcement_subject = "[Submitty " . $this->core->getConfig()->getCourse() . "]: New Announcement: (" . $thread_id . ") " . $title;
         $this->submitty_db->query("SELECT 1 from emails where subject = ?", [$announcement_subject]);
         return count($this->submitty_db->row()) > 0;
     }

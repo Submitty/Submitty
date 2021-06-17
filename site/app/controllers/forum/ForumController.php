@@ -368,7 +368,7 @@ class ForumController extends AbstractController {
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
-    
+
     /**
      * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
@@ -385,8 +385,8 @@ class ForumController extends AbstractController {
         // Check that the post is indeed less than an hour old on the server
         $dateTime = new \DateTime($thread_info['timestamp']);
         $now = $this->core->getDateTimeNow();
-        
-        if ($dateTime->add(new \DateInterval("PT1H")) < $now){
+
+        if ($dateTime->add(new \DateInterval("PT1H")) < $now) {
             return;
         }
 

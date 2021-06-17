@@ -38,7 +38,7 @@ class EmailStatusController extends AbstractController {
      * @AccessControl(role="FULL_ACCESS_GRADER")
      * @return JsonResponse
      */
-    public function checkAnnouncement(){
+    public function checkAnnouncement() {
         if (isset($_GET["thread_id"])) {
             $exists = $this->core->getQueries()->existsAnnouncementsId($_GET["thread_id"]);
             return JsonResponse::getSuccessResponse([
