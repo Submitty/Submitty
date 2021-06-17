@@ -707,7 +707,7 @@ class PlagiarismController extends AbstractController {
                 }
                 elseif ($match->getType() === "specific-match") {
                     //Color is orange -- general match from selected match
-                    $color = '#ffa500;';
+                    $color = '#ffa500';
 
                     $segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
                     if ($codebox == "2" && $user_id_2 != "") {
@@ -719,7 +719,7 @@ class PlagiarismController extends AbstractController {
                             $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
                             $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
 
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500;', $matchPosStart, $matchPosEnd];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $matchPosStart, $matchPosEnd];
                             $userMatchesStarts[] = $matchPosStart;
                             $userMatchesEnds[] = $matchPosEnd;
                         }
