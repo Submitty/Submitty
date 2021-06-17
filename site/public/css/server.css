@@ -808,7 +808,44 @@ tbody.collapse.in {
   border-right: 4px solid transparent;
   border-left: 4px solid transparent;
 }
-.dropup,
+
+.dropdown-menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.dropdown-menu li a {
+  display: block;
+  padding: 3px 20px;
+  text-decoration: none;
+  clear: both;
+  font-weight: normal;
+  line-height: 1.42857143;
+  color: var(--text-black);
+  white-space: nowrap;
+}
+.dropdown-menu li > a:hover,
+.dropdown-menu li > a:focus {
+  color: var(--standard-deep-dark-gray);
+  text-decoration: none;
+  background-color: var(--btn-standard-pale-blue-gray);
+}
+  
+.dropdown-menu .disabled > a,
+.dropdown-menu .disabled > a:hover,
+.dropdown-menu .disabled > a:focus {
+  color: var(--standard-medium-gray);
+}
+.dropdown-menu .disabled > a:hover,
+.dropdown-menu .disabled > a:focus {
+  text-decoration: none;
+  cursor: not-allowed;
+  background-color: transparent;
+  background-image: none;
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+
+/* .dropup,
 .dropdown {
   position: relative;
 }
@@ -959,7 +996,7 @@ tbody.collapse.in {
   bottom: 0;
   left: 0;
   z-index: 990;
-}
+} */
 
 .btn-primary {
   color: var(--default-white);
