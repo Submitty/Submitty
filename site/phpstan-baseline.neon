@@ -41,16 +41,6 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: "#^Variable \\$threshold might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$sequence_length might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
 			count: 4
 			path: app/controllers/admin/PlagiarismController.php
@@ -477,4 +467,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
