@@ -1,19 +1,22 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
-    <div id="grading-panel-student-name">
-        <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
+    <span id="grading-panel-student-name">
+        {% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
-                    Team:<br/>
-                    {% for team_member in submitter.getTeam().getMemberUsers() %}
-                        &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
-                    {% endfor %}
+                    <b>Team:</b>
+                    <select id="grading-panel-team-list">
+                        {% for team_member in submitter.getTeam().getMemberUsers() %}
+                            <option> &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})</option>
+                        {% endfor %}
+                    </select>
                 {% else %}
-                    Student:<br/>
-                    {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                    <b>
+                        Student:
+                        {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                    </b>
                     <br/>
                 {% endif %}
             {% endif %}
-        </b>
-    </div>
+    </span>
     <div class="navigation-box">
         <div class="grading_toolbar">
             {# Back to list button #}
@@ -91,9 +94,9 @@
 </div>
 <script>
     //if student/team name(s) are being displayed
-    if ({{ not anon_mode and not isBlind and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) }}) {
+    {# if ({{ not anon_mode and not isBlind and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) }}) {
         $('.navigation-box').css({'position':'relative'});
         $('.navigation-box').css({'float':'left'});
         $('.navigation-box').css({'margin-left':'20%'});
-    }
+    } #}
 </script>
