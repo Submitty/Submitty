@@ -34,6 +34,23 @@ class CourseMaterialsController extends AbstractController {
         );
     }
 
+    public function deleteHelper($file) {
+        if (array_key_exists('name', $file)) {
+            $filepath = $file['path'];
+            $this->core->getQueries()->deleteCourseMaterial($filepath);
+        }
+        else {
+            if (array_key_exists('files', $file)) {
+                $this->deleteHelper($file['files']);
+            }
+            else {
+                foreach ($file as $f) {
+                    $this->deleteHelper($f);
+                }
+            }
+        }
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      */
@@ -48,21 +65,36 @@ class CourseMaterialsController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
         }
 
-        $this->core->getQueries()->deleteCourseMaterial($path);
+        $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
 
         $success = false;
-        if (is_dir($path)) {
-            $success = FileUtils::recursiveRmdir($path);
-        }
-        else {
-            $success = unlink($path);
+
+        foreach ($all_files as $file) {
+            if (is_array($file)) {
+                $this->deleteHelper($file);
+            }
+            else {
+                $success = $this->core->getQueries()->deleteCourseMaterial($path);
+            }
         }
 
         if ($success) {
-            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
+            if (is_dir($path)) {
+                $success = FileUtils::recursiveRmdir($path);
+            }
+            else {
+                $success = unlink($path);
+            }
+
+            if ($success) {
+                $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
+            }
+            else {
+                $this->core->addErrorMessage("Failed to remove " . basename($path));
+            }
         }
         else {
-            $this->core->addErrorMessage("Failed to remove " . basename($path));
+            $this->core->addErrorMessage("Failed to delete " . basename($path) . " from database");
         }
 
         $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -155,7 +187,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
-        $new_data_time = DateUtils::dateTimeToString($new_data_time);
+        //$new_data_time = DateUtils::dateTimeToString($new_data_time);
 
         //only one will not iterate correctly
         if (is_string($data)) {
@@ -163,6 +195,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $has_error = false;
+        $success = false;
 
         foreach ($data as $filename) {
             if (!isset($filename)) {
@@ -173,7 +206,7 @@ class CourseMaterialsController extends AbstractController {
             $course_material = $this->tryGetCourseMaterial($file_name, false);
             if ($course_material != false) {
                 $course_material->setReleaseDate($new_data_time);
-                $this->core->getQueries()->updateCourseMaterial($course_material);
+                $success = $this->core->getQueries()->updateCourseMaterial($course_material);
             }
             else {
                 $has_error = true;
@@ -181,7 +214,10 @@ class CourseMaterialsController extends AbstractController {
         }
 
         if ($has_error) {
-            return JsonResponse::getErrorResponse("Failed to find one of the gradeables.");
+            return JsonResponse::getErrorResponse("Failed to find one of the course materials.");
+        }
+        if (!$success) {
+            return JsonResponse::getErrorResponse("Something went wrong while saving.");
         }
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
@@ -214,17 +250,22 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setSectionLock(false);
             $this->core->getQueries()->deleteCourseMaterialSections($course_material->getUrl());
         }
-
-        $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
-        $course_material->setPriority($_POST['sort_priority']);
+        if (isset($_POST['hide_from_students'])) {
+            $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
+        }
+        if (isset($_POST['sort_priority'])) {
+            $course_material->setPriority($_POST['sort_priority']);
+        }
 
         if (isset($_POST['release_time'])) {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getUser()->getUsableTimeZone());
             $course_material->setReleaseDate($date_time);
         }
 
-        $this->core->getQueries()->updateCourseMaterial($course_material);
-        return JsonResponse::getSuccessResponse("Successfully uploaded!");
+        if ($this->core->getQueries()->updateCourseMaterial($course_material)) {
+            return JsonResponse::getSuccessResponse("Successfully uploaded!");
+        }
+        return JsonResponse::getErrorResponse("Failed to save");
     }
 
     /**
@@ -243,7 +284,7 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'];
         }
-        $details['url'] = $requested_path;
+        $details['url'][0] = $requested_path;
 
         if (isset($_POST['release_time'])) {
             $details['release_date'] = $_POST['release_time'];
@@ -408,10 +449,12 @@ class CourseMaterialsController extends AbstractController {
 
                         $zip->extractTo($upload_path, $entries);
 
+                        $i = 0;
                         foreach ($zfiles as $zfile) {
                             $path = FileUtils::joinPaths($upload_path, $zfile);
-                            $details['type'] = $is_external_link_file ? 1 : 0;
-                            $details['url'] = $path;
+                            $details['type'][$i] = $is_external_link_file ? 1 : 0;
+                            $details['url'][$i] = $path;
+                            $i++;
                         }
                     }
                     else {
@@ -419,8 +462,8 @@ class CourseMaterialsController extends AbstractController {
                             return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
                         }
                         else {
-                            $details['type'] = $is_external_link_file ? 1 : 0;
-                            $details['url'] = $dst;
+                            $details['type'][0] = $is_external_link_file ? 1 : 0;
+                            $details['url'][0] = $dst;
                         }
                     }
                 }
@@ -434,8 +477,24 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        $course_material = new CourseMaterial($this->core, $details);
-        $this->core->getQueries()->createCourseMaterial($course_material);
-        return JsonResponse::getSuccessResponse("Successfully uploaded!");
+        $success = true;
+        foreach ($details['type'] as $key => $value) {
+            $course_material = new CourseMaterial($this->core, [
+                'type' => $value,
+                'url' => $details['url'][$key],
+                'release_date' => $details['release_date'],
+                'hidden_from_students' => $details['hidden_from_students'],
+                'priority' => $details['priority'],
+                'section_lock' => $details['section_lock'],
+                'sections' => $details['sections']
+            ]);
+            if (!$this->core->getQueries()->createCourseMaterial($course_material)) {
+                $success = false;
+            }
+        }
+        if ($success) {
+            return JsonResponse::getSuccessResponse("Successfully uploaded!");
+        }
+        return JsonResponse::getErrorResponse("Failed to save");
     }
 }
