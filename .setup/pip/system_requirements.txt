@@ -55,5 +55,6 @@ pyzbar==0.1.8
 pdf2image==1.14.0
 numpy==1.19.5
 
-#python libraries for OCR for digit recognition
-onnxruntime==1.7.0
+# python libraries for OCR for digit recognition
+# newer versions are not supported on 18.04
+onnxruntime==1.3.0

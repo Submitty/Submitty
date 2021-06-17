@@ -26,6 +26,7 @@ use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueModel;
+use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -4155,18 +4156,18 @@ AND gc_id IN (
     /**
      * Queues emails for all given recipients to be sent by email job
      *
-     * @param array $flattened_emails array of params
+     * @param array $flattened_params array of params
      * @param int   $email_count
      */
-    public function insertEmails(array $flattened_emails, int $email_count) {
+    public function insertEmails(array $flattened_params, int $email_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, current_timestamp, ?)";
+        $row_string = "(?, ?, current_timestamp, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query(
             "
-            INSERT INTO emails(subject, body, created, user_id)
+            INSERT INTO emails(subject, body, created, user_id, semester, course)
             VALUES " . $value_param_string,
-            $flattened_emails
+            $flattened_params
         );
     }
 
@@ -5753,6 +5754,19 @@ AND gc_id IN (
         $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
+    }
+
+    /**
+     * Get a status of emails sent of a course with course name and semester
+     *
+     * @param string $course
+     * @param string $semester
+     */
+    public function getEmailStatusWithCourse($semester, $course) {
+        $parameters = [$course, $semester];
+        $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
+        $details = $this->submitty_db->rows();
+        return new EmailStatusModel($this->core, $details);
     }
 
     /**

@@ -21,21 +21,21 @@
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
     "jspdf": "^2.3.1",
-    "mermaid": "8.10.1",
+    "mermaid": "8.10.2",
     "pdfjs-dist": "2.2.228",
     "plotly.js-dist": "1.58.4",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.3",
-    "@babel/preset-env": "^7.14.2",
-    "babel-jest": "^26.6.3",
-    "cypress": "^7.4.0",
-    "eslint": "^7.26.0",
+    "@babel/core": "^7.14.5",
+    "@babel/preset-env": "^7.14.5",
+    "babel-jest": "^27.0.2",
+    "cypress": "^7.5.0",
+    "eslint": "^7.28.0",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-jest": "^24.3.6",
-    "jest": "^26.6.3",
+    "jest": "^27.0.4",
     "regenerator-runtime": "^0.13.7"
   },
   "scripts": {

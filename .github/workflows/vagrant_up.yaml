@@ -16,6 +16,7 @@ jobs:
             port: 1501
           - image: ubuntu-20.04
             port: 1511
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v2

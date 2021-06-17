@@ -5,26 +5,29 @@
            href="{{ new_plagiarism_config_link }}"
         >+ Configure New Gradeable for Plagiarism Detection</a>
     </div>
-
-    <div class="plag-table-cont">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Gradeable</th>
-                    <th></th>
-                    <th>Last Run</th>
-                    <th>Submissions</th>
-                    <th>Students Matched</th>
-                    <th>Nightly<br/>Re-run</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in plagiarism_results_info %}
-                    {{ _self.renderPlagiarismRow(row) }}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    {% if plagiarism_results_info|length > 0 %}
+        <div class="plag-table-cont">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Gradeable</th>
+                        <th></th>
+                        <th>Last Run</th>
+                        <th>Submissions</th>
+                        <th>Students Matched</th>
+                        <th>Nightly<br/>Re-run</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in plagiarism_results_info %}
+                        {{ _self.renderPlagiarismRow(row) }}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="plag-table-no-cont">No gradeables configured to display...</div>
+    {% endif %}
 </div>
 <script>
     checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
