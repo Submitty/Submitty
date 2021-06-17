@@ -185,6 +185,14 @@ main#main.full-screen-mode .plagiarism-result-cont {
     float: right;
 }
 
+#popup_to_show_matches_id {
+    display: none;
+    top: 0px;
+    left: 0px;
+    width: auto;
+    position: fixed;
+}
+
 @media (max-width: 660px) {
     .nav-buttons a {
         width: 100%;

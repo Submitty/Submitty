@@ -83,7 +83,19 @@ function setUpLeftPane() {
         // Only grab the first one if there is overlap...
         let lineData = markers[0].find();
         let clickedMark = markers[0];
-        if(isColoredMarker(clickedMark, YELLOW)) {
+
+        // Reset any existing popups
+        if($('#popup_to_show_matches_id').css('display') === 'block'){
+            $('#popup_to_show_matches_id').css('display', 'none');
+            blueClickedMark.css = "background: " + clickedMark.attributes.data_prev_color;
+            blueClickedMark = null;
+            editor0.refresh();
+        }
+
+        if(isColoredMarker(clickedMark, YELLOW) || isColoredMarker(clickedMark, RED)) {
+            $('#popup_to_show_matches_id').css('left', e.clientX + "px");
+            $('#popup_to_show_matches_id').css('top', e.clientY + "px");
+
             let user_id_1 = $('[name="user_id_1"]', form).val();
             let user_1_version = $('[name="version_user_1"]', form).val();
             clickedMark.css = "background: " + BLUE;
@@ -92,13 +104,6 @@ function setUpLeftPane() {
             editor0.refresh();
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             updatePanesOnOrangeClick(clickedMark, editor0, editor1);
-        } else {
-            if($('#popup_to_show_matches_id').css('display') === 'block'){
-                $('#popup_to_show_matches_id').css('display', 'none');
-                blueClickedMark.css = "background: " + YELLOW;
-                blueClickedMark = null;
-                editor0.refresh();
-            }
         }
 
     }
@@ -134,8 +139,9 @@ function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     let user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
     let to_append = '';
     $.each(user_matches, function(i, match) {
+        console.log(user_matches);
         let res = match.split('_');
-        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>';
+        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + ' (version:'+res[1]+')</div></li>';
     });
     to_append = $.parseHTML(to_append);
     $("#popup_to_show_matches_id").empty().append(to_append);
@@ -184,6 +190,7 @@ function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
         success: function(data) {
+            $("#_test").append(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
