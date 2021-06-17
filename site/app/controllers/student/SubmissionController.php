@@ -848,7 +848,7 @@ class SubmissionController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods={"POST"})
      * @return array
      */
-    public function ajaxRegrade($gradeable_id) : array {
+    public function ajaxRegrade($gradeable_id): array {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -873,7 +873,6 @@ class SubmissionController extends AbstractController {
             if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
                 $graded_gradeables[] = $g;
             }
-
         }
 
         $regrade = $_POST['regrade'];
@@ -885,14 +884,13 @@ class SubmissionController extends AbstractController {
         foreach ($graded_gradeables as $g) {
             //if only regrading one student/teams assignments(s)
             if ( $regrade === 'true' || $regrade_all === 'true') {
-                //check to see if this gradeable is the one we should be regrading
                 if ($gradeable->isTeamAssignment()) {
-                    if ($user_id !== $g->getSubmitter()->getTeam()->getMemberUsers()[0]->getId()){
+                    if ($user_id !== $g->getSubmitter()->getTeam()->getMemberUsers()[0]->getId()) {
                         continue;
                     }
                 }
                 else {
-                    if( $user_id !== $g->getSubmitter()->getId()) {
+                    if ( $user_id !== $g->getSubmitter()->getId()) {
                         continue;
                     }
                 }
