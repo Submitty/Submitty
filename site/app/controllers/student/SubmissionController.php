@@ -883,14 +883,14 @@ class SubmissionController extends AbstractController {
         $count = 0;
         foreach ($graded_gradeables as $g) {
             //if only regrading one student/teams assignments(s)
-            if ( $regrade === 'true' || $regrade_all === 'true') {
+            if ($regrade === 'true' || $regrade_all === 'true') {
                 if ($gradeable->isTeamAssignment()) {
                     if ($user_id !== $g->getSubmitter()->getTeam()->getMemberUsers()[0]->getId()) {
                         continue;
                     }
                 }
                 else {
-                    if ( $user_id !== $g->getSubmitter()->getId()) {
+                    if ($user_id !== $g->getSubmitter()->getId()) {
                         continue;
                     }
                 }
