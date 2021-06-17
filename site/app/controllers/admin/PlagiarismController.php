@@ -142,7 +142,7 @@ class PlagiarismController extends AbstractController {
         //       before this function if they wish to clear whatever is already in the directory first.
 
         if (!file_exists($temporary_file_path)) {
-            throw new Exception("Upload failed: Temporary file not found");
+            throw new \Exception("Upload failed: Temporary file not found");
         }
 
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id);
@@ -158,13 +158,13 @@ class PlagiarismController extends AbstractController {
             else {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                throw new Exception("Upload failed: {$error_message}");
+                throw new \Exception("Upload failed: {$error_message}");
             }
         }
         else {
             if (!@move_uploaded_file($temporary_file_path, FileUtils::joinPaths($target_dir, $filename))) {
                 FileUtils::recursiveRmdir($target_dir);
-                throw new Exception("Upload failed: Could not copy file");
+                throw new \Exception("Upload failed: Could not copy file");
             }
         }
     }
