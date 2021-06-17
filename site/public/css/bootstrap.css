@@ -774,7 +774,7 @@ input[type="button"].btn-block {
 .dropdown-item:hover, .dropdown-item:focus {
   color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: var(--standard-pale-blue-gray);
+  background-color: var(--btn-standard-pale-blue-gray);
 }
 
 .dropdown-item.active, .dropdown-item:active {
