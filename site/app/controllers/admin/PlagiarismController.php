@@ -136,14 +136,13 @@ class PlagiarismController extends AbstractController {
      * @param string $temporary_file_path
      * @param string $filename
      * @param string $gradeable_id
-     * @return string
      */
-    private function saveNewProvidedCode(string $temporary_file_path, string $filename, string $gradeable_id): string {
+    private function saveNewProvidedCode(string $temporary_file_path, string $filename, string $gradeable_id): void {
         // NOTE: The user of this function is expected to call deleteExistingProvidedCode()
         //       before this function if they wish to clear whatever is already in the directory first.
 
         if (!file_exists($temporary_file_path)) {
-            return "Upload failed: Temporary file not found";
+            throw new Exception("Upload failed: Temporary file not found");
         }
 
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id);
@@ -159,18 +158,15 @@ class PlagiarismController extends AbstractController {
             else {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                return "Upload failed: {$error_message}";
+                throw new Exception("Upload failed: {$error_message}");
             }
         }
         else {
-            if (!@copy($temporary_file_path, FileUtils::joinPaths($target_dir, $filename))) {
+            if (!@move_uploaded_file($temporary_file_path, FileUtils::joinPaths($target_dir, $filename))) {
                 FileUtils::recursiveRmdir($target_dir);
-                return "Upload failed: Could not copy file";
+                throw new Exception("Upload failed: Could not copy file");
             }
         }
-
-        // Success
-        return "";
     }
 
     /**
@@ -300,9 +296,11 @@ class PlagiarismController extends AbstractController {
                 $this->core->redirect($return_url);
             }
             // save the code
-            $ret_str = $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id);
-            if ($ret_str !== "") {
-                $this->core->addErrorMessage("ERROR: could not upload instructor provided code");
+            try {
+                $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id);
+            }
+            catch (Exception $e) {
+                $this->core->addErrorMessage($e);
                 $this->core->redirect($return_url);
             }
         }
@@ -321,8 +319,7 @@ class PlagiarismController extends AbstractController {
 
 
         // Language
-        assert(isset($_POST['language']));
-        $language = $_POST['language'];
+        $language = $_POST['language'] ?? '';
         if (!in_array($language, PlagiarismUtils::getSupportedLanguages())) {
             $this->core->addErrorMessage("Invalid selected language");
             $this->core->redirect($return_url);
@@ -330,21 +327,17 @@ class PlagiarismController extends AbstractController {
 
 
         // Common code threshold
-        if (isset($_POST['threshold']) && $_POST['threshold'] !== '' && is_numeric($_POST['threshold']) && $_POST['threshold'] >= 2) {
-            $threshold = $_POST['threshold'];
-        }
-        else {
+        $threshold = (int) $_POST['threshold'] ?? 0;
+        if ($threshold < 2) {
             $this->core->addErrorMessage("Invalid input provided for threshold");
             $this->core->redirect($return_url);
         }
 
 
         // Sequence length
-        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && is_numeric($_POST['sequence_length']) && $_POST['sequence_length'] >= 1) {
-            $sequence_length = $_POST['sequence_length'];
-        }
-        else {
-            $this->core->addErrorMessage("Invalid input provided for sequence length. The minimum allowed threshold value is 2");
+        $sequence_length = (int) $_POST['sequence_length'] ?? 0;
+        if ($sequence_length < 1) {
+            $this->core->addErrorMessage("Invalid input provided for sequence length");
             $this->core->redirect($return_url);
         }
 

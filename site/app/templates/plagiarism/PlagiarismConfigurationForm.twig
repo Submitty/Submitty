@@ -69,7 +69,7 @@
                 <div class="plag-data">
                     <div id="files_to_be_compared">
                         <span class="option-alt">
-                            <a target=_blank href="https://https://submitty.org/instructor/course_management/plagiarism">How do I specify a regex expression?
+                            <a target=_blank href="https://submitty.org/instructor/course_management/plagiarism">How do I specify a regex expression?
                                 <i style="font-style: normal;" class="fa-question-circle"></i>
                             </a>
                         </span>
@@ -109,14 +109,15 @@
                 <div class="plag-data-label">Common Code Threshold:</div>
                 <label for="threshold">More than this number of students with matching code will be considered common code</label>
                 <div class="plag-data">
-                    <input type="text" id="threshold" name="threshold" value="{{ threshold }}" placeholder="(Required)"/>
+                    <input type="number" id="threshold" name="threshold" value="{{ threshold }}" min="2"/>
                 </div>
             </div>
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Sequence Length:</div>
+                <label for="sequence_length">This is the minimum size of matching regions</label>
                 <div class="plag-data">
-                    <input type="text" name="sequence_length" value="{{ sequence_length }}" placeholder="(Required)"/>
+                    <input type="number" id="sequence_length" name="sequence_length" value="{{ sequence_length }}" placeholder="(Required)" min="1"/>
                 </div>
             </div>
             {##################################################################}

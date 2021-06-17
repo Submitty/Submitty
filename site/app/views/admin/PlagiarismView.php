@@ -119,8 +119,8 @@ class PlagiarismView extends AbstractView {
         $regex_dirs = ["submissions"];
         $language = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
         $language["plaintext"] = "selected";
-        $threshold = "5";
-        $sequence_length = "4";
+        $threshold = 5;
+        $sequence_length = 4;
         $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables']) + 1 : 1;
         $prior_terms = false;
         $ignore_submissions = false;
@@ -142,9 +142,10 @@ class PlagiarismView extends AbstractView {
             $version = $saved_config['version'];
             $regex = $saved_config['regex'];
             $regex_dirs = $saved_config['regex_dirs'];
+            $language["plaintext"] = ""; // Reset value after we set it initially so be selected
             $language[$saved_config['language']] = "selected";
-            $threshold = $saved_config['threshold'];
-            $sequence_length = $saved_config['sequence_length'];
+            $threshold = (int) $saved_config['threshold'];
+            $sequence_length = (int) $saved_config['sequence_length'];
             $prior_terms = $prior_term_gradeables_number > 1;
             $ignore_submissions = count($saved_config['ignore_submissions']) > 0;
         }
