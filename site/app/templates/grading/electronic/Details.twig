@@ -1,20 +1,4 @@
 {% import _self as self %} {# Required to use macros in same template #}
-{#
-creates an array of submissions so that they can all be passed into the javascript and then the submission controller for regrading
-#}
-{% set submission = [] %}
-{% for section in sections %}
-    {% for row in section.rows %}
-        {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
-            {% if is_team %}
-                {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getTeam().getMemberUsers()[0].getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
-            {% else %}
-                {% set submission = submission | merge([{gradeable_id: row.graded_gradeable.gradeable.getId, submitter: row.graded_gradeable.getSubmitter().getUser().getId(), highest_version: row.graded_gradeable.getAutoGradedGradeable().getHighestVersion(), active_version: row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() }]) %}
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-{% endfor %}
-<input type="hidden" id="submission" value="{{ submission|json_encode }}">
 <div class="content">
     {#
         Default is viewing your sections
@@ -714,43 +698,6 @@ creates an array of submissions so that they can all be passed into the javascri
 
 {# /Column functions #}
 <script>
-    $(function() {
-        $('.regrade-btn').click(function(e) {
-            var array = document.getElementById('submission').value;
-            var submissions = JSON.parse(array);
-            console.log(submissions);
-            if(submissions.length > 50) {
-                e.preventDefault();
-                if (window.confirm("Are you sure you want to add " + submissions.length + " submissions to the queue ?")) {
-                    regradeAllStudents(submissions);
-                }
-            }
-            else {
-                regradeAllStudents(submissions);
-            }
-        });
-    });
-
-    $(function() {
-        $('.regrade-btn-all').click(function(e) {
-            var array = document.getElementById('submission').value;
-            var submissions = JSON.parse(array);
-            var count = 0;
-            for(var i = 0; i<submissions.length; i++){
-                count+=submissions[i]['highest_version'];
-            }
-            if(count > 50) {
-                e.preventDefault();
-                if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
-                    regradeAllStudentsAll(submissions);
-                }
-            }
-            else {
-                regradeAllStudentsAll(submissions);
-            }
-        });
-    });
-
     function changeAnon() {
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
@@ -761,13 +708,61 @@ creates an array of submissions so that they can all be passed into the javascri
         }
         location.reload();
     }
+
+    {# functions to handle regrading, they loop through sections in order to know if a confirm message should be displayed #}
+
+    $(function() {
+        $('.regrade-btn').click(function(e) {
+            let count = 0;
+            {% for section in sections %}
+                {% for row in section.rows %}
+                    {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
+                       count+=1;
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+            if(count > 50) {
+                e.preventDefault();
+                if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
+                    regradeAllStudents();
+                }
+            }
+            else {
+                regradeAllStudents();
+            }
+        });
+    });
+
+    $(function() {
+        $('.regrade-btn-all').click(function(e) {
+            let count = 0;
+            {% for section in sections %}
+                {% for row in section.rows %}
+                    {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
+                        {% set highest = row.graded_gradeable.getAutoGradedGradeable().getHighestVersion() %}
+                        count += {{ highest }};
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+            if(count > 50) {
+                e.preventDefault();
+                if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
+                    regradeAllStudentsAll();
+                }
+            }
+            else {
+                regradeAllStudentsAll();
+            }
+        });
+    });
+
     //some fields are left 0 or blank because it will be determined later for each specific graded gradeable
-    function regradeAllStudents(submissions) {
-        handleRegrade(0, 0, "{{ csrf_token }}", "{{ gradeable.getId }}", '', false, false, submissions, true)
+    function regradeAllStudents() {
+        handleRegrade(0, 0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
     }
 
-    function regradeAllStudentsAll(submissions) {
-        handleRegrade(0, 0, "{{ csrf_token }}", "{{ gradeable.getId }}", '', false, false, submissions, false, true)
+    function regradeAllStudentsAll() {
+        handleRegrade(0, 0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
     }
 </script>
 
