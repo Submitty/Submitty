@@ -186,11 +186,12 @@ main#main.full-screen-mode .plagiarism-result-cont {
 }
 
 .plag-legend {
-    border: 1px solid var(--text-black);
+    text-shadow: 0 0 3px var(--text-black);
+    margin-left: 5px;
 }
 
 [data-theme="dark"] .plag-legend {
-    border: 1px solid transparent;
+    text-shadow: 0 0 3px transparent;
 }
 
 @media (max-width: 660px) {
