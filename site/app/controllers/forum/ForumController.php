@@ -371,7 +371,7 @@ class ForumController extends AbstractController {
     
     /**
      * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
-     * @AccessControl(permission="forum.publish")
+     * @AccessControl(permission="forum.modify_announcement")
      */
     public function makeAnnouncement() {
         if (!isset($_POST['id'])) {
