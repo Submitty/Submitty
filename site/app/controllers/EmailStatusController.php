@@ -36,7 +36,7 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("email/check_announcemnt", methods={"GET"})
+     * @Route("email/check_announcement", methods={"GET"})
      * @return JsonResponse
      */
     public function checkAnnouncement(){

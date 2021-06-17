@@ -2122,11 +2122,11 @@ function checkIfAnnounced(id){
   console.log("yeet");
   $.ajax({
     type: 'GET',
-    url: buildUrl(['email', 'check_announcemnt']),
+    url: buildUrl(['email', 'check_announcement']),
     data: {'thread_id': id, csrfToken: csrfToken},
     success: function(res) {
       console.log(res);
-      console.log(buildUrl(['email', 'check_announcemnt']));
+      console.log(buildUrl(['email', 'check_announecemnt']));
       const response = JSON.parse(res);
       if (response.status === "success" && response.exists === "true"){
         $('.pin-and-email-message').show();
