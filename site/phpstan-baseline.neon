@@ -61,18 +61,8 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Variable \\$max_matching_version might not be defined\\.$#"
-			count: 3
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
-			count: 6
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$color might not be defined\\.$#"
-			count: 1
+			count: 4
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
