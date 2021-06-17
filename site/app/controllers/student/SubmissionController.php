@@ -848,7 +848,7 @@ class SubmissionController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods={"POST"})
      * @return array
      */
-    public function ajaxRegrade($gradeable_id) {
+    public function ajaxRegrade($gradeable_id) : array {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -859,6 +859,11 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['user_id'])) {
             return $this->uploadResult("Invalid user id.", false);
         }
+
+        if (!isset($_POST['regrade']) || !isset($_POST['regrade_all']) || !isset($_POST['regrade_all_students_all'])) {
+            return $this->uploadResult("Invalid user id.", false);
+        }
+
         //grab all graded gradeables for this gradeable
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
         $order->sort("id", "ASC");
