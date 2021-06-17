@@ -384,13 +384,17 @@ class ForumController extends AbstractController {
         if ($thread_info["parent_id"] != -1) {
             return;
         }
-        $dateTime = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat('forum'), $thread_info['timestamp']);
+        $dateTime = new \DateTime($thread_info['timestamp']);
         $now = $this->core->getDateTimeNow();
         
+        if ($dateTime->add(new \DateInterval("PT1H")) < $now){
+            return;
+        }
+
         $full_course_name = $this->core->getFullCourseName();
         $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
-        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
+        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $_POST['id']]), 'thread_id' => $_POST['id']]);
 
         $subject = "New Announcement: " . Notification::textShortner($thread_title);
         $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;

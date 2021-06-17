@@ -2118,17 +2118,14 @@ function sendAnnouncement(title, thread_post_content, id){
 }
 
 function checkIfAnnounced(id){
-  //$('.pin-and-email-message').hide();
-  console.log("yeet");
-  $.ajax({
+  $('.pin-and-email-message').hide();
+  call = $.ajax({
     type: 'GET',
-    url: buildUrl(['email', 'check_announcement']),
-    data: {'thread_id': id, csrfToken: csrfToken},
+    url: buildCourseUrl(['email', 'check_announcement']),
+    data: {'thread_id': id, "csrfToken": csrfToken},
     success: function(res) {
-      console.log(res);
-      console.log(buildUrl(['email', 'check_announecemnt']));
       const response = JSON.parse(res);
-      if (response.status === "success" && response.exists === "true"){
+      if (response.status === "success" && response["data"]["exists"] == false){
         $('.pin-and-email-message').show();
       }
     }
