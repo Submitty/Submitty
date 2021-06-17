@@ -375,19 +375,19 @@ class ForumController extends AbstractController {
      */
     public function makeAnnouncement() {
         if (!isset($_POST['id'])) {
-            return;
+            return $this->core->getOutput()->renderJsonFail("thread_id not provided");
         }
         // Check that the post is the first post of the thread
         $thread_info = $this->core->getQueries()->findPost($_POST['id']);
         if ($thread_info["parent_id"] != -1) {
-            return;
+            return $this->core->getOutput()->renderJsonFail("Post is not the beginning of a thread");
         }
         // Check that the post is indeed less than an hour old on the server
         $dateTime = new \DateTime($thread_info['timestamp']);
         $now = $this->core->getDateTimeNow();
 
         if ($dateTime->add(new \DateInterval("PT1H")) < $now) {
-            return;
+            return $this->core->getOutput()->renderJsonFail("Post is too old.");
         }
 
         $full_course_name = $this->core->getFullCourseName();
@@ -399,6 +399,7 @@ class ForumController extends AbstractController {
         $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
         $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
         $this->core->getNotificationFactory()->onNewAnnouncement($event);
+        return $this->core->getOutput()->renderJsonSuccess(['message' => "Announcement successfully queued for sending"]);
     }
 
     /**
