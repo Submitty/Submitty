@@ -299,7 +299,7 @@ class PlagiarismController extends AbstractController {
             try {
                 $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id);
             }
-            catch (Exception $e) {
+            catch (\Exception $e) {
                 $this->core->addErrorMessage($e);
                 $this->core->redirect($return_url);
             }
