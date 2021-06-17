@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
   # This is what RPI uses as of Fall 2018, though currently migrating to 20.04
-  config.vm.define 'ubuntu-18.04', primary: true do |ubuntu|
+  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
@@ -57,7 +57,7 @@ Vagrant.configure(2) do |config|
   end
 
   # Our primary development target, RPI uses it as of Fall 2021
-  config.vm.define 'ubuntu-20.04', autostart: false do |ubuntu|
+  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-20.04'
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
