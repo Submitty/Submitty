@@ -374,16 +374,15 @@ class ForumController extends AbstractController {
      * @AccessControl(permission="forum.publish")
      */
     public function makeAnnouncement() {
-        // add check here
-        // check that it's the first post
-        // check that it hasn't been an hour
         if (!isset($_POST['id'])) {
             return;
         }
+        // Check that the post is the first post of the thread
         $thread_info = $this->core->getQueries()->findPost($_POST['id']);
         if ($thread_info["parent_id"] != -1) {
             return;
         }
+        // Check that the post is indeed less than an hour old on the server
         $dateTime = new \DateTime($thread_info['timestamp']);
         $now = $this->core->getDateTimeNow();
         
