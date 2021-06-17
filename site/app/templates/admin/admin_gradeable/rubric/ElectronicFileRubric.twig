@@ -15,7 +15,7 @@
     <legend>
     Will graders be allowed to use custom marks?
         {% if has_custom_marks %}
-            <h5 id="custom_marks_warning">WARNING: Grading has begun and custom marks have already been used.</h5>
+            <h5 id="custom_marks_warning" style="display: none;">WARNING: Grading has begun and custom marks have already been used.</h5>
         {% endif %}
     </legend>
     <input type="radio" id="yes_custom_marks" name="allow_custom_marks" value="true"
@@ -68,5 +68,13 @@
                 });
             });
         });
+        //toggle warning message if custom marks have already been used and the settings are changed
+        $("#no_custom_marks").click(function(){
+            $("#custom_marks_warning").toggle();
+        })
+        $("#yes_custom_marks").click(function(){
+            $("#custom_marks_warning").toggle();
+        })
     });
+
 </script>
