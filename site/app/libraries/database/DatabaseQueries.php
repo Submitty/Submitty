@@ -4808,6 +4808,7 @@ AND gc_id IN (
                 $non_team_gradeables[] = $gradeable;
             }
         }
+
         return new CascadingIterator(
             $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false),
             $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true)

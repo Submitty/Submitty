@@ -865,7 +865,7 @@ function gatherInputAnswersByType(type){
  * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
-function handleRegrade(versions_used, versions_allowed, csrf_token, gradeable_id, user_id, regrade = false, regrade_all=false, regrade_all_students = false, regrade_all_students_all = false) {
+function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all=false, regrade_all_students = false, regrade_all_students_all = false) {
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     //don't redirect on success
     var return_url = ''
@@ -937,6 +937,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
     var return_url = buildCourseUrl(['gradeable', gradeable_id]);
+
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
@@ -958,12 +959,14 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             return;
         }
     }
+
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
     formData.append('git_user_id', git_user_id);
     formData.append('git_repo_id', git_repo_id);
+
     let filesize = 0;
 
     if (!vcs_checkout) {

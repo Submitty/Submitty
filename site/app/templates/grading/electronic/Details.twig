@@ -758,11 +758,11 @@
 
     //some fields are left 0 or blank because it will be determined later for each specific graded gradeable
     function regradeAllStudents() {
-        handleRegrade(0, 0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
+        handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
     }
 
     function regradeAllStudentsAll() {
-        handleRegrade(0, 0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
+        handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
     }
 </script>
 

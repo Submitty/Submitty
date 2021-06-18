@@ -882,7 +882,7 @@ class SubmissionController extends AbstractController {
 
         $count = 0;
         foreach ($graded_gradeables as $g) {
-            //if only regrading one student/teams assignments(s)
+            //if only regrading one student/teams assignments(s), skip gradeables from other submitters
             if ($regrade === 'true' || $regrade_all === 'true') {
                 if ($gradeable->isTeamAssignment()) {
                     if ($user_id !== $g->getSubmitter()->getTeam()->getMemberUsers()[0]->getId()) {
@@ -950,7 +950,7 @@ class SubmissionController extends AbstractController {
                     "version" => $active_version,
                     "who" => $who_id
                 ];
-                //add file to directory
+                //add file to directory which will trigger autograding
                 if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
                     return $this->uploadResult("Failed to create file for grading queue.", false);
                 }
@@ -958,7 +958,12 @@ class SubmissionController extends AbstractController {
                 $count += 1;
             }
         }
-        $msg = $count . " submissions added to queue for regrading";
+        if ($regrade === 'true' || $regrade_all === 'true') {
+            $msg = $count . " submission(s) from ".$who_id." added to queue for regrading";
+        }
+        else {
+            $msg = $count . " submissions added to queue for regrading";
+        }
         return $this->core->getOutput()->renderResultMessage($msg, true);
     }
 
@@ -1503,6 +1508,7 @@ class SubmissionController extends AbstractController {
                 "VCS__" . $queue_file_helper
             );
         }
+        // create json file
         $queue_data = [
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
@@ -1530,6 +1536,7 @@ class SubmissionController extends AbstractController {
             }
         }
         else {
+            //then create the file that will trigger autograding
             if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
                 return $this->uploadResult("Failed to create file for grading queue.", false);
             }

@@ -1164,7 +1164,6 @@ HTML;
             "show_hidden_cases" => $show_hidden_cases,
             "highest_version" =>  $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
             "max_submissions" => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
-            "csrf_token" => $this->core->getCsrfToken(),
             "is_vcs" => $gradeable->isVcs(),
             "gradeable_id" => $gradeable->getId(),
             "user_id" => $id,
