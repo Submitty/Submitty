@@ -887,10 +887,8 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
         contentType: false,
         type: 'POST',
         success: function(data) {
-            $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                console.log(data);
                 if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
@@ -914,7 +912,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
         },
         error: function(error) {
             $("#submit").prop("disabled", false);
-            alert("ERROR! Please contact administrator that you could not upload files.");
+            alert("ERROR! Please contact administrator that you could not regrade files.");
         }
     });
 }

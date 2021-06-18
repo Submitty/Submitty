@@ -841,6 +841,35 @@ class SubmissionController extends AbstractController {
 
         return $this->uploadResult("Successfully deleted this PDF.");
     }
+    /**
+     * function for counting the number of submissions to be regraded
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods={"POST"})
+     */
+    public function ajaxCountRegrade() {
+        $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+        $regrade_all = $_POST['regrade_all'];
+        $order->sort("id", "ASC");
+        $count = 0;
+        /** @var GradedGradeable $g */
+        if ($regrade_all === 'true') {
+            foreach ($order->getSortedGradedGradeables() as $g) {
+                if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                    $count+=$g->getAutoGradedGradeable()->getHighestVersion();
+                }
+            }
+        }
+        else {
+            foreach ($order->getSortedGradedGradeables() as $g) {
+                if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                    $count+=1;
+                }
+            }
+        }
+
+        return 'hello';
+    }
 
     /**
      * Function for regrading submissions

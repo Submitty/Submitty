@@ -713,14 +713,24 @@
 
     $(function() {
         $('.regrade-btn').click(function(e) {
-            let count = 0;
-            {% for section in sections %}
-                {% for row in section.rows %}
-                    {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
-                       count+=1;
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
+            var submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
+            var count = 0;
+            var formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('gradeable_id', "{{ gradeable.getId }}");
+            formData.append('regrade_all', 'false');
+            $.ajax({
+                url: submit_url,
+                data: formData,
+                processData: false,
+                headers : {
+                    Accept: "application/json"
+                },
+                type: 'POST',
+                success: function(data) {
+                   alert(data['data']);
+                }
+            });
             if(count > 50) {
                 e.preventDefault();
                 if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
@@ -728,7 +738,8 @@
                 }
             }
             else {
-                regradeAllStudents();
+                console.log(count);
+                ///regradeAllStudents();
             }
         });
     });
