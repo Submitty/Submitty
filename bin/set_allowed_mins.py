@@ -5,7 +5,7 @@ Handles updating the database with allowed minutes
 and override allowed minutes for the gradeable timer
 """
 
-from sqlalchemy import create_engine, MetaData, Table, bindparam, text
+from sqlalchemy import create_engine, MetaData, text
 import datetime
 import os
 import sys
@@ -36,6 +36,7 @@ SEMESTER = sys.argv[2]
 COURSE = sys.argv[3]
 GRADEABLE = sys.argv[4]
 
+
 def setup_db():
     """Set up a connection with the course database."""
     db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
@@ -52,6 +53,7 @@ def setup_db():
     metadata = MetaData(bind=db)
     return db, metadata
 
+
 def send_data(db, allowed_minutes, override):
     query = """UPDATE gradeable SET g_allowed_minutes = :minutes
                WHERE g_id=:gradeable"""
@@ -59,7 +61,9 @@ def send_data(db, allowed_minutes, override):
     for user in override:
         query = """INSERT INTO gradeable_allowed_minutes_override (g_id, user_id, allowed_minutes)
                    VALUES (:gradeable, :userid, :minutes)"""
-        db.execute(text(query), gradeable=GRADEABLE, userid=user['user'], minutes=user['allowed_minutes'])
+        db.execute(text(query), gradeable=GRADEABLE, userid=user['user'],
+                   minutes=user['allowed_minutes'])
+
 
 def main():
     db, metadata = setup_db()
@@ -75,9 +79,9 @@ def main():
             break
     if timelimit_case is None:
         for testcase in CONFIG_FILE['testcases']:
-            if testcase.has_key('validation'):
+            if 'validation' in testcase:
                 if len(testcase['validation']) > 0:
-                    if testcase['validation'][0].has_key('allowed_minutes'):
+                    if 'allowed_minutes' in testcase['validation'][0]:
                         timelimit_case = testcase
                         break
 
