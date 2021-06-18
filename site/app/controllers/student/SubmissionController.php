@@ -863,7 +863,7 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['regrade']) || !isset($_POST['regrade_all']) || !isset($_POST['regrade_all_students_all'])) {
             return $this->uploadResult("Invalid user id.", false);
         }
-
+        $who_id = "";
         //grab all graded gradeables for this gradeable
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
         $order->sort("id", "ASC");
