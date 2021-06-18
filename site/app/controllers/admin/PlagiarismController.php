@@ -296,11 +296,11 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && is_numeric($_POST['sequence_length']) && $_POST['sequence_length'] > 0) {
+        if (isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '' && is_numeric($_POST['sequence_length']) && $_POST['sequence_length'] >= 2) {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
-            $this->core->addErrorMessage("Invalid input provided for sequence length");
+            $this->core->addErrorMessage("Invalid input provided for sequence length. The minimum allowed threshold value is 2");
             $this->core->redirect($return_url);
         }
 
@@ -560,6 +560,27 @@ class PlagiarismController extends AbstractController {
         $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
         $this->core->redirect($return_url);
     }
+
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
+     */
+    public function getRunLog($gradeable_id) {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $log_file = FileUtils::joinPaths($course_path, "lichen", "logs", $gradeable_id, "lichen_job_output.txt");
+
+        if (!file_exists($log_file)) {
+            echo("Error: Unable to find run log.");
+        }
+
+        $log_data = file_get_contents($log_file);
+
+        echo $log_data;
+    }
+
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")

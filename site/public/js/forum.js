@@ -164,6 +164,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
     }
     var submit_url = form.attr('action');
 
+    form.find("[type=submit]").prop('disabled', true);
+
     $.ajax({
         url: submit_url,
         data: formData,
