@@ -185,6 +185,15 @@ main#main.full-screen-mode .plagiarism-result-cont {
     float: right;
 }
 
+.plag-legend {
+    text-shadow: 0 0 3px var(--text-black);
+    margin-left: 5px;
+}
+
+[data-theme="dark"] .plag-legend {
+    text-shadow: 0 0 3px transparent;
+}
+
 @media (max-width: 660px) {
     .nav-buttons a {
         width: 100%;
