@@ -1029,6 +1029,7 @@
                     "type" : "string"
                   },
                   "pattern" : {
+                    "type": "string"
                   },
                   "source" : {
                     "type" : "string"
