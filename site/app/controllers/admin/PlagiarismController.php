@@ -312,8 +312,11 @@ class PlagiarismController extends AbstractController {
 
 
         // Regex
-        // TODO: Can we find a way to validate the regex here to tell the user their regex was invalid before feeding it to Lichen?
-        assert(isset($_POST["regex_dir"]) && isset($_POST["regex_to_select_files"]));
+        // TODO: Can we find a way to validate the regex more thoroughly to tell the user their regex was invalid before feeding it to Lichen?
+        if (!isset($_POST["regex_dir"]) || !isset($_POST["regex_to_select_files"]) || str_contains($_POST["regex_to_select_files"], "..")) {
+            $this->core->addErrorMessage("Invalid regex form data.");
+            $this->core->redirect($return_url);
+        }
         $regex_directories = $_POST["regex_dir"];
         $regex_for_selecting_files = $_POST['regex_to_select_files'];
 
