@@ -21,3 +21,39 @@
 .sticky-top label, .sticky-top .not-sticky {
     display: none !important;
 }
+
+.simple-full-credit {
+    color: var(--simple-full-credit-dark-blue);
+}
+
+.simple-half-credit {
+    color: var(--simple-half-credit-light-blue);
+}
+
+.simple-save-error {
+    color: var(--simple-save-error-red);
+}
+
+/* styling for fields that aren't icons */
+.simple-full-credit:not(i) {
+    background-color: var(--simple-full-credit-dark-blue);
+}
+
+.simple-half-credit:not(i) {
+    background-color: var(--simple-half-credit-light-blue);
+}
+
+.simple-save-error:not(i) {
+    background-color: var(--simple-save-error-red);
+}
+
+.simple-icon {
+    transform: scaleX(3);
+    width: 20px;
+    margin-left: 20px;
+}
+
+#details-legend li {
+    margin-right: 6px;
+    font-size: 0.9em;
+}

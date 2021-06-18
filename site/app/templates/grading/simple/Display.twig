@@ -34,16 +34,32 @@
     </div>
 
     <div class="column-wrapper" style="margin: 1em 0;">
-        <p>
             {% if action == 'lab' %}
-                No Color - No Credit<br />
-                Dark Blue - Full Credit<br />
-                Light Blue - Half Credit<br />
-                Red - [SAVE ERROR] Refresh Page
+                <ul id="details-legend" class="table-bordered">
+                    <li>
+                        No Color - No Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-full-credit simple-icon"></i>
+                        Full Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-half-credit simple-icon"></i>
+                        Half Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-save-error simple-icon"></i>
+                        [SAVE ERROR] Refresh Page
+                    </li>
+                </ul>
             {% else %}
-                Red - [SAVE ERROR] Refresh Page
+                <ul id="details-legend" class="table-bordered">
+                    <li>
+                        <i class="fas fa-square simple-save-error simple-icon"></i>
+                        [SAVE ERROR] Refresh Page
+                    </li>
+                </ul>
             {% endif %}
-        </p>
 
         <div class="row-wrapper">
             {#

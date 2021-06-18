@@ -15,25 +15,32 @@
     "@submitty/pdf-annotate.js": "2.2.2",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
-    "codemirror": "5.61.0",
+    "codemirror": "5.61.1",
     "flatpickr": "4.6.6",
     "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
     "jspdf": "^2.3.1",
-    "mermaid": "8.10.1",
+    "mermaid": "8.10.2",
     "pdfjs-dist": "2.2.228",
     "plotly.js-dist": "1.58.4",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.4"
   },
   "devDependencies": {
-    "cypress": "^7.3.0",
-    "eslint": "^7.26.0",
-    "eslint-plugin-cypress": "^2.11.3"
+    "@babel/core": "^7.14.5",
+    "@babel/preset-env": "^7.14.5",
+    "babel-jest": "^27.0.2",
+    "cypress": "^7.5.0",
+    "eslint": "^7.28.0",
+    "eslint-plugin-cypress": "^2.11.3",
+    "eslint-plugin-jest": "^24.3.6",
+    "jest": "^27.0.4",
+    "regenerator-runtime": "^0.13.7"
   },
   "scripts": {
-    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\"",
-    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" --fix"
+    "lint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\" --fix",
+    "test": "jest"
   }
 }

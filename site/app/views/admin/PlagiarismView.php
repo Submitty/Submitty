@@ -17,14 +17,15 @@ class PlagiarismView extends AbstractView {
             $plagiarism_row = [];
             $plagiarism_row['title'] = $gradeable['g_title'];
             $plagiarism_row['id'] = $gradeable['g_id'];
+            $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format('F d Y H:i:s'); // TODO: think about the format of this date.  Using the format of the last run date for now.
             $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl([
                 'plagiarism',
                 'gradeable',
                 $plagiarism_row['id'],
                 'delete'
             ]);
-            if (file_exists($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt")) {
-                $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt"));
+            if (file_exists($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt")) {
+                $timestamp = date("F d Y H:i:s", filemtime($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt"));
                 $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $plagiarism_row['id']), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
@@ -55,7 +56,7 @@ class PlagiarismView extends AbstractView {
             }
             else {
                 // no lichen job
-                $ranking_file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt";
+                $ranking_file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt";
                 if (file_get_contents($ranking_file_path) == "") {
                     $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
                 }
@@ -88,7 +89,8 @@ class PlagiarismView extends AbstractView {
     }
 
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title, $rankings) {
-        $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
+        $this->core->getOutput()->addBreadcrumb('Plagiarism  Detection', $this->core->buildCourseUrl(['plagiarism']));
+        $this->core->getOutput()->addBreadcrumb($gradeable_title);
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
         $this->core->getOutput()->addInternalJs('plagiarism.js');
