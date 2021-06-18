@@ -139,7 +139,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        if ($_POST["question_type"] != "single-response" && $_POST["question_type"] != "multiple-response") {
+        if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -166,7 +166,15 @@ class PollController extends AbstractController {
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        } else if ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
+            $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        } else if (($_POST["question_type"] == "single-response-survey" || ($_POST["question_type"] == "multiple-response-survey"))
+                   && count($answers) != $response_count) {
+            $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
@@ -283,14 +291,14 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        if ($poll->getQuestionType() != "single-response" && $poll->getQuestionType() != "multiple-response") {
+        if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
         if ($poll->isOpen()) {
-            if ($poll->getQuestionType() == "single-response") {
+            if (PollUtils::isSingleResponse($poll->getQuestionType())) {
                 if ($_POST["answers"][0] == "-1") {
                     $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
                 }
@@ -383,6 +391,12 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
         }
+        if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
+            $this->core->addErrorMessage("Invalid poll question type");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
@@ -427,7 +441,15 @@ class PollController extends AbstractController {
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        } else if ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
+            $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        } else if (($_POST["question_type"] == "single-response-survey" || ($_POST["question_type"] == "multiple-response-survey")
+                   && count($answers) != $response_count)) {
+            $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
         $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $file_path);
         return new RedirectResponse($returnUrl);
     }
@@ -530,7 +552,7 @@ class PollController extends AbstractController {
             /*  Polls that were exported before this feature was
                 implemented don't have this data. At the time, there
                 only existed questions of type single reponse. */
-            $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response';
+            $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
             $responses = [];
             $orders = [];
             $i = 0;
