@@ -353,10 +353,13 @@ class PlagiarismController extends AbstractController {
 
         // Submissions to ignore
         $ignore_submission_option = $_POST['ignore_submission_option'];
-        assert($ignore_submission_option == "ignore" || $ignore_submission_option == "no_ignore");
+       if ($ignore_submission_option !== "ignore" && $ignore_submission_option !== "no_ignore") {
+           $this->core->addErrorMessage("Invalid ignore submission options, expected \"ignore\" or \"no_ignore\", got \"" . $ignore_submission_option . "\".");
+           $this->core->redirect($return_url);
+       }
         $ignore_submission_number = $_POST['ignore_submission_number'];
         $ignore_submissions = [];
-        if ($ignore_submission_option == "ignore") {
+        if ($ignore_submission_option === "ignore") {
             for ($i = 0; $i < $ignore_submission_number; $i++) {
                 if (isset($_POST['ignore_submission_' . $i]) && $_POST['ignore_submission_' . $i] !== '') {
                     array_push($ignore_submissions, $_POST['ignore_submission_' . $i]);
