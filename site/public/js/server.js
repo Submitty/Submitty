@@ -1621,3 +1621,104 @@ function getFocusableElements() {
     let focusable_elements = $(':focusable:tabbable');
     return Array.from(focusable_elements);
 }
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
+ * @param preview_element JQuery element of the span the markdown will be inserted into
+ * @param preview_button JQuery element of the "Preview Markdown" button
+ *                       Should have title="Preview Markdown"
+ * @param data Object whose properties will get sent through a POST request
+ */
+function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
+    const enablePreview = preview_element.is(':hidden');
+
+    $.ajax({
+        url: buildCourseUrl(['markdown', 'preview']),
+        type: 'POST',
+        data: {
+            enablePreview: enablePreview,
+            ...data,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            if (enablePreview) {
+                preview_element.empty();
+                preview_element.append(data);
+                preview_element.show();
+                markdown_textarea.hide();
+
+                preview_button.empty();
+                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+
+            }
+            else {
+                preview_element.hide();
+                markdown_textarea.show();
+
+                preview_button.empty();
+                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdownContainer JQuery element of the textarea where the markdown should be rendered
+ * @param url url to send ajax request to
+ * @param content Text content of the unrendered markdown
+ */
+function renderMarkdown(markdownContainer, url, content) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            enablePreview: true,
+            content: content,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            markdownContainer.empty();
+            markdownContainer.append(data);
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param type Number representing the type of markdown preset to insert
+ *             0: code
+ *             1: link
+ *             2: bold text
+ *             3: italic text
+ * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ */
+function addMarkdownCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[display text](url)";
+    }
+    else if(type == 0){
+        insert = "```" +
+            "\ncode\n```";
+    }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+}

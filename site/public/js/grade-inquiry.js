@@ -1,5 +1,5 @@
-/* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* global buildCourseUrl, WebSocketClient previewMarkdown */
+/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp previewInquiryMarkdown */
 
 function onReady(){
     // open last opened grade inquiry or open first component with grade inquiry
@@ -203,4 +203,13 @@ function newDiscussionRender(discussion) {
     else {
         $('#regradeBoxSection').html(discussion).hide().fadeIn('slow');
     }
+}
+
+function previewInquiryMarkdown() {
+    const markdown_textarea = $(this).closest('.markdown-area').find('[name="replyTextArea"]');
+    const preview_element = $('#inquiry_preview');
+    const preview_button = $(this);
+    const inquiry_content = markdown_textarea.val();
+
+    previewMarkdown(markdown_textarea, preview_element, preview_button, { content: inquiry_content });
 }
