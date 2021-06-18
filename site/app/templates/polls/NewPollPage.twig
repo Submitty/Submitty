@@ -30,19 +30,19 @@
 
             <div class="poll-type-option">
                 <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()"></input>
-                <label for="poll-type-single-response-single-correct">Single reponse - single correct</label>
+                <label for="poll-type-single-response-single-correct">Single response - single correct</label>
                 <p class="poll-type-description"><i>Students can pick only one response, and there is one correct answer.</i></p>
             </div>
 
             <div class="poll-type-option">
                 <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" checked></input>
-                <label for="poll-type-single-response-multiple-correct">Single reponse - multiple correct</label>
+                <label for="poll-type-single-response-multiple-correct">Single response - multiple correct</label>
                 <p class="poll-type-description"><i>Students can pick only one response, and there are multiple correct answers.</i></p>
             </div>
 
             <div class="poll-type-option">
                 <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()"></input>
-                <label for="poll-type-single-response-survey">Single reponse - survey</label>
+                <label for="poll-type-single-response-survey">Single response - survey</label>
                 <p class="poll-type-description"><i>Students can pick only one response, and all answers are correct.</i></p>
             </div>
 
@@ -128,19 +128,19 @@
 
             <div class="poll-type-option">
                 <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()" {{ poll.getQuestionType() == 'single-response-single-correct'? "checked" : "" }}></input>
-                <label for="poll-type-single-response-single-correct">Single reponse - single correct</label>
+                <label for="poll-type-single-response-single-correct">Single response - single correct</label>
                 <p class="poll-type-description"><i>Students can pick only one response, and there is one correct answer.</i></p>
             </div>
 
             <div class="poll-type-option">
                 <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" {{ poll.getQuestionType() == 'single-response-multiple-correct'? "checked" : "" }}></input>
-                <label for="poll-type-single-response-multiple-correct">Single reponse - multiple correct</label>
+                <label for="poll-type-single-response-multiple-correct">Single response - multiple correct</label>
                 <p class="poll-type-description"><i>Students can pick only one response, and there are multiple correct answers.</i></p>
             </div>
 
             <div class="poll-type-option">
                 <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()" {{ poll.getQuestionType() == 'single-response-survey'? "checked" : "" }}></input>
-                <label for="poll-type-single-response-survey">Single reponse - survey</label>
+                <label for="poll-type-single-response-survey">Single response - survey</label>
                 <p class="poll-type-description"><i>Students can pick only one response, and all answers are correct.</i></p>
             </div>
 
@@ -231,7 +231,7 @@
 <script>
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
-    let poll_type = "{{ poll.getQuestionType() }}";
+    let poll_type = "{{ poll_type }}";
 
     flatpickr('.poll-date', {
         allowInput: true,
@@ -448,15 +448,24 @@
         $("#edit-poll-form").on("change click", submitErrorChecks);
         let submit_form = false;
         $("#edit-poll-form").submit(function(event) {
-            if (!submit_form
-                && ( (poll_type != "single-response" && $("#poll-type-single-response").is(":checked"))
-                     || (poll_type != "multiple-response" && $("#poll-type-multiple-response").is(":checked")) )) {
-                // don't submit yet
-                event.preventDefault();
-                // send warning
-                if (confirm("Changing the poll question type may lead to data of students' answers being lost if students have already begun submitting responses to this poll. Are you sure you want to change the type of this poll?")) {
-                    submit_form = true;
-                    $("#edit-poll-form").submit();
+            if (!submit_form) {
+                if ((poll_type != "single-response"
+                    && ($('#poll-type-single-response-single-correct').is(':checked')
+                        || $('#poll-type-single-response-multiple-correct').is(':checked')
+                        || $('#poll-type-single-response-survey').is(':checked')))
+                || (poll_type != "multiple-response"
+                    && ($('#poll-type-multiple-response-exact').is(':checked')
+                        || $('#poll-type-multiple-response-flexible').is(':checked')
+                        || $('#poll-type-multiple-response-survey').is(':checked')))) {
+                    // don't submit yet
+                    event.preventDefault();
+                    // send warning
+                    if (confirm("Changing the poll question type may lead to data of students' answers being " +
+                               "lost if students have already begun submitting responses to this poll. " +
+                               "Are you sure you want to change the type of this poll?")) {
+                        submit_form = true;
+                        $("#edit-poll-form").submit();
+                    }
                 }
             }
         });

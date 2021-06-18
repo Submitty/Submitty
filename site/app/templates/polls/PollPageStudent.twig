@@ -14,7 +14,7 @@
             <legend>
                 <h2> Possible responses: </h2>
             </legend>
-            {% if poll.getQuestionType() == "single-response" %}
+            {% if poll_type == "single-response" %}
                 <label class="radio" for="answer-no-response">
                     {% if poll.isOpen() %}
                         {% if poll.getUserResponse(user_id) is same as(null) %}
@@ -36,7 +36,7 @@
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
                     <div class = "radio">
-                        {% if response is same as(poll.getUserResponse(user_id)) %}
+                        {% if response in poll.getUserResponse(user_id) %}
                             {% if poll.isOpen() %}
                                 <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked/>
                             {% else %}
@@ -53,9 +53,9 @@
                     </div>
                     {% set index = index + 1%}
                 {% endfor %}
-                
-                
-            {% else %} {# poll.getQuestionType() == "multiple-response" #}
+
+
+            {% else %} {# poll_type == "multiple-response" #}
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
                     <div class = "radio">

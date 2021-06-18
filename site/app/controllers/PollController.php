@@ -166,10 +166,12 @@ class PollController extends AbstractController {
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
-        } else if ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
+        }
+        elseif ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
             $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
-        } else if (($_POST["question_type"] == "single-response-survey" || ($_POST["question_type"] == "multiple-response-survey"))
+        }
+        elseif (($_POST["question_type"] == "single-response-survey" || ($_POST["question_type"] == "multiple-response-survey"))
                    && count($answers) != $response_count) {
             $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -284,15 +286,9 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        if (!array_key_exists("answers", $_POST) && $poll->getQuestionType() == "single-response") {
+        if (!array_key_exists("answers", $_POST) && PollUtils::isSingleResponse($poll->getQuestionType())) {
             // Answer must be given for single-response ("no response" counts as a reponse)
             $this->core->addErrorMessage("No answer given");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
-        }
-        if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
-            $this->core->addErrorMessage("Invalid poll question type");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
@@ -441,10 +437,12 @@ class PollController extends AbstractController {
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
-        } else if ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
+        }
+        elseif ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
             $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
-        } else if (($_POST["question_type"] == "single-response-survey" || ($_POST["question_type"] == "multiple-response-survey")
+        }
+        elseif (($_POST["question_type"] == "single-response-survey" || ($_POST["question_type"] == "multiple-response-survey")
                    && count($answers) != $response_count)) {
             $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
