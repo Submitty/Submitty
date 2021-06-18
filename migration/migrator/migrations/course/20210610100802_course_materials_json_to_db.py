@@ -118,7 +118,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE course_materials CASCADE;")
-    database.execute("DROP TABLE course_materials_access CASCADE;")
-    database.execute("DROP TABLE course_materials_sections CASCADE;")
     pass
