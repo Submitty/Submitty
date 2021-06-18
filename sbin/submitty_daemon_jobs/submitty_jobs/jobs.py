@@ -201,7 +201,7 @@ class DeleteLichenResult(CourseGradeableJob):
             config = Path(lichen_dir, 'config', lichen_json)
             if config.exists():
                 config.unlink()
-
+    
             for folder in ['ranking', 'provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)

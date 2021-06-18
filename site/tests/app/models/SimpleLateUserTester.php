@@ -34,7 +34,7 @@ class SimpleLateUserTester extends \PHPUnit\Framework\TestCase {
         $this->core->setUser($user);
         $this->core->setConfig($config);
         $sinceDateTime = new \DateTime('now', $this->core->getUser()->getUsableTimeZone());
-        $sinceTimestamp = $sinceDateTime->format('m/d/Y h:i:s A T');
+        $sinceTimestamp = $sinceDateTime->format('m/d/Y');
         $this->userDetails = [
             'user_id' => 'id',
             'user_firstname' => 'Alexander',
@@ -99,7 +99,7 @@ class SimpleLateUserTester extends \PHPUnit\Framework\TestCase {
     public function testLateUserMethods(): void {
         $user = new SimpleLateUser($this->core, $this->userDetails);
         $sinceDateTime = new \DateTime('now', $this->core->getUser()->getUsableTimeZone());
-        $sinceTimestamp = $sinceDateTime->format('m/d/Y h:i:s A T');
+        $sinceTimestamp = $sinceDateTime->format('m/d/Y');
         $newUserDetails = [
             'user_id' => 'id_updated',
             'user_firstname' => 'Alexander_updated',

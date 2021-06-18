@@ -24,7 +24,7 @@ class PlagiarismView extends AbstractView {
                 $plagiarism_row['id'],
                 'delete'
             ]);
-            if (file_exists($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt")) {
+            if (file_exists($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt")) {
                 $timestamp = date("F d Y H:i:s", filemtime($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . "/overall_ranking.txt"));
                 $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $plagiarism_row['id']), ['.', '..']);
                 $submissions = 0;
