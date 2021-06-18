@@ -561,6 +561,27 @@ class PlagiarismController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
+     */
+    public function getRunLog($gradeable_id) {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $log_file = FileUtils::joinPaths($course_path, "lichen", "logs", $gradeable_id, "lichen_job_output.txt");
+
+        if (!file_exists($log_file)) {
+            echo("Error: Unable to find run log.");
+        }
+
+        $log_data = file_get_contents($log_file);
+
+        echo $log_data;
+    }
+
+
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
