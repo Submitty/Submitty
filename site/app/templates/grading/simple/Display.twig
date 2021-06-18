@@ -318,7 +318,7 @@
                   contenteditable
                   onclick="this.select()"
                   onfocus="adjustHeight(this);"
-                  onfocusout="minimizeHeight(this);"
+                  onblur="minimizeHeight(this);"
                   onkeyup="adjustHeight(this);"
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
