@@ -81,7 +81,7 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d H:i:s', $_POST['datestamp']) === false)) {
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d H:i:s";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
