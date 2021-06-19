@@ -129,7 +129,7 @@ class RainbowCustomization extends AbstractModel {
 
         //Now that the buckets are ordered and the customization has been initialized, we can
         //loop through to find differences between the max_values from the database vs the customization JSON
-        if (!is_null($this->RCJSON)) {
+        if (!is_null($this->RCJSON) && count($this->RCJSON->getGradeables())) {
             $json_buckets = $this->RCJSON->getGradeables();
             //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
             //has all buckets (even empty ones) while the JSON only has buckets with content in it.

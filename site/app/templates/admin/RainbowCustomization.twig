@@ -141,7 +141,7 @@
                                                                     <br><br>
                                                                     Actual Max Score: {{ gradeable["max_score"] }}
                                                                     <br>
-                                                                    Override Max Score: {{ gradeable["override_max"] }}
+                                                                    Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"><span>
                                                                 </span>
                                                             </i>
                                                             <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
@@ -190,6 +190,13 @@ To remove a curve simply blank all boxes."></i>
     </div>
 
     <script>
+        $('.gradeable-li-info .tooltip').on('mouseenter', function(){
+            const gradeable = $(this).closest('.gradeable-li');
+            const override = gradeable.find('.override');
+            const gradeable_id = override.attr('id');
+            $(`#override-${gradeable_id}`).html(override.val());
+        });
+
         var old_index;
         var new_index;
         var old_parent;
