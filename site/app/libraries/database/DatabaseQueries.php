@@ -810,10 +810,12 @@ SQL;
 
         return ["thread_id" => $id, "post_id" => $post_id];
     }
-    public function setAnnounced($thread_id){
+
+    public function setAnnounced($thread_id) {
         $now = new \DateTime("now");
         $this->course_db->query("UPDATE threads SET announced = ? WHERE id = ?", [$now, $thread_id]);
     }
+    
     public function getThreadsBefore($timestamp, $page) {
         // TODO: Handle request page wise
         $this->course_db->query("SELECT t.id as id, title from threads t JOIN posts p on p.thread_id = t.id and parent_id = -1 WHERE timestamp < ? and t.deleted = false", [$timestamp]);
