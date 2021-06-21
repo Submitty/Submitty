@@ -845,6 +845,7 @@ class SubmissionController extends AbstractController {
      * function for counting the number of submissions to be regraded
      * @AccessControl(role="INSTRUCTOR")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods={"POST"})
+     * @return JsonResponse
      */
     public function ajaxCountRegrade() {
         $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
@@ -867,9 +868,7 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-//        $return_arr[] = array("success" => true, "count" => $count);
-//        return json_encode($return_arr);
-        //return $this->uploadResult($count, true);
+
         return JsonResponse::getSuccessResponse($count);
     }
 

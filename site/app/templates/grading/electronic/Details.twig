@@ -709,6 +709,7 @@
         location.reload();
     }
 
+    //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
     function ajaxCountRegrade(choice,e,warning) {
         const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
         let formData = new FormData();
@@ -734,7 +735,7 @@
                 data = JSON.parse(data);
                 console.log(data);
                 if (data['status'] === 'success') {
-                    warning(e, data['data'], choice);
+                    confirmMessage(e, data['data'], choice);
                 }
                 else {
                     if (data['message'] === "You do not have access to that page.") {
@@ -747,7 +748,7 @@
             }
         });
     }
-    function warning(e,count, choice) {
+    function confirmMessage(e,count, choice) {
         if(count > 50) {
             e.preventDefault();
             if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
