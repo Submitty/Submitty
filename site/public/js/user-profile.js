@@ -157,14 +157,14 @@ function updateUserSecondaryEmail () {
                     second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
                 }
                 else if (response.status === "error") {
-                    displayErrorMessage("Some went wrong while updating secondary email address!");
+                    displayErrorMessage(response.message);
                     second_email.val(second_email.data('current-second-email'));
                     second_email_notify.prop('checked', second_email_notify.data('current-second-email-notify'));
                 }
             },
             error: function() {
                 // display error message
-                displayErrorMessage("Some went wrong while updating secondary email address!");
+                displayErrorMessage("Something went wrong while updating secondary email address!");
             }
         });
     }

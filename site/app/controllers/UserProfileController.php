@@ -9,8 +9,6 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
-use app\views\grading\ImagesView;
-use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -172,7 +170,7 @@ class UserProfileController extends AbstractController {
      * @Route("/user_profile/change_secondary_email", methods={"POST"})
      * @return JsonResponse
      */
-    public function changeSecondaryEmail() {
+    public function changeSecondaryEmail(): JsonResponse {
         $user = $this->core->getUser();
 
         if (isset($_POST['secondary_email']) && isset($_POST['secondary_email_notify'])) {
@@ -190,7 +188,7 @@ class UserProfileController extends AbstractController {
                 ]);
             }
             else {
-                return JsonResponse::getErrorResponse("Secondary email address must be a valid email and the notify setting must be a boolean");
+                return JsonResponse::getErrorResponse("Secondary email address must be a valid email");
             }
         }
         else {
