@@ -1497,8 +1497,8 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
-            self.has_due_date = gradeable['has_due_date']
-            self.has_release_date = gradeable['has_release_date']
+            self.has_due_date = gradeable['eg_has_due_date']
+            self.has_release_date = gradeable['eg_has_release_date']
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
