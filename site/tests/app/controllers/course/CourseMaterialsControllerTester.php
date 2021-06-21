@@ -86,7 +86,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $course_materials = [];
         foreach ($names as $name) {
             $details = [
-                'url' => $slash ? $this->upload_path . "/" . $name : $this->upload_path . $name,
+                'path' => $slash ? $this->upload_path . "/" . $name : $this->upload_path . $name,
                 'section_lock' => false,
                 'hidden_from_students' => false,
                 'priority' => 0,
@@ -106,7 +106,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
                 foreach ($course_materials as $course_material) {
                     if (
                         $arg->getType() === $course_material->getType()
-                        && $arg->getUrl() === $course_material->getUrl()
+                        && $arg->getPath() === $course_material->getPath()
                         && $arg->getReleaseDate() == $course_material->getReleaseDate()
                         && $arg->getHiddenFromStudents() === $course_material->getHiddenFromStudents()
                         && $arg->getPriority() === $course_material->getPriority()
@@ -120,7 +120,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             }));
 
         $this->course_material = new CourseMaterial($this->core, [
-            'url' => $this->upload_path . "/" . $name,
+            'path' => $this->upload_path . "/" . $name,
             'section_lock' => false,
             'hidden_from_students' => false,
             'priority' => 0,
@@ -137,7 +137,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->will($this->returnCallback(function ($arg) use ($course_material) {
                 if (
                     $arg->getType() === $course_material->getType()
-                    && $arg->getUrl() === $course_material->getUrl()
+                    && $arg->getPath() === $course_material->getPath()
                     && $arg->getReleaseDate() == $course_material->getReleaseDate()
                     && $arg->getHiddenFromStudents() === $course_material->getHiddenFromStudents()
                     && $arg->getPriority() === $course_material->getPriority()
