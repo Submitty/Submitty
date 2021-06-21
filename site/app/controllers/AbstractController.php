@@ -289,7 +289,7 @@ abstract class AbstractController {
      * @return CourseMaterial|bool false in the fail/error case
      */
     public function tryGetCourseMaterial(string $path, bool $render_json = true) {
-        if ($path === '') {
+        if (!file_exists($path)) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Missing path parameter');
             }
