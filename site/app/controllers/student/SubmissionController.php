@@ -867,8 +867,10 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-
-        return 'hello';
+//        $return_arr[] = array("success" => true, "count" => $count);
+//        return json_encode($return_arr);
+        //return $this->uploadResult($count, true);
+        return JsonResponse::getSuccessResponse($count);
     }
 
     /**

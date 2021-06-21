@@ -57,12 +57,12 @@
     </div>
     {% if can_regrade and not is_vcs %}
     <div class="regrade-dropMenu" style="position: relative; float: right; margin-bottom: 3%">
-        <button class="btn btn-primary regrade-btn regrade-option-details">Regrade All Active Versions for All students</button>
+        <button class="btn btn-primary regrade-btn regrade-option-details" >Regrade All Active Versions for All students</button>
         <button class="btn btn-primary regrade-drop-btn">
             <i class="fa fa-caret-down"></i>
         </button>
         <div class="regrade-dropContent">
-            <button class="btn btn-primary regrade-btn-all regrade-option-details">Regrade All Versions for All students</button>
+            <button class="btn btn-primary regrade-btn-all regrade-option-details" >Regrade All Versions for All students</button>
         </div>
     </div>
     {% endif %}
@@ -709,71 +709,80 @@
         location.reload();
     }
 
-    {# functions to handle regrading, they loop through sections in order to know if a confirm message should be displayed #}
-
-    $(function() {
-        $('.regrade-btn').click(function(e) {
-            var submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
-            var count = 0;
-            var formData = new FormData();
-            formData.append('csrf_token', csrfToken);
-            formData.append('gradeable_id', "{{ gradeable.getId }}");
+    function ajaxCountRegrade(choice,e,warning) {
+        const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
+        let formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('gradeable_id', "{{ gradeable.getId }}");
+        //if regrading all versions
+        if (choice) {
+            formData.append('regrade_all', 'true');
+        }
+        else {
             formData.append('regrade_all', 'false');
-            $.ajax({
-                url: submit_url,
-                data: formData,
-                processData: false,
-                headers : {
-                    Accept: "application/json"
-                },
-                type: 'POST',
-                success: function(data) {
-                   alert(data['data']);
+        }
+        $.ajax({
+            url: submit_url,
+            data: formData,
+            processData: false,
+            type: 'POST',
+            headers : {
+                Accept: "application/json"
+            },
+            contentType: false,
+            success: function(data) {
+                data = JSON.parse(data);
+                console.log(data);
+                if (data['status'] === 'success') {
+                    warning(e, data['data'], choice);
                 }
-            });
-            if(count > 50) {
-                e.preventDefault();
-                if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
-                    regradeAllStudents();
+                else {
+                    if (data['message'] === "You do not have access to that page.") {
+                        window.location.href = '';
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
                 }
-            }
-            else {
-                console.log(count);
-                ///regradeAllStudents();
             }
         });
+    }
+    function warning(e,count, choice) {
+        if(count > 50) {
+            e.preventDefault();
+            if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
+                //if regrading all versions
+                if (choice) {
+                    handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
+                }
+                else {
+                    handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
+                }
+            }
+        }
+        else {
+            //if regrading all versions
+            if (choice) {
+                handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
+            }
+            else {
+                handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
+            }
+        }
+    }
+
+    //when either regrade buttons are clicked, make an ajax call to count how many submissions will be regraded
+    $(function() {
+        $('.regrade-btn').click(function(e) {
+            ajaxCountRegrade(0,e,warning);
+         });
     });
 
     $(function() {
         $('.regrade-btn-all').click(function(e) {
-            let count = 0;
-            {% for section in sections %}
-                {% for row in section.rows %}
-                    {% if row.graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
-                        {% set highest = row.graded_gradeable.getAutoGradedGradeable().getHighestVersion() %}
-                        count += {{ highest }};
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
-            if(count > 50) {
-                e.preventDefault();
-                if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
-                    regradeAllStudentsAll();
-                }
-            }
-            else {
-                regradeAllStudentsAll();
-            }
+            ajaxCountRegrade(1,e,warning);
         });
     });
 
-    //some fields are left 0 or blank because it will be determined later for each specific graded gradeable
-    function regradeAllStudents() {
-        handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
-    }
-
-    function regradeAllStudentsAll() {
-        handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
-    }
 </script>
 
