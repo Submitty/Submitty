@@ -710,7 +710,7 @@
     }
 
     //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
-    function ajaxCountRegrade(choice,e,warning) {
+    function ajaxCountRegrade(choice,e,confirmMessage) {
         const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
         let formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -775,13 +775,13 @@
     //when either regrade buttons are clicked, make an ajax call to count how many submissions will be regraded
     $(function() {
         $('.regrade-btn').click(function(e) {
-            ajaxCountRegrade(0,e,warning);
+            ajaxCountRegrade(0,e,confirmMessage);
          });
     });
 
     $(function() {
         $('.regrade-btn-all').click(function(e) {
-            ajaxCountRegrade(1,e,warning);
+            ajaxCountRegrade(1,e,confirmMessage);
         });
     });
 

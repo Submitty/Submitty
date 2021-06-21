@@ -853,7 +853,6 @@ class SubmissionController extends AbstractController {
         $regrade_all = $_POST['regrade_all'];
         $order->sort("id", "ASC");
         $count = 0;
-        /** @var GradedGradeable $g */
         if ($regrade_all === 'true') {
             foreach ($order->getSortedGradedGradeables() as $g) {
                 if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
