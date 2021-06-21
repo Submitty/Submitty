@@ -1961,6 +1961,10 @@ header > * {
     color: var(--standard-dark-gray);
 }
 
+[data-theme="dark"] .accessibility-message {
+    color: var(--standard-light-medium-gray);
+}
+
 @media (max-width: 541px) {
     .content {
         padding: 30px 15px;
