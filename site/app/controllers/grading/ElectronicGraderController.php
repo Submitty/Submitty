@@ -840,7 +840,7 @@ class ElectronicGraderController extends AbstractController {
                 return $submitter->getId();
             }, $section));
         }
-        
+
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");
         $empty_teams = [];
         if ($gradeable->isTeamAssignment()) {
