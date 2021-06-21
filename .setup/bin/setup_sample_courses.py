@@ -1385,6 +1385,8 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.has_due_date = True
+        self.has_release_date = True
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
