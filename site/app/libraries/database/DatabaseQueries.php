@@ -7192,7 +7192,7 @@ SQL;
         }
 
         $query = "SELECT 
-                    cm.url,
+                    cm.path,
                     cm.type,
                     cm.release_date,
                     cm.hidden_from_students,
@@ -7200,8 +7200,8 @@ SQL;
                     cm.section_lock,
                     json_agg(cms.section_id) AS sections
                         FROM course_materials AS cm
-                        LEFT JOIN course_materials_sections AS cms ON cm.url = cms.course_material_id
-                    $selector GROUP BY cm.url;";
+                        LEFT JOIN course_materials_sections AS cms ON cm.path = cms.course_material_id
+                    $selector GROUP BY cm.path;";
         $course_material_constructor = function ($row) {
             $row['sections'] = json_decode($row['sections']);
             return new CourseMaterial($this->core, $row);
@@ -7224,7 +7224,7 @@ SQL;
         try {
             $params = [
                 $course_material->getType(),
-                $course_material->getUrl(),
+                $course_material->getPath(),
                 $course_material->getReleaseDate(),
                 $course_material->getHiddenFromStudents(),
                 $course_material->getPriority(),
@@ -7234,7 +7234,7 @@ SQL;
                 "
             INSERT INTO course_materials(
               type,
-              url,
+              path,
               release_date,
               hidden_from_students,
               priority,
@@ -7245,7 +7245,7 @@ SQL;
             if ($course_material->getSectionLock()) {
                 foreach ($course_material->getSections() as $section) {
                     $params = [
-                        $course_material->getUrl(),
+                        $course_material->getPath(),
                         $section
                     ];
                     $this->course_db->query(
@@ -7273,7 +7273,7 @@ SQL;
                 $course_material->getHiddenFromStudents(),
                 $course_material->getPriority(),
                 $course_material->getSectionLock(),
-                $course_material->getUrl()
+                $course_material->getPath()
             ];
             $this->course_db->query(
                 "
@@ -7283,17 +7283,17 @@ SQL;
                 hidden_from_students=?,
                 priority=?,
                 section_lock=?
-            WHERE url=?",
+            WHERE path=?",
                 $params
             );
             $this->course_db->query(
                 "DELETE FROM course_materials_sections WHERE course_material_id=?",
-                [$course_material->getUrl()]
+                [$course_material->getPath()]
             );
             if ($course_material->getSectionLock()) {
                 foreach ($course_material->getSections() as $section) {
                     $params = [
-                        $course_material->getUrl(),
+                        $course_material->getPath(),
                         $section
                     ];
                     $this->course_db->query(
@@ -7315,7 +7315,7 @@ SQL;
 
     public function deleteCourseMaterial(string $path): bool {
         try {
-            $this->course_db->query("DELETE FROM course_materials WHERE url=?", [$path]);
+            $this->course_db->query("DELETE FROM course_materials WHERE path=?", [$path]);
             return true;
         }
         catch (DatabaseException $e) {

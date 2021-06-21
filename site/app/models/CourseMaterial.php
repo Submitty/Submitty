@@ -12,8 +12,8 @@ use app\libraries\DateUtils;
  * @method void setId($id)
  * @method int getType()
  * @method void setType($type)
- * @method string getUrl()
- * @method void setUrl($url)
+ * @method string getPath()
+ * @method void setPath($path)
  * @method string getLinkTitle()
  * @method void setLinkTitle($link_title)
  * @method string getLinkUrl()
@@ -36,8 +36,8 @@ class CourseMaterial extends AbstractModel {
 
     /** @prop @var int Type of the course material (0->file or 1->link) */
     protected $type;
-    /** @prop @var string URL of the course material if this is a file */
-    protected $url;
+    /** @prop @var string path of the course material if this is a file */
+    protected $path;
     /** @prop @var \DateTime The release date for the course material */
     protected $release_date;
     /** @prop @var bool Whether or not this will be displayed to students */
@@ -52,7 +52,7 @@ class CourseMaterial extends AbstractModel {
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
         $this->setType($details['type']);
-        $this->setUrl($details['url']);
+        $this->setPath($details['path']);
         $this->setReleaseDate(DateUtils::parseDateTime($details['release_date'], $this->core->getUser()->getUsableTimeZone()));
         $this->setHiddenFromStudents($details['hidden_from_students']);
         $this->setPriority($details['priority']);
@@ -63,17 +63,11 @@ class CourseMaterial extends AbstractModel {
     }
 
     public function isFile(): bool {
-        if ($this->getType() === self::FILE) {
-            return true;
-        }
-        return false;
+        return $this->getType() === self::FILE;
     }
 
     public function isLink(): bool {
-        if ($this->getType() === self::LINK) {
-            return true;
-        }
-        return false;
+        return $this->getType() === self::LINK;
     }
 
     public function isSectionAllowed(User $user): bool {

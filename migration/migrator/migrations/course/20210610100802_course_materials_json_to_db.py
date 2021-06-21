@@ -21,7 +21,7 @@ def up(config, database, semester, course):
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS course_materials (
-            url TEXT PRIMARY KEY,
+            path TEXT PRIMARY KEY,
             type smallint NOT NULL,
             release_date timestamptz NOT NULL,
             hidden_from_students BOOL NOT NULL,
@@ -37,7 +37,7 @@ def up(config, database, semester, course):
             section_id varchar(255) NOT NULL,
             CONSTRAINT fk_course_material_id
                 FOREIGN KEY(course_material_id)
-                    REFERENCES course_materials(url)
+                    REFERENCES course_materials(path)
                     ON DELETE CASCADE,
             CONSTRAINT fk_section_id
                 FOREIGN KEY(section_id)
@@ -56,7 +56,7 @@ def up(config, database, semester, course):
             if type(data) is dict:
                 for itemkey, itemvalue in data.items():
                     material_type = 0
-                    url = itemkey
+                    path = itemkey
                     if itemvalue['external_link'] is True:
                         material_type = 1
                     sections = []
@@ -67,18 +67,18 @@ def up(config, database, semester, course):
                     query =  """
                         INSERT INTO course_materials (
                             type,
-                            url,
+                            path,
                             release_date,
                             hidden_from_students,
                             priority,
                             section_lock
                         )
                         VALUES (
-                            :type, :url, :release_date, :hidden_from_students, :priority, :section_lock
-                        ) RETURNING url
+                            :type, :path, :release_date, :hidden_from_students, :priority, :section_lock
+                        ) RETURNING path
                         """
                     params = {
-                        'url': url,
+                        'path': path,
                         'type': material_type,
                         'release_date': itemvalue['release_datetime'],
                         'hidden_from_students': itemvalue['hide_from_students'],

@@ -42,7 +42,7 @@ class CourseMaterialsView extends AbstractView {
 
         $course_materials = [];
         foreach ($course_materials_iterator as $course_material) {
-            $course_materials[$course_material->getUrl()] = $course_material;
+            $course_materials[$course_material->getPath()] = $course_material;
         }
 
         $sort_default = 0;

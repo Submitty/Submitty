@@ -296,7 +296,7 @@ abstract class AbstractController {
             return false;
         }
 
-        // Get the gradeable
+        // Get the course material
         try {
             return $this->core->getQueries()->getCourseMaterial($path);
         }

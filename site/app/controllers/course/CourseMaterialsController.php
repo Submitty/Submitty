@@ -248,7 +248,7 @@ class CourseMaterialsController extends AbstractController {
         }
         else {
             $course_material->setSectionLock(false);
-            $this->core->getQueries()->deleteCourseMaterialSections($course_material->getUrl());
+            $this->core->getQueries()->deleteCourseMaterialSections($course_material->getPath());
         }
         if (isset($_POST['hide_from_students'])) {
             $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
@@ -284,7 +284,7 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'];
         }
-        $details['url'][0] = $requested_path;
+        $details['path'][0] = $requested_path;
 
         if (isset($_POST['release_time'])) {
             $details['release_date'] = $_POST['release_time'];
@@ -453,7 +453,7 @@ class CourseMaterialsController extends AbstractController {
                         foreach ($zfiles as $zfile) {
                             $path = FileUtils::joinPaths($upload_path, $zfile);
                             $details['type'][$i] = $is_external_link_file ? 1 : 0;
-                            $details['url'][$i] = $path;
+                            $details['path'][$i] = $path;
                             $i++;
                         }
                     }
@@ -463,7 +463,7 @@ class CourseMaterialsController extends AbstractController {
                         }
                         else {
                             $details['type'][0] = $is_external_link_file ? 1 : 0;
-                            $details['url'][0] = $dst;
+                            $details['path'][0] = $dst;
                         }
                     }
                 }
@@ -481,7 +481,7 @@ class CourseMaterialsController extends AbstractController {
         foreach ($details['type'] as $key => $value) {
             $course_material = new CourseMaterial($this->core, [
                 'type' => $value,
-                'url' => $details['url'][$key],
+                'path' => $details['path'][$key],
                 'release_date' => $details['release_date'],
                 'hidden_from_students' => $details['hidden_from_students'],
                 'priority' => $details['priority'],
