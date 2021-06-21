@@ -695,7 +695,7 @@ CREATE TABLE public.polls (
     status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
-    question_type text DEFAULT 'single-response'::text
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
 );
 
 
