@@ -21,7 +21,8 @@ gradeables:
 
 - g_id: two_overlapping_files
   g_title: Two Overlapping Files (Small)
-  gradeable_config: upload_onlyg_ta_view_start_date: 1970-01-01 23:59:59
+  gradeable_config: upload_only
+  g_ta_view_start_date: 1970-01-01 23:59:59
   eg_submission_open_date: 1973-01-01 23:59:59
   eg_submission_due_date: 9998-01-01 23:59:59
   g_grade_start_date: 9998-01-02 23:59:59
@@ -42,17 +43,6 @@ gradeables:
 
 - g_id: repeated_sequences
   g_title: Repeated Sequences (Small)
-  gradeable_config: upload_only
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_submission_open_date: 1973-01-01 23:59:59
-  eg_submission_due_date: 9998-01-01 23:59:59
-  g_grade_start_date: 9998-01-02 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
-  eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
-
-- g_id: two_large_files
-  g_title: Two Large Files (Small) # thousands of lines
   gradeable_config: upload_only
   g_ta_view_start_date: 1970-01-01 23:59:59
   eg_submission_open_date: 1973-01-01 23:59:59
@@ -100,17 +90,36 @@ gradeables:
 - g_id: common_code
   g_title: Common Code (Medium) # 10 submissions
   gradeable_config: upload_only
-- g_id: regex_selected_files
-g_ta_view_start_date: 1970-01-01 23:59:59
-eg_submission_open_date: 1973-01-01 23:59:59
-eg_submission_due_date: 9998-01-01 23:59:59
-g_grade_start_date: 9998-01-02 23:59:59
-g_grade_released_date: 9999-12-31 23:59:59
-eg_use_ta_grading: false
-# sample_path / eg_lichen_sample_path: TODO
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_submission_open_date: 1973-01-01 23:59:59
+  eg_submission_due_date: 9998-01-01 23:59:59
+  g_grade_start_date: 9998-01-02 23:59:59
+  g_grade_released_date: 9999-12-31 23:59:59
+  eg_use_ta_grading: false
+  # sample_path / eg_lichen_sample_path: TODO
 
+- g_id: regex_selected_files
   g_title: Regex Selected Files (Medium) # pdf2text + cat_{number}.cpp --> cat_*.cpp + one other random file
   gradeable_config: pdf_word_count
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_submission_open_date: 1973-01-01 23:59:59
+  eg_submission_due_date: 9998-01-01 23:59:59
+  g_grade_start_date: 9998-01-02 23:59:59
+  g_grade_released_date: 9999-12-31 23:59:59
+  eg_use_ta_grading: false
+  # sample_path / eg_lichen_sample_path: TODO
+
+- g_id: long_files
+  g_title: Long Files (Medium) # thousands of lines
+  gradeable_config: upload_only
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_submission_open_date: 1973-01-01 23:59:59
+  eg_submission_due_date: 9998-01-01 23:59:59
+  g_grade_start_date: 9998-01-02 23:59:59
+  g_grade_released_date: 9999-12-31 23:59:59
+  eg_use_ta_grading: false
+  # sample_path / eg_lichen_sample_path: TODO
+
 - g_id: plagiarism_test_medium
   g_title: Plagiarism Test (Medium)
   gradeable_config: upload_only
