@@ -32,19 +32,4 @@ class EmailStatusController extends AbstractController {
             )
         );
     }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/email/check_announcement", methods={"GET"})
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @return JsonResponse
-     */
-    public function checkAnnouncement() {
-        if (isset($_GET["thread_id"])) {
-            $exists = $this->core->getQueries()->existsAnnouncementsId($_GET["thread_id"]);
-            return JsonResponse::getSuccessResponse([
-                "exists" => $exists
-            ]);
-        }
-        return JsonResponse::getFailResponse("No thread_id provided");
-    }
 }

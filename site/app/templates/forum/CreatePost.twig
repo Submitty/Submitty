@@ -68,7 +68,7 @@
     {% endif %}
 
     {% if post.author_user_id == current_user and first and date() < date(post_date)|date_modify("+1hour") and userGroup <= 2 %}
-        <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{"\"" ~ activeThreadTitle ~ "\""}}, {{"\"" ~ post_content ~ "\""}}, {{ activeThread.id }});"> Pin &amp; email this thread </a>
+        <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{"\"" ~ post_content ~ "\""}}, {{ activeThread.id }});" style="display: none;"> Pin &amp; email this thread </a>
     {% endif %}
 
     <span class="post-action-container">

@@ -1014,6 +1014,7 @@ CREATE TABLE public.threads (
     is_visible boolean NOT NULL,
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
+    announced timestamp(6) with time zone DEFAULT NULL::timestamp with time zone,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 
@@ -1061,6 +1062,8 @@ CREATE TABLE public.users (
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary_notify boolean DEFAULT false,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 

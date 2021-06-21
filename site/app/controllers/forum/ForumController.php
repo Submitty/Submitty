@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -329,7 +330,7 @@ class ForumController extends AbstractController {
             }
             else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $announcement);
 
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
@@ -375,31 +376,51 @@ class ForumController extends AbstractController {
      */
     public function makeAnnouncement() {
         if (!isset($_POST['id'])) {
-            return $this->core->getOutput()->renderJsonFail("thread_id not provided");
+            $this->core->addErrorMessage("thread_id not provided");
+            return JsonResponse::getFailResponse("thread_id not provided");
         }
         // Check that the post is the first post of the thread
         $thread_info = $this->core->getQueries()->findPost($_POST['id']);
         if ($thread_info["parent_id"] != -1) {
-            return $this->core->getOutput()->renderJsonFail("Post is not the beginning of a thread");
+            $this->core->addErrorMessage("Post is not the beginning of a thread");
+            return JsonResponse::getFailResponse("Post is not the beginning of a thread");
         }
         // Check that the post is indeed less than an hour old on the server
         $dateTime = new \DateTime($thread_info['timestamp']);
         $now = $this->core->getDateTimeNow();
 
         if ($dateTime->add(new \DateInterval("PT1H")) < $now) {
-            return $this->core->getOutput()->renderJsonFail("Post is too old.");
+            $this->core->addErrorMessage("Post is too old");
+            return JsonResponse::getFailResponse("Post is too old.");
         }
 
         $full_course_name = $this->core->getFullCourseName();
-        $thread_title = trim($_POST["title"]);
-        $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
+        $thread_post_content = str_replace("\r", "", $thread_info['content']);
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $_POST['id']]), 'thread_id' => $_POST['id']]);
 
+        $thread_title = $this->core->getQueries()->findThread($_POST['id'])['title'];
         $subject = "New Announcement: " . Notification::textShortner($thread_title);
         $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
         $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
         $this->core->getNotificationFactory()->onNewAnnouncement($event);
-        return $this->core->getOutput()->renderJsonSuccess(['message' => "Announcement successfully queued for sending"]);
+        $this->core->addSuccessMessage("Announcement successfully queued for sending");
+        $this->core->getQueries()->setAnnounced($_POST['id']);
+        return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/forum/check_announcement", methods={"GET"})
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     * @return JsonResponse
+     */
+    public function checkAnnouncement() {
+        if (isset($_GET["thread_id"])) {
+            $exists = $this->core->getQueries()->existsAnnouncementsId($_GET["thread_id"]);
+            return JsonResponse::getSuccessResponse([
+                "exists" => $exists
+            ]);
+        }
+        return JsonResponse::getFailResponse("No thread_id provided");
     }
 
     /**

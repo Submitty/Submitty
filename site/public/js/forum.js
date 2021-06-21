@@ -2106,22 +2106,24 @@ function scrollThreadListTo(element){
 }
 
 //Only used by the posters and only on recent posts (60 minutes since posted)
-function sendAnnouncement(title, thread_post_content, id){
+function sendAnnouncement(thread_post_content, id){
+  $(".pin-and-email-message").attr('disabled','disabled');
   $.ajax({
     type: 'POST',
     url: buildCourseUrl(['forum', 'make_announcement']),
-    data: {'title': title, "thread_post_content": thread_post_content, "id": id, 'csrf_token': window.csrfToken},
+    data: {"id": id, 'csrf_token': window.csrfToken},
     success: function(data){
-      alterAnnouncement(id, "Are you sure you want to pin this thread to the top?", 1, window.csrfToken);
+      pinAnnouncement(id, 1, window.csrfToken);
+      window.location.reload();
     },
   });
 }
 
+//Used to decide to hide or show the button to send announcements based on if an announcement is made already
 function checkIfAnnounced(id){
-  $('.pin-and-email-message').hide();
   call = $.ajax({
     type: 'GET',
-    url: buildCourseUrl(['email', 'check_announcement']),
+    url: buildCourseUrl(['forum', 'check_announcement']),
     data: {'thread_id': id, "csrfToken": csrfToken},
     success: function(res) {
       const response = JSON.parse(res);
@@ -2130,4 +2132,27 @@ function checkIfAnnounced(id){
       }
     }
   });
+}
+
+function pinAnnouncement(thread_id, type, csrf_token){
+  if(confirm){
+      var url = buildCourseUrl(['forum', 'announcements']) + `?type=${type}`;
+      $.ajax({
+          url: url,
+          type: "POST",
+          data: {
+              thread_id: thread_id,
+              csrf_token: csrf_token
+
+          },
+          success: function(data){
+              if (type)
+                window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+              else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
+          },
+          error: function(){
+              window.alert("Something went wrong while trying to remove announcement. Please try again.");
+          }
+      })
+  }
 }

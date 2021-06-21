@@ -640,13 +640,15 @@ SQL;
         $this->course_db->query("SELECT * from posts where thread_id = ?", [$thread_id]);
         return $this->course_db->row();
     }
+    public function findThread($thread_id) {
+        $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
+        return $this->course_db->row();
+    }
 
     public function existsAnnouncementsId($thread_id) {
-        $this->course_db->query("SELECT title from threads where id = ?", [$thread_id]);
-        $title = $this->course_db->row()['title'];
-        $announcement_subject = "[Submitty " . $this->core->getConfig()->getCourse() . "]: New Announcement: (" . $thread_id . ") " . $title;
-        $this->submitty_db->query("SELECT 1 from emails where subject = ?", [$announcement_subject]);
-        return count($this->submitty_db->row()) > 0;
+        $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
+        $row = $this->course_db->row();
+        return count($row) > 0 && $row['announced'] != null;
     }
 
     public function getResolveState($thread_id) {
@@ -777,14 +779,13 @@ SQL;
         return $rows;
     }
 
-    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date) {
+    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $announcement) {
 
         $this->course_db->beginTransaction();
 
         try {
             //insert data
-            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date]);
-
+            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date, announced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date, null]);
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", [$title, $user]);
         }
@@ -794,6 +795,9 @@ SQL;
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
+        if ($announcement) {
+            $this->setAnnounced($id);
+        }
         foreach ($categories_ids as $category_id) {
             $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$id, $category_id]);
         }
@@ -806,7 +810,10 @@ SQL;
 
         return ["thread_id" => $id, "post_id" => $post_id];
     }
-
+    public function setAnnounced($thread_id){
+        $now = new \DateTime("now");
+        $this->course_db->query("UPDATE threads SET announced = ? WHERE id = ?", [$now, $thread_id]);
+    }
     public function getThreadsBefore($timestamp, $page) {
         // TODO: Handle request page wise
         $this->course_db->query("SELECT t.id as id, title from threads t JOIN posts p on p.thread_id = t.id and parent_id = -1 WHERE timestamp < ? and t.deleted = false", [$timestamp]);
