@@ -857,14 +857,14 @@ class SubmissionController extends AbstractController {
         if ($regrade_all === 'true') {
             foreach ($order->getSortedGradedGradeables() as $g) {
                 if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
-                    $count+=$g->getAutoGradedGradeable()->getHighestVersion();
+                    $count += $g->getAutoGradedGradeable()->getHighestVersion();
                 }
             }
         }
         else {
             foreach ($order->getSortedGradedGradeables() as $g) {
                 if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
-                    $count+=1;
+                    $count += 1;
                 }
             }
         }
