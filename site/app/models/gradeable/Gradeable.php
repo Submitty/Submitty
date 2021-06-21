@@ -194,9 +194,9 @@ class Gradeable extends AbstractModel {
     /** @prop @var float The point precision for manual grading */
     protected $precision = 0.0;
     /** @prop @var bool If this gradeable has a due date or not */
-    protected $has_due_date = false;
+    protected $has_due_date = true;
     /** @prop @var bool If this gradeable has a grade release date or not */
-    protected $has_release_date = false;
+    protected $has_release_date = true;
 
     /* Dates for all types of gradeables */
 

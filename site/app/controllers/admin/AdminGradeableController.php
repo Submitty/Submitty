@@ -903,7 +903,6 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
-                'has_due_date' => true,
 
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
@@ -915,7 +914,9 @@ class AdminGradeableController extends AbstractController {
                 'late_submission_allowed' => true,
                 'hidden_files' => "",
                 'limited_access_blind' => 1,
-                'peer_blind' => 3
+                'peer_blind' => 3,
+                'has_due_date' => false,
+                'has_release_date' => false
             ]);
         }
         else {
@@ -930,7 +931,6 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'has_due_date' => false,
                 'hidden_files' => ""
             ]);
         }

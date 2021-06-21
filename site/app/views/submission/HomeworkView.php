@@ -132,14 +132,6 @@ class HomeworkView extends AbstractView {
             && $gradeable->isRegradeOpen()
             && $submission_count !== 0;
 
-        $thing1 = $this->core->getConfig()->isRegradeEnabled();
-        $thing2 = ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate());
-        $thing3 = $gradeable->isTaGrading();
-        $thing4 = $graded_gradeable !== null;
-        $thing5 = $graded_gradeable->isTaGradingComplete();
-        $thing6 = $gradeable->isRegradeOpen();
-        $thing7 = $submission_count !== 0;
-
         if (
             ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()

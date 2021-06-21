@@ -462,7 +462,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '9998-01-01',
             '9999-01-01',
             true,
@@ -475,7 +475,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -488,7 +488,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -509,14 +509,16 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertCount(0, $actual);
 
         $actual = $list->getOpenGradeables();
-        $this->assertCount(1, $actual);
+        $this->assertCount(2, $actual);
         $this->assertArrayHasKey('01_future_no_due', $actual);
+        $this->assertArrayHasKey('02_grading_no_due', $actual);
         $this->assertEquals($gradeables['01_future_no_due'], $actual['01_future_no_due']);
+        $this->assertEquals($gradeables['02_grading_no_due'], $actual['02_grading_no_due']);
 
         $actual = $list->getClosedGradeables();
         $this->assertCount(0, $actual);
 
-        $expected = ['02_grading_no_due', '03_ta_submit_no_due'];
+        $expected = ['03_ta_submit_no_due'];
         $actual = $list->getGradingGradeables();
         $this->assertCount(count($expected), $actual);
         $this->assertEquals($expected, array_keys($actual));
@@ -538,7 +540,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -551,7 +553,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -564,7 +566,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -577,7 +579,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-01-01',
             '1004-01-01',
             true,
@@ -590,7 +592,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            null,
+            '9999-01-01',
             '1003-01-01',
             '1004-01-01',
             true,
@@ -611,11 +613,15 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertCount(0, $actual);
 
         $actual = $list->getOpenGradeables();
-        $this->assertCount(2, $actual);
+        $this->assertCount(4, $actual);
         $this->assertArrayHasKey('01_no_submit_no_due', $actual);
         $this->assertArrayHasKey('02_submitted_no_due', $actual);
+        $this->assertArrayHasKey('04_no_submit_grades_released', $actual);
+        $this->assertArrayHasKey('05_submitted_grades_released', $actual);
         $this->assertEquals($gradeables['01_no_submit_no_due'], $actual['01_no_submit_no_due']);
         $this->assertEquals($gradeables['02_submitted_no_due'], $actual['02_submitted_no_due']);
+        $this->assertEquals($gradeables['04_no_submit_grades_released'], $actual['04_no_submit_grades_released']);
+        $this->assertEquals($gradeables['05_submitted_grades_released'], $actual['05_submitted_grades_released']);
 
         $actual = $list->getGradingGradeables();
         $this->assertCount(1, $actual);
@@ -626,11 +632,7 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertCount(0, $actual);
 
         $actual = $list->getGradedGradeables();
-        $this->assertCount(2, $actual);
-        $this->assertArrayHasKey('04_no_submit_grades_released', $actual);
-        $this->assertArrayHasKey('05_submitted_grades_released', $actual);
-        $this->assertEquals($gradeables['04_no_submit_grades_released'], $actual['04_no_submit_grades_released']);
-        $this->assertEquals($gradeables['05_submitted_grades_released'], $actual['05_submitted_grades_released']);
+        $this->assertCount(0, $actual);
     }
 
     public function testNoSubmittableGradeables() {
