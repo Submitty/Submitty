@@ -1955,6 +1955,12 @@ header > * {
     color: unset;
 }
 
+.accessibility-message {
+    font-size: 75%;
+    font-style: italic;
+    color: var(--standard-dark-gray);
+}
+
 @media (max-width: 541px) {
     .content {
         padding: 30px 15px;
