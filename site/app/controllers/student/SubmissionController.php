@@ -1004,6 +1004,7 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
+
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
         $merge_previous = isset($merge) && $merge === 'true';
@@ -1020,6 +1021,7 @@ class SubmissionController extends AbstractController {
         }
 
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
         if ($gradeable === null) {
@@ -1234,6 +1236,7 @@ class SubmissionController extends AbstractController {
                     }
                 }
             }
+
 
             if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);
@@ -1527,7 +1530,6 @@ class SubmissionController extends AbstractController {
             "to_be_graded_queue",
             $queue_file_helper
         );
-
         // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
         $vcs_queue_file = "";
         if ($vcs_checkout === true) {
@@ -1537,7 +1539,8 @@ class SubmissionController extends AbstractController {
                 "VCS__" . $queue_file_helper
             );
         }
-        // create json file
+
+        // create json file...
         $queue_data = [
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
@@ -1565,7 +1568,7 @@ class SubmissionController extends AbstractController {
             }
         }
         else {
-            //then create the file that will trigger autograding
+            // Then create the file that will trigger autograding
             if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
                 return $this->uploadResult("Failed to create file for grading queue.", false);
             }
