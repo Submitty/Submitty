@@ -498,10 +498,7 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-team-list {
-    display:inline; 
-    height: inherit;
-    width: fit-content;
-    user-select: none;
+    margin-left: 5px;
 }
 
 #regrade_inner_info .inner-container {

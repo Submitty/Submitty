@@ -2,12 +2,18 @@
     <span id="grading-panel-student-name">
         {% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
+                    {% set team_members = submitter.getTeam.getMemberUsers() %}
                     <b>Team:</b>
-                    <select id="grading-panel-team-list">
-                        {% for team_member in submitter.getTeam().getMemberUsers() %}
-                            <option> &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})</option>
+                    <div id="grading-panel-team-list" class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ team_members[0].getDisplayedFirstName() }} {{ team_members[0].getDisplayedLastName() }} ({{ team_members[0].getId() }})
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {% for team_member in team_members|slice(1) %}
+                            <a class="dropdown-item disabled" href="#">{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})</a>
                         {% endfor %}
-                    </select>
+                        </div>
+                    </div>
                 {% else %}
                     <b>
                         Student:
