@@ -959,11 +959,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     }
 
     var formData = new FormData();
+
     formData.append('csrf_token', csrf_token);
     formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
     formData.append('git_user_id', git_user_id);
     formData.append('git_repo_id', git_repo_id);
+    formData.append('student_page', student_page);
 
     let filesize = 0;
 
@@ -974,6 +976,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             window.location.reload();
             return;
         }
+
         // Files selected
         for (var i = 0; i < file_array.length; i++) {
             for (var j = 0; j < file_array[i].length; j++) {
@@ -1000,6 +1003,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
     }
+
 
     //check if filesize greater than 1,25 MB, then turn on the progressbar
     if(filesize > 1250000){
@@ -1068,7 +1072,6 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
-
             }
         },
         error: function(error) {
