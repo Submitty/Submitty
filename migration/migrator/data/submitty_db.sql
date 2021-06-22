@@ -247,6 +247,13 @@ $$;
 CREATE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+    DECLARE
+        course_row RECORD;
+        db_conn VARCHAR;
+        query_string TEXT;
+        preferred_name_change_details TEXT;
+    BEGIN
+        -- Check for changes in users.user_preferred_firstname and users.user_preferred_lastname.
 
 SET default_tablespace = '';
 
@@ -302,8 +309,7 @@ CREATE TABLE public.emails (
     sent timestamp without time zone,
     error character varying DEFAULT ''::character varying NOT NULL,
     semester character varying,
-    course character varying,
-    email_address character varying(255) DEFAULT ''::character varying NOT NULL
+    course character varying
 );
 
 
@@ -407,8 +413,6 @@ CREATE TABLE public.users (
     api_key character varying(255) DEFAULT encode(public.gen_random_bytes(16), 'hex'::text) NOT NULL,
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
-    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
-    user_email_secondary_notify boolean DEFAULT false,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 
