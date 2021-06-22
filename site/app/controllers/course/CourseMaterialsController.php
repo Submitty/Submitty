@@ -128,7 +128,7 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $file_path = $file->getRealPath();
-                $course_material = $this->tryGetCourseMaterial($file_path, false);
+                $course_material = $this->tryGetCourseMaterial($file_path);
                 if ($course_material != false) {
                     if (!$this->core->getUser()->accessGrading()) {
                         // only add the file if the section of student is allowed and course material is released!
@@ -198,7 +198,7 @@ class CourseMaterialsController extends AbstractController {
             }
 
             $file_name = htmlspecialchars($filename);
-            $course_material = $this->tryGetCourseMaterial($file_name, false);
+            $course_material = $this->tryGetCourseMaterial($file_name);
             if ($course_material != false) {
                 $course_material->setReleaseDate($new_data_time);
                 $success = $this->core->getQueries()->updateCourseMaterial($course_material);
@@ -226,7 +226,7 @@ class CourseMaterialsController extends AbstractController {
         if ($requested_path === '') {
             return JsonResponse::getErrorResponse("Requested path cannot be empty");
         }
-        $course_material = $this->tryGetCourseMaterial($requested_path, false);
+        $course_material = $this->tryGetCourseMaterial($requested_path);
         if ($course_material == false) {
             return JsonResponse::getErrorResponse("Course material not found");
         }

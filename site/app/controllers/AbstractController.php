@@ -285,7 +285,6 @@ abstract class AbstractController {
     /**
      * Gets a course material from its path.
      * @param string $path
-     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return CourseMaterial|bool false in the fail/error case
      */
     public function tryGetCourseMaterial(string $path) {
