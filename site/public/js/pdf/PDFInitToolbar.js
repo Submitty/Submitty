@@ -151,13 +151,13 @@ function renderPDFToolbar() {
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
-        let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
+        let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`) || {};
         $.ajax({
             type: 'POST',
             url: url,
             data: {
-                annotation_layer,
-                GENERAL_INFORMATION,
+                'annotation_layer': annotation_layer,
+                'GENERAL_INFORMATION': GENERAL_INFORMATION,
                 'csrf_token': csrfToken
             },
             success: function(data){
