@@ -15,6 +15,28 @@ env:
   NODE_VERSION: 10
 
 jobs:
+    css-lint:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - name: Run stylelint
+              run: npm run css-stylelint
+
+
     eslint:
         runs-on: ubuntu-18.04
         defaults:
@@ -34,7 +56,7 @@ jobs:
                        ${{ runner.os }}-cache-node-modules-
             - run: npm install
             - name: Run eslint
-              run: npm run lint
+              run: npm run eslint
 
 
     js-unit:
@@ -446,5 +468,3 @@ jobs:
 
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
-
-
