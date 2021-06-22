@@ -33,3 +33,11 @@ input[type=text]:valid {
 input[type=text]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
+
+[data-theme="dark"] input[type=text]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] input[type=text]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}

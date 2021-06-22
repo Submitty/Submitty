@@ -49,6 +49,12 @@ aside {
     padding: 6px 0;
 }
 
+#bar_banner{
+    position: relative;
+    float: right;
+    margin-right: 10%;
+}
+
 .navigation-box {
     margin: 0 auto;
     display: flex;
@@ -157,11 +163,9 @@ button > i.fas:hover {
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
-    margin-top: 4px;
     border: 2px solid black;
     border-radius: 5px;
     box-shadow: 2px 2px 4px;
-    box-sizing: border-box;
 }
 
 #prev-student-navlink i,
@@ -204,6 +208,7 @@ progress::-webkit-progress-value {
 
 .panel-header-box {
     display: flex;
+    margin: auto;
 }
 
 .grade-panel {
@@ -374,8 +379,7 @@ progress::-webkit-progress-value {
 /* Grading Panels CSS */
 
 .panels-container {
-    height: calc(100% - 140px);
-    margin: 0 6px;
+    margin: 0;
     background: var(--standard-medium-gray);
 }
 
@@ -453,8 +457,12 @@ progress::-webkit-progress-value {
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 50px;
-    background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
+    background-color: var(--submitty-logo-blue);
+}
+
+.panel-item-section-drag-bar:hover:after, .panel-item-section-drag-bar:active:after {
+  height: 9px;
 }
 
 .two-panel-drag-bar:after {
@@ -468,12 +476,23 @@ progress::-webkit-progress-value {
     transform: translate(-50%, -50%);
     border-radius: 50px;
     background: var(--submitty-logo-blue);
-    transition: all 0.5s;
+    transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after,
-.panel-item-section-drag-bar:hover:after {
-    filter: blur(3px);
+.two-panel-drag-bar:hover:after, .two-panel-drag-bar:active:after  {
+  width: 9px;
+}
+
+#panel-instructions{
+    color: dimgray;
+    display: flex;
+    justify-content: center;
+    padding-top: 20%;
+}
+
+#grading-panel-student-name{
+    display: flex;
+    margin: auto;
 }
 
 #regrade_inner_info .inner-container {
@@ -543,14 +562,14 @@ progress::-webkit-progress-value {
     border: solid 6px var(--important-post);
     position:relative;
     display: block;
-    width: 400px;
-    height: 25px;
+    width: fit-content;
+    padding: 0.5vh 0.5vw 0.5vh 0.5vw;
+    height: fit-content;
     top: 2px;
-    left: 120px;
+    margin: auto;
     padding-top:3px;
     padding-bottom:3px;
     text-align: center;
-    vertical-align: middle;
     line-height: 25px;
     font-weight:    bold;
     background-color: var(--badge-backgroud-red);
@@ -810,22 +829,26 @@ tr.is_publish {
     overflow-y: auto;
 }
 
-#hotkeys-list {
+.ta-grading-setting-list {
     width: 100%;
     border-collapse: collapse;
 }
 
-#hotkeys-list tr {
-    border: 1px solid #ddd;
+.ta-grading-setting-list tr {
+    border: 1px solid var(--standard-light-gray);
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:nth-child(even) {
-    background-color: var(--alternating-row-color-light);
+.ta-grading-setting-list tr:nth-child(odd) {
+    background-color: var(--standard-hover-light-gray);
 }
 
-#hotkeys-list td {
+.ta-grading-setting-list tr:nth-child(even) {
+    background-color: var(--default-white);
+}
+
+.ta-grading-setting-list td {
     padding: 4px;
 }
 
@@ -1246,6 +1269,7 @@ tr.is_publish {
     position:relative;
     float:left;
     width:100%;
+    padding-left: 10px;
 }
 
 #file-view {
@@ -1287,7 +1311,7 @@ tr.is_publish {
     font-weight: initial;
 }
 
-.layouts-cont .layout-option {
+.layout-option {
     margin-bottom: 20px;
 }
 
@@ -1298,7 +1322,7 @@ tr.is_publish {
 .layout-option-cont {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
-    width: 83vw;
+    max-width: 83vw;
     grid-column-gap: 5px;
     grid-row-gap: 5px;
 }
@@ -1376,10 +1400,21 @@ tr.is_publish {
 }
 
 /* Notebook panel */
-#notebook-view {
+#notebook-main-view {
     padding: 10px;
 }
 
+input[type="radio"][disabled=""]:checked:before {
+    content: "";
+    display: block;
+    position: relative;
+    top: 3px;
+    left: 3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 100%;
+    background: var(--standard-medium-dark-gray);
+}
 
 /* Media queries */
 @media (max-width: 540px) {

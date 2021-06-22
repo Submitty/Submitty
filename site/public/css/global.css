@@ -70,6 +70,10 @@ nav a > i.f {
     display: none;
 }
 
+.centered-icon {
+  line-height: inherit;
+}
+
 .external-breadcrumb {
     padding-left: 7px;
 }
@@ -180,3 +184,4 @@ footer .footer-separator {
 #loading-bar-percentage{
     margin-left: 10px;
 }
+

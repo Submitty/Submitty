@@ -41,38 +41,8 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: "#^Variable \\$threshold might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$sequence_length might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$regex_for_selecting_files might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$instructor_provided_code_path might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$max_matching_version might not be defined\\.$#"
-			count: 3
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
-			count: 6
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$color might not be defined\\.$#"
-			count: 1
+			count: 4
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
@@ -254,26 +224,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$course\\)\\: Unexpected token \"\\$course\", expected type at offset 484$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$semester\\)\\: Unexpected token \"\\$semester\", expected type at offset 460$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 22$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$status_code$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected type at offset 230$#"
 			count: 1
 			path: app/libraries/DateUtils.php
@@ -307,101 +257,6 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 18$#"
 			count: 1
 			path: app/libraries/GradeableType.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\: message to log to the file\\)\\: Unexpected token \"\\$message\", expected type at offset 484$#"
-			count: 1
-			path: app/libraries/Logger.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$action\\)\\: Unexpected token \"\\$action\", expected type at offset 513$#"
-			count: 1
-			path: app/libraries/Logger.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$token\\)\\: Unexpected token \"\\$token\", expected type at offset 492$#"
-			count: 1
-			path: app/libraries/Logger.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 469$#"
-			count: 1
-			path: app/libraries/Logger.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$params All the params in a key\\-value array\\)\\: Unexpected token \"\\$params\", expected type at offset 502$#"
-			count: 1
-			path: app/libraries/Logger.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:renderTemplate\\(\\) should return string but returns null\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$json\\)\\: Unexpected token \"\\$json\", expected type at offset 223$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\)\\: Unexpected token \"\\$message\", expected type at offset 79$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$view$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:displayOutput\\(\\) should return string but return statement is missing\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Cannot call method exceptionPage\\(\\) on string\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @return with type array is incompatible with native type Ds\\\\Set\\.$#"
-			count: 2
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$session_id\\)\\: Unexpected token \"\\$session_id\", expected type at offset 257$#"
-			count: 1
-			path: app/libraries/SessionManager.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/SessionManager.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Utils\\:\\:stripStringFromArray\\(\\) should return array but returns null\\.$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 119$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected type at offset 404$#"
-			count: 1
-			path: app/libraries/Utils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected type at offset 163$#"
-			count: 1
-			path: app/libraries/Utils.php
 
 		-
 			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
@@ -612,4 +467,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-

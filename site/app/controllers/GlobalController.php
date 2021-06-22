@@ -128,6 +128,13 @@ class GlobalController extends AbstractController {
                 "title" => "Course Settings",
                 "icon" => "fa-cog"
             ]);
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['sql_toolbox']),
+                "title" => "SQL Toolbox",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-sql-toolbox",
+                "icon" => "fa-toolbox"
+            ]);
         }
 
         if ($this->core->getConfig()->isQueueEnabled()) {
@@ -178,6 +185,13 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getUser()->accessAdmin()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['email_status']),
+                "title" => "Email Status",
+                "icon" => "fa-envelope"
+            ]);
+        }
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [

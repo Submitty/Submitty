@@ -114,8 +114,8 @@ class Core {
      *
      * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
      * @throws \Exception
      */
     public function loadCourseConfig($semester, $course) {
@@ -170,7 +170,7 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadMasterDatabase() {
+    public function loadMasterDatabase(): void {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
@@ -183,13 +183,21 @@ class Core {
         $this->setQueries($this->database_factory->getQueries($this));
     }
 
-    public function loadCourseDatabase() {
+    public function setMasterDatabase(AbstractDatabase $database): void {
+        $this->submitty_db = $database;
+    }
+
+    public function loadCourseDatabase(): void {
         if ($this->config->isCourseLoaded()) {
             $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
             $this->course_db->connect();
 
             $this->database_queries = $this->database_factory->getQueries($this);
         }
+    }
+
+    public function setCourseDatabase(AbstractDatabase $database): void {
+        $this->course_db = $database;
     }
 
     public function loadForum() {
@@ -526,8 +534,8 @@ class Core {
     }
 
     /**
-     * @param     $url
-     * @param int $status_code
+     * @param string $url
+     * @param int $http_response_code
      */
     public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
