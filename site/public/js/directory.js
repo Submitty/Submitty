@@ -1,5 +1,5 @@
 /* global captureTabInModal */
-/* exported newDownloadForm, newClassListForm, newGraderListForm, editRegistrationSectionsForm */
+/* exported newDownloadForm, newSettingsForm, newClassListForm, newGraderListForm, editRegistrationSectionsForm */
 // Modals for StudentList and GraderList
 
 function newDownloadForm() {
@@ -21,14 +21,15 @@ function newDownloadForm() {
 
 function newSettingsForm(){
     $('.popup-form').css('display', 'none');
-    var form = $('#settings-form');
+    let form = $('#settings-form');
     form.css('display', 'block');
     captureTabInModal('settings-form');
     form.find('.form-body').scrollTop(0);
     $('#settings-form input:checkbox').each(function() {
         if ($(this).val() == 'NULL') {
             $(this).prop('checked', false);
-        }else{
+        }
+        else {
             $(this).prop('checked', true);
         }
     });

@@ -16,7 +16,8 @@ function downloadData() {
 
 /* exported sortTable */
 function sortTable(n, flag) {
-    let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    const table = 0;
     table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
         document.getElementById(i).style.color = 'white';
@@ -67,7 +68,8 @@ function sortTable(n, flag) {
             switching = true;
             // Each time a switch is done, increase this count by 1:
             switchcount ++;
-        } else {
+        }
+        else {
             /* If no switching has been done AND the direction is 'asc',
             set the direction to 'desc' and run the while loop again. */
             if (switchcount == 0 && dir == 'asc') {
