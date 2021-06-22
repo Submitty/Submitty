@@ -25,13 +25,14 @@
                     {# Verify all button #}
                     {% if show_verify_all %}
                         <div class="col-no-gutters">
+                            <label for="verify-all" tabIndex="0" class="screen-reader">Verify All</label>
                             <input id="verify-all" type="button" class="btn btn-default key_to_click" tabindex="0" value="Verify All" onclick="onVerifyAll(this)"/>
                         </div>
                     {% endif %}
                     {# Silent Edit Checkbox #}
                     {% if show_silent_edit %}
                         <div class="col-no-gutters">
-                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</input>
+                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}

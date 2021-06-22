@@ -1312,35 +1312,6 @@ textarea.comment_display {
 end of styles used in the admin gradeable page
 */
 
-#settings-content {
-    height: 400px;
-    padding-top: 1em;
-    overflow-y: auto;
-}
-
-.ta-grading-setting-list {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.ta-grading-setting-list tr {
-    border: 1px solid var(--standard-light-gray);
-    border-left: none;
-    border-right: none;
-}
-
-.ta-grading-setting-list tr:nth-child(odd) {
-    background-color: var(--standard-hover-light-gray);
-}
-
-.ta-grading-setting-list tr:nth-child(even) {
-    background-color: var(--default-white);
-}
-
-.ta-grading-setting-list td {
-    padding: 4px;
-}
-
 .file-viewer{
     margin-right: 10px;
     cursor: pointer;
