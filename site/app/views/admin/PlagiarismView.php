@@ -146,7 +146,7 @@ class PlagiarismView extends AbstractView {
             $language[$saved_config['language']] = "selected";
             $threshold = (int) $saved_config['threshold'];
             $sequence_length = (int) $saved_config['sequence_length'];
-            $prior_terms = $prior_term_gradeables_number > 1;
+            $prior_terms = false; // $prior_term_gradeables_number > 1;
             $ignore_submissions = count($saved_config['ignore_submissions']) > 0;
         }
 
