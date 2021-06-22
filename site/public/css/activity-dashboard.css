@@ -2,7 +2,6 @@
 input[type=date] {
   width: 50%;
   padding: 12px 20px;
-  /* display: inline-block; */
   float: right;
 }
 
