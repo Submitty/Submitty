@@ -45,29 +45,29 @@
     function checkRefreshLichenMainPage(url, semester, course) {
         // refresh time for lichen main page
         let refresh_time = 1000;
-        setTimeout(function() {
+        setInterval(function() {
             check_lichen_jobs(url, semester, course);
         }, refresh_time);
     }
 
-    let last_data = "{{ refresh_page }}";
+    let waiting_gradeables = -1;
 
     function check_lichen_jobs(url, semester, course) {
         $.get(url,
             function(data) {
-                if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
-                    last_data = "DONE_REFRESH";
+                if (waiting_gradeables === -1 || (data === waiting_gradeables && data !== 0)) {
+                    waiting_gradeables = data;
+                }
+                else {
                     // We can't just reload because we need to get rid of the REFRESH_ME part of the URL
                     window.location.href = buildCourseUrl(['plagiarism']);
-                }
-                else if (last_data !== "DONE_REFRESH") {
-                    checkRefreshLichenMainPage(url, semester, course);
                 }
             }
         );
     }
-
-    checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
+    {% if refresh_page == "REFRESH_ME" %}
+        checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
+    {% endif %}
 </script>
 
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
