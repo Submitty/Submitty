@@ -21,7 +21,7 @@ function newDownloadForm() {
 
 function newSettingsForm(){
     $('.popup-form').css('display', 'none');
-    let form = $('#settings-form');
+    const form = $('#settings-form');
     form.css('display', 'block');
     captureTabInModal('settings-form');
     form.find('.form-body').scrollTop(0);
