@@ -27,22 +27,30 @@ Required Parameters:
         </div>
     </div>
     <div class="row" id="overall-comments">
-        <label for="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}" tabIndex="0" class="screen-reader">Overall Comment From {{overall_comment["logged_in_user"]["user_id"]|escape}}</label>
-        <textarea
-                id="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}"
-                rows="5"
-                data-previous-comment="{{overall_comment["logged_in_user"]["comment"]|escape }}"
-                class="general-comment-entry noscroll key_to_click" tabindex="0"
-                onkeydown="auto_grow(this)"
-                onchange="{{ grading_disabled ? '' : 'onChangeOverallComment()'}}"
-                placeholder="Overall message for student about the gradeable...">{{overall_comment["logged_in_user"]["comment"]|escape }}</textarea>
+        {% include "../misc/MarkdownArea.twig" with {
+            markdown_area_id : "overall-comment-" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ,
+            markdown_area_name : '',
+            markdown_area_value : (overall_comment["logged_in_user"]["comment"]|escape),
+            class : "general-comment-entry noscroll key_to_click",
+            placeholder : "Overall message for student about the gradeable...",
+            preview_div_id : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
+            preview_div_name : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
+            preview_button_id : "overall-comment-markdown-preview-button",
+            onclick : "previewOverallCommentMarkdown.call(this, '" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ~ "')", 
+            render_buttons : true,
+            min_height : "100px",
+            textarea_onkeydown : "auto_grow(this)",
+            textarea_onchange : grading_disabled ? '' : 'onChangeOverallComment()',
+            data_previous_comment : (overall_comment["logged_in_user"]["comment"]|escape)
+        } only %}
         {% for user, comment in overall_comment["other_graders"] %}
-            <label for="overall-comment-{{user | escape }}" tabIndex="0" class="screen-reader">Overall Comment From {{user|escape}}</label>
-            <textarea disabled
-                    id="overall-comment-{{user | escape }}"
-                    style="display:none;"
-                    rows="5"
-                    class="general-comment-entry noscroll key_to_click" tabindex="0">{{comment|escape }}</textarea>
+            <div
+              id="overall-comment-{{user | escape }}"
+              style="display:none;"
+              class="general-comment-entry markdown-preview noscroll key_to_click" tabindex="0"
+            >
+              {{comment|escape }}
+            </div>
         {% endfor %}
     </div>
     <script>

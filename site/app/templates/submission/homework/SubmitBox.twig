@@ -19,6 +19,15 @@
                 </a>
             {% endif %}
         </h1>
+        {% if is_timed %}
+            <div id="gradeable-timer">
+                <div id="gradeable-progress">
+                    <div id="gradeable-progress-bar"></div>
+                </div>
+                <h2 id="time-remaining-text">Your Time Remaining: </h2>
+            </div>
+
+        {% endif %}
         {% if has_due_date %}
             {% set diff_time_zone = server_time_zone_string != user_time_zone_string %}
 
@@ -33,6 +42,7 @@
                 {% if diff_time_zone %}
                     <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
                 {% endif %}
+                <h2 id="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
             </div>
         {% endif %}
         <div class="loading-bar-wrapper">
@@ -518,6 +528,7 @@
             e.stopPropagation();
         });
     });
+    initializeTimer('{{ gradeable_id }}');
 </script>
 
 

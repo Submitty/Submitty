@@ -164,6 +164,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
     }
     var submit_url = form.attr('action');
 
+    form.find("[type=submit]").prop('disabled', true);
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -1570,25 +1572,22 @@ function bookmarkThread(thread_id, type){
     });
 }
 
+function toggleMarkdown(post_box_id) {
+  if(!post_box_id) post_box_id = '';
+  $(`#markdown_buttons_${post_box_id}`).toggle();
+  $(this).toggleClass('markdown-active'); 
+  $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
+  $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+}
 
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
-    }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+function previewForumMarkdown(){
+  const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
+  const reply_box = $(`textarea#reply_box_${post_box_num}`);
+  const preview_box = $(`#preview_box_${post_box_num}`);
+  const preview_button = $(this);
+  const post_content = reply_box.val();
+
+  previewMarkdown(reply_box, preview_box, preview_button, { content: post_content });
 }
 
 function checkInputMaxLength(obj){
@@ -1700,20 +1699,43 @@ function loadThreadHandler(){
 }
 
 function loadAllInlineImages() {
-  $(".attachment-btn").each(function () {
+  const toggleButton = $('#toggle-attachments-button');
+
+  const allShown = $('.attachment-well').filter(function(){ return $(this).is(':visible') }).length === $('.attachment-well').length;
+  //if the button were to show them all but they have all been individually shown,
+  //we should hide them all
+  if (allShown && toggleButton.hasClass('show-all')) {
+    toggleButton.removeClass('show-all');
+  }
+
+  const allHidden = $('.attachment-well').filter(function(){ return !($(this).is(':visible')) }).length === $('.attachment-well').length;
+  //if the button were to hide them all but they have all been individually hidden,
+  //we should show them all
+  if (allHidden && !(toggleButton.hasClass('show-all'))) {
+    toggleButton.addClass('show-all');
+  }
+
+  $('.attachment-btn').each(function (i) {
     $(this).click();
+
+    //overwrite individual button click behavior to decide if it should be shown/hidden
+    if(toggleButton.hasClass('show-all')){
+      $('.attachment-well').eq(i).show();
+    } else {
+      $('.attachment-well').eq(i).hide();
+    }
   });
-  $(".attachment-well").each(function () {
-    $(this).show();
-  });
+
+  toggleButton.toggleClass('show-all');
 }
 
 function loadInlineImages(encoded_data) {
   var data = JSON.parse(encoded_data);
   var attachment_well = $("#"+data[data.length-1]);
 
-  if (attachment_well.is(':visible'))
+  if (attachment_well.is(':visible')){
     attachment_well.hide();
+  }
   else {
     attachment_well.show();
   }

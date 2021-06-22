@@ -178,46 +178,14 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 # PYTHON PACKAGE SETUP
 #########################
 
-pip3 install python-pam
-pip3 install PyYAML
-pip3 install psycopg2-binary
-pip3 install "sqlalchemy<1.4.0"
-pip3 install pylint
-pip3 install psutil
-pip3 install python-dateutil
-pip3 install watchdog
-pip3 install xlsx2csv
-pip3 install pause
-pip3 install paramiko
-pip3 install tzlocal
-pip3 install PyPDF2
-pip3 install distro
-pip3 install jsonschema
-pip3 install jsonref
-pip3 install docker
-
-# for Lichen / Plagiarism Detection
-pip3 install parso
-
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-pip3 install clang
-
 #libraries for QR code processing:
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
-#python libraries for QR bulk upload
-pip3 install pyzbar
-pip3 install pdf2image
-pip3 install opencv-python
-pip3 install numpy
+pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
-#python libraries for OCR for digit recognition
-pip3 install onnxruntime
-
-# Install an email catcher
 if [ ${VAGRANT} == 1 ]; then
-    pip3 install nullsmtpd
+    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
 #################################################################
