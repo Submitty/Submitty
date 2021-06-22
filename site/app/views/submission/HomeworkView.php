@@ -973,7 +973,7 @@ class HomeworkView extends AbstractView {
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
-            if ($graded_gradeable->hasTaGradingInfo()) {
+            if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
                 $active_same_as_graded = $graded_gradeable->getTaGradedGradeable()->getGradedVersion() === $active_version_number;
             }
         }
