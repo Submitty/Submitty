@@ -7,8 +7,10 @@ function clear(){
     document.getElementById('num_poll_responses').value = '';
     document.getElementById('office_hours_queue_date').value = '';
 }
+
+/* exported downloadData */
 function downloadData() {
-    console.log("{{data[0].user_id}}");
+    console.log('{{data[0].user_id}}');
 }
 
 
@@ -16,14 +18,14 @@ function downloadData() {
 function sortTable(n, flag) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById("data-table");
-    for(var i = 0; i < 10; i++){
+    for (i = 0; i < 10; i++){
         document.getElementById(i).style.color = 'white';
     }
     document.getElementById(n).style.color = 'blue';
     switching = true;
     // Set the sorting direction to ascending:
-    dir = "asc";
-    if(flag) dir = "desc";
+    dir = 'asc';
+    if (flag){dir = 'desc'};
     /* Make a loop that will continue until
     no switching has been done: */
     while (switching) {
