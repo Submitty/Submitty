@@ -1,28 +1,19 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
-    <span id="grading-panel-student-name">
-        {% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
+    <div id="grading-panel-student-name">
+        <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
-                    {% set team_members = submitter.getTeam.getMemberUsers() %}
-                    <b>Team:</b>
-                    <div id="grading-panel-team-list" class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {{ team_members[0].getDisplayedFirstName() }} {{ team_members[0].getDisplayedLastName() }} ({{ team_members[0].getId() }})
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        {% for team_member in team_members|slice(1) %}
-                            <a class="dropdown-item disabled" href="#">{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})</a>
-                        {% endfor %}
-                        </div>
-                    </div>
+                    Team:<br/>
+                    {% for team_member in submitter.getTeam().getMemberUsers() %}
+                        &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
+                    {% endfor %}
                 {% else %}
-                    <b>
-                        Student:
-                        {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
-                    </b>
+                    Student:<br/>
+                    {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
                     <br/>
                 {% endif %}
             {% endif %}
-    </span>
+        </b>
+    </div>
     <div class="navigation-box">
         <div class="grading_toolbar">
             {# Back to list button #}
@@ -99,10 +90,15 @@
     </div>
 </div>
 <script>
-    //if student/team name(s) are being displayed
-    if ({{ not anon_mode and not isBlind and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) }}) {
-        $('.navigation-box').css({'position':'relative'});
-        $('.navigation-box').css({'float':'left'});
-        $('.navigation-box').css({'margin-left':'20%'});
-    }
+    window.addEventListener('resize', function(event) {
+        const name_div = $('#grading-panel-student-name');
+        name_div.show();
+        const toolbar_bbox = $('.grading_toolbar')[0].getClientRects()[0];
+        const name_div_bbox = name_div[0].getClientRects()[0];
+
+        const overlapping = (toolbar_bbox.left - name_div_bbox.right) < 5;
+        if (overlapping) {
+            $('#grading-panel-student-name').hide()
+        }
+    });
 </script>

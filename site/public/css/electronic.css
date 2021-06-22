@@ -491,19 +491,9 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name {
-    position: relative;
-    float: left;
-    padding-left: 5px;
-}
-
-#grading-panel-team-list.dropdown {
-    display: inline-block;
-    background-color: var(--default-white);
-}
-
-#grading-panel-team-list > button.dropdown-toggle {
-    background-color: var(--default-white) !important;
-    box-shadow: none;
+    position: absolute;
+    left: 5px;
+    top: 5px;
 }
 
 #regrade_inner_info .inner-container {
