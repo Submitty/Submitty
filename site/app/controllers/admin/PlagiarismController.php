@@ -815,8 +815,8 @@ class PlagiarismController extends AbstractController {
             array_push($temp, $item[1]);
             array_push($temp, $item[2]);
             if (!$this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
-                array_push($temp, $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
-                array_push($temp, $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
+                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
             }
             else {
                 array_push($temp, "");
