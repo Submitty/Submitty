@@ -66,7 +66,7 @@ abstract class AbstractDatabase {
 
     abstract public function getDSN();
 
-    public function getPdo(): \PDO {
+    public function getConnection(): \PDO {
         if ($this->link === null) {
             throw new DatabaseException("Database not yet connected");
         }

@@ -199,7 +199,7 @@ class Core {
         );
         $conn = [
             'driver' => 'pdo_pgsql',
-            'pdo' => $this->submitty_db->getPdo(),
+            'pdo' => $this->submitty_db->getConnection(),
         ];
         $this->submitty_entity_manager = EntityManager::create($conn, $config);
     }
@@ -230,13 +230,17 @@ class Core {
         );
         $conn = [
             'driver' => 'pdo_pgsql',
-            'pdo' => $this->course_db->getPdo(),
+            'pdo' => $this->course_db->getConnection(),
         ];
         $this->course_entity_manager = EntityManager::create($conn, $config);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
         $this->course_db = $database;
+    }
+
+    public function setCourseEntityManager(EntityManager $entity_manager) {
+        $this->course_entity_manager = $entity_manager;
     }
 
     public function getCourseEntityManager(): EntityManager {

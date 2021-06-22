@@ -8,10 +8,15 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
+use app\entities\db\Table;
 use app\exceptions\DatabaseException;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\response\JsonResponse;
 use app\views\admin\SqlToolboxView;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Reflection;
+use ReflectionClass;
 use tests\BaseUnitTest;
 
 class SqlToolboxControllerTester extends BaseUnitTest {
@@ -42,60 +47,42 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     public function testShowToolbox(): void {
+        $reflection = new ReflectionClass(Table::class);
         $tables = [
-        [
-            'table_name' => 'gradeable',
-            'column_name' => 'g_title',
-            'data_type' => 'character varying'
-        ],
-        [
-            'table_name' => 'gradeable',
-            'column_name' => 'g_gradeable_type',
-            'data_type' => 'integer'
-        ],
-        [
-            'table_name' => 'threads',
-            'column_name' => 'title',
-            'data_type' => 'character varying'
-        ],
-        [
-            'table_name' => 'threads',
-            'column_name' => 'is_visible',
-            'data_type' => 'boolean'
-        ]
+            new Table(),
+            new Table(),
         ];
-        $mock_queries = $this->createMock(DatabaseQueries::class);
-        $mock_queries->expects($this->once())->method('getCourseSchemaTables')->willReturn($tables);
-        $this->core->setQueries($mock_queries);
+        $prop = $reflection->getProperty('name');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[0], 'bar');
+        $prop->setAccessible(false);
 
-        $organizedTables = [
-            'gradeable' => [
-                [
-                    'name' => 'g_title',
-                    'type' => 'character varying'
-                ],
-                [
-                    'name' => 'g_gradeable_type',
-                    'type' => 'integer'
-                ]
-            ],
-            'threads' => [
-                [
-                    'name' => 'title',
-                    'type' => 'character varying'
-                ],
-                [
-                    'name' => 'is_visible',
-                    'type' => 'boolean'
-                ]
-            ]
-        ];
+        $prop = $reflection->getProperty('name');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[1], 'foo');
+        $prop->setAccessible(false);
+
+        /** @var EntityManager&\PHPUnit\Framework\MockObject\MockObject $entity_manager */
+        $entity_manager = $this->createMock(EntityManager::class);
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['schema' => 'public'], ['name' => 'ASC'])
+            ->willReturn($tables);
+        $entity_manager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(Table::class)
+            ->willReturn($repository);
+
+        $this->core->setCourseEntityManager($entity_manager);
 
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertSame($response->parameters, [$organizedTables]);
+        $this->assertSame($response->parameters, [$tables]);
     }
 
     public function testRunQuery(): void {
