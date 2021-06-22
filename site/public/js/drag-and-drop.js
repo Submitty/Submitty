@@ -866,10 +866,8 @@ function gatherInputAnswersByType(type){
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
 function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all=false, regrade_all_students = false, regrade_all_students_all = false) {
-    var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
-    //don't redirect on success
-    var return_url = ''
-    var formData = new FormData();
+    const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
+    let formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('user_id', user_id);
     formData.append('regrade', regrade);
@@ -890,11 +888,11 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
             try {
                 data = JSON.parse(data);
                 if (data['status'] === 'success') {
-                    window.location.href = return_url;
+                    window.location.reload();
                 }
                 else {
                     if (data['message'] == "You do not have access to that page.") {
-                        window.location.href = return_url;
+                        window.location.reload()
                     }
                     else if(typeof data['code'] !== undefined && data['code'] === 302){
 
