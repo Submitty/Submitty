@@ -405,6 +405,7 @@ class ForumController extends AbstractController {
         $this->core->getNotificationFactory()->onNewAnnouncement($event);
         $this->core->addSuccessMessage("Announcement successfully queued for sending");
         $this->core->getQueries()->setAnnounced($_POST['id']);
+        $this->core->getQueries()->updateResolveState($_POST['id'], 0);
         return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
     }
 

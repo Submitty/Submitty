@@ -2113,9 +2113,17 @@ function sendAnnouncement(thread_post_content, id){
     url: buildCourseUrl(['forum', 'make_announcement']),
     data: {"id": id, 'csrf_token': window.csrfToken},
     success: function(data){
-      pinAnnouncement(id, 1, window.csrfToken);
-      window.location.reload();
+      if (JSON.parse(data)["status"] === "success"){ 
+        pinAnnouncement(id, 1, window.csrfToken);
+        window.location.reload();
+      }
+      else{
+        window.alert("Something went wrong while trying to queue the announcement. Please try again.");
+      }
     },
+    error: function(){
+      window.alert("Something went wrong while trying to queue the announcement. Please try again.");
+    }
   });
 }
 
