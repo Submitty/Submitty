@@ -374,7 +374,7 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
-    public function makeAnnouncement() {
+    public function makeAnnouncement(): JsonResponse {
         if (!isset($_POST['id'])) {
             $this->core->addErrorMessage("thread_id not provided");
             return JsonResponse::getFailResponse("thread_id not provided");
