@@ -894,9 +894,6 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
                     if (data['message'] == "You do not have access to that page.") {
                         window.location.reload();
                     }
-                    else if(typeof data['code'] !== undefined && data['code'] === 302){
-
-                    }
                     else {
                         alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
                     }
