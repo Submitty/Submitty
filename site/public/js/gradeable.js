@@ -120,6 +120,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
     if (graded_gradeable.graded_components === undefined || graded_gradeable.graded_components === null) {
         graded_gradeable.graded_components = {};
     }
+    console.log(graded_gradeable);
     // Calculate the total scores
     gradeable.components.forEach(function (component) {
         graded_gradeable.graded_components[component.id]
@@ -134,7 +135,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'decimal_precision': DECIMAL_PRECISION,
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
-        'display_version': displayVersion
+        'display_version': displayVersion,
     });
 }
 
@@ -155,6 +156,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         graded_gradeable.graded_components = {};
     }
 
+    console.log(graded_gradeable);
     var peer_details = {};
     // Group together some useful data for rendering:
     gradeable.components.forEach(function(component) {

@@ -58,7 +58,7 @@ l
             <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, max_total, max_total) }}">
                 {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (max_total)|round(decimal_precision) }}
             </strong>
-            <strong>Total </strong>
+            <strong>Total {{ yo }}</strong>
         </div>
     {% endif %}
 {% endif %}
