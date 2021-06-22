@@ -892,7 +892,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
                 }
                 else {
                     if (data['message'] == "You do not have access to that page.") {
-                        window.location.reload()
+                        window.location.reload();
                     }
                     else if(typeof data['code'] !== undefined && data['code'] === 302){
 
