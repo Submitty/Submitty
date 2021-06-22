@@ -288,28 +288,16 @@ abstract class AbstractController {
      * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return CourseMaterial|bool false in the fail/error case
      */
-    public function tryGetCourseMaterial(string $path, bool $render_json = true) {
+    public function tryGetCourseMaterial(string $path) {
         if (!file_exists($path)) {
-            if ($render_json) {
-                $this->core->getOutput()->renderJsonFail('Missing path parameter');
-            }
             return false;
         }
-
         // Get the course material
         try {
             return $this->core->getQueries()->getCourseMaterial($path);
         }
-        catch (\InvalidArgumentException $e) {
-            if ($render_json) {
-                $this->core->getOutput()->renderJsonFail('Invalid path parameter');
-            }
-        }
         catch (\Exception $e) {
-            if ($render_json) {
-                $this->core->getOutput()->renderJsonError('Failed to load gradeable');
-            }
+            return false;
         }
-        return false;
     }
 }

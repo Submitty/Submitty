@@ -53,7 +53,7 @@ def up(config, database, semester, course):
     if json_file.is_file():
         with json_file.open('r') as file:
             data = json.load(file)
-            if type(data) is dict:
+            if isinstance(data, dict):
                 for itemkey, itemvalue in data.items():
                     material_type = 0
                     path = itemkey
@@ -75,7 +75,7 @@ def up(config, database, semester, course):
                         )
                         VALUES (
                             :type, :path, :release_date, :hidden_from_students, :priority, :section_lock
-                        ) RETURNING path
+                        ) ON CONFLICT(path) DO UPDATE RETURNING path
                         """
                     params = {
                         'path': path,
@@ -95,7 +95,7 @@ def up(config, database, semester, course):
                             )
                             VALUES (
                                 :course_material_id, :section_id
-                            )
+                            ) ON CONFLICT(course_material_id) DO UPDATE
                             """
                         params = {
                             'course_material_id': course_material_id,

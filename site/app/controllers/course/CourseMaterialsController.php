@@ -17,15 +17,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
 class CourseMaterialsController extends AbstractController {
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
-
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage() {
-        $course_materials = $this->core->getQueries()->getCourseMaterials(null);
+        $course_materials = $this->core->getQueries()->getCourseMaterials();
         return new WebResponse(
             CourseMaterialsView::class,
             'listCourseMaterials',
@@ -187,7 +183,6 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
-        //$new_data_time = DateUtils::dateTimeToString($new_data_time);
 
         //only one will not iterate correctly
         if (is_string($data)) {
@@ -226,11 +221,8 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function ajaxEditCourseMaterialsFiles() {
-        $requested_path = "";
-        if (isset($_POST['requested_path'])) {
-            $requested_path = $_POST['requested_path'] ?? '';
-        }
+    public function ajaxEditCourseMaterialsFiles(): JsonResponse {
+        $requested_path = $_POST['requested_path'] ?? '';
         if ($requested_path === '') {
             return JsonResponse::getErrorResponse("Requested path cannot be empty");
         }
@@ -452,7 +444,7 @@ class CourseMaterialsController extends AbstractController {
                         $i = 0;
                         foreach ($zfiles as $zfile) {
                             $path = FileUtils::joinPaths($upload_path, $zfile);
-                            $details['type'][$i] = $is_external_link_file ? 1 : 0;
+                            $details['type'][$i] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
                             $details['path'][$i] = $path;
                             $i++;
                         }
@@ -462,7 +454,7 @@ class CourseMaterialsController extends AbstractController {
                             return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
                         }
                         else {
-                            $details['type'][0] = $is_external_link_file ? 1 : 0;
+                            $details['type'][0] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
                             $details['path'][0] = $dst;
                         }
                     }

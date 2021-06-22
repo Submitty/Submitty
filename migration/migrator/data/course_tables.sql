@@ -173,7 +173,7 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 --
 
 CREATE TABLE public.course_materials (
-    url text NOT NULL,
+    path text NOT NULL,
     type smallint NOT NULL,
     release_date timestamp with time zone NOT NULL,
     hidden_from_students boolean NOT NULL,
@@ -1228,7 +1228,7 @@ ALTER TABLE ONLY public.categories_list
 --
 
 ALTER TABLE ONLY public.course_materials
-    ADD CONSTRAINT course_materials_pkey PRIMARY KEY (url);
+    ADD CONSTRAINT course_materials_pkey PRIMARY KEY (path);
 
 
 --
@@ -1694,7 +1694,7 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 --
 
 ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(url) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(path) ON DELETE CASCADE;
 
 
 --

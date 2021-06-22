@@ -7176,7 +7176,7 @@ SQL;
         return $this->course_db->rows();
     }
 
-    public function getCourseMaterials($paths): \Iterator {
+    public function getCourseMaterials($paths = null): \Iterator {
         if ($paths === []) {
             return new \EmptyIterator();
         }
