@@ -24,7 +24,11 @@ l
             <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total, ta_grading_complete) }}">
                 {{ ta_grading_earned is defined ? ta_grading_earned|round(decimal_precision) : '&minus;' }} / {{ ta_grading_total|round(decimal_precision) }}
             </strong>
-            <strong>Non Peer Manual Grading Total</strong>
+            {% if peer_gradeable == true %}
+                <strong>Non Peer Manual Grading Total</strong>
+            {% else %}
+                <strong>Manual Grading Total</strong>
+            {% endif %}
         </div>
     {% endif %}
     {% if peer_grade_earned is defined %}
