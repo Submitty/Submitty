@@ -1,12 +1,20 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-secondary-email-form{% endblock %}
-{% block title %}Edit Secondary Email{% endblock %}
+{% block title %}Edit Secondary Email (Optional){% endblock %}
 {% block body %}
-    <p>Please fill in below to change your secondary email and configure whether or not you would like
-    us to send emails to it in addition to your normal email address.</p>
+    <p class="std-margin">
+       Your <em>primary email address</em> is most likely an email account affilitiated
+       with your educational institution.
+       Contact your instructor or system administrator if you need to modify the primary email
+       address associated with your Submitty account.
+    </p>
+
+    <p class="std-margin">
+       You are invited to optionally add a <em>secondary email address</em> to your Submitty account.
+       This email address will be shared with your instructors.
+    </p>
     <div class="flex-col" id="user_settings_modal">
         <input id="user-secondary-email-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <h2>My Secondary Email</h2>
         <div class="edit_user_row">
             <label for="user-secondary-email-change">Secondary Email Address:&emsp;</label>
             <input type="text"
@@ -15,8 +23,16 @@
                    id="user-secondary-email-change"
                    data-current-second-email="{{ user.getSecondaryEmail() }}"/>
         </div>
+
+        <p class="std-margin">
+           If you would like email notifications to be sent to both your primary <em>and</em>
+           your secondary email address, please check the box below.
+           If you leave the box unchecked, email notifications will only be sent to
+           your primary email address.
+        </p>
+
         <div class="edit_user_row">
-            <label for="user-secondary-email-notify-change">Enable Second Email:</label>
+            <label for="user-secondary-email-notify-change">Enable Second Email Notifications:</label>
             <input type="checkbox"
                    name="user_secondary_email_notify_change"
                    {% if user.getEmailBoth() %}
