@@ -1,20 +1,18 @@
-
-
+/* exported clear */
 function clear(){
-  console.log("Clearing");
   document.getElementById('gradeable_access_date').value = '';
   document.getElementById('gradeable_submission_date').value = '';
   document.getElementById('forum_view').value = '';
   document.getElementById('form_post').value = '';
   document.getElementById('num_poll_responses').value = '';
   document.getElementById('office_hours_queue_date').value = '';
-  console.log("done clearing");
 }
 function downloadData() {
     console.log("{{data[0].user_id}}");
 }
 
 
+/* exported sortTable */
 function sortTable(n, flag) {
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("data-table");
