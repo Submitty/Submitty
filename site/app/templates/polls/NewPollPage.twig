@@ -2,7 +2,7 @@
     {% if not poll is defined %}
         <h1> Add a New Poll </h1>
 
-        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll">
+        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
@@ -12,21 +12,30 @@
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                Question:
-                <textarea
-                    id="poll-question"
-                    name="question"
-                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                    rows="10" cols="30"
-                    placeholder="Enter question here..."
-                    maxlength="5000"></textarea>
-            </label>
+            <p>Question:</p>
+            {% include "misc/MarkdownArea.twig" with {
+                "markdown_area_id" : "poll-question",
+                "markdown_area_query" : "$('#poll-question')",
+                "markdown_area_name" : "question",
+                "markdown_area_value" : "",
+                "placeholder" : "Enter question here...",
+                "preview_div_id" : "poll_preview_new",
+                "preview_div_name" : "poll_preview_new",
+                "onclick" : "previewPollMarkdown.call(this)",
+                "render_buttons" : true,
+                "min_height" : min_height
+            } only %}
             <br/><br/>
+
+            <label for="image-file">
+                Optional Image:
+            </label>
+            <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+  	    <br/><br/>
 
             <label for="poll-date">
                 Expected release date:
-                <input id="poll-date" class="poll-date"  name="release_date" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
             <br/>
 
@@ -45,14 +54,15 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+  	    <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
         <h1> Edit Poll </h1>
 
-        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits">
+        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+            <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
             <label for="poll-name">
@@ -61,20 +71,38 @@
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                Question:
-                <textarea
-                    id="poll-question"
-                    name="question"
-                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                    rows="10" cols="30"
-                    maxlength="5000">{{ poll.getQuestion() }}</textarea>
-            </label>
+            
+            <p>Question:</p>
+            {% include "misc/MarkdownArea.twig" with {
+                "markdown_area_id" : "poll-question",
+                "markdown_area_query" : "$('#poll-question')",
+                "markdown_area_name" : "question",
+                "markdown_area_value" : poll.getQuestion(),
+                "preview_div_id" : "poll_preview_edit",
+                "onclick" : "previewPollMarkdown.call(this)",
+                "render_buttons" : true,
+                "min_height" : min_height
+            } only %}
             <br/><br/>
+
+            <label for="image-file">
+                Optional Image:
+            </label>
+            <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+            <br />
+            {% if poll.getImagePath() != null %}
+                Current Image: {{ poll.getImagePath() }}
+                <br/>
+                <label for="keep-image">
+                    Keep Image:
+                </label>
+                <input type="checkbox" id="keep-image" name="keep_image" checked />
+            {% endif %}
+            <br/>
 
             <label for="poll-date">
                 Expected release date:
-                <input id="poll-date" class="poll-date" name="release_date" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
             <br/>
             <hr>
@@ -86,13 +114,13 @@
                         <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
                         <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
                         <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
-                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                         rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
                         <div class="move-btn up-btn">
-                            <i class="move-arrow up"></i>
+                            <i class="fa fa-lg fa-chevron-up"></i>
                         </div>
                         <div class="move-btn down-btn">
-                            <i class="move-arrow down"></i>
+                            <i class="fa fa-lg fa-chevron-down"></i>
                         </div>
                         <div class="move-btn delete-btn">
                             <i class="fa fa-lg fa-trash delete"></i>
@@ -112,6 +140,7 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
@@ -119,13 +148,25 @@
 
 
 <script>
+    let MAX_SIZE = {{ max_size }};
+    let size_is_valid = true;
+	
     flatpickr('.poll-date', {
         allowInput: true,
-        dateFormat: "Y-m-d",
+        dateFormat: "{{ date_format }}",
         onReady: (a, b, fp) => {
           fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
         }
     });
+	
+    function checkSize(uploadedFile) {
+        if (uploadedFile.files[0].size > MAX_SIZE) {
+            size_is_valid = false;
+        } else {
+            size_is_valid = true;
+        }
+        submitErrorChecks();
+    };
 
     function addResponse() {
         let count = $(".poll_response").length
@@ -138,16 +179,16 @@
                 <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
                 <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
                 <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_${count}">
-                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
-                    <i class="move-arrow up"></i>
+                    <i class="fa fa-lg fa-chevron-up"></i>
                 </div>
                 <div class="move-btn down-btn">
-                    <i class="move-arrow down"></i>
+                    <i class="fa fa-lg fa-chevron-down"></i>
                 </div>
                 <div class="move-btn delete-btn">
-                    <i class="fa fa-lg fa-trash delete"></i>
+                    <i class="fa fa-lg fa-trash"></i>
                 </div>
                 <br/>
             </div>
@@ -218,6 +259,10 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-question-error").show();
+        } else if (!size_is_valid) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#file-size-error").show();
         } else if ($("#poll-date").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();

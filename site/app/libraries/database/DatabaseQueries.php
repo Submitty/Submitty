@@ -26,6 +26,7 @@ use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueModel;
+use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -1749,7 +1750,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         );
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
-    public function getAverageForGradeable($g_id, $section_key, $is_team) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team, $override) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -1758,13 +1759,38 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
+
+        // Get count
         $this->course_db->query(
-            "
-SELECT COUNT(*) as cnt from gradeable_component where g_id=?
-          ",
+            "SELECT COUNT(*) as cnt from gradeable_component where g_id=?",
             [$g_id]
         );
         $count = $this->course_db->row()['cnt'];
+
+        $exclude = '';
+        $include = '';
+        $params = [$g_id, $count];
+
+        // Check if we want to exlcude grade overridden gradeables
+        if (!$is_team && $override == 'include') {
+            $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
+                        WHERE u.user_id = grade_override.user_id 
+                        AND grade_override.g_id=gc.g_id)";
+        }
+
+        // Check if we want to combine grade overridden marks within averages
+        if (!$is_team && $override == 'include') {
+            $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
+                FROM grade_override
+                INNER JOIN users as u ON u.user_id = grade_override.user_id
+                AND u.user_id IS NOT NULL
+                LEFT JOIN gradeable_data as gd ON u.user_id = gd.gd_user_id
+                AND grade_override.g_id = gd.g_id
+                WHERE grade_override.g_id=?
+                GROUP BY gd.gd_id, marks";
+            $params[] = $g_id;
+        }
+
         $this->course_db->query(
             "
 SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
@@ -1794,13 +1820,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
         INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
         WHERE gc.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+        " . $exclude . "
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
-  )g WHERE count=?
-)AS individual
-          ",
-            [$g_id, $count]
+  )g WHERE count=?" . $include . ")AS individual",
+            $params
         );
         if (count($this->course_db->rows()) == 0) {
             return;
@@ -2453,12 +2478,15 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  Mark      $mark
      * @param  User      $grader
      * @param  Gradeable $gradeable
+     * @param  bool      $anon
      * @return string[]
      */
-    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable) {
+    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = false) {
          // Switch the column based on gradeable team-ness
          $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-         $row_type = $type . "_id";
+         // TODO: anon teams?
+         $user_type = ($type == 'user' && $anon) ? 'anon' : $type;
+         $row_type = $user_type . "_id";
 
          $params = [$grader->getId(), $mark->getId()];
          $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
@@ -2466,7 +2494,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
         $this->course_db->query(
             "
-             SELECT u.{$type}_id
+             SELECT u.{$user_type}_id
              FROM {$table} u
                  JOIN (
                      SELECT gr.sections_{$grade_type}_id
@@ -2493,18 +2521,38 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
     }
 
-    public function getAllSubmittersWhoGotMark($mark) {
+    public function getAllSubmittersWhoGotMark($mark, $anon = false) {
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-        $row_type = "gd_" . $type . "_id";
-        $this->course_db->query(
-            "
-            SELECT gd.gd_{$type}_id
-            FROM gradeable_component_mark_data gcmd
-              JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
-            WHERE gcm_id = ?",
-            [$mark->getId()]
-        );
+        $row_type = ($anon && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
+        //TODO: anon teams?
+        if ($anon && $type != 'team') {
+            $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
+            $this->course_db->query(
+                "
+                SELECT u.anon_id
+                FROM {$table} u
+                    JOIN (
+                        SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                        FROM gradeable_component_mark_data AS gcmd
+                            JOIN gradeable_data AS gd ON gd.gd_id=gcmd.gd_id
+                    ) as gcmd
+                    ON gcmd.gd_{$type}_id=u.{$type}_id
+                WHERE gcmd.gcm_id = ?",
+                [$mark->getId()]
+            );
+        }
+        else {
+            $this->course_db->query(
+                "
+                SELECT gd.gd_{$type}_id
+                FROM gradeable_component_mark_data gcmd
+                  JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                WHERE gcm_id = ?",
+                [$mark->getId()]
+            );
+        }
+
 
         // Map the results into a non-associative array of team/user ids
         return array_map(
@@ -2643,6 +2691,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getAllGradeablesIdsAndTitles() {
         $this->course_db->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
         return $this->course_db->rows();
+    }
+
+    /**
+     * Gets the date for a specified gradeable
+     *
+     * @param string $id
+     * @return \DateTime
+     */
+    public function getDateForGradeableById($id) {
+        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
+        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
     }
 
     public function getAllGradeablesIds() {
@@ -3652,7 +3711,7 @@ SELECT t.name AS term_name, u.semester, u.course, u.user_group
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
 INNER JOIN terms t ON u.semester=t.term_id
-WHERE u.user_id=? ${extra}
+WHERE u.user_id=? ${extra} AND (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -4155,18 +4214,18 @@ AND gc_id IN (
     /**
      * Queues emails for all given recipients to be sent by email job
      *
-     * @param array $flattened_emails array of params
+     * @param array $flattened_params array of params
      * @param int   $email_count
      */
-    public function insertEmails(array $flattened_emails, int $email_count) {
+    public function insertEmails(array $flattened_params, int $email_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, current_timestamp, ?)";
+        $row_string = "(?, ?, current_timestamp, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query(
             "
-            INSERT INTO emails(subject, body, created, user_id)
+            INSERT INTO emails(subject, body, created, user_id, semester, course)
             VALUES " . $value_param_string,
-            $flattened_emails
+            $flattened_params
         );
     }
 
@@ -4360,7 +4419,10 @@ AND gc_id IN (
     }
 
     public function getRegradePost($post_id) {
-        $this->course_db->query("SELECT * FROM regrade_discussion WHERE id = ?", [$post_id]);
+        $this->course_db->query(
+            "SELECT * FROM regrade_discussion WHERE id = ?",
+            [$post_id]
+        );
         return $this->course_db->row();
     }
 
@@ -4432,9 +4494,9 @@ AND gc_id IN (
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,
               g_grade_released_date AS grade_released_date,
-              g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
+              g_allowed_minutes AS allowed_minutes,
               eg.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
@@ -4526,6 +4588,7 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
+            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
 
             // Construct the components
             $component_properties = [
@@ -5085,8 +5148,6 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-            $gradeable->getGradeLockedDate() !== null ?
-                DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket()
         ];
@@ -5103,10 +5164,9 @@ AND gc_id IN (
               g_grade_start_date,
               g_grade_due_date,
               g_grade_released_date,
-              g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5238,8 +5298,6 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
-                $gradeable->getGradeLockedDate() !== null ?
-                    DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getId()
@@ -5256,7 +5314,6 @@ AND gc_id IN (
                   g_grade_start_date=?,
                   g_grade_due_date=?,
                   g_grade_released_date=?,
-                  g_grade_locked_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?
                 WHERE g_id=?",
@@ -5758,6 +5815,19 @@ AND gc_id IN (
     }
 
     /**
+     * Get a status of emails sent of a course with course name and semester
+     *
+     * @param string $course
+     * @param string $semester
+     */
+    public function getEmailStatusWithCourse($semester, $course) {
+        $parameters = [$course, $semester];
+        $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
+        $details = $this->submitty_db->rows();
+        return new EmailStatusModel($this->core, $details);
+    }
+
+    /**
      * Gives true if thread is locked
      *
      * @param  int $thread_id
@@ -6118,20 +6188,9 @@ AND gc_id IN (
               FROM users
               WHERE user_group = 4) AS user_data
               LEFT JOIN (SELECT
-                user_id,
-                COUNT(*) AS queue_interactions,
-                COUNT(DISTINCT name) AS number_names_used,
-                AVG(time_out - time_help_start) AS avg_help_time,
-                MIN(time_out - time_help_start) AS min_help_time,
-                MAX(time_out - time_help_start) AS max_help_time,
-                AVG(time_help_start - time_in) AS avg_wait_time,
-                MIN(time_help_start - time_in) AS min_wait_time,
-                MAX(time_help_start - time_in) AS max_wait_time,
-                SUM(CASE
-                  WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                  ELSE 0
-                END) AS help_count,
-                SUM(CASE
+                user_id,"
+                . $this->getInnerQueueSelect() .
+               ",SUM(CASE
                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                   ELSE 0
                 END) AS not_helped_count
@@ -6143,49 +6202,19 @@ AND gc_id IN (
     }
 
     public function getQueueDataOverall() {
-        $this->course_db->query("SELECT
-                 COUNT(*) AS queue_interactions,
-                 COUNT(DISTINCT user_id) AS number_distinct_students,
-                 AVG(time_out - time_help_start) AS avg_help_time,
-                 MIN(time_out - time_help_start) AS min_help_time,
-                 MAX(time_out - time_help_start) AS max_help_time,
-                 AVG(time_help_start - time_in) AS avg_wait_time,
-                 MIN(time_help_start - time_in) AS min_wait_time,
-                 MAX(time_help_start - time_in) AS max_wait_time,
-                 SUM(CASE
-                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                   ELSE 0
-                 END) AS help_count,
-                 SUM(CASE
-                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                   ELSE 0
-                 END) AS not_helped_count
-               FROM queue");
+        $this->course_db->query("SELECT"
+                . $this->getInnerQueueSelect() .
+               "FROM queue");
         return $this->course_db->rows();
     }
 
     public function getQueueDataToday() {
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
         $this->course_db->query(
-            "SELECT
-                 COUNT(*) AS queue_interactions,
-                 COUNT(DISTINCT user_id) AS number_distinct_students,
-                 AVG(time_out - time_help_start) AS avg_help_time,
-                 MIN(time_out - time_help_start) AS min_help_time,
-                 MAX(time_out - time_help_start) AS max_help_time,
-                 AVG(time_help_start - time_in) AS avg_wait_time,
-                 MIN(time_help_start - time_in) AS min_wait_time,
-                 MAX(time_help_start - time_in) AS max_wait_time,
-                 SUM(CASE
-                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                   ELSE 0
-                 END) AS help_count,
-                 SUM(CASE
-                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                   ELSE 0
-                 END) AS not_helped_count
-               FROM queue
-               WHERE time_in > ?",
+            "SELECT"
+                 . $this->getInnerQueueSelect() .
+                "FROM queue
+                 WHERE time_in > ?",
             [$current_date]
         );
         return $this->course_db->rows();
@@ -6193,24 +6222,9 @@ AND gc_id IN (
 
     public function getQueueDataByQueue() {
         $this->course_db->query("SELECT
-                 queue_code,
-                 COUNT(*) AS queue_interactions,
-                 COUNT(DISTINCT user_id) AS number_distinct_students,
-                 AVG(time_out - time_help_start) AS avg_help_time,
-                 MIN(time_out - time_help_start) AS min_help_time,
-                 MAX(time_out - time_help_start) AS max_help_time,
-                 AVG(time_help_start - time_in) AS avg_wait_time,
-                 MIN(time_help_start - time_in) AS min_wait_time,
-                 MAX(time_help_start - time_in) AS max_wait_time,
-                 SUM(CASE
-                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                   ELSE 0
-                 END) AS help_count,
-                 SUM(CASE
-                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                   ELSE 0
-                 END) AS not_helped_count
-               FROM queue
+                 queue_code,"
+                 . $this->getInnerQueueSelect() .
+              "FROM queue
                GROUP BY queue_code
                ORDER BY queue_code");
         return $this->course_db->rows();
@@ -6218,24 +6232,9 @@ AND gc_id IN (
 
     public function getQueueDataByWeekDay() {
         $this->course_db->query("SELECT
-              dow,
-              COUNT(*) AS queue_interactions,
-              COUNT(DISTINCT user_id) AS number_distinct_students,
-              AVG(time_out - time_help_start) AS avg_help_time,
-              MIN(time_out - time_help_start) AS min_help_time,
-              MAX(time_out - time_help_start) AS max_help_time,
-              AVG(time_help_start - time_in) AS avg_wait_time,
-              MIN(time_help_start - time_in) AS min_wait_time,
-              MAX(time_help_start - time_in) AS max_wait_time,
-              SUM(CASE
-                WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                ELSE 0
-              END) AS help_count,
-              SUM(CASE
-                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                ELSE 0
-              END) AS not_helped_count
-            FROM (SELECT
+              dow,"
+              . $this->getInnerQueueSelect() .
+           "FROM (SELECT
               *,
               extract(dow from time_in) AS dow
             FROM queue) AS dow_queue
@@ -6248,24 +6247,9 @@ AND gc_id IN (
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
         $this->course_db->query(
             "SELECT
-              dow,
-              COUNT(*) AS queue_interactions,
-              COUNT(DISTINCT user_id) AS number_distinct_students,
-              AVG(time_out - time_help_start) AS avg_help_time,
-              MIN(time_out - time_help_start) AS min_help_time,
-              MAX(time_out - time_help_start) AS max_help_time,
-              AVG(time_help_start - time_in) AS avg_wait_time,
-              MIN(time_help_start - time_in) AS min_wait_time,
-              MAX(time_help_start - time_in) AS max_wait_time,
-              SUM(CASE
-                WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                ELSE 0
-              END) AS help_count,
-              SUM(CASE
-                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                ELSE 0
-              END) AS not_helped_count
-            FROM (SELECT
+              dow,"
+              . $this->getInnerQueueSelect() .
+            "FROM (SELECT
                 *,
                 extract(dow from time_in) AS dow
                 FROM queue
@@ -6282,24 +6266,9 @@ AND gc_id IN (
     public function getQueueDataByWeekNumber() {
         $this->course_db->query("SELECT
               weeknum,
-      			  min(yearnum) as yearnum,
-              COUNT(*) AS queue_interactions,
-              COUNT(DISTINCT user_id) AS number_distinct_students,
-              AVG(time_out - time_help_start) AS avg_help_time,
-              MIN(time_out - time_help_start) AS min_help_time,
-              MAX(time_out - time_help_start) AS max_help_time,
-              AVG(time_help_start - time_in) AS avg_wait_time,
-              MIN(time_help_start - time_in) AS min_wait_time,
-              MAX(time_help_start - time_in) AS max_wait_time,
-              SUM(CASE
-                WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                ELSE 0
-              END) AS help_count,
-              SUM(CASE
-                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                ELSE 0
-              END) AS not_helped_count
-            FROM (SELECT
+      			  min(yearnum) as yearnum,"
+              . $this->getInnerQueueSelect() .
+           "FROM (SELECT
               *,
               extract(WEEK from time_in) AS weeknum,
 			        extract(YEAR from time_in) AS yearnum
@@ -7038,7 +7007,7 @@ AND gc_id IN (
     //// BEGIN ONLINE POLLING QUERIES ////
 
     public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
-        $this->course_db->query("INSERT INTO polls(name, question, status, release_date) VALUES (?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date]);
+        $this->course_db->query("INSERT INTO polls(name, question, status, release_date, image_path) VALUES (?, ?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date, null]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -7047,6 +7016,7 @@ AND gc_id IN (
         foreach ($answers as $answer) {
             $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
         }
+        return $poll_id;
     }
 
     public function endPoll($poll_id) {
@@ -7102,7 +7072,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date DESC, name ASC", [date("Y-m-d")]);
+        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
@@ -7122,7 +7092,8 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"]);
+        $date = new \Datetime($row['release_date']);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('poll')), $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7166,18 +7137,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function getTotalPollsScore($user_id) {
-        $polls = $this->getPolls();
-        $total = 0.0;
-        foreach ($polls as $poll) {
-            $total = $total + $poll->getScore($user_id);
-        }
-        return $total;
-    }
-
-    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders, $image_path) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ? where poll_id = ?", [$poll_name, $question, $release_date, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $release_date, $image_path, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -7204,6 +7166,10 @@ AND gc_id IN (
     public function deleteUserResponseIfExists($poll_id) {
         $user = $this->core->getUser()->getId();
         $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+    }
+
+    public function setPollImage($poll_id, $image_path) {
+        $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
     }
 
     //// END ONLINE POLLING QUERIES ////
@@ -7264,6 +7230,39 @@ SQL;
             'SELECT * FROM gradeable_access WHERE g_id=? AND team_id=? ORDER BY "timestamp"',
             [$g_id, $team_id]
         );
+        return $this->course_db->rows();
+    }
+
+    private function getInnerQueueSelect(): string {
+        return <<<SQL
+
+      COUNT(*) AS queue_interactions,
+      COUNT(DISTINCT user_id) AS number_distinct_students,
+      DATE_TRUNC('second', AVG(time_out - time_help_start)) AS avg_help_time,
+      MIN(time_out - time_help_start) AS min_help_time,
+      MAX(time_out - time_help_start) AS max_help_time,
+      DATE_TRUNC('second', AVG(time_help_start - time_in)) AS avg_wait_time,
+      MIN(time_help_start - time_in) AS min_wait_time,
+      MAX(time_help_start - time_in) AS max_wait_time,
+      SUM(CASE
+        WHEN removal_type IN ('helped', 'self_helped') THEN 1
+        ELSE 0
+      END) AS help_count,
+      SUM(CASE
+        WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+        ELSE 0
+      END) AS not_helped_count
+
+SQL;
+    }
+
+    private function getGradeableMinutesOverride(string $gradeable_id): array {
+        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows();
+    }
+
+    public function getCourseSchemaTables(): array {
+        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
         return $this->course_db->rows();
     }
 }

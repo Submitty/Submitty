@@ -38,7 +38,7 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
-unless Vagrant.has_plugin?('vagrant-vbguest')
+unless Vagrant.has_plugin?('vagrant-vbguest') || ENV.has_key?('SKIP_VBGUEST')
   raise 'vagrant-vbguest is not installed! To install, run: vagrant plugin install vagrant-vbguest'
 end
 
@@ -48,16 +48,20 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  # Our primary development target, this is what RPI uses as of Fall 2018
-  config.vm.define 'ubuntu-18.04', primary: true do |ubuntu|
+  # This is what RPI uses as of Fall 2018, though currently migrating to 20.04
+  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
-    # TODO: remove the private_network after some time and everyone has
-    # safely transitioned to the new forwarded port
-    ubuntu.vm.network 'private_network', ip: '192.168.56.111'
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
+  end
 
+  # Our primary development target, RPI uses it as of Fall 2021
+  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-20.04'
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
   end
 
   config.vm.provider 'virtualbox' do |vb|

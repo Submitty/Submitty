@@ -10,20 +10,24 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "today_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
+        <div  onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['today'] ? ' down' : ' right'}}"></i>
+                <i class="dropdown-arrow{{dropdown_states['today'] ? ' down'}} fa fa-chevron-right"></i>
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 5%">
+            <col style="width: 5%">
+            <col style="width: 45%">
+            <col style="width: 10%">
+            <col style="width: 10%">
+            <col style="width: 10%">
+            <col style="width: 15%">
             <thead>
                 <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
                     <th scope="col"></th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
@@ -34,23 +38,27 @@
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
+                        <td>
+                                <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
+                                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                                </a>
+                        </td>
+                        <td>
+                                <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
+                        </td>
                         <td align="left">
-                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                            </a>
-                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
                         <td>
-                            <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
+                            <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
-                            <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
+                            <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
                         </td>
@@ -65,21 +73,25 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "old_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
+        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}}"></i>
+                <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;{{ dropdown_states['old'] ? '' : ' display: none;'}}">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 5%">
+            <col style="width: 5%">
+            <col style="width: 30%">
             <col style="width: 15%">
-            <col style="width: 15%">
-            <col style="width: 15%">
+            <col style="width: 10%">
+            <col style="width: 10%">
+            <col style="width: 10%">
             <col style="width: 15%">
             <thead>
                 <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
                     <th scope="col"></th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Visible</th>
@@ -91,24 +103,28 @@
             <tbody>
                 {% for poll in older_polls %}
                     <tr>
+                        <td>
+                                <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
+                                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                                </a>
+                        </td>
+                        <td>
+                                <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
+                        </td>	
                         <td align="left"> 
-                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                            </a>
-                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td>
-                            <input type="checkbox" id="poll_{{ poll.getID() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getID() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
+                            <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
-                            <input type="checkbox" id="poll_{{ poll.getID() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getID() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
+                            <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
                         </td>
@@ -122,19 +138,23 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick='updateDropdownStates($(this).find(".dropdown-arrow").hasClass("down"), "future_polls_dropdown", "{{ base_url }}")' class="dropdown-bar">
+        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}}"></i>
+                <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
             </div>
         </div>
         <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
-            <col style="width: 25%">
-            <col style="width: 25%">
-            <col style="width: 25%">
-            <col style="width: 25%">
+            <col style="width: 5%">
+            <col style="width: 5%">
+            <col style="width: 50%">
+            <col style="width: 15%">
+            <col style="width: 10%">
+            <col style="width: 15%">
             <thead>
                 <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
                     <th scope="col"></th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Responses</th>
@@ -144,18 +164,22 @@
             <tbody>
                 {% for poll in future_polls %}
                     <tr>
+                        <td>
+                                <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
+                                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                                </a>
+                        </td>
+                        <td>
+                                <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
+                        </td>
                         <td align="left">
-                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getID() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                            </a>
-                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getID() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getID() }}"></a>
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getID() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </a>
                         </td>

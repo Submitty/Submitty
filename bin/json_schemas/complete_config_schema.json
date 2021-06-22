@@ -857,7 +857,7 @@
                 "description" : "The standard version of click and drag starts either at the mouse’s current position or at a position specified by the user. If a mouse button has been specified, that button is pressed down at that position, otherwise, the left mouse button is pressed. The mouse is then moved to coordinates specified by the end position, and the held button is released.",
                 "type": "object",
                 "additionalProperties" : false,
-                "required" : ["action", "start_x", "start_y", "end_x", "end_y", "mouse_button"],
+                "required" : ["action"],
                 "properties" : {
                   "action" : {
                     "type" : "string",
@@ -986,13 +986,13 @@
                     "type" : "string",
                     "enum" : ["move mouse"]
                   },
-                  "action" : {
-                    "type" : "integer",
-                    "enum" : ["end_x"]
+                  "end_x" : {
+                    "description" : "(Optional) An integer ending x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer"
                   },
-                  "action" : {
-                    "type" : "integer",
-                    "enum" : ["end_y"]
+                  "end_y" : {
+                    "description" : "(Optional) An integer ending y position for the mouse in window coordinates.Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer"
                   }
                 }
               }
@@ -1029,6 +1029,7 @@
                     "type" : "string"
                   },
                   "pattern" : {
+                    "type": "string"
                   },
                   "source" : {
                     "type" : "string"
@@ -1252,30 +1253,6 @@
           "properties" : {
             "method" : {
               "type" : "string",
-              "enum" : ["EmmaInstrumentationGrader"]
-            }
-          }
-        },
-        {
-          "type" : "object",
-          "required" : ["method", "coverage_threshold"],
-          "properties" : {
-            "method" : {
-              "type" : "string",
-              "enum" : ["EmmaCoverageReportGrader_doit"]
-            },
-            "coverage_threshold" : {
-              "type" : "number",
-              "minimum" : 0
-            }
-          }
-        },
-        {
-          "type" : "object",
-          "required" : ["method"],
-          "properties" : {
-            "method" : {
-              "type" : "string",
               "enum" : ["DrMemoryGrader"]
             }
           }
@@ -1454,11 +1431,25 @@
           "properties" : {
             "method" : {
               "type" : "string",
-              "not" : {"enum":["JUnitTestGrader", "EmmaInstrumentationGrader", "MultipleJUnitTestGrader",
-                       "EmmaCoverageReportGrader", "JaCoCoCoverageReportGrader", "DrMemoryGrader",
-                       "PacmanGrader", "searchToken", "intComparison", "diff", "fileExists",
-                       "warnIfNotEmpty", "warnIfEmpty", "errorIfNotEmpty", "errorIfEmpty", "ImageDiff",
-                       "custom_validator"]}
+              "not" : {
+                "enum": [
+                  "JUnitTestGrader",
+                  "MultipleJUnitTestGrader",
+                  "JaCoCoCoverageReportGrader",
+                  "DrMemoryGrader",
+                  "PacmanGrader",
+                  "searchToken",
+                  "intComparison",
+                  "diff",
+                  "fileExists",
+                  "warnIfNotEmpty",
+                  "warnIfEmpty",
+                  "errorIfNotEmpty",
+                  "errorIfEmpty",
+                  "ImageDiff",
+                  "custom_validator"
+                ]
+              }
             }
           }
         }

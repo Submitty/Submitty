@@ -213,16 +213,20 @@ class ElectronicGraderController extends AbstractController {
         4 - Randomly Select Y offsets
         5 - Shift the random order by the offsets to create the matrix, with no duplicates, and exactly Y assignments and & graders for each student.  no student grades self.
         */
-        $number_to_grade = $_POST['number_to_grade'];
-        $restrict_to_registration = $_POST['restrict_to_registration'];
-        $submit_before_grading = $_POST['submit_before_grading'];
+        $restrict_to_registration = ($_POST['restrict_to_registration'] ?? '') === "checked";
+        $submit_before_grading = ($_POST['submit_before_grading'] ?? '') === "checked";
+        $number_to_grade = $_POST['number_to_grade'] ?? '';
+        if (!is_numeric($number_to_grade)) {
+            $this->core->addErrorMessage("Peer assignment failed: An invalid number of students to grade was assigned");
+            return JsonResponse::getFailResponse("Number to grade wasn't an integer");
+        }
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
         /* If Restrict to Registration checkbox is checked, then the randomised peer assignments should be restricted to each registration section" */
-        if ($restrict_to_registration == "checked") {
+        if ($restrict_to_registration) {
             $sections = $this->core->getQueries()->getRegistrationSections();
             foreach ($sections as $i => $section) {
                 $sections[$i] = $section['sections_registration_id'];
@@ -236,7 +240,7 @@ class ElectronicGraderController extends AbstractController {
                 $students = $this->core->getQueries()->getUsersByRegistrationSections([$section]);
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
-                    if ($submit_before_grading == "checked") {
+                    if ($submit_before_grading) {
                         if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
                         }
                         else {
@@ -279,7 +283,7 @@ class ElectronicGraderController extends AbstractController {
              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
-            if ($submit_before_grading == "checked") {
+            if ($submit_before_grading) {
                 if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
                 }
                 else {
@@ -517,10 +521,11 @@ class ElectronicGraderController extends AbstractController {
         $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
+        $total_users_who_submitted = [];
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
-            $total_who_submitted = $this->core->getQueries()->getTotalSubmissions($gradeable_id);
+            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $student_array = [];
@@ -609,7 +614,8 @@ class ElectronicGraderController extends AbstractController {
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
+            $override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit';
+            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
@@ -627,6 +633,12 @@ class ElectronicGraderController extends AbstractController {
                     continue;
                 }
                 $total_submissions += $value;
+            }
+            foreach ($total_users_who_submitted as $key => $value) {
+                if ($key === 'NULL') {
+                    continue;
+                }
+                $total_who_submitted += $value;
             }
             if (!$gradeable->isTeamAssignment() && $isPeerGradeable) {
                 $sections['peer_stu_grad'] = [
@@ -784,7 +796,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC", $anon_mode = false) {
+    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -806,6 +818,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
         }
+        $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
@@ -874,7 +887,6 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
         }
-
         $show_all_sections_button = $can_show_all;
         $show_edit_teams = $this->core->getAccess()->canI("grading.electronic.show_edit_teams") && $gradeable->isTeamAssignment();
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
@@ -1228,7 +1240,19 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
+    public function showGrading(
+        $gradeable_id,
+        $who_id = '',
+        $from = "",
+        $to = null,
+        $gradeable_version = null,
+        $sort = "id",
+        $direction = "ASC",
+        $to_ungraded = null,
+        $component_id = "-1",
+        $anon_mode = false,
+        $to_same_itempool = false
+    ) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
@@ -1272,7 +1296,7 @@ class ElectronicGraderController extends AbstractController {
             }
 
             if ($from_graded_gradeable === false) {
-                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
             }
 
             // Get the user ID of the user we were viewing on the TA grading interface
@@ -1282,31 +1306,18 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
-            if ($to === 'prev' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id);
+            if ($to === 'prev' && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'prev' && $to_ungraded === 'false') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id);
+            elseif ($to === 'prev') {
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id);
+            elseif ($to === 'next' && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'next' && $to_ungraded === 'false') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
+            elseif ($to === 'next') {
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
             }
-            elseif ($to === 'prev' && $to_ungraded === 'true' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevUngradedSubmitter($from_id, $component_id);
-            }
-            elseif ($to === 'prev' && $to_ungraded === 'true') {
-                $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
-            }
-            elseif ($to === 'next' && $to_ungraded === 'true' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextUngradedSubmitter($from_id, $component_id);
-            }
-            elseif ($to === 'next' && $to_ungraded === 'true') {
-                $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
-            }
-
             // Reassign who_id
             if (!is_null($goToStudent)) {
                 $who_id = $goToStudent->getId();
@@ -1472,7 +1483,7 @@ class ElectronicGraderController extends AbstractController {
             "action" => "VIEW_PAGE",
         ];
         Logger::logTAGrading($logger_params);
-
+        $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
         $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $graded_gradeable->getSubmitter()->getId());
         $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
 
@@ -1484,7 +1495,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -1683,6 +1694,14 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
+
+        $response_data['itempool_items'] = [];
+        $components = $gradeable->getComponents();
+        $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $submitter);
+        foreach ($components as $key => $value) {
+            $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
+        }
+
         return $response_data;
     }
 
@@ -1766,12 +1785,19 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
-
+        //don't allow peer graders to save custom marks
+        if (($custom_message != null || $custom_points != null) && $gradeable->isPeerGrading()) {
+            if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+                $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
+                return;
+            }
+        }
         // Check if the user can silently edit assigned marks
         if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
             $silent_edit = false;
@@ -2727,8 +2753,10 @@ class ElectronicGraderController extends AbstractController {
     private function getMarkStats(Mark $mark, User $grader) {
         $gradeable = $mark->getComponent()->getGradeable();
 
-        $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable);
-        $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark);
+        $anon = $this->amIBlindGrading($gradeable, $grader, false);
+
+        $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon);
+        $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark, $anon);
 
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);

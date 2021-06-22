@@ -1,0 +1,29 @@
+name: Vagrant Up
+
+on: 
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  vagrant-up:
+    runs-on: macos-10.15
+    
+    strategy:
+      matrix:
+        include:
+          - image: ubuntu-18.04
+            port: 1501
+          - image: ubuntu-20.04
+            port: 1511
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2
+      # Installing this is skipped in CI as using it was causing some corruption in
+      # attempting to mount the shared folder. The guest and host guest additions
+      # versions are close enough that we are fine without it.
+      # - run: vagrant plugin install vagrant-vbguest
+      - run: NO_SUBMISSIONS=1 SKIP_VBGUEST=1 vagrant up ${{ matrix.image }}
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost:${{ matrix.port }}

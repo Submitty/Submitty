@@ -1,0 +1,14 @@
+{
+    "env": {
+        "cypress/globals": true,
+        "node": true,
+        "browser": null,
+        "jquery": null
+    },
+    "parserOptions": {
+        "sourceType": "module"
+    },
+    "plugins" : [
+        "cypress"
+    ]
+}

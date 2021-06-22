@@ -18,6 +18,7 @@ class ReportView extends AbstractView {
 
     public function showFullGradebook($grade_file) {
         $this->core->getOutput()->addBreadcrumb('Gradebook');
+        $this->core->getOutput()->addInternalCss('rainbow-grades.css');
 
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
 

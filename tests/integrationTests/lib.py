@@ -7,6 +7,9 @@ import subprocess
 import traceback
 import sys
 import shutil
+from functools import wraps
+from multiprocessing import Pool, cpu_count
+
 from submitty_utils import submitty_schema_validator
 
 # global variable available to be used by the test suite modules
@@ -15,8 +18,23 @@ SUBMITTY_INSTALL_DIR = os.path.realpath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
 )
 
+INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./test_suite/integrationTests/"
+)
+
+COMPILE_CONFIGURE_BIN_PATH = os.path.join(
+    INTEGRATION_TEST_ROOT_FOLDER,
+    'compile_configure_bin.sh'
+)
+
+CONFIGURE_BIN_PATH = os.path.join(
+    INTEGRATION_TEST_ROOT_FOLDER, 
+    "configure.bin"
+)
+
 BUILD_MAIN_CONFIGUE_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
+    INTEGRATION_TEST_ROOT_FOLDER,
     'build_main_configure.sh'
 )
 
@@ -25,11 +43,21 @@ BUILD_MAIN_CONFIGUE_PATH = os.path.join(
 if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
     raise SystemExit('You must install the test suite before being able to run it.')
 
-SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
-GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
+SUBMITTY_TUTORIAL_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./GIT_CHECKOUT/Tutorial"
+)
+
+GRADING_SOURCE_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./src/grading"
+)
 
 LOG_FILE = None
-LOG_DIR = SUBMITTY_INSTALL_DIR + "/test_suite/log"
+LOG_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./test_suite/log"
+)
 
 
 def print(*args, **kwargs):
@@ -49,11 +77,20 @@ def print(*args, **kwargs):
     sys.stdout.write(message)
 
 
+# Concurrency note:
+# To be able to work across process boundary, there must be no lambda expression
+# within the TestcaseFile class, and all wrappers must be annotated with
+# functools.wraps. This is a must for python to transfer the object to the worker
+# process, for more please see python pickling.
+# Note: there could still be lambdas and non-top level functions in client test
+# case code, its just the TestcaseFile must be pickle-able
 class TestcaseFile:
     def __init__(self):
-        self.prebuild = lambda: None
+        self.wrapper = type(None)  # Equivalent to lambda: None, but pickle-able
+        self.prebuild = type(None)
         self.testcases = []
         self.testcases_names = []
+
 
 to_run = defaultdict(lambda: TestcaseFile(), {})
 
@@ -64,13 +101,14 @@ class ASCIIEscapeManager:
         self.codes = list(map(str, codes))
 
     def __enter__(self):
-        sys.stdout.write("\033[" + ";".join(self.codes) + "m")
+        sys.stdout.write(f"\u001B[{';'.join(self.codes)}m")
 
     def __exit__(self, exc_type, exc_value, traceback):
         sys.stdout.write("\033[0m")
 
     def __add__(self, other):
         return ASCIIEscapeManager(self.codes + other.codes)
+
 
 bold = ASCIIEscapeManager([1])
 underscore = ASCIIEscapeManager([4])
@@ -88,105 +126,156 @@ white = ASCIIEscapeManager([37])
 
 ###################################################################################
 ###################################################################################
-# Run the given list of test case names
+# Run the given list of test case names in parallel using multiprocessing
 def run_tests(names):
-    totalmodules = len(names)
+    arguments = []  # Arguments for run_single_test(list<str>, TestcaseFile)
     for name in sorted(names):
         name = name.split(".")
         key = name[0]
-        val = to_run[key]
-        modsuccess = True
-        with bold:
-            print("--- BEGIN TEST MODULE " + key.upper() + " ---")
-        cont = True
-        try:
-            print("* Starting compilation...")
-            val.prebuild()
-            val.wrapper.build()
-            print("* Finished compilation")
-        except Exception as e:
-            print("Build failed with exception: %s" % e)
-            modsuccess = False
-            cont = False
-        if cont:
-            testcases = []
-            if len(name) > 1:
-                for i in range(len(val.testcases)):
-                    if str(val.testcases_names[i]).lower() == name[1].lower():
-                        testcases.append(val.testcases[i])
-            else:
-                testcases = val.testcases
-            total = len(testcases)
-            for index, f in zip(range(1, total + 1), testcases):
-                try:
-                    f()
-                except Exception as e:
-                    with bold + red:
-                        lineno = None
-                        tb = traceback.extract_tb(sys.exc_info()[2])
-                        for i in range(len(tb)-1, -1, -1):
-                            if os.path.basename(tb[i][0]) == '__init__.py':
-                                lineno = tb[i][1]
-                        print("Testcase " + str(index) + " failed on line " + str(lineno) +
-                              " with exception: ", e)
-                        sys.exc_info()
-                        total -= 1
-            if total == len(testcases):
-                with bold + green:
-                    print("All testcases passed")
-            else:
-                with bold + red:
-                    print(str(total) + "/" + str(len(testcases)) + " testcases passed")
-                    modsuccess = False
-        with bold:
-            print("--- END TEST MODULE " + key.upper() + " ---")
-        print()
-        if not modsuccess:
-            totalmodules -= 1
-    if totalmodules == len(names):
-        with bold + green:
-            print("All " + str(len(names)) + " modules passed")
-    else:
+        case = to_run[key]
+        arguments.append((name, case))
+    __setup()
+    # Concurrency note:
+    # Its best to use something close to cpu_count() here, as single-thread
+    # performance is important for some modules that are compute-intensive,
+    # they might timeout as a result of lack of single thread performance.
+    # This can happen with python_simple_homework.infinite_loop_time_cutoff
+    with Pool(cpu_count()) as p:
+        test_result = p.starmap(__run_single_test_module, arguments)
+    if False in test_result:
         with bold + red:
-            print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
+            print(f"{test_result.count(True)}/{len(test_result)} modules passed")
             sys.exit(1)
+    else:
+        with bold + green:
+            print(f"All {len(names)} modules passed")
+
+def __setup():
+    subprocess.check_output([
+            "/bin/bash", 
+            COMPILE_CONFIGURE_BIN_PATH,
+            SUBMITTY_INSTALL_DIR, 
+            CONFIGURE_BIN_PATH
+        ],
+        stderr=subprocess.STDOUT
+    )
+    pass
+
+
+# Concurrency note:
+# Currently all tests are run in parallel per-number of threads on a module level.
+# Different modules are run in parallel on different worker threads, but all the
+# test cases within the same module is run on the same thread sequentially.
+
+# Executes a single test module, this method is executed across process boundary,
+# Not meant to be called externally.
+def __run_single_test_module(name, case):
+    key = name[0]
+    with bold:
+        print(f"--- BEGIN TEST MODULE {key.upper()} AT PROCESS {os.getpid()} ---")
+    module_success = __compile_test_module(case)
+    if module_success:
+        testcases = __collect_test_cases(case, name)
+        succeed_count = len(testcases)
+        for index, f in zip(range(1, succeed_count + 1), testcases):
+            test_case_success = __execute_test_case(index, f)
+            if not test_case_success:
+                succeed_count -= 1
+        if succeed_count == len(testcases):
+            with bold + green:
+                print("All testcases passed")
+        else:
+            with bold + red:
+                print(f"{succeed_count}/{len(testcases)} testcases passed")
+                module_success = False
+    with bold:
+        print(f"--- END TEST MODULE {key.upper()} ---")
+    print()
+    return module_success
+
+
+def __compile_test_module(case):
+    try:
+        print("* Starting compilation...")
+        case.prebuild()
+        case.wrapper.build()
+        print("* Finished compilation")
+        return True
+    except Exception as e:
+        print(f"Build failed with exception: {e}")
+        return False
+
+
+def __collect_test_cases(case, name):
+    testcases = []
+    if len(name) > 1:
+        for i in range(len(case.testcases)):
+            if str(case.testcases_names[i]).lower() == name[1].lower():
+                testcases.append(case.testcases[i])
+    else:
+        testcases = case.testcases
+    return testcases
+
+
+# Concurrency note:
+# For future integration test speed-ups, concurrency level can be
+# increased if this __execute_test_case is executed in parallel.
+# However test code will lose its ability to share states within a
+# test module across test cases as they are run in executed in
+# different processes.
+def __execute_test_case(index, test_case):
+    try:
+        test_case()
+        return True
+    except Exception as e:
+        with bold + red:
+            lineno = None
+            tb = traceback.extract_tb(sys.exc_info()[2])
+            for i in range(len(tb) - 1, -1, -1):
+                if os.path.basename(tb[i][0]) == '__init__.py':
+                    lineno = tb[i][1]
+            print(f"Testcase {index} failed on line {lineno} with exception: ", e)
+            sys.exc_info()
+        return False
 
 
 # Run every test currently loaded
 def run_all():
     run_tests(to_run.keys())
 
-# copy the files & directories from source to target
+
+# Copy the files & directories from source to target
 # it will create directories as needed
 # it's ok if the target directory or subdirectories already exist
 # it will overwrite files with the same name if they exist
-def copy_contents_into(source,target):
+def copy_contents_into(source, target):
     if not os.path.isdir(target):
-        raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
+        raise RuntimeError(f"ERROR: the target directory does not exist '{target}'")
     if os.path.isdir(source):
         for item in os.listdir(source):
-            if os.path.isdir(os.path.join(source,item)):
-                if os.path.isdir(os.path.join(target,item)):
+            if os.path.isdir(os.path.join(source, item)):
+                if os.path.isdir(os.path.join(target, item)):
                     # recurse
-                    copy_contents_into(os.path.join(source,item),os.path.join(target,item))
-                elif os.path.isfile(os.path.join(target,item)):
-                    raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
+                    copy_contents_into(os.path.join(source, item), os.path.join(target, item))
+                elif os.path.isfile(os.path.join(target, item)):
+                    raise RuntimeError(f"ERROR: the target subpath is a file not a directory '{os.path.join(target, item)}'")
                 else:
                     # copy entire subtree
-                    shutil.copytree(os.path.join(source,item),os.path.join(target,item))
+                    shutil.copytree(os.path.join(source, item), os.path.join(target, item))
             else:
-                if os.path.exists(os.path.join(target,item)):
-                    os.remove(os.path.join(target,item))
+                if os.path.exists(os.path.join(target, item)):
+                    os.remove(os.path.join(target, item))
                 try:
-                    shutil.copy(os.path.join(source,item),target)
+                    shutil.copy(os.path.join(source, item), target)
                 except:
-                    raise RuntimeError("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
+                    raise RuntimeError(f"ERROR COPYING FILE: {os.path.join(source, item)} -> {os.path.join(target, item)}")
+
 
 def move_only_files(source, target):
     source_files = os.listdir(source)
     for file_name in source_files:
         full_file_name = os.path.join(source, file_name)
-        if (os.path.isfile(full_file_name)):
+        if os.path.isfile(full_file_name):
             shutil.move(full_file_name, target)
 
 
@@ -212,7 +301,6 @@ class TestcaseWrapper:
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
 
-
     def build(self):
         try:
             # the log directory will contain various log files
@@ -228,30 +316,29 @@ class TestcaseWrapper:
             pass
         # copy the cmake file to the build directory
         subprocess.call(["cp",
-            os.path.join(GRADING_SOURCE_DIR, "Sample_CMakeLists.txt"),
-            os.path.join(self.testcase_path, "build", "CMakeLists.txt")])
+                         os.path.join(GRADING_SOURCE_DIR, "Sample_CMakeLists.txt"),
+                         os.path.join(self.testcase_path, "build", "CMakeLists.txt")])
 
         shutil.copy(BUILD_MAIN_CONFIGUE_PATH, os.path.join(self.testcase_path, "build"))
 
         # First, we need to compile and run configure.out
         with open(os.path.join(self.testcase_path, "log", "main_configure_build.txt"), "w") as configure_output:
-            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR],
-                    cwd=os.path.join(self.testcase_path, "build"), stdout=configure_output, stderr=configure_output)
+            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR, CONFIGURE_BIN_PATH],
+                                          cwd=os.path.join(self.testcase_path, "build"), stdout=configure_output, stderr=configure_output)
             if return_code != 0:
-                raise RuntimeError("Failed to generate main configure: " + str(return_code))
+                raise RuntimeError(f"Failed to generate main configure: {return_code}")
 
         with open(os.path.join(self.testcase_path, "log", "cmake_output.txt"), "w") as cmake_output:
             return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
-                    cwd=os.path.join(self.testcase_path, "build"), stdout=cmake_output, stderr=cmake_output)
+                                          cwd=os.path.join(self.testcase_path, "build"), stdout=cmake_output, stderr=cmake_output)
             if return_code != 0:
-                raise RuntimeError("Build (cmake) exited with exit code " + str(return_code))
+                raise RuntimeError(f"Build (cmake) exited with exit code {return_code}")
         with open(os.path.join(self.testcase_path, "log", "make_output.txt"), "w") as make_output:
             return_code = subprocess.call(["make"],
-                    cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
+                                          cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
             if return_code != 0:
                 self.debug_print("log/make_output.txt")
-                raise RuntimeError("Build (make) exited with exit code " + str(return_code))
-
+                raise RuntimeError(f"Build (make) exited with exit code {return_code}")
 
     # Run compile.out using some sane arguments.
     def run_compile(self):
@@ -262,30 +349,30 @@ class TestcaseWrapper:
 
         data_folder = os.path.join(self.testcase_path, 'data')
 
-        #We create a temporary data folder, so that we don't tarnish the original.
+        # We create a temporary data folder, so that we don't tarnish the original.
         tmp_data_folder = os.path.join(self.testcase_path, 'tmp_data')
         if os.path.isdir(tmp_data_folder):
             shutil.rmtree(tmp_data_folder)
         os.makedirs(tmp_data_folder)
 
-        #will hold the compiled files and their STDOUT/STDERRs
+        # Will hold the compiled files and their STDOUT/STDERRs
         tmp_comp_folder = os.path.join(self.testcase_path, 'tmp_comp')
 
-        #make the work folder used by run_run.
+        # Make the work folder used by run_run.
         if os.path.isdir(tmp_comp_folder):
             shutil.rmtree(tmp_comp_folder)
         os.makedirs(tmp_comp_folder)
 
-        #copy the data folder to the temp_data folder, then pull that into the tmp_comp_folder
+        # Copy the data folder to the temp_data folder, then pull that into the tmp_comp_folder
         copy_contents_into(data_folder, tmp_data_folder)
-        copy_contents_into(tmp_data_folder,tmp_comp_folder)
+        copy_contents_into(tmp_data_folder, tmp_comp_folder)
 
         executable_path_list = list()
-        with open (os.path.join(self.testcase_path, "log", "compile_output.txt"), "w") as log:
-            # we start counting from one.
-            for testcase_num in range(1, len(my_testcases)+1):
-                my_testcase = my_testcases[testcase_num-1]
-                testcase_folder = os.path.join(tmp_comp_folder,  my_testcase['testcase_id'])
+        with open(os.path.join(self.testcase_path, "log", "compile_output.txt"), "w") as log:
+            # We start counting from one.
+            for testcase_num in range(1, len(my_testcases) + 1):
+                my_testcase = my_testcases[testcase_num - 1]
+                testcase_folder = os.path.join(tmp_comp_folder, my_testcase['testcase_id'])
 
                 if 'type' in my_testcase:
                     if my_testcase['type'] != 'FileCheck' and my_testcase['type'] != 'Compilation':
@@ -304,7 +391,7 @@ class TestcaseWrapper:
                 else:
                     continue
 
-                #make the tmp folder for this testcase.
+                # Make the tmp folder for this testcase.
                 if os.path.isdir(testcase_folder):
                     shutil.rmtree(testcase_folder)
                 os.makedirs(testcase_folder)
@@ -323,16 +410,16 @@ class TestcaseWrapper:
                     cwd=testcase_folder, stdout=log, stderr=log)
 
                 if return_code != 0:
-                    raise RuntimeError("Compile exited with exit code " + str(return_code))
+                    raise RuntimeError(f"Compile exited with exit code {return_code}")
 
         compiled_files_directory = os.path.join(self.testcase_path, 'compiled_files')
 
-        #don't trust that the developer properly cleaned up after themselves.
+        # Don't trust that the developer properly cleaned up after themselves.
         if os.path.isdir(compiled_files_directory):
             shutil.rmtree(compiled_files_directory)
         os.makedirs(compiled_files_directory)
 
-        # move the compiled files into the compiled_files_directory
+        # Move the compiled files into the compiled_files_directory
         for path, name in executable_path_list:
             if not os.path.isfile(path):
                 continue
@@ -341,16 +428,15 @@ class TestcaseWrapper:
                 os.makedirs(os.path.dirname(target_path), exist_ok=True)
             shutil.copy(path, target_path)
 
-        #create the work folder, which will be used by run_run.
+        # Create the work folder, which will be used by run_run.
         work_folder = os.path.join(self.testcase_path, 'work')
         if os.path.isdir(work_folder):
             shutil.rmtree(work_folder)
         os.makedirs(work_folder)
 
-        # move the test##/ files generated by compoliation into the work directory
-        copy_contents_into(tmp_comp_folder,work_folder)
+        # Move the test##/ files generated by compoliation into the work directory
+        copy_contents_into(tmp_comp_folder, work_folder)
         shutil.rmtree(tmp_comp_folder)
-
 
     # Run run.out using some sane arguments.
     def run_run(self):
@@ -371,18 +457,18 @@ class TestcaseWrapper:
 
         copy_contents_into(data_folder, tmp_data_folder)
 
-        with open (os.path.join(self.testcase_path, "log", "run_output.txt"), "w") as log:
-            # we start counting from one.
-            for testcase_num in range(1, len(my_testcases)+1):
-                my_testcase = my_testcases[testcase_num-1]
+        with open(os.path.join(self.testcase_path, "log", "run_output.txt"), "w") as log:
+            # We start counting from one.
+            for testcase_num in range(1, len(my_testcases) + 1):
+                my_testcase = my_testcases[testcase_num - 1]
 
-                if 'type' in my_testcases[testcase_num-1]:
+                if 'type' in my_testcases[testcase_num - 1]:
                     if my_testcase['type'] == 'FileCheck' or my_testcase['type'] == 'Compilation':
                         continue
-                #make the tmp folder for this testcase.
-                testcase_folder = os.path.join(work_folder,  my_testcase['testcase_id'])
+                # Make the tmp folder for this testcase.
+                testcase_folder = os.path.join(work_folder, my_testcase['testcase_id'])
 
-                #don't trust that the developer properly cleaned up after themselves.
+                # Don't trust that the developer properly cleaned up after themselves.
                 if os.path.isdir(testcase_folder):
                     shutil.rmtree(testcase_folder)
                 os.makedirs(testcase_folder)
@@ -400,10 +486,10 @@ class TestcaseWrapper:
                     ],
                     cwd=testcase_folder, stdout=log, stderr=log)
                 if return_code != 0:
-                    raise RuntimeError("run.out exited with exit code " + str(return_code))
+                    raise RuntimeError(f"run.out exited with exit code {return_code}")
 
-            #copy the results to the data folder.
-            copy_contents_into(work_folder,data_folder)
+            # Copy the results to the data folder.
+            copy_contents_into(work_folder, data_folder)
             copy_contents_into(compiled_files_directory, data_folder)
             shutil.rmtree(work_folder)
             shutil.rmtree(tmp_data_folder)
@@ -414,17 +500,14 @@ class TestcaseWrapper:
     # customizable (different submission numbers, multiple users, etc.)
     # TODO: Read "main" for other executables, determine what files they expect and
     # the locations in which they expect them given different inputs.
-    def run_validator(self,user="testuser",subnum="1",subtime="0"):
-
+    def run_validator(self, user="testuser", subnum="1", subtime="0"):
         # VALIDATOR USAGE: validator <hw_id> <rcsid> <submission#> <time-of-submission>
-
-        with open (os.path.join(self.testcase_path, "log", "validate_output.txt"), "w") as log:
+        with open(os.path.join(self.testcase_path, "log", "validate_output.txt"), "w") as log:
             return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"),
-                "testassignment", user,subnum,subtime], #"testuser", "1", "0"],
-                cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
+                                           "testassignment", user, subnum, subtime],  # "testuser", "1", "0"],
+                                          cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
             if return_code != 0:
-                raise RuntimeError("Validator exited with exit code " + str(return_code))
-
+                raise RuntimeError(f"Validator exited with exit code {return_code}")
 
     ###################################################################################
     # Run the UNIX diff command given a filename. The files are compared between the
@@ -445,34 +528,33 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if not os.path.isfile(filename1):
-            raise RuntimeError("File " + filename1 + " does not exist")
+            raise RuntimeError(f"File {filename1} does not exist")
         if not os.path.isfile(filename2):
-            raise RuntimeError("File " + filename2 + " does not exist")
+            raise RuntimeError(f"File {filename2} does not exist")
 
-        if (arg=="") :
+        if arg == "":
             process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        elif (arg=="-b") :
-            #ignore changes in white space
+        elif arg == "-b":
+            # Ignore changes in white space
             process = subprocess.Popen(["diff", arg, filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        else :
-            raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
+        else:
+            raise RuntimeError(f"ARGUMENT {arg} TO DIFF NOT TESTED")
         out, _ = process.communicate()
         out = out.decode('utf-8')
         if process.returncode == 1:
-            raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
-                               " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
+            raise RuntimeError(f"Difference between {filename1} and {filename2} "
+                               f"exited with exit code {process.returncode}\n\n"
+                               f"Diff:\n{out}")
 
-
-    # Helpful for debugging make errors on travis
-    def debug_print(self,f):
-        filename=os.path.join(self.testcase_path,f)
-        print ("\nDEBUG_PRINT: ",filename)
+    # Helpful for debugging make errors on CI
+    def debug_print(self, f):
+        filename = os.path.join(self.testcase_path, f)
+        print("\nDEBUG_PRINT: ", filename)
         if os.path.exists(filename):
             with open(filename, 'r') as fin:
-                print (fin.read())
+                print(fin.read())
         else:
-            print ("  < file does not exist >")
-
+            print("  < file does not exist >")
 
     # Loads 2 files, truncates them after specified number of lines,
     # and then checks to see if they match
@@ -489,9 +571,9 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if not os.path.isfile(filename1):
-            raise RuntimeError("File " + filename1 + " does not exist")
+            raise RuntimeError(f"File {filename1} does not exist")
         if not os.path.isfile(filename2):
-            raise RuntimeError("File " + filename2 + " does not exist")
+            raise RuntimeError(f"File {filename2} does not exist")
 
         with open(filename1) as file1:
             contents1 = file1.readlines()
@@ -503,8 +585,7 @@ class TestcaseWrapper:
         del contents2[num_lines_to_compare:]
 
         if contents1 != contents2:
-            raise RuntimeError("Files " + filename1 + " and " + filename2 + " are different within the first " + num_lines_to_compare + " lines.")
-
+            raise RuntimeError(f"Files {filename1} and {filename2} are different within the first {num_lines_to_compare} lines.")
 
     ###################################################################################
     def empty_file(self, f):
@@ -513,16 +594,15 @@ class TestcaseWrapper:
         f = os.path.join("data", f)
         filename = os.path.join(self.testcase_path, f)
         if not os.path.isfile(filename):
-            raise RuntimeError("File " + filename + " should exist")
+            raise RuntimeError(f"File {filename} should exist")
         if os.stat(filename).st_size != 0:
-            raise RuntimeError("File " + filename + " should be empty")
-
+            raise RuntimeError(f"File {filename} should be empty")
 
     ###################################################################################
     # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
     # Credit: Zero Piraeus.
     # http://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
-    def json_ordered(self,obj):
+    def json_ordered(self, obj):
         if isinstance(obj, dict):
             return sorted((k, self.json_ordered(v)) for k, v in obj.items())
         if isinstance(obj, list):
@@ -547,9 +627,9 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if not os.path.isfile(filename1):
-            raise RuntimeError("File " + filename1 + " does not exist")
+            raise RuntimeError(f"File {filename1} does not exist")
         if not os.path.isfile(filename2):
-            raise RuntimeError("File " + filename2 + " does not exist")
+            raise RuntimeError(f"File {filename2} does not exist")
 
         with open(filename1) as file1:
             contents1 = json.load(file1)
@@ -561,29 +641,27 @@ class TestcaseWrapper:
             # NOTE: The ordered json has extra syntax....
             # so instead, print the original contents to a file and diff that
             # (yes clumsy)
-            with open ('json_ordered_1.json','w') as outfile:
-                json.dump(contents1,outfile,sort_keys=True,indent=4, separators=(',', ': '))
-            with open ('json_ordered_2.json','w') as outfile:
-                json.dump(contents2,outfile,sort_keys=True,indent=4, separators=(',', ': '))
-            print ("\ndiff json_ordered_1.json json_ordered_2.json\n")
+            with open('json_ordered_1.json', 'w') as outfile:
+                json.dump(contents1, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+            with open('json_ordered_2.json', 'w') as outfile:
+                json.dump(contents2, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+            print("\ndiff json_ordered_1.json json_ordered_2.json\n")
             process = subprocess.Popen(["diff", 'json_ordered_1.json', 'json_ordered_2.json'])
-            raise RuntimeError("JSON files are different:  " + filename1 + " " + filename2)
+            raise RuntimeError(f"JSON files are different:  {filename1} {filename2}")
 
     def empty_json_diff(self, f):
-
         f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
-        filename2 = os.path.join(SUBMITTY_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
-        return self.json_diff(filename1,filename2)
-
+        filename2 = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite/integrationTests/data/empty_json_diff_file.json")
+        return self.json_diff(filename1, filename2)
 
     ###################################################################################
     # remove the running time, and many of the system stack trace lines
-    def simplify_junit_output(self,filename):
+    def simplify_junit_output(self, filename):
         if not os.path.isfile(filename):
-            raise RuntimeError("File " + filename + " does not exist")
+            raise RuntimeError(f"File {filename} does not exist")
         simplified = []
-        with open(filename,'r') as file:
+        with open(filename, 'r') as file:
             for line in file:
                 if 'Time' in line:
                     continue
@@ -599,7 +677,7 @@ class TestcaseWrapper:
                     continue
                 if '... ' in line and ' more' in line:
                     continue
-                #sys.stdout.write("LINE: " + line)
+                # sys.stdout.write(f"LINE: {line}")
                 simplified.append(line)
         return simplified
 
@@ -617,41 +695,7 @@ class TestcaseWrapper:
         filename2 = os.path.join(self.testcase_path, f2)
 
         if self.simplify_junit_output(filename1) != self.simplify_junit_output(filename2):
-            raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
-
-
-
-
-    ###################################################################################
-    # remove the timestamp on the emma coverage report
-    def simplify_emma_coverage(self,filename):
-        if not os.path.isfile(filename):
-            raise RuntimeError("File " + filename + " does not exist")
-        simplified = []
-        with open(filename,'r') as file:
-            for line in file:
-                if ' report, generated ' in line:
-                    continue
-                #sys.stdout.write("LINE: " + line)
-                simplified.append(line)
-        return simplified
-
-    # Compares two emma coverage report files, ignoring the timestamp on the report
-    def emma_coverage_diff(self, f1, f2=""):
-        # if only 1 filename provided...
-        if not f2:
-            f2 = f1
-        # if no directory provided...
-        if not os.path.dirname(f1):
-            f1 = os.path.join("data", f1)
-        if not os.path.dirname(f2):
-            f2 = os.path.join("validation", f2)
-
-        filename1 = os.path.join(self.testcase_path, f1)
-        filename2 = os.path.join(self.testcase_path, f2)
-
-        if self.simplify_emma_coverage(filename1) != self.simplify_emma_coverage(filename2):
-            raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
+            raise RuntimeError(f"JUNIT OUTPUT files {filename1} and {filename2} are different")
 
     # Validate a configuration against the submitty complete_config_schema.json
     def validate_complete_config(self, config_path):
@@ -662,18 +706,23 @@ class TestcaseWrapper:
             s.print_human_readable_error()
             raise
 
+        ###################################################################################
 
-###################################################################################
+
+# Decorators
 ###################################################################################
 def prebuild(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
     tw = TestcaseWrapper(path)
+
+    @wraps(func)  # Allows pickling for this lambda
     def wrapper():
-        print("* Starting prebuild for " + modname + "... ", end="")
+        print(f"* Starting prebuild for {modname}... ", end="")
         func(tw)
         print("Done")
+
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].prebuild = wrapper
@@ -693,8 +742,10 @@ def testcase(func):
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
     tw = TestcaseWrapper(path)
+
+    @wraps(func)  # Allows pickling for this lambda
     def wrapper():
-        print("* Starting testcase " + modname + "." + func.__name__ + "... ", end="")
+        print(f"* Starting testcase {modname}.{func.__name__}... ", end="")
         try:
             func(tw)
             with bold + green:

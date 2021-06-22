@@ -28,10 +28,10 @@
         alert("Can't fetch annotations");
     }
     {% if student_download %}
-    download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}" , "{{ rerender_annotated_pdf }}");
+    download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}" , "{{ rerender_annotated_pdf }}");
     {% elseif student_popup %}
-    render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}");
+    render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}");
     {% else %}
-    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}', "{{ file_path }}", {{ page_num }}, "{{ pdf_url_base | raw}}");
+    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
     {% endif %}
 </script>

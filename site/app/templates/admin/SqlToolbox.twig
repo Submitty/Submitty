@@ -1,0 +1,42 @@
+<div class="content">
+    <h1>SQL Toolbox</h1>
+
+    <div>
+      Use this toolbox to run a SELECT query. You cannot run any other type of query, and may only run a single query at a time.
+      You can download a CSV of the query results. Must Run Query before you can Download.
+      <br /><br />
+
+        <div>
+            <button id="sql-database-schema" class="btn btn-primary">Database Schema Documentation</button>
+            <div id="sql-database-schema-content" hidden>
+                <p>Click on each table to see columns</p>
+                <ul style="margin-left: 30px;">
+                    {% for name, table in tables %}
+                        <li><a class="sql-database-table">{{ name }}</a>
+                            <div class="sql-database-columns" hidden>
+                                <ul style="margin-left: 15px">
+                                    {% for column in table %}
+                                        <li>{{ column.name }} - {{ column.type }}</li>
+                                    {% endfor %}
+                                </ul>
+
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <br>
+      <textarea id="toolbox-textarea" name="sql" ></textarea>
+      <br />
+      <button id='run-sql-btn' class="btn btn-primary">Run Query</button>
+      <button id='download-sql-btn' class="btn btn-primary" disabled>Download CSV</button>
+    </div>
+
+    <div>
+      <h3>Query Results</h3>
+      <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
+      <table id="query-results" class="table table-striped mobile-table">
+      </table>
+    </div>
+</div>
