@@ -2113,7 +2113,7 @@ function sendAnnouncement(thread_post_content, id){
     url: buildCourseUrl(['forum', 'make_announcement']),
     data: {"id": id, 'csrf_token': window.csrfToken},
     success: function(data){
-      if (JSON.parse(data)["status"] === "success"){ 
+      if (JSON.parse(data).status === "success"){ 
         pinAnnouncement(id, 1, window.csrfToken);
         window.location.reload();
       }
@@ -2132,10 +2132,10 @@ function checkIfAnnounced(id){
   call = $.ajax({
     type: 'GET',
     url: buildCourseUrl(['forum', 'check_announcement']),
-    data: {'thread_id': id, "csrfToken": csrfToken},
+    data: {'thread_id': id},
     success: function(res) {
       const response = JSON.parse(res);
-      if (response.status === "success" && response["data"]["exists"] == false){
+      if (response.status === "success" && response.data["exists"] == false){
         $('.pin-and-email-message').show();
       }
     }
