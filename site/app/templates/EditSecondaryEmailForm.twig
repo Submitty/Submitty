@@ -17,7 +17,7 @@
         <input id="user-secondary-email-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="edit_user_row">
             <label for="user-secondary-email-change">Secondary Email Address:&emsp;</label>
-            <input type="text"
+            <input type="email"
                    name="user_secondary_email_change"
                    value="{{ user.getSecondaryEmail() }}"
                    id="user-secondary-email-change"

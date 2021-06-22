@@ -135,38 +135,41 @@ function updateUserSecondaryEmail () {
         displayErrorMessage('No changes detected to secondary email');
     }
     else {
-        let data = new FormData();
-        data.append('csrf_token', csrfToken);
-        data.append('secondary_email', second_email.val());
-        data.append('secondary_email_notify', second_email_notify.get(0).checked);
-        let url = buildUrl(['user_profile', 'change_secondary_email']);
-        $.ajax({
-            url,
-            type: "POST",
-            data,
-            processData: false,
-            contentType: false,
-            success: function(res) {
-                const response = JSON.parse(res);
-                if (response.status === "success") {
-                    const { data } = response;
-                    displaySuccessMessage(data.message);
-                    $('#secondary-email-row .value').text(data.secondary_email);
-                    $('#secondary-email-notify-row .value').text(data.secondary_email_notify);
-                    second_email.data('current-second-email', data.secondary_email);
-                    second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
+        if (second_email.val() === '' && second_email_notify.get(0).checked) {
+            displayErrorMessage('Please disable second email notifications or add a valid second email');
+        }
+        else {
+            let data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('secondary_email', second_email.val());
+            data.append('secondary_email_notify', second_email_notify.get(0).checked);
+            let url = buildUrl(['user_profile', 'change_secondary_email']);
+            $.ajax({
+                url,
+                type: "POST",
+                data,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    const response = JSON.parse(res);
+                    if (response.status === "success") {
+                        const { data } = response;
+                        displaySuccessMessage(data.message);
+                        $('#secondary-email-row .value').text(data.secondary_email);
+                        $('#secondary-email-notify-row .value').text(data.secondary_email_notify);
+                        second_email.data('current-second-email', data.secondary_email);
+                        second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
+                    }
+                    else if (response.status === "error") {
+                        displayErrorMessage(response.message);
+                    }
+                },
+                error: function() {
+                    // display error message
+                    displayErrorMessage("Something went wrong while updating secondary email address!");
                 }
-                else if (response.status === "error") {
-                    displayErrorMessage(response.message);
-                    second_email.val(second_email.data('current-second-email'));
-                    second_email_notify.prop('checked', second_email_notify.data('current-second-email-notify'));
-                }
-            },
-            error: function() {
-                // display error message
-                displayErrorMessage("Something went wrong while updating secondary email address!");
-            }
-        });
+            });
+        }
     }
     $('.popup-form').css('display', 'none');
     return false;
