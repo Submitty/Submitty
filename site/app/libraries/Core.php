@@ -170,6 +170,22 @@ class Core {
         $this->session_manager = $manager;
     }
 
+    private function createEntityManager(AbstractDatabase $database): EntityManager {
+        $config = Setup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'app', 'entities')],
+            false,
+            null,
+            null,
+            false
+        );
+
+        $conn = [
+            'driver' => 'pdo_pgsql',
+            'pdo' => $database->getConnection(),
+        ];
+        return EntityManager::create($conn, $config);
+    }
+
     /**
      * Create a connection to the database using the details loaded from the config files. Additionally, we make
      * available queries that all parts of the application should go through. It should never be allowed to directly
@@ -189,19 +205,7 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-
-        $config = Setup::createAnnotationMetadataConfiguration(
-            [FileUtils::joinPaths(__DIR__, '..', 'app')],
-            false,
-            null,
-            null,
-            false
-        );
-        $conn = [
-            'driver' => 'pdo_pgsql',
-            'pdo' => $this->submitty_db->getConnection(),
-        ];
-        $this->submitty_entity_manager = EntityManager::create($conn, $config);
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -219,20 +223,8 @@ class Core {
         $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
         $this->course_db->connect();
 
-        $this->database_queries = $this->database_factory->getQueries($this);
-
-        $config = Setup::createAnnotationMetadataConfiguration(
-            [FileUtils::joinPaths(__DIR__, '..', 'app')],
-            false,
-            null,
-            null,
-            false
-        );
-        $conn = [
-            'driver' => 'pdo_pgsql',
-            'pdo' => $this->course_db->getConnection(),
-        ];
-        $this->course_entity_manager = EntityManager::create($conn, $config);
+        $this->setQueries($this->database_factory->getQueries($this));
+        $this->course_entity_manager = $this->createEntityManager($this->course_db);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
