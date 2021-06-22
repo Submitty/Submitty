@@ -559,7 +559,7 @@ CREATE TABLE public.late_day_exceptions (
 CREATE TABLE public.late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp(6) with time zone NOT NULL
+    since_timestamp date NOT NULL
 );
 
 
