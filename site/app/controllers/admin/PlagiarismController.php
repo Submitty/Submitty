@@ -178,7 +178,10 @@ class PlagiarismController extends AbstractController {
 
         $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id_title['g_id'] . "/overall_ranking.txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+            if (!file_exists(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "config", "lichen_{$semester}_{$course}_{$gradeable_id_title['g_id']}.json"))
+                && !file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}.json"))
+                && !file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}.json"))
+                ) {
                 unset($gradeables_with_plagiarism_result[$i]);
                 continue;
             }

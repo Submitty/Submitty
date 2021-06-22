@@ -53,7 +53,7 @@ class PlagiarismView extends AbstractView {
             else {
                 // no lichen job
                 $ranking_file_path = FileUtils::joinPaths($course_path, "lichen", "ranking", $plagiarism_row["id"], "overall_ranking.txt");
-                if (file_get_contents($ranking_file_path) == "") {
+                if (!file_exists($ranking_file_path) || file_get_contents($ranking_file_path) == "") {
                     $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
                 }
                 else {
