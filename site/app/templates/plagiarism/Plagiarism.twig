@@ -3,7 +3,7 @@
     <div class="nav-buttons">
         <a class="btn btn-primary"
            href="{{ new_plagiarism_config_link }}"
-        >+ Configure New Gradeable for Plagiarism Detection</a>
+        ><i class="fas fa-plus"></i><span style="margin-left:0.5em;"></span>Configure New Gradeable for Plagiarism Detection</a>
     </div>
     {% if plagiarism_results_info|length > 0 %}
         <div class="plag-table-cont">
@@ -16,6 +16,7 @@
                         <th>Submissions</th>
                         <th>Students Matched</th>
                         <th>Nightly<br/>Re-run</th>
+                        <th>Run Log</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,6 +31,46 @@
     {% endif %}
 </div>
 <script>
+    function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+        $('.popup-form').css('display', 'none');
+        var form = $("#delete-plagiarism-result-and-config-form");
+        $('[name="gradeable_title"]', form).html('');
+        $('[name="gradeable_title"]', form).append(gradeable_title);
+        $('[name="delete"]', form).attr('action', form_action);
+        form.css("display", "block");
+        form.find('.form-body').scrollTop(0);
+        captureTabInModal("delete-plagiarism-result-and-config-form");
+    }
+
+    function checkRefreshLichenMainPage(url, semester, course) {
+        // refresh time for lichen main page
+        var refresh_time = 5000;
+        setTimeout(function() {
+            check_lichen_jobs(url, semester, course);
+        }, refresh_time);
+    }
+
+    function check_lichen_jobs(url, semester, course) {
+        $.get(url,
+            function(data) {
+                var last_data = localStorage.getItem("last_data");
+                if (data === "REFRESH_ME") {
+                    last_data= "REFRESH_ME";
+                    localStorage.setItem("last_data", last_data);
+                    window.location.href = buildCourseUrl(['plagiarism']);
+                }
+                else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
+                    last_data= "NO_REFRESH";
+                    localStorage.setItem("last_data", last_data);
+                    window.location.href = buildCourseUrl(['plagiarism']);
+                }
+                else {
+                    checkRefreshLichenMainPage(url, semester, course);
+                }
+            }
+        );
+    }
+
     checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
 </script>
 
@@ -43,7 +84,7 @@
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 
 {% macro renderPlagiarismRow(row) %}
-    <tr>
+    <tr id="{{ row['id'] }}_table_row">
         <td>
             {% if row['ranking_available'] %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
@@ -95,5 +136,33 @@
                    onclick='window.location.href = {{ row['nightly_rerun_link'] }};'
                    {{ row['nightly_rerun_status'] }}>
         </td>
+        <td>
+            <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}')">View Log</button>
+        </td>
     </tr>
 {% endmacro %}
+
+<script>
+    // This is a hacky way to ensure that the run log is set to the width of the original table.
+    //  Otherwise, the run log row will expand to contain the text within and make the table bigger because there isn't a fixed width on the table.
+    let originalTableWidth;
+    $(document).ready(function() {
+        originalTableWidth = $(".plag-table-cont").width();
+    });
+
+    function viewRunLog(gradeable_id) {
+        if ($("#" + gradeable_id + "_table_row").next().hasClass("run-log-results")) {
+            $("#" + gradeable_id + "_table_row").next().remove();
+        }
+        else {
+            const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}`;
+            $.get(url, function (data) {
+                $(`<tr class="run-log-results">
+                <td colspan="7" class="run-log-data">
+                    <pre style="width:` + originalTableWidth + `px">` + data + `</pre>
+                </td>
+            </tr>`).insertAfter("#" + gradeable_id + "_table_row");
+            });
+        }
+    }
+</script>

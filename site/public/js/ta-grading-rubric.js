@@ -2418,10 +2418,37 @@ function toggleComponent(component_id, saveChanges) {
 }
 
 function open_overall_comment_tab(user) {
+    const textarea = $(`#overall-comment-${user}`);
+    const content = textarea.html();
+
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    $('#overall-comment-' + user ).show();
+    textarea.parent().show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
+
+    //if the tab is for the main user of the page
+    if(!textarea.hasClass('markdown-preview')){
+        if($(`#overall-comment-markdown-preview-${user}`).is(':hidden')){
+            textarea.show();
+        }
+    } else {
+        textarea.show();
+    }
+
+    //if it is someone not the current user's comment and it hasn't been rendered yet
+    if(textarea.hasClass('markdown-preview') && !textarea.find('.markdown').length){
+        const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
+        renderMarkdown($(`#overall-comment-${user}`), url, content);
+    }
+}
+
+function previewOverallCommentMarkdown(user){
+    const markdown_area = $(`#overall-comment-${user}`);
+    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
+    const preview_button = $(this);
+    const markdown_content = markdown_area.val();
+
+    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**
