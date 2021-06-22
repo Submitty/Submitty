@@ -81,7 +81,7 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d H:i:s', $_POST['datestamp']) === false)) {
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d H:i:s";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
@@ -98,14 +98,7 @@ class LateController extends AbstractController {
 
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
-            $existing_user = $this->core->getQueries()->getLateDaysForUserOnTimestamp($_POST['user_id'], $date_time);
-            if ($existing_user !== null) {
-                $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days'] + $existing_user->getAllowedLateDays());
-            }
-            else { // The user doesn't have any late days yet so we just assign them the number of late days specified.
-                $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
-            }
-
+            $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
@@ -287,6 +280,8 @@ class LateController extends AbstractController {
                 "error" => "Invalid mimetype, must start with 'text/', got '{$mime_type}'"
             ];
         }
+        ini_set("auto_detect_line_endings", true);
+
         $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($rows === false) {
             $data = null;

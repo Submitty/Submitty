@@ -25,11 +25,14 @@ class SqlToolboxController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"GET"})
      */
     public function showToolbox(): WebResponse {
-        $tables = $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
-            ['schema' => 'public'],
-            ['name' => 'ASC']
+        return new WebResponse(
+            SqlToolboxView::class,
+            'showToolbox',
+            $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
+                ['schema' => 'public'],
+                ['name' => 'ASC']
+            )
         );
-        return new WebResponse(SqlToolboxView::class, 'showToolbox', $tables);
     }
 
     /**

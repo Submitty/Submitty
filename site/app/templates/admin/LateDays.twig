@@ -18,7 +18,7 @@
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
-                Additional Late Days:
+                Late Days:
                 <input class="option-input" type="text" name="late_days" id="late_days">
             </label>
             <div>
@@ -105,10 +105,10 @@
             }
         )],
         allowInput: true,
-        enableTime: true,
-        enableSeconds: true,
+        enableTime: false,
+        enableSeconds: false,
         time_24hr: true,
-        dateFormat: "Y-m-d H:i:S",
+        dateFormat: "Y-m-d",
         onReady: (a, b, fp) => {
             fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
             fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');

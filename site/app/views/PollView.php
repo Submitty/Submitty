@@ -44,6 +44,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("New Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -52,6 +53,7 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
+            'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('poll'),
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize'))
           ]);
     }
@@ -80,6 +82,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("Edit Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));

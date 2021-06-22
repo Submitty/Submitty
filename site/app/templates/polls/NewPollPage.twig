@@ -12,16 +12,19 @@
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                Question:
-                <textarea
-                    id="poll-question"
-                    name="question"
-                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                    rows="10" cols="30"
-                    placeholder="Enter question here..."
-                    maxlength="5000"></textarea>
-            </label>
+            <p>Question:</p>
+            {% include "misc/MarkdownArea.twig" with {
+                "markdown_area_id" : "poll-question",
+                "markdown_area_query" : "$('#poll-question')",
+                "markdown_area_name" : "question",
+                "markdown_area_value" : "",
+                "placeholder" : "Enter question here...",
+                "preview_div_id" : "poll_preview_new",
+                "preview_div_name" : "poll_preview_new",
+                "onclick" : "previewPollMarkdown.call(this)",
+                "render_buttons" : true,
+                "min_height" : min_height
+            } only %}
             <br/><br/>
 
             <label for="image-file">
@@ -68,15 +71,18 @@
             </label>
             <br/> <br/>
 
-            <label for="poll-question">
-                Question:
-                <textarea
-                    id="poll-question"
-                    name="question"
-                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                    rows="10" cols="30"
-                    maxlength="5000">{{ poll.getQuestion() }}</textarea>
-            </label>
+            
+            <p>Question:</p>
+            {% include "misc/MarkdownArea.twig" with {
+                "markdown_area_id" : "poll-question",
+                "markdown_area_query" : "$('#poll-question')",
+                "markdown_area_name" : "question",
+                "markdown_area_value" : poll.getQuestion(),
+                "preview_div_id" : "poll_preview_edit",
+                "onclick" : "previewPollMarkdown.call(this)",
+                "render_buttons" : true,
+                "min_height" : min_height
+            } only %}
             <br/><br/>
 
             <label for="image-file">
@@ -147,7 +153,7 @@
 	
     flatpickr('.poll-date', {
         allowInput: true,
-        dateFormat: "Y-m-d",
+        dateFormat: "{{ date_format }}",
         onReady: (a, b, fp) => {
           fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
         }

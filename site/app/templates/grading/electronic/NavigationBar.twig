@@ -1,4 +1,19 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
+    <div id="grading-panel-student-name">
+        <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
+                {% if team_assignment %}
+                    Team:<br/>
+                    {% for team_member in submitter.getTeam().getMemberUsers() %}
+                        &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
+                    {% endfor %}
+                {% else %}
+                    Student:<br/>
+                    {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                    <br/>
+                {% endif %}
+            {% endif %}
+        </b>
+    </div>
     <div class="navigation-box">
         <div class="grading_toolbar">
             {# Back to list button #}
@@ -26,22 +41,6 @@
                    id="next-student"
                 >
                    <i title="Next student" class="fas fa-caret-right icon-header icon-streched"></i>
-                </a>
-            </span>
-            <span class="ta-navlink-cont" id="prev-ungraded-student-navlink">
-                <a href="javascript:gotoPrevStudent(true);"
-                   data-href="{{ prev_ungraded_student_url }}"
-                   id="prev-ungraded-student"
-                >
-                    <i title="Previous assigned ungraded student" class="fas fa-backward icon-header icon-streched"></i>
-                </a>
-            </span>
-            <span class="ta-navlink-cont" id="next-ungraded-student-navlink">
-                <a href="javascript:gotoNextStudent(true);"
-                   data-href="{{ next_ungraded_student_url }}"
-                   id="next-ungraded-student"
-                >
-                    <i title="Next assigned ungraded student" class="fas fa-forward icon-header icon-streched"></i>
                 </a>
             </span>
 
@@ -90,3 +89,4 @@
         </div>
     </div>
 </div>
+
