@@ -51,8 +51,9 @@ aside {
 
 #bar_banner{
     position: relative;
-    float: right;
-    margin-right: 10%;
+    display: block;
+    margin: auto;
+    margin-bottom: 5px;
 }
 
 .navigation-box {
