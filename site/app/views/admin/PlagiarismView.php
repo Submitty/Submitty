@@ -121,10 +121,10 @@ class PlagiarismView extends AbstractView {
         $language["plaintext"] = "selected";
         $threshold = 5;
         $sequence_length = 4;
-        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables']) + 1 : 1;
+        //$prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables']) + 1 : 1;
         $prior_terms = false;
         $ignore_submissions = false;
-        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions']) + 1 : 1;
+        //$ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions']) + 1 : 1;
 
 
         // Values which are in saved configuration
@@ -146,7 +146,7 @@ class PlagiarismView extends AbstractView {
             $language[$saved_config['language']] = "selected";
             $threshold = (int) $saved_config['threshold'];
             $sequence_length = (int) $saved_config['sequence_length'];
-            $prior_terms = $prior_term_gradeables_number > 1;
+            $prior_terms = false; // $prior_term_gradeables_number > 1;
             $ignore_submissions = count($saved_config['ignore_submissions']) > 0;
         }
 
@@ -154,8 +154,8 @@ class PlagiarismView extends AbstractView {
             "new_or_edit" => $new_or_edit,
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}",
             "csrf_token" => $this->core->getCsrfToken(),
-            "ignore_submission_number" => $ignore_submission_number,
-            "prior_term_gradeables_number" => $prior_term_gradeables_number,
+            //"ignore_submission_number" => $ignore_submission_number,
+            //"prior_term_gradeables_number" => $prior_term_gradeables_number,
             "provided_code" => $provided_code,
             "gradeable_ids_titles" => $gradeable_ids_titles,
             "title" => $title,

@@ -237,7 +237,8 @@ class PlagiarismController extends AbstractController {
     public function showPlagiarismResult($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $gradeable_title = ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
+        $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        $gradeable_title = $gradeable_config->getTitle();
 
         $rankings = $this->getOverallRankings($gradeable_id);
         if ($rankings === null) {
@@ -250,8 +251,14 @@ class PlagiarismController extends AbstractController {
         }
 
         foreach ($rankings as $i => $ranking) {
-            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
-            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+            if (!$gradeable_config->isTeamAssignment()) {
+                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
+                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+            }
+            else {
+                array_push($rankings[$i], "");
+                array_push($rankings[$i], "");
+            }
         }
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
@@ -807,8 +814,14 @@ class PlagiarismController extends AbstractController {
             $temp = [];
             array_push($temp, $item[1]);
             array_push($temp, $item[2]);
-            array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
-            array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            if (!$this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
+                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
+                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            }
+            else {
+                array_push($temp, "");
+                array_push($temp, "");
+            }
             array_push($temp, $item[0]);
             array_push($return, $temp);
         }
