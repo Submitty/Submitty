@@ -1660,10 +1660,14 @@ class ElectronicGraderController extends AbstractController {
         // Passing null returns grading for all graders.
         $grading_done_by = ($all_peers ? null : $grader);
         $response_data = $ta_graded_gradeable->toArray($grading_done_by);
-
+        $response_data_2 = $ta_graded_gradeable->toArray();
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
+        $combined_peer_score = 0;
+        foreach ($response_data_2['peer_scores'] as $score) {
+            $combined_peer_score += $score;
+        }
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
         if (count($gradeable->getAutogradingConfig()->getPersonalizedTestcases($submitter)) > 1) {
@@ -1693,7 +1697,8 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['peer_total'] = $gradeable->getPeerPoints();
                 $response_data['user_group'] = $this->core->getUser()->getGroup();
                 $response_data['peer_gradeable'] = true;
-                $response_data['gang'] = $ta_graded_gradeable->getTotalScore($this->core->getQueries()->getUserById('instructor'));
+                //$response_data['gang'] = $ta_graded_gradeable->getTotalScore($this->core->getQueries()->getUserById('instructor'));
+                $response_data['combined_peer_score'] = $combined_peer_score;
             }
             else {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);

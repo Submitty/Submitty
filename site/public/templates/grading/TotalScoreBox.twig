@@ -33,11 +33,17 @@ l
     {% endif %}
     {% if peer_grade_earned is defined %}
         <div class="box-title badge-container">
-        <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total, peer_total) }}">
-            {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
-        </strong>
-        <strong>Individual Peer Grading Total</strong>
-    </div>
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total, peer_total) }}">
+                {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
+            </strong>
+            <strong>Individual Peer Grading Total</strong>
+        </div>
+        <div class="box-title badge-container">
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(combined_peer_score, peer_total, peer_total) }}">
+                {{ combined_peer_score is defined ? combined_peer_score|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
+            </strong>
+            <strong>Combined Peer Grading Total</strong>
+        </div>
     {% endif %}
     {% if show_total %}
         {% set any_earned = peer_grade_earned is defined or ta_grading_earned is defined or auto_grading_earned is defined %}
@@ -58,7 +64,7 @@ l
             <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, max_total, max_total) }}">
                 {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (max_total)|round(decimal_precision) }}
             </strong>
-            <strong>Total {{ yo }}</strong>
+            <strong>Total</strong>
         </div>
     {% endif %}
 {% endif %}
@@ -68,6 +74,6 @@ l
         <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total, peer_total) }}">
             {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
-        <strong>My Peer Grading Total</strong>
+        <strong>My Peer Grading Totals</strong>
     </div>
 {% endif %}
