@@ -48,7 +48,9 @@
                     {% else %}
                         <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" disabled/>
                     {% endif %}
-                    {{ poll.getResponseString(response) | markdown}}
+                    {% include "misc/Markdown.twig" with {
+                        "content" : poll.getResponseString(response)
+                    } only %}
                     <br/>
                     <br/>
                 </div>
