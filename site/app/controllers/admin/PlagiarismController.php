@@ -414,7 +414,7 @@ class PlagiarismController extends AbstractController {
                     $grader->getGroup() == 1 && in_array("ignore_instructors", $_POST['ignore_submission_option'])
                     || $grader->getGroup() == 2 && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
                     || $grader->getGroup() == 3 && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
-                    ) {
+                ) {
                     array_push($ignore_submission_option, $grader->getId());
                 }
             }
