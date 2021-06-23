@@ -35,9 +35,17 @@ class StudentActivityDashboardController extends AbstractController {
    public function downloadData(){
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         $file_url = FileUtils::joinPaths(
-             $this->core->getConfig()->getSubmittyPath(), 
-             'tmp', 
-             'Student_Activity.csv'
+             $this->core->getConfig()->getCoursePath(), 
+             'tmp'
+        );
+
+        if (!FileUtils::createDir($file_url)) {
+            return;
+        }
+
+        $file_url = FileUtils::joinPaths(
+            $file_url,
+            'Student_Activity.csv'
         );
 
         $fp = fopen($file_url, 'w');
