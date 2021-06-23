@@ -26,6 +26,7 @@ a.component-tab.btn-selected {
 
 .component-tab-icon {
     padding: 3px 5px;
+
     /* disable hover for icon to prevent icon turning to blue link color */
     pointer-events: none;
 }

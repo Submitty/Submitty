@@ -15,7 +15,7 @@
     width: 90%;
     background: #316498;
     color: var(--text-white);
-    border-color: #FFF;
+    border-color: #fff;
     line-height: 31px;
     list-style-type: none;
     overflow-y: auto;
@@ -25,11 +25,13 @@
 }
 
 @keyframes slideFromRight {
-    from {right: -100%;}
-    to {right: 0;}
+    from { right: -100%; }
+    to { right: 0; }
 }
 
-#mobile-menu a, #mobile-menu .fa, #mobile-menu .fab {
+#mobile-menu a,
+#mobile-menu .fa,
+#mobile-menu .fab {
     text-decoration: none;
     color: var(--btn-text-white);
     font-size: 20px;
@@ -42,18 +44,19 @@
     margin: 0;
 }
 
-#mobile-menu li .selected, #mobile-menu li .selected i {
+#mobile-menu li .selected,
+#mobile-menu li .selected i {
     background: var(--default-white);
     color: var(--text-black);
     font-weight: bold;
 }
 
 #mobile-menu hr {
-    border-color: #FFF;
+    border-color: #fff;
 }
 
 #menu-header {
-    border-bottom: 2px solid #FFF;
+    border-bottom: 2px solid #fff;
 }
 
 .mobile-title {
@@ -70,7 +73,7 @@
     position: absolute;
     height: 100%;
     width: 100%;
-    background-color: rgba(0,0,0,.55);
+    background-color: rgba(0, 0, 0, 0.55);
     z-index: 1;
 }
 
@@ -83,7 +86,8 @@
 
 .icon-title {
     /* commenting this out because the sidebar text was not wrapping */
-    /*flex: 1 0 auto;*/
+
+    /* flex: 1 0 auto; */
 }
 
 #menu-button .notification-badge {
@@ -104,7 +108,9 @@
 }
 
 @media (min-width: 541px) {
-    #menu-button, #mobile-menu, #menu-overlay {
+    #menu-button,
+    #mobile-menu,
+    #menu-overlay {
         display: none;
     }
 }

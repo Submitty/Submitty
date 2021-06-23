@@ -18,7 +18,7 @@ input[type="color"] {
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
-    color: #555555;
+    color: #555;
     vertical-align: middle;
     border: 1px solid #ccc;
     -webkit-border-radius: 4px;
@@ -27,8 +27,9 @@ input[type="color"] {
     width: auto;
 }
 
-[data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="password"]{
-    color:white;
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="password"] {
+    color: white;
 }
 
 input.readonly {
@@ -41,37 +42,37 @@ select {
     font-size: 16px;
     border: 1px solid #ccc;
     height: 34px;
-    background: #FFF;
+    background: #fff;
     background-size: 20px;
 }
 
-input[type="checkbox"]{
+input[type="checkbox"] {
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: #FFF;
+    background: #fff;
     box-sizing: border-box;
     width: 20px;
     height: 20px;
-    border: 1px solid #000000;
-    transition: all .2s linear;
+    border: 1px solid #000;
+    transition: all 0.2s linear;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
 }
 
-input[type="checkbox"]:checked{
-    background-color: #3093FC;
+input[type="checkbox"]:checked {
+    background-color: #3093fc;
 }
 
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
-input[type="checkbox"]:checked:before {
+input[type="checkbox"]:checked::before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
     color: var(--text-white);
     font-size: 18px;
-    font-weight: 900
+    font-weight: 900;
 }
 
 select.disabled,

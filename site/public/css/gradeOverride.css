@@ -24,7 +24,8 @@ textarea {
     resize: vertical;
 }
 
-.single-student input,textarea,
+.single-student input,
+textarea,
 #gradeOverrideForm button,
 #gradeOverrideForm input {
     width: 100%;
@@ -32,12 +33,12 @@ textarea {
 
 /* Adding Content for the 'before' pseudo element */
 
-#grade-override-table td:nth-of-type(1):before { content: "Student ID"; }
-#grade-override-table td:nth-of-type(2):before { content: "First Name"; }
-#grade-override-table td:nth-of-type(3):before { content: "Last Name"; }
-#grade-override-table td:nth-of-type(4):before { content: "Marks"; }
-#grade-override-table td:nth-of-type(5):before { content: "Comments"; }
-#grade-override-table td:nth-of-type(6):before { content: "Delete"; }
+#grade-override-table td:nth-of-type(1)::before { content: "Student ID"; }
+#grade-override-table td:nth-of-type(2)::before { content: "First Name"; }
+#grade-override-table td:nth-of-type(3)::before { content: "Last Name"; }
+#grade-override-table td:nth-of-type(4)::before { content: "Marks"; }
+#grade-override-table td:nth-of-type(5)::before { content: "Comments"; }
+#grade-override-table td:nth-of-type(6)::before { content: "Delete"; }
 
 @media (min-width: 541px) {
     h1 {
@@ -51,13 +52,15 @@ textarea {
         width: 420px;
         justify-content: space-between;
     }
+
     #gradeOverrideForm label span,
     #gradeOverrideForm label input,
     #gradeOverrideForm label textarea {
         flex: 1;
     }
 
-    .single-student input,textarea,
+    .single-student input,
+    textarea,
     #gradeOverrideForm button,
     #gradeOverrideForm input {
         width: auto;
@@ -68,6 +71,7 @@ textarea {
     #grade-override-table {
         text-align: left;
     }
+
     #grade-override-table caption {
         border-bottom: 1px solid #ddd;
     }
