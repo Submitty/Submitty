@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\exceptions\DatabaseException;
 use app\libraries\Core;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
