@@ -77,6 +77,7 @@ function setUpLeftPane() {
         // Reset any existing popups
         if($('#popup_to_show_matches_id').css('display') === 'block'){
             $('#popup_to_show_matches_id').css('display', 'none');
+            clickedMark.css = "background: " + clickedMark.attributes.data_prev_color;
             blueClickedMark = null;
         }
 
