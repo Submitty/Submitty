@@ -654,7 +654,7 @@ class PlagiarismController extends AbstractController {
             else {
                 $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
             }
-            $data = ['display_code1' => $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info];
+            $data = ['display_code1' => $this->getDisplayForCode($file_name), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info];
         }
         else {
             $return = ['error' => 'User 1 submission.concatenated for specified version not found.'];
@@ -662,12 +662,13 @@ class PlagiarismController extends AbstractController {
             echo($return);
             return;
         }
+
         if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
             $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/submission.concatenated";
 
             if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
                 $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
-                $data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
+                $data['display_code2'] = $this->getDisplayForCode($file_name);
             }
             else {
                 $return = ['error' => 'User 2 submission.concatenated for matching version not found.'];
@@ -676,6 +677,7 @@ class PlagiarismController extends AbstractController {
                 return;
             }
         }
+
         $data['ci'] = $color_info[0];
         $data['si'] = $color_info[1];
         $return = json_encode($data);
@@ -687,7 +689,6 @@ class PlagiarismController extends AbstractController {
 
         //Represents left and right display users
         $color_info[1] = [];
-        $color_info[2] = [];
         $segment_info = [];
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
@@ -747,7 +748,7 @@ class PlagiarismController extends AbstractController {
                     //Color is orange -- general match from selected match
                     $color = '#ffa500';
 
-                    $segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
+                    //$segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
                     if ($codebox == "2" && $user_id_2 != "") {
                         foreach ($match->getMatchingPositions($user_id_2, $version_user_2) as $pos) {
                             $matchPosStart = $pos['start'];
@@ -757,11 +758,14 @@ class PlagiarismController extends AbstractController {
                             $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
                             $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
 
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $matchPosStart, $matchPosEnd];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, $color, $matchPosStart, $matchPosEnd];
                             $userMatchesStarts[] = $matchPosStart;
                             $userMatchesEnds[] = $matchPosEnd;
                         }
                     }
+
+                    $others = array_keys($match->getOthers());
+                    $segment_info["{$start_line}_{$start_pos}"] = $others;
                 }
                 elseif ($match->getType() === "common") { // common code does not show up on user 2
                     //Color is grey -- common matches among all students
@@ -772,13 +776,13 @@ class PlagiarismController extends AbstractController {
                     $color = '#b5e3b5';
                 }
 
-                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $userMatchesStarts, $userMatchesEnds]);
             }
         }
         return [$color_info, $segment_info];
     }
 
-    public function getDisplayForCode(string $file_name, $color_info) {
+    public function getDisplayForCode(string $file_name) {
         return file_get_contents($file_name);
     }
 

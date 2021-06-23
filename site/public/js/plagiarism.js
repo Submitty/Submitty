@@ -15,8 +15,8 @@ function isColoredMarker(marker, color) {
 }
 
 function colorEditors(data) {
-    console.log(data)
-    window.si = data.si;
+    console.log(data.si)
+    si = data.si;
     for(let users_color in data.ci) {
     	let editor = parseInt(users_color) === 1 ? editor0 : editor1;
     	editor.operation(() => {
@@ -100,10 +100,9 @@ function setUpLeftPane() {
 }
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
-    let user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
+    let user_matches = si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
     let to_append = '';
     $.each(user_matches, function(i, match) {
-        console.log(user_matches);
         let res = match.split('_');
         to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + ' (version:'+res[1]+')</div></li>';
     });
@@ -179,7 +178,6 @@ function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
         success: function(data) {
-            $("#_test").append(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
