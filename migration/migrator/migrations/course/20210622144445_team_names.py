@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("""ALTER TABLE gradeable_teams ADD COLUMN team_name character varying(255) DEFAULT NULL;""")
+    database.execute("""ALTER TABLE gradeable_teams ADD COLUMN IF NOT EXISTS team_name character varying(255) DEFAULT NULL;""")
 
 
 def down(config, database, semester, course):

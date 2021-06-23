@@ -476,7 +476,7 @@ class TeamController extends AbstractController {
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildCourseUrl());
+            return new RedirectResponse($this->core->buildCourseUrl());
         }
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
@@ -508,7 +508,7 @@ class TeamController extends AbstractController {
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
             $this->core->addErrorMessage("Failed to open settings file");
-            $this->core->redirect($return_url);
+            return new RedirectResponse($return_url);
         }
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $json["team_history"][] = ["action" => "change_name", "time" => $current_time, "user" => $user_id];
