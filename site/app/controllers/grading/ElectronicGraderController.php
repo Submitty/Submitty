@@ -1142,10 +1142,12 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        $team_name = $_POST['team_name'] ?? null;
+
         if ($new_team) {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             try {
-                $gradeable->createTeam($leader, $users, $reg_section, $rot_section);
+                $gradeable->createTeam($leader, $users, $reg_section, $rot_section, $team_name);
                 $this->core->addSuccessMessage("Created New Team {$team_id}");
             }
             catch (\Exception $e) {
@@ -1179,6 +1181,7 @@ class ElectronicGraderController extends AbstractController {
 
             $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section === 'NULL' ? null : $reg_section);
             $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section === 0 ? null : $rot_section);
+            $this->core->getQueries()->updateTeamName($team_id, $team_name);
             foreach ($add_user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);

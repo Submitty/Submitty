@@ -2,7 +2,7 @@
 /* global captureTabInModal */
 
 function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members,
-    pending_members, multiple_invite_members, max_members, lock_date) {
+    pending_members, multiple_invite_members, max_members, lock_date, team_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#admin-team-form');
     form.css('display', 'block');
@@ -63,6 +63,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="edit_team_team_id"]', form).val(who_id);
 
         title_div.append(`Edit Team: ${who_id}`);
+
+        $('#admin-team-name-form').val(team_name);
 
         //append current members in the team to members_div
         for (let i = 0; i < members.length; i++) {
@@ -151,6 +153,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     }
 
     $(':text',form).change(function() {
+        if ($(this)[0].id === 'admin-team-name-form') {
+            return;
+        }
         let found = false;
         for (let i = 0; i < student_full.length; i++) {
             if (student_full[i]['value'] === $(this).val()) {

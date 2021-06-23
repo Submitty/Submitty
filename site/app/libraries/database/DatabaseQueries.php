@@ -2731,7 +2731,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  integer $rotating_section
      * @return string $team_id
      */
-    public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
+    public function createTeam($g_id, $user_id, $registration_section, $rotating_section, $team_name) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
         if (strlen($team_id_prefix) < 5) {
@@ -2739,8 +2739,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         }
         $team_id = "{$team_id_prefix}_{$user_id}";
 
-        $params = [$team_id, $g_id, $registration_section, $rotating_section];
-        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
+        $params = [$team_id, $g_id, $registration_section, $rotating_section, $team_name];
+        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section, team_name) VALUES(?,?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", [$team_id, $user_id]);
         return $team_id;
     }
