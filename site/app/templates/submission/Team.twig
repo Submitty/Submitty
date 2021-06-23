@@ -1,6 +1,10 @@
 {# Current team box #}
 <div class="content">
     <h1>Manage Team For: {{ gradeable.getTitle() }}</h1>
+    {% if team %}
+    <h2>Team Name: {% if team_name is not null %}{{ team_name }}{% else %}Not Set{% endif %}
+        <a class="icon" id="team-name-change-icon"><i class="fas fa-pencil-alt"></i></a></h2>
+    {% endif %}
     {# Team lock message #}
     {% if lock %}
         {% if team %}
@@ -198,3 +202,5 @@
     }
 
 </script>
+
+{% include 'submission/EditTeamName.twig' %}

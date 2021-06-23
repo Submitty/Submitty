@@ -1386,7 +1386,7 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
                 FROM gradeable_teams gt
                   JOIN
                     (SELECT t.team_id, t.state, u.*
@@ -1425,7 +1425,7 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
                 FROM gradeable_teams gt
                   JOIN
                     (SELECT t.team_id, t.state, u.*
@@ -2770,6 +2770,16 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Set team $team_id's team_name
+     *
+     * @param string $team_id
+     * @param string $team_name
+     */
+    public function updateTeamName($team_id, $team_name) {
+        $this->course_db->query("UPDATE gradeable_teams SET team_name=? WHERE team_id=?", [$team_name, $team_id]);
+    }
+
+    /**
      * Remove a user from their current team
      *
      * @param string $team_id
@@ -2926,7 +2936,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
@@ -4693,7 +4703,7 @@ AND gc_id IN (
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
         $query = "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
@@ -6322,13 +6332,15 @@ AND gc_id IN (
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.rotating_section';
+               team.rotating_section,
+               team.team_name';
 
             $submitter_inject = '
               JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
                   gt.rotating_section,
+                  gt.team_name,
                   json_agg(tu) AS array_team_users
                 FROM gradeable_teams gt
                   JOIN (

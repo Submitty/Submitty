@@ -5,6 +5,7 @@ namespace app\controllers\student;
 use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
@@ -459,6 +460,51 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
         $this->core->redirect($return_url);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")
+     */
+    public function setTeamName($gradeable_id): RedirectResponse {
+        $user_id = $this->core->getUser()->getId();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage("Invalid gradeable");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable === false) {
+            $this->core->addErrorMessage("You are not on a team");
+            return new RedirectResponse($return_url);
+        }
+        $team = $graded_gradeable->getSubmitter()->getTeam();
+
+        if (!isset($_POST['team_name'])) {
+            $this->core->addErrorMessage("You must pick a name");
+            return new RedirectResponse($return_url);
+        }
+
+        if ($_POST['team_name'] == '') {
+            $_POST['team_name'] = null;
+        }
+
+        if ($_POST['team_name'] === $team->getTeamName()) {
+            $this->core->addErrorMessage("No changes detected in team name");
+            return new RedirectResponse($return_url);
+        }
+
+        $this->core->getQueries()->updateTeamName($team->getId(), $_POST['team_name']);
+        $this->core->addSuccessMessage("Team name successfully set");
+        return new RedirectResponse($return_url);
     }
 
     /**
