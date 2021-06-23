@@ -97,11 +97,6 @@ input[type=text]:invalid {
     margin-right: 0;
 }
 
-#ignore_submission_div {
-    position: relative;
-    padding-bottom: 30px;
-}
-
 #text_ignore_submission, #current_code_file, #provided_code_file,
 #add_more_ignore, #prev_gradeable_div {
     display: none;

@@ -202,9 +202,22 @@
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Users to be Ignored:</div>
-                <div id="ignore_submission_div" class="plag-data">
-                    <input type="checkbox" id="ignore_staff" value="ignore_staff" name="ignore_submission_option" {{ ignore_submissions ? "checked" : "" }}>
-                    <label for="ignore_none_id">Course staff</label>
+                <div class="plag-data">
+                    <input type="checkbox" id="ignore_instructors" value="ignore_instructors" name="ignore_submission_option[]" {{ "instructors" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore_instructors">Instructors</label>
+                </div>
+                <div class="plag-data">
+                    <input type="checkbox" id="ignore_full_access_graders" value="ignore_full_access_graders" name="ignore_submission_option[]" {{ "full_access_graders" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore_full_access_graders">Full Access Graders</label>
+                </div>
+                <div class="plag-data">
+                    <input type="checkbox" id="ignore_limited_access_graders" value="ignore_limited_access_graders" name="ignore_submission_option[]" {{ "limited_access_graders" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore_limited_access_graders">Limited Access Graders</label>
+                </div>
+                <div class="plag-data">
+                    <input type="checkbox" id="ignore_others" value="ignore_others" name="ignore_submission_option[]" {{ "others" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore_others">Others:</label>
+                    <input type="text" id="ignore_others_list" value="{{ ignore_submissions_list }}" placeholder="Type user ID's separated by commas and spaces" name="ignore_others_list" style="width:80%;">
                 </div>
             </div>
             {##################################################################}
