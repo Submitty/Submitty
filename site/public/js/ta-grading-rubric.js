@@ -2305,6 +2305,34 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             console.error(err);
         });
 }
+/**
+ * Call this to update the totals and subtotals once a grader is done grading a component
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @return {Promise}
+ */
+
+function updateTotals(gradeable_id, anon_id) {
+    let gradeable_tmp = null;
+    return ajaxGetGradeableRubric(gradeable_id)
+        .catch(function (err) {
+            alert('Could not fetch gradeable rubric: ' + err.message);
+        })
+        .then(function (gradeable) {
+            gradeable_tmp = gradeable;
+            return ajaxGetGradedGradeable(gradeable_id, anon_id, false);
+        })
+        .catch(function (err) {
+            alert('Could not fetch graded gradeable: ' + err.message);
+        })
+        .then(function (graded_gradeable) {
+            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+                isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
+        })
+        .then(function (elements) {
+            setRubricDOMElements(elements);
+        });
+}
 
 /**
  * Call this once on page load to load the peer panel.
@@ -2702,6 +2730,7 @@ function closeComponentGrading(component_id, saveChanges) {
         .then(function (graded_component) {
             return injectGradingComponent(component_tmp, graded_component, false, false);
         });
+
 }
 
 /**
@@ -2718,6 +2747,11 @@ function closeComponent(component_id, saveChanges = true) {
         : closeComponentGrading(component_id, saveChanges))
         .then(function () {
             setComponentInProgress(component_id, false);
+        })
+        .then(function () {
+            let gradeable_id = getGradeableId();
+            let anon_id = getAnonId();
+            return updateTotals(gradeable_id, anon_id);
         });
 }
 

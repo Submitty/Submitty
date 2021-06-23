@@ -120,7 +120,6 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
     if (graded_gradeable.graded_components === undefined || graded_gradeable.graded_components === null) {
         graded_gradeable.graded_components = {};
     }
-    console.log(graded_gradeable);
     // Calculate the total scores
     gradeable.components.forEach(function (component) {
         graded_gradeable.graded_components[component.id]
@@ -156,8 +155,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         graded_gradeable.graded_components = {};
     }
 
-    console.log(graded_gradeable);
-    var peer_details = {};
+    let peer_details = {};
     // Group together some useful data for rendering:
     gradeable.components.forEach(function(component) {
         // The peer details for a specific component (who has graded it and what marks have they chosen.)
