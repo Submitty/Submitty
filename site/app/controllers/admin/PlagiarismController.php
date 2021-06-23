@@ -64,7 +64,7 @@ class PlagiarismController extends AbstractController {
         return $return;
     }
 
-    private function getIgnoreSubmissionType(array $usernames) : array {
+    private function getIgnoreSubmissionType(array $usernames): array {
         $ignore = [];
         $ignore[0] = [];
         $ignore[1] = [];
@@ -410,7 +410,8 @@ class PlagiarismController extends AbstractController {
             }
             $graders = $this->core->getQueries()->getAllGraders();
             foreach ($graders as $grader) {
-                if ($grader->getGroup() == 1 && in_array("ignore_instructors", $_POST['ignore_submission_option'])
+                if (
+                    $grader->getGroup() == 1 && in_array("ignore_instructors", $_POST['ignore_submission_option'])
                     || $grader->getGroup() == 2 && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
                     || $grader->getGroup() == 3 && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
                     ) {
