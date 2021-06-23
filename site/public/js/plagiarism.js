@@ -15,14 +15,13 @@ function isColoredMarker(marker, color) {
 }
 
 function colorEditors(data) {
-    console.log(data.si)
     si = data.si;
     for(let users_color in data.ci) {
     	let editor = parseInt(users_color) === 1 ? editor0 : editor1;
     	editor.operation(() => {
         	for(let pos in data.ci[users_color]) {
             	let element = data.ci[users_color][pos];
-            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6]}, css: "background: " + element[4] + "; " + (parseInt(users_color) === 1 ? "border: solid black 1px;" : "")});
+            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6], "line": element[1]}, css: "background: " + element[4] + "; " + (parseInt(users_color) === 1 ? "border: solid black 1px;" : "")});
         	}
     	});
     }
@@ -31,10 +30,16 @@ function colorEditors(data) {
 function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
     // Remove existing red region and add new one
     let marks_editor2 = editor2.getAllMarks();
+
     //add new red colored marks
+    let firstMarkFound = false;
     marks_editor2.forEach(mark => {
         for (let i=0; i < leftClickedMarker.attributes.data_start.length; i++) {
             if (mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start[i]) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end[i])) {
+                if (!firstMarkFound) {
+                    editor2.scrollIntoView({line: mark.attributes.line, ch: 0});
+                    firstMarkFound = true;
+                }
                 mark.css = "background: " + RED + ";";
             }
         }
