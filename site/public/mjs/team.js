@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 export function showUpdateTeamName() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-team-name-form');
