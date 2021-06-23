@@ -480,14 +480,14 @@ HTML;
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 if ($peer === 'false') {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
-                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                    $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
                 }
                 else {
-                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
+                    $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading_blind"];
                 }
-                $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {

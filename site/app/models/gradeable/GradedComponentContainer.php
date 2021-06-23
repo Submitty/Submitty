@@ -228,7 +228,7 @@ class GradedComponentContainer extends AbstractModel {
     }
 
     /**
-     * Gets the score the submitter received for this component, rounded
+     * Gets the score the submitter received for this peer component, rounded
      *  to the precision of the gradeable
      * @return float
      */
@@ -236,7 +236,7 @@ class GradedComponentContainer extends AbstractModel {
         $points_earned = 0.0;
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
-            // If there is a grader, we are only computing their total score rather than the total score for all peers.
+            // If there is a grader, we are only computing their total score rather than the total score for all graders
             if ($grader !== null && $graded_component->getGrader()->getId() !== $grader->getId()) {
                 continue;
             }
@@ -246,9 +246,7 @@ class GradedComponentContainer extends AbstractModel {
                 }
             }
         }
-        // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
-        // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
-        //$points_earned = Utils::safeCalcPercent($points_earned, max(1, $number_of_graders));
+
         return $points_earned;
     }
 

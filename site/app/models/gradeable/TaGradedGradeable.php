@@ -267,7 +267,10 @@ class TaGradedGradeable extends AbstractModel {
         }
         return $points_earned;
     }
-
+    /**
+     * Gets the instructor/ta score for peer components that the student earned
+     * @return float
+     */
     public function getTotalPeerScore($grader = null) {
         $points_earned = 0.0;
         /** @var GradedComponentContainer $container */
