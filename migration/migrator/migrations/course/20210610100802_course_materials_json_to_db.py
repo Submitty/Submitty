@@ -33,6 +33,7 @@ def up(config, database, semester, course):
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS course_materials_sections (
+            id SERIAL PRIMARY KEY,
             course_material_id TEXT NOT NULL,
             section_id varchar(255) NOT NULL,
             CONSTRAINT fk_course_material_id
@@ -75,7 +76,12 @@ def up(config, database, semester, course):
                         )
                         VALUES (
                             :type, :path, :release_date, :hidden_from_students, :priority, :section_lock
-                        ) ON CONFLICT(path) DO UPDATE RETURNING path
+                        ) ON CONFLICT(path) DO UPDATE SET
+                        release_date = EXCLUDED.release_date,
+                        hidden_from_students = EXCLUDED.hidden_from_students,
+                        priority = EXCLUDED.priority,
+                        section_lock = EXCLUDED.section_lock
+                        RETURNING path
                         """
                     params = {
                         'path': path,
@@ -95,7 +101,8 @@ def up(config, database, semester, course):
                             )
                             VALUES (
                                 :course_material_id, :section_id
-                            ) ON CONFLICT(course_material_id) DO UPDATE
+                            ) ON CONFLICT(course_material_id) DO UPDATE SET
+                            section_id = EXCLUDED.section_id
                             """
                         params = {
                             'course_material_id': course_material_id,
