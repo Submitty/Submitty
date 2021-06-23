@@ -75,7 +75,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
-     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
@@ -106,7 +106,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && ($submitter_id === $user->getId() || $submitter->accessGrading() );
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) || !$can_inquiry) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to make grade inquiry post')
             );
@@ -182,7 +182,7 @@ class GradeInquiryController extends AbstractController {
             "grading.electronic.grade_inquiry",
             ['graded_gradeable' => $graded_gradeable]
         ) && ($submitter_id === $user->getId() || $submitter->accessGrading() );
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) || !$can_inquiry) {
             return "";
         }
 
@@ -207,7 +207,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
-     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
@@ -238,7 +238,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && ($submitter_id === $user->getId() || $submitter->accessGrading() );
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) || !$can_inquiry) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to change grade inquiry status')
             );
