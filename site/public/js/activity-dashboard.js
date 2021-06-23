@@ -16,8 +16,8 @@ function downloadData() {
 
 /* exported sortTable */
 function sortTable(n, flag) {
-    let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById('data-table');
+    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
         document.getElementById(i).style.color = 'white';
     }
