@@ -54,6 +54,12 @@ class StudentActivityDashboardController extends AbstractController {
                fputcsv($fp, $rows);
         }
 
+        header("Content-type: text/csv");
+        header('Content-Disposition: attachment; filename="Student_Activity.csv"');
+        header("Content-length: " . filesize($file_url));
+        header("Pragma: no-cache");
+        header("Expires: 0");
+        readfile($file_url);
         fclose($fp);
         return new WebResponse([
                'admin',

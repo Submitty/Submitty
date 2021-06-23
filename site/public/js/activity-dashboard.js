@@ -8,12 +8,6 @@ function clear(){
     document.getElementById('office_hours_queue_date').value = '';
 }
 
-/* exported downloadData */
-function downloadData() {
-    console.log('{{data[0].user_id}}');
-}
-
-
 /* exported sortTable */
 function sortTable(n, flag) {
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
