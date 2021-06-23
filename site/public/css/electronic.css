@@ -493,8 +493,22 @@ progress::-webkit-progress-value {
 
 #grading-panel-student-name {
     position: absolute;
+    height: 80px;
+    overflow-y: scroll;
+    border-right: 1px solid var(--standard-light-medium-gray);
     left: 5px;
     top: 5px;
+}
+
+#grading-panel-student-name::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+  
+#grading-panel-student-name::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
 #regrade_inner_info .inner-container {
