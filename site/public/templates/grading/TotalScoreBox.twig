@@ -49,7 +49,7 @@ l
         {% set any_earned = peer_grade_earned is defined or ta_grading_earned is defined or auto_grading_earned is defined %}
         {% if any_earned %}
             {% if peer_grade_earned is defined %}
-                {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) + peer_grade_earned %}
+                {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) + combined_peer_score %}
                 {% if peer_grade_earned == 0%}
                     {% set max_total = peer_total|default(0) + ta_grading_total|default(0) + auto_grading_total|default(0) %}
                 {% else %}
@@ -74,6 +74,6 @@ l
         <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total, peer_total) }}">
             {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
-        <strong>My Peer Grading Totals</strong>
+        <strong>My Peer Grading Total</strong>
     </div>
 {% endif %}

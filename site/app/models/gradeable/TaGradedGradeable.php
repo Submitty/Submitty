@@ -268,6 +268,15 @@ class TaGradedGradeable extends AbstractModel {
         return $points_earned;
     }
 
+    public function getTotalPeerScore($grader = null) {
+        $points_earned = 0.0;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $points_earned += $container->getTotalPeerScore($grader);
+        }
+        return $points_earned;
+    }
+
     /**
      * Gets the percent of points the student has earned of the
      *  components that have been graded

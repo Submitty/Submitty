@@ -8,8 +8,8 @@ Required Parameters:
 
 #}
 <div class="box-title badge-container">
-        <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned,  peer_total,  peer_total) }}">
-            {{ peer_grade_earned is defined ? (peer_grade_earned)|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
+        <strong id="score_total" class="badge {{ functions.getBadgeStyle(combined_peer_score,  peer_total,  peer_total) }}">
+            {{ combined_peer_score is defined ? (combined_peer_score)|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
         <strong>Combined Peer Grading Total</strong>
 </div>
