@@ -271,18 +271,22 @@ class GradingOrder extends AbstractModel {
             return $this->getFilterFunction($submitter, $component_id, 'ungraded');
         }
         elseif($filter === 'inquiry') {
-            $this->initUsersGradeInquiry(false, $component_id);
+            if($this->core->getConfig()->isRegradeEnabled()) {
+                $this->initUsersGradeInquiry(false, $component_id);
 
-            return function (Submitter $sub) {
-                return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
-            };
+                return function (Submitter $sub) {
+                    return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
+                };
+            }
         }
         elseif($filter === 'active-inquiry') {
-            $this->initUsersGradeInquiry(true, $component_id);
+            if($this->core->getConfig()->isRegradeEnabled()) {
+                $this->initUsersGradeInquiry(true, $component_id);
 
-            return function (Submitter $sub) {
-                return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
-            };
+                return function (Submitter $sub) {
+                    return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
+                };
+            }
         }
         return function (Submitter $sub) {
             return $this->getHasSubmission($sub);

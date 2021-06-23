@@ -219,6 +219,26 @@ function changeStudentArrowTooltips(data) {
         $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
       }
       break;
+    case "inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "active-inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
     default:
       $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
       $('#next-student-navlink').find("i").first().attr("title", "Next student");

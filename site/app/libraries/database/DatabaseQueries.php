@@ -4313,7 +4313,7 @@ AND gc_id IN (
         }
         $component_query = "";
         if($component_id !== -1) {
-            $component_query = "AND gc_id = ? ";
+            $component_query = "AND (gc_id IS NULL OR gc_id = ?) ";
             $parameters[] = $component_id;
         }
         
