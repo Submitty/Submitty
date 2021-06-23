@@ -503,6 +503,21 @@ class TeamController extends AbstractController {
         }
 
         $this->core->getQueries()->updateTeamName($team->getId(), $_POST['team_name']);
+
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $this->core->addErrorMessage("Failed to open settings file");
+            $this->core->redirect($return_url);
+        }
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
+        $json["team_history"][] = ["action" => "change_name", "time" => $current_time, "user" => $user_id];
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMessage("Failed to write to team history to settings file");
+            return new RedirectResponse($return_url);
+        }
+
         $this->core->addSuccessMessage("Team name successfully set");
         return new RedirectResponse($return_url);
     }

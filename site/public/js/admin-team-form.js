@@ -145,6 +145,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 else if (user_assignment_setting_json.team_history[j].action == 'cancel_invitation') {
                     team_history_tbody.append(getRowBound(curr_json_entry.canceled_by_user, `Uninvited ${curr_json_entry.canceled_user}`));
                 }
+                else if (user_assignment_setting_json.team_history[j].action == 'change_name') {
+                    team_history_tbody.append(getRowBound(curr_json_entry.user, 'Changed Team Name'));
+                }
             }
             if (past_lock_date) {
                 $('#admin_team_history_table > tfoot').css('display', 'table-footer-group');
