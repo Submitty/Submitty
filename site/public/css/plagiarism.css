@@ -97,9 +97,17 @@ input[type=text]:invalid {
     margin-right: 0;
 }
 
-#text_ignore_submission, #current_code_file, #provided_code_file,
-#add_more_ignore, #prev_gradeable_div {
+#current_code_file, #provided_code_file, #prev_gradeable_div {
     display: none;
+}
+
+#ignore_others_list {
+    flex-grow: 100;
+    margin-left: 0.5em;
+}
+
+#ignore-others-container {
+    display: inline-flex;
 }
 
 .radio-label-pair {
