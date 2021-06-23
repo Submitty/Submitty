@@ -366,21 +366,7 @@ class PlagiarismController extends AbstractController {
         }
 
         // Submissions to ignore
-        $ignore_submission_option = $_POST['ignore_submission_option'];
-        if ($ignore_submission_option !== "ignore" && $ignore_submission_option !== "no_ignore") {
-            $this->core->addErrorMessage("Invalid ignore submission options, expected \"ignore\" or \"no_ignore\", got \"" . $ignore_submission_option . "\".");
-            $this->core->redirect($return_url);
-        }
-        $ignore_submission_number = $_POST['ignore_submission_number'];
-        $ignore_submissions = [];
-        if ($ignore_submission_option === "ignore") {
-            for ($i = 0; $i < $ignore_submission_number; $i++) {
-                if (isset($_POST['ignore_submission_' . $i]) && $_POST['ignore_submission_' . $i] !== '') {
-                    array_push($ignore_submissions, $_POST['ignore_submission_' . $i]);
-                }
-            }
-        }
-
+        $ignore_submission_option = isset($_POST['ignore_submission_option']) ? $_POST['ignore_submission_option'] : "";
 
         // Save the config.json
         $json_file = FileUtils::joinPaths($course_path, "lichen", "config", "lichen_{$semester}_{$course}_{$gradeable_id}.json");
@@ -396,7 +382,7 @@ class PlagiarismController extends AbstractController {
             // "hash" => bin2hex(random_bytes(8)),
             "sequence_length" => $sequence_length,
             "prev_term_gradeables" => $prev_term_gradeables,
-            "ignore_submissions" => $ignore_submissions
+            "ignore_submissions" => $ignore_submission_option
         ];
 
         if (!@file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT))) {

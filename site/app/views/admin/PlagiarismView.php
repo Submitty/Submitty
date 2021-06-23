@@ -147,14 +147,13 @@ class PlagiarismView extends AbstractView {
             $threshold = (int) $saved_config['threshold'];
             $sequence_length = (int) $saved_config['sequence_length'];
             $prior_terms = false; // $prior_term_gradeables_number > 1;
-            $ignore_submissions = count($saved_config['ignore_submissions']) > 0;
+            $ignore_submissions = $saved_config['ignore_submissions'] == "ignore_staff" ? true : false;
         }
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}",
             "csrf_token" => $this->core->getCsrfToken(),
-            //"ignore_submission_number" => $ignore_submission_number,
             //"prior_term_gradeables_number" => $prior_term_gradeables_number,
             "provided_code" => $provided_code,
             "gradeable_ids_titles" => $gradeable_ids_titles,

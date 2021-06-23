@@ -5,7 +5,6 @@
         <form method="post" action="{{ form_action_link }}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" />
-            <input type="hidden" name="ignore_submission_number" value="{{ ignore_submission_number }}" /><br />
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Select Gradeable:</div>
@@ -204,34 +203,8 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Users to be Ignored:</div>
                 <div id="ignore_submission_div" class="plag-data">
-                    <span class="radio-label-pair">
-                        <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {{ ignore_submissions ? "" : "checked" }}>
-                        <label for="ignore_none_id">No</label>
-                    </span>
-                    <span class="radio-label-pair">
-                        <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {{ ignore_submissions ? "checked" : "" }}>
-                        <label for="ignore_id">Yes</label>
-                    </span>
-
-                    <div id="add_more_ignore" class="add-more" aria-label="Add more">
-                        <i class="fas fa-plus-square"></i>Add more
-                    </div>
-
-                    <div id="text_ignore_submission">
-                        {% if new_or_edit == "edit" %}
-                            {# {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
-                                <div name="wrapper_ignore_submission_{{ loop.index0 }}">
-                                    <input type="text" name="ignore_submission_{{ loop.index0 }}" class="low-margin-top deletable-text" value="{{ saved_ignore_submission }}"/>
-                                    <i class="fa fa-trash delete-btn"></i>
-                                </div>
-                            {% endfor %} #}
-                        {% else %}
-                            <div name="wrapper_ignore_submission_0">
-                                <input type="text" name="ignore_submission_0" class="low-margin-top deletable-text"/>
-                                <i class="fa fa-trash delete-btn"></i>
-                            </div>
-                        {% endif %}
-                    </div>
+                    <input type="checkbox" id="ignore_staff" value="ignore_staff" name="ignore_submission_option" {{ ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore_none_id">Course staff</label>
                 </div>
             </div>
             {##################################################################}
@@ -281,42 +254,6 @@
 
     $("#past_terms_id").change(function() {
         $(".past-terms-wrapper").show();
-    });
-
-    // IGNORED SUBMISSIONS /////////////////////////////////////////////////////
-    $("#ignore_none_id").change(function() {
-        if ($("#ignore_none_id").is(":checked")) {
-            $("#text_ignore_submission").hide();
-            $("#add_more_ignore").hide();
-        }
-    });
-
-    $("#ignore_id").change(function() {
-        if ($("#ignore_id").is(":checked")) {
-            $("#text_ignore_submission").show();
-            $("#add_more_ignore").show();
-        }
-    });
-
-    $('#add_more_ignore', form).on('click', function(){
-        const ignore_submission_number = $('[name="ignore_submission_number"]', form).val();
-        $('#text_ignore_submission', form).append(`
-            <div name="wrapper_ignore_submission_` + ignore_submission_number + `">
-                <input type="text" name="ignore_submission_` + ignore_submission_number + `" class="low-margin-top deletable-text"/>
-                <i class="fa fa-trash delete-btn"></i>
-            </div>
-        `);
-        $('[name="ignore_submission_number"]', form).val(parseInt(ignore_submission_number)+1);
-    });
-
-    $(".delete-btn").on("click", function() {
-        // delete the div with the text field whose delete icon was clicked
-        $(this).parent().remove();
-        // renumber all other fields
-        $(".deletable-text").each(function(index) {
-            $(this).attr("name", "ignore_submission_"+index);
-            $(this).parent().attr("name", "wrapper_ignore_submission_"+index);
-        });
     });
 
     // OTHER RANDOM JS //////////////////////////////////////////////////////////////
