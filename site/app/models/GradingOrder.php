@@ -193,7 +193,7 @@ class GradingOrder extends AbstractModel {
      * @param string $filter The filter to use when checking submitters
      * @return Submitter|null Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter,  int $component_id = -1, string $filter = 'default'): ?Submitter {
+    public function getPrevSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
         return $this->getPrevSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
     }
 
@@ -224,14 +224,14 @@ class GradingOrder extends AbstractModel {
      * Queries the database to populate $this->grade_inquiry_users
      * @param bool $ungraded If it should only find active grade inquiries
      * @param int $component_id The component ID in the gradeable
-     * @return void 
+     * @return void
      */
     private function initUsersGradeInquiry(bool $ungraded, int $component_id) {
         if (is_null($this->grade_inquiry_users)) {
             $this->grade_inquiry_users = $this->core->getQueries()->getRegradeRequestsUsers($this->gradeable->getId(), $ungraded, $component_id);
         }
     }
-    
+
     /**
      * Given the selected filter, returns a function that can be used to filter students in getSubmitterMatching
      * @param Submitter $submitter Current grading submitter
@@ -240,38 +240,38 @@ class GradingOrder extends AbstractModel {
      * @return callable Args: (Submitter) Returns: bool, true if the submitter should be included
      */
     private function getFilterFunction(Submitter $submitter, int $component_id, string $filter) {
-        if($filter === 'default') {
+        if ($filter === 'default') {
             return function (Submitter $sub) {
                 return $this->getHasSubmission($sub);
             };
         }
-        elseif($filter === 'ungraded') {
+        elseif ($filter === 'ungraded') {
             $this->initUsersNotFullyGraded($component_id);
 
-            return function(Submitter $sub) {
+            return function (Submitter $sub) {
                 return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
             };
         }
-        elseif($filter === 'itempool') {
-            if($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+        elseif ($filter === 'itempool') {
+            if ($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
                 return function (Submitter $sub) {
                     return $this->getHasSubmission($sub) && $this->isSameItempool($sub);
                 };
             }
             return $this->getFilterFunction($submitter, $component_id, 'default');
         }
-        elseif($filter === 'ungraded-itempool') {
+        elseif ($filter === 'ungraded-itempool') {
             $this->initUsersNotFullyGraded($component_id);
 
-            if($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
+            if ($component_id !== -1 && $this->getItempoolIndicesForSubmitter($submitter, $component_id)) {
                 return function (Submitter $sub) {
                     return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub) && $this->isSameItempool($sub);
                 };
             }
             return $this->getFilterFunction($submitter, $component_id, 'ungraded');
         }
-        elseif($filter === 'inquiry') {
-            if($this->core->getConfig()->isRegradeEnabled()) {
+        elseif ($filter === 'inquiry') {
+            if ($this->core->getConfig()->isRegradeEnabled()) {
                 $this->initUsersGradeInquiry(false, $component_id);
 
                 return function (Submitter $sub) {
@@ -279,8 +279,8 @@ class GradingOrder extends AbstractModel {
                 };
             }
         }
-        elseif($filter === 'active-inquiry') {
-            if($this->core->getConfig()->isRegradeEnabled()) {
+        elseif ($filter === 'active-inquiry') {
+            if ($this->core->getConfig()->isRegradeEnabled()) {
                 $this->initUsersGradeInquiry(true, $component_id);
 
                 return function (Submitter $sub) {
@@ -291,7 +291,6 @@ class GradingOrder extends AbstractModel {
         return function (Submitter $sub) {
             return $this->getHasSubmission($sub);
         };
-
     }
 
     /**

@@ -4307,16 +4307,16 @@ AND gc_id IN (
         $parameters = [];
         $parameters[] = $gradeable_id;
         $ungraded_query = "";
-        if($ungraded_only) {
+        if ($ungraded_only) {
             $ungraded_query = "AND status = ? ";
             $parameters[] = RegradeRequest::STATUS_ACTIVE;
         }
         $component_query = "";
-        if($component_id !== -1) {
+        if ($component_id !== -1) {
             $component_query = "AND (gc_id IS NULL OR gc_id = ?) ";
             $parameters[] = $component_id;
         }
-        
+
         $this->course_db->query("SELECT user_id FROM regrade_requests WHERE g_id = ? " . $ungraded_query . $component_query, $parameters);
         return $this->rowsToArray($this->course_db->rows());
     }
