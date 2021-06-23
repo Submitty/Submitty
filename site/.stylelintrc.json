@@ -1,5 +1,10 @@
 {
   "extends": "stylelint-config-standard",
+  "rules": {
+    "indentation": 4,
+    "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
+    "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$"
+  },
   "ignoreFiles": [
     "public/css/jquery-ui.min.css",
     "public/css/reset.css",
@@ -9,13 +14,11 @@
     "public/css/pdf/toolbar_fullscreen.css",
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
-    "public/css/google/source_sans_pro.css",
-    "public/css/google/pt_sans.css",
+    "public/css/google/*",
     "public/css/userform.css",
     "public/css/user-profile.css",
     "public/css/table.css",
     "public/css/submitbox.css",
-    "public/css/sql-toolbox.css",
     "public/css/simple-grading.css",
     "public/css/sidebar.css",
     "public/css/server.css",
