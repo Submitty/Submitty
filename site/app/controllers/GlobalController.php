@@ -270,7 +270,7 @@ class GlobalController extends AbstractController {
                 "title" => "Activity Dashboard",
                 "class" => "nav-row",
                 "id" => "nav-sizebar-activity-dashboard",
-                "icon" => "fa-calendar-check"
+                "icon" => "fa-table"
             ]);
         }
 

@@ -171,7 +171,7 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, user_firstname, user_lastname
+        (SELECT registration_section, user_id, COALESCE(user_preferred_firstname, user_firstname) as user_firstname, user_lastname
         FROM users
         ORDER BY registration_section, user_lastname, user_firstname, user_id),
         B AS
@@ -199,7 +199,7 @@ class DatabaseQueries {
         FROM queue
         ORDER BY user_id, time_in desc)
         SELECT
-        A.registration_section, A.user_id, user_firstname, user_lastname,
+        A.registration_section, A.user_id, A.user_firstname, user_lastname,
         B.timestamp as gradeable_access,
         C.submission_time as gradeable_submission,
         D.timestamp as forum_view,
@@ -214,7 +214,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
-        ORDER BY A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
+        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
         ");
         return $this->course_db->rows();
      }
