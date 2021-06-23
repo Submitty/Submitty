@@ -234,6 +234,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
     left: 0px;
     width: auto;
     position: fixed;
+}
 
 .plag-legend {
     text-shadow: 0 0 3px var(--text-black);

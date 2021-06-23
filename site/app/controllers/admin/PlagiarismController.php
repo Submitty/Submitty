@@ -748,7 +748,6 @@ class PlagiarismController extends AbstractController {
                     //Color is orange -- general match from selected match
                     $color = '#ffa500';
 
-                    //$segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
                     if ($codebox == "2" && $user_id_2 != "") {
                         foreach ($match->getMatchingPositions($user_id_2, $version_user_2) as $pos) {
                             $matchPosStart = $pos['start'];
