@@ -178,7 +178,11 @@ class PlagiarismController extends AbstractController {
 
         $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $gradeable_id_title['g_id'] . "/overall_ranking.txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+            if (
+                !file_exists(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "config", "lichen_{$semester}_{$course}_{$gradeable_id_title['g_id']}.json"))
+                && !file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}.json"))
+                && !file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}.json"))
+            ) {
                 unset($gradeables_with_plagiarism_result[$i]);
                 continue;
             }
@@ -237,7 +241,8 @@ class PlagiarismController extends AbstractController {
     public function showPlagiarismResult($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $gradeable_title = ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
+        $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        $gradeable_title = $gradeable_config->getTitle();
 
         $rankings = $this->getOverallRankings($gradeable_id);
         if ($rankings === null) {
@@ -250,8 +255,14 @@ class PlagiarismController extends AbstractController {
         }
 
         foreach ($rankings as $i => $ranking) {
-            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
-            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+            if (!$gradeable_config->isTeamAssignment()) {
+                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
+                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+            }
+            else {
+                array_push($rankings[$i], "");
+                array_push($rankings[$i], "");
+            }
         }
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
@@ -312,8 +323,11 @@ class PlagiarismController extends AbstractController {
 
 
         // Regex
-        // TODO: Can we find a way to validate the regex here to tell the user their regex was invalid before feeding it to Lichen?
-        assert(isset($_POST["regex_dir"]) && isset($_POST["regex_to_select_files"]));
+        // TODO: Can we find a way to validate the regex more thoroughly to tell the user their regex was invalid before feeding it to Lichen?
+        if (!isset($_POST["regex_dir"]) || !isset($_POST["regex_to_select_files"]) || str_contains($_POST["regex_to_select_files"], "..")) {
+            $this->core->addErrorMessage("Invalid regex form data.");
+            $this->core->redirect($return_url);
+        }
         $regex_directories = $_POST["regex_dir"];
         $regex_for_selecting_files = $_POST['regex_to_select_files'];
 
@@ -353,10 +367,13 @@ class PlagiarismController extends AbstractController {
 
         // Submissions to ignore
         $ignore_submission_option = $_POST['ignore_submission_option'];
-        assert($ignore_submission_option == "ignore" || $ignore_submission_option == "no_ignore");
+        if ($ignore_submission_option !== "ignore" && $ignore_submission_option !== "no_ignore") {
+            $this->core->addErrorMessage("Invalid ignore submission options, expected \"ignore\" or \"no_ignore\", got \"" . $ignore_submission_option . "\".");
+            $this->core->redirect($return_url);
+        }
         $ignore_submission_number = $_POST['ignore_submission_number'];
         $ignore_submissions = [];
-        if ($ignore_submission_option == "ignore") {
+        if ($ignore_submission_option === "ignore") {
             for ($i = 0; $i < $ignore_submission_number; $i++) {
                 if (isset($_POST['ignore_submission_' . $i]) && $_POST['ignore_submission_' . $i] !== '') {
                     array_push($ignore_submissions, $_POST['ignore_submission_' . $i]);
@@ -566,6 +583,27 @@ class PlagiarismController extends AbstractController {
         $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
         $this->core->redirect($return_url);
     }
+
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
+     */
+    public function getRunLog($gradeable_id) {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $log_file = FileUtils::joinPaths($course_path, "lichen", "logs", $gradeable_id, "lichen_job_output.txt");
+
+        if (!file_exists($log_file)) {
+            echo("Error: Unable to find run log.");
+        }
+
+        $log_data = file_get_contents($log_file);
+
+        echo $log_data;
+    }
+
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
@@ -780,8 +818,14 @@ class PlagiarismController extends AbstractController {
             $temp = [];
             array_push($temp, $item[1]);
             array_push($temp, $item[2]);
-            array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
-            array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            if (!$this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
+                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
+                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            }
+            else {
+                array_push($temp, "");
+                array_push($temp, "");
+            }
             array_push($temp, $item[0]);
             array_push($return, $temp);
         }

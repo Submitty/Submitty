@@ -5,6 +5,7 @@
 
 .plag-table-cont {
     margin-top: 24px;
+    width: 100%;
 }
 
 td .plag-action-btn-cont {
@@ -14,6 +15,21 @@ td .plag-action-btn-cont {
 td .plag-action-btn-cont a:not(:last-child) {
     margin-right: 40px;
 }
+
+.run-log-data {
+    text-align: left;
+    width: inherit;
+    background-color: var(--table-info);
+}
+
+.run-log-data pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+    max-height: 20em;
+    max-width: 100%;
+}
+
 /* Configuration form page */
 .plag-data-group {
     display: flex;
@@ -218,6 +234,15 @@ main#main.full-screen-mode .plagiarism-result-cont {
     left: 0px;
     width: auto;
     position: fixed;
+
+.plag-legend {
+    text-shadow: 0 0 3px var(--text-black);
+    margin-left: 5px;
+}
+
+[data-theme="dark"] .plag-legend {
+    text-shadow: 0 0 3px transparent;
+
 }
 
 @media (max-width: 660px) {
