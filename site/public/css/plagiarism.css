@@ -236,6 +236,10 @@ main#main.full-screen-mode .plagiarism-result-cont {
     position: fixed;
 }
 
+.ui-menu-item:hover {
+    background-color: var(--selected-nav-sidebar);
+}
+
 .plag-legend {
     text-shadow: 0 0 3px var(--text-black);
     margin-left: 5px;
