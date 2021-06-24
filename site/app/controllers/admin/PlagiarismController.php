@@ -424,7 +424,6 @@ class PlagiarismController extends AbstractController {
                 ) {
                     array_push($ignore_submission_option, $grader->getId());
                 }
-
             }
             // parse and append user id's specified in "Others"
             if (in_array("ignore_others", $_POST['ignore_submission_option']) && isset($_POST["ignore_others_list"])) {
