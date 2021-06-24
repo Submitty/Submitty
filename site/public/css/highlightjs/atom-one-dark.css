@@ -1,14 +1,3 @@
-[data-theme="dark"] pre code.hljs {
-    display: block;
-    overflow-x: scroll;
-    white-space: pre;
-    padding: 1em;
-}
-
-[data-theme="dark"] code.hljs {
-    padding: 3px 5px;
-}
-
 [data-theme="dark"] .hljs {
     color: #abb2bf;
     background: #282c34;

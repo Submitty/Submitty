@@ -45,19 +45,28 @@
 }
 
 .markdown pre {
+    position: relative;
     background: var(--code-box-background-light-gray);
     color: var(--code-box-font-color-dark-gray);
 }
 
-.markdown pre + pre {
+.markdown pre + pre:not(.line-numbers) {
     border-top: 1px dashed var(--text-black);
+}
+
+.markdown .line-numbers {
+    position:absolute;
+    top: 1em;
+    padding-right: 1px;
+    text-align: right;
+    border-right: 0.5px solid var(--standard-medium-gray);
 }
 
 .markdown code {
     display: block;
-    padding: 1em;
+    padding: 1em 1em 1em 2em;
     overflow-x: scroll;
-} 
+}
 
 .markdown th {
     border: 1px solid var(--text-black);

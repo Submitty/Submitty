@@ -15,7 +15,7 @@ use League\CommonMark\Environment;
 use League\CommonMark\Block\Renderer\BlockRendererInterface;
 use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
 use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
-use app\libraries\MyCodeRenderer;
+use app\libraries\CustomCodeRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
 use Ds\Set;
@@ -139,9 +139,8 @@ HTML;
 
         $environment = Environment::createCommonMarkEnvironment();
         $environment->addExtension(new AutolinkExtension());
-        $environment->addBlockRenderer(FencedCode::class, new MyCodeRenderer());
-        //$environment->addBlockRenderer(FencedCode::class, new FencedCodeRenderer());
-        //$environment->addBlockRenderer(IndentedCode::class, new IndentedCodeRenderer());
+        $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
         $environment->mergeConfig([]);
 
         $converter = new CommonMarkConverter([], $environment);
