@@ -52,6 +52,7 @@ aside {
 #bar_banner{
     position: relative;
     display: block;
+    width:100%;
     margin: auto;
     margin-bottom: 5px;
 }
