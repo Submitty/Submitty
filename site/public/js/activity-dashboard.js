@@ -12,7 +12,7 @@ function sortTable(n, flag) {
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
-        if (i != n && $(`#{i}`).children('i').hasClass('fa-angle-up')){
+        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')){
             $(`#${i}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
         }
     }
@@ -28,80 +28,76 @@ function sortTable(n, flag) {
     if (flag){
         dir = 'desc';
     }
-    /* Make a loop that will continue until
-    no switching has been done: */
-    while (switching) {
-        // Start by saying: no switching is done:
-        switching = false;
-        rows = table.rows;
-        /* Loop through all table rows (except the
-        first, which contains table headers): */
-        for (i = 1; i < (rows.length - 1); i++) {
-            // Start by saying there should be no switching:
-            shouldSwitch = false;
-            /* Get the two elements you want to compare,
-            one from current row and one from the next: */
-            x = rows[i].getElementsByTagName('TD')[n];
-            y = rows[i + 1].getElementsByTagName('TD')[n];
-            /* Check if the two rows should switch place,
-            based on the direction, asc or desc: */
+    
+    let comparator = null;
+    // if n == 0 or n == 8
+    // returns true if elem1 < elem2
+    if (n == 0 || n == 8){
+        comparator = function (x, y) {
             const xIsDigit = /^\d+$/.test(x);
             const yIsDigit = /^\d+$/.test(y);
-            if (dir == 'asc') {
-                // Data that should be interpreted as a number
-
-                if ((n == 0 && (xIsDigit || yIsDigit)) || n == 8) {
-                    if (xIsDigit && yIsDigit && Number(x.innerHTML) > Number(y.innerHTML)) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                    if (!xIsDigit) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-                // Other data
-                else if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    // If so, mark as a switch and break the loop:
-                    shouldSwitch = true;
-                    break;
-                }
+            if (xIsDigit && yIsDigit) {
+                return Number(x) < Number(y);
             }
-            else if (dir == 'desc') {
-                // Data that should be interpreted as a number
-                if ((n == 0 && (xIsDigit || yIsDigit))|| n == 8) {
-                    if (xIsDigit && yIsDigit && Number(x.innerHTML) < Number(y.innerHTML)) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                    if (!yIsDigit) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-                // Other data
-                else if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    // If so, mark as a switch and break the loop:
-                    shouldSwitch = true;
-                    break;
-                }
+            else if (!xIsDigit ^ !yIsDigit){
+                return xIsDigit;
             }
-        }
-        if (shouldSwitch) {
-            /* If a switch has been marked, make the switch
-            and mark that a switch has been done: */
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            // Each time a switch is done, increase this count by 1:
-            switchcount ++;
-        }
-        else {
-            /* If no switching has been done AND the direction is 'asc',
-            set the direction to 'desc' and run the while loop again. */
-            if (switchcount == 0 && dir == 'asc') {
-                dir = 'desc';
-                switching = true;
+            else {
+                if (x === ''){
+                    return false;
+                }
+                return x < y;
             }
+        };
+    }
+    else {
+        // other n's
+        comparator = function(x, y) {
+            return x < y;
         }
     }
+    
+    const directedComp = function (x,y) {
+        if (dir == "asc"){
+            return !comparator(x,y);
+        }
+        return comparator(x,y);
+    }
+    let merge = function(arr1, arr2) {
+        let res = [];
+        let i, j = 0;
+        while (i < arr1.length && j < arr2.length) {
+            if (directedComp(arr1[i].getElementsByTagName('TD')[n], arr2[j].getElementsByTagName('TD')[n])) {
+                res.push(arr1[i]);
+                i++;
+            }
+            else {
+                res.push(arr2[j]);
+                j++;
+            }
+        }
+        while (i < arr1.length) {
+            res.push(arr1[i]);
+            i++;
+        }
+        while (j < arr2.lenghth) {
+            res.push(arr2[j]);
+            j++;
+        }
+    }
+
+    let mergeSort = function (arr) {
+        if (arr.length <= 1) {
+            return arr;
+        }
+
+        const mid = Math.floor(arr.length/2);
+        console.log(mid);
+        let left = mergeSort(arr.slice(0, mid));
+        let right = mergeSort(arr.slice(mid));
+        return merge(left,right);
+    }
+    rows = Array.prototype.slice.call(table.rows);
+    console.log(rows);
+    table.rows = mergeSort(rows);
 }
