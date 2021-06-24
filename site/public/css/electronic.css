@@ -1048,7 +1048,7 @@ tr.is_publish {
 
 .gradeable .component .row.divider,
 .solution-box .row.divider {
-    background: #ddd;
+    background: #dddddd;
     height: 2px;
     width: 100%;
     padding-left: 10px;
@@ -1093,7 +1093,7 @@ tr.is_publish {
 
 .gradeable .mark-container {
     min-height: 28px;
-    border-bottom: 1px solid #999;
+    border-bottom: 1px solid #999999;
     padding: 3px;
 }
 
@@ -1168,7 +1168,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container.mark-publish {
-    background-color: #bde;
+    background-color: #bbddee;
 }
 
 .gradeable .mark-disabled span {
@@ -1177,12 +1177,12 @@ tr.is_publish {
 }
 
 .gradeable .mark-deleted {
-    background: #faa;
+    background: #ffaaaa;
 }
 
 .gradeable .custom-mark-error {
-    border-color: #f00;
-    background-color: #fee;
+    border-color: #ff0000;
+    background-color: #ffeeee;
 }
 
 .gradeable .mark-deleted span.delete-mark-container {

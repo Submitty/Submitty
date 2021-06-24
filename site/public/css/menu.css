@@ -1,5 +1,5 @@
 #menu-button {
-    border: 1px solid #000;
+    border: 1px solid #000000;
     border-radius: 3px;
     background: transparent;
     margin: 15px;
@@ -15,7 +15,7 @@
     width: 90%;
     background: #316498;
     color: var(--text-white);
-    border-color: #fff;
+    border-color: #ffffff;
     line-height: 31px;
     list-style-type: none;
     overflow-y: auto;
@@ -52,11 +52,11 @@
 }
 
 #mobile-menu hr {
-    border-color: #fff;
+    border-color: #ffffff;
 }
 
 #menu-header {
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid #ffffff;
 }
 
 .mobile-title {
@@ -97,7 +97,7 @@
 }
 
 #mobile-menu .notification-badge {
-    background-color: #000;
+    background-color: #000000;
     padding: 0 10px;
     color: var(--text-white);
     font-weight: bold;

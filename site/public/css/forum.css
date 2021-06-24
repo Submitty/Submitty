@@ -60,7 +60,7 @@
 
 .post_box {
     position: relative;
-    box-shadow: 0 2px 15px -5px #888;
+    box-shadow: 0 2px 15px -5px #888888;
     padding: 7px;
     margin-top: 20px;
     word-wrap: break-word;
@@ -100,7 +100,7 @@
     min-height: 40px;
     position: relative;
     background: rgba(255, 255, 255, 0.8);
-    box-shadow: 2px 2px 4px -3px #ddd;
+    box-shadow: 2px 2px 4px -3px #dddddd;
 }
 
 .reply-box {
@@ -352,7 +352,7 @@
 }
 
 #post-hr {
-    border-top: 1px solid #999;
+    border-top: 1px solid #999999;
     margin-bottom: 5px;
 }
 
@@ -507,7 +507,7 @@
 }
 
 .well blockquote {
-    border-color: #ddd;
+    border-color: #dddddd;
     border-color: rgba(0, 0, 0, 0.15);
 }
 
@@ -522,7 +522,7 @@
 }
 
 .attachment-img {
-    border: 1px solid #ddd;
+    border: 1px solid #dddddd;
     border-radius: 4px;
     padding: 5px;
     max-width: 400px;
@@ -570,7 +570,7 @@
 }
 
 .filter-inactive {
-    background: #fff;
+    background: #ffffff;
     color: var(--actionable-blue);
 }
 
@@ -597,13 +597,13 @@
 }
 
 [data-theme="dark"] .post_box:not(.important) {
-    border: 1px solid #bbb;
+    border: 1px solid #bbbbbb;
 }
 
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
-    box-shadow: 4px 7px 5px #ccc;
+    box-shadow: 4px 7px 5px #cccccc;
 }
 
 .thread_box .flex-row,

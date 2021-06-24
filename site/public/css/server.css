@@ -264,7 +264,7 @@ table tr.table-header {
 }
 
 .table tr {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #dddddd;
 }
 
 .table-bordered {
@@ -380,7 +380,7 @@ td > a.active-sort {
     overflow: auto;
     margin: 10px;
     padding: 30px;
-    background-color: #fff;
+    background-color: #ffffff;
     flex-grow: 1;
 }
 
@@ -1429,7 +1429,7 @@ end of styles used in the admin gradeable page
 /* color for limited access graders who were verifed */
 .grader-verified {
     /* yellow       green   */
-    background: linear-gradient(to right, #fc3 50%, #3c3 50%);
+    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
     background-clip: text;
     color: transparent;
 
@@ -1490,10 +1490,10 @@ end of styles used in the admin gradeable page
     color: var(--default-white);
     font-size: 1.5em;
     text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
+        -1px -1px 0 #000000,
+        1px -1px 0 #000000,
+        -1px 1px 0 #000000,
+        1px 1px 0 #000000;
 }
 
 .viewed-red-x {
@@ -1690,7 +1690,7 @@ end of styles used in the admin gradeable page
 }
 
 .invisible-btn {
-    background-color: #0000;
+    background-color: #00000000;
     border: 0;
     padding: 0;
 }
@@ -1703,7 +1703,7 @@ end of styles used in the admin gradeable page
 }
 
 .skip-btn {
-    box-shadow: 0 2px 15px -5px #888;
+    box-shadow: 0 2px 15px -5px #888888;
     border-radius: 3px;
 
     /* TODO on mobile, different header height */

@@ -190,7 +190,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
     line-height: 1.5em;
     overflow: auto;
     padding: 5px;
-    border: 2px solid #555;
+    border: 2px solid #555555;
     background: white;
     min-width: 100px;
 }
