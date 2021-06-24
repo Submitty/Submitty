@@ -10,6 +10,7 @@
 
 .markdown {
     font-family: 'Source Sans Pro', 'sans-serif';
+    white-space: normal;
 }
 
 .markdown h1,

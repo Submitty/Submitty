@@ -39,6 +39,7 @@
 
 .post_content {
     margin-right: 5px;
+    white-space: pre;
 }
 .post_viewed_btn {
     background-color: #dcdcdcb5 !important;
