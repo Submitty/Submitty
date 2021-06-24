@@ -76,7 +76,7 @@ input[type=text]:invalid {
     color: var(--alert-invalid-entry-pink);
 }
 
-#prev_gradeable_div {
+#prev-gradeable-div {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -84,24 +84,24 @@ input[type=text]:invalid {
     padding-bottom: 30px;
 }
 
-#prev_gradeable_div select {
+#prev-gradeable-div select {
     width: calc(100% / 3 - 10px);
     margin: 5px;
 }
 
-#prev_gradeable_div select:nth-child(3n+2) {
+#prev-gradeable-div select:nth-child(3n+2) {
     margin-left: 0;
 }
 
-#prev_gradeable_div select:nth-child(3n+1) {
+#prev-gradeable-div select:nth-child(3n+1) {
     margin-right: 0;
 }
 
-#current_code_file, #provided_code_file, #prev_gradeable_div {
+#current-code-file, #provided-code-file, #prev-gradeable-div {
     display: none;
 }
 
-#ignore_others_list {
+#ignore-others-list {
     flex-grow: 100;
     margin-left: 0.5em;
 }
