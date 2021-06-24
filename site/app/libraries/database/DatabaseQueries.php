@@ -7220,18 +7220,17 @@ SQL;
         throw new \InvalidArgumentException('Course material does not exist');
     }
 
-    public function createCourseMaterial(CourseMaterial $course_material): bool {
-        try {
-            $params = [
-                $course_material->getType(),
-                $course_material->getPath(),
-                $course_material->getReleaseDate(),
-                $course_material->getHiddenFromStudents(),
-                $course_material->getPriority(),
-                $course_material->getSectionLock()
-            ];
-            $this->course_db->query(
-                "
+    public function createCourseMaterial(CourseMaterial $course_material): void {
+        $params = [
+            $course_material->getType(),
+            $course_material->getPath(),
+            $course_material->getReleaseDate(),
+            $course_material->getHiddenFromStudents(),
+            $course_material->getPriority(),
+            $course_material->getSectionLock()
+        ];
+        $this->course_db->query(
+            "
             INSERT INTO course_materials(
               type,
               path,
@@ -7240,43 +7239,37 @@ SQL;
               priority,
               section_lock)
             VALUES (?, ?, ?, ?, ?, ?)",
-                $params
-            );
-            if ($course_material->getSectionLock()) {
-                foreach ($course_material->getSections() as $section) {
-                    $params = [
-                        $course_material->getPath(),
-                        $section
-                    ];
-                    $this->course_db->query(
-                        "
+            $params
+        );
+        if ($course_material->getSectionLock()) {
+            foreach ($course_material->getSections() as $section) {
+                $params = [
+                    $course_material->getPath(),
+                    $section
+                ];
+                $this->course_db->query(
+                    "
                 INSERT INTO course_materials_sections(
                   course_material_id,
                   section_id)
                 VALUES (?, ?)",
-                        $params
-                    );
-                }
+                    $params
+                );
             }
-            return true;
-        }
-        catch (DatabaseException $e) {
-            return false;
         }
     }
 
-    public function updateCourseMaterial(CourseMaterial $course_material): bool {
-        try {
-            $params = [
-                $course_material->getType(),
-                $course_material->getReleaseDate(),
-                $course_material->getHiddenFromStudents(),
-                $course_material->getPriority(),
-                $course_material->getSectionLock(),
-                $course_material->getPath()
-            ];
-            $this->course_db->query(
-                "
+    public function updateCourseMaterial(CourseMaterial $course_material): void {
+        $params = [
+            $course_material->getType(),
+            $course_material->getReleaseDate(),
+            $course_material->getHiddenFromStudents(),
+            $course_material->getPriority(),
+            $course_material->getSectionLock(),
+            $course_material->getPath()
+        ];
+        $this->course_db->query(
+            "
             UPDATE course_materials SET
                 type=?,
                 release_date=?,
@@ -7284,43 +7277,32 @@ SQL;
                 priority=?,
                 section_lock=?
             WHERE path=?",
-                $params
-            );
-            $this->course_db->query(
-                "DELETE FROM course_materials_sections WHERE course_material_id=?",
-                [$course_material->getPath()]
-            );
-            if ($course_material->getSectionLock()) {
-                foreach ($course_material->getSections() as $section) {
-                    $params = [
-                        $course_material->getPath(),
-                        $section
-                    ];
-                    $this->course_db->query(
-                        "
+            $params
+        );
+        $this->course_db->query(
+            "DELETE FROM course_materials_sections WHERE course_material_id=?",
+            [$course_material->getPath()]
+        );
+        if ($course_material->getSectionLock()) {
+            foreach ($course_material->getSections() as $section) {
+                $params = [
+                    $course_material->getPath(),
+                    $section
+                ];
+                $this->course_db->query(
+                    "
                 INSERT INTO course_materials_sections(
                   course_material_id,
                   section_id)
                 VALUES (?, ?)",
-                        $params
-                    );
-                }
+                    $params
+                );
             }
-            return true;
-        }
-        catch (DatabaseException $e) {
-            return false;
         }
     }
 
-    public function deleteCourseMaterial(string $path): bool {
-        try {
-            $this->course_db->query("DELETE FROM course_materials WHERE path=?", [$path]);
-            return true;
-        }
-        catch (DatabaseException $e) {
-            return false;
-        }
+    public function deleteCourseMaterial(string $path): void {
+        $this->course_db->query("DELETE FROM course_materials WHERE path=?", [$path]);
     }
 
     public function deleteCourseMaterialSections(string $path): void {

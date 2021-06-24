@@ -63,34 +63,28 @@ class CourseMaterialsController extends AbstractController {
 
         $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
 
-        $success = false;
-
         foreach ($all_files as $file) {
             if (is_array($file)) {
                 $this->deleteHelper($file);
             }
             else {
-                $success = $this->core->getQueries()->deleteCourseMaterial($path);
+                $this->core->getQueries()->deleteCourseMaterial($path);
             }
+        }
+
+        $success = false;
+        if (is_dir($path)) {
+            $success = FileUtils::recursiveRmdir($path);
+        }
+        else {
+            $success = unlink($path);
         }
 
         if ($success) {
-            if (is_dir($path)) {
-                $success = FileUtils::recursiveRmdir($path);
-            }
-            else {
-                $success = unlink($path);
-            }
-
-            if ($success) {
-                $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
-            }
-            else {
-                $this->core->addErrorMessage("Failed to remove " . basename($path));
-            }
+            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
         else {
-            $this->core->addErrorMessage("Failed to delete " . basename($path) . " from database");
+            $this->core->addErrorMessage("Failed to remove " . basename($path));
         }
 
         $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -201,7 +195,7 @@ class CourseMaterialsController extends AbstractController {
             $course_material = $this->tryGetCourseMaterial($file_name);
             if ($course_material != false) {
                 $course_material->setReleaseDate($new_data_time);
-                $success = $this->core->getQueries()->updateCourseMaterial($course_material);
+                $this->core->getQueries()->updateCourseMaterial($course_material);
             }
             else {
                 $has_error = true;
@@ -210,9 +204,6 @@ class CourseMaterialsController extends AbstractController {
 
         if ($has_error) {
             return JsonResponse::getErrorResponse("Failed to find one of the course materials.");
-        }
-        if (!$success) {
-            return JsonResponse::getErrorResponse("Something went wrong while saving.");
         }
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
@@ -254,10 +245,8 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setReleaseDate($date_time);
         }
 
-        if ($this->core->getQueries()->updateCourseMaterial($course_material)) {
-            return JsonResponse::getSuccessResponse("Successfully uploaded!");
-        }
-        return JsonResponse::getErrorResponse("Failed to save");
+        $this->core->getQueries()->updateCourseMaterial($course_material);
+        return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 
     /**
@@ -469,7 +458,6 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        $success = true;
         foreach ($details['type'] as $key => $value) {
             $course_material = new CourseMaterial($this->core, [
                 'type' => $value,
@@ -480,13 +468,8 @@ class CourseMaterialsController extends AbstractController {
                 'section_lock' => $details['section_lock'],
                 'sections' => $details['sections']
             ]);
-            if (!$this->core->getQueries()->createCourseMaterial($course_material)) {
-                $success = false;
-            }
+            $this->core->getQueries()->createCourseMaterial($course_material);
         }
-        if ($success) {
-            return JsonResponse::getSuccessResponse("Successfully uploaded!");
-        }
-        return JsonResponse::getErrorResponse("Failed to save");
+        return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 }

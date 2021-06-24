@@ -2,6 +2,7 @@
 
 namespace tests\app\controllers\course;
 
+use app\controllers\AbstractController;
 use app\controllers\course\CourseMaterialsController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -82,91 +83,16 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         return $files;
     }
 
-    public function buildMockQueries(array $names, bool $slash) {
-        $course_materials = [];
-        foreach ($names as $name) {
-            $details = [
-                'path' => $slash ? $this->upload_path . "/" . $name : $this->upload_path . $name,
-                'section_lock' => false,
-                'hidden_from_students' => false,
-                'priority' => 0,
-                'release_date' => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
-                'type' => 0
-            ];
-
-            $course_materials[] = new CourseMaterial($this->core, $details);
-        }
-
-        //$mock_queries = $this->createMock(DatabaseQueries::class);
-        $this->core->getQueries()
-            ->expects($this->any())
-            ->method('createCourseMaterial')
-            ->with($this->anything())
-            ->will($this->returnCallback(function ($arg) use ($course_materials) {
-                foreach ($course_materials as $course_material) {
-                    if (
-                        $arg->getType() === $course_material->getType()
-                        && $arg->getPath() === $course_material->getPath()
-                        && $arg->getReleaseDate() == $course_material->getReleaseDate()
-                        && $arg->getHiddenFromStudents() === $course_material->getHiddenFromStudents()
-                        && $arg->getPriority() === $course_material->getPriority()
-                        && $arg->getSectionLock() === $course_material->getSectionLock()
-                        && $arg->getSections() === $course_material->getSections()
-                    ) {
-                        return true;
-                    }
-                }
-                return false;
-            }));
-
-        $this->course_material = new CourseMaterial($this->core, [
-            'path' => $this->upload_path . "/" . $name,
+    public function buildCourseMaterial(string $name): CourseMaterial {
+        $details = [
+            'path' => $this->upload_path . $name,
             'section_lock' => false,
             'hidden_from_students' => false,
             'priority' => 0,
-            'release_date' => '2005-01-01 00:00:00+0000',
+            'release_date' => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
             'type' => 0
-        ]);
-
-        $course_material = $this->course_material;
-
-        $this->core->getQueries()
-            ->expects($this->any())
-            ->method('updateCourseMaterial')
-            ->with($this->anything())
-            ->will($this->returnCallback(function ($arg) use ($course_material) {
-                if (
-                    $arg->getType() === $course_material->getType()
-                    && $arg->getPath() === $course_material->getPath()
-                    && $arg->getReleaseDate() == $course_material->getReleaseDate()
-                    && $arg->getHiddenFromStudents() === $course_material->getHiddenFromStudents()
-                    && $arg->getPriority() === $course_material->getPriority()
-                    && $arg->getSectionLock() === $course_material->getSectionLock()
-                    && $arg->getSections() === $course_material->getSections()
-                ) {
-                    return true;
-                }
-                return false;
-            }));
-
-        $this->core->getQueries()
-            ->expects($this->any())
-            ->method('getCourseMaterial')
-            ->with($this->anything())
-            ->willReturn($course_materials[0]);
-
-        $path = $this->upload_path . "/" . $name;
-
-        $this->core->getQueries()
-            ->expects($this->any())
-            ->method('deleteCourseMaterial')
-            ->with($this->anything())
-            ->will($this->returnCallback(function ($arg) use ($path) {
-                if ($arg == $path) {
-                    return true;
-                }
-                return false;
-            }));
+        ];
+        return new CourseMaterial($this->core, $details);
     }
 
     public function testCourseMaterialsUpload() {
@@ -178,12 +104,17 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         file_put_contents($this->upload_path . "/" .  $name, 'a');
         $this->buildFakeFile($name);
 
+        $course_material = $this->buildCourseMaterial("/$name");
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('createCourseMaterial')
+            ->with($course_material);
+
         $_POST['requested_path'] = '';
         $_POST['sections_lock'] = false;
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
-
-        $this->buildMockQueries([$name], true);
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -217,7 +148,16 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->core->getConfig()->getCoursePath() . '/lev0/test1.txt'
         ];
 
-        $this->buildMockQueries($names, false);
+        $course_materials = [];
+        foreach ($names as $name) {
+            $course_materials[] = $this->buildCourseMaterial($name);
+        }
+
+        $this->core->getQueries()
+            ->expects($this->exactly(4))
+            ->method('createCourseMaterial')
+            ->withConsecutive([$course_materials[0]], [$course_materials[1]], [$course_materials[2]], [$course_materials[3]]);
+
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -262,7 +202,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         file_put_contents($this->upload_path . "/" . $name, 'a');
         $this->buildFakeFile($name);
 
-        $this->buildMockQueries([$name], true);
+        $course_material = $this->buildCourseMaterial("/$name");
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('createCourseMaterial')
+            ->with($course_material);
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -279,12 +224,55 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $new_date = new \DateTime('2005-01-01');
         $new_date = $new_date->format('Y-m-d H:i:sO');
 
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('getCourseMaterial')
+            ->with($_POST['fn'][0])
+            ->willReturn($course_material);
+
+        $course_material->setReleaseDate($new_date);
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('updateCourseMaterial')
+            ->with($course_material);
+
         $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date);
         $exptected_ret = ['status' => 'success', 'data' => 'Time successfully set.'];
         $this->assertEquals($exptected_ret, $ret->json);
+    }
 
-        $this->course_material->setSectionLock(true);
-        $this->course_material->setSections(['1','2']);
+    /**
+     * @runInSeparateProcess
+     */
+    public function testUpdateCourseMaterial() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
+        $_FILES = [];
+
+        $name = "foo.txt";
+        file_put_contents($this->upload_path . "/" . $name, 'a');
+        $this->buildFakeFile($name);
+
+        $course_material = $this->buildCourseMaterial("/$name");
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('createCourseMaterial')
+            ->with($course_material);
+
+        $controller = new CourseMaterialsController($this->core);
+
+        $_POST['requested_path'] = '';
+        $_POST['sections_lock'] = false;
+        $_POST['hide_from_students'] = false;
+        $_POST['sort_priority'] = 0;
+
+        $ret = $controller->ajaxUploadCourseMaterialsFiles();
+        $exptected_ret = ['status' => 'success', 'data' => 'Successfully uploaded!'];
+        $this->assertEquals($exptected_ret, $ret->json);
 
         $_POST = [];
 
@@ -292,13 +280,27 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $_POST['sections'] = '1,2';
         $_POST['requested_path'] = FileUtils::joinPaths($this->upload_path, $name);
 
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('getCourseMaterial')
+            ->with($_POST['requested_path'])
+            ->willReturn($course_material);
+
+        $course_material->setSectionLock(true);
+        $course_material->setSections(['1','2']);
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('updateCourseMaterial')
+            ->with($course_material);
+
         $ret = $controller->ajaxEditCourseMaterialsFiles();
         $exptected_ret = ['status' => 'success', 'data' => 'Successfully uploaded!'];
         $this->assertEquals($exptected_ret, $ret->json);
     }
 
     /**
-     * @runInSeparateProcess
+     *
      */
     public function testDeleteCourseMaterial() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
@@ -312,7 +314,14 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         file_put_contents($this->upload_path . "/" .  $name, 'a');
         $this->buildFakeFile($name);
 
-        $this->buildMockQueries([$name], true);
+        //$this->buildMockQueries([$name], true);
+
+        $course_material = $this->buildCourseMaterial("/$name");
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('createCourseMaterial')
+            ->with($course_material);
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -326,7 +335,11 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $path = $this->upload_path . "/" . $name;
 
         $this->core->getAccess()->method('resolveDirPath')->willReturn($path);
-        $controller->deleteCourseMaterial($this->upload_path . "/" . $name);
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('deleteCourseMaterial')
+            ->with($path);
+        $controller->deleteCourseMaterial($path);
 
         $files = FileUtils::getAllFiles($this->upload_path);
         $this->assertEquals(0, count($files));
@@ -346,7 +359,14 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
 
-        $this->buildMockQueries(['foo/foo2/' . $name], true);
+        //$this->buildMockQueries(['foo/foo2/' . $name], true);
+
+        $course_material = $this->buildCourseMaterial("/foo/foo2/$name");
+
+        $this->core->getQueries()
+            ->expects($this->once())
+            ->method('createCourseMaterial')
+            ->with($course_material);
 
         $controller = new CourseMaterialsController($this->core);
 
