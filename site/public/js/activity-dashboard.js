@@ -12,15 +12,15 @@ function sortTable(n, flag) {
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
-        if (i != n && $('#'+i).children('i').hasClass("fa-angle-up")){
-            $('#'+i).children('i').removeClass("fa-angle-up").addClass("fa-angle-down");
+        if (i != n && $(`#{i}`).children('i').hasClass('fa-angle-up')){
+            $(`#${i}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
         }
     }
-    if ($('#'+n).children('i').hasClass("fa-angle-up")){
-        $('#'+n).children('i').removeClass("fa-angle-up").addClass("fa-angle-down");
+    if ($(`#${n}`).children('i').hasClass('fa-angle-up')){
+        $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
     }
     else {
-        $('#'+n).children('i').removeClass("fa-angle-down").addClass("fa-angle-up");
+        $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
     }
     switching = true;
     // Set the sorting direction to ascending:
@@ -45,11 +45,11 @@ function sortTable(n, flag) {
             y = rows[i + 1].getElementsByTagName('TD')[n];
             /* Check if the two rows should switch place,
             based on the direction, asc or desc: */
-            let xIsDigit = /^\d+$/.test(x);
-            let yIsDigit = /^\d+$/.test(y);
+            const xIsDigit = /^\d+$/.test(x);
+            const yIsDigit = /^\d+$/.test(y);
             if (dir == 'asc') {
                 // Data that should be interpreted as a number
-                
+
                 if ((n == 0 && (xIsDigit || yIsDigit)) || n == 8) {
                     if (xIsDigit && yIsDigit && Number(x.innerHTML) > Number(y.innerHTML)) {
                         shouldSwitch = true;

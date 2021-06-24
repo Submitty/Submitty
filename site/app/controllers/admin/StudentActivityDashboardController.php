@@ -10,8 +10,6 @@ use app\libraries\FileUtils;
 /**
  * Class StudentActivityDashboardController
  * @package app\controllers\admin
- * 
-
  */
 
 class StudentActivityDashboardController extends AbstractController {
@@ -23,8 +21,8 @@ class StudentActivityDashboardController extends AbstractController {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         //var_dump($data_dump);
         return new WebResponse([
-             'admin',
-             'StudentActivityDashboard'
+            'admin',
+            'StudentActivityDashboard'
         ], 'createTable', $data_dump);
    }
 
@@ -35,8 +33,8 @@ class StudentActivityDashboardController extends AbstractController {
    public function downloadData(){
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         $file_url = FileUtils::joinPaths(
-             $this->core->getConfig()->getCoursePath(), 
-             'tmp'
+            $this->core->getConfig()->getCoursePath(),
+            'tmp'
         );
 
         if (!FileUtils::createDir($file_url)) {
@@ -50,8 +48,8 @@ class StudentActivityDashboardController extends AbstractController {
 
         $fp = fopen($file_url, 'w');
 
-        foreach($data_dump as $rows){
-               fputcsv($fp, $rows);
+        foreach($data_dump as $rows) {
+            fputcsv($fp, $rows);
         }
 
         header("Content-type: text/csv");
@@ -62,8 +60,8 @@ class StudentActivityDashboardController extends AbstractController {
         readfile($file_url);
         fclose($fp);
         return new WebResponse([
-               'admin',
-               'StudentActivityDashboard'
+            'admin',
+            'StudentActivityDashboard'
         ], 'downloadFile', $file_url);
    }
 }
