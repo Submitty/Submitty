@@ -47,11 +47,11 @@
 }
 
 [data-theme="dark"] .hljs-bullet,
-[data-theme="dark"].hljs-link,
-[data-theme="dark"].hljs-meta,
-[data-theme="dark"].hljs-selector-id,
-[data-theme="dark"]hljs-symbol,
-[data-theme="dark"]hljs-title {
+[data-theme="dark"] .hljs-link,
+[data-theme="dark"] .hljs-meta,
+[data-theme="dark"] .hljs-selector-id,
+[data-theme="dark"] .hljs-symbol,
+[data-theme="dark"] .hljs-title {
     color: #61aeee;
 }
 

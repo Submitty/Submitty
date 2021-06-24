@@ -65,6 +65,7 @@
 
 .markdown code {
     display: block;
+    white-space: pre;
     padding: 1em 1em 1em 2em;
     overflow-x: scroll;
 }
