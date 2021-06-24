@@ -499,6 +499,12 @@ progress::-webkit-progress-value {
     top: 5px;
 }
 
+#grading-scroll-message {
+    color: var(--standard-medium-gray);
+    margin-left: 5px;
+    font-size:  14px;
+}
+
 #grading-panel-student-name::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 7px;
