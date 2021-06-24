@@ -15,7 +15,6 @@ use app\libraries\response\JsonResponse;
 use app\views\admin\SqlToolboxView;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Reflection;
 use ReflectionClass;
 use tests\BaseUnitTest;
 
@@ -49,8 +48,8 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function testShowToolbox(): void {
         $reflection = new ReflectionClass(Table::class);
         $tables = [
-            new Table(),
-            new Table(),
+            $reflection->newInstanceWithoutConstructor(),
+            $reflection->newInstanceWithoutConstructor(),
         ];
         $prop = $reflection->getProperty('name');
         $prop->setAccessible(true);

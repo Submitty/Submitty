@@ -63,7 +63,7 @@ class Column {
     protected $table;
 
     public function __construct() {
-      throw new \RuntimeException("Cannot create new information_schema.column");
+        throw new \RuntimeException("Cannot create new information_schema.column");
     }
 
     public function getName(): string {
