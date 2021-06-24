@@ -15,6 +15,7 @@
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
     "public/css/google/*",
+    "public/css/highlightjs/*",
     "public/css/userform.css",
     "public/css/user-profile.css",
     "public/css/table.css",
