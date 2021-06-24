@@ -47,14 +47,30 @@ function sortTable(n, flag) {
             /* Check if the two rows should switch place,
             based on the direction, asc or desc: */
             if (dir == 'asc') {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                // Data that should be interpreted as a number
+                if (n == 0 || n == 8) {
+                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                // Other data
+                else if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             }
             else if (dir == 'desc') {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                // Data that should be interpreted as a number
+                if (n == 0 || n == 8) {
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                // Other data
+                else if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
