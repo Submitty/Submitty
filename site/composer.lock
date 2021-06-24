@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "057c2c4d33b0b4b996c2a3190c71ca59",
+    "content-hash": "741c3336be39429f22b86cfc976dab22",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1601,10 +1601,6 @@
                 "stream",
                 "zip"
             ],
-            "support": {
-                "issues": "https://github.com/maennchen/ZipStream-PHP/issues",
-                "source": "https://github.com/maennchen/ZipStream-PHP/tree/master"
-            },
             "funding": [
                 {
                     "url": "https://opencollective.com/zipstream",
