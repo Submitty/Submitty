@@ -913,7 +913,7 @@ HTML;
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
-                $error_message = [                    
+                $error_message = [
                     "color" => "var(--standard-creamsicle-orange)", // mango orange
                     "message" => "Cancelled Submission"
                 ];
