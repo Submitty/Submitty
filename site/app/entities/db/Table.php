@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\entities\db;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -13,16 +15,20 @@ class Table {
   /**
    * @ORM\Id
    * @ORM\Column(name="table_catalog",type="string")
+   * @var string
    */
     protected $database;
   /**
    * @ORM\Id
    * @ORM\Column(name="table_schema",type="string")
+   * @var string
    */
     protected $schema;
+
   /**
    * @ORM\Id
    * @ORM\Column(name="table_name",type="string")
+   * @var string
    */
     protected $name;
 
@@ -34,21 +40,22 @@ class Table {
    * @ORM\JoinColumn(name="table_name", referencedColumnName="table_name")
    * })
    * @ORM\OrderBy({"position" = "ASC"})
+   * @var Collection<Column>
    */
     protected $columns;
 
     public function __construct() {
-        $this->columns = new ArrayCollection();
+        throw new \RuntimeException("Cannot create new information_schema.table");
     }
 
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
 
   /**
-   * @return ArrayCollection<Column>
+   * @return Collection<Column>
    */
-    public function getColumns() {
+    public function getColumns(): Collection {
         return $this->columns;
     }
 }
