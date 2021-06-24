@@ -33,7 +33,6 @@ def up(config, database, semester, course):
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS course_materials_sections (
-            id SERIAL PRIMARY KEY,
             course_material_id TEXT NOT NULL,
             section_id varchar(255) NOT NULL,
             CONSTRAINT fk_course_material_id
@@ -43,7 +42,8 @@ def up(config, database, semester, course):
             CONSTRAINT fk_section_id
                 FOREIGN KEY(section_id)
                     REFERENCES sections_registration(sections_registration_id)
-                    ON DELETE CASCADE
+                    ON DELETE CASCADE,
+            CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id)
         );
         """
     )
@@ -101,8 +101,7 @@ def up(config, database, semester, course):
                             )
                             VALUES (
                                 :course_material_id, :section_id
-                            ) ON CONFLICT(course_material_id) DO UPDATE SET
-                            section_id = EXCLUDED.section_id
+                            ) ON CONFLICT(course_material_id, section_id) DO NOTHING
                             """
                         params = {
                             'course_material_id': course_material_id,
