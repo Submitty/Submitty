@@ -9,33 +9,33 @@
         </div>
     </header>
     <div id="container">
-      <div class="line">
-        <label for="gradeable_access_date">Gradeable Access Date</label>
-        <input type="date" class="date_picker flatpickr-input active" id="gradeable_access_date">
-      </div>
-      <div class="line">
-        <label for="gradeable_submission_date">Gradeable Submission Date</label>
-        <input type="date" class="date_picker flatpickr-input active" id="gradeable_submission_date">
-      </div>
-      <div class="line">
-        <label for="forum_view_date">Forum View Date</label>
-        <input type="date" class="date_picker flatpickr-input active" id="forum_view_date">
-      </div>
-      <div class="line">
-        <label for="forum_post_date">Forum Post Date</label>
-        <input type="date" class="date_picker flatpickr-input active" id="forum_post_date">
-      </div>
-      <div class="line">
-        <label for="num_poll_responses">Number of Poll Responses</label>
-        <input type="date" class="date_picker" id="num_poll_responses">
-      </div>
-      <div class="line">
-        <label for="office_hours_queue_date">Office Hours Queue Date</label>
-        <input type="date" class="date_picker" id="office_hours_queue_date">
-      </div>
+        <div class="line">
+            <label for="gradeable_access_date">Gradeable Access Date</label>
+            <input type="date" class="date_picker flatpickr-input active" id="gradeable_access_date">
+        </div>
+        <div class="line">
+            <label for="gradeable_submission_date">Gradeable Submission Date</label>
+            <input type="date" class="date_picker flatpickr-input active" id="gradeable_submission_date">
+        </div>
+        <div class="line">
+            <label for="forum_view_date">Forum View Date</label>
+            <input type="date" class="date_picker flatpickr-input active" id="forum_view_date">
+        </div>
+        <div class="line">
+            <label for="forum_post_date">Forum Post Date</label>
+            <input type="date" class="date_picker flatpickr-input active" id="forum_post_date">
+        </div>
+        <div class="line">
+            <label for="num_poll_responses">Number of Poll Responses</label>
+            <input type="number" id="num_poll_responses">
+        </div>
+        <div class="line">
+            <label for="office_hours_queue_date">Office Hours Queue Date</label>
+            <input type="date" class="date_picker" id="office_hours_queue_date">
+        </div>
 
-      <div onclick="applySettings()" class="btn btn-primary">Apply</div> 
-      <div onclick="clearFields()" class="btn btn-primary">Clear</div>
+        <div onclick="applySettings()" class="btn btn-primary">Apply</div> 
+        <div onclick="clearFields()" class="btn btn-primary">Clear</div>
     </div>
 <table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
@@ -72,7 +72,6 @@
                 <td>{{row.num_poll_response}}</td>
                 <td>{{row.office_hours_queue}}</td>
                 <td style="display: none;">False</td>
-
             </tr>
           {% endfor %}
         </tbody>
