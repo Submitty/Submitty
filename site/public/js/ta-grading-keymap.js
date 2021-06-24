@@ -12,19 +12,39 @@ var remapping = {
     index: 0
 };
 
-let settingsData = [{
+let settingsData = [
+    {
+        id: "general-setting-list",
+        name: "General",
+        values: [
+            {
+                name: "Prev/Next student arrow functionality",
+                storageCode: "general-setting-arrow-function",
+                options: {
+                    "Prev/Next Student": "default",
+                    "Prev/Next Ungraded Student": "ungraded",
+                    "Prev/Next Itempool Student": "itempool",
+                    "Prev/Next Ungraded Itempool Student": "ungraded-itempool"
+                }, 
+                default: "Prev/Next Student"
+            }
+        ]
+    },
+    {
         id: "notebook-setting-list",
         name: "Notebook",
-        values: [{
-                    name: "Expand files in notebook file submission on page load",
-                    storageCode: "notebook-setting-file-submission-expand",
-                    options: {
-                        "No": "false", 
-                        "Yes": "true"
-                    }, 
-                    default: "No"
-                }]
-        }
+        values: [
+            {
+                name: "Expand files in notebook file submission on page load",
+                storageCode: "notebook-setting-file-submission-expand",
+                options: {
+                    "No": "false", 
+                    "Yes": "true"
+                }, 
+                default: "No"
+            }
+        ]
+    }
 ];
 
 window.onkeyup = function(e) {

@@ -1723,4 +1723,36 @@ class SubmissionController extends AbstractController {
 
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")
+     * @return JsonResponse
+     */
+    public function getTimeRemainingData($gradeable_id) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable !== null) {
+            if ($gradeable->hasAllowedTime()) {
+                $allowed_time = $gradeable->getUserAllowedTime($this->core->getUser());
+                $thing = $this->core->getQueries()->getGradeableAccessUser($gradeable->getId(), $this->core->getUser()->getId())[0]['timestamp'];
+                $now = new \DateTime($thing);
+                $now->add(new \DateInterval('PT' . $allowed_time . 'M'));
+                $duedate = $gradeable->getSubmissionDueDate();
+                return JsonResponse::getSuccessResponse([
+                    'deadline' => $duedate->getTimestamp() * 1000,
+                    'user_allowed_time_deadline' => $now->getTimestamp() * 1000,
+                    'user_allowed_time' => $allowed_time,
+                    'user_start_time' => (new \DateTime($thing))->getTimestamp() * 1000,
+                    'current_time' => (new \DateTime())->getTimestamp() * 1000
+                ]);
+            }
+            else {
+                $duedate = $gradeable->getSubmissionDueDate();
+                return JsonResponse::getSuccessResponse([
+                    'deadline' => $duedate->getTimestamp() * 1000,
+                    'current_time' => (new \DateTime())->getTimestamp() * 1000
+                ]);
+            }
+        }
+        return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
+    }
 }

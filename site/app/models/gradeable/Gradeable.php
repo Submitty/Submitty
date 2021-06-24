@@ -71,6 +71,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method Component[] getComponents()
+ * @method void setAllowedMinutes($minutes)
  * @method bool isRegradeAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -197,6 +198,10 @@ class Gradeable extends AbstractModel {
     protected $has_due_date = true;
     /** @prop @var bool If this gradeable has a grade release date or not */
     protected $has_release_date = true;
+    /** @prop @var int The amount of time given to a default student to complete assignment */
+    protected $allowed_minutes = null;
+    /** @prop @var array Contains all of the allowed time overrides */
+    protected $allowed_minutes_overrides = [];
 
     /* Dates for all types of gradeables */
 
@@ -290,6 +295,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            $this->setAllowedMinutes($details['allowed_minutes']);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }
@@ -2101,5 +2107,45 @@ class Gradeable extends AbstractModel {
         );
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
+    }
+
+    /**
+     * Determine if $this gradeable has an allowed time.
+     *
+     * @return bool True if has allowed, false otherwise.
+     */
+    public function hasAllowedTime(): bool {
+        return $this->allowed_minutes !== null;
+    }
+
+    /**
+     * Retrieve users allowed time for this exam
+     *
+     * @return int Number of minutes allowed
+     */
+    public function getUserAllowedTime(User $user): ?int {
+        if ($this->allowed_minutes === null) {
+            return null;
+        }
+        if (empty($this->allowed_minutes_overrides) || $this->allowed_minutes_overrides === null) {
+            return $this->allowed_minutes;
+        }
+        if (isset($this->allowed_minutes_overrides[$user->getId()])) {
+            return $this->allowed_minutes_overrides[$user->getId()];
+        }
+        else {
+            return $this->allowed_minutes;
+        }
+    }
+
+    /**
+     * Setup the allowed time overrides array
+     *
+     * @return void
+     */
+    public function setAllowedMinutesOverrides(array $overrides): void {
+        foreach ($overrides as $override) {
+            $this->allowed_minutes_overrides[$override['user_id']] = $override['allowed_minutes'];
+        }
     }
 }

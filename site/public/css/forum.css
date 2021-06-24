@@ -152,10 +152,6 @@
     font-size: 1.17em;
 }
 
-.btn_markdown {
-    margin-right:10px;
-}
-
 .active-thread-remove-announcement{
     display: inline-block;
     color: orange;
@@ -569,37 +565,6 @@
     font-size: 1.8em;
 }
 
-.post_content p {
-    white-space: pre-wrap;
-}
-
-.post_content li {
-    white-space: normal;
-}
-
-.post_content ol {
-    white-space: normal;
-    padding-left: 15px;
-}
-
-.post_content ul {
-    white-space: normal;
-    padding-left: 15px;
-}
-
-.post_content table {
-    border-collapse: collapse;
-    border: 1px solid black;
-}
-
-.post_content th {
-    border: 1px solid black;
-}
-
-.post_content td {
-    border: 1px solid black;
-}
-
 .category-sortable {
   background-color: var(--always-default-white);
 }
@@ -641,4 +606,45 @@
 
 .thread-left-cont {
     flex: 3;
+}
+
+.viewed_post{
+    background-color: var(--default-white);
+}
+
+/* TODO: MAKE THIS CASCADE */
+.deleted {
+    background-color: var(--deleted-discussion-post-grey);
+}
+
+.deleted.active {
+    background-color: var(--deleted-discussion-post-grey);
+}
+
+.new_post {
+    background-color: var(--viewed-content);
+}
+
+.important {
+    /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
+    border-style: solid;
+    border-width: 4px;
+    border-color: var(--important-post); /* gold */
+}
+
+.active {
+    background-color: var(--default-white);
+    /*    color: #4a4a4a;*/
+    border: 4px solid var(--submitty-logo-blue);
+}
+
+.new_thread{
+    background-color: var(--viewed-content);
+    color: var(--text-black)
+}
+
+.markdown-toggle {
+    margin-right:10px; 
+    padding:unset; 
+    cursor:pointer;
 }

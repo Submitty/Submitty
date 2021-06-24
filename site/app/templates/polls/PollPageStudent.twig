@@ -1,6 +1,8 @@
 <div class="content">
     <h1> {{ poll.getName() }} </h1>
-    {{ poll.getQuestion() | markdown}}
+    {% include "generic/Markdown.twig" with { 
+        "content": poll.getQuestion(),
+    } only %}
     {% if file_data is not null %}
         <br/>
         <img src="{{ file_data }}">
