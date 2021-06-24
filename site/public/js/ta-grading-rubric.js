@@ -2437,7 +2437,7 @@ function open_overall_comment_tab(user) {
 
     //if it is someone not the current user's comment and it hasn't been rendered yet
     if(textarea.hasClass('markdown-preview') && !textarea.find('.markdown').length){
-        const url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'overall_comment', 'preview']);
+        const url = buildCourseUrl(['markdown', 'preview']);
         renderMarkdown($(`#overall-comment-${user}`), url, content);
     }
 }

@@ -34,7 +34,7 @@
     "spatie/commonmark-highlighter": "^2.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "8.5.16",
+    "phpunit/phpunit": "8.5.17",
     "submitty/php-codesniffer": "2.5.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",

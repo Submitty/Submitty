@@ -45,9 +45,12 @@ Required Parameters:
         } only %}
         {% for user, comment in overall_comment["other_graders"] %}
             <div
-                    id="overall-comment-{{user | escape }}"
-                    style="display:none;"
-                    class="general-comment-entry markdown-preview noscroll key_to_click" tabindex="0">{{comment|escape }}</div>
+              id="overall-comment-{{user | escape }}"
+              style="display:none;"
+              class="general-comment-entry markdown-preview noscroll key_to_click" tabindex="0"
+            >
+              {{comment|escape }}
+            </div>
         {% endfor %}
     </div>
     <script>
