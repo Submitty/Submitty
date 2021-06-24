@@ -261,10 +261,13 @@ function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 =
     let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
     let es = false;
     if (user_id_2 != null) {
+        editor1.getDoc().setValue('');
         url += `&user_id_2=${user_id_2}&version_user_2=${version_id_2}`;
         es = true;
         $(".user2-select").val(`{"user_id":"${user_id_2}","version":${version_id_2}}`);
     } else {
+        editor0.getDoc().setValue('');
+        editor1.getDoc().setValue('');
         updateRightUserLists(user_id_1, version_id_1);
     }
     requestAjaxData(url, f, es);
