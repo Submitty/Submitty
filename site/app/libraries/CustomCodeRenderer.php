@@ -10,7 +10,7 @@ use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 use League\CommonMark\HtmlElement;
 
 class CustomCodeRenderer implements BlockRendererInterface {
-    
+
     /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
     protected $baseRenderer;
 
