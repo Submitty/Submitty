@@ -142,7 +142,7 @@ HTML;
         $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
         $environment->mergeConfig([]);
 
-        $converter = new CommonMarkConverter([], $environment);
+        $converter = new CommonMarkConverter(['html_input' => 'escape'], $environment);
         $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
