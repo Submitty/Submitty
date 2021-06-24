@@ -43,17 +43,17 @@
 <table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" onclick="sortTable(0, false)" style="cursor: pointer">Registration Section</td>
-                <td id="1" onclick="sortTable(1, false)" style="cursor: pointer">User ID</td>
-                <td id="2" onclick="sortTable(2, false)" style="cursor: pointer">Last Name</td>
-                <td id="3" onclick="sortTable(3, false)" style="cursor: pointer">First Name</td>
-                <td id="4" onclick="sortTable(4, false)" style="cursor: pointer">Gradeable Access Date</td>
-                <td id="5" onclick="sortTable(5, false)" style="cursor: pointer">Gradeable Submission Date</td>
-                <td id="6" onclick="sortTable(6, false)" style="cursor: pointer">Forum View Date</td>
-                <td id="7" onclick="sortTable(7, false)" style="cursor: pointer">Forum Post Date</td>
-                <td id="8" onclick="sortTable(8, false)" style="cursor: pointer">Number of Poll Responses</td>
-                <td id="9" onclick="sortTable(9, false)" style="cursor: pointer">Office Hours Queue Date</td>
-                <td id="10" onclick="sortTable(10, false)" style="cursor: pointer; display:none">Flagged</td>
+                <td id="0" onclick="sortTable(0, false)" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" onclick="sortTable(1, false)" style="cursor: pointer">User ID <i class="fas fa-angle-down"></i></td>
+                <td id="2" onclick="sortTable(2, false)" style="cursor: pointer">Last Name <i class="fas fa-angle-down"></i></td>
+                <td id="3" onclick="sortTable(3, false)" style="cursor: pointer">First Name <i class="fas fa-angle-down"></i></td>
+                <td id="4" onclick="sortTable(4, false)" style="cursor: pointer">Gradeable Access Date <i class="fas fa-angle-down"></i></td>
+                <td id="5" onclick="sortTable(5, false)" style="cursor: pointer">Gradeable Submission Date <i class="fas fa-angle-down"></i></td>
+                <td id="6" onclick="sortTable(6, false)" style="cursor: pointer">Forum View Date <i class="fas fa-angle-down"></i></td>
+                <td id="7" onclick="sortTable(7, false)" style="cursor: pointer">Forum Post Date <i class="fas fa-angle-down"></i></td>
+                <td id="8" onclick="sortTable(8, false)" style="cursor: pointer">Number of Poll Responses <i class="fas fa-angle-down"></i></td>
+                <td id="9" onclick="sortTable(9, false)" style="cursor: pointer">Office Hours Queue Date <i class="fas fa-angle-down"></i></td>
+                <td id="10" onclick="sortTable(10, false)" style="cursor: pointer; display:none">Flagged <i class="fas fa-angle-down"></i></td>
             </tr>
         </thead>
     
@@ -102,19 +102,19 @@ function applySettings(){
     var s_off_hours = data[i].office_hours_queue;
     var flag = false;
     //if(s_grad_acc == null || s_grad_sub == null || s_forum_view == null || s_forum_post == null || s_num_poll == null || s_off_hours == null) document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-    if(Date.parse(s_grad_acc) < grad_acc) flag = true;
-    else if(Date.parse(s_grad_sub) < grad_sub) flag = true;
-    else if(Date.parse(s_forum_view) < forum_view) flag = true;
-    else if(Date.parse(s_forum_post) < forum_post) flag = true;
-    else if(Date.parse(s_num_polls) < num_poll) flag = true;
-    else if(Date.parse(s_off_hours) < off_hours) flag = true;
+    if((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) flag = true;
+    else if((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) flag = true;
+    else if((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) flag = true;
+    else if((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) flag = true;
+    else if((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) flag = true;
+    else if((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) flag = true;
     else {
       rows[i+1].getElementsByTagName("TD")[10].innerText = 'False'; 
       document.getElementById(data[i].user_id).style.backgroundColor= 'green';
     }
     if(flag){
       document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-      console.log(rows[i+1].getElementsByTagName("TD")[10].innerText = 'True');
+      rows[i+1].getElementsByTagName("TD")[10].innerText = 'True';
     }
 
   }
@@ -124,7 +124,6 @@ function applySettings(){
 }
 
 function clearFields(){
-  console.log("Clearing?");
   document.getElementById('gradeable_access_date').value = '';
   document.getElementById('gradeable_submission_date').value = '';
   document.getElementById('forum_view_date').value = '';

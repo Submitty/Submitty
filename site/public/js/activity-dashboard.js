@@ -13,9 +13,16 @@ function sortTable(n, flag) {
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
-        document.getElementById(i).style.color = 'white';
+        if (i != n && $('#'+i).children('i').hasClass("fa-angle-up")){
+            $('#'+i).children('i').removeClass("fa-angle-up").addClass("fa-angle-down");
+        }
     }
-    document.getElementById(n).style.color = 'blue';
+    if ($('#'+n).children('i').hasClass("fa-angle-up")){
+        $('#'+n).children('i').removeClass("fa-angle-up").addClass("fa-angle-down");
+    }
+    else {
+        $('#'+n).children('i').removeClass("fa-angle-down").addClass("fa-angle-up");
+    }
     switching = true;
     // Set the sorting direction to ascending:
     dir = 'asc';
