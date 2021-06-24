@@ -1716,7 +1716,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         // Check if we want to exlcude grade overridden gradeables
         if (!$is_team && $override == 'include') {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
-                        WHERE u.user_id = grade_override.user_id 
+                        WHERE u.user_id = grade_override.user_id
                         AND grade_override.g_id=gc.g_id)";
         }
 
@@ -7034,8 +7034,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        $date = new \Datetime($row['release_date']);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('poll')), $row["image_path"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {

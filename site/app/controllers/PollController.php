@@ -132,7 +132,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        $date = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat()->getFormat('poll'), $_POST["release_date"]);
+        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return MultiResponse::RedirectOnlyResponse(
@@ -381,7 +381,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
             return new RedirectResponse($returnUrl);
         }
-        $date = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat()->getFormat('poll'), $_POST["release_date"]);
+        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
