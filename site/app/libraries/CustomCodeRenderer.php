@@ -5,11 +5,13 @@ namespace app\libraries;
 use League\CommonMark\Block\Element\AbstractBlock;
 use League\CommonMark\Block\Renderer\BlockRendererInterface;
 use League\CommonMark\ElementRendererInterface;
+use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
+use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 use League\CommonMark\HtmlElement;
 
 class CustomCodeRenderer implements BlockRendererInterface {
-
-    /** @var \League\CommonMark\Block\Renderer */
+    
+    /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
     protected $baseRenderer;
 
     public function __construct($baseRenderer) {
