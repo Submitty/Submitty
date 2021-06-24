@@ -8,6 +8,10 @@ use League\CommonMark\ElementRendererInterface;
 use League\CommonMark\HtmlElement;
 
 class CustomCodeRenderer implements BlockRendererInterface {
+    
+    /** @var \League\CommonMark\Block\Renderer */
+    protected $baseRenderer;
+
     public function __construct($baseRenderer) {
         $this->baseRenderer = new $baseRenderer();
     }
