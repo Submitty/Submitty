@@ -231,7 +231,7 @@ class Core {
         $this->course_db = $database;
     }
 
-    public function setCourseEntityManager(EntityManager $entity_manager) {
+    public function setCourseEntityManager(EntityManager $entity_manager): void {
         $this->course_entity_manager = $entity_manager;
     }
 
