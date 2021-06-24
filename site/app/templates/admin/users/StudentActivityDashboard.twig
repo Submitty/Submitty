@@ -1,7 +1,4 @@
 {# This is a data table #}
-
-
-
 <div class="content">
     <header>
         <h1>Student Activity Dashboard</h1>
@@ -83,44 +80,44 @@
 
 <script>
 function applySettings(){
-  console.log(document.getElementById('office_hours_queue_date').value);
-  var grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
-  var grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
-  var forum_view = Date.parse(document.getElementById('forum_view_date').value);
-  var forum_post = Date.parse(document.getElementById('forum_post_date').value);
-  var num_poll = Date.parse(document.getElementById('num_poll_responses').value);
-  var off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
-  var data = {{data|json_encode|raw}};
-  var table = document.getElementById("data-table");
-  var rows = table.rows;
-  for(var i = 0; i < data.length; i++){
-    var s_grad_acc = data[i].gradeable_access;
-    var s_grad_sub = data[i].gradeable_submission;
-    var s_forum_view = data[i].forum_view;
-    var s_forum_post = data[i].forum_post;
-    var s_num_polls = data[i].num_poll_responses;
-    var s_off_hours = data[i].office_hours_queue;
-    var flag = false;
-    //if(s_grad_acc == null || s_grad_sub == null || s_forum_view == null || s_forum_post == null || s_num_poll == null || s_off_hours == null) document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-    if((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) flag = true;
-    else if((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) flag = true;
-    else if((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) flag = true;
-    else if((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) flag = true;
-    else if((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) flag = true;
-    else if((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) flag = true;
-    else {
-      rows[i+1].getElementsByTagName("TD")[10].innerText = 'False'; 
-      document.getElementById(data[i].user_id).style.backgroundColor= 'green';
-    }
-    if(flag){
-      document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-      rows[i+1].getElementsByTagName("TD")[10].innerText = 'True';
-    }
+    console.log(document.getElementById('office_hours_queue_date').value);
+    var grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
+    var grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
+    var forum_view = Date.parse(document.getElementById('forum_view_date').value);
+    var forum_post = Date.parse(document.getElementById('forum_post_date').value);
+    var num_poll = Date.parse(document.getElementById('num_poll_responses').value);
+    var off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
+    var data = {{data|json_encode|raw}};
+    var table = document.getElementById("data-table");
+    var rows = table.rows;
+    for(var i = 0; i < data.length; i++){
+        var s_grad_acc = data[i].gradeable_access;
+        var s_grad_sub = data[i].gradeable_submission;
+        var s_forum_view = data[i].forum_view;
+        var s_forum_post = data[i].forum_post;
+        var s_num_polls = data[i].num_poll_responses;
+        var s_off_hours = data[i].office_hours_queue;
+        var flag = false;
+        //if(s_grad_acc == null || s_grad_sub == null || s_forum_view == null || s_forum_post == null || s_num_poll == null || s_off_hours == null) document.getElementById(data[i].user_id).style.backgroundColor = 'red';
+        if((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) flag = true;
+        else if((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) flag = true;
+        else if((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) flag = true;
+        else if((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) flag = true;
+        else if((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) flag = true;
+        else if((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) flag = true;
+        else {
+            rows[i+1].getElementsByTagName("TD")[10].innerText = 'False'; 
+            document.getElementById(data[i].user_id).style.backgroundColor= 'green';
+        }
+        if(flag){
+            document.getElementById(data[i].user_id).style.backgroundColor = 'red';
+            rows[i+1].getElementsByTagName("TD")[10].innerText = 'True';
+        }
 
-  }
-  document.getElementById('office_hours_queue_date').value = '';
+    }
+    document.getElementById('office_hours_queue_date').value = '';
 
-  sortTable(10, true);
+    sortTable(10, true);
 }
 
 function clearFields(){
