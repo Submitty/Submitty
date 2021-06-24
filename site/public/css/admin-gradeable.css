@@ -292,42 +292,6 @@ select[name="component-itempool"] {
     width: 100%;
 }
 
-.regrade-dropMenu {
-    margin-top: 10px;
-    display: inline-block;
-}
-
-.regrade-dropContent {
-    display: none;
-    position: absolute;
-    min-width: 160px;
-    z-index: 1;
-}
-
-.regrade-dropMenu:hover .regrade-dropContent {
-    display: block;
-}
-
-.regrade-option {
-    border: 1px solid var(--standard-pale-gray);
-    width: 210px !important;
-}
-
-.regrade-option-details {
-    border: 1px solid var(--standard-pale-gray);
-    width: 320px !important;
-}
-
-.regrade-drop-btn {
-    border: 1px solid var(--standard-pale-gray);
-    margin-left: -4%;
-}
-
-.regrade-drop-btn:hover,
-.regrade-dropMenu:hover .regrade-drop-btn {
-    background-color: var(--standard-medium-blue);
-}
-
 .drop-down{
     display: inline-block;
     width: 64%

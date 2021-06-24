@@ -4,13 +4,13 @@
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
         {% if can_regrade and not is_vcs%}
-            <div class="regrade-dropMenu" style="margin-left: 3px;">
-                <button class="btn btn-primary regrade-option" onclick="regrade(1)">Regrade Active Version</button>
-                <button class="btn btn-primary regrade-drop-btn">
-                    <i class="fa fa-caret-down"></i>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="regrade(1)">Regrade Active Version</button>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Toggle Dropdown</span>
                 </button>
-                <div class="regrade-dropContent">
-                    <button class="btn btn-primary regrade-option" onclick="regrade(0)">Regrade All Versions</button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="regrade(0)">Regrade All Versions</button>
                 </div>
             </div>
         {% endif %}

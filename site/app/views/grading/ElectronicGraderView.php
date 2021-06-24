@@ -798,7 +798,7 @@ HTML;
         $this->core->getOutput()->addInternalCss('admin-team-form.css');
         $this->core->getOutput()->addInternalJs('admin-team-form.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
-
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -1146,6 +1146,7 @@ HTML;
     public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, $graded_gradeable, $gradeable, $display_version) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
 
         //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
         if ($gradeable->isTeamAssignment()) {
