@@ -271,14 +271,14 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                         });
                         document.getElementById(`pageContainer${page_id}`).addEventListener('mouseenter', () => {
                             const selected = $($('.tool-selected')[0]).attr('value');
-                            if(selected === "pen"){
+                            if (selected === 'pen') {
                                 PDFAnnotate.UI.enablePen();
                             }
                         });
                         document.getElementById(`pageContainer${page_id}`).addEventListener('mouseleave', () => {
                             //disable pen when mouse leaves the pdf page to allow for selecting inputs (like pen size)
                             const selected = $($('.tool-selected')[0]).attr('value');
-                            if(selected === "pen"){
+                            if (selected === 'pen') {
                                 PDFAnnotate.UI.disablePen();
                             }
                         });
