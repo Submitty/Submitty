@@ -114,8 +114,4 @@ Vagrant.configure(2) do |config|
     config.ssh.password = 'vagrant'
     config.ssh.insert_key = 'true'
   end
-
-if Vagrant.has_plugin?("vagrant-vbguest")
-    config.vbguest.auto_update = false
-  end
 end
