@@ -5,6 +5,7 @@
 
 .plag-table-cont {
     margin-top: 24px;
+    width: 100%;
 }
 
 td .plag-action-btn-cont {
@@ -14,6 +15,21 @@ td .plag-action-btn-cont {
 td .plag-action-btn-cont a:not(:last-child) {
     margin-right: 40px;
 }
+
+.run-log-data {
+    text-align: left;
+    width: inherit;
+    background-color: var(--table-info);
+}
+
+.run-log-data pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+    max-height: 20em;
+    max-width: 100%;
+}
+
 /* Configuration form page */
 .plag-data-group {
     display: flex;
@@ -21,11 +37,11 @@ td .plag-action-btn-cont a:not(:last-child) {
     margin: 26px 0;
 }
 
-.plag-data-group .plag-data-label{
+.plag-data-label {
     flex: 1;
     font-weight: bold;
     font-size: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 0.2rem;
 }
 
 input[type="radio"] {
@@ -36,8 +52,16 @@ input[type="radio"] {
    flex: 1;
 }
 
-input[type="text"]{
+input[type="text"] {
     width: 100%;
+}
+
+.deletable-text {
+    width: calc(100% - 2em) !important;
+}
+
+.delete-btn {
+    padding-left: 5px;
 }
 
 input[type=text]:invalid {
@@ -78,6 +102,25 @@ input[type=text]:invalid {
     padding-bottom: 30px;
 }
 
+#text_ignore_submission, #current_code_file, #provided_code_file,
+#add_more_ignore, #prev_gradeable_div {
+    display: none;
+}
+
+.radio-label-pair {
+    margin-left: 0.5em;
+    display: inline-flex;
+    align-items: center;
+}
+
+.radio-label-pair:first-of-type {
+    margin-left: 0;
+}
+
+.right {
+    float: right;
+}
+
 .low-margin-top {
     margin-top: 5px;
 }
@@ -99,6 +142,11 @@ input[type=text]:invalid {
     height: 100%;
     padding: 20px;
     margin: 0 20px 0 0;
+}
+
+.plag-table-no-cont {
+    padding-top: 20px;
+    padding-left: 5px;
 }
 
 main#main.full-screen-mode {
@@ -178,6 +226,15 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 .plag-results-header-right {
     float: right;
+}
+
+.plag-legend {
+    text-shadow: 0 0 3px var(--text-black);
+    margin-left: 5px;
+}
+
+[data-theme="dark"] .plag-legend {
+    text-shadow: 0 0 3px transparent;
 }
 
 @media (max-width: 660px) {
