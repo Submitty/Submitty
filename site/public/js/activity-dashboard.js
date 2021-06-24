@@ -1,4 +1,4 @@
-/* exported clear */
+/* exported clear, sortTable */
 function clear(){
     document.getElementById('gradeable_access_date').value = '';
     document.getElementById('gradeable_submission_date').value = '';
@@ -8,7 +8,6 @@ function clear(){
     document.getElementById('office_hours_queue_date').value = '';
 }
 
-/* exported sortTable */
 function sortTable(n, flag) {
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     const table = document.getElementById('data-table');
@@ -46,10 +45,17 @@ function sortTable(n, flag) {
             y = rows[i + 1].getElementsByTagName('TD')[n];
             /* Check if the two rows should switch place,
             based on the direction, asc or desc: */
+            let xIsDigit = /^\d+$/.test(x);
+            let yIsDigit = /^\d+$/.test(y);
             if (dir == 'asc') {
                 // Data that should be interpreted as a number
-                if (n == 0 || n == 8) {
-                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                
+                if ((n == 0 && (xIsDigit || yIsDigit)) || n == 8) {
+                    if (xIsDigit && yIsDigit && Number(x.innerHTML) > Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                    if (!xIsDigit) {
                         shouldSwitch = true;
                         break;
                     }
@@ -63,8 +69,12 @@ function sortTable(n, flag) {
             }
             else if (dir == 'desc') {
                 // Data that should be interpreted as a number
-                if (n == 0 || n == 8) {
-                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                if ((n == 0 && (xIsDigit || yIsDigit))|| n == 8) {
+                    if (xIsDigit && yIsDigit && Number(x.innerHTML) < Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                    if (!yIsDigit) {
                         shouldSwitch = true;
                         break;
                     }
