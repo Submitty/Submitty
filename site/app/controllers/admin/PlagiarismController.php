@@ -10,6 +10,7 @@ use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\User;
 
 /**
  * Class PlagiarismController
@@ -64,25 +65,29 @@ class PlagiarismController extends AbstractController {
         return $return;
     }
 
+    /**
+     * @param array $usernames
+     * @return array
+     */
     private function getIgnoreSubmissionType(array $usernames): array {
         $ignore = [];
-        $ignore[0] = [];
-        $ignore[1] = [];
+        $ignore[0] = []; // array of user categories to be ignored
+        $ignore[1] = []; // array of user_id in the category "Others"
         foreach ($usernames as $user_id) {
             $user_obj = $this->core->getQueries()->getUserById($user_id);
             if ($user_obj != null) {
                 switch ($user_obj->getGroup()) {
-                    case 1:
+                    case User::GROUP_INSTRUCTOR:
                         if (!in_array("instructors", $ignore[0])) {
                             array_push($ignore[0], "instructors");
                         }
                         break;
-                    case 2:
+                    case User::GROUP_FULL_ACCESS_GRADER:
                         if (!in_array("full_access_graders", $ignore[0])) {
                             array_push($ignore[0], "full_access_graders");
                         }
                         break;
-                    case 3:
+                    case User::GROUP_LIMITED_ACCESS_GRADER:
                         if (!in_array("limited_access_graders", $ignore[0])) {
                             array_push($ignore[0], "limited_access_graders");
                         }
@@ -401,6 +406,7 @@ class PlagiarismController extends AbstractController {
         // Submissions to ignore
         $ignore_submission_option = [];
         if (isset($_POST['ignore_submission_option'])) {
+            // error checking
             $valid_inputs = ["ignore_instructors", "ignore_full_access_graders", "ignore_limited_access_graders", "ignore_others"];
             foreach ($_POST['ignore_submission_option'] as $ignore_type) {
                 if (!in_array($ignore_type, $valid_inputs)) {
@@ -408,16 +414,19 @@ class PlagiarismController extends AbstractController {
                     $this->core->redirect($return_url);
                 }
             }
+            // get user_id in the user categories specified
             $graders = $this->core->getQueries()->getAllGraders();
             foreach ($graders as $grader) {
                 if (
-                    $grader->getGroup() == 1 && in_array("ignore_instructors", $_POST['ignore_submission_option'])
-                    || $grader->getGroup() == 2 && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
-                    || $grader->getGroup() == 3 && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
+                    $grader->getGroup() == User::GROUP_INSTRUCTOR && in_array("ignore_instructors", $_POST['ignore_submission_option'])
+                    || $grader->getGroup() == User::GROUP_FULL_ACCESS_GRADER && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
+                    || $grader->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
                 ) {
                     array_push($ignore_submission_option, $grader->getId());
                 }
+
             }
+            // parse and append user id's specified in "Others"
             if (in_array("ignore_others", $_POST['ignore_submission_option']) && isset($_POST["ignore_others_list"])) {
                 // parse and push to the array of users
                 $other_users = explode(", ", $_POST["ignore_others_list"]);
