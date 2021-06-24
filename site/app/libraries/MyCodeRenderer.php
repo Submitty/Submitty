@@ -25,9 +25,14 @@ class MyCodeRenderer implements BlockRendererInterface
         $test = new HtmlElement('div', ['class' => 'test'], 'test div');
         //$block->setLiteral('hellooooo');
         $element = $this->baseRenderer->render($block, $htmlRenderer, $inTightList);
+        $newlines = substr_count($element->getContents(), "\n");
         //$test->insertBefore($element);
+        //var_dump($element->getContents());
+        $element->setContents('hello');
+        var_dump($element);
+        var_dump($newlines);
         //var_dump($test);
         //var_dump($block);
-        return $element->getContents();
+        return $element;
     }
 }

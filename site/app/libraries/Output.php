@@ -139,9 +139,9 @@ HTML;
 
         $environment = Environment::createCommonMarkEnvironment();
         $environment->addExtension(new AutolinkExtension());
-        //$environment->addBlockRenderer(FencedCode::class, new MyCodeRenderer());
-        $environment->addBlockRenderer(FencedCode::class, new FencedCodeRenderer());
-        $environment->addBlockRenderer(IndentedCode::class, new IndentedCodeRenderer());
+        $environment->addBlockRenderer(FencedCode::class, new MyCodeRenderer());
+        //$environment->addBlockRenderer(FencedCode::class, new FencedCodeRenderer());
+        //$environment->addBlockRenderer(IndentedCode::class, new IndentedCodeRenderer());
         $environment->mergeConfig([]);
 
         $converter = new CommonMarkConverter([], $environment);
