@@ -23,7 +23,7 @@ class AutoGradingView extends AbstractView {
      * @param bool $show_hidden_details True to show the details of hidden testcases
      * @return string
      */
-    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false) {
+    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false, bool $ta_grading = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -83,8 +83,13 @@ class AutoGradingView extends AbstractView {
             }
 
             $show_hidden_breakdown = $any_visible_hidden && $show_hidden;
+            //always show hidden points to the grader
+            if ($ta_grading === true) {
+                $show_hidden_breakdown = true;
+            }
             // &&($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
+
         // testcases should only be visible if autograding is complete
         if (!$incomplete_autograding) {
             foreach ($version_instance->getTestcases() as $testcase) {
