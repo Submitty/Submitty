@@ -27,45 +27,8 @@
             } only %}
             <br/><br/>
 
-            <span class="option-title">
-                Question Type:
-            </span>
+            {% include "polls/PollType.twig" %}
 
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()"></input>
-                <label for="poll-type-single-response-single-correct">Single response - single correct</label>
-                <p class="poll-type-description"><i>Students can pick only one response, and there is one correct answer.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" checked></input>
-                <label for="poll-type-single-response-multiple-correct">Single response - multiple correct</label>
-                <p class="poll-type-description"><i>Students can pick only one response, and there are multiple correct answers.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()"></input>
-                <label for="poll-type-single-response-survey">Single response - survey</label>
-                <p class="poll-type-description"><i>Students can pick only one response, and all answers are correct.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()"></input>
-                <label for="poll-type-multiple-response-exact">Multiple response - exact</label>
-                <p class="poll-type-description"><i>Students can pick multiple responses, and students get "credit" if they select exactly the specified correct answers.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" value="multiple-response-flexible" onclick="changePollType()"></input>
-                <label for="poll-type-multiple-response-flexible">Multiple response - flexible</label>
-                <p class="poll-type-description"><i>Students can pick multiple responses, and students get "credit" if they select at least one of the specified correct answers.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()"></input>
-                <label for="poll-type-multiple-response-survey">Multiple response - survey</label>
-                <p class="poll-type-description"><i>Students can pick multiple responses, all answers are correct, and students get "credit" if they select at least one of the answers.</i></p>
-            </div>
             <br/>
 
             <label for="image-file" class="option-title">
@@ -127,45 +90,8 @@
             } only %}
             <br/><br/>
 
-            <span class="option-title" >
-                Question Type:
-            </span>
+            {% include "polls/PollType.twig" %}
 
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()" {{ poll.getQuestionType() == 'single-response-single-correct'? "checked" : "" }}></input>
-                <label for="poll-type-single-response-single-correct">Single response - single correct</label>
-                <p class="poll-type-description"><i>Students can pick only one response, and there is one correct answer.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" {{ poll.getQuestionType() == 'single-response-multiple-correct'? "checked" : "" }}></input>
-                <label for="poll-type-single-response-multiple-correct">Single response - multiple correct</label>
-                <p class="poll-type-description"><i>Students can pick only one response, and there are multiple correct answers.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()" {{ poll.getQuestionType() == 'single-response-survey'? "checked" : "" }}></input>
-                <label for="poll-type-single-response-survey">Single response - survey</label>
-                <p class="poll-type-description"><i>Students can pick only one response, and all answers are correct.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()" {{ poll.getQuestionType() == 'multiple-response-exact'? "checked" : "" }}></input>
-                <label for="poll-type-multiple-response-exact">Multiple response - exact</label>
-                <p class="poll-type-description"><i>Students can pick multiple responses, and students get "credit" if they select exactly the specified correct answers.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" value="multiple-response-flexible" onclick="changePollType()" {{ poll.getQuestionType() == 'multiple-response-flexible'? "checked" : "" }}></input>
-                <label for="poll-type-multiple-response-flexible">Multiple response - flexible</label>
-                <p class="poll-type-description"><i>Students can pick multiple responses, and students get "credit" if they select at least one of the specified correct answers.</i></p>
-            </div>
-
-            <div class="poll-type-option">
-                <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()" {{ poll.getQuestionType() == 'multiple-response-survey'? "checked" : "" }}></input>
-                <label for="poll-type-multiple-response-survey">Multiple response - survey</label>
-                <p class="poll-type-description"><i>Students can pick multiple responses, all answers are correct, and students get "credit" if they select at least one of the answers.</i></p>
-            </div>
             <br/>
 
             <label for="image-file" class="option-title">
