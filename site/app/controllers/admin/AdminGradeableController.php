@@ -264,7 +264,7 @@ class AdminGradeableController extends AbstractController {
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
-            'peer' => $gradeable->isPeerGrading(),
+            'peer' => $gradeable->hasPeerComponent(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
             'hidden_files' => $gradeable->getHiddenFiles()
@@ -331,7 +331,7 @@ class AdminGradeableController extends AbstractController {
      * TODO: This was extracted from the rubric saving code for electronic files
      */
     private function shufflePeerGrading(Gradeable $gradeable) {
-        if ($gradeable->isPeerGrading()) {
+        if ($gradeable->hasPeerComponent()) {
             //$old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
             //$make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
             //if ($make_peer_assignments) {
