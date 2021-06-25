@@ -24,6 +24,13 @@ function showUpdateProfilePhotoForm() {
   form.find('.form-body').scrollTop(0);
 }
 
+function showUpdateSecondaryEmailForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-secondary-email-form")
+    form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
+}
+
 /**
  * Gets the list of all available time zones as an array
  * @returns {string[]}
@@ -119,6 +126,53 @@ function updateUserProfilePhoto () {
   $('.popup-form').css('display', 'none');
   $('#user-image-button').val(null);
   return false;
+}
+
+function updateUserSecondaryEmail () {
+    const second_email = $('#user-secondary-email-change');
+    const second_email_notify = $('#user-secondary-email-notify-change');
+    if (second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)) {
+        displayErrorMessage('No changes detected to secondary email');
+    }
+    else {
+        if (second_email.val() === '' && second_email_notify.get(0).checked) {
+            displayErrorMessage('Please disable second email notifications or add a valid second email');
+        }
+        else {
+            let data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('secondary_email', second_email.val());
+            data.append('secondary_email_notify', second_email_notify.get(0).checked);
+            let url = buildUrl(['user_profile', 'change_secondary_email']);
+            $.ajax({
+                url,
+                type: "POST",
+                data,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    const response = JSON.parse(res);
+                    if (response.status === "success") {
+                        const { data } = response;
+                        displaySuccessMessage(data.message);
+                        $('#secondary-email-row .value').text(data.secondary_email);
+                        $('#secondary-email-notify-row .value').text(data.secondary_email_notify);
+                        second_email.data('current-second-email', data.secondary_email);
+                        second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
+                    }
+                    else if (response.status === "error") {
+                        displayErrorMessage(response.message);
+                    }
+                },
+                error: function() {
+                    // display error message
+                    displayErrorMessage("Something went wrong while updating secondary email address!");
+                }
+            });
+        }
+    }
+    $('.popup-form').css('display', 'none');
+    return false;
 }
 
 $(document).ready(function() {
