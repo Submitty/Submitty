@@ -138,6 +138,9 @@ class RainbowCustomization extends AbstractModel {
                 if (property_exists($json_bucket, 'type')) {
                     $c_bucket = $json_bucket->type;
                 }
+                else {
+                    continue;
+                }
 
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
