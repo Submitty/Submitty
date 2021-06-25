@@ -177,7 +177,7 @@ CREATE TABLE public.course_materials (
     type smallint NOT NULL,
     release_date timestamp with time zone NOT NULL,
     hidden_from_students boolean NOT NULL,
-    priority integer NOT NULL,
+    priority double precision NOT NULL,
     section_lock boolean NOT NULL
 );
 
@@ -1453,6 +1453,14 @@ ALTER TABLE ONLY public.peer_assign
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id);
 
 
 --
