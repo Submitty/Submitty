@@ -77,6 +77,7 @@
             <i class="fab fa-markdown fa-2x"></i>
         </div>
         <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+        <a class="skip-btn skip-first-post" href="#{{ first_post_id }}">Skip to first post</a>
         {% include "misc/MarkdownArea.twig" with {
             "markdown_area_id" : "reply_box_" ~ post_box_id,
             "markdown_area_query" : "$('#reply_box_" ~ post_box_id ~ "')",
@@ -96,6 +97,7 @@
         } only %}
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
+    <a class="skip-btn" href="#{{ first_post_id }}">Skip to first post</a>
 <br/>
 {% endif %}
 
@@ -218,6 +220,16 @@
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
             }
+        });
+
+        //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
+        //from an input with 'post-content-reply' class
+        $('.post_content_reply').focus(function(){
+            $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
+        });
+
+        $(':not(.post_content_reply, .skip-first-post)').focus(function(){
+            $('.skip-first-post').attr('tabindex', '-1');
         });
     });
 
