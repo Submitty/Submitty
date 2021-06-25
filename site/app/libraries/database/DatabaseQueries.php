@@ -5728,7 +5728,6 @@ AND gc_id IN (
                    WHERE gc.g_id=? AND gcd.gcd_component_comment <> '' ",
             [$gradeable_id]
         );
-        $rows = count($this->course_db->rows());
         if (count($this->course_db->rows()) > 0) {
             return true;
         }
