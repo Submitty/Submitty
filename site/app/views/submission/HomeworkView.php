@@ -973,7 +973,7 @@ class HomeworkView extends AbstractView {
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
-            if ($graded_gradeable->hasTaGradingInfo()) {
+            if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
                 $active_same_as_graded = $graded_gradeable->getTaGradedGradeable()->getGradedVersion() === $active_version_number;
             }
         }
@@ -1006,6 +1006,7 @@ class HomeworkView extends AbstractView {
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
+            'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds')
         ]);

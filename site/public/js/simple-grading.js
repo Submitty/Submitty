@@ -478,7 +478,7 @@ function setupNumericTextCells() {
                 reader.readAsText(f);
                 reader.onload = function(evt) {
                     var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
-                    var lines = (reader.result).trim().split(/\r\n|\n/);
+                    var lines = (reader.result).trim().split(/\r\n|\n|\r/);
                     var tempArray = lines[0].split(',');
                     var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
                     for (var k = 0; k < lines.length && !breakOut; k++) {
