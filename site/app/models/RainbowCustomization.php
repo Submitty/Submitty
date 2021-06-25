@@ -133,27 +133,21 @@ class RainbowCustomization extends AbstractModel {
             $json_buckets = $this->RCJSON->getGradeables();
             //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
             //has all buckets (even empty ones) while the JSON only has buckets with content in it.
-            $c_bucket = 0;
-            $j_bucket = 0;
-            while ($c_bucket < count($this->customization_data)) {
-                //if there are no gradeables in this bucket, skip it
-                if (count($this->customization_data[self::syllabus_buckets[$c_bucket]]) === 0) {
-                    $c_bucket++;
-                    continue;
+            $c_bucket = "";
+            foreach ($json_buckets as $json_bucket) {
+                if (property_exists($json_bucket, 'type')) {
+                    $c_bucket = $json_bucket->type;
                 }
 
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
-                foreach ($this->customization_data[self::syllabus_buckets[$c_bucket]] as &$c_gradeable) {
-                    if ($c_gradeable['max_score'] !== (float) $json_buckets[$j_bucket]->ids[$j_index]->max) {
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
-                        $c_gradeable['override_max'] = $json_buckets[$j_bucket]->ids[$j_index]->max;
+                        $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
                     }
                     $j_index++;
                 }
-
-                $c_bucket++;
-                $j_bucket++;
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
