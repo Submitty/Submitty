@@ -29,6 +29,15 @@ let settingsData = [
                     "Prev/Next Active Grade Inquiry": "active-inquiry",
                 }, 
                 default: "Prev/Next Student"
+            },
+            {
+                name: "Force prev/next student arrow to only go to assigned sections",
+                storageCode: "general-setting-arrow-force-grading-sections",
+                options: {
+                    "No": "false",
+                    "Yes": "true"
+                }, 
+                default: "No"
             }
         ]
     },
@@ -46,7 +55,7 @@ let settingsData = [
                 default: "No"
             }
         ]
-    }
+    },
 ];
 
 window.onkeyup = function(e) {
