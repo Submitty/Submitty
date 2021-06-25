@@ -23,7 +23,9 @@ class TeamTester extends BaseUnitTest {
                     'anon_id' => 'anon1',
                     'user_firstname' => 'User',
                     'user_lastname' => 'One',
-                    'user_email' => 'user1@example.com'
+                    'user_email' => 'user1@example.com',
+                    'user_email_secondary' => null,
+                    'user_email_secondary_notify' => false
                 ],
                 [
                     'state' => 0,
@@ -31,7 +33,9 @@ class TeamTester extends BaseUnitTest {
                     'anon_id' => 'anon2',
                     'user_firstname' => 'User',
                     'user_lastname' => 'Two',
-                    'user_email' => 'user2@example.com'
+                    'user_email' => 'user2@example.com',
+                    'user_email_secondary' => null,
+                    'user_email_secondary_notify' => false
                 ]
             ]
         ];
