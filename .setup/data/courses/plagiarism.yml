@@ -17,7 +17,11 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  # eg_lichen_sample_path: TODO
+
 
 - g_id: two_overlapping_files
   g_title: Two Overlapping Files (Small)
@@ -28,7 +32,10 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  # eg_lichen_sample_path: TODO
 
 - g_id: no_matches
   g_title: No Matches (Small)
@@ -39,7 +46,10 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  # eg_lichen_sample_path: TODO
 
 - g_id: repeated_sequences
   g_title: Repeated Sequences (Small)
@@ -50,7 +60,22 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  # eg_lichen_sample_path: TODO
+
+- g_id: provided_code
+  g_title: Provided Code (Small)
+  gradeable_config: upload_only
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_submission_open_date: 1973-01-01 23:59:59
+  eg_submission_due_date: 9998-01-01 23:59:59
+  g_grade_start_date: 9998-01-02 23:59:59
+  g_grade_released_date: 9999-12-31 23:59:59
+  eg_use_ta_grading: false
+  # eg_lichen_sample_path: TODO
+  # eg_plagiarized_users: TODO
 
 - g_id: plagiarism_test_small
   g_title: Plagiarism Test (Small)
@@ -61,7 +86,10 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  # eg_lichen_sample_path: TODO
 
 ########## MEDIUM -- 3-10 submissions ##########################################
 ########## can be debugged from the UI by a human ##############################
@@ -74,18 +102,8 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
-
-- g_id: provided_code
-  g_title: Provided Code (Medium) # 10 submissions
-  gradeable_config: upload_only
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_submission_open_date: 1973-01-01 23:59:59
-  eg_submission_due_date: 9998-01-01 23:59:59
-  g_grade_start_date: 9998-01-02 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
-  eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # eg_lichen_sample_path: TODO
+  # eg_plagiarized_users: TODO
 
 - g_id: common_code
   g_title: Common Code (Medium) # 10 submissions
@@ -96,7 +114,8 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # eg_lichen_sample_path: TODO
+  # eg_plagiarized_users: TODO
 
 - g_id: regex_selected_files
   g_title: Regex Selected Files (Medium) # pdf2text + cat_{number}.cpp --> cat_*.cpp + one other random file
@@ -107,7 +126,8 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # eg_lichen_sample_path: TODO
+  # eg_plagiarized_users: TODO
 
 - g_id: long_files
   g_title: Long Files (Medium) # thousands of lines
@@ -118,10 +138,15 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  - student: 1
+  - smithj: 1
+  # eg_lichen_sample_path: TODO
 
-- g_id: plagiarism_test_medium
-  g_title: Plagiarism Test (Medium)
+- g_id: ignore_submissions
+  g_title: Ignore Submissions (Medium)
   gradeable_config: upload_only
   g_ta_view_start_date: 1970-01-01 23:59:59
   eg_submission_open_date: 1973-01-01 23:59:59
@@ -129,7 +154,16 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  eg_plagiarized_users:
+  - aphacker: 1
+  - bitdiddle: 1
+  - student: 1
+  - grader: 1
+  - grader2: 1
+  - ta: 1
+  - ta2: 1
+  - instructor: 1
+  # eg_lichen_sample_path: TODO
 
 ########## LARGE -- 10+ submissions ############################################
 ########## stress-testing (probably challenging/impossible to debug) ###########
@@ -142,7 +176,7 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # sample_path: TODO
 
 - g_id: average_assignment
   g_title: Average Class Assignment (Large) # 75 students, 5-20? submissions per student, ~400-line files
@@ -153,7 +187,7 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # sample_path: TODO
 
 - g_id: large_class_test
   g_title: Large Class Test (Large) # 400 students, one submission each, ~100-line files
@@ -164,7 +198,7 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # sample_path: TODO
 
 - g_id: large_class_large_assignment
   g_title: Large Class Large Assignment (Large) # 400 students, 0-20 submissions each, ~600-line files
@@ -175,14 +209,6 @@ gradeables:
   g_grade_start_date: 9998-01-02 23:59:59
   g_grade_released_date: 9999-12-31 23:59:59
   eg_use_ta_grading: false
-  # sample_path / eg_lichen_sample_path: TODO
+  # sample_path: TODO
 
 # TODO: (future) test submissions with teams
-#   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
-#
-#     sample_path [optional]: path for where to get submissions for a given gradeable. If no path is given, then
-#         just use /usr/local/submitty/GIT_CHECKOUT/Submitty/more_autograding_examples/<gradeable_id>/submissions or
-#         just use /usr/local/submitty/GIT_CHECKOUT/Tutorial/examples/<gradeable_id>/submissions
-#
-#     eg_max_random_submissions: [optional] integer limiting how many random submissions should be generated.
-#         Defaults to no limit.
