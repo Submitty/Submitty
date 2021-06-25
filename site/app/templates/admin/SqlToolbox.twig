@@ -11,12 +11,12 @@
             <div id="sql-database-schema-content" hidden>
                 <p>Click on each table to see columns</p>
                 <ul style="margin-left: 30px;">
-                    {% for name, table in tables %}
-                        <li><a class="sql-database-table">{{ name }}</a>
+                    {% for table in tables %}
+                        <li><a class="sql-database-table">{{ table.getName }}</a>
                             <div class="sql-database-columns" hidden>
                                 <ul style="margin-left: 15px">
-                                    {% for column in table %}
-                                        <li>{{ column.name }} - {{ column.type }}</li>
+                                    {% for column in table.getColumns %}
+                                        <li>{{ column.getName }} - {{ column.getType }}</li>
                                     {% endfor %}
                                 </ul>
 
