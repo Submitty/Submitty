@@ -28,6 +28,12 @@
                             <i class="fas fa-pencil-alt"></i> Edit Preferred Names
                         </a>
                     </span>
+                    <span>&nbsp;&nbsp;&nbsp;</span>
+                    <span>
+                        <a class="icon" tabindex="0" href="javascript:showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
+                            <i class="fas fa-pencil-alt"></i> Edit Secondary Email
+                        </a>
+                    </span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row" id="username-row">
@@ -56,10 +62,30 @@
                     </div>
                     <div class="flex-row" id="email-row">
                         <span class="label">
-                            Email:
+                            Primary Email:
                         </span>
                         <span class="value">
                             {{ user.getEmail() }}
+                        </span>
+                    </div>
+                    <div class="flex-row" id="secondary-email-row">
+                        <span class="label">
+                            Secondary Email:
+                        </span>
+                        <span class="value">
+                            {{ user.getSecondaryEmail() }}
+                        </span>
+                    </div>
+                    <div class="flex-row" id="secondary-email-notify-row">
+                        <span class="label">
+                            Send Email to Secondary Address:
+                        </span>
+                        <span class="value">
+                            {% if user.getEmailBoth() %}
+                                True
+                            {% else %}
+                                False
+                            {% endif %}
                         </span>
                     </div>
                     {% if display_access_level %}
@@ -126,6 +152,7 @@
 </div>
 {% include 'EditNameForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
+{% include 'EditSecondaryEmailForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}
