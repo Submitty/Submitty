@@ -212,6 +212,8 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
             'user_firstname' => 'test',
             'user_lastname' => 'person',
             'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
             'time_zone' => $timezone,
         ]);
         $this->assertSame($expected, DateUtils::convertTimeStamp($user, $timestamp, $format));

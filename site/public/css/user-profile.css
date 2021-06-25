@@ -101,6 +101,10 @@
     text-transform: capitalize;
 }
 
+#user-secondary-email-change {
+    width: 20em;
+}
+
 @media (max-width: 401px) {
     .content {
         margin: 10px 0 0 0;
