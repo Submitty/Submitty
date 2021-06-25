@@ -5723,11 +5723,12 @@ AND gc_id IN (
     public function getHasCustomMarks($gradeable_id) {
         //first get the gc_id's for all components associated with the gradeable
         $this->course_db->query(
-            'SELECT gc.gc_id FROM gradeable_component AS gc
+            "SELECT gc.gc_id FROM gradeable_component AS gc
                    INNER JOIN gradeable_component_data AS gcd ON gc.gc_id=gcd.gc_id
-                   WHERE gc.g_id=?',
+                   WHERE gc.g_id=? AND gcd.gcd_component_comment <> '' ",
             [$gradeable_id]
         );
+        $rows = count($this->course_db->rows());
         if (count($this->course_db->rows()) > 0) {
             return true;
         }
