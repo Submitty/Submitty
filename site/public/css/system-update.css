@@ -1,0 +1,48 @@
+
+.update-Developer {
+    background-color: #e8fdff;
+}
+
+.update-InstructorUI {
+    background-color: #fcedd7;
+}
+
+.update-Forum {
+    background-color: #eefcde;
+}
+
+.update-Plagiarism {
+    background-color: #dbefff;
+}
+
+.update-System {
+    background-color: #ededed;
+}
+
+.update-Autograding {
+    background-color: #fffee8;
+}
+
+.update-TAGrading {
+    background-color: #f4e8ff;
+}
+
+.update-RainbowGrades {
+    background: -webkit-linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
+    background: -o-linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
+    background: -moz-linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
+    background: linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
+}
+
+.update-Submission {
+    background-color: #daffef;
+}
+
+.update-VPAT {
+    background-color: #ffe8fe;
+}
+
+.update-SYSADMIN {
+    background-color: var(--alert-background-danger-red);
+}
+

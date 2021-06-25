@@ -9,12 +9,16 @@
     </button>
 
     <div id="update_status" class="box">
-        <p id="current-version"> Current Version Installed: {{ latest_tag }} </p>
+        <p id="current-version"> Current Version Installed: <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}">{{ latest_tag }}</a></p>
         <p id="tag"></p>
         <br> 
         <p id="text"></p>
     </div>
 
-    <div class="box" id="release-notes" hidden>
+    <div class="box" id="release-notes">
+        Loading...
     </div>
 </div>
+<script>
+    window.onload = getReleases.bind(this, '{{ latest_tag }}');
+</script>

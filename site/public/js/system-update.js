@@ -36,33 +36,46 @@ async function getReleases(current_tag) {
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag){
-    const latest = data[0];
-    let tag = document.getElementById("tag");
-    let container = document.getElementById("update_status");
-    container.style.display = "block";
-    tag.innerHTML = "Most Recent Version Available: " + latest["tag_name"];
+    const latest = data[data.length-1];
 
-    let text = document.getElementById("text");
-    if(current_tag === latest["tag_name"]){
-        text.innerHTML = "<i>Submitty is up to date!</i>";
-    }else{
-        text.innerHTML = "<a href = \""+ latest["html_url"] + "\"" +
-            "target = \"_blank\"" +  
-            "A new version of Submitty is available<a/>" ;
-    }
-
-    let notes = document.getElementById("release-notes");
-    notes.style.display = "block";
-    notes.innerHTML = parseReleaseNotes(latest["body"]);
+    $.ajax({
+        url: buildUrl(['markdown']),
+        type: 'POST',
+        data: {
+            content: addPRLinks(latest["body"]),
+            csrf_token: csrfToken
+        },
+        success: function(markdown_data){
+            $('#release-notes').css('display', 'block');
+            $('#release-notes').html(injectStyling(markdown_data));
+            $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
+            if (current_tag === latest['tag_name']) {
+                $('#text').html('<i>Submitty is up to date!</i>');
+            }
+            else {
+                $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a>`);
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to render markdown. Please try again.');
+        }
+    });
 }
 
+function addPRLinks(raw_str) {
+    return raw_str.replace(/#(\d+)/g, '[#$1](https://github.com/Submitty/Submitty/pulls/$1)');
+}
 
-/**
-* Helper function to clean up some raw markdown before getting displayed
-*
-* @param {String} raw_str - raw markdown text 
-* @returns {String}
-*/
-function parseReleaseNotes(raw_str) {
-    return raw_str.replace(/\n/g, "<br />").replace(/\r/g, "").replace("*", "").replace(RegExp("\[(.*?)\]"), "");
+function injectStyling(markdown_data) {
+    //add <hr> after each ul or <p><em> tag
+    markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>/g, '$&<hr>');
+    console.log(markdown_data);
+    //replace normal li contents with spans with classes
+    //markdown_data = markdown_data.replace(/\[\w+:(\w+)\].+(?=<\/li>)|\[(\w+)\].+(?=<\/li>)/g, '<span class="update update-$1$2">$&</span>');
+    markdown_data = markdown_data.replace(/\[\w+:(\w+)\].+(?=<\/li>)|\[([^\]]+)\].+(?=<\/li>)/g, '<span class="update update-$1$2">$&</span>');
+    //special highlighting for SYSADMIN updates only if there are any
+    if ((markdown_data.match(/\[SYSADMIN ACTION\]/g) || []).length) {
+        markdown_data = markdown_data.replace(/<p>SYSADMIN[\s\S]+?(?:<hr>)/g, '<div class="update-SYSADMIN">$&</div>');
+    }
+    return markdown_data;
 }
