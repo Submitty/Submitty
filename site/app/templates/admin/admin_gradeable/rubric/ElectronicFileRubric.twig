@@ -54,6 +54,9 @@
 
 <script>
     $(document).ready(function() {
+        if ($('#no_custom_marks').is(':checked')) {
+            $("#custom_marks_warning").show();
+        }
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val(), $('#gradeable_rubric').attr('data-notebook'), JSON.parse($('#gradeable_rubric').attr('data-itempool-options'))).then( function() {
                 $('body').on('DOMSubtreeModified', '.component-container', function() {
@@ -70,10 +73,10 @@
         });
         //toggle warning message if custom marks have already been used and the settings are changed
         $("#no_custom_marks").click(function(){
-            $("#custom_marks_warning").toggle();
+            $("#custom_marks_warning").show();
         })
         $("#yes_custom_marks").click(function(){
-            $("#custom_marks_warning").toggle();
+            $("#custom_marks_warning").hide();
         })
     });
 
