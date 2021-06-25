@@ -1,8 +1,6 @@
 <?php
 
-
 namespace tests\app\models;
-
 
 use app\models\SimpleStat;
 use tests\BaseUnitTest;
