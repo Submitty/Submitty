@@ -695,8 +695,7 @@ CREATE TABLE public.polls (
     question text NOT NULL,
     status text NOT NULL,
     release_date date NOT NULL,
-    image_path text,
-    question_type text DEFAULT 'single-response'::text
+    image_path text
 );
 
 
