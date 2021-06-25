@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class StudentActivityDashboardView extends AbstractView {
 
@@ -11,6 +12,10 @@ class StudentActivityDashboardView extends AbstractView {
         $this->core->getOutput()->addInternalCss('activity-dashboard.css');
         $this->core->getOutput()->addInternalJs('activity-dashboard.js');
         $this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentActivityDashboard.twig", [
             "data" => $data_dump,
             "download_link" => $this->core->buildCourseUrl(['activity', 'download'])

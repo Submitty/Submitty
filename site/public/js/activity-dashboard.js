@@ -9,7 +9,7 @@ function clear(){
 }
 
 function sortTable(n, flag) {
-    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    let rows, i, dir;
     const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
         if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')){
@@ -24,8 +24,6 @@ function sortTable(n, flag) {
         $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
         dir = "asc";
     }
-    switching = true;
-    console.log(dir);
     // Comparator used to compare 2 data entries for sorting
     let comparator = function (row1, row2) {
         if (dir == "desc" && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
@@ -71,18 +69,14 @@ function sortTable(n, flag) {
             }
         }
         else {
-            // other n's
+            // other columns
             return x < y;
         }
     };
-    
-    console.log(comparator);
     let merge = function(arr1, arr2) {
         let res = [];
         let i = 0, j = 0;
         while (i < arr1.length && j < arr2.length) {
-            //console.log(arr1[i].getElementsByTagName('TD')[n].innerHTML, arr2[j].getElementsByTagName('TD')[n].innerHTML)
-            //console.log(comparator(arr1[i].getElementsByTagName('TD'), arr2[j].getElementsByTagName('TD')));
             if (comparator(arr1[i].getElementsByTagName('TD'), arr2[j].getElementsByTagName('TD'))) {
                 res.push(arr1[i]);
                 i++;
@@ -112,15 +106,12 @@ function sortTable(n, flag) {
         let left = mergeSort(arr.slice(0, mid));
         let right = mergeSort(arr.slice(mid));
         let res = merge(left,right);
-        //console.log(res);
         return res;
     }
     rows = table.rows;
-    //console.log(rows);
     const sorted = mergeSort(Array.prototype.slice.call(rows).slice(1));
     document.getElementById('data-table');
-    //console.log(table.rows.length);
-    for (i = 1; i < table.rows.length; i++){
-        table.rows[i-1].nextSibling.parentNode.insertBefore(sorted[i-1],rows[i-1].nextSibling);
+    for (i = 1; i < table.rows.length-1; i++) {
+        rows[i].parentNode.insertBefore(rows[i + 1], sorted[i]);
     }
 }
