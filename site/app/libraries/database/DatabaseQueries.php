@@ -7188,7 +7188,7 @@ SQL;
         $selector = '';
         if (count($paths) > 0) {
             $place_holders = implode(',', array_fill(0, count($paths), '?'));
-            $selector = "WHERE cm.url IN ($place_holders)";
+            $selector = "WHERE cm.path IN ($place_holders)";
         }
 
         $query = "SELECT 

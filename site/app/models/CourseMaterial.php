@@ -22,7 +22,7 @@ use app\libraries\DateUtils;
  * @method void setReleaseDate($release_date)
  * @method bool getHiddenFromStudents()
  * @method void setHiddenFromStudents($hidden_from_students)
- * @method int getPriority()
+ * @method float getPriority()
  * @method void setPriority($priority)
  * @method bool getSectionLock()
  * @method void setSectionLock($section_lock)
@@ -42,7 +42,7 @@ class CourseMaterial extends AbstractModel {
     protected $release_date;
     /** @prop @var bool Whether or not this will be displayed to students */
     protected $hidden_from_students;
-    /** @prop @var int Sorting priority for this item */
+    /** @prop @var float Sorting priority for this item */
     protected $priority = 0;
     /** @prop @var bool Whether or not there is a section lock */
     protected $section_lock;

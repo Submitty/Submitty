@@ -25,7 +25,7 @@ def up(config, database, semester, course):
             type smallint NOT NULL,
             release_date timestamptz NOT NULL,
             hidden_from_students BOOL NOT NULL,
-            priority integer NOT NULL,
+            priority float8 NOT NULL,
             section_lock BOOL NOT NULL
         );
         """
