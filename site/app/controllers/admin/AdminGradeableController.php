@@ -464,7 +464,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => 1
         ]);
         $component->setText(false);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -488,7 +488,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => $details['max_score']
         ]);
         $component->setText(false);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -506,7 +506,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => 0
         ]);
         $component->setText(true);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
