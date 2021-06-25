@@ -3,6 +3,7 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\entities\CourseMaterialSection;
 use app\libraries\Core;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
@@ -11,8 +12,10 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
-use app\models\CourseMaterial;
+use app\entities\CourseMaterial;
 use app\views\course\CourseMaterialsView;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
@@ -20,8 +23,10 @@ class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials")
      */
-    public function viewCourseMaterialsPage() {
-        $course_materials = $this->core->getQueries()->getCourseMaterials();
+    public function viewCourseMaterialsPage(): WebResponse {
+        $course_materials = $this->core->getCourseEntityManager()
+            ->getRepository(CourseMaterial::class)
+            ->findAll();
         return new WebResponse(
             CourseMaterialsView::class,
             'listCourseMaterials',
@@ -58,7 +63,7 @@ class CourseMaterialsController extends AbstractController {
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
 
         $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
@@ -68,7 +73,14 @@ class CourseMaterialsController extends AbstractController {
                 $this->deleteHelper($file);
             }
             else {
-                $this->core->getQueries()->deleteCourseMaterial($path);
+                $cm = $this->tryGetCourseMaterial($path);
+                try {
+                    $this->core->getCourseEntityManager()->remove($cm);
+                }
+                catch (ORMException $e) {
+                    $this->core->addErrorMessage("Failed to remove " . basename($path));
+                    return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+                }
             }
         }
 
@@ -87,7 +99,7 @@ class CourseMaterialsController extends AbstractController {
             $this->core->addErrorMessage("Failed to remove " . basename($path));
         }
 
-        $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
+        return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
     }
 
     /**
@@ -160,7 +172,7 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
+    public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime): JsonResponse {
         $data = $_POST['fn'];
 
         if (!isset($newdatatime)) {
@@ -195,7 +207,12 @@ class CourseMaterialsController extends AbstractController {
             $course_material = $this->tryGetCourseMaterial($file_name);
             if ($course_material != false) {
                 $course_material->setReleaseDate($new_data_time);
-                $this->core->getQueries()->updateCourseMaterial($course_material);
+                try {
+                    $this->core->getCourseEntityManager()->flush();
+                }
+                catch (\Exception $e) {
+                    return JsonResponse::getErrorResponse($e->getMessage());
+                }
             }
             else {
                 $has_error = true;
@@ -224,7 +241,7 @@ class CourseMaterialsController extends AbstractController {
 
         //handle sections here
 
-        if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
+        /*if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
             $course_material->setSectionLock(true);
             $sections = explode(",", $_POST['sections']);
             $course_material->setSections($sections);
@@ -232,7 +249,7 @@ class CourseMaterialsController extends AbstractController {
         else {
             $course_material->setSectionLock(false);
             $this->core->getQueries()->deleteCourseMaterialSections($course_material->getPath());
-        }
+        }*/
         if (isset($_POST['hide_from_students'])) {
             $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
         }
@@ -245,7 +262,13 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setReleaseDate($date_time);
         }
 
-        $this->core->getQueries()->updateCourseMaterial($course_material);
+        try {
+            $this->core->getCourseEntityManager()->flush();
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 
@@ -253,7 +276,7 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials/upload", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function ajaxUploadCourseMaterialsFiles() {
+    public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         $details = [];
 
         $expand_zip = "";
@@ -459,7 +482,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         foreach ($details['type'] as $key => $value) {
-            $course_material = new CourseMaterial($this->core, [
+            /*$course_material = new CourseMaterial($this->core, [
                 'type' => $value,
                 'path' => $details['path'][$key],
                 'release_date' => $details['release_date'],
@@ -467,8 +490,15 @@ class CourseMaterialsController extends AbstractController {
                 'priority' => $details['priority'],
                 'section_lock' => $details['section_lock'],
                 'sections' => $details['sections']
-            ]);
-            $this->core->getQueries()->createCourseMaterial($course_material);
+            ]);*/
+            try {
+                $this->core->getCourseEntityManager()->persist($course_material);
+                $this->core->getCourseEntityManager()->flush();
+            }
+            catch (\Exception $e) {
+                return JsonResponse::getErrorResponse($e->getMessage());
+            }
+            //$this->core->getQueries()->createCourseMaterial($course_material);
         }
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }

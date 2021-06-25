@@ -9,13 +9,14 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\User;
 use app\views\AbstractView;
+use Doctrine\Common\Collections\Collection;
 
 class CourseMaterialsView extends AbstractView {
     /**
      * @param User $user
-     * @param DatabaseRowIterator $course_materials_iterator
+     * @param array $course_materials_db
      */
-    public function listCourseMaterials(User $user, DatabaseRowIterator $course_materials_iterator) {
+    public function listCourseMaterials(User $user, array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
@@ -41,7 +42,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
         $course_materials = [];
-        foreach ($course_materials_iterator as $course_material) {
+        foreach ($course_materials_db as $course_material) {
             $course_materials[$course_material->getPath()] = $course_material;
         }
 
@@ -133,11 +134,14 @@ class CourseMaterialsView extends AbstractView {
                 if (isset($course_materials[$expected_file_path])) {
                     $isMaterialReleased = '1';
 
-                    if ($course_materials[$expected_file_path]->getSectionLock()) {
-                        $file_sections[$expected_file_path] = $course_materials[$expected_file_path]->getSections();
+                    if ($course_materials[$expected_file_path]->isSectionLock()) {
+                        $sections = $course_materials[$expected_file_path]->getSections();
+                        foreach ($sections as $section) {
+                            $file_sections[$expected_file_path][] = $section->getSectionId();
+                        }
                     }
                     $release_date = $course_materials[$expected_file_path]->getReleaseDate();
-                    $hide_from_students[$expected_file_path] = $course_materials[$expected_file_path]->getHiddenFromStudents();
+                    $hide_from_students[$expected_file_path] = $course_materials[$expected_file_path]->isHiddenFromStudents();
 
                     //TODO: Add individual authorization here
 

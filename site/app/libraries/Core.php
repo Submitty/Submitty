@@ -173,7 +173,7 @@ class Core {
     private function createEntityManager(AbstractDatabase $database): EntityManager {
         $config = Setup::createAnnotationMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'app', 'entities')],
-            false,
+            $this->config->isDebug(),
             null,
             null,
             false

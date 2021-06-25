@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\models\CourseMaterial;
+use app\entities\CourseMaterial;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
@@ -293,7 +293,13 @@ abstract class AbstractController {
         }
         // Get the course material
         try {
-            return $this->core->getQueries()->getCourseMaterial($path);
+            //return $this->core->getQueries()->getCourseMaterial($path);
+            return $this->core
+                ->getCourseEntityManager()
+                ->getRepository(CourseMaterial::class)
+                ->findOneBy([
+                    'path' => $path
+                ]);
         }
         catch (\Exception $e) {
             return false;
