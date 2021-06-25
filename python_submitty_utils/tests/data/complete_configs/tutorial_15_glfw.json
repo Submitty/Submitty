@@ -1,0 +1,487 @@
+{
+    "auto_pts": 3,
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class",
+            "test01/a.out"
+        ],
+        "compilation_to_validation": [
+            "test01/STDOUT*.txt",
+            "test01/STDERR*.txt",
+            "test02/STDOUT*.txt",
+            "test02/STDERR*.txt",
+            "test03/STDOUT*.txt",
+            "test03/STDERR*.txt",
+            "SubmissionLimit/STDOUT*.txt",
+            "SubmissionLimit/STDERR*.txt",
+            "test01/a.out"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "**/*.pdf",
+            ".user_assigment_access.json"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test01/*.txt",
+            "test01/*_diff.json",
+            "test02/*.txt",
+            "test02/*_diff.json",
+            "test03/*.txt",
+            "test03/*_diff.json",
+            "SubmissionLimit/*.txt",
+            "SubmissionLimit/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "**/dispatched_actions.txt",
+            "test01/STDERR_0.txt",
+            "test01/STDERR_1.txt",
+            "test01/STDOUT_0.txt",
+            "test01/STDOUT_1.txt",
+            "test02/0.png",
+            "test02/STDOUT.txt",
+            "test02/STDERR.txt",
+            "test03/0.png",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest",
+        "number_of_ports": 1,
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "early_submission_incentive": {
+        "message": "",
+        "minimum_days_early": 0,
+        "minimum_points": 0,
+        "test_cases": []
+    },
+    "gradeable_message": "",
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
+    "id": "test_assignment",
+    "item_pool": [],
+    "load_gradeable_message": {
+        "first_time_only": false,
+        "message": ""
+    },
+    "max_possible_grading_time": 0,
+    "max_submission_size": 1000000,
+    "max_submissions": 20,
+    "points_visible": 3,
+    "publish_actions": true,
+    "required_capabilities": "default",
+    "ta_pts": 0,
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "cmake .",
+                        "make"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "",
+            "dispatcher_actions": [],
+            "executable_name": "a.out",
+            "extra_credit": false,
+            "hidden": false,
+            "points": 1,
+            "pre_commands": [],
+            "publish_actions": true,
+            "release_hidden_details": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "testcase_id": "test01",
+            "testcase_label": "",
+            "timestamped_stdout": false,
+            "title": "Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "a.out",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ],
+            "view_testcase_message": true
+        },
+        {
+            "actions": [
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 100,
+                    "end_y": 0,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": -100,
+                    "end_y": 0,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 0,
+                    "end_y": 100,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 0,
+                    "end_y": -100,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 1000,
+                    "end_y": 0,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": -1000,
+                    "end_y": 0,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 0,
+                    "end_y": 160,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 0,
+                    "end_y": -160,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag delta",
+                    "end_x": 300,
+                    "end_y": 300,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "origin"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "center"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "move mouse",
+                    "end_x": 10,
+                    "end_y": 200
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag",
+                    "end_x": 150,
+                    "end_y": 150,
+                    "mouse_button": "left",
+                    "start_x": 10,
+                    "start_y": 10
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "click and drag",
+                    "end_x": 160,
+                    "end_y": 160,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "screenshot",
+                    "name": "screenshot_0.png"
+                },
+                {
+                    "action": "key",
+                    "delay_in_seconds": 0.100000001490116,
+                    "key_combination": "q",
+                    "presses": 1
+                }
+            ],
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out -input sierpinski_triangle.txt -size 400 -iters 0 -cubes"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "",
+            "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
+            "points": 1,
+            "pre_commands": [],
+            "publish_actions": true,
+            "release_hidden_details": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "testcase_id": "test02",
+            "testcase_label": "",
+            "timestamped_stdout": false,
+            "title": "Graphics program 1",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "0.png",
+                    "deduction": 1.0,
+                    "description": "screenshot a",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ],
+            "view_testcase_message": true
+        },
+        {
+            "actions": [
+                {
+                    "action": "click and drag delta",
+                    "end_x": 50,
+                    "end_y": -125,
+                    "mouse_button": "left"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 1.0
+                },
+                {
+                    "action": "screenshot",
+                    "name": "screenshot_0.png"
+                },
+                {
+                    "action": "key",
+                    "delay_in_seconds": 0.100000001490116,
+                    "key_combination": "q",
+                    "presses": 1
+                }
+            ],
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out -input sierpinski_triangle.txt -size 400 -iters 0 -cubes"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "",
+            "dispatcher_actions": [],
+            "extra_credit": false,
+            "hidden": false,
+            "points": 1,
+            "pre_commands": [],
+            "publish_actions": false,
+            "release_hidden_details": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "testcase_id": "test03",
+            "testcase_label": "",
+            "timestamped_stdout": false,
+            "title": "Graphics program 1",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "0.png",
+                    "deduction": 1.0,
+                    "description": "screenshot a",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ],
+            "view_testcase_message": true
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "testcase_id": "SubmissionLimit",
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ],
+    "timestamped_stdout": false,
+    "total_pts": 3
+}
