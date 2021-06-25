@@ -1,4 +1,4 @@
-{% set question_type = poll is defined ? poll.getQuestionType() : 'single-response-single-correct' %}
+{% set question_type = poll is defined ? poll.getQuestionType() : 'single-response-multiple-correct' %}
 
 <span class="option-title" >
   Question Type:
@@ -40,4 +40,3 @@
   <label for="poll-type-multiple-response-survey">multiple response - survey</label>
   <p class="poll-type-description"><i>Students can select one or more responses, and any selection is worth full credit.</i></p>
 </div>
-
