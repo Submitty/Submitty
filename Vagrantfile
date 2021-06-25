@@ -38,10 +38,6 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
-unless Vagrant.has_plugin?('vagrant-vbguest') || ENV.has_key?('SKIP_VBGUEST')
-  raise 'vagrant-vbguest is not installed! To install, run: vagrant plugin install vagrant-vbguest'
-end
-
 Vagrant.configure(2) do |config|
   # Specify the various machines that we might develop on. After defining a name, we
   # can specify if the vm is our "primary" one (if we don't specify a VM, it'll use

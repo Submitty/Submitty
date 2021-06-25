@@ -963,7 +963,8 @@ VALUES (?,?,?,?,?,?)",
      */
     public function updateUser(User $user, $semester = null, $course = null) {
         $params = [$user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
-                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
+                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(), $user->getSecondaryEmail(),
+                       $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
         $extra = "";
@@ -985,7 +986,8 @@ UPDATE users
 SET
   user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
   user_lastname=?, user_preferred_lastname=?,
-  user_email=?, user_updated=?, instructor_updated=?{$extra}
+  user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
+  user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
             $params
         );
@@ -4161,11 +4163,11 @@ AND gc_id IN (
      */
     public function insertEmails(array $flattened_params, int $email_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, current_timestamp, ?, ?, ?)";
+        $row_string = "(?, ?, current_timestamp, ?, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query(
             "
-            INSERT INTO emails(subject, body, created, user_id, semester, course)
+            INSERT INTO emails(subject, body, created, user_id, email_address, semester, course)
             VALUES " . $value_param_string,
             $flattened_params
         );
@@ -4301,6 +4303,24 @@ AND gc_id IN (
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
         $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
+    }
+
+    public function getRegradeRequestsUsers(string $gradeable_id, bool $ungraded_only = false, int $component_id = -1) {
+        $parameters = [];
+        $parameters[] = $gradeable_id;
+        $ungraded_query = "";
+        if ($ungraded_only) {
+            $ungraded_query = "AND status = ? ";
+            $parameters[] = RegradeRequest::STATUS_ACTIVE;
+        }
+        $component_query = "";
+        if ($component_id !== -1) {
+            $component_query = "AND (gc_id IS NULL OR gc_id = ?) ";
+            $parameters[] = $component_id;
+        }
+
+        $this->course_db->query("SELECT user_id FROM regrade_requests WHERE g_id = ? " . $ungraded_query . $component_query, $parameters);
+        return $this->rowsToArray($this->course_db->rows());
     }
 
 
@@ -6366,6 +6386,8 @@ AND gc_id IN (
               u.user_lastname,
               u.user_preferred_lastname,
               u.user_email,
+              u.user_email_secondary,
+              u.user_email_secondary_notify,
               u.user_group,
               u.manual_registration,
               u.last_updated,
@@ -6440,6 +6462,8 @@ AND gc_id IN (
               gcd.array_grader_user_preferred_firstname,
               gcd.array_grader_user_lastname,
               gcd.array_grader_user_email,
+              gcd.array_grader_user_email_secondary,
+              gcd.array_grader_user_email_secondary_notify,
               gcd.array_grader_user_group,
               gcd.array_grader_manual_registration,
               gcd.array_grader_last_updated,
@@ -6512,6 +6536,8 @@ AND gc_id IN (
                   json_agg(ug.user_preferred_firstname) AS array_grader_user_preferred_firstname,
                   json_agg(ug.user_lastname) AS array_grader_user_lastname,
                   json_agg(ug.user_email) AS array_grader_user_email,
+                  json_agg(ug.user_email_secondary) AS array_grader_user_email_secondary,
+                  json_agg(ug.user_email_secondary_notify) AS array_grader_user_email_secondary_notify,
                   json_agg(ug.user_group) AS array_grader_user_group,
                   json_agg(ug.manual_registration) AS array_grader_manual_registration,
                   json_agg(ug.last_updated) AS array_grader_last_updated,
@@ -6671,6 +6697,8 @@ AND gc_id IN (
                 'user_preferred_firstname',
                 'user_lastname',
                 'user_email',
+                'user_email_secondary',
+                'user_email_secondary_notify',
                 'user_group',
                 'manual_registration',
                 'last_updated',

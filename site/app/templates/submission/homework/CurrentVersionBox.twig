@@ -63,10 +63,15 @@
                         This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
                         You may select any version above and press "Grade This Version" to re-activate your submission for grading.<br />
                     </p>
+                {% elseif ta_grades_incomplete %}
+                    <p class="red-message">
+                        Note: Grades have been released for this assignment but your assignment was not graded.<br />
+                        Contact an instructor or TA if this is unexpected.
+                    </p>
                 {% elseif not active_same_as_graded and has_manual_grading %}
                     <p class="red-message">
                         Note: The version you have selected to be graded is not the version graded by the instructor/TAs.<br />
-                        If the graded version does not match your selected version, a zero will be recorded in the gradebook.
+                        If the graded version does not match your selected version, a zero will be recorded in the gradebook.<br />
                     </p>
                 {% elseif active_version > 0 and active_version == display_version %}
                     <p class="green-message">

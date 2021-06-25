@@ -876,10 +876,6 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * Check if the results folder exists for a given gradeable and version results.json
-     * in the results/ directory. If the file exists, we output a string that the calling
-     * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
-     *
      * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
      */
     public function checkRefreshLichenMainPage() {
@@ -890,13 +886,12 @@ class PlagiarismController extends AbstractController {
 
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
+        $gradeables_in_progress = 0;
         foreach ($gradeable_ids_titles as $gradeable_id_title) {
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
-                $this->core->getOutput()->renderString("REFRESH_ME");
-                return;
+                $gradeables_in_progress++;
             }
         }
-
-        $this->core->getOutput()->renderString("NO_REFRESH");
+        echo $gradeables_in_progress;
     }
 }
