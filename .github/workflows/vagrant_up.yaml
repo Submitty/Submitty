@@ -24,6 +24,6 @@ jobs:
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
       # - run: vagrant plugin install vagrant-vbguest
-      - run: NO_SUBMISSIONS=1 SKIP_VBGUEST=1 vagrant up ${{ matrix.image }}
+      - run: NO_SUBMISSIONS=1 vagrant up ${{ matrix.image }}
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:${{ matrix.port }}

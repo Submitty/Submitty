@@ -44,42 +44,31 @@
 
     function checkRefreshLichenMainPage(url, semester, course) {
         // refresh time for lichen main page
-        var refresh_time = 5000;
-        setTimeout(function() {
+        let refresh_time = 1000;
+        setInterval(function() {
             check_lichen_jobs(url, semester, course);
         }, refresh_time);
     }
 
+    let waiting_gradeables = -1;
+
     function check_lichen_jobs(url, semester, course) {
         $.get(url,
             function(data) {
-                var last_data = localStorage.getItem("last_data");
-                if (data === "REFRESH_ME") {
-                    last_data= "REFRESH_ME";
-                    localStorage.setItem("last_data", last_data);
-                    window.location.href = buildCourseUrl(['plagiarism']);
-                }
-                else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
-                    last_data= "NO_REFRESH";
-                    localStorage.setItem("last_data", last_data);
-                    window.location.href = buildCourseUrl(['plagiarism']);
+                if (waiting_gradeables === -1 || (data === waiting_gradeables && data !== 0)) {
+                    waiting_gradeables = data;
                 }
                 else {
-                    checkRefreshLichenMainPage(url, semester, course);
+                    // We can't just reload because we need to get rid of the REFRESH_ME part of the URL
+                    window.location.href = buildCourseUrl(['plagiarism']);
                 }
             }
         );
     }
-
-    checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
+    {% if refresh_page == "REFRESH_ME" %}
+        checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
+    {% endif %}
 </script>
-
-{# refresh page ensures atleast one refresh of lichen mainpage when delete, rerun, edit or new configuration is saved #}
-{% if refresh_page == "REFRESH_ME" %}
-    <script>
-        localStorage.setItem("last_data", "REFRESH_ME");
-    </script>
-{% endif %}
 
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 

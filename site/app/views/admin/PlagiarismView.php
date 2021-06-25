@@ -102,7 +102,7 @@ class PlagiarismView extends AbstractView {
         ]);
     }
 
-    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config, $title) {
+    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $ignore_submissions, $ignore_submissions_others, $saved_config, $title) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $this->core->getOutput()->addInternalCss("plagiarism.css");
@@ -123,9 +123,7 @@ class PlagiarismView extends AbstractView {
         $sequence_length = 4;
         //$prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables']) + 1 : 1;
         $prior_terms = false;
-        $ignore_submissions = false;
-        //$ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions']) + 1 : 1;
-
+        $ignore_submissions_list = null;
 
         // Values which are in saved configuration
         if ($new_or_edit == "edit") {
@@ -147,14 +145,13 @@ class PlagiarismView extends AbstractView {
             $threshold = (int) $saved_config['threshold'];
             $sequence_length = (int) $saved_config['sequence_length'];
             $prior_terms = false; // $prior_term_gradeables_number > 1;
-            $ignore_submissions = count($saved_config['ignore_submissions']) > 0;
+            $ignore_submissions_list = implode(", ", $ignore_submissions_others);
         }
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}",
             "csrf_token" => $this->core->getCsrfToken(),
-            //"ignore_submission_number" => $ignore_submission_number,
             //"prior_term_gradeables_number" => $prior_term_gradeables_number,
             "provided_code" => $provided_code,
             "gradeable_ids_titles" => $gradeable_ids_titles,
@@ -168,6 +165,7 @@ class PlagiarismView extends AbstractView {
             "sequence_length" => $sequence_length,
             "prior_terms" => $prior_terms,
             "ignore_submissions" => $ignore_submissions,
+            "ignore_submissions_list" => $ignore_submissions_list,
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
             "prior_term_gradeables" => $prior_term_gradeables,
             "prior_term_gradeables_json" => $prior_term_gradeables_json
