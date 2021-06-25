@@ -2,7 +2,6 @@
 
 namespace tests\app\models;
 
-use app\libraries\Core;
 use app\models\Team;
 use tests\BaseUnitTest;
 
