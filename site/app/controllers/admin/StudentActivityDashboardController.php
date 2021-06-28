@@ -1,6 +1,7 @@
 <?php
 
 namespace app\controllers\admin;
+
 use app\controllers\AbstractController;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,7 +18,7 @@ class StudentActivityDashboardController extends AbstractController {
    * @Route("/courses/{_semester}/{_course}/activity", methods={"GET"})
    * @AccessControl(role="INSTRUCTOR")
    */
-   public function getStudents(){
+    public function getStudents() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         //var_dump($data_dump);
         return new WebResponse([
@@ -30,7 +31,7 @@ class StudentActivityDashboardController extends AbstractController {
     * @Route("/courses/{_semester}/{_course}/activity/download", methods={"GET"})
     * @AccessControl(role="INSTRUCTOR")
     */
-   public function downloadData(){
+    public function downloadData() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         $file_url = FileUtils::joinPaths(
             $this->core->getConfig()->getCoursePath(),

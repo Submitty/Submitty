@@ -9,7 +9,7 @@ function clear(){
 }
 
 function sortTable(n, flag) {
-    let rows, i, dir;
+    let i, dir;
     const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
         if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')){
@@ -18,25 +18,25 @@ function sortTable(n, flag) {
     }
     if ($(`#${n}`).children('i').hasClass('fa-angle-up')){
         $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
-        dir = "desc";
+        dir = 'desc';
     }
     else {
         $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
-        dir = "asc";
+        dir = 'asc';
     }
     // Comparator used to compare 2 data entries for sorting
     let comparator = function (row1, row2) {
-        if (dir == "desc" && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
+        if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
             return true;
         }
-        else if (dir == "desc" && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
+        else if (dir == 'desc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
             // row2 > row1
             return false;
         }
-        else if (dir == "asc" && !helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
+        else if (dir == 'asc' && !helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
             return true;
         }
-        else if (dir == "asc" && !helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
+        else if (dir == 'asc' && !helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
             return false;
         }
         for (i = 1; i < 4; i++){
@@ -48,7 +48,7 @@ function sortTable(n, flag) {
     };
     // if n == 0 or n == 8
     // returns true if x < y, digits < strings < empty strings
-    let helper = function (x, y, i) {
+    const helper = function (x, y, i) {
         if (i == 0 || i == 8){
             const xIsDigit = /^\d+$/.test(x);
             const yIsDigit = /^\d+$/.test(y);
@@ -74,7 +74,7 @@ function sortTable(n, flag) {
         }
     };
     let merge = function(arr1, arr2) {
-        let res = [];
+        const res = [];
         let i = 0, j = 0;
         while (i < arr1.length && j < arr2.length) {
             if (comparator(arr1[i].getElementsByTagName('TD'), arr2[j].getElementsByTagName('TD'))) {
@@ -97,18 +97,18 @@ function sortTable(n, flag) {
         return res;
     }
 
-    let mergeSort = function (arr) {
+    const mergeSort = function (arr) {
         if (arr.length <= 1) {
             return arr;
         }
 
         const mid = Math.floor(arr.length/2);
-        let left = mergeSort(arr.slice(0, mid));
-        let right = mergeSort(arr.slice(mid));
-        let res = merge(left,right);
+        const left = mergeSort(arr.slice(0, mid));
+        const right = mergeSort(arr.slice(mid));
+        const res = merge(left,right);
         return res;
     }
-    rows = table.rows;
+    const rows = table.rows;
     const sorted = mergeSort(Array.prototype.slice.call(rows).slice(1));
     // inserting rows back into table to update the order
     for (i = 0; i < table.rows.length-1; i++) {

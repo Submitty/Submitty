@@ -1,31 +1,30 @@
-input[type=text],
-input[type=number] {
-  width: 50%;
-  padding: 12px 20px;
-  float: right;
-}
-
-input[type=number],
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=text],
+input[type=number] {
+    width: 50%;
+    padding: 12px 20px;
+    float: right;
 }
 
 input[type=number] {
-  -moz-appearance: textfield;
+    -moz-appearance: textfield;
 }
 
 #container {
-  width: 500px;
-  margin-bottom: 5px;
+    width: 500px;
+    margin-bottom: 5px;
 }
 
 .line {
-  width: 100%;
-  height: 30px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+    width: 100%;
+    height: 30px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .label {

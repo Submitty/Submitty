@@ -263,8 +263,8 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-id-card"
             ]);
         }
-        
-        if($this->core->getUser()->accessAdmin()) {
+
+        if ($this->core->getUser()->accessAdmin()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildCourseUrl(['activity']),
                 "title" => "Activity Dashboard",

@@ -164,10 +164,9 @@ class DatabaseQueries {
      * Retrieves all students from a course and their virtual attendance
      * information such as logs for the course materials page, and logs
      * for the discussion forum page.
-     * 
      */
 
-     public function getAttendanceInfo(): array{
+    public function getAttendanceInfo(): array {
         $this->course_db->query("
         WITH
         A AS
