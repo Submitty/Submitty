@@ -16,6 +16,19 @@
     transform: rotate(90deg);
 }
 
+.option-title {
+    font-weight: bold;
+}
+
+.poll-type-option {
+    padding-bottom: 10px;
+}
+
+.poll-type-description {
+    padding-left: 25px;
+    color: var(--standard-medium-gray);
+}
+
 .move-btn {
     background: transparent;
     padding: 10px;

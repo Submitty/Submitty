@@ -117,11 +117,14 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewPoll() {
-        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
-            $this->core->addErrorMessage("Error occured in adding poll");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
+        foreach ($fields as $field) {
+            if (!isset($_POST[$field])) {
+                $this->core->addErrorMessage("Error occured in adding poll");
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildCourseUrl(['polls']))
+                );
+            }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
@@ -129,14 +132,19 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        $date = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat()->getFormat('poll'), $_POST["release_date"]);
+        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-
+        if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
+            $this->core->addErrorMessage("Invalid poll question type");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
@@ -159,7 +167,16 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
+        elseif ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
+            $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        elseif ((($_POST["question_type"] == "single-response-survey") || ($_POST["question_type"] == "multiple-response-survey")) && count($answers) != $response_count) {
+            $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             // validate the uploaded file size
@@ -261,12 +278,6 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        if (!isset($_POST["answer"])) {
-            $this->core->addErrorMessage("No answer given");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
-        }
         $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
         if ($poll == null) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -274,12 +285,30 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+        if (!array_key_exists("answers", $_POST) && PollUtils::isSingleResponse($poll->getQuestionType())) {
+            // Answer must be given for single-response ("no response" counts as a reponse)
+            $this->core->addErrorMessage("No answer given");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
         if ($poll->isOpen()) {
-            if ($_POST["answer"] == "-1") {
-                $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+            if (PollUtils::isSingleResponse($poll->getQuestionType())) {
+                if ($_POST["answers"][0] == "-1") {
+                    $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+                }
+                else {
+                    $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answers"]);
+                }
             }
             else {
-                $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answer"]);
+                // $poll->getQuestionType() == "multiple-response"
+                if (!array_key_exists("answers", $_POST)) {
+                    $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+                }
+                else {
+                    $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answers"]);
+                }
             }
         }
         else {
@@ -341,18 +370,25 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
         }
-        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
-            $this->core->addErrorMessage("Error occured in editing poll");
-            return new RedirectResponse($returnUrl);
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
+        foreach ($fields as $field) {
+            if (!isset($_POST[$field])) {
+                $this->core->addErrorMessage("Error occured in editing poll");
+                return new RedirectResponse($returnUrl);
+            }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
             return new RedirectResponse($returnUrl);
         }
-        $date = \DateTime::createFromFormat($this->core->getConfig()->getDateTimeFormat()->getFormat('poll'), $_POST["release_date"]);
+        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
+        }
+        if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
+            $this->core->addErrorMessage("Invalid poll question type");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
@@ -399,7 +435,16 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Polls must have at least one correct response");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders, $file_path);
+        elseif ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
+            $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        elseif ((($_POST["question_type"] == "single-response-survey") || ($_POST["question_type"] == "multiple-response-survey")) && count($answers) != $response_count) {
+            $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
+            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $file_path);
         return new RedirectResponse($returnUrl);
     }
 
@@ -484,6 +529,7 @@ class PollController extends AbstractController {
         }
         $num_imported = 0;
         $num_errors = 0;
+        $question_type = null;
         foreach ($polls as $poll) {
             if (
                 !array_key_exists("name", $poll)
@@ -497,6 +543,10 @@ class PollController extends AbstractController {
             }
             $name = $poll["name"];
             $question = $poll["question"];
+            /*  Polls that were exported before this feature was
+                implemented don't have this data. At the time, there
+                only existed questions of type single reponse. */
+            $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
             $responses = [];
             $orders = [];
             $i = 0;
@@ -508,7 +558,7 @@ class PollController extends AbstractController {
             }
             $answers = $poll["correct_responses"];
             $release_date = $poll["release_date"];
-            $this->core->getQueries()->addNewPoll($name, $question, $responses, $answers, $release_date, $orders);
+            $this->core->getQueries()->addNewPoll($name, $question, $question_type, $responses, $answers, $release_date, $orders);
             $num_imported = $num_imported + 1;
         }
         if ($num_errors === 0) {
