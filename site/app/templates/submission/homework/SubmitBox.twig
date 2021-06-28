@@ -339,8 +339,11 @@
                 {{ upload_message | markdown}}
             </p>
         </div>
-
-        <button type="button" id="submit" class="btn btn-success">Submit</button>
+        {% if viewing_inactive_version %}
+            <button type="button" id="submit" class="btn btn-success" title="Switch to Most Recent Version" onclick="">Submit</button>
+        {% else %}
+            <button type="button" id="submit" class="btn btn-success">Submit</button>
+        {% endif %}
 
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>

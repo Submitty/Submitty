@@ -8,7 +8,6 @@
 function setMultipleChoices(mc_field_id) {
     let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
     prev_checked = prev_checked.split('\n');
-    console.log(prev_checked);
     // For each input inside the fieldset see if its value is inside the prev checked array
     $(`#${mc_field_id} :input`).each((index,element) => {
 
