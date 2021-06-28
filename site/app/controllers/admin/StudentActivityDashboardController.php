@@ -20,7 +20,6 @@ class StudentActivityDashboardController extends AbstractController {
    */
     public function getStudents() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
-        //var_dump($data_dump);
         return new WebResponse([
             'admin',
             'StudentActivityDashboard'
