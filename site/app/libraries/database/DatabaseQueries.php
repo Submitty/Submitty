@@ -637,7 +637,7 @@ SQL;
     }
 
     public function findPost($thread_id) {
-        $this->course_db->query("SELECT * from posts where thread_id = ?", [$thread_id]);
+        $this->course_db->query("SELECT * from posts where thread_id = ? and parent_id = -1", [$thread_id]);
         return $this->course_db->row();
     }
     public function findThread($thread_id) {

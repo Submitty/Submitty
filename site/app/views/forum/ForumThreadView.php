@@ -1121,7 +1121,8 @@ class ForumThreadView extends AbstractView {
             "parent_id" => $parent_id,
             "render_markdown" => $markdown,
             "has_history" => $has_history,
-            "thread_previously_merged" => $merged_thread
+            "thread_previously_merged" => $merged_thread,
+            "thread_announced" => $this->core->getQueries()->existsAnnouncementsId($thread_id)
         ];
 
         if ($render) {

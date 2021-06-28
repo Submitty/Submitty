@@ -381,9 +381,9 @@ class ForumController extends AbstractController {
         }
         // Check that the post is the first post of the thread
         $thread_info = $this->core->getQueries()->findPost($_POST['id']);
-        if ($thread_info["parent_id"] != -1) {
-            $this->core->addErrorMessage("Post is not the beginning of a thread");
-            return JsonResponse::getFailResponse("Post is not the beginning of a thread");
+        if (count($thread_info) == 0) {
+            $this->core->addErrorMessage("No post found");
+            return JsonResponse::getFailResponse("No post found");
         }
         // Check that the post is indeed less than an hour old on the server
         $dateTime = new \DateTime($thread_info['timestamp']);
@@ -407,21 +407,6 @@ class ForumController extends AbstractController {
         $this->core->getQueries()->setAnnounced($_POST['id']);
         $this->core->getQueries()->updateResolveState($_POST['id'], 0);
         return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/forum/check_announcement", methods={"GET"})
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @return JsonResponse
-     */
-    public function checkAnnouncement(): JsonResponse {
-        if (isset($_GET["thread_id"])) {
-            $exists = $this->core->getQueries()->existsAnnouncementsId($_GET["thread_id"]);
-            return JsonResponse::getSuccessResponse([
-                "exists" => $exists
-            ]);
-        }
-        return JsonResponse::getFailResponse("No thread_id provided");
     }
 
     /**
