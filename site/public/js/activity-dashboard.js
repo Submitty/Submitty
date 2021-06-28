@@ -8,7 +8,7 @@ function clear(){
     document.getElementById('office_hours_queue_date').value = '';
 }
 
-function sortTable(n, flag) {
+function sortTable(n) {
     let i, dir;
     const table = document.getElementById('data-table');
     for (i = 0; i < 10; i++){
@@ -25,7 +25,7 @@ function sortTable(n, flag) {
         dir = 'asc';
     }
     // Comparator used to compare 2 data entries for sorting
-    let comparator = function (row1, row2) {
+    const comparator = function (row1, row2) {
         if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
             return true;
         }
@@ -73,7 +73,7 @@ function sortTable(n, flag) {
             return x < y;
         }
     };
-    let merge = function(arr1, arr2) {
+    const merge = function(arr1, arr2) {
         const res = [];
         let i = 0, j = 0;
         while (i < arr1.length && j < arr2.length) {
@@ -95,7 +95,7 @@ function sortTable(n, flag) {
             j++;
         }
         return res;
-    }
+    };
 
     const mergeSort = function (arr) {
         if (arr.length <= 1) {
@@ -107,7 +107,7 @@ function sortTable(n, flag) {
         const right = mergeSort(arr.slice(mid));
         const res = merge(left,right);
         return res;
-    }
+    };
     const rows = table.rows;
     const sorted = mergeSort(Array.prototype.slice.call(rows).slice(1));
     // inserting rows back into table to update the order
