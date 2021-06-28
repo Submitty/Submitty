@@ -110,8 +110,8 @@ function sortTable(n, flag) {
     }
     rows = table.rows;
     const sorted = mergeSort(Array.prototype.slice.call(rows).slice(1));
-    document.getElementById('data-table');
-    for (i = 1; i < table.rows.length-1; i++) {
-        rows[i].parentNode.insertBefore(rows[i + 1], sorted[i]);
+    // inserting rows back into table to update the order
+    for (i = 0; i < table.rows.length-1; i++) {
+        rows[i+1].parentNode.insertBefore(sorted[i], rows[i+1]);
     }
 }

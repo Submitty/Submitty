@@ -1,4 +1,4 @@
-input[type=date],
+input[type=text],
 input[type=number] {
   width: 50%;
   padding: 12px 20px;
