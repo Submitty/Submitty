@@ -1,12 +1,12 @@
 input[type=text],
 input[type=number] {
-  width: 50%;
-  padding: 12px 20px;
-  float: right;
+    width: 50%;
+    padding: 12px 20px;
+    float: right;
 }
 
 input[type=number] {
-  -moz-appearance: textfield;
+    -moz-appearance: textfield;
 }
 
 input[type=number]::-webkit-inner-spin-button,
