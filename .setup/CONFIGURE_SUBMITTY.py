@@ -164,6 +164,7 @@ defaults = {
     'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
     'email_server_hostname': 'mail.myuniversity.edu',
     'email_server_port': 25,
+    'email_internal_domain': 'example.com',
     'course_code_requirements': "Please follow your school's convention for course code.",
     'sys_admin_email': '',
     'sys_admin_url': ''
@@ -298,6 +299,7 @@ else:
                 EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
             except ValueError:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
+            EMAIL_INTERNAL_DOMAIN = get_input("What is the internal email address format?", defaults['email_internal_domain'])
             break
 
         elif (is_email_enabled.lower() in ['no', 'n']):
@@ -608,6 +610,7 @@ if not args.worker:
     config['email_reply_to'] = EMAIL_REPLY_TO
     config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
     config['email_server_port'] = EMAIL_SERVER_PORT
+    config['email_internal_domain'] = EMAIL_INTERNAL_DOMAIN
 
     with open(EMAIL_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)

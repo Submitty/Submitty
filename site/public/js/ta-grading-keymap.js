@@ -24,7 +24,9 @@ let settingsData = [
                     "Prev/Next Student": "default",
                     "Prev/Next Ungraded Student": "ungraded",
                     "Prev/Next Itempool Student": "itempool",
-                    "Prev/Next Ungraded Itempool Student": "ungraded-itempool"
+                    "Prev/Next Ungraded Itempool Student": "ungraded-itempool",
+                    "Prev/Next Grade Inquiry": "inquiry",
+                    "Prev/Next Active Grade Inquiry": "active-inquiry",
                 }, 
                 default: "Prev/Next Student"
             }
