@@ -1277,7 +1277,7 @@ function getGradedComponentFromDOM(component_id) {
 function getScoresFromDOM() {
     let gradeable_id = getGradeableId();
     let dataDOMElement = $('#gradeable-scores-id');
-    var user_group_txt = $.ajax({
+    let user_group_txt = $.ajax({
         type: 'GET',       
         url: buildCourseUrl(['gradeable', gradeable_id, 'getUserGroup']),
         dataType: 'html',
@@ -1288,8 +1288,8 @@ function getScoresFromDOM() {
             return res.data;
         }
     }).responseText;
-    var user_group_obj=JSON.parse(user_group_txt);
-    var user_group = user_group_obj.data;
+    let user_group_obj=JSON.parse(user_group_txt);
+    let user_group = user_group_obj.data;
     let scores = {
         user_group: user_group,
         ta_grading_complete: getTaGradingComplete(),

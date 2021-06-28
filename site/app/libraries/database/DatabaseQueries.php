@@ -1888,11 +1888,7 @@ AND rotating_section IS NOT NULL;"
 
         return $this->course_db->rows();
     }
-
-//    public function getComponentGrader() {
-//        $this->course_db->query("SELECT gcd_grader_id FROM gradeable_component_data WHERE")
-//    }
-
+    
     public function getGradersForRegistrationSections($sections) {
         $return = [];
         $params = [];

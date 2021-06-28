@@ -202,6 +202,8 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Route for Getting Gradeable
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getUserGroup", methods={"GET"})
+     * @param string $gradeable_id
+     * @return JsonResponse
      */
     public function getUserGroup($gradeable_id) {
         $user_group = $this->core->getUser()->getGroup();

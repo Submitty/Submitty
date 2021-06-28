@@ -207,7 +207,7 @@ class GradedComponentContainer extends AbstractModel {
      *  to the precision of the gradeable
      * @return float
      */
-    public function getTotalScore(User $grader = null) {
+    public function getTotalScore(User $grader = null): float {
         $points_earned = 0.0;
         $number_of_graders = 0;
         // TODO: how should peer grades be calculated: now its an average
@@ -232,7 +232,7 @@ class GradedComponentContainer extends AbstractModel {
      *  to the precision of the gradeable
      * @return float
      */
-    public function getTotalPeerScore(User $grader = null) {
+    public function getTotalPeerScore(User $grader = null): float {
         $points_earned = 0.0;
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
@@ -255,7 +255,7 @@ class GradedComponentContainer extends AbstractModel {
      *  to the precision of the gradeable
      * @return float
      */
-    public function getTotalTaScore(User $grader = null) {
+    public function getTotalTaScore(User $grader = null): float {
         $points_earned = 0.0;
         $number_of_graders = 0;
         // TODO: how should peer grades be calculated: now its an average
@@ -274,9 +274,7 @@ class GradedComponentContainer extends AbstractModel {
                 $number_of_graders = 0;
             }
         }
-        // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
-        // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
-        //$points_earned = Utils::safeCalcPercent($points_earned, max(1, $number_of_graders));
+
         return $points_earned;
     }
 
