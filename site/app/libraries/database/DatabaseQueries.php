@@ -1888,7 +1888,7 @@ AND rotating_section IS NOT NULL;"
 
         return $this->course_db->rows();
     }
-    
+
     public function getGradersForRegistrationSections($sections) {
         $return = [];
         $params = [];
