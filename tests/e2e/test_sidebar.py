@@ -143,6 +143,7 @@ class TestSidebar(BaseTestCase):
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
+            [base_url + '/email_status', 'Email Status'],
             [base_url + '/users', 'Manage Students'],
             [base_url + '/graders', 'Manage Graders'],
             [base_url + '/sections', 'Manage Sections'],
