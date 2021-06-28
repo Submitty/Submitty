@@ -45,7 +45,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && ($submitter_id === $user->getId() || $submitter->accessGrading() );
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) || !$can_inquiry) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to request regrade')
             );
