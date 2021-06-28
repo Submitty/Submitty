@@ -15,13 +15,13 @@ function isColoredMarker(marker, color) {
 }
 
 function colorEditors(data) {
-    window.si = data.si;
+    si = data.si;
     for(let users_color in data.ci) {
     	let editor = parseInt(users_color) === 1 ? editor0 : editor1;
     	editor.operation(() => {
         	for(let pos in data.ci[users_color]) {
             	let element = data.ci[users_color][pos];
-            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6]}, css: "background: " + element[4] + ";" + (parseInt(users_color) === 1 ? "border: solid black 1px;" : "")});
+            	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[5], "data_end": element[6], "line": element[1]}, css: "background: " + element[4] + "; " + (parseInt(users_color) === 1 ? "border: solid black 1px;" : "")});
         	}
     	});
     }
@@ -30,43 +30,23 @@ function colorEditors(data) {
 function updatePanesOnOrangeClick(leftClickedMarker, editor1, editor2) {
     // Remove existing red region and add new one
     let marks_editor2 = editor2.getAllMarks();
-    editor2.operation( () => {
-        // remove existing marks
-        marks_editor2.forEach(mark => {
-            if (mark.attributes.data_current_color === RED) {
-                mark.css = "background: " + ORANGE + ";";
-                mark.attributes.data_current_color = ORANGE;
-            }
-        });
 
-        //add new red colored marks
-    	marks_editor2.forEach(mark => {
-    	    for (let i=0; i < leftClickedMarker.attributes.data_start.length; i++) {
-                if (mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start[i]) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end[i])) {
-                    mark.css = "background: " + RED + ";";
-                    mark.attributes.data_current_color = RED;
+    //add new red colored marks
+    let firstMarkFound = false;
+    marks_editor2.forEach(mark => {
+        for (let i=0; i < leftClickedMarker.attributes.data_start.length; i++) {
+            if (mark.attributes.data_start === parseInt(leftClickedMarker.attributes.data_start[i]) && mark.attributes.data_end === parseInt(leftClickedMarker.attributes.data_end[i])) {
+                if (!firstMarkFound) {
+                    editor2.scrollIntoView({line: mark.attributes.line, ch: 0});
+                    firstMarkFound = true;
                 }
+                mark.css = "background: " + RED + ";";
             }
-    	});
-	});
-
-    // Remove existing red regions on editor1
-    editor2.operation( () => {
-        editor1.getAllMarks().forEach(mark => {
-            if (mark.attributes.data_current_color === RED) {
-                mark.css = "background: " + ORANGE + "; border: solid black 1px;";
-                mark.attributes.data_current_color = ORANGE;
-            }
-        });
+        }
     });
 
     // Color the clicked region in editor1
 	leftClickedMarker.css = "background: " + RED + "; border: solid black 1px;";
-	leftClickedMarker.attributes.data_current_color = RED;
-
-	// Refresh editors
-	editor1.refresh();
-    editor2.refresh();
 }
 
 function setUpLeftPane() {
@@ -83,25 +63,58 @@ function setUpLeftPane() {
         // Only grab the first one if there is overlap...
         let lineData = markers[0].find();
         let clickedMark = markers[0];
-        if(isColoredMarker(clickedMark, YELLOW)) {
+
+        // remove existing marks on editor 1
+        editor1.operation(function() {
+            editor1.getAllMarks().forEach(mark => {
+                mark.css = "background: " + mark.attributes.data_prev_color + ";";
+            });
+        });
+        // Remove existing marks on editor 0
+        editor0.operation(function() {
+            editor0.getAllMarks().forEach(mark => {
+                if (mark !== clickedMark) {
+                    mark.css = "background: " + mark.attributes.data_prev_color + "; border: solid black 1px;";
+                }
+            });
+        });
+
+        // Reset any existing popups
+        if($('#popup_to_show_matches_id').css('display') === 'block'){
+            $('#popup_to_show_matches_id').css('display', 'none');
+            clickedMark.css = "background: " + clickedMark.attributes.data_prev_color;
+            blueClickedMark = null;
+        }
+
+        if(isColoredMarker(clickedMark, YELLOW) || isColoredMarker(clickedMark, RED)) {
+            $('#popup_to_show_matches_id').css('left', e.clientX + "px");
+            $('#popup_to_show_matches_id').css('top', e.clientY + "px");
+
             let user_id_1 = $('[name="user_id_1"]', form).val();
             let user_1_version = $('[name="version_user_1"]', form).val();
             clickedMark.css = "background: " + BLUE;
             blueClickedMark = clickedMark;
             getMatchesListForClick(user_id_1, user_1_version, lineData.from);
-            editor0.refresh();
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             updatePanesOnOrangeClick(clickedMark, editor0, editor1);
-        } else {
-            if($('#popup_to_show_matches_id').css('display') === 'block'){
-                $('#popup_to_show_matches_id').css('display', 'none');
-                blueClickedMark.css = "background: " + YELLOW;
-                blueClickedMark = null;
-                editor0.refresh();
-            }
         }
 
+        // Refresh editors
+        editor0.refresh();
+        editor1.refresh();
     }
+}
+
+function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
+    let user_matches = si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
+    let to_append = '';
+    $.each(user_matches, function(i, match) {
+        let res = match.split('_');
+        to_append += `<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection('${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');">${res[0]} (version:${res[1]})</div></li>`;
+    });
+    to_append = $.parseHTML(to_append);
+    $("#popup_to_show_matches_id").empty().append(to_append);
+    $('#popup_to_show_matches_id').css('display', 'block');
 }
 
 function getUserData() {
@@ -129,19 +142,6 @@ function toggleFullScreenMode() {
 $(document).ready(() => {
     initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
 });
-
-function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
-    let user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
-    let to_append = '';
-    $.each(user_matches, function(i, match) {
-        let res = match.split('_');
-        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>';
-    });
-    to_append = $.parseHTML(to_append);
-    $("#popup_to_show_matches_id").empty().append(to_append);
-    $('#popup_to_show_matches_id').css('display', 'block');
-    // TODO: Discuss location for matches popup
-}
 
 function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
@@ -261,9 +261,13 @@ function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 =
     let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
     let es = false;
     if (user_id_2 != null) {
+        editor1.getDoc().setValue('');
         url += `&user_id_2=${user_id_2}&version_user_2=${version_id_2}`;
         es = true;
+        $(".user2-select").val(`{"user_id":"${user_id_2}","version":${version_id_2}}`);
     } else {
+        editor0.getDoc().setValue('');
+        editor1.getDoc().setValue('');
         updateRightUserLists(user_id_1, version_id_1);
     }
     requestAjaxData(url, f, es);
