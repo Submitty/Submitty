@@ -1,48 +1,90 @@
+:root {
+    --developer-blue: #e8fdff;
+    --instructor-ui-orange: #fce9cd;
+    --course-features-green: #defcde;
+    --system-gray: #e1e0e0;
+    --grading-purple: #eddffa;
+    --submission-yellow: #fffad7;
+    --vpat-pink: #ffe8fe;
 
-.update-Developer {
-    background-color: #e8fdff;
+    --alpha-red: #ff000055;
+    --alpha-orange: #ff950055;
+    --alpha-yellow: #ffff0055;
+    --alpha-green: #00ff0055;
+    --alpha-teal: #00d9ff55;
+    --alpha-blue: #0000ff55;
+    --alpha-violet: #9500ff55;
 }
 
-.update-InstructorUI {
-    background-color: #fcedd7;
+[data-theme="dark"] {
+    --developer-blue: #014d53;
+    --instructor-ui-orange: #653d02;
+    --course-features-green: #015c01;
+    --system-gray: #555454;
+    --grading-purple: #350265;
+    --submission-yellow: #615600;
+    --vpat-pink: #660161;
 }
 
-.update-Forum {
-    background-color: #eefcde;
+span.update-Developer,
+span.update-DevDependency,
+span.update-Dependency,
+span.API {
+    background-color: var(--developer-blue);
 }
 
-.update-Plagiarism {
-    background-color: #dbefff;
+span.update-InstructorUI,
+span.update-CourseMaterials,
+span.update-Plagiarism {
+    background-color: var(--instructor-ui-orange);
 }
 
-.update-System {
-    background-color: #ededed;
+span.update-Forum,
+span.update-SubminiPolls,
+span.update-HelpQueue {
+    background-color: var(--course-features-green);
 }
 
-.update-Autograding {
-    background-color: #fffee8;
+span.update-System,
+span.update-Notifications {
+    background-color: var(--system-gray);
 }
 
-.update-TAGrading {
-    background-color: #f4e8ff;
+
+span.update-TAGrading,
+span.update-Autograding {
+    background-color: var(--grading-purple);
 }
 
-.update-RainbowGrades {
-    background: -webkit-linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
-    background: -o-linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
-    background: -moz-linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
-    background: linear-gradient(to right, #ff000055, #ff950055 , #ffff0055, #00ff0055, #00d9ff55, #0000ff55, #9500ff55);
+span.update-Submission,
+span.update-Notebook {
+    background-color: var(--submission-yellow);
 }
 
-.update-Submission {
-    background-color: #daffef;
+span.update-VPAT {
+    background-color: var(--vpat-pink);
 }
 
-.update-VPAT {
-    background-color: #ffe8fe;
+span.update-RainbowGrades {
+    background: -webkit-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
+    background: -o-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
+    background: -moz-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
+    background: linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
 }
 
 .update-SYSADMIN {
     background-color: var(--alert-background-danger-red);
 }
 
+.update-SECURITY {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+.release-filtered {
+    background-color: var(--selected-nav-sidebar);
+    border: 0.3px dotted var(--text-black);
+}
+
+.no-content {
+    background-color: transparent !important;
+}

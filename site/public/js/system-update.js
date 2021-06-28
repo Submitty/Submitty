@@ -36,7 +36,7 @@ async function getReleases(current_tag) {
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag){
-    const latest = data[data.length-1];
+    const latest = data[0];
 
     $.ajax({
         url: buildUrl(['markdown']),
@@ -48,6 +48,11 @@ function updateReleaseNotes(data, current_tag){
         success: function(markdown_data){
             $('#release-notes').css('display', 'block');
             $('#release-notes').html(injectStyling(markdown_data));
+            $('div.update').each( (index, div) => {
+                if ($(div).text().includes('None')) {
+                    $(div).addClass('no-content');
+                }
+            })
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
                 $('#text').html('<i>Submitty is up to date!</i>');
@@ -69,13 +74,43 @@ function addPRLinks(raw_str) {
 function injectStyling(markdown_data) {
     //add <hr> after each ul or <p><em> tag
     markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>/g, '$&<hr>');
-    console.log(markdown_data);
     //replace normal li contents with spans with classes
-    //markdown_data = markdown_data.replace(/\[\w+:(\w+)\].+(?=<\/li>)|\[(\w+)\].+(?=<\/li>)/g, '<span class="update update-$1$2">$&</span>');
     markdown_data = markdown_data.replace(/\[\w+:(\w+)\].+(?=<\/li>)|\[([^\]]+)\].+(?=<\/li>)/g, '<span class="update update-$1$2">$&</span>');
-    //special highlighting for SYSADMIN updates only if there are any
-    if ((markdown_data.match(/\[SYSADMIN ACTION\]/g) || []).length) {
-        markdown_data = markdown_data.replace(/<p>SYSADMIN[\s\S]+?(?:<hr>)/g, '<div class="update-SYSADMIN">$&</div>');
-    }
+    // //special highlighting for SYSADMIN updates only if there are any
+    // if ((markdown_data.match(/\[SYSADMIN ACTION\]/g) || []).length) {
+    //     markdown_data = markdown_data.replace(/<p>SYSADMIN[\s\S]+?(?:<hr>)/g, '<div class="update-SYSADMIN">$&</div>');
+    // }
+    // //special highlighting for SECURITY updates only if there are any
+    // if ((markdown_data.match(/\[SECURITY\]/g) || []).length) {
+    markdown_data = markdown_data.replace(/<p>([^<\n]+)[\s\S]+?(?:<hr>)/g, '<div class="update update-$1">$&</div>');
+    //}
     return markdown_data;
+}
+
+function filterReleaseNotes(filter) {
+    console.log('filter', filter)
+    const sections = $('div.update');    
+    sections.each( (index, section) => {
+        $(section).hide();
+        if($(section).text().toLowerCase().includes(filter.toLowerCase())){
+            $(section).show();
+            $(section).find('li').each( (index, list_item) => {
+                //remove old filter highlighting
+                const no_filter = $(list_item).html().replace(/<span class=\"release-filtered\">([\s\S]+?)<\/span>/g, '$1');
+                $(list_item).html(no_filter);
+                $(list_item).hide();
+                if(!filter) {
+                    $(list_item).show();
+                }
+                if(filter && $(list_item).text().toLowerCase().includes(filter.toLowerCase())){
+                    $(list_item).show();
+                    //replace all instances of the filter text that is not inside an html tag's attributes
+                    //with a span wrapper for styling
+                    const matches = $(list_item).html().replace(new RegExp(`${filter}(?=[^<>]+<)`, 'gi'), '<span class="release-filtered">$&</span>');
+                    $(list_item).html(matches);
+                }
+            });
+        }
+
+    });
 }

@@ -2,11 +2,17 @@
     <h1>System Update</h1>
     <a target="_blank" href="https://submitty.org/sysadmin/update">Need help with updating Submitty? <i style="font-style:normal;" class="fa-question-circle"></i></a>
 
+    <div class="float-right">
+    <label>
+        Search:
+        <input id="release-notes-filter" type="textbox" onkeyup="filterReleaseNotes(this.value)">
+    </label>
     <button 
-        class="btn btn-primary float-right" 
+        class="btn btn-primary" 
         onclick="getReleases('{{latest_tag}}');">
         Check for Updates
     </button>
+    </div>
 
     <div id="update_status" class="box">
         <p id="current-version"> Current Version Installed: <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}">{{ latest_tag }}</a></p>
