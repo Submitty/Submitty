@@ -70,7 +70,6 @@
     {% if post.author_user_id == current_user and first and not thread_announced and date() < date(post_date)|date_modify("+1hour") and userGroup <= 2 %}
         <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{"\"" ~ post_content ~ "\""}}, {{ activeThread.id }});"> Pin &amp; email this thread </a>
     {% endif %}
-
     <span class="post-action-container">
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}

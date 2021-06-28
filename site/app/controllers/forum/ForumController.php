@@ -380,7 +380,7 @@ class ForumController extends AbstractController {
             return JsonResponse::getFailResponse("thread_id not provided");
         }
         // Check that the post is the first post of the thread
-        $thread_info = $this->core->getQueries()->findPost($_POST['id']);
+        $thread_info = $this->core->getQueries()->findParentPost($_POST['id']);
         if (count($thread_info) == 0) {
             $this->core->addErrorMessage("No post found");
             return JsonResponse::getFailResponse("No post found");
