@@ -1543,7 +1543,6 @@ class ElectronicGraderController extends AbstractController {
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
                 return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
-        //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeerComponent() === ($grader->getGroup() === User::GROUP_STUDENT));
         $return['components'] = array_values($return['components']);
         return $return;
     }
