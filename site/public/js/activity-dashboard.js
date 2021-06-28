@@ -11,11 +11,7 @@ function clear(){
 function sortTable(n) {
     let i, dir;
     const table = document.getElementById('data-table');
-    for (i = 0; i < 10; i++){
-        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')){
-            $(`#${i}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
-        }
-    }
+    
     if ($(`#${n}`).children('i').hasClass('fa-angle-up')){
         $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
         dir = 'desc';
@@ -24,6 +20,16 @@ function sortTable(n) {
         $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
         dir = 'asc';
     }
+
+    for (i = 0; i < 10; i++){
+        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')){
+            $(`#${i}`).children('i').removeClass('fa-angle-up');
+        }
+        else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')){
+            $(`#${i}`).children('i').removeClass('fa-angle-down');
+        }
+    }
+    
     // Comparator used to compare 2 data entries for sorting
     const comparator = function (row1, row2) {
         if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
