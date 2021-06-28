@@ -1,5 +1,5 @@
 /* global captureTabInModal */
-/* exported newDownloadForm, newSettingsForm, newClassListForm, newGraderListForm, editRegistrationSectionsForm */
+/* exported newDownloadForm, newClassListForm, newGraderListForm, editRegistrationSectionsForm */
 // Modals for StudentList and GraderList
 
 function newDownloadForm() {
@@ -17,24 +17,6 @@ function newDownloadForm() {
         }
     });
     $('#registration_section_1').focus();
-}
-
-function newSettingsForm(){
-    $('.popup-form').css('display', 'none');
-    const form = $('#settings-form');
-    form.css('display', 'block');
-    captureTabInModal('settings-form');
-    form.find('.form-body').scrollTop(0);
-    $('#settings-form input:checkbox').each(function() {
-        if ($(this).val() == 'NULL') {
-            $(this).prop('checked', false);
-        }
-        else {
-            $(this).prop('checked', true);
-        }
-    });
-    $('#registration_section_1').focus();
-
 }
 
 function newClassListForm() {
