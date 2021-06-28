@@ -76,7 +76,7 @@ input[type=text]:invalid {
     color: var(--alert-invalid-entry-pink);
 }
 
-#prev_gradeable_div {
+#prev-gradeable-div {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -84,27 +84,30 @@ input[type=text]:invalid {
     padding-bottom: 30px;
 }
 
-#prev_gradeable_div select {
+#prev-gradeable-div select {
     width: calc(100% / 3 - 10px);
     margin: 5px;
 }
 
-#prev_gradeable_div select:nth-child(3n+2) {
+#prev-gradeable-div select:nth-child(3n+2) {
     margin-left: 0;
 }
 
-#prev_gradeable_div select:nth-child(3n+1) {
+#prev-gradeable-div select:nth-child(3n+1) {
     margin-right: 0;
 }
 
-#ignore_submission_div {
-    position: relative;
-    padding-bottom: 30px;
+#current-code-file, #provided-code-file, #prev-gradeable-div {
+    display: none;
 }
 
-#text_ignore_submission, #current_code_file, #provided_code_file,
-#add_more_ignore, #prev_gradeable_div {
-    display: none;
+#ignore-others-list {
+    flex-grow: 100;
+    margin-left: 0.5em;
+}
+
+#ignore-others-container {
+    display: inline-flex;
 }
 
 .radio-label-pair {
@@ -228,6 +231,18 @@ main#main.full-screen-mode .plagiarism-result-cont {
     float: right;
 }
 
+#popup_to_show_matches_id {
+    display: none;
+    top: 0;
+    left: 0;
+    width: auto;
+    position: fixed;
+}
+
+.ui-menu-item:hover {
+    background-color: var(--selected-nav-sidebar);
+}
+
 .plag-legend {
     text-shadow: 0 0 3px var(--text-black);
     margin-left: 5px;
@@ -235,6 +250,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 [data-theme="dark"] .plag-legend {
     text-shadow: 0 0 3px transparent;
+
 }
 
 @media (max-width: 660px) {

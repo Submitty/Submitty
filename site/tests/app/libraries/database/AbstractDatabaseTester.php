@@ -7,6 +7,7 @@ use app\libraries\database\AbstractDatabase;
 use app\libraries\database\PostgresqlDatabase;
 use app\libraries\database\SqliteDatabase;
 use app\libraries\FileUtils;
+use PDO;
 
 class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
     private $queries = [
@@ -15,15 +16,25 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
         ["INSERT INTO test VALUES (?, ?)", [2, 'b']]
     ];
 
-    /**
-     * @param AbstractDatabase $database
-     */
-    private function setupDatabase($database) {
+    private function setupDatabase(AbstractDatabase $database) {
         if ($database->isConnected()) {
             foreach ($this->queries as $query) {
                 $database->query($query[0], $query[1]);
             }
         }
+    }
+
+    public function testGetConnection() {
+        $database = new SqliteDatabase(['memory' => true]);
+        $database->connect();
+        $this->assertInstanceOf(PDO::class, $database->getConnection());
+    }
+
+    public function testThrowsOnNoConnection() {
+        $database = new SqliteDatabase(['memory' => true]);
+        $this->expectException(DatabaseException::class);
+        $this->expectExceptionMessage('Database not yet connected');
+        $database->getConnection();
     }
 
     public function testBasicDatabaseFeatures() {

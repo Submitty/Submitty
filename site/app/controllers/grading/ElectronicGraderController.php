@@ -1255,10 +1255,9 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_version = null,
         $sort = "id",
         $direction = "ASC",
-        $to_ungraded = null,
         $component_id = "-1",
         $anon_mode = false,
-        $to_same_itempool = false
+        $filter = 'default'
     ) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
@@ -1314,16 +1313,16 @@ class ElectronicGraderController extends AbstractController {
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
             if ($to === 'prev' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'prev') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             // Reassign who_id
             if (!is_null($goToStudent)) {
