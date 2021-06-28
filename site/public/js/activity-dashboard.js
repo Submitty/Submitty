@@ -11,7 +11,7 @@ function clear(){
 function sortTable(n) {
     let i, dir;
     const table = document.getElementById('data-table');
-    
+
     if ($(`#${n}`).children('i').hasClass('fa-angle-up')){
         $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
         dir = 'desc';
@@ -29,7 +29,7 @@ function sortTable(n) {
             $(`#${i}`).children('i').removeClass('fa-angle-down');
         }
     }
-    
+
     // Comparator used to compare 2 data entries for sorting
     const comparator = function (row1, row2) {
         if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
