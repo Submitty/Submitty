@@ -173,6 +173,7 @@ class Notebook extends AbstractModel {
                             $question_name = $notebookVal['filename'];
                             $file = fopen("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name, "r") or die("unable to open file");
                             $version_answer = fread($file,filesize("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name));
+                            $version_answer = rtrim($version_answer);
                             fclose($file);
                         }
                         catch (AuthorizationException $e) {
@@ -199,7 +200,7 @@ class Notebook extends AbstractModel {
                             $question_name = $notebookVal['filename'];
                             $file = fopen("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name, "r") or die("unable to open file");
                             $version_answer = fread($file,filesize("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name));
-                            $version_answer = str_replace(array("\r", "\n"), '', $version_answer);
+                            $version_answer = rtrim($version_answer);
                             fclose($file);
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
