@@ -26,7 +26,7 @@
     --vpat-pink: #660161;
 }
 
-span.update-Developer,
+/* span.update-Developer,
 span.update-DevDependency,
 span.update-Dependency,
 span.API {
@@ -70,7 +70,7 @@ span.update-RainbowGrades {
     background: -o-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
     background: -moz-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
     background: linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
-}
+} */
 
 .update-SYSADMIN {
     background-color: var(--alert-background-danger-red);
