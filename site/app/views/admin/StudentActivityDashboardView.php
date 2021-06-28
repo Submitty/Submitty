@@ -10,7 +10,7 @@ class StudentActivityDashboardView extends AbstractView {
     public function createTable($data_dump) {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('activity-dashboard.css');
-        $this->core->getOutput()->addInternalJs('activity-dashboard.js');
+        $this->core->getOutput()->addInternalModuleJs('activity-dashboard.mjs');
         $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
