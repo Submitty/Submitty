@@ -155,28 +155,36 @@ class Notebook extends AbstractModel {
     * @param int $version which version to get notebook submission values from
     * @param string $student_id which student's notebook to pull data from
     */
-    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id): array {
+    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, int $display_version, string $gradeable_id, string $semester, string $course): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
                     // If no previous submissions set string to default initial_value
                     if ($version === 0) {
                         $recentSubmission = $notebookVal['initial_value'] ?? "";
+                        $version_answer = $notebookVal['initial_value'] ?? "";
                     }
                     else {
                         // Else there has been a previous submission try to get it
                         try {
                             // Try to get the most recent submission
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
+                            //get answer for the selected display version
+                            $question_name = $notebookVal['filename'];
+                            $file = fopen("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name, "r") or die("unable to open file");
+                            $version_answer = fread($file,filesize("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name));
+                            fclose($file);
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
                             $recentSubmission = $notebookVal['initial_value'] ?? "";
+                            $version_answer = $notebookVal['initial_value'] ?? "";
                         }
                     }
 
                     // Add field to the array
                     $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                    $new_notebook[$notebookKey]['version_submission'] = $version_answer;
                 }
                 elseif ($notebookVal['type'] == "multiple_choice") {
                     // If no previous submissions do nothing, else there has been, so try and get it
@@ -187,9 +195,15 @@ class Notebook extends AbstractModel {
                         try {
                             // Try to get the most recent submission
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
-
+                            //get answer for the selected display version
+                            $question_name = $notebookVal['filename'];
+                            $file = fopen("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name, "r") or die("unable to open file");
+                            $version_answer = fread($file,filesize("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name));
+                            $version_answer = str_replace(array("\r", "\n"), '', $version_answer);
+                            fclose($file);
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                            $new_notebook[$notebookKey]['version_submission'] = $version_answer;
                         }
                         catch (AuthorizationException $e) {
                             // If failed to get the most recent submission then skip

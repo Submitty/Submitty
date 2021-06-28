@@ -59,10 +59,14 @@
                      spellcheck="false"
                      data-initial_value="{{ cell.initial_value }}"
                      data-recent_submission="{{ cell.recent_submission }}"
+                     data-version_submission="{{ cell.version_submission }}"
                      onkeyup="handle_input_keypress();">
                 </div>
-
-                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
+                {% if cell.initial_value == "" %}
+                    <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
+                {% else %}
+                    <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Reset</button>
+                {% endif %}
                 <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
                 <script>
@@ -114,7 +118,7 @@
 
                 <fieldset id="mc_field_{{ num_multiple_choice }}"
                           class="mc"
-                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
+                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
                         <legend class="markdown">
                             {% if cell.label %}

@@ -315,13 +315,33 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-            if ($graded_gradeable !== null) {
-                $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                    $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                    $notebook,
-                    $this->core->getUser()->getId()
-                );
+            if($version_instance) {
+                if ($graded_gradeable !== null) {
+                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                        $notebook,
+                        $this->core->getUser()->getId(),
+                        $version_instance->getVersion() ?? null,
+                        $graded_gradeable->getGradeableId(),
+                        $this->core->getConfig()->getSemester(),
+                        $this->core->getConfig()->getCourse()
+                    );
+                }
             }
+            else {
+               if ($graded_gradeable !== null) {
+                   $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                       $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                       $notebook,
+                       $this->core->getUser()->getId(),
+                       0,
+                       $graded_gradeable->getGradeableId(),
+                       $this->core->getConfig()->getSemester(),
+                       $this->core->getConfig()->getCourse()
+                   );
+               }
+            }
+
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
@@ -400,7 +420,6 @@ class HomeworkView extends AbstractView {
             }
         }
 
-
         $component_names = array_map(function (Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
@@ -416,6 +435,11 @@ class HomeworkView extends AbstractView {
         }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
+
+        $viewing_inactive_version = false;
+        if ($highest_version !== $display_version) {
+            $viewing_inactive_version = true;
+        }
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
@@ -487,7 +511,8 @@ class HomeworkView extends AbstractView {
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
-            'is_notebook' => $config->isNotebookGradeable()
+            'is_notebook' => $config->isNotebookGradeable(),
+            'viewing_inactive_version' => $viewing_inactive_version
         ]);
     }
 

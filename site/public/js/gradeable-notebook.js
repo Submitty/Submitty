@@ -47,8 +47,7 @@ function clearMultipleChoices(mc_field_id) {
 function setCodeBox(codebox_id, state) {
     // Get initial and previous submission values
     const initial_value = $(`#${codebox_id}`).attr('data-initial_value');
-    const recent_submission = $(`#${codebox_id}`).attr('data-recent_submission');
-
+    const version_submission =  $(`#${codebox_id}`).attr('data-version_submission');
     // Get the codebox
     const codebox = $(`#${codebox_id} .CodeMirror`).get(0).CodeMirror;
 
@@ -56,7 +55,7 @@ function setCodeBox(codebox_id, state) {
         codebox.setValue(initial_value);
     }
     else {
-        codebox.setValue(recent_submission);
+        codebox.setValue(version_submission);
     }
 }
 
