@@ -6,7 +6,6 @@ use app\controllers\student\LateDaysTableController;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
@@ -942,7 +941,7 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $graded_gradeable, $gradeable, $display_version);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $graded_gradeable);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grading);
@@ -1141,13 +1140,14 @@ HTML;
      * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, $graded_gradeable, $gradeable, $display_version) {
+    public function renderAutogradingPanel(AutoGradedVersion $version_instance, bool $show_hidden_cases,GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
-
+        $gradeable = $graded_gradeable->getGradeable();
         //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
         if ($gradeable->isTeamAssignment()) {
             $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();

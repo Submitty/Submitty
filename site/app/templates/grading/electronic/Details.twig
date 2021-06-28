@@ -57,12 +57,12 @@
     </div>
     {% if can_regrade and not is_vcs %}
         <div class="btn-group">
-            <button type="button" class="btn btn-primary regrade-btn">Regrade Active Versions for All students</button>
+            <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <div class="dropdown-menu">
-                <a class="dropdown-item regrade-btn-all" >Regrade All Versions for All students</a>
+                <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">Regrade All Versions for All students</a>
             </div>
         </div>
     {% endif %}
@@ -95,7 +95,7 @@
             {% else %}
                 <a class="btn btn-default"
                    href="{{ randomize_team_rotating_sections_url }}"
-                >
+                    >
                     Randomly Re-Assign Teams to Rotating Sections
                 </a>
             {% endif %}
@@ -733,17 +733,11 @@
             contentType: false,
             success: function(data) {
                 data = JSON.parse(data);
-                console.log(data);
                 if (data['status'] === 'success') {
                     confirmMessage(e, data['data'], choice);
                 }
                 else {
-                    if (data['message'] === "You do not have access to that page.") {
-                        window.location.href = '';
-                    }
-                    else {
-                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                    }
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
                 }
             }
         });
@@ -771,19 +765,5 @@
             }
         }
     }
-
-    //when either regrade buttons are clicked, make an ajax call to count how many submissions will be regraded
-    $(function() {
-        $('.regrade-btn').click(function(e) {
-            ajaxCountRegrade(0,e,confirmMessage);
-         });
-    });
-
-    $(function() {
-        $('.regrade-btn-all').click(function(e) {
-            ajaxCountRegrade(1,e,confirmMessage);
-        });
-    });
-
 </script>
 

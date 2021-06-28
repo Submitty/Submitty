@@ -891,13 +891,9 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
                     window.location.reload();
                 }
                 else {
-                    if (data['message'] == "You do not have access to that page.") {
-                        window.location.reload();
-                    }
-                    else {
-                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                    }
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
                 }
+
             }
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
