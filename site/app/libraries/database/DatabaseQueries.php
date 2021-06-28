@@ -216,7 +216,7 @@ class DatabaseQueries {
         ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
         ");
         return $this->course_db->rows();
-     }
+    }
 
     /**
      * given a string with missing digits, get all similar numeric ids

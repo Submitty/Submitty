@@ -25,7 +25,7 @@ class StudentActivityDashboardController extends AbstractController {
             'admin',
             'StudentActivityDashboard'
         ], 'createTable', $data_dump);
-   }
+    }
 
    /**
     * @Route("/courses/{_semester}/{_course}/activity/download", methods={"GET"})
@@ -49,7 +49,7 @@ class StudentActivityDashboardController extends AbstractController {
 
         $fp = fopen($file_url, 'w');
 
-        foreach($data_dump as $rows) {
+        foreach ($data_dump as $rows) {
             fputcsv($fp, $rows);
         }
 
@@ -64,5 +64,5 @@ class StudentActivityDashboardController extends AbstractController {
             'admin',
             'StudentActivityDashboard'
         ], 'downloadFile', $file_url);
-   }
+    }
 }
