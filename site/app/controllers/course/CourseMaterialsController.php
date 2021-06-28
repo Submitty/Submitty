@@ -3,7 +3,7 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
-use app\entities\CourseMaterialSection;
+use app\entities\course\CourseMaterialSection;
 use app\libraries\Core;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
@@ -12,7 +12,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
-use app\entities\CourseMaterial;
+use app\entities\course\CourseMaterial;
 use app\views\course\CourseMaterialsView;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -73,17 +73,14 @@ class CourseMaterialsController extends AbstractController {
                 $this->deleteHelper($file);
             }
             else {
-                $cm = $this->tryGetCourseMaterial($path);
-                try {
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $path]);
+                if ($cm != null) {
                     $this->core->getCourseEntityManager()->remove($cm);
-                }
-                catch (ORMException $e) {
-                    $this->core->addErrorMessage("Failed to remove " . basename($path));
-                    return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
                 }
             }
         }
-
+        $this->core->getCourseEntityManager()->flush();
         $success = false;
         if (is_dir($path)) {
             $success = FileUtils::recursiveRmdir($path);
@@ -134,8 +131,9 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $file_path = $file->getRealPath();
-                $course_material = $this->tryGetCourseMaterial($file_path);
-                if ($course_material != false) {
+                $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $file_path]);
+                if ($course_material != null) {
                     if (!$this->core->getUser()->accessGrading()) {
                         // only add the file if the section of student is allowed and course material is released!
                         if ($course_material->isSectionAllowed($this->core->getUser()) && $course_material->getReleaseDate() < $this->core->getDateTimeNow()) {
@@ -204,20 +202,17 @@ class CourseMaterialsController extends AbstractController {
             }
 
             $file_name = htmlspecialchars($filename);
-            $course_material = $this->tryGetCourseMaterial($file_name);
+            $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['path' => $file_name]);
             if ($course_material != false) {
                 $course_material->setReleaseDate($new_data_time);
-                try {
-                    $this->core->getCourseEntityManager()->flush();
-                }
-                catch (\Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
             }
             else {
                 $has_error = true;
             }
         }
+
+        $this->core->getCourseEntityManager()->flush();
 
         if ($has_error) {
             return JsonResponse::getErrorResponse("Failed to find one of the course materials.");
@@ -234,22 +229,35 @@ class CourseMaterialsController extends AbstractController {
         if ($requested_path === '') {
             return JsonResponse::getErrorResponse("Requested path cannot be empty");
         }
-        $course_material = $this->tryGetCourseMaterial($requested_path);
-        if ($course_material == false) {
+        $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['path' => $requested_path]);
+        if ($course_material == null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
 
         //handle sections here
 
-        /*if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
+        if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
             $course_material->setSectionLock(true);
             $sections = explode(",", $_POST['sections']);
-            $course_material->setSections($sections);
+            foreach ($sections as $section) {
+                $course_material_section = $this->core->getCourseEntityManager()
+                    ->getRepository(CourseMaterialSection::class)
+                    ->findOneBy(
+                        [
+                            'course_material_id' => $course_material->getId(),
+                            'section_id' => $section
+                        ]
+                    );
+                if ($course_material_section == null) {
+                    $course_material_section = new CourseMaterialSection($section, $course_material);
+                    $this->core->getCourseEntityManager()->persist($course_material_section);
+                }
+            }
         }
         else {
             $course_material->setSectionLock(false);
-            $this->core->getQueries()->deleteCourseMaterialSections($course_material->getPath());
-        }*/
+        }
         if (isset($_POST['hide_from_students'])) {
             $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
         }
@@ -262,12 +270,7 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setReleaseDate($date_time);
         }
 
-        try {
-            $this->core->getCourseEntityManager()->flush();
-        }
-        catch (\Exception $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
-        }
+        $this->core->getCourseEntityManager()->flush();
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
@@ -405,6 +408,10 @@ class CourseMaterialsController extends AbstractController {
                 if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j]) || $is_external_link_file) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
+                    if (strlen($dst) > 255) {
+                        return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
+                    }
+
                     $is_zip_file = false;
 
                     if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
@@ -482,24 +489,32 @@ class CourseMaterialsController extends AbstractController {
         }
 
         foreach ($details['type'] as $key => $value) {
-            /*$course_material = new CourseMaterial($this->core, [
+            $course_material = new CourseMaterial([
                 'type' => $value,
                 'path' => $details['path'][$key],
-                'release_date' => $details['release_date'],
+                'release_date' => DateUtils::parseDateTime($details['release_date'], $this->core->getUser()->getUsableTimeZone()),
                 'hidden_from_students' => $details['hidden_from_students'],
                 'priority' => $details['priority'],
-                'section_lock' => $details['section_lock'],
-                'sections' => $details['sections']
-            ]);*/
-            try {
-                $this->core->getCourseEntityManager()->persist($course_material);
-                $this->core->getCourseEntityManager()->flush();
+                'section_lock' => $details['section_lock']
+            ]);
+            $this->core->getCourseEntityManager()->persist($course_material);
+            $this->core->getCourseEntityManager()->flush();
+            foreach ($details['sections'] as $section) {
+                $course_material_section = $this->core->getCourseEntityManager()
+                    ->getRepository(CourseMaterialSection::class)
+                    ->findOneBy(
+                        [
+                            'course_material_id' => $course_material->getId(),
+                            'section_id' => $section
+                        ]
+                    );
+                if ($course_material_section == null) {
+                    $course_material_section = new CourseMaterialSection($section, $course_material);
+                    $this->core->getCourseEntityManager()->persist($course_material_section);
+                }
             }
-            catch (\Exception $e) {
-                return JsonResponse::getErrorResponse($e->getMessage());
-            }
-            //$this->core->getQueries()->createCourseMaterial($course_material);
         }
+        $this->core->getCourseEntityManager()->flush();
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 }

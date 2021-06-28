@@ -21,7 +21,8 @@ def up(config, database, semester, course):
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS course_materials (
-            path TEXT PRIMARY KEY,
+            id serial PRIMARY KEY,
+            path varchar(255) UNIQUE,
             type smallint NOT NULL,
             release_date timestamptz NOT NULL,
             hidden_from_students BOOL NOT NULL,
@@ -33,11 +34,11 @@ def up(config, database, semester, course):
     database.execute(
         """
         CREATE TABLE IF NOT EXISTS course_materials_sections (
-            course_material_id TEXT NOT NULL,
+            course_material_id integer NOT NULL,
             section_id varchar(255) NOT NULL,
             CONSTRAINT fk_course_material_id
                 FOREIGN KEY(course_material_id)
-                    REFERENCES course_materials(path)
+                    REFERENCES course_materials(id)
                     ON DELETE CASCADE,
             CONSTRAINT fk_section_id
                 FOREIGN KEY(section_id)
@@ -124,4 +125,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    database.execute("DROP TABLE IF EXISTS course_materials CASCADE")
+    database.execute("DROP TABLE IF EXISTS course_materials_sections CASCADE")
     pass

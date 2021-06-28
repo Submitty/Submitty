@@ -278,7 +278,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students == "on"){
+    if(this_hide_from_students === "1"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
 

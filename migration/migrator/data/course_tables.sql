@@ -173,7 +173,8 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 --
 
 CREATE TABLE public.course_materials (
-    path text NOT NULL,
+    id integer NOT NULL,
+    path character varying(255),
     type smallint NOT NULL,
     release_date timestamp with time zone NOT NULL,
     hidden_from_students boolean NOT NULL,
@@ -183,11 +184,31 @@ CREATE TABLE public.course_materials (
 
 
 --
+-- Name: course_materials_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_id_seq OWNED BY public.course_materials.id;
+
+
+--
 -- Name: course_materials_sections; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.course_materials_sections (
-    course_material_id text NOT NULL,
+    course_material_id integer NOT NULL,
     section_id character varying(255) NOT NULL
 );
 
@@ -1110,6 +1131,13 @@ ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nex
 
 
 --
+-- Name: course_materials id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials ALTER COLUMN id SET DEFAULT nextval('public.course_materials_id_seq'::regclass);
+
+
+--
 -- Name: gradeable_access id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1224,11 +1252,19 @@ ALTER TABLE ONLY public.categories_list
 
 
 --
+-- Name: course_materials course_materials_path_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_path_key UNIQUE (path);
+
+
+--
 -- Name: course_materials course_materials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials
-    ADD CONSTRAINT course_materials_pkey PRIMARY KEY (path);
+    ADD CONSTRAINT course_materials_pkey PRIMARY KEY (id);
 
 
 --
@@ -1702,7 +1738,7 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 --
 
 ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(path) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --

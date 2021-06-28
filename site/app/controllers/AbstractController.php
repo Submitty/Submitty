@@ -281,28 +281,4 @@ abstract class AbstractController {
             return false;
         }
     }
-
-    /**
-     * Gets a course material from its path.
-     * @param string $path
-     * @return CourseMaterial|bool false in the fail/error case
-     */
-    public function tryGetCourseMaterial(string $path) {
-        if (!file_exists($path)) {
-            return false;
-        }
-        // Get the course material
-        try {
-            //return $this->core->getQueries()->getCourseMaterial($path);
-            return $this->core
-                ->getCourseEntityManager()
-                ->getRepository(CourseMaterial::class)
-                ->findOneBy([
-                    'path' => $path
-                ]);
-        }
-        catch (\Exception $e) {
-            return false;
-        }
-    }
 }

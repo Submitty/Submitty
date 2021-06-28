@@ -1,8 +1,7 @@
 <?php
 
-namespace app\entities;
+namespace app\entities\course;
 
-use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\models\User;
 use Doctrine\Common\Collections\Collection;
@@ -18,10 +17,15 @@ class CourseMaterial {
     const FILE = 0;
     const LINK = 1;
 
-    private $core;
-
     /**
      * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @var integer
+     */
+    protected $id;
+
+    /**
      * @ORM\Column(type="string")
      * @var string
      */
@@ -58,16 +62,15 @@ class CourseMaterial {
     protected $section_lock;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\CourseMaterialSection", mappedBy="course_material", fetch="EAGER")
+     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER")
      * @var Collection<CourseMaterialSection>
      */
     protected $sections;
 
-    public function __construct(Core $core, array $details) {
-        $this->core = $core;
+    public function __construct(array $details) {
         $this->setType($details['type']);
         $this->setPath($details['path']);
-        $this->setReleaseDate(DateUtils::parseDateTime($details['release_date'], $this->core->getUser()->getUsableTimeZone()));
+        $this->setReleaseDate($details['release_date']);
         $this->setHiddenFromStudents($details['hidden_from_students']);
         $this->setPriority($details['priority']);
         $this->setSectionLock($details['section_lock']);
@@ -166,5 +169,16 @@ class CourseMaterial {
      */
     public function setType(int $type): void {
         $this->type = $type;
+    }
+
+    public function addSection(CourseMaterialSection $section): void {
+        $this->sections->add($section);
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int {
+        return $this->id;
     }
 }
