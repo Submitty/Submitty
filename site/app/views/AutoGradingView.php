@@ -82,11 +82,7 @@ class AutoGradingView extends AbstractView {
                 }
             }
 
-            $show_hidden_breakdown = $any_visible_hidden && $show_hidden;
-            //always show hidden points to the grader
-            if ($ta_grading === true) {
-                $show_hidden_breakdown = true;
-            }
+            $show_hidden_breakdown = $ta_grading || ($any_visible_hidden && $show_hidden);
             // &&($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
 
