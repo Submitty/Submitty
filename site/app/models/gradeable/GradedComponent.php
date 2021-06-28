@@ -32,7 +32,7 @@ class GradedComponent extends AbstractModel {
     /** @prop @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
-    /** @var string If the component is peer */
+    /** @var bool If the component is peer */
     private $is_peer = false;
 
     /** @var User The grader of this component */
