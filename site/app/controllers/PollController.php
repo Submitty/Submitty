@@ -422,7 +422,7 @@ class PollController extends AbstractController {
         $orders = [];
         for ($i = 0; $i < $response_count; $i++) {
             if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
+                $this->core->addErrorMessage("Error occured in editing poll");
                 return new RedirectResponse($returnUrl);
             }
             $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
@@ -494,6 +494,17 @@ class PollController extends AbstractController {
                 $results
             )
         );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function hasAnswers() {
+        var_dump("WE MADE IT!!!");
+        die();
+        $results = $this->core->getQueries()->getResults($_POST["poll_id"]);
+        echo(!is_null($results) && isset($results[$_POST["option_id"]]) && count($results[$_POST["option_id"]]) > 0);
     }
 
     /**

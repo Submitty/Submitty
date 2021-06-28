@@ -356,24 +356,49 @@
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
         })
         $(".delete-btn").on("click", function() {
-            let count = $(".poll_response").length
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
-            for(let i=curr_pos + 1; i < count; i++) {
-                $(".order-" + i).attr("value", i - 1)
-                $(".order-" + i).addClass("order-" + (i - 1));
-                $(".order-" + i).removeClass("order-" + i);
-            }
-            for(let i=wrapper_id + 1; i < count; i++) {
-                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
-                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
-            }
-            $(this).parent().remove()
-            count -= 1
-            $("#response-count").val("" + count)
+            let my_url = "{{base_url}}" + "/hasAnswers";
+            let optionHasReplies = 0;
+            $.ajax({
+                url: my_url,
+                type: "POST",
+                data: {
+                    csrf_token: csrfToken,
+                    poll_id: {{ poll.getId() }},
+                    option_id: $(this).val()
+                },
+                success: function(data) {
+                    alert("data: " + parseInt(data));
+                    if (parseInt(data) == 1) {
+                        // we cannot delete. send an error to the instructor
+                        alert("Students and/or other staff users have already submitted this response as their answer. " +
+                              "This response cannot be deleted unless they switch their answers.");
+                    } else {
+                        // delete the response
+                        alert("Doing our deleting business!");
+                        let count = $(".poll_response").length
+                        let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+                        let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+                        for(let i=curr_pos + 1; i < count; i++) {
+                            $(".order-" + i).attr("value", i - 1)
+                            $(".order-" + i).addClass("order-" + (i - 1));
+                            $(".order-" + i).removeClass("order-" + i);
+                        }
+                        for(let i=wrapper_id + 1; i < count; i++) {
+                            $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
+                            $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
+                            $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
+                            $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
+                            $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+                        }
+                        $(this).parent().remove()
+                        count -= 1
+                        $("#response-count").val("" + count)
+                    }
+                },
+                error: function(e) {
+                    alert("Error occured when requesting via ajax. Please refresh the page and try again.");
+                }
+            });
         })
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
