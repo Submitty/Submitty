@@ -223,7 +223,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
-    public function showPlagiarismResult($gradeable_id) {
+    public function showPlagiarismResult(string $gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -256,7 +256,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
-    public function saveNewPlagiarismConfiguration($new_or_edit, $gradeable_id = null) {
+    public function saveNewPlagiarismConfiguration(string $new_or_edit, string $gradeable_id = null) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -439,7 +439,7 @@ class PlagiarismController extends AbstractController {
     }
 
 
-    private function enqueueLichenJob($job, $gradeable_id, $config_id) {
+    private function enqueueLichenJob(string $job, string $gradeable_id, string $config_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
@@ -466,7 +466,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
      */
-    public function reRunPlagiarism($gradeable_id, $config_id) {
+    public function reRunPlagiarism(string $gradeable_id, string $config_id) {
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -503,8 +503,6 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
      */
     public function configureNewGradeableForPlagiarismForm() {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
         $gradeable_with_submission = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions/"), ['.', '..']);
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
@@ -528,24 +526,22 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
      */
-    public function editPlagiarismSavedConfig($gradeable_id, $config_id) {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
+    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id) {
+        $config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "config.json");
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
-        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-
-        if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json")) {
+        if (!file_exists($config_path)) {
             $this->core->addErrorMessage("Saved configuration not found.");
             $this->core->redirect($return_url);
         }
 
-        $saved_config = json_decode(file_get_contents("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json"), true);
+        $saved_config = json_decode(file_get_contents($config_path), true);
         $title = "";
         if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
         }
 
+        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
         $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
@@ -556,17 +552,20 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
      */
     public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id) {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
-        if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
-            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $lichen_job_file = FileUtils::joinPaths($daemon_job_queue_path, "lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+        $lichen_job_file_processing = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+        $config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "config.json");
+
+        if (file_exists($lichen_job_file) || file_exists($lichen_job_file_processing)) {
+            $this->core->addErrorMessage("A job is already running for this configuration. Try again after a while.");
             $this->core->redirect($return_url);
         }
 
-        if (!file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json")) {
-            $this->core->addErrorMessage("Plagiarism results for the gradeable are already deleted. Refresh the page.");
+        if (!file_exists($config_path)) {
+            $this->core->addErrorMessage("Plagiarism results for the configuration are already deleted. Refresh the page.");
             $this->core->redirect($return_url);
         }
 
@@ -576,7 +575,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.");
+        $this->core->addSuccessMessage("Lichen results and saved configuration will be deleted.");
         $this->core->redirect($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
     }
 
