@@ -145,21 +145,34 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+
         $response_count = $_POST["response_count"];
         $responses = [];
         $answers = [];
         $orders = [];
-        for ($i = 0; $i < $response_count; $i++) {
-            if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
-                return MultiResponse::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['polls']))
-                );
+        $count = 0;
+        for ($i = 0; $count < $response_count; $i++) {
+            if (isset($_POST["option_id_" . $i]) || isset($_POST["response_" . $i]) || isset($_POST["order_" . $i])) {
+                // if at least one of the fields for a response with this index
+                // is set, assert that the rest are also set
+                if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
+                    $this->core->addErrorMessage("Error with responses occured in editing poll");
+                    return new RedirectResponse($returnUrl);
+                }
+                $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
+                $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
+                if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
+                    $answers[] = $_POST["option_id_" . $i];
+                }
+                $count++;
             }
-            $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
-            $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
-            if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
-                $answers[] = $_POST["option_id_" . $i];
+            if ($i === 1000) {
+                // the indices assigned to responses don't have to be consecutive,
+                // so to make sure we don't get into an infinite loop, we stop checking
+                // after an arbitrary large number in case $response_count and the
+                // actual number of responses don't match
+                $this->core->addErrorMessage("Error occured in editing poll with the number of responses provided");
+                return new RedirectResponse($returnUrl);
             }
         }
 
