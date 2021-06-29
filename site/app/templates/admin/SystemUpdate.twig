@@ -3,16 +3,16 @@
     <a target="_blank" href="https://submitty.org/sysadmin/update">Need help with updating Submitty? <i style="font-style:normal;" class="fa-question-circle"></i></a>
 
     <div class="float-right">
-    <label>
-        Search:
-        <input id="release-notes-filter" type="textbox" onkeyup="filterReleaseNotes(this.value)">
-    </label>
-    <button class="btn btn-default" onclick="$('#release-notes-filter').val(''); filterReleaseNotes('');">
-        Clear
-    </button>
-    <button class="btn btn-primary" onclick="toggleAllReleases(this)">
-        Expand All
-    </button>
+        <label>
+            Search:
+            <input id="release-notes-filter" type="textbox" onkeyup="filterReleaseNotes(this.value)">
+        </label>
+        <button class="btn btn-default" onclick="clearFilter()">
+            Clear
+        </button>
+        <button id="toggle-releases"class="btn btn-primary" onclick="toggleAllReleases(this)">
+            Expand All
+        </button>
     {# <button 
         class="btn btn-primary" 
         onclick="getReleases('{{latest_tag}}');">
@@ -29,6 +29,10 @@
 
     <div class="box" id="loading-text">
         Loading...
+    </div>
+
+    <div class="box" id="no-filter-results" hidden>
+        No search results found.
     </div>
 </div>
 <script>

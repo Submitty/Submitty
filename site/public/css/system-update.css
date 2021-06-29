@@ -24,6 +24,11 @@
     align-items: center;
 }
 
+.version-header:hover {
+    cursor: pointer;
+}
+
+
 .version-header .badge {
     float: none;
 }
@@ -31,10 +36,15 @@
     display: inline;
 }
 
-.version-header .btn-collapse-release {
+.version-header .btn-toggle-release {
     margin-left: auto;
 }
 
 .important-text {
     color: var(--focus-danger-red);
+}
+
+#toolbar {
+    position: sticky;
+    top: 10px;
 }
