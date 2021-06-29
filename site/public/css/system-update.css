@@ -87,8 +87,14 @@ span.update-RainbowGrades {
     background-color: transparent !important;
 }
 
-.btn-collapse-release {
+/* .btn-collapse-release {
     position: absolute;
     right: 5px;
     top: 5px;
+} */
+
+.version-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

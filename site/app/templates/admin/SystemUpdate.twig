@@ -7,11 +7,17 @@
         Search:
         <input id="release-notes-filter" type="textbox" onkeyup="filterReleaseNotes(this.value)">
     </label>
-    <button 
+    <button class="btn btn-default" onclick="$('#release-notes-filter').val(''); filterReleaseNotes('');">
+        Clear
+    </button>
+    <button class="btn btn-primary" onclick="toggleAllReleases(this)">
+        Expand All
+    </button>
+    {# <button 
         class="btn btn-primary" 
         onclick="getReleases('{{latest_tag}}');">
         Check for Updates
-    </button>
+    </button> #}
     </div>
 
     <div id="update_status" class="box">

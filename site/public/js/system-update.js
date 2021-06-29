@@ -44,8 +44,6 @@ function updateReleaseNotes(data, current_tag){
         releases_behind++;
     }
 
-    console.log('updates', updates);
-
     $('.release-notes').remove();
 
     const latest = data[0];
@@ -60,10 +58,12 @@ function updateReleaseNotes(data, current_tag){
         success: function(markdown_data){
             const release_notes = markdown_data.split('-END-');
 
-            for(let release of release_notes) {
+            //due to the splitting of the single markdown payload, there will always be an extra empty release at the
+            //end, so don't include it in the loop
+            for(let i = 0; i < release_notes.length-1; i++) {
                 //have to wrap the output in <div class="markdown"></div> since we are using 1 ajax call to process multiple payloads
                 //that way they all come back at the same time
-                $('.content').append(`<div class="box"><div class="markdown">${injectStyling(release)}</div></div>`);
+                $('.content').append(`<div class="box"><div class="markdown">${injectStyling(release_notes[i])}</div></div>`);
             }
 
             //mark release sections with no items with a special class
@@ -74,9 +74,11 @@ function updateReleaseNotes(data, current_tag){
             });
 
             //add collapse buttons to each release, and initially collapse all releases
-            $('<button class="btn btn-default btn-collapse-release" onclick="collapseRelease(this)">Collapse</button>').insertAfter($('.version-header'));
+            $('.version-header').append('<button class="btn btn-default btn-collapse-release" onclick="collapseRelease(this)">Collapse</button>');
+            //$('<button class="btn btn-default btn-collapse-release" onclick="collapseRelease(this)">Collapse</button>').insertAfter($('.version-header'));
             $('.btn-collapse-release').trigger('click');
 
+            $('<span class="badge red-background">IMPORTANT</span>').insertAfter($('.update-IMPORTANT').find('.version-header').find('h1'));
             //set info about state of submitty
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
@@ -85,7 +87,7 @@ function updateReleaseNotes(data, current_tag){
             else {
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
                                 Submitty is ${releases_behind} releases behind.<br>
-                                THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} IMPORTANT UPDATES`);
+                                <strong style="color: var(--alert-danger-red);"><em>THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} IMPORTANT UPDATES</em></strong>`);
             }
             
             //initially expand the latest release
@@ -100,21 +102,39 @@ function updateReleaseNotes(data, current_tag){
     });
 }
 
+function toggleAllReleases(toggleAllButton) {
+    $('.btn-collapse-release').each( (index, button) => {
+        if($(toggleAllButton).hasClass('collapsed') != $(button).hasClass('collapsed')) {
+            collapseRelease(button);
+        }
+    });
+
+    $(toggleAllButton).toggleClass('collapsed');
+    //in this case, collapsed class controls what action the button should use next
+    if($(toggleAllButton).hasClass('collapsed')) {
+        $(toggleAllButton).html('Collapse All');
+    }
+    else {
+        $(toggleAllButton).html('Expand All');
+    }
+
+}
+
 function collapseRelease(button){
     const release = $(button).closest('.box');
     $(button).toggleClass('collapsed');
     if ($(button).hasClass('collapsed')) {
-        release.find(':not(div.markdown, h1, button)').hide();
+        release.find(':not(div.markdown, h1, div.version-header, span.badge, button)').hide();
         const security_notes = release.find('.update-SECURITY');
         const sysadmin_notes = release.find('.update-SYSADMIN');
-        console.log('security notes', security_notes);
-        console.log('sysadmin notes', sysadmin_notes);
+        //console.log('security notes', security_notes);
+        //console.log('sysadmin notes', sysadmin_notes);
         //highlight the collapsed release if it contains sysadmin or security notes
         if ((security_notes.length && !security_notes.hasClass('no-content')) || (sysadmin_notes.length && !sysadmin_notes.hasClass('no-content'))) {
             release.addClass('update-IMPORTANT');
+            $(button).addClass('btn-primary');
+            $(button).removeClass('btn-default');
         }
-        $(button).removeClass('btn-default');
-        $(button).addClass('btn-primary');
         $(button).html('Expand');
     }
     else {
@@ -135,8 +155,8 @@ function injectStyling(markdown_data) {
     markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>/g, '$&<hr>');
     //replace normal li contents with spans with classes
     markdown_data = markdown_data.replace(/\[\w+:(\w+)\].+(?=<\/li>)|\[([^\]]+)\].+(?=<\/li>)/g, '<span class="update update-$1$2">$&</span>');
-    //add class to version headers
-    markdown_data = markdown_data.replace(/<h1/g, '$& class="version-header"');
+    //add class and wrapper to version headers
+    markdown_data = markdown_data.replace(/<h1>.+?<\/h1>/g, '<div class="version-header">$&</div>');
     
     //markdown_data = markdown_data.replace(/<\/h1>([\s\S]+?<hr><\/div>))/g, '</h1><div class="update-wrapper">$1</div><hr>');
     
@@ -150,7 +170,14 @@ function injectStyling(markdown_data) {
     // }
     // //special highlighting for SECURITY updates only if there are any
     // if ((markdown_data.match(/\[SECURITY\]/g) || []).length) {
+
+
     markdown_data = markdown_data.replace(/<p>([^<\n]+)[\s\S]+?(?:<hr>)/g, '<div class="update update-$1">$&</div>');
+
+    //special regex for SUPPORTING ... because it has an & (&amp;) which messes up the other regex
+    markdown_data = markdown_data.replace(/<p>(SUPPORTING)[^<\n]+[\s\S]+?(?:hr)/g, '<div class="update update-$1">$&</div>')
+
+
     //}
     return markdown_data;
 }
@@ -159,6 +186,9 @@ function filterReleaseNotes(filter) {
     //console.log('filter', filter)
     const sections = $('div.update');    
     sections.each( (index, section) => {
+        // if($(section).closest('.box').find('.btn-collapse-release').hasClass('collapsed')) {
+        //     return;
+        // }
         $(section).hide();
         if($(section).text().toLowerCase().includes(filter.toLowerCase())){
             $(section).show();
@@ -172,6 +202,10 @@ function filterReleaseNotes(filter) {
                 }
                 if(filter && $(list_item).text().toLowerCase().includes(filter.toLowerCase())){
                     $(list_item).show();
+                    // const button = $(list_item).closest('.box').find('.btn-collapse-release');
+                    // if(button.hasClass('collapsed')) {
+                    //     button.trigger('click');
+                    // }
                     //replace all instances of the filter text that is not inside an html tag's attributes
                     //with a span wrapper for styling
                     const matches = $(list_item).html().replace(new RegExp(`${filter}(?=[^<>]+<)`, 'gi'), '<span class="release-filtered">$&</span>');
