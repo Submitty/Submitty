@@ -5,7 +5,7 @@
  *
  * @param mc_field_id The id of the multiple choice fieldset
  */
-function setMultipleChoices(mc_field_id) {
+function setMultipleChoices(mc_field_id, viewing_inactive_version) {
     let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
     prev_checked = prev_checked.split('\n');
     // For each input inside the fieldset see if its value is inside the prev checked array
@@ -17,6 +17,9 @@ function setMultipleChoices(mc_field_id) {
             $(element).prop('checked', true);
         }
         else {
+            if (viewing_inactive_version) {
+                $(element).prop('disabled', true);
+            }
             $(element).prop('checked', false);
         }
     });
@@ -187,14 +190,27 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', true);
         }
         else {
-            $(clear_button_id).attr('disabled', false);
+            //RIGHT HERE
+            const value = $(clear_button_id).getAttribute('data-older_version');
+            if (value) {
+                $(clear_button_id).attr('disabled', true);
+            }
+            else {
+                $(clear_button_id).attr('disabled', false);
+            }
         }
 
         if (code === recent_submission) {
             $(recent_button_id).attr('disabled', true);
         }
         else {
-            $(recent_button_id).attr('disabled', false);
+            const value = $(recent_button_id).getAttribute('data-older_version');
+            if (value) {
+                $(recent_button_id).attr('disabled', true);
+            }
+            else {
+                $(recent_button_id).attr('disabled', false);
+            }
             window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));
@@ -217,7 +233,7 @@ $(document).ready(() => {
         }
         else if (action == 'recent') {
             setMultipleChoices(field_set_id);
-            $(`#mc_${index}_clear_button`).attr('disabled', false);
+            $(`#mc_${index}_clear_button`).attr('disabled', true);
             $(`#mc_${index}_recent_button`).attr('disabled', true);
         }
 
@@ -231,7 +247,7 @@ $(document).ready(() => {
         const index = items[2];
 
         // Enable recent button
-        $(`#mc_${index}_clear_button`).attr('disabled', false);
+        $(`#mc_${index}_recent_button`).attr('disabled', false);
         const prev_checked_items = this.getAttribute('data-prev_checked');
         const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');
         if (curr_checked_items !== prev_checked_items) {
