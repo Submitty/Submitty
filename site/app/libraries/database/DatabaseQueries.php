@@ -783,10 +783,7 @@ SQL;
 
         $this->course_db->beginTransaction();
 
-        $now = null;
-        if ($announcement) {
-            $now = new \DateTime("now");
-        }
+        $now = $announcement ? new \DateTime("now") : null;
 
         try {
             //insert data
