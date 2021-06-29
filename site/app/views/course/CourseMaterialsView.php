@@ -134,7 +134,7 @@ class CourseMaterialsView extends AbstractView {
                 if (isset($course_materials[$expected_file_path])) {
                     $isMaterialReleased = '1';
 
-                    if ($course_materials[$expected_file_path]->isSectionLock()) {
+                    if ($course_materials[$expected_file_path]->getSections()->count() > 0) {
                         $sections = $course_materials[$expected_file_path]->getSections();
                         foreach ($sections as $section) {
                             $file_sections[$expected_file_path][] = $section->getSectionId();

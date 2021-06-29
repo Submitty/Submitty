@@ -257,6 +257,10 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
         }
+        else {
+            $course_material->deleteSections();
+            $this->core->getCourseEntityManager()->flush();
+        }
         if (isset($_POST['hide_from_students'])) {
             $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
         }
@@ -493,8 +497,7 @@ class CourseMaterialsController extends AbstractController {
                 'path' => $details['path'][$key],
                 'release_date' => DateUtils::parseDateTime($details['release_date'], $this->core->getUser()->getUsableTimeZone()),
                 'hidden_from_students' => $details['hidden_from_students'],
-                'priority' => $details['priority'],
-                'section_lock' => $details['section_lock']
+                'priority' => $details['priority']
             ]);
             $this->core->getCourseEntityManager()->persist($course_material);
             $this->core->getCourseEntityManager()->flush();
