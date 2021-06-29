@@ -1,11 +1,11 @@
 .column-wrapper {
-    display:flex; 
+    display:flex;
     justify-content: space-between;
     align-items: flex-end;
 }
 
 .row-wrapper {
-    display:flex; 
+    display:flex;
     flex-direction:column;
 }
 

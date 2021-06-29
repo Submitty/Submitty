@@ -623,7 +623,7 @@ HTML;
                 $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
                 $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}');";
-                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
+                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"] ?? null;
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
                 $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
                 $info["edited_past_lock_date"] = $edited_past_lock_date;
@@ -899,6 +899,9 @@ HTML;
         $return = "";
         $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
 
+        //$ta_grading is used in AutoGradingView to determine if hidden autograding points will be shown, we want to always show them to graders unless they are peer graders
+        $ta_grading = $this->core->getUser()->getGroup() !== User::GROUP_STUDENT;
+
         $this->core->getOutput()->addInternalJs("resizable-panels.js");
 
         $return .= <<<HTML
@@ -937,7 +940,7 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grading);
@@ -1138,11 +1141,12 @@ HTML;
      * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+            "ta_grading" => $ta_grading
         ]);
     }
 

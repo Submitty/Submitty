@@ -24,8 +24,8 @@
                 {% for poll in todays_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        <td align="left"> 
-                            {% set response_label = poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) %}
+                        <td align="left">
+                            {% set response_label = poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
                             } only %}
@@ -77,7 +77,7 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        {% set response_label = poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) %}
+                        {% set response_label = poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
                         <td align="left">
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
