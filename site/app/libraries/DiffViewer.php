@@ -449,10 +449,10 @@ class DiffViewer {
      * @return string actual html
      * @throws \Exception
      */
-    public function getDisplayActual($option = self::SPECIAL_CHARS_ORIGINAL) {
+    public function getDisplayActual($downloadLink, $option = self::SPECIAL_CHARS_ORIGINAL) {
         $this->buildViewer();
         if ($this->display_actual) {
-            return $this->getDisplay($this->actual, self::ACTUAL, $option);
+            return $this->getDisplay($this->actual, $downloadLink, self::ACTUAL, $option);
         }
         else {
             return "";
@@ -502,10 +502,10 @@ class DiffViewer {
      * @return string expected html
      * @throws \Exception
      */
-    public function getDisplayExpected($option = self::SPECIAL_CHARS_ORIGINAL) {
+    public function getDisplayExpected($downloadLink, $option = self::SPECIAL_CHARS_ORIGINAL) {
         $this->buildViewer();
         if ($this->display_expected) {
-            return $this->getDisplay($this->expected, self::EXPECTED, $option);
+            return $this->getDisplay($this->expected, $downloadLink, self::EXPECTED, $option);
         }
         else {
             return "";
@@ -525,7 +525,7 @@ class DiffViewer {
      * @return string html to be displayed to user
      * @throws \Exception
      */
-    private function getDisplay($lines, $type = self::EXPECTED, $option = self::SPECIAL_CHARS_ORIGINAL) {
+    private function getDisplay($lines, $downloadLink, $type = self::EXPECTED, $option = self::SPECIAL_CHARS_ORIGINAL) {
         $this->buildViewer();
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
@@ -544,7 +544,12 @@ class DiffViewer {
          * there's a difference on that line or that the line doesn't exist.
          */
         $max_digits = strlen((string) count($lines));
+        $long = false;
         for ($i = 0; $i < count($lines); $i++) {
+            if ($i === 5000) {
+                $long = true;
+                break;
+            }
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
@@ -637,6 +642,9 @@ class DiffViewer {
                 $start = null;
                 $html .= "\t</div>\n";
             }
+        }
+        if ($long) {
+            $html .= "<p>File too long to be fully displayed. Click <a href='$downloadLink'>here</a> to download the full file.</p>";
         }
         return $html . "</div></div>\n";
     }

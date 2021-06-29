@@ -228,6 +228,28 @@ class MiscController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")
+     */
+    public function downloadTestCaseResult($gradeable_id, $version, $test_case, $file_name) {
+        $user = $this->core->getUser();
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user->getId(), false);
+        $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
+
+        $name = "details/test" . sprintf("%02d", $test_case) . "/$file_name";
+        $files = $autograde->getResultsFiles();
+        $file_path = $files[$name]['path'];
+        if (file_exists($file_path)) {
+            $this->core->getOutput()->useHeader(false);
+            $this->core->getOutput()->useFooter(false);
+            header('Content-Type: application/octet-stream');
+            header("Content-Transfer-Encoding: Binary");
+            header("Content-disposition: attachment; filename=\"{$file_name}\"");
+            readfile($file_path);
+        }
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
     public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {

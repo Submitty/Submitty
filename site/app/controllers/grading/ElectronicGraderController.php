@@ -370,7 +370,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         try {
-            $results = $this->removeEmpty($autocheck, $option, $which);
+            $results = $this->removeEmpty($autocheck, $option, $which, $gradeable);
             $this->core->getOutput()->renderJsonSuccess($results);
         }
         catch (\Exception $e) {
@@ -378,15 +378,15 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    private function removeEmpty(GradeableAutocheck $autocheck, string $option, string $type) {
+    private function removeEmpty(GradeableAutocheck $autocheck, string $option, string $type, Gradeable $gradeable) {
         $diff_viewer = $autocheck->getDiffViewer();
 
         //There are currently two views, the view of student's code and the expected view.
         if ($type === DiffViewer::ACTUAL) {
-            $html = $diff_viewer->getDisplayActual($option);
+            $html = $diff_viewer->getDisplayActual("", $option);
         }
         else {
-            $html = $diff_viewer->getDisplayExpected($option);
+            $html = $diff_viewer->getDisplayExpected("", $option);
         }
         $white_spaces = $diff_viewer->getWhiteSpaces();
         return ['html' => $html, 'whitespaces' => $white_spaces];

@@ -164,7 +164,14 @@ class AutoGradingView extends AbstractView {
                 $actual_title .= $description;
 
                 $actual_image = $diff_viewer->getActualImageFilename();
-                $actual_display = $diff_viewer->getDisplayActual();
+                //index = id_0_0
+                $test_case = str_replace("id_", "", $autocheck->getIndex());
+                $test_case = str_replace("_0", "", $test_case);
+                $test_case = intval($test_case) + 1;
+                $test_case = strval($test_case);
+                $link = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'downloadTestCaseResult']) .
+                    "?version=" . $version->getVersion() . "&test_case=$test_case&file_name=$description";
+                $actual_display = $diff_viewer->getDisplayActual($link);
                 if ($actual_image != "") {
                     $check["actual"] = [
                         "type" => "image",
@@ -193,7 +200,7 @@ class AutoGradingView extends AbstractView {
                 }
 
                 $expected_image = $diff_viewer->getExpectedImageFilename();
-                $expected_display = $diff_viewer->getDisplayExpected();
+                $expected_display = $diff_viewer->getDisplayExpected($link);
                 $expected_title = "Expected {$description}";
                 if ($expected_image != "") {
                     $check["expected"] = [
