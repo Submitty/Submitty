@@ -38,7 +38,11 @@ class CourseMaterialsController extends AbstractController {
     public function deleteHelper($file) {
         if (array_key_exists('name', $file)) {
             $filepath = $file['path'];
-            $this->core->getQueries()->deleteCourseMaterial($filepath);
+            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['path' => $filepath]);
+            if ($cm != null) {
+                $this->core->getCourseEntityManager()->remove($cm);
+            }
         }
         else {
             if (array_key_exists('files', $file)) {
@@ -238,7 +242,6 @@ class CourseMaterialsController extends AbstractController {
         //handle sections here
 
         if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
-            $course_material->setSectionLock(true);
             if ($_POST['sections'] === "") {
                 $sections = null;
             }
@@ -253,9 +256,6 @@ class CourseMaterialsController extends AbstractController {
                     $course_material->addSection($course_material_section);
                 }
             }
-        }
-        else {
-            $course_material->setSectionLock(false);
         }
         if (isset($_POST['hide_from_students'])) {
             $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
@@ -500,7 +500,7 @@ class CourseMaterialsController extends AbstractController {
             $this->core->getCourseEntityManager()->flush();
             if ($details['section_lock']) {
                 foreach ($details['sections'] as $section) {
-                    $course_material_section = new CourseMaterialSection($section/*, $course_material*/);
+                    $course_material_section = new CourseMaterialSection($section, $course_material);
                     $course_material->addSection($course_material_section);
                     $this->core->getCourseEntityManager()->persist($course_material_section);
                 }
