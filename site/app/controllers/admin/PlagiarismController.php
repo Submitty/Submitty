@@ -20,49 +20,7 @@ use app\models\User;
  */
 class PlagiarismController extends AbstractController {
     private function getGradeablesFromPriorTerm() {
-        $return = [];
-
-        $filename = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", "gradeables_from_prior_terms.txt");
-
-        if (file_exists($filename)) {
-            $file = fopen($filename, "r");
-            if (!$file) {
-                exit("Unable to open file!");
-            }
-
-            while (!feof($file)) {
-                $line = fgets($file);
-                $line = trim($line, " ");
-                $line = explode("/", $line);
-                $sem = $line[5];
-                $course = $line[6];
-                $gradeables = [];
-                while (!feof($file)) {
-                    $line = fgets($file);
-                    if (trim(trim($line, " "), "\n") === "") {
-                        break;
-                    }
-                    array_push($gradeables, trim(trim($line, " "), "\n"));
-                }
-                $return[$sem][$course] = $gradeables;
-            }
-
-            fclose($file);
-            uksort($return, function ($semester_a, $semester_b) {
-                $year_a = (int) substr($semester_a, 1);
-                $year_b = (int) substr($semester_b, 1);
-                if ($year_a > $year_b) {
-                    return 0;
-                }
-                elseif ($year_a < $year_b) {
-                    return 1;
-                }
-                else {
-                    return ($semester_a[0] === 'f') ? 0 : 1;
-                }
-            });
-        }
-        return $return;
+        // TODO: Implement.
     }
 
     /**
@@ -422,6 +380,9 @@ class PlagiarismController extends AbstractController {
             }
         }
 
+        // TODO: write this
+        $config_id =
+
         // Save the config.json
         $json_file = FileUtils::joinPaths($course_path, "lichen", "config", "lichen_{$semester}_{$course}_{$gradeable_id}.json");
         $json_data = [
@@ -444,18 +405,8 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-
-        // Save the Lichen run timestamp file
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
-        $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
-        if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", "." . $gradeable_id . ".lichenrun.timestamp"), $current_time_string_tz . "\n")) {
-            $this->core->addErrorMessage("Failed to save timestamp file for this Lichen Run. Create the configuration again.");
-            $this->core->redirect($return_url);
-        }
-
-
         // Create the Lichen job
-        $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
+        $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         if ($ret !== null) {
             $this->core->addErrorMessage("Failed to add configuration to Lichen queue. Create the configuration again.");
             $this->core->redirect($return_url);
@@ -581,7 +532,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
      */
-    public function deletePlagiarismResultAndConfig($gradeable_id) {
+    public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
@@ -628,14 +579,16 @@ class PlagiarismController extends AbstractController {
 
 
     /**
+     * @param string $gradeable_id
+     * @param string $config_id
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
      */
-    public function getRunLog($gradeable_id) {
+    public function getRunLog(string $gradeable_id, string $config_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        $log_file = FileUtils::joinPaths($course_path, "lichen", "logs", $gradeable_id, "lichen_job_output.txt");
+        $log_file = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "logs", "lichen_job_output.txt");
 
         if (!file_exists($log_file)) {
             echo("Error: Unable to find run log.");
@@ -648,9 +601,16 @@ class PlagiarismController extends AbstractController {
 
 
     /**
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @param string $user_id_1
+     * @param string $version_user_1
+     * @param string|null $user_id_2
+     * @param string|null $version_user_2
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
-    public function ajaxGetSubmissionConcatenated($gradeable_id, $user_id_1, $version_user_1, $user_id_2 = null, $version_user_2 = null) {
+    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1,
+                                                  string $version_user_1, string $user_id_2 = null, string $version_user_2 = null) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -667,7 +627,7 @@ class PlagiarismController extends AbstractController {
         $return = "";
         $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
-        $rankings = $this->getOverallRankings($gradeable_id);
+        $rankings = $this->getOverallRankings($gradeable_id, $config_id);
 
         if ($rankings === null || count($rankings) === 0) {
             $return = ['error' => 'Rankings file not found or no matches found for selected user'];
@@ -685,18 +645,25 @@ class PlagiarismController extends AbstractController {
         if ($version_user_1 == "max_matching" || $version_user_1 == "") {
             $version_user_1 = $max_matching_version;
         }
-        $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), [".", ".."]);
+        $all_versions_user_1 = array_diff(scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "users", $user_id_1)), [".", ".."]);
 
-        $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/submission.concatenated";
+        $file_name = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "users", $user_id_1, $version_user_1, "submission.concatenated");
         $data = "";
-        if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
+        if (file_exists($file_name)) {
             if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '1');
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $config_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '1');
             }
             else {
-                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $config_id, $user_id_1, $version_user_1, '', '', '1');
             }
-            $data = ['display_code1' => $this->getDisplayForCode($file_name), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info];
+            $data = [
+                'display_code1' => $this->getDisplayForCode($file_name),
+                'code_version_user_1' => $version_user_1,
+                'max_matching_version' => $max_matching_version,
+                'active_version_user_1' => $active_version_user_1,
+                'all_versions_user_1' => $all_versions_user_1,
+                'ci' => $color_info
+            ];
         }
         else {
             $return = ['error' => 'User 1 submission.concatenated for specified version not found.'];
@@ -706,10 +673,10 @@ class PlagiarismController extends AbstractController {
         }
 
         if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-            $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/submission.concatenated";
+            $file_name = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "users", $user_id_2, $version_user_2, "submission.concatenated");
 
             if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $config_id,  $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
                 $data['display_code2'] = $this->getDisplayForCode($file_name);
             }
             else {
@@ -730,6 +697,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $course_path
      * @param string $gradeable_id
+     * @param string $config_id
      * @param string $user_id_1
      * @param string $version_user_1
      * @param string $user_id_2
