@@ -21,8 +21,18 @@
 
 .version-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+}
+
+.version-header .badge {
+    float: none;
+}
+.version-header > h1 {
+    display: inline;
+}
+
+.version-header .btn-collapse-release {
+    margin-left: auto;
 }
 
 .important-text {

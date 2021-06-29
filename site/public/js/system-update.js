@@ -36,7 +36,7 @@ async function getReleases(current_tag) {
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag){
-    current_tag = "v21.06.01";
+    current_tag = "v20.10.00";
     let updates = '';
     let releases_behind = 0;
     while (releases_behind < data.length && data[releases_behind].tag_name !== current_tag) {
@@ -80,14 +80,14 @@ function updateReleaseNotes(data, current_tag){
             //$('<button class="btn btn-default btn-collapse-release" onclick="collapseRelease(this)">Collapse</button>').insertAfter($('.version-header'));
             $('.btn-collapse-release').trigger('click');
 
-            $('<span class="badge red-background">IMPORTANT</span>').insertAfter($('.update-IMPORTANT').find('.version-header').find('h1'));
+            $('<span class="badge red-background">SECURITY / SYSADMIN</span>').insertAfter($('.update-IMPORTANT').find('.version-header').find('h1'));
             //set info about state of submitty
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
                 $('#text').html('<i>Submitty is up to date!</i>');
             }
             else {
-                const important_message = $('.update-IMPORTANT').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} IMPORTANT UPDATES</em></strong>` : '';
+                const important_message = $('.update-IMPORTANT').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} SECURITY/SYSADMIN UPDATES</em></strong>` : '';
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
                                 Submitty is ${releases_behind} releases behind.<br>
                                 ${important_message}`);
