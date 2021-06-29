@@ -501,10 +501,9 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function hasAnswers() {
-        var_dump("WE MADE IT!!!");
-        die();
         $results = $this->core->getQueries()->getResults($_POST["poll_id"]);
-        echo(!is_null($results) && isset($results[$_POST["option_id"]]) && count($results[$_POST["option_id"]]) > 0);
+        $ret = !empty($results) && $results[$_POST["option_id"]] > 0;
+        return JsonResponse::getSuccessResponse($ret);
     }
 
     /**

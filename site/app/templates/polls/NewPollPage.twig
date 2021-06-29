@@ -356,6 +356,9 @@
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
         })
         $(".delete-btn").on("click", function() {
+            // first we check if the response option that is about to be deleted
+            // has responses by users, via an ajax request
+            let my_this = $(this);
             let my_url = "{{base_url}}" + "/hasAnswers";
             let optionHasReplies = 0;
             $.ajax({
@@ -363,21 +366,21 @@
                 type: "POST",
                 data: {
                     csrf_token: csrfToken,
-                    poll_id: {{ poll.getId() }},
-                    option_id: $(this).val()
+                    poll_id: {{ poll.getId() == null? -1 : poll.getId() }},
+                    option_id: my_this.siblings(".option_id").attr("value")
                 },
                 success: function(data) {
-                    alert("data: " + parseInt(data));
-                    if (parseInt(data) == 1) {
+                    // the result is a boolean -- whether or not this options has responses
+                    let parsed_result = JSON.parse(data);
+                    if (parsed_result.data) {
                         // we cannot delete. send an error to the instructor
                         alert("Students and/or other staff users have already submitted this response as their answer. " +
-                              "This response cannot be deleted unless they switch their answers.");
+                              "This response cannot be deleted unless they switch their answers to the poll.");
                     } else {
                         // delete the response
-                        alert("Doing our deleting business!");
                         let count = $(".poll_response").length
-                        let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-                        let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+                        let curr_pos = parseInt($(my_this.siblings(".order")[0]).attr("value"))
+                        let wrapper_id = parseInt(my_this.parent().attr("id").match("response_(.*)?_wrapper")[1])
                         for(let i=curr_pos + 1; i < count; i++) {
                             $(".order-" + i).attr("value", i - 1)
                             $(".order-" + i).addClass("order-" + (i - 1));
@@ -390,7 +393,7 @@
                             $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
                             $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
                         }
-                        $(this).parent().remove()
+                        my_this.parent().remove()
                         count -= 1
                         $("#response-count").val("" + count)
                     }
