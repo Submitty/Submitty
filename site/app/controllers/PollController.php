@@ -157,7 +157,9 @@ class PollController extends AbstractController {
                 // is set, assert that the rest are also set
                 if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
                     $this->core->addErrorMessage("Error with responses occured in editing poll");
-                    return new RedirectResponse($returnUrl);
+                    return MultiResponse::RedirectOnlyResponse(
+                        new RedirectResponse($this->core->buildCourseUrl(['polls']))
+                    );
                 }
                 $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
                 $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
@@ -172,7 +174,9 @@ class PollController extends AbstractController {
                 // after an arbitrary large number in case $response_count and the
                 // actual number of responses don't match
                 $this->core->addErrorMessage("Error occured in editing poll with the number of responses provided");
-                return new RedirectResponse($returnUrl);
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildCourseUrl(['polls']))
+                );
             }
         }
 
