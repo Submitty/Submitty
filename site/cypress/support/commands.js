@@ -23,6 +23,7 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
+import 'cypress-file-upload';
 import {buildUrl} from './utils.js';
 //These functions can be called like "cy.login(...)" and will yeild a result
 
