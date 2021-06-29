@@ -38,10 +38,10 @@ async function getReleases(current_tag) {
 function updateReleaseNotes(data, current_tag){
     current_tag = "v20.10.00";
     let updates = '';
-    let i = 0;
-    while (i < data.length && data[i].tag_name !== current_tag) {
-        updates += (`# ${data[i].tag_name}\n${data[i].body}\n-END-\n`);
-        i++;
+    let releases_behind = 0;
+    while (releases_behind < data.length && data[releases_behind].tag_name !== current_tag) {
+        updates += (`# ${data[releases_behind].tag_name}\n${data[releases_behind].body}\n-END-\n`);
+        releases_behind++;
     }
 
     console.log('updates', updates);
@@ -66,27 +66,33 @@ function updateReleaseNotes(data, current_tag){
                 $('.content').append(`<div class="box"><div class="markdown">${injectStyling(release)}</div></div>`);
             }
 
+            //mark release sections with no items with a special class
             $('div.update').each( (index, div) => {
                 if ($(div).text().includes('None')) {
                     $(div).addClass('no-content');
                 }
             });
 
+            //add collapse buttons to each release, and initially collapse all releases
             $('<button class="btn btn-default btn-collapse-release" onclick="collapseRelease(this)">Collapse</button>').insertAfter($('.version-header'));
             $('.btn-collapse-release').trigger('click');
-            $('.btn-collapse-release').eq(0).trigger('click');
 
-
-
+            //set info about state of submitty
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
                 $('#text').html('<i>Submitty is up to date!</i>');
             }
             else {
-                $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a>`);
+                $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
+                                Submitty is ${releases_behind} releases behind.<br>
+                                THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} IMPORTANT UPDATES`);
             }
+            
+            //initially expand the latest release
+            $('.btn-collapse-release').eq(0).trigger('click');
 
-            $('#release-notes').hide();
+            //hide loading text
+            $('#loading-text').hide();
         },
         error: function() {
             displayErrorMessage('Something went wrong while trying to render markdown. Please try again.');
@@ -131,8 +137,7 @@ function injectStyling(markdown_data) {
     markdown_data = markdown_data.replace(/\[\w+:(\w+)\].+(?=<\/li>)|\[([^\]]+)\].+(?=<\/li>)/g, '<span class="update update-$1$2">$&</span>');
     //add class to version headers
     markdown_data = markdown_data.replace(/<h1/g, '$& class="version-header"');
-    //add content wrapper
-    console.log(markdown_data);
+    
     //markdown_data = markdown_data.replace(/<\/h1>([\s\S]+?<hr><\/div>))/g, '</h1><div class="update-wrapper">$1</div><hr>');
     
     // //special highlighting for SYSADMIN updates only if there are any
