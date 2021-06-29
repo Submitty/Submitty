@@ -12,7 +12,7 @@
             <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             <br/> <br/>
 
-            <p>Question:</p>
+            <p class="option-title">Question:</p>
             {% include "misc/MarkdownArea.twig" with {
                 "markdown_area_id" : "poll-question",
                 "markdown_area_query" : "$('#poll-question')",
@@ -49,10 +49,9 @@
 
             </div>
             <br/>
-            <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
-            <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
+            <button type="button" class="btn btn-primary" onclick="addResponse()">+ Add Response</button>
             <br/> <br/>
-
+            <hr>
             <span id="empty-name-error" class="red-message polls-submit-error">Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
             <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
@@ -61,6 +60,7 @@
             <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
+            <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -77,7 +77,7 @@
             <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             <br/> <br/>
 
-            <p>Question:</p>
+            <p class="option-title">Question:</p>
             {% include "misc/MarkdownArea.twig" with {
                 "markdown_area_id" : "poll-question",
                 "markdown_area_query" : "$('#poll-question')",
@@ -141,10 +141,9 @@
                 {% endfor %}
             </div>
             <br/>
-            <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
-            <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
+            <button type="button" class="btn btn-primary" onclick="addResponse()">+ Add Response</button>
             <br/> <br/>
-
+            <hr>
             <span id="empty-name-error" class="red-message polls-submit-error" hidden>Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
             <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
@@ -153,6 +152,7 @@
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
             <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
+            <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
@@ -195,11 +195,15 @@
     };
 
     function addResponse() {
-        let count = $(".poll_response").length
+        let count = $(".option_id").length;
         let first_free_id = 0
-        while($(`.option_id[value="${first_free_id}"]`).length != 0){
-            first_free_id++;
+        let curr_max_id = -1;
+        for (let i = 0; i < $(".option_id").length; i++) {
+            if ( parseInt($($(".option_id")[i]).val()) > curr_max_id) {
+                curr_max_id = parseInt($($(".option_id")[i]).val());
+            }
         }
+        first_free_id = curr_max_id + 1;
         let hidden_style = "";
         let is_checked = "";
         if ($("#poll-type-single-response-survey").is(":checked")
@@ -208,11 +212,11 @@
             is_checked = "checked";
         }
         $("#responses").append(`
-            <div id="response_${count}_wrapper">
-                <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
-                <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
-                <input aria-label="Is correct" class="correct-box" type="checkbox" name="is_correct_${count}" ${hidden_style} ${is_checked}>
-                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+            <div id="response_${first_free_id}_wrapper">
+                <input type="hidden" class="order order-${count}" name="order_${first_free_id}" value="${count}"/>
+                <input type="hidden" class="option_id" name="option_id_${first_free_id}" value="${first_free_id}"/>
+                <input aria-label="Is correct" class="correct-box" type="checkbox" name="is_correct_${first_free_id}" ${hidden_style} ${is_checked}>
+                <textarea aria-label="Response text" class="poll_response" name="response_${first_free_id}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
                     <i class="fa fa-lg fa-chevron-up"></i>
@@ -226,61 +230,8 @@
                 <br/>
             </div>
         `);
-        $(`#response_${count}_wrapper`).children(".up-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            if (curr_pos == 0) {
-                return;
-            }
-            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
-            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
-            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
-            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
-            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
-        $(`#response_${count}_wrapper`).children(".down-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            if (curr_pos == $(".poll_response").length - 1) {
-                return;
-            }
-            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
-            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
-            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
-            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
-            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
-        $(`#response_${count}_wrapper`).children(".delete-btn").on("click", function() {
-            let count = $(".poll_response").length
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
-            for(let i=curr_pos + 1; i < count; i++) {
-                $(".order-" + i).attr("value", i - 1)
-                $(".order-" + i).addClass("order-" + (i - 1));
-                $(".order-" + i).removeClass("order-" + i);
-            }
-            for(let i=wrapper_id + 1; i < count; i++) {
-                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
-                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
-            }
-            $(this).parent().remove()
-            count -= 1
-            $("#response-count").val("" + count)
-        })
-        count += 1
-        $("#response-count").val("" + count)
-    }
-
-    function removeResponse() {
-        let count = $(".poll_response").length
-        count -= 1
-        $(`#response_${count}_wrapper`).remove()
-        $("#response-count").val("" + count)
+        let curr_resp_count = parseInt($("#response-count").val()) + 1;
+        $("#response-count").val("" + curr_resp_count);
     }
 
     function submitErrorChecks() {

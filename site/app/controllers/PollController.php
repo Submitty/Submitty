@@ -421,7 +421,6 @@ class PollController extends AbstractController {
         $answers = [];
         $orders = [];
         $count = 0;
-        // the assgined idices don't have to be consecutive. let's hope not to get into an infinite loop...
         for ($i = 0; $count < $response_count; $i++) {
             if (isset($_POST["option_id_" . $i]) || isset($_POST["response_" . $i]) || isset($_POST["order_" . $i])) {
                 // if at least one of the fields for a response with this index
@@ -436,6 +435,14 @@ class PollController extends AbstractController {
                     $answers[] = $_POST["option_id_" . $i];
                 }
                 $count++;
+            }
+            if ($i === 1000) {
+                // the indices assigned to responses don't have to be consecutive,
+                // so to make sure we don't get into an infinite loop, we stop checking
+                // after an arbitrary large number in case $response_count and the
+                // actual number of responses don't match
+                $this->core->addErrorMessage("Error occured in editing poll with the number of responses provided");
+                return new RedirectResponse($returnUrl);
             }
         }
         if (count($answers) == 0) {
