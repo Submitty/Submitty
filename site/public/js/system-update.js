@@ -36,8 +36,6 @@ async function getReleases(current_tag) {
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag){
-    current_tag = "v20.10.00";
-
     //collect all of the release notes submitty is behind into one large string
     //release notes are separated with \n-END-\n to help with parsing later
     let updates = '';
@@ -255,7 +253,7 @@ function filterReleaseNotes(filter) {
     }
 
     $('#no-filter-results').hide();
-    
+
     let releases_shown = 0;
     const releases = $('.release');
     releases.each( (i, release) => {
