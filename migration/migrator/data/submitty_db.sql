@@ -282,6 +282,7 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
     END;
     $$;
 
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
