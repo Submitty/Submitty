@@ -420,15 +420,22 @@ class PollController extends AbstractController {
         $responses = [];
         $answers = [];
         $orders = [];
-        for ($i = 0; $i < $response_count; $i++) {
-            if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
-                $this->core->addErrorMessage("Error occured in editing poll");
-                return new RedirectResponse($returnUrl);
-            }
-            $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
-            $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
-            if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
-                $answers[] = $_POST["option_id_" . $i];
+        $count = 0;
+        // the assgined idices don't have to be consecutive. let's hope not to get into an infinite loop...
+        for ($i = 0; $count < $response_count; $i++) {
+            if (isset($_POST["option_id_" . $i]) || isset($_POST["response_" . $i]) || isset($_POST["order_" . $i])) {
+                // if at least one of the fields for a response with this index
+                // is set, assert that the rest are also set
+                if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
+                    $this->core->addErrorMessage("Error with responses occured in editing poll");
+                    return new RedirectResponse($returnUrl);
+                }
+                $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
+                $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
+                if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
+                    $answers[] = $_POST["option_id_" . $i];
+                }
+                $count++;
             }
         }
         if (count($answers) == 0) {
