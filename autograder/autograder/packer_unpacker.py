@@ -75,10 +75,15 @@ def copytree_if_exists(config, job_id, source, target):
         os.mkdir(target)
     else:
         try:
+            # NOTE: Now that we have ignore_dangling_symlinks there
+            # will be no system failure, but it may be unclear to
+            # students why their files are 'missing'.  It would be
+            # nice to pass a warning message of the dangling symlink
+            # back to the student.
             shutil.copytree(source, target, symlinks=False, ignore_dangling_symlinks=True)
         except Exception as error:
             config.logger.log_message(
-                message="ERROR: '"+str(error)+"' attempting to copytree_if_exists: '"+source+"' -> '"+target+"'",
+                f"ERROR: '{str(error)} attempting to copytree_if_exists: {source}->{target}",
                 job_id=job_id,
             )
 
@@ -230,23 +235,19 @@ def prepare_autograding_and_submission_zip(
     tmp_submission = os.path.join(tmp, "TMP_SUBMISSION")
     os.mkdir(tmp_submission)
 
-    copytree_if_exists(config,job_id,provided_code_path, os.path.join(tmp_autograding, "provided_code"))
-    copytree_if_exists(config,job_id,test_input_path, os.path.join(tmp_autograding, "test_input"))
-    copytree_if_exists(config,job_id,test_output_path, os.path.join(tmp_autograding, "test_output"))
-    copytree_if_exists(config,job_id,generated_output_path, os.path.join(tmp_autograding, "generated_output"))
-    copytree_if_exists(config,job_id,bin_path, os.path.join(tmp_autograding, "bin"))
-    copytree_if_exists(
-        config,
-        job_id,
-        instructor_solution_path,
-        os.path.join(tmp_autograding, "instructor_solution")
-    )
-    copytree_if_exists(
-        config,
-        job_id,
-        custom_validation_code_path,
-        os.path.join(tmp_autograding, "custom_validation_code")
-    )
+    copytree_if_exists(config, job_id, provided_code_path,
+                       os.path.join(tmp_autograding, "provided_code"))
+    copytree_if_exists(config, job_id, test_input_path,
+                       os.path.join(tmp_autograding, "test_input"))
+    copytree_if_exists(config, job_id, test_output_path,
+                       os.path.join(tmp_autograding, "test_output"))
+    copytree_if_exists(config, job_id, generated_output_path,
+                       os.path.join(tmp_autograding, "generated_output"))
+    copytree_if_exists(config, job_id, bin_path, os.path.join(tmp_autograding, "bin"))
+    copytree_if_exists(config, job_id, instructor_solution_path,
+                       os.path.join(tmp_autograding, "instructor_solution"))
+    copytree_if_exists(config, job_id, custom_validation_code_path,
+                       os.path.join(tmp_autograding, "custom_validation_code"))
 
     # Copy the default submitty_router into bin.
     router_path = os.path.join(
@@ -296,8 +297,10 @@ def prepare_autograding_and_submission_zip(
                 )
 
     if "generate_output" not in obj:
-        copytree_if_exists(config,job_id,submission_path, os.path.join(tmp_submission, "submission"))
-        copytree_if_exists(config,job_id,checkout_path, os.path.join(tmp_submission, "checkout"))
+        copytree_if_exists(config, job_id, submission_path,
+                           os.path.join(tmp_submission, "submission"))
+        copytree_if_exists(config, job_id, checkout_path,
+                           os.path.join(tmp_submission, "checkout"))
     obj["queue_time"] = dateutils.write_submitty_date(queue_time)
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
