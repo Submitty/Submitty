@@ -382,9 +382,11 @@ function addLabel(filename, filesize, part, previous){
     label_array[part-1].push(filename);
 }
 
-function handle_input_keypress() {
+function handle_input_keypress(inactive_version) {
     empty_inputs = false;
-    setButtonStatus();
+    if (!inactive_version) {
+        setButtonStatus();
+    }
 }
 
 // BULK UPLOAD

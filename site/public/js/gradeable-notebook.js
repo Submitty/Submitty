@@ -139,10 +139,6 @@ $(document).ready(() => {
 
         // Set global javascript variable to allow submission for notebook
         window.is_notebook = true;
-
-        // Enable submit button
-        $('#submit').attr('disabled', false);
-
     });
 
     $('#submit').click(() => {
@@ -199,7 +195,6 @@ $(document).ready(() => {
         }
         else {
             $(recent_button_id).attr('disabled', false);
-            $('#submit').attr('disabled', false);
             window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));
@@ -241,7 +236,6 @@ $(document).ready(() => {
         const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');
         if (curr_checked_items !== prev_checked_items) {
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $('#submit').attr('disabled', false);
             $(`#mc_${index}_recent_button`).attr('disabled', false);
         }
         else {
@@ -307,7 +301,6 @@ $(document).ready(() => {
         else {
             $(recent_button_id).attr('disabled', false);
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $('#submit').attr('disabled', false);
         }
     });
 

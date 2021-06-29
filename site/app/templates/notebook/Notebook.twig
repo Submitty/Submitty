@@ -52,17 +52,29 @@
                 </div>
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
-
-                <div id="codebox_{{ num_codeboxes }}"
-                     name="codebox_{{ num_codeboxes }}"
-                     autocapitalization="off"
-                     style="pointer-events:none;"
-                     spellcheck="false"
-                     data-initial_value="{{ cell.initial_value }}"
-                     data-recent_submission="{{ cell.recent_submission }}"
-                     data-version_submission="{{ cell.version_submission }}"
-                     onkeyup="handle_input_keypress();">
-                </div>
+                {#disable input if viewing inactive version#}
+                {% if viewing_inactive_version %}
+                    <div id="codebox_{{ num_codeboxes }}"
+                         name="codebox_{{ num_codeboxes }}"
+                         autocapitalization="off"
+                         style="pointer-events:none;"
+                         spellcheck="false"
+                         data-initial_value="{{ cell.initial_value }}"
+                         data-recent_submission="{{ cell.recent_submission }}"
+                         data-version_submission="{{ cell.version_submission }}"
+                         onkeyup="handle_input_keypress({{ viewing_inactive_version }});">
+                    </div>
+                {% else %}
+                    <div id="codebox_{{ num_codeboxes }}"
+                         name="codebox_{{ num_codeboxes }}"
+                         autocapitalization="off"
+                         spellcheck="false"
+                         data-initial_value="{{ cell.initial_value }}"
+                         data-recent_submission="{{ cell.recent_submission }}"
+                         data-version_submission="{{ cell.version_submission }}"
+                         onkeyup="handle_input_keypress({{ viewing_inactive_version }});">
+                    </div>
+                {% endif %}
                 {% if cell.initial_value == "" %}
                     <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
                 {% else %}
@@ -139,7 +151,7 @@
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress();"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
                                 />
                                 {{ cell.choices[idx].description | markdown }}
                             </label>
@@ -161,7 +173,7 @@
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress();"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
                                 />
                                 {{ cell.choices[idx].description | markdown }}
                             </label>
