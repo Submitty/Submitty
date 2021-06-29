@@ -40,7 +40,7 @@ function updateReleaseNotes(data, current_tag){
     let updates = '';
     let i = 0;
     while (i < data.length && data[i].tag_name !== current_tag) {
-        updates += (`# ${data[i].tag_name}\n${data[i].body}-END-\n`);
+        updates += (`# ${data[i].tag_name}\n${data[i].body}\n-END-\n`);
         i++;
     }
 
@@ -59,7 +59,6 @@ function updateReleaseNotes(data, current_tag){
         },
         success: function(markdown_data){
             const release_notes = markdown_data.split('-END-');
-            console.log('release_notes', release_notes);
 
             for(let release of release_notes) {
                 //have to wrap the output in <div class="markdown"></div> since we are using 1 ajax call to process multiple payloads
@@ -67,12 +66,18 @@ function updateReleaseNotes(data, current_tag){
                 $('.content').append(`<div class="box"><div class="markdown">${injectStyling(release)}</div></div>`);
             }
 
-            //$('#release-notes').html(injectStyling(markdown_data));
             $('div.update').each( (index, div) => {
                 if ($(div).text().includes('None')) {
                     $(div).addClass('no-content');
                 }
-            })
+            });
+
+            $('<button class="btn btn-default btn-collapse-release" onclick="collapseRelease(this)">Collapse</button>').insertAfter($('.version-header'));
+            $('.btn-collapse-release').trigger('click');
+            $('.btn-collapse-release').eq(0).trigger('click');
+
+
+
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
                 $('#text').html('<i>Submitty is up to date!</i>');
@@ -80,11 +85,39 @@ function updateReleaseNotes(data, current_tag){
             else {
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a>`);
             }
+
+            $('#release-notes').hide();
         },
         error: function() {
             displayErrorMessage('Something went wrong while trying to render markdown. Please try again.');
         }
     });
+}
+
+function collapseRelease(button){
+    const release = $(button).closest('.box');
+    $(button).toggleClass('collapsed');
+    if ($(button).hasClass('collapsed')) {
+        release.find(':not(div.markdown, h1, button)').hide();
+        const security_notes = release.find('.update-SECURITY');
+        const sysadmin_notes = release.find('.update-SYSADMIN');
+        console.log('security notes', security_notes);
+        console.log('sysadmin notes', sysadmin_notes);
+        //highlight the collapsed release if it contains sysadmin or security notes
+        if ((security_notes.length && !security_notes.hasClass('no-content')) || (sysadmin_notes.length && !sysadmin_notes.hasClass('no-content'))) {
+            release.addClass('update-IMPORTANT');
+        }
+        $(button).removeClass('btn-default');
+        $(button).addClass('btn-primary');
+        $(button).html('Expand');
+    }
+    else {
+        release.find(':not(h1, button)').show();
+        release.removeClass('update-IMPORTANT');
+        $(button).removeClass('btn-primary');
+        $(button).addClass('btn-default');
+        $(button).html('Collapse');
+    }
 }
 
 function addPRLinks(raw_str) {
@@ -99,7 +132,8 @@ function injectStyling(markdown_data) {
     //add class to version headers
     markdown_data = markdown_data.replace(/<h1/g, '$& class="version-header"');
     //add content wrapper
-    //markdown_data = markdown_data.replace(/<\/h1>([\s\S]+?)(?=<hr>)/g)
+    console.log(markdown_data);
+    //markdown_data = markdown_data.replace(/<\/h1>([\s\S]+?<hr><\/div>))/g, '</h1><div class="update-wrapper">$1</div><hr>');
     
     // //special highlighting for SYSADMIN updates only if there are any
     // if ((markdown_data.match(/\[SYSADMIN ACTION\]/g) || []).length) {
@@ -116,40 +150,8 @@ function injectStyling(markdown_data) {
     return markdown_data;
 }
 
-function mergeReleaseNotes(accumulated, current) {
-    let split = current.body.split('\r\n\r\n').slice(1);
-    let last_section = split[0];
-    for (let i = 0; i < split.length; i++) {
-        if(!accumulated.hasOwnProperty(last_section)) {
-            accumulated[last_section] = [];
-        }
-        while(isReleaseItem(split[i])) {
-            if(!split[i].includes("None")){
-                accumulated[last_section].push(split[i]);
-            }
-            i++;
-        }
-        last_section = split[i];
-    }
-    return accumulated;
-}
-
-function isReleaseItem(string) {
-    return string && string[0] === '*';
-}
-
-function updatesToNotes(merged_updates) {
-    let release_notes = '';
-    release_notes += `${merged_updates["SYSADMIN ACTION / BREAKING CHANGE"]}\n\n${merged_updates["SYSADMIN ACTION / BREAKING CHANGE"].join('\n')}\n\n`;
-    release_notes += `${merged_updates["SECURITY"]}\n\n${merged_updates["SECURITY"].join('\n')}\n\n`;
-    for(let section in merged_updates) {
-        release_notes += `${section}\n\n${merged_updates[section].join('\n')}\n\n`;
-    }
-    return release_notes;
-}
-
 function filterReleaseNotes(filter) {
-    console.log('filter', filter)
+    //console.log('filter', filter)
     const sections = $('div.update');    
     sections.each( (index, section) => {
         $(section).hide();

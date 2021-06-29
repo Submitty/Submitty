@@ -72,12 +72,10 @@ span.update-RainbowGrades {
     background: linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
 } */
 
-.update-SYSADMIN {
+.update-SYSADMIN,
+.update-SECURITY,
+.update-IMPORTANT {
     background-color: var(--alert-background-danger-red);
-}
-
-.update-SECURITY {
-    background-color: var(--alert-invalid-entry-pink);
 }
 
 .release-filtered {
@@ -87,4 +85,10 @@ span.update-RainbowGrades {
 
 .no-content {
     background-color: transparent !important;
+}
+
+.btn-collapse-release {
+    position: absolute;
+    right: 5px;
+    top: 5px;
 }
