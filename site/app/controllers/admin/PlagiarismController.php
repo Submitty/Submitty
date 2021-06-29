@@ -105,11 +105,12 @@ class PlagiarismController extends AbstractController {
 
     /**
      * @param string $gradeable_id
+     * @param string $config_id
      * @return array|null
      */
-    private function getOverallRankings(string $gradeable_id): ?array {
+    private function getOverallRankings(string $gradeable_id, string $config_id): ?array {
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/overall_ranking.txt";
+        $file_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "overall_ranking.txt");
         if (!file_exists($file_path)) {
             return null;
         }
@@ -124,13 +125,14 @@ class PlagiarismController extends AbstractController {
     /**
      * Returns a ranking of users by percent match with user 1 (used for determining the rightmost dropdown list)
      * @param string $gradeable_id
+     * @param string $config_id
      * @param string $user_id_1
      * @param string $user_1_version
-     * @return array
+     * @return array|null
      */
-    private function getRankingsForUser(string $gradeable_id, string $user_id_1, string $user_1_version): ?array {
+    private function getRankingsForUser(string $gradeable_id, string $config_id, string $user_id_1, string $user_1_version): ?array {
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/" . $user_1_version . "/" . $user_id_1 . "_" . $user_1_version . ".txt";
+        $file_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, $user_id_1, $user_1_version, "ranking.txt");
         if (!file_exists($file_path)) {
             return null;
         }
@@ -144,29 +146,12 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * Returns a string containing the concatenated contents of the specified user's submission
-     * @param string $user_id
      * @param string $gradeable_id
-     * @param string $version
-     * @return string
+     * @param string $config_id
      */
-    private function getConcatenatedSubmission(string $user_id, string $gradeable_id, string $version): string {
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id . "/" . $version . "/submission.concatenated";
-
-        if (!file_exists($file_name) || !$this->core->getUser()->accessAdmin()) {
-            return 'error';
-        }
-        return file_get_contents($file_name);
-    }
-
-
-    /**
-     * @param string $gradeable_id
-     */
-    private function deleteExistingProvidedCode(string $gradeable_id): void {
-        if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id))) {
-            FileUtils::emptyDir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id));
+    private function deleteExistingProvidedCode(string $gradeable_id, string $config_id): void {
+        if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code"))) {
+            FileUtils::emptyDir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id, $config_id, "provided_code"));
         }
     }
 
@@ -174,8 +159,10 @@ class PlagiarismController extends AbstractController {
      * @param string $temporary_file_path
      * @param string $filename
      * @param string $gradeable_id
+     * @param string $config_id
+     * @throws \Exception
      */
-    private function saveNewProvidedCode(string $temporary_file_path, string $filename, string $gradeable_id): void {
+    private function saveNewProvidedCode(string $temporary_file_path, string $filename, string $gradeable_id, string $config_id): void {
         // NOTE: The user of this function is expected to call deleteExistingProvidedCode()
         //       before this function if they wish to clear whatever is already in the directory first.
 
@@ -183,7 +170,7 @@ class PlagiarismController extends AbstractController {
             throw new \Exception("Upload failed: Temporary file not found");
         }
 
-        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id);
+        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code");
         FileUtils::createDir($target_dir); // creates dir if not yet exists
 
         if (mime_content_type($temporary_file_path) == "application/zip") {
@@ -210,7 +197,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism")
      */
-    public function plagiarismMainPage($refresh_page = "NO_REFRESH") {
+    public function plagiarismMainPage($refresh_page="NO_REFRESH") {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
@@ -739,14 +726,26 @@ class PlagiarismController extends AbstractController {
         echo($return);
     }
 
-    public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
+
+    /**
+     * @param string $course_path
+     * @param string $gradeable_id
+     * @param string $user_id_1
+     * @param string $version_user_1
+     * @param string $user_id_2
+     * @param string $version_user_2
+     * @param string $codebox
+     * @return array
+     */
+    public function getColorInfo(string $course_path, string $gradeable_id, string $config_id, string $user_id_1,
+                                 string $version_user_1, string $user_id_2, string $version_user_2, string $codebox): array {
         $color_info = [];
 
         //Represents left and right display users
         $color_info[1] = [];
         $segment_info = [];
 
-        $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
+        $file_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "users", $user_id_1, $version_user_1, "matches.json");
         if (!file_exists($file_path)) {
             return $color_info;
         }
@@ -757,10 +756,12 @@ class PlagiarismController extends AbstractController {
 
             $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2));
 
-            $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/tokens.json";
+            $file_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "users", $user_id_1, $version_user_1, "tokens.json");
             $tokens_user_1 = json_decode(file_get_contents($file_path), true);
+
+            $tokens_user_2 = [];
             if ($user_id_2 != "") {
-                $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/tokens.json";
+                $file_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "users", $user_id_2, $version_user_2, "tokens.json");
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
                 array_push($tokens_user_2, $dummyToken);
             }
@@ -846,18 +847,18 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
      */
-    public function ajaxGetMatchingUsers($gradeable_id, $user_id_1, $version_user_1) {
+    public function ajaxGetMatchingUsers(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . "/" . $user_id_1 . "/";
+        $file_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, $user_id_1, $version_user_1, "ranking.txt");
 
         $i = 1;
         $max_matching_version = 1;
         $max_matching_percent = 0;
         while (is_dir($file_path . $i)) {
-            $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($i));
+            $ranking = $this->getRankingsForUser($gradeable_id, $config_id, $user_id_1, strval($i));
 
             if ($ranking === null || count($ranking) === 0) {
                 echo "";
@@ -872,7 +873,7 @@ class PlagiarismController extends AbstractController {
         }
 
         // we shouldn't need any error checking here because we just loaded the file above
-        $ranking = $this->getRankingsForUser($gradeable_id, $user_id_1, strval($max_matching_version));
+        $ranking = $this->getRankingsForUser($gradeable_id, $config_id, $user_id_1, strval($max_matching_version));
 
         $return = [];
         foreach ($ranking as $item) {
@@ -895,46 +896,6 @@ class PlagiarismController extends AbstractController {
         echo json_encode($return);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/clicked_match")
-     */
-    public function ajaxGetMatchesForClickedMatch($gradeable_id, $user_id_1, $version_user_1, $start, $end) {
-        $course_path = $this->core->getConfig()->getCoursePath();
-
-        $token_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/tokens.json";
-        $tokens_user_1 = json_decode(file_get_contents($token_path), true);
-
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
-        $return = [];
-
-        $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
-        if (!file_exists($file_path)) {
-            echo(json_encode(["error" => "user 1 matches.json does not exist"]));
-        }
-        else {
-            $content = json_decode(file_get_contents($file_path), true);
-            foreach ($content as $match) {
-                if ($tokens_user_1[$match["start"] - 1]["line"] - 1 == $start && $tokens_user_1[$match["end"] - 1]["line"] - 1 == $end) { //also do char place
-                    foreach ($match["others"] as $match_info) {
-                        $matchingpositions = [];
-                        $token_path_2 = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $match_info['username'] . "/" . $match_info['version'] . "/tokens.json";
-                        $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
-                        foreach ($match_info['matchingpositions'] as $matchingpos) {
-                            array_push($matchingpositions, ["start_line" => $tokens_user_2[$matchingpos["start"] - 1]["line"] - 1 , "start_ch" => $tokens_user_2[$matchingpos["start"] - 1]["char"] - 1,
-                                "end_line" => $tokens_user_2[$matchingpos["end"] - 1]["line"] - 1, "end_ch" => $tokens_user_2[$matchingpos["end"] - 1]["char"] - 1 ]);
-                        }
-                        $first_name = $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
-                        $last_name = $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedLastName();
-                        array_push($return, [$match_info["username"],$match_info["version"], $matchingpositions, $first_name, $last_name]);
-                    }
-                }
-            }
-            $return = json_encode($return);
-            echo($return);
-        }
-    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
@@ -949,7 +910,10 @@ class PlagiarismController extends AbstractController {
 
         $gradeables_in_progress = 0;
         foreach ($gradeable_ids_titles as $gradeable_id_title) {
-            if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+            if (
+                file_exists(FileUtils::joinPaths("var", "local", "submitty", "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}__/* TODO */.json"))
+                || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")
+            ) {
                 $gradeables_in_progress++;
             }
         }
