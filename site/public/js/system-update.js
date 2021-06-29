@@ -36,13 +36,15 @@ async function getReleases(current_tag) {
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag){
-    current_tag = "v20.10.00";
+    current_tag = "v21.06.01";
     let updates = '';
     let releases_behind = 0;
     while (releases_behind < data.length && data[releases_behind].tag_name !== current_tag) {
-        updates += (`# ${data[releases_behind].tag_name}\n${data[releases_behind].body}\n-END-\n`);
+        updates += `# ${data[releases_behind].tag_name}\n${data[releases_behind].body}\n\n-END-\n`;
         releases_behind++;
     }
+
+    //console.log('updates', updates);
 
     $('.release-notes').remove();
 
@@ -85,13 +87,16 @@ function updateReleaseNotes(data, current_tag){
                 $('#text').html('<i>Submitty is up to date!</i>');
             }
             else {
+                const important_message = $('.update-IMPORTANT').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} IMPORTANT UPDATES</em></strong>` : '';
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
                                 Submitty is ${releases_behind} releases behind.<br>
-                                <strong style="color: var(--alert-danger-red);"><em>THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} IMPORTANT UPDATES</em></strong>`);
+                                ${important_message}`);
             }
             
-            //initially expand the latest release
-            $('.btn-collapse-release').eq(0).trigger('click');
+            //initially expand the latest release if there is only 1
+            if ($('.btn-collapse-release').length === 1) {
+                $('.btn-collapse-release').eq(0).trigger('click');
+            }
 
             //hide loading text
             $('#loading-text').hide();
@@ -171,11 +176,11 @@ function injectStyling(markdown_data) {
     // //special highlighting for SECURITY updates only if there are any
     // if ((markdown_data.match(/\[SECURITY\]/g) || []).length) {
 
-
-    markdown_data = markdown_data.replace(/<p>([^<\n]+)[\s\S]+?(?:<hr>)/g, '<div class="update update-$1">$&</div>');
+    //console.log('markdown data', markdown_data);
+    markdown_data = markdown_data.replace(/<p>([^<\n\s]+)[^<\n]*?[\s\S]+?(?:<hr>)|<p>([^<\n]+)[\s\S]+?(?=<\/ul>)/g, '<div class="update update-$1">$&</div>');
 
     //special regex for SUPPORTING ... because it has an & (&amp;) which messes up the other regex
-    markdown_data = markdown_data.replace(/<p>(SUPPORTING)[^<\n]+[\s\S]+?(?:hr)/g, '<div class="update update-$1">$&</div>')
+    //markdown_data = markdown_data.replace(/<p>(SUPPORTING)[^<\n]+[\s\S]+?(?:hr)/g, '<div class="update update-$1">$&</div>')
 
 
     //}

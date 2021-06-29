@@ -1,81 +1,13 @@
-:root {
-    --developer-blue: #e8fdff;
-    --instructor-ui-orange: #fce9cd;
-    --course-features-green: #defcde;
-    --system-gray: #e1e0e0;
-    --grading-purple: #eddffa;
-    --submission-yellow: #fffad7;
-    --vpat-pink: #ffe8fe;
-
-    --alpha-red: #ff000055;
-    --alpha-orange: #ff950055;
-    --alpha-yellow: #ffff0055;
-    --alpha-green: #00ff0055;
-    --alpha-teal: #00d9ff55;
-    --alpha-blue: #0000ff55;
-    --alpha-violet: #9500ff55;
-}
-
-[data-theme="dark"] {
-    --developer-blue: #014d53;
-    --instructor-ui-orange: #653d02;
-    --course-features-green: #015c01;
-    --system-gray: #555454;
-    --grading-purple: #350265;
-    --submission-yellow: #615600;
-    --vpat-pink: #660161;
-}
-
-/* span.update-Developer,
-span.update-DevDependency,
-span.update-Dependency,
-span.API {
-    background-color: var(--developer-blue);
-}
-
-span.update-InstructorUI,
-span.update-CourseMaterials,
-span.update-Plagiarism {
-    background-color: var(--instructor-ui-orange);
-}
-
-span.update-Forum,
-span.update-SubminiPolls,
-span.update-HelpQueue {
-    background-color: var(--course-features-green);
-}
-
-span.update-System,
-span.update-Notifications {
-    background-color: var(--system-gray);
-}
-
-
-span.update-TAGrading,
-span.update-Autograding {
-    background-color: var(--grading-purple);
-}
-
-span.update-Submission,
-span.update-Notebook {
-    background-color: var(--submission-yellow);
-}
-
-span.update-VPAT {
-    background-color: var(--vpat-pink);
-}
-
-span.update-RainbowGrades {
-    background: -webkit-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
-    background: -o-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
-    background: -moz-linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
-    background: linear-gradient(to right, var(--alpha-red), var(--alpha-orange) , var(--alpha-yellow), var(--alpha-green), var(--alpha-teal), var(--alpha-blue), var(--alpha-violet));
-} */
-
 .update-SYSADMIN,
 .update-SECURITY,
 .update-IMPORTANT {
     background-color: var(--alert-background-danger-red);
+}
+
+[data-theme="dark"] .update-SYSADMIN,
+[data-theme="dark"] .update-SECURITY,
+[data-theme="dark"] .update-IMPORTANT {
+    background-color: var(--alert-danger-red);
 }
 
 .release-filtered {
@@ -87,14 +19,12 @@ span.update-RainbowGrades {
     background-color: transparent !important;
 }
 
-/* .btn-collapse-release {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-} */
-
 .version-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.important-text {
+    color: var(--focus-danger-red);
 }

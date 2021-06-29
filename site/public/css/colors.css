@@ -192,23 +192,6 @@
     --simple-half-credit-light-blue: #88d0f4;
     --simple-save-error-red: #da4f49;
 
-    /* system update page */
-    --developer-blue: #e8fdff;
-    --instructor-ui-orange: #fce9cd;
-    --course-features-green: #defcde;
-    --system-gray: #e1e0e0;
-    --grading-purple: #eddffa;
-    --submission-yellow: #fffad7;
-    --vpat-pink: #ffe8fe;
-
-    --alpha-red: #ff000055;
-    --alpha-orange: #ff950055;
-    --alpha-yellow: #ffff0055;
-    --alpha-green: #00ff0055;
-    --alpha-teal: #00d9ff55;
-    --alpha-blue: #0000ff55;
-    --alpha-violet: #9500ff55;
-
     /* other */
     --box-shadow-very-transparent: rgba(0,0,0,0.12);
     --box-shadow-slightly-transparent: rgba(0,0,0,0.20);
@@ -418,15 +401,6 @@
       /*notebook builder*/
       --notebook-builder-form-options-orange: #7b6148;
       --notebook-builder-itempool-green: #50826a;
-
-    /* system update page */
-    --developer-blue: #014d53;
-    --instructor-ui-orange: #653d02;
-    --course-features-green: #015c01;
-    --system-gray: #555454;
-    --grading-purple: #350265;
-    --submission-yellow: #615600;
-    --vpat-pink: #660161;
 
       /* other */
       --box-shadow-very-transparent: rgba(255,255,255,0);
