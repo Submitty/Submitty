@@ -171,8 +171,8 @@ class Notebook extends AbstractModel {
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                             //get answer for the selected display version
                             $question_name = $notebookVal['filename'];
-                            $file = fopen("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name, "r") or die("unable to open file");
-                            $version_answer = fread($file,filesize("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name));
+                            $file = fopen("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name, "r");
+                            $version_answer = fread($file,filesize("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name));
                             $version_answer = rtrim($version_answer);
                             fclose($file);
                         }
@@ -198,8 +198,8 @@ class Notebook extends AbstractModel {
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                             //get answer for the selected display version
                             $question_name = $notebookVal['filename'];
-                            $file = fopen("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name, "r") or die("unable to open file");
-                            $version_answer = fread($file,filesize("/var/local/submitty/courses/".$semester."/".$course."/submissions/".$gradeable_id."/".$student_id."/".$display_version."/".$question_name));
+                            $file = fopen("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name, "r");
+                            $version_answer = fread($file,filesize("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name));
                             $version_answer = rtrim($version_answer);
                             fclose($file);
                             // Add field to the array

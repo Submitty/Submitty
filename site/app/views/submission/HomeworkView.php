@@ -315,7 +315,7 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-            if($version_instance) {
+            if ($version_instance) {
                 if ($graded_gradeable !== null) {
                     $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
                         $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
@@ -329,17 +329,17 @@ class HomeworkView extends AbstractView {
                 }
             }
             else {
-               if ($graded_gradeable !== null) {
-                   $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                       $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                       $notebook,
-                       $this->core->getUser()->getId(),
-                       0,
-                       $graded_gradeable->getGradeableId(),
-                       $this->core->getConfig()->getSemester(),
-                       $this->core->getConfig()->getCourse()
-                   );
-               }
+                if ($graded_gradeable !== null) {
+                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                        $notebook,
+                        $this->core->getUser()->getId(),
+                        0,
+                        $graded_gradeable->getGradeableId(),
+                        $this->core->getConfig()->getSemester(),
+                        $this->core->getConfig()->getCourse()
+                    );
+                }
             }
 
             $notebook_inputs = $notebook_model->getInputs();
