@@ -973,7 +973,11 @@ HTML;
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
                 $display_version,
                 $notebook,
-                $graded_gradeable->getSubmitter()->getId()
+                $graded_gradeable->getSubmitter()->getId(),
+                $display_version,
+                $graded_gradeable->getGradeableId(),
+                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getCourse()
             );
 
             $old_files = [];
