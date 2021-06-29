@@ -13,6 +13,7 @@
         You can input dates/or numbers in the filter fields below, and clicking apply after will highlight all students whose last activity
         is before specified date as red. In addition, those whose activities are after the specified filter will be highlighted as green.
     </p>
+    <div id="data" data-original="{{data|json_encode}}" hidden></div>
     <div id="container">
         <div class="line">
             <label for="gradeable_access_date">Gradeable Access Date</label>
@@ -39,23 +40,23 @@
             <input type="text" class="date_picker" id="office_hours_queue_date">
         </div>
 
-        <div onclick="applySettings()" class="btn btn-primary">Apply</div> 
-        <div onclick="clearFields()" class="btn btn-primary">Clear</div>
+        <div id="apply-btn" class="btn btn-primary">Apply</div> 
+        <div id="clear-btn" class="btn btn-primary">Clear</div>
     </div>
     <table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
-                <td id="0" onclick="sortTable(0)" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
-                <td id="1" onclick="sortTable(1)" style="cursor: pointer">User ID <i class="fas"></i></td>
-                <td id="2" onclick="sortTable(2)" style="cursor: pointer">First Name <i class="fas"></i></td>
-                <td id="3" onclick="sortTable(3)" style="cursor: pointer">Last Name <i class="fas"></i></td>
-                <td id="4" onclick="sortTable(4)" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
-                <td id="5" onclick="sortTable(5)" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
-                <td id="6" onclick="sortTable(6)" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
-                <td id="7" onclick="sortTable(7)" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
-                <td id="8" onclick="sortTable(8)" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
-                <td id="9" onclick="sortTable(9)" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10" onclick="sortTable(10)" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10"  style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
     
@@ -66,10 +67,10 @@
                 <td class='align-left'>{{row.user_id}}</td>
                 <td class='align-left'>{{row.user_firstname}}</td>
                 <td class='align-left'>{{row.user_lastname}}</td>
-                <td>{{row.gradeable_access}}</td>
                 <td>{{row.gradeable_submission}}</td>
                 <td>{{row.forum_view}}</td>
                 <td>{{row.forum_post}}</td>
+                <td>{{row.gradeable_access}}</td>
                 <td>{{row.num_poll_response}}</td>
                 <td>{{row.office_hours_queue}}</td>
                 <td style="display: none;">False</td>
@@ -77,7 +78,6 @@
         {% endfor %}
         </tbody>
     </table>
-
     <script>
         flatpickr('.date_picker', {
             allowInput: true,
@@ -86,62 +86,5 @@
                 fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
             }
         });
-        
-        function applySettings(){
-            var grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
-            var grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
-            var forum_view = Date.parse(document.getElementById('forum_view_date').value);
-            var forum_post = Date.parse(document.getElementById('forum_post_date').value);
-            var num_poll = Date.parse(document.getElementById('num_poll_responses').value);
-            var off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
-            var data = {{data|json_encode|raw}};
-            var table = document.getElementById("data-table");
-            var rows = table.rows;
-            for(var i = 0; i < data.length; i++){
-                var s_grad_acc = data[i].gradeable_access;
-                var s_grad_sub = data[i].gradeable_submission;
-                var s_forum_view = data[i].forum_view;
-                var s_forum_post = data[i].forum_post;
-                var s_num_polls = data[i].num_poll_responses;
-                var s_off_hours = data[i].office_hours_queue;
-                var flag = false;
-                //if(s_grad_acc == null || s_grad_sub == null || s_forum_view == null || s_forum_post == null || s_num_poll == null || s_off_hours == null) document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-                if((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) flag = true;
-                else if((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) flag = true;
-                else if((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) flag = true;
-                else if((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) flag = true;
-                else if((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) flag = true;
-                else if((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) flag = true;
-                else {
-                    rows[i+1].getElementsByTagName("TD")[10].innerText = 'False'; 
-                    document.getElementById(data[i].user_id).style.backgroundColor= 'green';
-                }
-                if(flag){
-                    document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-                    rows[i+1].getElementsByTagName("TD")[10].innerText = 'True';
-                }
-
-            }
-            document.getElementById('office_hours_queue_date').value = '';
-        }
-
-        function clearFields(){
-            document.getElementById('gradeable_access_date').value = '';
-            document.getElementById('gradeable_submission_date').value = '';
-            document.getElementById('forum_view_date').value = '';
-            document.getElementById('forum_post_date').value = '';
-            document.getElementById('num_poll_responses').value = '';
-            document.getElementById('office_hours_queue_date').value = '';
-            applySettings();
-            var data = {{data|json_encode|raw}};
-            var table = document.getElementById("data-table");
-            var rows = table.rows;
-            for(var i = 0; i < data.length; i++){
-                rows[i+1].getElementsByTagName("TD")[10].innerText = ''; 
-                document.getElementById(data[i].user_id).style.backgroundColor= '';
-            }
-            sortTable(0);
-        }
-
     </script>
 </div>
