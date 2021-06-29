@@ -4,6 +4,7 @@ namespace app\entities\course;
 
 use app\libraries\DateUtils;
 use app\models\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -56,14 +57,8 @@ class CourseMaterial {
     protected $priority;
 
     /**
-     * @ORM\Column(type="boolean")
-     * @var boolean
-     */
-    protected $section_lock;
-
-    /**
-     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER")
-     * @var Collection<CourseMaterialSection>
+     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
+     * @var Collection
      */
     protected $sections;
 
@@ -73,11 +68,15 @@ class CourseMaterial {
         $this->setReleaseDate($details['release_date']);
         $this->setHiddenFromStudents($details['hidden_from_students']);
         $this->setPriority($details['priority']);
-        $this->setSectionLock($details['section_lock']);
+        $this->sections = new ArrayCollection();
     }
 
     public function getSections(): Collection {
         return $this->sections;
+    }
+
+    public function deleteSections(): void {
+        $this->sections->clear();
     }
 
     public function getPath(): string {
@@ -111,13 +110,6 @@ class CourseMaterial {
      */
     public function isHiddenFromStudents(): bool {
         return $this->hidden_from_students;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSectionLock(): bool {
-        return $this->section_lock;
     }
 
     public function isSectionAllowed(User $user): bool {
@@ -158,13 +150,6 @@ class CourseMaterial {
     }
 
     /**
-     * @param bool $section_lock
-     */
-    public function setSectionLock(bool $section_lock): void {
-        $this->section_lock = $section_lock;
-    }
-
-    /**
      * @param int $type
      */
     public function setType(int $type): void {
@@ -172,7 +157,7 @@ class CourseMaterial {
     }
 
     public function addSection(CourseMaterialSection $section): void {
-        $this->sections->add($section);
+        $this->sections[] = $section;
     }
 
     /**

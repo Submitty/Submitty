@@ -26,8 +26,7 @@ def up(config, database, semester, course):
             type smallint NOT NULL,
             release_date timestamptz NOT NULL,
             hidden_from_students BOOL NOT NULL,
-            priority float8 NOT NULL,
-            section_lock BOOL NOT NULL
+            priority float8 NOT NULL
         );
         """
     )
@@ -72,16 +71,14 @@ def up(config, database, semester, course):
                             path,
                             release_date,
                             hidden_from_students,
-                            priority,
-                            section_lock
+                            priority
                         )
                         VALUES (
                             :type, :path, :release_date, :hidden_from_students, :priority, :section_lock
                         ) ON CONFLICT(path) DO UPDATE SET
                         release_date = EXCLUDED.release_date,
                         hidden_from_students = EXCLUDED.hidden_from_students,
-                        priority = EXCLUDED.priority,
-                        section_lock = EXCLUDED.section_lock
+                        priority = EXCLUDED.priority
                         RETURNING path
                         """
                     params = {
@@ -89,8 +86,7 @@ def up(config, database, semester, course):
                         'type': material_type,
                         'release_date': itemvalue['release_datetime'],
                         'hidden_from_students': itemvalue['hide_from_students'],
-                        'priority': itemvalue['sort_priority'],
-                        'section_lock': has_sections
+                        'priority': itemvalue['sort_priority']
                     }
                     result = database.session.execute(query, params)
                     course_material_id = result.fetchone()[0]

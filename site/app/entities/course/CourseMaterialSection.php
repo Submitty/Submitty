@@ -14,13 +14,6 @@ use Doctrine\ORM\Mapping as ORM;
 class CourseMaterialSection {
     /**
      * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @var integer
-     */
-    protected $course_material_id;
-
-    /**
-     * @ORM\Id
      * @ORM\Column(type="string")
      * @var string
      */
@@ -28,7 +21,6 @@ class CourseMaterialSection {
 
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\course\CourseMaterial", inversedBy="sections")
-     * @ORM\JoinColumn(name="course_material_id", referencedColumnName="id")
      * @var CourseMaterial
      */
     protected $course_material;
@@ -36,7 +28,6 @@ class CourseMaterialSection {
     public function __construct(string $section_id, CourseMaterial $course_material) {
         $this->section_id = $section_id;
         $this->course_material = $course_material;
-        $this->course_material_id = $course_material->getId();
     }
 
     /**

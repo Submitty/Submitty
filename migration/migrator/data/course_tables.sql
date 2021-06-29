@@ -178,8 +178,7 @@ CREATE TABLE public.course_materials (
     type smallint NOT NULL,
     release_date timestamp with time zone NOT NULL,
     hidden_from_students boolean NOT NULL,
-    priority double precision NOT NULL,
-    section_lock boolean NOT NULL
+    priority double precision NOT NULL
 );
 
 

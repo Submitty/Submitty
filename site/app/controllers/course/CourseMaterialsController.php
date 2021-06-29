@@ -239,19 +239,18 @@ class CourseMaterialsController extends AbstractController {
 
         if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
             $course_material->setSectionLock(true);
-            $sections = explode(",", $_POST['sections']);
-            foreach ($sections as $section) {
-                $course_material_section = $this->core->getCourseEntityManager()
-                    ->getRepository(CourseMaterialSection::class)
-                    ->findOneBy(
-                        [
-                            'course_material_id' => $course_material->getId(),
-                            'section_id' => $section
-                        ]
-                    );
-                if ($course_material_section == null) {
+            if ($_POST['sections'] === "") {
+                $sections = null;
+            }
+            else {
+                $sections = explode(",", $_POST['sections']);
+            }
+            $course_material->deleteSections();
+            $this->core->getCourseEntityManager()->flush();
+            if ($sections != null) {
+                foreach ($sections as $section) {
                     $course_material_section = new CourseMaterialSection($section, $course_material);
-                    $this->core->getCourseEntityManager()->persist($course_material_section);
+                    $course_material->addSection($course_material_section);
                 }
             }
         }
@@ -499,17 +498,10 @@ class CourseMaterialsController extends AbstractController {
             ]);
             $this->core->getCourseEntityManager()->persist($course_material);
             $this->core->getCourseEntityManager()->flush();
-            foreach ($details['sections'] as $section) {
-                $course_material_section = $this->core->getCourseEntityManager()
-                    ->getRepository(CourseMaterialSection::class)
-                    ->findOneBy(
-                        [
-                            'course_material_id' => $course_material->getId(),
-                            'section_id' => $section
-                        ]
-                    );
-                if ($course_material_section == null) {
-                    $course_material_section = new CourseMaterialSection($section, $course_material);
+            if ($details['section_lock']) {
+                foreach ($details['sections'] as $section) {
+                    $course_material_section = new CourseMaterialSection($section/*, $course_material*/);
+                    $course_material->addSection($course_material_section);
                     $this->core->getCourseEntityManager()->persist($course_material_section);
                 }
             }
