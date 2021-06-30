@@ -2105,20 +2105,25 @@ function scrollThreadListTo(element){
 }
 
 //Only used by the posters and only on recent posts (60 minutes since posted)
-function sendAnnouncement(thread_post_content, id){
+function sendAnnouncement(id){
   $(".pin-and-email-message").attr('disabled','disabled');
   $.ajax({
     type: 'POST',
     url: buildCourseUrl(['forum', 'make_announcement']),
     data: {"id": id, 'csrf_token': window.csrfToken},
     success: function(data){
-      if (JSON.parse(data).status === "success"){ 
-        pinAnnouncement(id, 1, window.csrfToken);
-        window.location.reload();
-      }
-      else{
-        window.alert("Something went wrong while trying to queue the announcement. Please try again.");
-      }
+        try {
+            if (JSON.parse(data).status === "success"){ 
+                pinAnnouncement(id, 1, window.csrfToken);
+                window.location.reload();
+            }
+            else{
+                window.alert("Something went wrong while trying to queue the announcement. Please try again.");
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
     },
     error: function(){
       window.alert("Something went wrong while trying to queue the announcement. Please try again.");
@@ -2133,33 +2138,38 @@ function checkIfAnnounced(id){
     url: buildCourseUrl(['forum', 'check_announcement']),
     data: {'thread_id': id},
     success: function(res) {
-      const response = JSON.parse(res);
-      if (response.status === "success" && response.data["exists"] == false){
-        $('.pin-and-email-message').show();
-      }
+        const response = JSON.parse(res);
+        try {
+            if (response.status === "success" && response.data["exists"] == false){
+                $('.pin-and-email-message').show();
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
     }
   });
 }
 
 function pinAnnouncement(thread_id, type, csrf_token){
-  if(confirm){
-      var url = buildCourseUrl(['forum', 'announcements']) + `?type=${type}`;
-      $.ajax({
-          url: url,
-          type: "POST",
-          data: {
-              thread_id: thread_id,
-              csrf_token: csrf_token
+    if(confirm){
+        var url = buildCourseUrl(['forum', 'announcements']) + `?type=${type}`;
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_id: thread_id,
+                csrf_token: csrf_token
 
-          },
-          success: function(data){
-              if (type)
-                window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
-              else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
-          },
-          error: function(){
-              window.alert("Something went wrong while trying to remove announcement. Please try again.");
-          }
-      })
-  }
+            },
+            success: function(data){
+                if (type)
+                    window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to remove announcement. Please try again.");
+            }
+        })
+    }
 }

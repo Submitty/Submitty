@@ -915,7 +915,7 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false) {
+    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false, $thread_announced = false) {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
         $parent_id = $post["parent_id"];
@@ -1122,7 +1122,7 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $this->core->getQueries()->existsAnnouncementsId($thread_id)
+            "thread_announced" => $thread_announced
         ];
 
         if ($render) {
