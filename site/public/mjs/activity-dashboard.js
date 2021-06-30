@@ -124,14 +124,14 @@ export function applySettings(){
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
     const table = document.getElementById("data-table");
     const rows = table.rows;
-    for(var i = 0; i < data.length; i++){
-        var s_grad_acc = data[i].gradeable_access;
-        var s_grad_sub = data[i].gradeable_submission;
-        var s_forum_view = data[i].forum_view;
-        var s_forum_post = data[i].forum_post;
-        var s_num_polls = data[i].num_poll_responses;
-        var s_off_hours = data[i].office_hours_queue;
-        var flag = false;
+    for(let i = 0; i < data.length; i++){
+        const s_grad_acc = data[i].gradeable_access;
+        const s_grad_sub = data[i].gradeable_submission;
+        const s_forum_view = data[i].forum_view;
+        const s_forum_post = data[i].forum_post;
+        const s_num_polls = data[i].num_poll_responses;
+        const s_off_hours = data[i].office_hours_queue;
+        let flag = false;
 
         if((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) flag = true;
         else if((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) flag = true;
@@ -160,10 +160,10 @@ export function clearFields(){
     document.getElementById('num_poll_responses').value = '';
     document.getElementById('office_hours_queue_date').value = '';
     applySettings();
-    var table = document.getElementById("data-table");
-    var data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
-    var rows = table.rows;
-    for(var i = 0; i < data.length; i++){
+    const table = document.getElementById("data-table");
+    const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
+    const rows = table.rows;
+    for(let i = 0; i < data.length; i++){
         rows[i+1].getElementsByTagName("TD")[10].innerText = ''; 
         document.getElementById(data[i].user_id).style.backgroundColor= '';
     }
