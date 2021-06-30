@@ -31,6 +31,7 @@
 .version-header .badge {
     float: none;
 }
+
 .version-header > h1 {
     display: inline;
 }
