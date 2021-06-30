@@ -620,7 +620,7 @@ function gotoPrevStudent() {
   }
 
   if (force_grading_sections) {
-    window_location += "&force_grading_sections=true"
+    window_location += "&force_grading_sections=true";
   }
 
   if (getGradeableId() !== '') {
@@ -667,7 +667,7 @@ function gotoNextStudent() {
   }
 
   if (force_grading_sections) {
-    window_location += "&force_grading_sections=true"
+    window_location += "&force_grading_sections=true";
   }
 
   if (getGradeableId() !== '') {

@@ -55,7 +55,7 @@ let settingsData = [
                 default: "No"
             }
         ]
-    },
+    }
 ];
 
 window.onkeyup = function(e) {
