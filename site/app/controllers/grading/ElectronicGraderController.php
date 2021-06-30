@@ -477,6 +477,32 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        //get all graded gradeables for queue stats
+        $gradeables_in_queue = 0;
+        $gradeables_grading_in_progress = 0;
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+        $order->sort("id", "ASC");
+        $graded_gradeables = [];
+        $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable); // Collect user ids so we know who isn't on a team
+        foreach ($order->getSortedGradedGradeables() as $g) {
+            $graded_gradeables[] = $g;
+            if ($gradeable->isTeamAssignment()) {
+                $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
+            }
+        }
+        foreach ($graded_gradeables as $g) {
+            $display_version = $g->getAutoGradedGradeable()->getActiveVersion();
+            if ($display_version > 0) {
+                $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+                if ($display_version_instance->isQueued()) {
+                    $gradeables_in_queue+=1;
+                }
+                if ($display_version_instance->isGrading()) {
+                    $gradeables_grading_in_progress+=1;
+                }
+            }
+        }
+
         if (!$this->core->getAccess()->canI("grading.electronic.status", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -788,7 +814,9 @@ class ElectronicGraderController extends AbstractController {
             $viewed_grade,
             $section_key,
             $regrade_requests,
-            $show_warnings
+            $show_warnings,
+            $gradeables_in_queue,
+            $gradeables_grading_in_progress
         );
     }
 

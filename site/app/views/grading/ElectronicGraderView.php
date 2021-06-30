@@ -51,7 +51,9 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings
+        bool $show_warnings,
+        int $gradeables_in_queue,
+        int $gradeables_grading_in_progress
     ) {
 
         $peer = false;
@@ -84,6 +86,8 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+        $gradeables_grading_in_progress_percentage = 0;
+        $gradeables_in_queue_percentage = 0;
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
@@ -105,6 +109,8 @@ class ElectronicGraderView extends AbstractView {
         }
         else {
             $graded_percentage = number_format(($graded / $total) * 100, 1);
+            $gradeables_grading_in_progress_percentage = number_format(($gradeables_grading_in_progress / $total_submissions) * 100, 1);
+            $gradeables_in_queue_percentage = number_format(($gradeables_in_queue / $total_submissions) * 100, 1);
         }
 
         if ($graded_percentage !== -1) {
@@ -317,7 +323,11 @@ class ElectronicGraderView extends AbstractView {
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
-            "histograms" => $histogram_data
+            "histograms" => $histogram_data,
+            "gradeables_in_queue" => $gradeables_in_queue,
+            "gradeables_grading_in_progress" => $gradeables_grading_in_progress,
+            "gradeables_in_queue_percentage" => $gradeables_in_queue_percentage,
+            "gradeables_grading_in_progress_percentage" => $gradeables_grading_in_progress_percentage
         ]);
     }
 
