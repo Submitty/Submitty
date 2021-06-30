@@ -21,14 +21,15 @@ class PlagiarismView extends AbstractView {
             $plagiarism_row = [];
             $plagiarism_row['title'] = $gradeable['g_title'];
             $plagiarism_row['id'] = $gradeable['g_id'];
+            $plagiarism_row['config_id'] = $gradeable['g_config_version'];
             $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format('F d Y H:i:s'); // TODO: think about the format of this date.  Using the format of the last run date for now.
             $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']);
-            if (file_exists(FileUtils::joinPaths($course_path, "lichen", "ranking", $plagiarism_row['id'], "overall_ranking.txt"))) {
-                $timestamp = date("F d Y H:i:s", filemtime(FileUtils::joinPaths($course_path, "lichen", "ranking", $plagiarism_row['id'], "overall_ranking.txt")));
-                $students = array_diff(scandir(FileUtils::joinPaths($course_path, "lichen", "concatenated", $plagiarism_row['id'])), ['.', '..']);
+            if (file_exists(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "overall_ranking.txt"))) {
+                $timestamp = date("F d Y H:i:s", filemtime(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "overall_ranking.txt")));
+                $students = array_diff(scandir(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "users")), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
-                    $submissions += count(array_diff(scandir(FileUtils::joinPaths($course_path, "lichen", "concatenated", $plagiarism_row['id'], $student)), ['.', '..']));
+                    $submissions += count(array_diff(scandir(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "users", $student)), ['.', '..']));
                 }
                 $students = count($students);
             }
