@@ -413,21 +413,22 @@ class PlagiarismController extends AbstractController {
         // Generate a unique number for this version of the gradeable //////////
         $config_id = 1;
 
-        if (isdir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id))) {
+        if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id))) {
             foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id)) as $file) {
                 if ($file !== '.' && $file !== '..' && is_numeric($file) && intval($file) > $config_id) {
                     $config_id = intval($file) + 1;
                 }
             }
         }
+        $config_id = strval($config_id);
 
 
         // Create directory structure //////////////////////////////////////////
-        $config_path = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id);
-        if (!is_dir($config_path)) {
-            FileUtils::createDir($config_path);
+        if (!is_dir($this->getConfigDirectoryPath($gradeable_id, $config_id))) {
+            $this->core->addErrorMessage("Creating the directory ");
+            $test = $this->getConfigDirectoryPath($gradeable_id, $config_id);
+            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id));
         }
-
 
         // Upload instructor provided code /////////////////////////////////////
         if ($new_or_edit === "edit" && ($_POST['provided_code_option'] !== "code_provided" || $_FILES['provided_code_file']['tmp_name'] !== "")) {
@@ -452,7 +453,7 @@ class PlagiarismController extends AbstractController {
 
 
         // Save the config.json ////////////////////////////////////////////////
-        $json_file = FileUtils::joinPaths($course_path, "lichen", $gradeable_id, $config_id, "config.json");
+        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
         $json_data = [
             "semester" => $semester,
             "course" => $course,
@@ -524,7 +525,7 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
-        $lichen_job_file_processing = $this->getProcessingQueuePath($gradeable_id, $config_id));
+        $lichen_job_file_processing = $this->getProcessingQueuePath($gradeable_id, $config_id);
 
         # Re run only if following checks are passed.
         if (file_exists($lichen_job_file) || file_exists($lichen_job_file_processing)) {
@@ -539,7 +540,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
+        $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         if ($ret !== null) {
             $this->core->addErrorMessage($ret);
             $this->core->redirect($return_url);

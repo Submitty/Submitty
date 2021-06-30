@@ -45,18 +45,18 @@ class PlagiarismView extends AbstractView {
             $plagiarism_row['night_rerun_status'] = $nightly_rerun_info[$plagiarism_row['id']] ? "" : "checked";
 
             // lichen job in queue for this gradeable but processing not started
-            if (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$plagiarism_row['id']}.json"))) {
+            if (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$plagiarism_row['id']}_{$plagiarism_row['config_id']}.json"))) {
                 $plagiarism_row['in_queue'] = true;
                 $plagiarism_row['processing'] = false;
             }
-            elseif (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$plagiarism_row['id']}.json"))) {
+            elseif (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$plagiarism_row['id']}__{$plagiarism_row['config_id']}.json"))) {
                 // lichen job in processing stage for this gradeable but not completed
                 $plagiarism_row['in_queue'] = true;
                 $plagiarism_row['processing'] = true;
             }
             else {
                 // no lichen job
-                $ranking_file_path = FileUtils::joinPaths($course_path, "lichen", "ranking", $plagiarism_row["id"], "overall_ranking.txt");
+                $ranking_file_path = FileUtils::joinPaths($course_path, "lichen", $plagiarism_row["id"], $plagiarism_row["config_id"], "overall_ranking.txt");
                 if (!file_exists($ranking_file_path) || file_get_contents($ranking_file_path) == "") {
                     $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
                 }
@@ -117,6 +117,7 @@ class PlagiarismView extends AbstractView {
 
         // Default values for the form
         $gradeable_id = "";
+        $config_id = "";
         $provided_code = false;
         $provided_code_filenames = [];
         $version = "all_versions";
@@ -133,9 +134,10 @@ class PlagiarismView extends AbstractView {
         // Values which are in saved configuration
         if ($new_or_edit == "edit") {
             $gradeable_id = $saved_config['gradeable'];
+            $config_id = $saved_config['config_id'];
 
             if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id))) {
-                $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id)), [".", ".."]);
+                $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code", "files")), [".", ".."]);
                 $provided_code = count($provided_code_filename_array) > 0;
                 foreach ($provided_code_filename_array as $filename) {
                     $provided_code_filenames[] = $filename;
@@ -155,7 +157,7 @@ class PlagiarismView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
-            "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}",
+            "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}&config_id={$config_id}",
             "csrf_token" => $this->core->getCsrfToken(),
             //"prior_term_gradeables_number" => $prior_term_gradeables_number,
             "provided_code" => $provided_code,
