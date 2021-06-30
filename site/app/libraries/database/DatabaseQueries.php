@@ -4957,7 +4957,7 @@ AND gc_id IN (
             $component->getUpperClamp(),
             $component->isText(),
             $component->getOrder(),
-            $component->isPeer(),
+            $component->isPeerComponent(),
             $component->getPage(),
             $component->getIsItempoolLinked(),
             $component->getItempool()
@@ -5043,7 +5043,7 @@ AND gc_id IN (
                 $component->getUpperClamp(),
                 $component->isText(),
                 $component->getOrder(),
-                $component->isPeer(),
+                $component->isPeerComponent(),
                 $component->getPage(),
                 $component->getIsItempoolLinked(),
                 $component->getItempool(),
@@ -5477,7 +5477,7 @@ AND gc_id IN (
      */
     private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
-            if (!$graded_component->getComponent()->isPeer()) {
+            if (!$graded_component->getComponent()->isPeerComponent()) {
                 $params = [
                     $graded_component->getScore(),
                     $graded_component->getComment(),
