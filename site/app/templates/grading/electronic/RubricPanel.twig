@@ -36,7 +36,7 @@
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
-                    {% if not is_peer_grading %}
+                    {% if not is_peer_grader %}
                     <div class="col-no-gutters">
                         <input id="edit-mode-enabled" class="key_to_click" tabindex="0" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
                     </div>
