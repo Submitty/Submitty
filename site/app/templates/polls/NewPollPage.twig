@@ -5,6 +5,7 @@
         <form id="new-poll-form" method="post" action="{{base_url}}/newPoll" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
+            <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
             <label for="poll-name" class="option-title">
                 Poll Name:
@@ -71,6 +72,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
+            <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
             <label for="poll-name" class="option-title">
                 Poll Name:
@@ -364,6 +366,12 @@
                         my_this.parent().remove();
                         count -= 1;
                         $("#response-count").val("" + count);
+                        let temp = $("#removed-responses").val();
+                        if (temp !== "") {
+                            temp += ",";
+                        }
+                        temp += $(my_this.siblings(".option_id")[0]).attr("value");
+                        $("#removed-responses").val(temp);
                     }
                 },
                 error: function(e) {

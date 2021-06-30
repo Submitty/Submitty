@@ -388,7 +388,7 @@ class PollController extends AbstractController {
         }
 
         $poll = $this->core->getQueries()->getPoll($_POST['poll_id']);
-
+        
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
@@ -470,6 +470,16 @@ class PollController extends AbstractController {
                 // actual number of responses don't match
                 $this->core->addErrorMessage("Error occured in editing poll with the number of responses provided");
                 return new RedirectResponse($returnUrl);
+            }
+        }
+        if ($_POST["removed_responses"] !== "") {
+            $prev_responses = $poll->getResponses();
+            $removed_resp = explode(",", $_POST["removed_responses"]);
+            foreach ($removed_resp as $response_id) {
+                if (array_key_exists($response_id, $prev_responses)) {
+                    $this->core->addErrorMessage("Error occured in editing poll: attempt to delete response option that has already been submitted as an answer");
+                    return new RedirectResponse($returnUrl);
+                }
             }
         }
         if (count($answers) == 0) {
