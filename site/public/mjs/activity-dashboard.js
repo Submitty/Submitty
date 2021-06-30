@@ -7,7 +7,7 @@ export function sortTable(n) {
     let i, dir;
     const table = document.getElementById('data-table');
 
-    if ($(`#${n}`).children('i').hasClass('fa-angle-up')){
+    if ($(`#${n}`).children('i').hasClass('fa-angle-up')) {
         $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
         dir = 'desc';
     }
@@ -16,11 +16,11 @@ export function sortTable(n) {
         dir = 'asc';
     }
 
-    for (i = 0; i < 10; i++){
-        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')){
+    for (i = 0; i < 10; i++) {
+        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
             $(`#${i}`).children('i').removeClass('fa-angle-up');
         }
-        else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')){
+        else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
             $(`#${i}`).children('i').removeClass('fa-angle-down');
         }
     }
@@ -47,13 +47,13 @@ export function sortTable(n) {
     // if n == 0 or n == 8
     // returns true if x < y, digits < strings < empty strings
     const helper = function (x, y, i) {
-        if (i == 0 || i == 8){
+        if (i == 0 || i == 8) {
             const xIsDigit = /^\d+$/.test(x);
             const yIsDigit = /^\d+$/.test(y);
             if (xIsDigit && yIsDigit) {
                 return Number(x) < Number(y);
             }
-            else if (!xIsDigit ^ !yIsDigit){
+            else if (!xIsDigit ^ !yIsDigit) {
                 return xIsDigit;
             }
             else {
@@ -114,7 +114,7 @@ export function sortTable(n) {
     }
 }
 
-export function applySettings(){
+export function applySettings() {
     const grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
     const grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
     const forum_view = Date.parse(document.getElementById('forum_view_date').value);
@@ -122,9 +122,9 @@ export function applySettings(){
     const num_poll = Date.parse(document.getElementById('num_poll_responses').value);
     const off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
-    const table = document.getElementById("data-table");
+    const table = document.getElementById('data-table');
     const rows = table.rows;
-    for(let i = 0; i < data.length; i++){
+    for(let i = 0; i < data.length; i++) {
         const s_grad_acc = data[i].gradeable_access;
         const s_grad_sub = data[i].gradeable_submission;
         const s_forum_view = data[i].forum_view;
@@ -140,19 +140,19 @@ export function applySettings(){
         else if((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) flag = true;
         else if((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) flag = true;
         else {
-            rows[i+1].getElementsByTagName("TD")[10].innerText = 'False'; 
+            rows[i+1].getElementsByTagName('TD')[10].innerText = 'False'; 
             document.getElementById(data[i].user_id).style.backgroundColor= 'green';
         }
-        if(flag){
+        if(flag) {
             document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-            rows[i+1].getElementsByTagName("TD")[10].innerText = 'True';
+            rows[i+1].getElementsByTagName('TD')[10].innerText = 'True';
         }
 
     }
     document.getElementById('office_hours_queue_date').value = '';
 }
 
-export function clearFields(){
+export function clearFields() {
     document.getElementById('gradeable_access_date').value = '';
     document.getElementById('gradeable_submission_date').value = '';
     document.getElementById('forum_view_date').value = '';
@@ -160,31 +160,31 @@ export function clearFields(){
     document.getElementById('num_poll_responses').value = '';
     document.getElementById('office_hours_queue_date').value = '';
     applySettings();
-    const table = document.getElementById("data-table");
+    const table = document.getElementById('data-table');
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
     const rows = table.rows;
-    for(let i = 0; i < data.length; i++){
-        rows[i+1].getElementsByTagName("TD")[10].innerText = ''; 
+    for(let i = 0; i < data.length; i++) {
+        rows[i+1].getElementsByTagName('TD')[10].innerText = ''; 
         document.getElementById(data[i].user_id).style.backgroundColor= '';
     }
 }
 
-export function init(){
+export function init() {
     sortTable(0);
-    document.getElementById("0").addEventListener("click", () => sortTable(0));
-    document.getElementById("1").addEventListener("click", () => sortTable(1));
-    document.getElementById("2").addEventListener("click", () => sortTable(2));
-    document.getElementById("3").addEventListener("click", () => sortTable(3));
-    document.getElementById("4").addEventListener("click", () => sortTable(4));
-    document.getElementById("5").addEventListener("click", () => sortTable(5));
-    document.getElementById("6").addEventListener("click", () => sortTable(6));
-    document.getElementById("7").addEventListener("click", () => sortTable(7));
-    document.getElementById("8").addEventListener("click", () => sortTable(8));
-    document.getElementById("9").addEventListener("click", () => sortTable(9));
-    document.getElementById("10").addEventListener("click", () => sortTable(10));
+    document.getElementById('0').addEventListener('click', () => sortTable(0));
+    document.getElementById('1').addEventListener('click', () => sortTable(1));
+    document.getElementById('2').addEventListener('click', () => sortTable(2));
+    document.getElementById('3').addEventListener('click', () => sortTable(3));
+    document.getElementById('4').addEventListener('click', () => sortTable(4));
+    document.getElementById('5').addEventListener('click', () => sortTable(5));
+    document.getElementById('6').addEventListener('click', () => sortTable(6));
+    document.getElementById('7').addEventListener('click', () => sortTable(7));
+    document.getElementById('8').addEventListener('click', () => sortTable(8));
+    document.getElementById('9').addEventListener('click', () => sortTable(9));
+    document.getElementById('10').addEventListener('click', () => sortTable(10));
     
-    document.getElementById("clear-btn").addEventListener("click", () => clearFields());
-    document.getElementById("apply-btn").addEventListener("click", () => applySettings());
+    document.getElementById('clear-btn').addEventListener('click', () => clearFields());
+    document.getElementById('apply-btn').addEventListener('click', () => applySettings());
 }
 
 document.addEventListener('DOMContentLoaded', () => init());

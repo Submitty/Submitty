@@ -47,8 +47,7 @@ class StudentActivityDashboardController extends AbstractController {
         );
 
         $fp = fopen($file_url, 'w');
-
-        fputcsv($fp, ["Registration Section", "User ID", "First Name", "Last Name", "Gradeable Access Date", "Gradeable Submission Date", 
+        fputcsv($fp, ["Registration Section", "User ID", "First Name", "Last Name", "Gradeable Access Date", "Gradeable Submission Date",
             "Forum View Date", "Number of Poll Responses", "Office Hours Queue Date"]);
         foreach ($data_dump as $rows) {
             fputcsv($fp, $rows);
