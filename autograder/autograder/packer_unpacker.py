@@ -80,7 +80,7 @@ def copytree_if_exists(config, job_id, source, target):
             # students why their files are 'missing'.  It would be
             # nice to pass a warning message of the dangling symlink
             # back to the student.
-            shutil.copytree(source, target, symlinks=False, ignore_dangling_symlinks=True)
+            shutil.copytree(source, target, symlinks=True, ignore_dangling_symlinks=True)
         except Exception as error:
             config.logger.log_message(
                 f"ERROR: '{str(error)} attempting to copytree_if_exists: {source}->{target}",
