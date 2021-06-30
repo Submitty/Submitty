@@ -56,6 +56,6 @@ class StudentActivityDashboardController extends AbstractController {
         return new WebResponse([
             'admin',
             'StudentActivityDashboard'
-        ], 'downloadFile', $file_url);
+        ], 'downloadFile', $file_url, $fp);
     }
 }

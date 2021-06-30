@@ -124,7 +124,7 @@ export function applySettings() {
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
     const table = document.getElementById('data-table');
     const rows = table.rows;
-    for(let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
         const s_grad_acc = data[i].gradeable_access;
         const s_grad_sub = data[i].gradeable_submission;
         const s_forum_view = data[i].forum_view;
@@ -133,26 +133,26 @@ export function applySettings() {
         const s_off_hours = data[i].office_hours_queue;
         let flag = false;
 
-        if((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) {
+        if ((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) {
             flag = true;
         }
-        else if((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) {
+        else if ((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) {
             flag = true;
         }
-        else if((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) {
+        else if ((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) {
             flag = true;
         }
-        else if((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) {
+        else if ((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) {
             flag = true;
         }
-        else if((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) {
+        else if ((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) {
             flag = true;
         }
-        else if((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) {
+        else if ((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) {
             flag = true;
         }
         else {
-            rows[i+1].getElementsByTagName('TD')[10].innerText = 'False'; 
+            rows[i+1].getElementsByTagName('TD')[10].innerText = 'False';
             document.getElementById(data[i].user_id).style.backgroundColor= 'green';
         }
         if(flag) {
@@ -176,7 +176,7 @@ export function clearFields() {
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
     const rows = table.rows;
     for(let i = 0; i < data.length; i++) {
-        rows[i+1].getElementsByTagName('TD')[10].innerText = ''; 
+        rows[i+1].getElementsByTagName('TD')[10].innerText = '';
         document.getElementById(data[i].user_id).style.backgroundColor= '';
     }
 }
@@ -194,7 +194,7 @@ export function init() {
     document.getElementById('8').addEventListener('click', () => sortTable(8));
     document.getElementById('9').addEventListener('click', () => sortTable(9));
     document.getElementById('10').addEventListener('click', () => sortTable(10));
-    
+
     document.getElementById('clear-btn').addEventListener('click', () => clearFields());
     document.getElementById('apply-btn').addEventListener('click', () => applySettings());
 }
