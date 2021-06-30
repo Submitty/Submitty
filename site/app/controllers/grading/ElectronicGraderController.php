@@ -495,10 +495,10 @@ class ElectronicGraderController extends AbstractController {
             if ($display_version > 0) {
                 $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
                 if ($display_version_instance->isQueued()) {
-                    $submissions_in_queue+=1;
+                    $submissions_in_queue += 1;
                 }
                 if ($display_version_instance->isGrading()) {
-                    $submissions_grading_in_progress+=1;
+                    $submissions_grading_in_progress += 1;
                 }
             }
         }
