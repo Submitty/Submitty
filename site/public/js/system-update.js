@@ -72,7 +72,7 @@ function updateReleaseNotes(data, current_tag){
 
             //mark release sections that have no items with a special class
             $('.section').each( (index, section) => {
-                if (!$(section).find('li').length) {
+                if (!$(section).find('li').length && $(section).text().includes('None')) {
                     $(section).addClass('no-content');
                 }
             });
@@ -90,8 +90,8 @@ function updateReleaseNotes(data, current_tag){
 
             //mark security & sysadmin releases with badges
             $('.release').each( (i, release) => {
-                const security_notes = $(release).find('.update-SECURITY');
-                const sysadmin_notes = $(release).find('.update-SYSADMIN');
+                const security_notes = $(release).find('.update-security');
+                const sysadmin_notes = $(release).find('.update-sysadmin');
                 //highlight the collapsed release if it contains sysadmin or security notes
                 if (security_notes.length && !security_notes.hasClass('no-content')) {
                     $('<span class="badge red-background">SECURITY</span>').insertAfter($(release).find('.version-header').find('h1'));
@@ -108,7 +108,7 @@ function updateReleaseNotes(data, current_tag){
                 $('#text').html('<i>Submitty is up to date!</i>');
             }
             else {
-                const important_message = $('.update-IMPORTANT').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-IMPORTANT').length === 1 ? "IS" : "ARE"} ${$('.update-IMPORTANT').length} SECURITY/SYSADMIN UPDATES</em></strong>` : '';
+                const important_message = $('.update-important').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-important').length === 1 ? "IS" : "ARE"} ${$('.update-important').length} SECURITY/SYSADMIN UPDATES</em></strong>` : '';
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
                                 Submitty is ${releases_behind} releases behind.<br>
                                 ${important_message}`);
@@ -162,11 +162,11 @@ function toggleRelease(button, event) {
     if ($(button).hasClass('collapsed')) {
         //hide everything that is not in the header
         release.find(':not(div.markdown, div.version-header, div.version-header *)').hide();
-        const security_notes = release.find('.update-SECURITY');
-        const sysadmin_notes = release.find('.update-SYSADMIN');
+        const security_notes = release.find('.update-security');
+        const sysadmin_notes = release.find('.update-sysadmin');
         //highlight the collapsed release if it contains sysadmin or security notes
         if ((security_notes.length && !security_notes.hasClass('no-content')) || (sysadmin_notes.length && !sysadmin_notes.hasClass('no-content'))) {
-            release.addClass('update-IMPORTANT');
+            release.addClass('update-important');
             $(button).addClass('btn-primary');
             $(button).removeClass('btn-default');
         }
@@ -177,7 +177,7 @@ function toggleRelease(button, event) {
         //show everything that was hidden (not in the header)
         release.find(':not(div.markdown, div.version-header, div.version-header *)').show();
         //important class is only helpful when release is collapsed
-        release.removeClass('update-IMPORTANT');
+        release.removeClass('update-important');
         $(button).removeClass('btn-primary');
         $(button).addClass('btn-default');
         $(button).html('Collapse');
@@ -203,13 +203,13 @@ function addPRLinks(raw_str) {
  */
 function injectStyling(markdown_data) {
     //add <hr> after each <ul> or <p><em> tag
-    markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>/g, '$&<hr>');
+    markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>|<\/a><\/p>/g, '$&<hr>');
     //replace normal <li> contents with spans with classes
-    markdown_data = markdown_data.replace(/<li>(\[\w+:(\w+)\].+)(?=<\/li>)|<li>(\[([^\]]+)\].+)(?=<\/li>)/g, '<li class="release-item"><span class="update-$2$4">$1$3</span>');
+    markdown_data = markdown_data.replace(/<li>(\[\w+:(\w+)\].+)(?=<\/li>)|<li>(\[([^\]]+)\].+)(?=<\/li>)/g, (match, p1, p2, p3, p4) => `<li class="release-item"><span class="update-${`${p2}${p4}`.toLowerCase()}}">${p1}${p3}</span>`);
     //add class and wrapper to version headers
     markdown_data = markdown_data.replace(/<h1>.+?<\/h1>/g, `<div class="version-header" onclick="$(this).find('.btn-toggle-release').trigger('click')">$&</div>`);
     //wrap release sections in a <div>
-    markdown_data = markdown_data.replace(/<p>([^<\n\s]+)[^<\n]*?[\s\S]+?(?:<hr>)/g, '<div class="section update-$1">$&</div>');
+    markdown_data = markdown_data.replace(/<p>([^<\n\s]+)[^<\n]*?[\s\S]+?(?:<hr>)/g, (match, p1) => `<div class="section update-${p1.toLowerCase()}">${match}</div>`);
 
     return markdown_data;
 }

@@ -1,12 +1,12 @@
-.update-SYSADMIN,
-.update-SECURITY,
-.update-IMPORTANT {
+.update-sysadmin,
+.update-security,
+.update-important {
     background-color: var(--alert-background-danger-red);
 }
 
-[data-theme="dark"] .update-SYSADMIN,
-[data-theme="dark"] .update-SECURITY,
-[data-theme="dark"] .update-IMPORTANT {
+[data-theme="dark"] .update-sysadmin,
+[data-theme="dark"] .update-security,
+[data-theme="dark"] .update-important {
     background-color: var(--alert-danger-red);
 }
 
@@ -27,7 +27,6 @@
 .version-header:hover {
     cursor: pointer;
 }
-
 
 .version-header .badge {
     float: none;
