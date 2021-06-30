@@ -25,57 +25,11 @@ export function sortTable(n) {
         }
     }
 
-    // Comparator used to compare 2 data entries for sorting
-    const comparator = function (row1, row2) {
-        // Check if they're equal
-        if (!helper(row1[n].innerHTML, row2[n].innerHTML) && !helper(row2[n].innerHTML, row1[n].innerHTML)) {
-            if (1 != n && helper(row1[1].innerHTML, row2[1].innerHTML, 1)) {
-                return true;
-            }
-            return false;
-        }
-        // They are not equal
-        // Then check for lesser or greater relationships
-        if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
-            return true;
-        }
-        else if (dir == 'asc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
-            return true;
-        }
-        return false;
-    };
-    // if n == 0 or n == 8
-    // returns true if x < y, digits < strings < empty strings
-    const helper = function (x, y, i) {
-        if (i == 0 || i == 8) {
-            const xIsDigit = /^\d+$/.test(x);
-            const yIsDigit = /^\d+$/.test(y);
-            if (xIsDigit && yIsDigit) {
-                return Number(x) < Number(y);
-            }
-            else if (!xIsDigit ^ !yIsDigit) {
-                return xIsDigit;
-            }
-            else {
-                if (x != '' && y == '') {
-                    return true;
-                }
-                else if (x == '' && y != '') {
-                    return false;
-                }
-                return x < y;
-            }
-        }
-        else {
-            // other columns
-            return x < y;
-        }
-    };
     const merge = function(arr1, arr2) {
         const res = [];
         let i = 0, j = 0;
         while (i < arr1.length && j < arr2.length) {
-            if (comparator(arr1[i].getElementsByTagName('TD'), arr2[j].getElementsByTagName('TD'))) {
+            if (comparator(arr1[i].getElementsByTagName('TD'), arr2[j].getElementsByTagName('TD'), n, dir)) {
                 res.push(arr1[i]);
                 i++;
             }
@@ -111,6 +65,54 @@ export function sortTable(n) {
     // inserting rows back into table to update the order
     for (i = 0; i < table.rows.length-1; i++) {
         rows[i+1].parentNode.insertBefore(sorted[i], rows[i+1]);
+    }
+}
+
+// Comparator used to compare 2 data entries for sorting
+export function comparator (row1, row2, n, dir) {
+    // Check if they're equal
+    if (!helper(row1[n].innerHTML, row2[n].innerHTML) && !helper(row2[n].innerHTML, row1[n].innerHTML)) {
+        if (1 != n && helper(row1[1].innerHTML, row2[1].innerHTML, 1)) {
+            return true;
+        }
+        return false;
+    }
+    // They are not equal
+    // Then check for lesser or greater relationships
+    if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
+        return true;
+    }
+    else if (dir == 'asc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
+        return true;
+    }
+    return false;
+}
+
+// if n == 0 or n == 8
+// returns true if x < y, digits < strings < empty strings
+export function helper (x, y, i) {
+    if (i == 0 || i == 8) {
+        const xIsDigit = /^\d+$/.test(x);
+        const yIsDigit = /^\d+$/.test(y);
+        if (xIsDigit && yIsDigit) {
+            return Number(x) < Number(y);
+        }
+        else if (!xIsDigit ^ !yIsDigit) {
+            return xIsDigit;
+        }
+        else {
+            if (x != '' && y == '') {
+                return true;
+            }
+            else if (x == '' && y != '') {
+                return false;
+            }
+            return x < y;
+        }
+    }
+    else {
+        // other columns
+        return x < y;
     }
 }
 
