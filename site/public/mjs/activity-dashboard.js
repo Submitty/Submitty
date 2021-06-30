@@ -155,7 +155,7 @@ export function applySettings() {
             rows[i+1].getElementsByTagName('TD')[10].innerText = 'False';
             document.getElementById(data[i].user_id).style.backgroundColor= 'green';
         }
-        if(flag) {
+        if (flag) {
             document.getElementById(data[i].user_id).style.backgroundColor = 'red';
             rows[i+1].getElementsByTagName('TD')[10].innerText = 'True';
         }
@@ -175,7 +175,7 @@ export function clearFields() {
     const table = document.getElementById('data-table');
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
     const rows = table.rows;
-    for(let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
         rows[i+1].getElementsByTagName('TD')[10].innerText = '';
         document.getElementById(data[i].user_id).style.backgroundColor= '';
     }
