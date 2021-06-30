@@ -8,8 +8,11 @@ use app\libraries\plagiarism\PlagiarismUtils;
 
 class PlagiarismView extends AbstractView {
 
-    public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info) {
+    public function plagiarismMainPage($gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
+
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
 
         $plagiarism_result_info = [];
 
@@ -84,7 +87,7 @@ class PlagiarismView extends AbstractView {
         ]);
     }
 
-    public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title, $rankings) {
+    public function showPlagiarismResult($gradeable_id, $config_id, $gradeable_title, $rankings) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism  Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb($gradeable_title);
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
@@ -97,12 +100,13 @@ class PlagiarismView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismResult.twig', [
             "gradeable_id" => $gradeable_id,
+            "config_id" => $config_id,
             "gradeable_title" => $gradeable_title,
             "rankings" => $rankings,
         ]);
     }
 
-    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $ignore_submissions, $ignore_submissions_others, $saved_config, $title) {
+    public function configurePlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $ignore_submissions, $ignore_submissions_others, $saved_config, $title) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $this->core->getOutput()->addInternalCss("plagiarism.css");

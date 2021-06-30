@@ -158,85 +158,87 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism")
      */
     public function plagiarismMainPage($refresh_page="NO_REFRESH") {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $all_configurations = [];
 
         $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if (
-                !file_exists(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "config.json"))
-                && !file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}__{$config_id}.json"))
-                && !file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id_title['g_id']}__{$config_id}.json"))
-            ) {
-                unset($gradeables_with_plagiarism_result[$i]);
-                continue;
+            if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id']))) {
+                foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id'])) as $config_id) {
+                    if ($config_id !== '.' && $config_id !== '..' && file_exists(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id'], $config_id, "config.json"))) {
+                        $configuration = [];
+                        $configuration["g_id"] = $gradeable_id_title["g_id"];
+                        $configuration["g_title"] = $gradeable_id_title["g_title"];
+                        $configuration["g_grade_due_date"] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title["g_id"]);
+                        $configuration["g_config_version"] = $config_id;
+
+                        $all_configurations[] = $configuration;
+                    }
+                }
             }
-            $gradeables_with_plagiarism_result[$i]['g_grade_due_date'] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
         }
 
-        usort($gradeables_with_plagiarism_result, function ($a, $b) {
+        usort($all_configurations, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
         });
 
-        $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
-        if (!file_exists($nightly_rerun_info_file)) {
-            $nightly_rerun_info = [];
-            foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
-                $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
-            }
-            if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
-                die("Failed to create nightly rerun info file");
-            }
-        }
-        else {
-            $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
-            foreach ($nightly_rerun_info as $gradeable_id => $nightly_rerun_status) {
-                $flag = 0;
-                foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
-                    if ($gradeable_id_title['g_id'] == $gradeable_id) {
-                        $flag = 1;
-                        break;
-                    }
-                }
-                if ($flag == 0) {
-                    #implies plagiarism result for this gradeable are deleted
-                    unset($nightly_rerun_info[$gradeable_id]);
-                }
-            }
+        // TODO: return to this and enable later
+        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
+        // if (!file_exists($nightly_rerun_info_file)) {
+        //     $nightly_rerun_info = [];
+        //     foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
+        //         $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
+        //     }
+        //     if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
+        //         die("Failed to create nightly rerun info file");
+        //     }
+        // }
+        // else {
+        //     $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
+        //     foreach ($nightly_rerun_info as $gradeable_id => $nightly_rerun_status) {
+        //         $flag = 0;
+        //         foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
+        //             if ($gradeable_id_title['g_id'] == $gradeable_id) {
+        //                 $flag = 1;
+        //                 break;
+        //             }
+        //         }
+        //         if ($flag == 0) {
+        //             #implies plagiarism result for this gradeable are deleted
+        //             unset($nightly_rerun_info[$gradeable_id]);
+        //         }
+        //     }
+        //
+        //     foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
+        //         if (!array_key_exists($gradeable_id_title['g_id'], $nightly_rerun_info)) {
+        //             #implies plagiarism was run for this gradeable
+        //             $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
+        //         }
+        //     }
+        //     if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
+        //         die("Failed to create nightly rerun info file");
+        //     }
+        // }
+        $nightly_rerun_info = []; // placeholder
 
-            foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
-                if (!array_key_exists($gradeable_id_title['g_id'], $nightly_rerun_info)) {
-                    #implies plagiarism was run for this gradeable
-                    $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
-                }
-            }
-            if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
-                die("Failed to create nightly rerun info file");
-            }
-        }
-
-
-
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismMainPage', $all_configurations, $refresh_page, $nightly_rerun_info);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}?configuration={config_id}")
      */
-    public function showPlagiarismResult(string $gradeable_id) {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
+    public function showPlagiarismResult(string $gradeable_id, string $config_id) {
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $gradeable_title = $gradeable_config->getTitle();
 
-        $rankings = $this->getOverallRankings($gradeable_id);
+        $rankings = $this->getOverallRankings($gradeable_id, $config_id);
         if ($rankings === null) {
             // This should theoretically never happen from the UI but we check it anyway.
             $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($this->core->buildCourseUrl(['plagiarism']));
         }
         elseif (count($rankings) === 0) {
-            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
+            $this->core->addSuccessMessage("There are no matches (plagiarism) for the gradeable with current configuration");
         }
 
         foreach ($rankings as $i => $ranking) {
@@ -250,7 +252,7 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $gradeable_id, $config_id, $gradeable_title, $rankings);
     }
 
     /**
@@ -364,11 +366,10 @@ class PlagiarismController extends AbstractController {
 
 
         // Generate a unique number for this version of the gradeable //////////
-        // TODO: write this
         $config_id = 1;
 
-        if (isdir(FileUtils::joinPaths(($course_path, "lichen", $gradeable_id)))) {
-            foreach (scandir(FileUtils::joinPaths(($course_path, "lichen", $gradeable_id)) as $file) {
+        if (isdir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id))) {
+            foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id)) as $file) {
                 if ($file !== '.' && $file !== '..' && is_numeric($file) && intval($file) > $config_id) {
                     $config_id = intval($file) + 1;
                 }
@@ -427,6 +428,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+
         // Create the Lichen job ///////////////////////////////////////////////
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         if ($ret !== null) {
@@ -439,6 +441,12 @@ class PlagiarismController extends AbstractController {
     }
 
 
+    /**
+     * @param string $job
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @return string|null
+     */
     private function enqueueLichenJob(string $job, string $gradeable_id, string $config_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -462,6 +470,7 @@ class PlagiarismController extends AbstractController {
         }
         return null;
     }
+
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
@@ -502,8 +511,8 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
      */
-    public function configureNewGradeableForPlagiarismForm() {
-        $gradeable_with_submission = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions/"), ['.', '..']);
+    public function configurePlagiarismForm() {
+        $gradeable_with_submission = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions/")), ['.', '..']);
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
             if (!in_array($gradeable_id_title['g_id'], $gradeable_with_submission)) {
@@ -519,7 +528,7 @@ class PlagiarismController extends AbstractController {
         });
 
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null, null, null);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null, null, null);
     }
 
 
@@ -580,30 +589,30 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun?configuration={config_id}")
      */
-    public function toggleNightlyRerun($gradeable_id) {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        $return_url = $this->core->buildCourseUrl(['plagiarism']);
-
-        $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
-
-        $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
-        $nightly_rerun_info[$gradeable_id] = !$nightly_rerun_info[$gradeable_id];
-        if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
-            $this->core->addErrorMessage("Failed to change nightly rerun for the gradeable");
-            $this->core->redirect($return_url);
-        }
-        $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
-        $this->core->redirect($return_url);
+    public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
+        // $semester = $this->core->getConfig()->getSemester();
+        // $course = $this->core->getConfig()->getCourse();
+        // $return_url = $this->core->buildCourseUrl(['plagiarism']);
+        //
+        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
+        //
+        // $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
+        // $nightly_rerun_info[$gradeable_id] = !$nightly_rerun_info[$gradeable_id];
+        // if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
+        //     $this->core->addErrorMessage("Failed to change nightly rerun for the gradeable");
+        //     $this->core->redirect($return_url);
+        // }
+        // $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
+        // $this->core->redirect($return_url);
     }
 
 
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log?configuration={config_id}")
      */
     public function getRunLog(string $gradeable_id, string $config_id) {
         $this->core->getOutput()->useHeader(false);
@@ -629,7 +638,7 @@ class PlagiarismController extends AbstractController {
      * @param string $version_user_1
      * @param string|null $user_id_2
      * @param string|null $version_user_2
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat?configuration={config_id}")
      */
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1,
                                                   string $version_user_1, string $user_id_2 = null, string $version_user_2 = null) {
@@ -711,8 +720,7 @@ class PlagiarismController extends AbstractController {
 
         $data['ci'] = $color_info[0];
         $data['si'] = $color_info[1];
-        $return = json_encode($data);
-        echo($return);
+        echo(json_encode($data););
     }
 
 
