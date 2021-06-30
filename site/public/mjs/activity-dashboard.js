@@ -29,10 +29,8 @@ export function sortTable(n) {
     const comparator = function (row1, row2) {
         // Check if they're equal
         if (!helper(row1[n].innerHTML, row2[n].innerHTML) && !helper(row2[n].innerHTML, row1[n].innerHTML)) {
-            for (i = 1; i <= 3; i++){
-                if (i != n && helper(row1[i].innerHTML, row2[i].innerHTML, i)) {
-                    return true;
-                }
+            if (1 != n && helper(row1[1].innerHTML, row2[1].innerHTML, 1)) {
+                return true;
             }
             return false;
         }
@@ -172,6 +170,7 @@ export function clearFields(){
 }
 
 export function init(){
+    sortTable(0);
     document.getElementById("0").addEventListener("click", () => sortTable(0));
     document.getElementById("1").addEventListener("click", () => sortTable(1));
     document.getElementById("2").addEventListener("click", () => sortTable(2));
