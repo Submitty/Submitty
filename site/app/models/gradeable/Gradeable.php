@@ -1474,7 +1474,7 @@ class Gradeable extends AbstractModel {
      */
     public function getNonPeerComponents() {
         return array_filter($this->components, function (Component $component) {
-            return !$component->isPeer();
+            return !$component->isPeerComponent();
         });
     }
 
@@ -1484,7 +1484,7 @@ class Gradeable extends AbstractModel {
      */
     public function getPeerComponents() {
         return array_filter($this->components, function (Component $component) {
-            return $component->isPeer();
+            return $component->isPeerComponent();
         });
     }
 
@@ -1639,7 +1639,7 @@ class Gradeable extends AbstractModel {
     public function getTaPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if (!$component->isPeer()) {
+            if (!$component->isPeerComponent()) {
                 $total += $component->getMaxValue();
             }
         }
@@ -1653,16 +1653,20 @@ class Gradeable extends AbstractModel {
     public function getPeerPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 $total += $component->getMaxValue();
             }
         }
         return $total;
     }
 
-    public function isPeerGrading() {
+    /**
+     * Gets if a gradeable has peer component(s)
+     * @return bool
+     */
+    public function hasPeerComponent() {
         foreach ($this->getComponents() as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 return true;
             }
         }
@@ -1675,7 +1679,7 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getGradingSectionsForUser(User $user) {
-        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
+        if ($this->hasPeerComponent() && $user->getGroup() === User::GROUP_STUDENT) {
             if ($this->isTeamAssignment()) {
                 $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
                 $teams = [];
@@ -1768,7 +1772,7 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getAllGradingSections() {
-        if ($this->isPeerGrading()) {
+        if ($this->hasPeerComponent()) {
             //Todo: What are all sections when you have peer grading?
         }
 
