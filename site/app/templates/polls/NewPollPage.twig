@@ -59,6 +59,7 @@
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
@@ -150,6 +151,7 @@
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
             <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
@@ -173,14 +175,14 @@
     });
 
     function changePollType() {
-        let count = $(".poll_response").length;
+        let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
                 || $("#poll-type-multiple-response-survey").is(":checked")) {
-                $("input[name='is_correct_" + i + "']").prop('checked', true);
-                $("input[name='is_correct_" + i + "']").css({"display":"none"});
+                $($(".correct-box")[i]).prop('checked', true);
+                $($(".correct-box")[i]).css({"display":"none"});
             } else {
-                $("input[name='is_correct_" + i + "']").css({"display":"inline-block"});
+                $($(".correct-box")[i]).css({"display":"inline-block"});
             }
         }
     }
@@ -236,6 +238,13 @@
     }
 
     function submitErrorChecks() {
+        let empty_responses = false;
+        for (let i = 0; i < $(".poll_response").length; i++) {
+            if ($($(".poll_response")[i]).val() === "") {
+                empty_responses = true;
+            }
+        }
+
         if ($("#poll-name").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -274,6 +283,10 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#single-response-error").show();
+        } else if (empty_responses) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-response-error").show();
         } else {
             $("#poll-form-submit").prop("disabled", false);
             $(".polls-submit-error").hide();

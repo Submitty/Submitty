@@ -156,7 +156,13 @@ class PollController extends AbstractController {
                 // if at least one of the fields for a response with this index
                 // is set, assert that the rest are also set
                 if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
-                    $this->core->addErrorMessage("Error with responses occured in editing poll");
+                    $this->core->addErrorMessage("Error with responses occured in adding poll");
+                    return MultiResponse::RedirectOnlyResponse(
+                        new RedirectResponse($this->core->buildCourseUrl(['polls']))
+                    );
+                }
+                if ($_POST["response_" . $i] === "") {
+                    $this->core->addErrorMessage("Error occured in adding poll: responses must not be left blank");
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildCourseUrl(['polls']))
                     );
@@ -173,7 +179,7 @@ class PollController extends AbstractController {
                 // so to make sure we don't get into an infinite loop, we stop checking
                 // after an arbitrary large number in case $response_count and the
                 // actual number of responses don't match
-                $this->core->addErrorMessage("Error occured in editing poll with the number of responses provided");
+                $this->core->addErrorMessage("Error occured in adding poll with the number of responses provided");
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildCourseUrl(['polls']))
                 );
@@ -446,6 +452,10 @@ class PollController extends AbstractController {
                     $this->core->addErrorMessage("Error with responses occured in editing poll");
                     return new RedirectResponse($returnUrl);
                 }
+                if ($_POST["response_" . $i] === "") {
+                    $this->core->addErrorMessage("Error occured in editing poll: responses must not be left blank");
+                    return new RedirectResponse($returnUrl);
+                }
                 $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
                 $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
                 if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
@@ -533,7 +543,7 @@ class PollController extends AbstractController {
      */
     public function hasAnswers() {
         $results = $this->core->getQueries()->getResults($_POST["poll_id"]);
-        $ret = !empty($results) && $results[$_POST["option_id"]] > 0;
+        $ret = !empty($results) && isset($results[$_POST["option_id"]]) && $results[$_POST["option_id"]] > 0;
         return JsonResponse::getSuccessResponse($ret);
     }
 
