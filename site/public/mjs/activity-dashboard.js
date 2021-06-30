@@ -115,15 +115,15 @@ export function sortTable(n) {
 }
 
 export function applySettings(){
-    var grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
-    var grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
-    var forum_view = Date.parse(document.getElementById('forum_view_date').value);
-    var forum_post = Date.parse(document.getElementById('forum_post_date').value);
-    var num_poll = Date.parse(document.getElementById('num_poll_responses').value);
-    var off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
-    var data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
-    var table = document.getElementById("data-table");
-    var rows = table.rows;
+    const grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
+    const grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
+    const forum_view = Date.parse(document.getElementById('forum_view_date').value);
+    const forum_post = Date.parse(document.getElementById('forum_post_date').value);
+    const num_poll = Date.parse(document.getElementById('num_poll_responses').value);
+    const off_hours = Date.parse(document.getElementById('office_hours_queue_date').value);
+    const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
+    const table = document.getElementById("data-table");
+    const rows = table.rows;
     for(var i = 0; i < data.length; i++){
         var s_grad_acc = data[i].gradeable_access;
         var s_grad_sub = data[i].gradeable_submission;
