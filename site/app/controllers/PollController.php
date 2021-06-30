@@ -388,7 +388,7 @@ class PollController extends AbstractController {
         }
 
         $poll = $this->core->getQueries()->getPoll($_POST['poll_id']);
-        
+
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
