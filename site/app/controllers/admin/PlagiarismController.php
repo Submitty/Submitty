@@ -757,7 +757,7 @@ class PlagiarismController extends AbstractController {
             $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "submission.concatenated");
 
             if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-                $color_info = $this->getColorInfo($gradeable_id, $config_id,  $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
+                $color_info = $this->getColorInfo($gradeable_id, $config_id,  $user_id_1, $version_user_1, $user_id_2, $version_user_2,'2');
                 $data['display_code2'] = $this->getDisplayForCode($file_name);
             }
             else {
