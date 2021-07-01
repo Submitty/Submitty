@@ -1438,7 +1438,7 @@ HTML;
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
-                "is_peer_grading" => $is_peer_grading
+                "is_peer_grader" => $is_peer_grader
             ]);
     }
 
