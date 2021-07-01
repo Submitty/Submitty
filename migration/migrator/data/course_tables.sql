@@ -281,12 +281,10 @@ CREATE TABLE public.gradeable (
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
     g_grade_released_date timestamp(6) with time zone NOT NULL,
-    g_grade_locked_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
+    g_allowed_minutes integer,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
 );
@@ -325,6 +323,17 @@ CREATE SEQUENCE public.gradeable_access_id_seq
 --
 
 ALTER SEQUENCE public.gradeable_access_id_seq OWNED BY public.gradeable_access.id;
+
+
+--
+-- Name: gradeable_allowed_minutes_override; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_allowed_minutes_override (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    allowed_minutes integer NOT NULL
+);
 
 
 --
@@ -550,7 +559,7 @@ CREATE TABLE public.late_day_exceptions (
 CREATE TABLE public.late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp(6) with time zone NOT NULL
+    since_timestamp date NOT NULL
 );
 
 
@@ -685,7 +694,8 @@ CREATE TABLE public.polls (
     question text NOT NULL,
     status text NOT NULL,
     release_date date NOT NULL,
-    image_path text
+    image_path text,
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
 );
 
 
@@ -1052,6 +1062,8 @@ CREATE TABLE public.users (
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary_notify boolean DEFAULT false,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1210,6 +1222,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_data g_id_gd_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_data
+    ADD CONSTRAINT g_id_gd_team_id_unique UNIQUE (g_id, gd_team_id);
 
 
 --

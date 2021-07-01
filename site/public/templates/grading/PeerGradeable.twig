@@ -5,7 +5,7 @@
 
 {% block components_block %}
     {% for component in gradeable.components %}
-        {% if component.peer %}
+        {% if component.peer_component %}
             <div class="component-container">
                 {% include "PeerComponent.twig" with {
                     'precision': gradeable.precision,

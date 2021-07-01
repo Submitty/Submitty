@@ -1,6 +1,6 @@
 .customization_item
 {
-    border: 2px solid var(--viewed_content);
+    border: 2px solid var(--viewed-content);
     padding: 5px;
     padding-left: 20px;
     margin-top: 10px;
@@ -156,7 +156,7 @@
 hr
 {
     margin: 7px 10px;
-    border-top: 1px solid var(--viewed_content);
+    border-top: 1px solid var(--viewed-content);
 }
 
 .rg_info_message

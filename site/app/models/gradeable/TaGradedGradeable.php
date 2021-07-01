@@ -424,7 +424,7 @@ class TaGradedGradeable extends AbstractModel {
     public function deleteGradedComponent(Component $component, User $grader = null) {
         $container = $this->getGradedComponentContainer($component);
 
-        if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
+        if ($grader === null || !$component->getGradeable()->hasPeerComponent()) {
             // If the grader is null or we aren't peer grading, then delete all component grades for this component
             $this->deleted_graded_components = array_merge(
                 $this->deleted_graded_components,

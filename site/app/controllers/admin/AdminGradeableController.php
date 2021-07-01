@@ -234,6 +234,7 @@ class AdminGradeableController extends AbstractController {
             'regrade_allowed' => $gradeable->isRegradeAllowed(),
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
+            'electronic' => $gradeable->getType() === GradeableType::ELECTRONIC_FILE,
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
@@ -263,7 +264,7 @@ class AdminGradeableController extends AbstractController {
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
-            'peer' => $gradeable->isPeerGrading(),
+            'peer' => $gradeable->hasPeerComponent(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
             'hidden_files' => $gradeable->getHiddenFiles()
@@ -330,7 +331,7 @@ class AdminGradeableController extends AbstractController {
      * TODO: This was extracted from the rubric saving code for electronic files
      */
     private function shufflePeerGrading(Gradeable $gradeable) {
-        if ($gradeable->isPeerGrading()) {
+        if ($gradeable->hasPeerComponent()) {
             //$old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
             //$make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
             //if ($make_peer_assignments) {
@@ -463,7 +464,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => 1
         ]);
         $component->setText(false);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -487,7 +488,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => $details['max_score']
         ]);
         $component->setText(false);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -505,7 +506,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => 0
         ]);
         $component->setText(true);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 

@@ -11,6 +11,10 @@
     margin-right: 0;
 }
 
+.notebook > div {
+    margin-top: 20px;
+}
+
 /* Push recent and clear buttons down a little bit and shrink them slightly */
 .notebook .sa-clear-reset,
 .notebook .codebox-clear-reset,

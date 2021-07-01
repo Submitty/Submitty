@@ -67,7 +67,7 @@
     --standard-light-medium-gray: #bbbbbb;
     --standard-medium-gray: #888888;
     --standard-medium-dark-gray: #666666;
-    --standard-dark-gray: #5555555;
+    --standard-dark-gray: #555555;
     --standard-deep-dark-gray: #2e2e2e;
 
     --standard-gray-black: #111111;
@@ -153,6 +153,10 @@
     --attachment-box-color: #f5f5f5;
     --file-upload-table-hover: #d1d1d1;
 
+    /*notebook builder*/
+    --notebook-builder-form-options-orange: #F7D8BA;
+    --notebook-builder-itempool-green: #CAF1DE;
+
 
         /*these differ from the colors on the posts for some reason?
         so I will put them here for reference
@@ -183,6 +187,11 @@
     --date-picker-yellow: #ffeb54;
     --date-picker-red: #f76c6c;
 
+    /* simple gradeables */
+    --simple-full-credit-dark-blue: #149bdf;
+    --simple-half-credit-light-blue: #88d0f4;
+    --simple-save-error-red: #da4f49;
+
     /* other */
     --box-shadow-very-transparent: rgba(0,0,0,0.12);
     --box-shadow-slightly-transparent: rgba(0,0,0,0.20);
@@ -190,11 +199,10 @@
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
     --overall-comment: #E9EFEF;
-    --alternating-row-color-light: #eee;
     --grading-note: #777;
     --file-browser-blue: #2627ee;
     --extra-credit-blue: #0a6495;
-
+    --viewed-content: #e8f0f7;
 
 
 }
@@ -274,7 +282,7 @@
       --standard-light-medium-gray: #bbbbbb;
       --standard-medium-gray: #A3A3A3;
       --standard-medium-dark-gray: #666666;
-      --standard-dark-gray: #5555555;
+      --standard-dark-gray: #555555;
       --standard-deep-dark-gray: #2e2e2e;
 
       --standard-gray-black: #111111;
@@ -390,6 +398,10 @@
       --date-picker-yellow: #9d9131;
       --date-picker-red: #953d3d;
 
+      /*notebook builder*/
+      --notebook-builder-form-options-orange: #7b6148;
+      --notebook-builder-itempool-green: #50826a;
+
       /* other */
       --box-shadow-very-transparent: rgba(255,255,255,0);
       --box-shadow-slightly-transparent: rgba(255,255,255,0);
@@ -397,8 +409,8 @@
       --standard-input-background: #4a4a4a;
       --checkbox-black: #5296db;
       --overall-comment: #4E5353;
-      --alternating-row-color-light: #4d4848;
       --grading-note: #A8A8A8;
       --file-browser-blue: #ffffff;
       --extra-credit-blue: #2DACF0;
+      --viewed-content: #50535a;
 }
