@@ -82,7 +82,7 @@ class GradedComponent extends AbstractModel {
             throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
         }
         $this->ta_graded_gradeable = $ta_graded_gradeable;
-        $this->is_peer = $component->isPeer();
+        $this->is_peer = $component->isPeerComponent();
         $this->setComponent($component);
         $this->setGrader($grader);
         $this->setComment($details['comment'] ?? '');
