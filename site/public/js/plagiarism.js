@@ -7,6 +7,7 @@ let editor1 = null;
 let form = null;
 let si = null;
 let gradeableId = null;
+let configId = null;
 let blueClickedMark = null;
 
 
@@ -147,9 +148,10 @@ function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
 }
 
-function setUpPlagView(gradeable_id) {
+function setUpPlagView(gradeable_id, config_id) {
 
     gradeableId = gradeable_id;
+    configId = config_id;
 	form = $("#users_with_plagiarism");
     editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
@@ -238,7 +240,7 @@ function createLeftUserVersionDropdown(version_data, active_version_user_1, max_
 }
 
 function updateRightUserLists(user_id_1, version_id_1, select = null) {
-    let url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    let url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}&config_id=${configId}`;
     const f2 = function(data, select) {
         createRightUsersList(data, select);
     }
@@ -258,7 +260,7 @@ function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 =
         }
         colorEditors(data);
     };
-    let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}&config_id=${configId}`;
     let es = false;
     if (user_id_2 != null) {
         editor1.getDoc().setValue('');

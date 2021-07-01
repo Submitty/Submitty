@@ -175,7 +175,7 @@ class RunLichen(CourseGradeableJob):
             print('invalid path component ".." in string')
             return
 
-        # create paths
+        # paths
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
         config_path = os.path.join(lichen_dir, gradeable, config_id)
         data_path = os.path.join(DATA_DIR, 'courses')
