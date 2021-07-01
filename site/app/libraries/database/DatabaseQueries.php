@@ -170,7 +170,7 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, COALESCE(user_preferred_firstname, user_firstname) as user_firstname, user_lastname
+        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_firstname,''), user_firstname) as user_firstname, COALESCE(NULLIF(user_preferred_lastname,''), user_lastname) as user_lastname
         FROM users
         ORDER BY registration_section, user_lastname, user_firstname, user_id),
         B AS
