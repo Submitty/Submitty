@@ -126,7 +126,7 @@
                    {{ row['nightly_rerun_status'] }}>
         </td>
         <td>
-            <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}')">View Log</button>
+            <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
         </td>
     </tr>
 {% endmacro %}
@@ -139,12 +139,12 @@
         originalTableWidth = $(".plag-table-cont").width();
     });
 
-    function viewRunLog(gradeable_id) {
+    function viewRunLog(gradeable_id, config_id) {
         if ($("#" + gradeable_id + "_table_row").next().hasClass("run-log-results")) {
             $("#" + gradeable_id + "_table_row").next().remove();
         }
         else {
-            const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}`;
+            const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}&config_id=${config_id}`;
             $.get(url, function (data) {
                 $(`<tr class="run-log-results">
                 <td colspan="7" class="run-log-data">

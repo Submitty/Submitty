@@ -271,7 +271,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}?configuration={config_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult(string $gradeable_id, string $config_id) {
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -425,9 +425,7 @@ class PlagiarismController extends AbstractController {
 
         // Create directory structure //////////////////////////////////////////
         if (!is_dir($this->getConfigDirectoryPath($gradeable_id, $config_id))) {
-            $this->core->addErrorMessage("Creating the directory ");
-            $test = $this->getConfigDirectoryPath($gradeable_id, $config_id);
-            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id));
+            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id), "true", 0770);
         }
 
         // Upload instructor provided code /////////////////////////////////////
@@ -617,7 +615,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $ret = $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id);
+        $ret = $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id, $config_id);
         if ($ret !== null) {
             $this->core->addErrorMessage($ret);
             $this->core->redirect($return_url);
@@ -628,7 +626,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun?configuration={config_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
      */
     public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
         // $semester = $this->core->getConfig()->getSemester();
@@ -651,17 +649,17 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log?configuration={config_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
      */
     public function getRunLog(string $gradeable_id, string $config_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        $course_path = $this->core->getConfig()->getCoursePath();
         $log_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "logs", "lichen_job_output.txt");
 
         if (!file_exists($log_file)) {
             echo("Error: Unable to find run log.");
+            return;
         }
 
         $log_data = file_get_contents($log_file);
@@ -677,7 +675,7 @@ class PlagiarismController extends AbstractController {
      * @param string $version_user_1
      * @param string|null $user_id_2
      * @param string|null $version_user_2
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat?configuration={config_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1,
                                                   string $version_user_1, string $user_id_2 = null, string $version_user_2 = null) {
@@ -882,7 +880,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match?configuration={config_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
      */
     public function ajaxGetMatchingUsers(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1) {
         $this->core->getOutput()->useHeader(false);

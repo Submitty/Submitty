@@ -23,7 +23,7 @@ class PlagiarismView extends AbstractView {
             $plagiarism_row['id'] = $gradeable['g_id'];
             $plagiarism_row['config_id'] = $gradeable['g_config_version'];
             $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format('F d Y H:i:s'); // TODO: think about the format of this date.  Using the format of the last run date for now.
-            $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']);
+            $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']) . "?config_id={$plagiarism_row["config_id"]}";
             if (file_exists(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "overall_ranking.txt"))) {
                 $timestamp = date("F d Y H:i:s", filemtime(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "overall_ranking.txt")));
                 $students = array_diff(scandir(FileUtils::joinPaths($course_path, "lichen", $plagiarism_row['id'], $plagiarism_row['config_id'], "users")), ['.', '..']);
@@ -42,7 +42,7 @@ class PlagiarismView extends AbstractView {
             $plagiarism_row['students'] = $students;
             $plagiarism_row['submissions'] = $submissions;
 
-            $plagiarism_row['night_rerun_status'] = $nightly_rerun_info[$plagiarism_row['id']] ? "" : "checked";
+            $plagiarism_row['night_rerun_status'] = "";//$nightly_rerun_info[$plagiarism_row['id']] ? "" : "checked";
 
             // lichen job in queue for this gradeable but processing not started
             if (file_exists(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "lichen__{$semester}__{$course}__{$plagiarism_row['id']}_{$plagiarism_row['config_id']}.json"))) {
@@ -65,11 +65,11 @@ class PlagiarismView extends AbstractView {
                     $rankings = array_chunk(preg_split('/ +/', $content), 3);
                     $plagiarism_row['ranking_available'] = true;
                     $plagiarism_row['matches_and_topmatch'] = count($rankings) . " students matched, {$rankings[0][0]} top match";
-                    $plagiarism_row['gradeable_link'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id']]);
+                    $plagiarism_row['gradeable_link'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id']]) . "?config_id={$plagiarism_row["config_id"]}";
                 }
-                $plagiarism_row['rerun_plagiarism_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", $plagiarism_row["id"], "rerun"]);
-                $plagiarism_row['edit_plagiarism_link'] = $this->core->buildCourseUrl(["plagiarism", "configuration", "edit"]) . "?gradeable_id={$plagiarism_row["id"]}";
-                $plagiarism_row['nightly_rerun_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", $plagiarism_row["id"], "nightly_rerun"]);
+                $plagiarism_row['rerun_plagiarism_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", $plagiarism_row["id"], "rerun"]) . "?config_id={$plagiarism_row["config_id"]}";
+                $plagiarism_row['edit_plagiarism_link'] = $this->core->buildCourseUrl(["plagiarism", "configuration", "edit"]) . "?gradeable_id={$plagiarism_row["id"]}&config_id={$plagiarism_row["config_id"]}";
+                $plagiarism_row['nightly_rerun_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", $plagiarism_row["id"], "nightly_rerun"]) . "?config_id={$plagiarism_row["config_id"]}";
             }
             $plagiarism_result_info[] = $plagiarism_row;
         }

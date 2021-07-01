@@ -169,10 +169,18 @@ class RunLichen(CourseGradeableJob):
         gradeable = self.job_details['gradeable']
         config_id = self.job_details['config_id']
 
+        # error checking
+        # prevent against backwards crawling
+        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
+            print('invalid path component ".." in string')
+            return
+
+        # create paths
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
         config_path = os.path.join(lichen_dir, gradeable, config_id)
         data_path = os.path.join(DATA_DIR, 'courses')
 
+        # run Lichen
         subprocess.call(['/usr/local/submitty/Lichen/bin/process_all.sh', config_path, data_path])
 
 
@@ -186,7 +194,12 @@ class DeleteLichenResult(CourseGradeableJob):
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
 
         # error checking
-        if not lichen_dir.exists() or not os.path.isdir(lichen_dir):
+        # prevent against backwards crawling
+        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
+            print('invalid path component ".." in string')
+            return
+
+        if not os.path.isdir(lichen_dir):
             return
 
         # delete the config directory
@@ -239,9 +252,7 @@ class BulkUpload(CourseJob):
 
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
-        log_file_path = os.path.join(log_path,
-                                     "{:04d}{:02d}{:02d}.txt".format(today.year,
-                                                                     today.month, today.day))
+        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
 
         pid = os.getpid()
         log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
