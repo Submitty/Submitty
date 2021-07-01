@@ -202,6 +202,6 @@ class Team extends AbstractModel {
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $this->getId(), "user_assignment_settings.json");
             $this->assignment_settings = FileUtils::readJsonFile($settings_file);
         }
-        return $this->assignment_settings;
+        return $this->assignment_settings ?: ["team_history" => null];
     }
 }

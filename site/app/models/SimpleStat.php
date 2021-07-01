@@ -15,7 +15,7 @@ use app\libraries\Core;
  * @method float getStandardDeviation()
  * @method int getCount()
  * @method int getActiveGradeInquiryCount()
- * @method bool getIsPeer()
+ * @method bool getIsPeerComponent()
  * @method string[] getGraderInfo()
 
  */
@@ -37,7 +37,7 @@ class SimpleStat extends AbstractModel {
     /** @prop @var number of active grade inquiries for given grading component*/
     protected $active_grade_inquiry_count = 0;
     /** @prop @var bool Does this component use peer grading*/
-    protected $is_peer = null;
+    protected $is_peer_component = null;
     /** @prop @var array Grader information for these stats*/
     protected $grader_info = null;
 
@@ -50,7 +50,7 @@ class SimpleStat extends AbstractModel {
             $this->average_score = $details['avg_comp_score'];
             $this->standard_deviation = $details['std_dev'];
             $this->order = $details['gc_order'];
-            $this->is_peer = $details['gc_is_peer'];
+            $this->is_peer_component = $details['gc_is_peer'];
             $this->count = $details['count'];
             $this->active_grade_inquiry_count = $details['active_grade_inquiry_count'];
             $this->grader_info = $this->core->getQueries()->getAverageGraderScores($details['g_id'], $details['gc_id'], $details['section_key'], $details['team']);

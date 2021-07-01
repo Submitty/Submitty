@@ -1,6 +1,6 @@
 <div class="content">
     <h1> {{ poll.getName() }} </h1>
-    {% include "generic/Markdown.twig" with { 
+    {% include "misc/Markdown.twig" with {
         "content": poll.getQuestion(),
     } only %}
     {% if file_data is not null %}
@@ -16,44 +16,75 @@
             <legend>
                 <h2> Possible responses: </h2>
             </legend>
-            <label class="radio" for="answer-no-response">
-                {% if poll.isOpen() %}
-                    {% if poll.getUserResponse(user_id) is same as(null) %}
-                        <input type="radio" value="-1" name="answer" id="answer-no-response" checked/>
-                    {% else %}
-                        <input type="radio" value="-1" name="answer" id="answer-no-response"/>
-                    {% endif %}
-                {% else %}
-                    {% if poll.getUserResponse(user_id) is same as(null) %}
-                        <input type="radio" value="-1" name="answer" id="answer-no-response" checked disabled/>
-                    {% else %}
-                        <input type="radio" value="-1" name="answer" id="answer-no-response" disabled/>
-                    {% endif %}
-                {% endif %}
-                No response
-            </label>
-            <br/>
-            <br/>
-            {% set index = 0%}
-            {% for response in poll.getResponses() %}
-                <div class = "radio">
-                    {% if response is same as(poll.getUserResponse(user_id)) %}
-                        {% if poll.isOpen() %}
-                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" checked/>
+            {% if poll_type == "single-response" %}
+                <label class="radio" for="answer-no-response">
+                    {% if poll.isOpen() %}
+                        {% if poll.getUserResponse(user_id) is same as(null) %}
+                            <input type="radio" value="-1" name="answers[]" id="answer-no-response" checked/>
                         {% else %}
-                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" checked disabled/>
+                            <input type="radio" value="-1" name="answers[]" id="answer-no-response"/>
                         {% endif %}
-                    {% elseif poll.isOpen() %}
-                        <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}"/>
                     {% else %}
-                        <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answer" id="answer-{{index}}" disabled/>
+                        {% if poll.getUserResponse(user_id) is same as(null) %}
+                            <input type="radio" value="-1" name="answers[]" id="answer-no-response" checked disabled/>
+                        {% else %}
+                            <input type="radio" value="-1" name="answers[]" id="answer-no-response" disabled/>
+                        {% endif %}
                     {% endif %}
-                    {{ poll.getResponseString(response) | markdown}}
-                    <br/>
-                    <br/>
-                </div>
-            {% set index = index + 1%}
-            {% endfor %}
+                    No response
+                </label>
+                <br/>
+                <br/>
+                {% set index = 0%}
+                {% for response in poll.getResponses() %}
+                    <div class = "radio">
+                        {% if response in poll.getUserResponse(user_id) %}
+                            {% if poll.isOpen() %}
+                                <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked/>
+                            {% else %}
+                                <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked disabled/>
+                            {% endif %}
+                        {% elseif poll.isOpen() %}
+                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}"/>
+                        {% else %}
+                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" disabled/>
+                        {% endif %}
+                        {% include "misc/Markdown.twig" with {
+                            "content" : poll.getResponseString(response),
+                            "style": "display: inline-block"
+                        } only %}
+                        <br/>
+                        <br/>
+                    </div>
+                    {% set index = index + 1%}
+                {% endfor %}
+
+
+            {% else %} {# poll_type == "multiple-response" #}
+                {% set index = 0%}
+                {% for response in poll.getResponses() %}
+                    <div class = "radio">
+                        {% if response in poll.getUserResponse(user_id) %}
+                            {% if poll.isOpen() %}
+                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked/>
+                            {% else %}
+                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked disabled/>
+                            {% endif %}
+                        {% elseif poll.isOpen() %}
+                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}"/>
+                        {% else %}
+                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" disabled/>
+                        {% endif %}
+                        {% include "misc/Markdown.twig" with {
+                            "content" : poll.getResponseString(response),
+                            "style" : "display: inline-block;"
+                        } only %}
+                        <br/>
+                        <br/>
+                    </div>
+                    {% set index = index + 1%}
+                {% endfor %}
+            {% endif %}
         </fieldset>
         {% if poll.isOpen() %}
             <button type="submit" class="btn btn-primary">Submit</button>
