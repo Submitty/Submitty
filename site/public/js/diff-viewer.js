@@ -2,6 +2,7 @@ $(document).ready(() => {
     const types = ['expected', 'actual'];
     const hoverOn = function(e) {
         const args = $(e.currentTarget).attr('id').split('_');
+        console.log(args);
         let id = args[0];
         for (let i = 1; i < args.length-2; i++) {
             id += `_${args[i]}`;
