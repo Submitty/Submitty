@@ -431,7 +431,7 @@ class PlagiarismController extends AbstractController {
         // Upload instructor provided code /////////////////////////////////////
         if ($new_or_edit === "edit" && ($_POST['provided_code_option'] !== "code_provided" || $_FILES['provided_code_file']['tmp_name'] !== "")) {
             // delete the old provided code
-            $this->deleteExistingProvidedCode($gradeable_id);
+            $this->deleteExistingProvidedCode($gradeable_id, $config_id);
         }
         if ($_POST['provided_code_option'] === "code_provided" && $_FILES['provided_code_file']['tmp_name'] !== "") {
             // error checking
@@ -441,7 +441,7 @@ class PlagiarismController extends AbstractController {
             }
             // save the code
             try {
-                $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id);
+                $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id, $config_id);
             }
             catch (\Exception $e) {
                 $this->core->addErrorMessage($e);
@@ -594,7 +594,7 @@ class PlagiarismController extends AbstractController {
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
         $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
 
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
     }
 
 
