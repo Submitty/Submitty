@@ -27,13 +27,13 @@
                {{ self.render_messages(check.messages) }}
                </div>
             {% else %}
-               {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
+               {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0, display_version, gradeable_id, who) }}
             {% endif %}
             {% if check.expected %}
-                {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
+                {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0, display_version, gradeable_id, who) }}
             {% endif %}
             {% if check.difference %}
-                {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0) }}
+                {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0, display_version, gradeable_id, who) }}
             {% endif %}
 
         </div>
@@ -50,7 +50,7 @@
 
 {% endfor %}
 
-{% macro render_diff_element(check, element, side, popup_css_file, index, check_index) %}
+{% macro render_diff_element(check, element, side, popup_css_file, index, check_index, display_version, gradeable_id, who) %}
     <!-- Readded css here so the popups have the css -->
     <div class=
       {% if element.type != "sequence_diagram" %}
@@ -63,6 +63,10 @@
             {% if element.show_popup %}
                 <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ check_index }}, {{ side }});" class="key_to_click" tabindex="0">
                     <i class="fas fa-window-restore" style="cursor: pointer;"></i>
+                </span>
+
+                <span onclick="downloadTestCaseResult({{ index }}, '{{ check.filename }}', {{ display_version }}, '{{ gradeable_id }}', '{{ who }}')" tabindex="0">
+                    <i class="fas fa-download" style="cursor: pointer;"></i>
                 </span>
             {% endif %}
         </h4>

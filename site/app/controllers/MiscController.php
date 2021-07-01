@@ -2,13 +2,17 @@
 
 namespace app\controllers;
 
+use app\libraries\Access;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
@@ -143,6 +147,10 @@ class MiscController extends AbstractController {
         else {
             $contents = file_get_contents($corrected_name);
             if (!is_null($ta_grading) && $ta_grading === "true") {
+                $newlines = substr_count($contents, "\n");
+                if ($newlines > 5000) {
+                    return new WebResponse(MiscView::class, 'tooLarge');
+                }
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
             }
             else {
@@ -230,10 +238,16 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")
      */
-    public function downloadTestCaseResult($gradeable_id, $version, $test_case, $file_name) {
-        $user = $this->core->getUser();
+    public function downloadTestCaseResult($gradeable_id, $version, $test_case, $file_name, $user_id) {
+        $user = $this->core->getQueries()->getUserById($user_id);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user->getId(), false);
+        if ($user !== $this->core->getUser()) {
+            if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+                $this->core->addErrorMessage("You do not have peremission to download this file!");
+                return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+            }
+        }
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
 
         $name = "details/test" . sprintf("%02d", $test_case) . "/$file_name";
