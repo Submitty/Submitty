@@ -1,4 +1,4 @@
-import {buildUrl, getCurrentSemesterYearString} from '../support/utils.js';
+import {buildUrl} from '../support/utils.js';
 
 describe('Test cases revolving around the logging in functionality of the site', () => {
     describe('Test cases where the user should succesfully login', () => {
