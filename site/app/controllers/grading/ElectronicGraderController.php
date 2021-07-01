@@ -508,7 +508,7 @@ class ElectronicGraderController extends AbstractController {
         foreach ($graded_gradeables as $g) {
             $highest_version = $g->getAutoGradedGradeable()->getHighestVersion();
             if ($highest_version > 0) {
-                for ($i = 1; $i < $highest_version+1; $i++) {
+                for ($i = 1; $i < $highest_version+1; ++$i ) {
                     $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($i);
                     if ($display_version_instance->isQueued()) {
                         $submissions_in_queue += 1;
