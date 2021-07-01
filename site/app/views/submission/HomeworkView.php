@@ -1008,7 +1008,8 @@ class HomeworkView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
-            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds')
+            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
+            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow()
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
