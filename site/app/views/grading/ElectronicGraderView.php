@@ -1079,8 +1079,6 @@ HTML;
     /**
      * @param GradedGradeable $graded_gradeable
      * @param float $progress
-     * @param string $prev_id
-     * @param string $next_id
      * @param bool $peer
      * @param string $sort
      * @param string $direction
