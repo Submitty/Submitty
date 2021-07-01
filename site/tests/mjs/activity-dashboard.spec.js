@@ -37,9 +37,9 @@ test('comparator', () => {
                 <td class="align-left">aphacker</td>
                 <td class="align-left"></td>
                 <td class="align-left">Hacker</td>
-                <td>2021-07-01 10:21:31.123456-04</td>
+                <td>2021-07-01 10:21:31</td>
                 <td></td>
-                <td>2018-05-23 11:55:27.142647-04</td>
+                <td>2018-05-23 11:55:27</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -50,9 +50,9 @@ test('comparator', () => {
                 <td class="align-left">bitdiddle</td>
                 <td class="align-left">Ben</td>
                 <td class="align-left">Bitdiddle</td>
-                <td>2021-07-01 9:35:21.125234-03</td>
+                <td>2021-07-01 9:35:21</td>
                 <td></td>
-                <td>2018-04-03 18:47:02.281828-04</td>
+                <td>2018-04-03 18:47:02</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -63,9 +63,9 @@ test('comparator', () => {
                 <td class="align-left">zoezoe</td>
                 <td class="align-left">Zoe</td>
                 <td class="align-left">Zoe</td>
-                <td>1971-12-30 23:59:59-05</td>
+                <td>1971-12-30 23:59:59</td>
                 <td></td>
-                <td>2018-04-03 18:47:02.281828-05</td>
+                <td>2018-04-03 18:47:02</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -76,7 +76,7 @@ test('comparator', () => {
                 <td class="align-left">bechta</td>
                 <td class="align-left">Abigale</td>
                 <td class="align-left">Bechtelar</td>
-                <td>1971-12-30 23:59:59-05</td>
+                <td>1971-12-30 23:59:59</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -113,4 +113,6 @@ test('comparator', () => {
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 3, 'asc')).toEqual(true);
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 3, 'desc')).toEqual(true);
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 3, 'desc')).toEqual(false);
+
+    // testing 9
 });
