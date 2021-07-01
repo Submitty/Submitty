@@ -976,8 +976,6 @@ HTML;
                 $graded_gradeable->getSubmitter()->getId(),
                 $display_version,
                 $graded_gradeable->getGradeableId(),
-                $this->core->getConfig()->getSemester(),
-                $this->core->getConfig()->getCourse()
             );
 
             $old_files = [];

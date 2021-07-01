@@ -154,8 +154,10 @@ class Notebook extends AbstractModel {
     * @param array $new_notebook a notebook config to parse
     * @param int $version which version to get notebook submission values from
     * @param string $student_id which student's notebook to pull data from
+    * @param int $display_version selected version (may not be active version)
+    * @param string $gradeable_id
     */
-    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, int $display_version, string $gradeable_id, string $semester, string $course): array {
+    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, int $display_version, string $gradeable_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
@@ -171,8 +173,10 @@ class Notebook extends AbstractModel {
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                             //get answer for the selected display version
                             $question_name = $notebookVal['filename'];
-                            $file = fopen("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name, "r");
-                            $version_answer = fread($file, filesize("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name));
+                            $file_path = $this->core->getConfig()->getCoursePath();
+                            $file_path = $file_path . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name;
+                            $file = fopen($file_path, "r");
+                            $version_answer = fread($file, filesize($file_path));
                             $version_answer = rtrim($version_answer);
                             fclose($file);
                         }
@@ -198,8 +202,10 @@ class Notebook extends AbstractModel {
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                             //get answer for the selected display version
                             $question_name = $notebookVal['filename'];
-                            $file = fopen("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name, "r");
-                            $version_answer = fread($file, filesize("/var/local/submitty/courses/" . $semester . "/" . $course . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name));
+                            $file_path = $this->core->getConfig()->getCoursePath();
+                            $file_path = $file_path . "/submissions/" . $gradeable_id . "/" . $student_id . "/" . $display_version . "/" . $question_name;
+                            $file = fopen($file_path, "r");
+                            $version_answer = fread($file, filesize($file_path));
                             $version_answer = rtrim($version_answer);
                             fclose($file);
                             // Add field to the array
