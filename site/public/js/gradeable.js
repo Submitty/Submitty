@@ -161,6 +161,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
     }
 
     var peer_details = {};
+
     // Group together some useful data for rendering:
     gradeable.components.forEach(function(component) {
         // The peer details for a specific component (who has graded it and what marks have they chosen.)
@@ -173,7 +174,6 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
             peer_details[component.id]["marks_assigned"][graded_component.grader_id] = graded_component.mark_ids;
         });
     });
-
     // TODO: i don't think this is async
     return Twig.twig({ref: "PeerGradeable"}).render({
         'gradeable': gradeable,
@@ -224,10 +224,8 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'decimal_precision': DECIMAL_PRECISION,
             'can_verify_graders': canVerifyGraders,
             'grader_id': grader_id,
-            'component_version_conflict': componentVersionConflict,
             'peer_component' : component.peer,
             'allow_custom_marks' : allowCustomMarks,
-            'ta_grading_peer': taGradingPeer,
             'itempool_id': itempool_items.hasOwnProperty(component.id) ? itempool_items[component.id] : '',
             'ta_grading_peer': taGradingPeer
         }));
@@ -299,7 +297,7 @@ function renderEditComponent(component, precision, showMarkList) {
             'itempool_available': isItempoolAvailable(),
             'itempool_options': getItempoolOptions(),
             'decimal_precision': DECIMAL_PRECISION,
-            'peer_component' : component.peer,
+            'peer_component' : component.peer_component,
         }));
     });
 }

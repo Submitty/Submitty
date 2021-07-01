@@ -1691,7 +1691,7 @@ class Component(object):
         self.ta_comment = ""
         self.student_comment = ""
         self.is_text = False
-        self.is_peer = False
+        self.is_peer_component = False
         self.page = 0
         self.order = order
         self.marks = []
@@ -1699,7 +1699,7 @@ class Component(object):
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
         if 'gc_is_peer' in component:
-            self.is_peer = component['gc_is_peer']
+            self.is_peer_component = component['gc_is_peer']
         if 'gc_student_comment' in component:
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
@@ -1732,7 +1732,7 @@ class Component(object):
                                     gc_student_comment=self.student_comment,
                                     gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value,
                                     gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
-                                    gc_is_peer=self.is_peer, gc_order=self.order, gc_page=self.page)
+                                    gc_is_peer=self.is_peer_component, gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 

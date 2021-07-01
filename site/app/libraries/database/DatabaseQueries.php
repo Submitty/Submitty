@@ -1718,7 +1718,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         // Check if we want to exlcude grade overridden gradeables
         if (!$is_team && $override == 'include') {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
-                        WHERE u.user_id = grade_override.user_id 
+                        WHERE u.user_id = grade_override.user_id
                         AND grade_override.g_id=gc.g_id)";
         }
 
@@ -4936,7 +4936,7 @@ AND gc_id IN (
             $component->getUpperClamp(),
             $component->isText(),
             $component->getOrder(),
-            $component->isPeer(),
+            $component->isPeerComponent(),
             $component->getPage(),
             $component->getIsItempoolLinked(),
             $component->getItempool()
@@ -5022,7 +5022,7 @@ AND gc_id IN (
                 $component->getUpperClamp(),
                 $component->isText(),
                 $component->getOrder(),
-                $component->isPeer(),
+                $component->isPeerComponent(),
                 $component->getPage(),
                 $component->getIsItempoolLinked(),
                 $component->getItempool(),
@@ -5460,7 +5460,7 @@ AND gc_id IN (
      */
     private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
-            if (!$graded_component->getComponent()->isPeer()) {
+            if (!$graded_component->getComponent()->isPeerComponent()) {
                 $params = [
                     $graded_component->getScore(),
                     $graded_component->getComment(),
@@ -7002,8 +7002,8 @@ AND gc_id IN (
     }
     //// BEGIN ONLINE POLLING QUERIES ////
 
-    public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
-        $this->course_db->query("INSERT INTO polls(name, question, status, release_date, image_path) VALUES (?, ?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date, null]);
+    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders) {
+        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path) VALUES (?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -7088,8 +7088,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        $date = new \Datetime($row['release_date']);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('poll')), $row["image_path"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
     }
 
     public function getResponses($poll_id) {
@@ -7099,7 +7098,6 @@ AND gc_id IN (
         foreach ($responses_rows as $rep_row) {
             $responses[$rep_row["option_id"]] = $rep_row["response"];
         }
-
         return $responses;
     }
 
@@ -7108,19 +7106,22 @@ AND gc_id IN (
         $rows = $this->course_db->rows();
         $responses = [];
         foreach ($rows as $row) {
-            $responses[$row["student_id"]] = $row["option_id"];
+            if (!isset($responses[$row["student_id"]])) {
+                $responses[$row["student_id"]] = [];
+            }
+            array_push($responses[$row["student_id"]], $row["option_id"]);
         }
         return $responses;
     }
 
-    public function submitResponse($poll_id, $response) {
+    public function submitResponse($poll_id, $responses) {
         $user = $this->core->getUser()->getId();
         $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
-        if (count($this->course_db->rows()) <= 0) {
-            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response]);
-        }
-        else {
-            $this->course_db->query("UPDATE poll_responses SET option_id=? where poll_id = ? and student_id = ?", [$response, $poll_id, $user]);
+        // clear all existing answers of the student
+        $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+        // insert new answers
+        foreach ($responses as $index => $response_id) {
+            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response_id]);
         }
     }
 
@@ -7133,9 +7134,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders, $image_path) {
+    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $release_date, $image_path, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -7254,11 +7255,6 @@ SQL;
 
     private function getGradeableMinutesOverride(string $gradeable_id): array {
         $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows();
-    }
-
-    public function getCourseSchemaTables(): array {
-        $this->course_db->query("SELECT * FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name ASC, ordinal_position ASC");
         return $this->course_db->rows();
     }
 }
