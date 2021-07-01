@@ -190,7 +190,6 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', true);
         }
         else {
-            //RIGHT HERE
             const value = $(clear_button_id).getAttribute('data-older_version');
             if (value) {
                 $(clear_button_id).attr('disabled', true);

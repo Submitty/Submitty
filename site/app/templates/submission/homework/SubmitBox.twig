@@ -458,6 +458,11 @@
     }
     $(function() {
         $("#submit").click(function(e){ // Submit button
+            //don't allow submission if viewing inactive version
+            if({{ viewing_inactive_version }}) {
+                alert('Must be on most recent version to make new submission');
+                return;
+            }
             var user_id = "";
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
