@@ -330,7 +330,6 @@
             // has responses by users, via an ajax request
             let my_this = $(this);
             let my_url = "{{base_url}}" + "/hasAnswers";
-            let optionHasReplies = 0;
             $.ajax({
                 url: my_url,
                 type: "POST",
@@ -385,6 +384,10 @@
         setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
+        $("#new-poll-form").submit(function() {
+            $("#poll-form-submit").prop("disabled", true);
+            return true;
+        });
         let submit_form = false;
         $("#edit-poll-form").submit(function(event) {
             if (!submit_form) {
@@ -405,7 +408,11 @@
                         submit_form = true;
                         $("#edit-poll-form").submit();
                     }
+                } else {
+                    $("#poll-form-submit").prop("disabled", true);
                 }
+            } else {
+                $("#poll-form-submit").prop("disabled", true);
             }
         });
     });
