@@ -203,7 +203,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism")
      */
-    public function plagiarismMainPage($refresh_page="NO_REFRESH") {
+    public function plagiarismMainPage($refresh_page = "NO_REFRESH") {
         $course_path = $this->core->getConfig()->getCoursePath();
         $all_configurations = [];
 
@@ -691,8 +691,7 @@ class PlagiarismController extends AbstractController {
      * @param string|null $version_user_2
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
-    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1,
-                                                  string $version_user_1, string $user_id_2 = null, string $version_user_2 = null) {
+    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -785,8 +784,7 @@ class PlagiarismController extends AbstractController {
      * @param string $codebox
      * @return array
      */
-    public function getColorInfo(string $gradeable_id, string $config_id, string $user_id_1,
-                                 string $version_user_1, string $user_id_2, string $version_user_2, string $codebox): array {
+    public function getColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2, string $version_user_2, string $codebox): array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $color_info = [];
 
