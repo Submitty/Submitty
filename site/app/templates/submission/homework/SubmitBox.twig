@@ -2,7 +2,10 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message markdown'>{{ gradeable_message | markdown }}</div>
+    {% include "misc/Markdown.twig" with {
+        "content" : gradeable_message,
+        "class" : "content gradeable_message"
+    } only %}
 {% endif %}
 
 {% if has_overridden_grades %}
@@ -335,9 +338,9 @@
         {# /Page selector #}
 
         <div class="upload-message">
-            <p>
-                {{ upload_message | markdown}}
-            </p>
+            {% include "misc/Markdown.twig" with {
+                "content" : upload_message
+            } only %}
         </div>
         {% if viewing_inactive_version %}
             <button type="button" id="submit" class="btn btn-success">Switch To Most Recent Version To Make New Submission</button>

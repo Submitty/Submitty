@@ -10,6 +10,7 @@ use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\User;
 
 /**
  * Class PlagiarismController
@@ -64,6 +65,43 @@ class PlagiarismController extends AbstractController {
         return $return;
     }
 
+    /**
+     * @param array $usernames
+     * @return array
+     */
+    private function getIgnoreSubmissionType(array $usernames): array {
+        $ignore = [];
+        $ignore[0] = []; // array of user categories to be ignored
+        $ignore[1] = []; // array of user_id in the category "Others"
+        foreach ($usernames as $user_id) {
+            $user_obj = $this->core->getQueries()->getUserById($user_id);
+            if ($user_obj != null) {
+                switch ($user_obj->getGroup()) {
+                    case User::GROUP_INSTRUCTOR:
+                        if (!in_array("instructors", $ignore[0])) {
+                            array_push($ignore[0], "instructors");
+                        }
+                        break;
+                    case User::GROUP_FULL_ACCESS_GRADER:
+                        if (!in_array("full_access_graders", $ignore[0])) {
+                            array_push($ignore[0], "full_access_graders");
+                        }
+                        break;
+                    case User::GROUP_LIMITED_ACCESS_GRADER:
+                        if (!in_array("limited_access_graders", $ignore[0])) {
+                            array_push($ignore[0], "limited_access_graders");
+                        }
+                        break;
+                    default:
+                        if (!in_array("others", $ignore[0])) {
+                            array_push($ignore[0], "others");
+                        }
+                        array_push($ignore[1], $user_id);
+                }
+            }
+        }
+        return $ignore;
+    }
 
     /**
      * @param string $gradeable_id
@@ -366,21 +404,36 @@ class PlagiarismController extends AbstractController {
         }
 
         // Submissions to ignore
-        $ignore_submission_option = $_POST['ignore_submission_option'];
-        if ($ignore_submission_option !== "ignore" && $ignore_submission_option !== "no_ignore") {
-            $this->core->addErrorMessage("Invalid ignore submission options, expected \"ignore\" or \"no_ignore\", got \"" . $ignore_submission_option . "\".");
-            $this->core->redirect($return_url);
-        }
-        $ignore_submission_number = $_POST['ignore_submission_number'];
-        $ignore_submissions = [];
-        if ($ignore_submission_option === "ignore") {
-            for ($i = 0; $i < $ignore_submission_number; $i++) {
-                if (isset($_POST['ignore_submission_' . $i]) && $_POST['ignore_submission_' . $i] !== '') {
-                    array_push($ignore_submissions, $_POST['ignore_submission_' . $i]);
+        $ignore_submission_option = [];
+        if (isset($_POST['ignore_submission_option'])) {
+            // error checking
+            $valid_inputs = ["ignore_instructors", "ignore_full_access_graders", "ignore_limited_access_graders", "ignore_others"];
+            foreach ($_POST['ignore_submission_option'] as $ignore_type) {
+                if (!in_array($ignore_type, $valid_inputs)) {
+                    $this->core->addErrorMessage("Invalid type provided for users to ignore");
+                    $this->core->redirect($return_url);
+                }
+            }
+            // get user_id in the user categories specified
+            $graders = $this->core->getQueries()->getAllGraders();
+            foreach ($graders as $grader) {
+                if (
+                    $grader->getGroup() == User::GROUP_INSTRUCTOR && in_array("ignore_instructors", $_POST['ignore_submission_option'])
+                    || $grader->getGroup() == User::GROUP_FULL_ACCESS_GRADER && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
+                    || $grader->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
+                ) {
+                    array_push($ignore_submission_option, $grader->getId());
+                }
+            }
+            // parse and append user id's specified in "Others"
+            if (in_array("ignore_others", $_POST['ignore_submission_option']) && isset($_POST["ignore_others_list"])) {
+                // parse and push to the array of users
+                $other_users = explode(", ", $_POST["ignore_others_list"]);
+                foreach ($other_users as $other_user) {
+                    array_push($ignore_submission_option, $other_user);
                 }
             }
         }
-
 
         // Save the config.json
         $json_file = FileUtils::joinPaths($course_path, "lichen", "config", "lichen_{$semester}_{$course}_{$gradeable_id}.json");
@@ -396,7 +449,7 @@ class PlagiarismController extends AbstractController {
             // "hash" => bin2hex(random_bytes(8)),
             "sequence_length" => $sequence_length,
             "prev_term_gradeables" => $prev_term_gradeables,
-            "ignore_submissions" => $ignore_submissions
+            "ignore_submissions" => $ignore_submission_option
         ];
 
         if (!@file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT))) {
@@ -507,7 +560,7 @@ class PlagiarismController extends AbstractController {
         });
 
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null, null, null);
     }
 
 
@@ -532,7 +585,9 @@ class PlagiarismController extends AbstractController {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
         }
 
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config, $title);
+        $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
+
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
     }
 
 
@@ -654,7 +709,7 @@ class PlagiarismController extends AbstractController {
             else {
                 $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
             }
-            $data = ['display_code1' => $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info];
+            $data = ['display_code1' => $this->getDisplayForCode($file_name), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info];
         }
         else {
             $return = ['error' => 'User 1 submission.concatenated for specified version not found.'];
@@ -662,12 +717,13 @@ class PlagiarismController extends AbstractController {
             echo($return);
             return;
         }
+
         if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
             $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/submission.concatenated";
 
             if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
                 $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
-                $data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
+                $data['display_code2'] = $this->getDisplayForCode($file_name);
             }
             else {
                 $return = ['error' => 'User 2 submission.concatenated for matching version not found.'];
@@ -676,6 +732,7 @@ class PlagiarismController extends AbstractController {
                 return;
             }
         }
+
         $data['ci'] = $color_info[0];
         $data['si'] = $color_info[1];
         $return = json_encode($data);
@@ -687,7 +744,6 @@ class PlagiarismController extends AbstractController {
 
         //Represents left and right display users
         $color_info[1] = [];
-        $color_info[2] = [];
         $segment_info = [];
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
@@ -742,12 +798,14 @@ class PlagiarismController extends AbstractController {
                 if ($match->getType() === "match") {
                     //Color is yellow -- matches other students but not general match between students...
                     $color = '#ffff00';
+
+                    $others = array_keys($match->getOthers());
+                    $segment_info["{$start_line}_{$start_pos}"] = $others;
                 }
                 elseif ($match->getType() === "specific-match") {
                     //Color is orange -- general match from selected match
-                    $color = '#ffa500;';
+                    $color = '#ffa500';
 
-                    $segment_info["{$start_line}_{$start_pos}"][] = $user_id_2 . "_" . $version_user_2;
                     if ($codebox == "2" && $user_id_2 != "") {
                         foreach ($match->getMatchingPositions($user_id_2, $version_user_2) as $pos) {
                             $matchPosStart = $pos['start'];
@@ -757,11 +815,14 @@ class PlagiarismController extends AbstractController {
                             $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
                             $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
 
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500;', $matchPosStart, $matchPosEnd];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, $color, $matchPosStart, $matchPosEnd];
                             $userMatchesStarts[] = $matchPosStart;
                             $userMatchesEnds[] = $matchPosEnd;
                         }
                     }
+
+                    $others = array_keys($match->getOthers());
+                    $segment_info["{$start_line}_{$start_pos}"] = $others;
                 }
                 elseif ($match->getType() === "common") { // common code does not show up on user 2
                     //Color is grey -- common matches among all students
@@ -772,13 +833,13 @@ class PlagiarismController extends AbstractController {
                     $color = '#b5e3b5';
                 }
 
-                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $userMatchesStarts, $userMatchesEnds]);
             }
         }
         return [$color_info, $segment_info];
     }
 
-    public function getDisplayForCode(string $file_name, $color_info) {
+    public function getDisplayForCode(string $file_name) {
         return file_get_contents($file_name);
     }
 
@@ -876,10 +937,6 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * Check if the results folder exists for a given gradeable and version results.json
-     * in the results/ directory. If the file exists, we output a string that the calling
-     * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
-     *
      * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
      */
     public function checkRefreshLichenMainPage() {
@@ -890,13 +947,12 @@ class PlagiarismController extends AbstractController {
 
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
+        $gradeables_in_progress = 0;
         foreach ($gradeable_ids_titles as $gradeable_id_title) {
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
-                $this->core->getOutput()->renderString("REFRESH_ME");
-                return;
+                $gradeables_in_progress++;
             }
         }
-
-        $this->core->getOutput()->renderString("NO_REFRESH");
+        echo $gradeables_in_progress;
     }
 }
