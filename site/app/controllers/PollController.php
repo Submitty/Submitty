@@ -485,7 +485,7 @@ class PollController extends AbstractController {
             || $response_count !== count($responses)
             || count($answers) > count($responses)
             || count($prev_responses) < $original_responses_removed
-           ) {
+        ) {
             $this->core->addErrorMessage("Error with responses occured in editing poll");
             return new RedirectResponse($returnUrl);
         }
