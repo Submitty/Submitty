@@ -190,7 +190,7 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', true);
         }
         else {
-            const value = $(clear_button_id).getAttribute('data-older_version');
+            const value = $(clear_button_id).attr('data-older_version');
             if (value) {
                 $(clear_button_id).attr('disabled', true);
             }
@@ -203,7 +203,7 @@ $(document).ready(() => {
             $(recent_button_id).attr('disabled', true);
         }
         else {
-            const value = $(recent_button_id).getAttribute('data-older_version');
+            const value = $(recent_button_id).attr('data-older_version');
             if (value) {
                 $(recent_button_id).attr('disabled', true);
             }
