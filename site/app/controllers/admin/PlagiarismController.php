@@ -271,6 +271,9 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
+     * @param string $gradeable_id
+     * @param string $config_id
+     *
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult(string $gradeable_id, string $config_id) {
@@ -302,9 +305,13 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
+     * @param string $new_or_edit
+     * @param string $gradeable_id
+     * @param string $config_id
+     *
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
-    public function saveNewPlagiarismConfiguration(string $new_or_edit, string $gradeable_id = null, string $config_id = null) {
+    public function saveNewPlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -411,16 +418,17 @@ class PlagiarismController extends AbstractController {
 
 
         // Generate a unique number for this version of the gradeable //////////
-        $config_id = 1;
-
-        if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id))) {
-            foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id)) as $file) {
-                if ($file !== '.' && $file !== '..' && is_numeric($file) && intval($file) > $config_id) {
-                    $config_id = intval($file) + 1;
+        if ($new_or_edit === "new") {
+            $config_id = 1;
+            if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id))) {
+                foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id)) as $file) {
+                    if ($file !== '.' && $file !== '..' && is_numeric($file) && intval($file) >= $config_id) {
+                        $config_id = intval($file) + 1;
+                    }
                 }
             }
+            $config_id = strval($config_id);
         }
-        $config_id = strval($config_id);
 
 
         // Create directory structure //////////////////////////////////////////
@@ -654,6 +662,12 @@ class PlagiarismController extends AbstractController {
     public function getRunLog(string $gradeable_id, string $config_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
+
+        // check for backwards crawling
+        if (str_contains($gradeable_id, '..') || str_contains($config_id, '..')) {
+            echo('Error: path contains invalid component "..".');
+            return;
+        }
 
         $log_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "logs", "lichen_job_output.txt");
 

@@ -8,7 +8,7 @@ use app\libraries\plagiarism\PlagiarismUtils;
 
 class PlagiarismView extends AbstractView {
 
-    public function plagiarismMainPage($gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info) {
+    public function plagiarismMainPage($all_configurations, $refresh_page, $nightly_rerun_info) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
 
         $semester = $this->core->getConfig()->getSemester();
@@ -17,7 +17,7 @@ class PlagiarismView extends AbstractView {
         $plagiarism_result_info = [];
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        foreach ($gradeables_with_plagiarism_result as $gradeable) {
+        foreach ($all_configurations as $gradeable) {
             $plagiarism_row = [];
             $plagiarism_row['title'] = $gradeable['g_title'];
             $plagiarism_row['id'] = $gradeable['g_id'];
