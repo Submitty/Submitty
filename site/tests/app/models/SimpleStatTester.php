@@ -48,7 +48,7 @@ class SimpleStatTester extends BaseUnitTest {
         $this->assertEquals($details['avg_comp_score'], $simple_stat->getAverageScore());
         $this->assertEquals($details['std_dev'], $simple_stat->getStandardDeviation());
         $this->assertEquals($details['gc_order'], $simple_stat->getOrder());
-        $this->assertEquals($details['gc_is_peer'], $simple_stat->getIsPeer());
+        $this->assertEquals($details['gc_is_peer'], $simple_stat->getIsPeerComponent());
         $this->assertEquals($details['count'], $simple_stat->getCount());
         $this->assertEquals($details['active_grade_inquiry_count'], $simple_stat->getActiveGradeInquiryCount());
         $this->assertEquals($average_grader_scores, $simple_stat->getGraderInfo());
