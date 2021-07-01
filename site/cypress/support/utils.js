@@ -16,19 +16,6 @@ export function getCurrentSemester(){
 }
 
 /**
- * Generates semester + year string like Spring 2021 based on today's date
- *
- * @returns {String}
- */
-export function getCurrentSemesterYearString(){
-    const today = new Date();
-    const year = today.getFullYear().toString();
-    const semester = ((today.getMonth() + 1) < 7) ? 'Spring' : 'Fall';
-
-    return `${semester} ${year}`;
-}
-
-/**
 * Build a courseURL based on an array of 'parts', e.g [foo, bar] -> courses/s21/foo/bar
 *
 * @param {String[]} [parts=[]] array of parts to string together
