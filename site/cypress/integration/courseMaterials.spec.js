@@ -10,12 +10,12 @@ describe('Test cases revolving around course material uploading and access contr
         cy.visit(['sample', 'course_materials']);
     });
 
-    // afterEach(() => {
-    // 	cy.reload();
-    // 	cy.logout();
-    // 	cy.login();
-    // 	cy.visit(['sample', 'course_materials']);
-    // });
+    afterEach(() => {
+    	cy.reload();
+    	cy.logout();
+    	cy.login();
+    	cy.visit(['sample', 'course_materials']);
+    });
 
     it('Should upload a file and be able to view and download it', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
