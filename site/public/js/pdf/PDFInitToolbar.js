@@ -59,6 +59,7 @@ function renderPDFToolbar() {
                     PDFAnnotate.UI.enableEraser();
                     break;
                 case 'cursor':
+                    currentTool = 'cursor';
                     PDFAnnotate.UI.enableEdit();
                     break;
                 case 'clear':
@@ -187,7 +188,7 @@ function renderPDFToolbar() {
         document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
         let init_color = localStorage.getItem('main_color');
-        setColor(init_color);
+        setColor(init_color || '#000000');
     }
 
     function colorMenuToggle(e){
