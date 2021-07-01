@@ -38,12 +38,15 @@
                 {% endif %}
                 <br/>
                 <br/>
-                <b>Submissions currently in the queue:</b> {{ submissions_in_queue }} / {{ total_submissions }} ({{ submissions_in_queue_percentage }}%)
+                <b>Queue Statistics for ALL SUBMISSIONS (active and inactive):</b>
                 <br/>
-                <br/>
-                <b>Submissions currently being graded:</b> {{ submissions_grading_in_progress }} / {{ total_submissions }} ({{ submissions_grading_in_progress_percentage }}%)
-                <br/>
-                <br/>
+                <div style="margin-left: 20px">
+                    Submissions currently in the queue: {{ submissions_in_queue }} / {{ total_submissions_all_versions }} ({{ submissions_in_queue_percentage }}%)
+                    <br/>
+                    Submissions currently being graded: {{ submissions_grading_in_progress }} / {{ total_submissions_all_versions }} ({{ submissions_grading_in_progress_percentage }}%)
+                    <br/>
+                    <br/>
+                </div>
             {% endif %}
             {% if peer and not team_assignment %}
                 <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})

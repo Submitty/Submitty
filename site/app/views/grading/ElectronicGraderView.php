@@ -55,7 +55,8 @@ class ElectronicGraderView extends AbstractView {
         int $regrade_requests,
         bool $show_warnings,
         int $submissions_in_queue,
-        int $submissions_grading_in_progress
+        int $submissions_grading_in_progress,
+        int $total_submissions_all_versions
     ) {
 
         $peer = false;
@@ -111,8 +112,8 @@ class ElectronicGraderView extends AbstractView {
         }
         else {
             $graded_percentage = number_format(($graded / $total) * 100, 1);
-            $submissions_grading_in_progress_percentage = number_format(($submissions_grading_in_progress / $total_submissions) * 100, 1);
-            $submissions_in_queue_percentage = number_format(($submissions_in_queue / $total_submissions) * 100, 1);
+            $submissions_grading_in_progress_percentage = number_format(($submissions_grading_in_progress / $total_submissions_all_versions) * 100, 1);
+            $submissions_in_queue_percentage = number_format(($submissions_in_queue / $total_submissions_all_versions) * 100, 1);
         }
 
         if ($graded_percentage !== -1) {
@@ -329,7 +330,8 @@ class ElectronicGraderView extends AbstractView {
             "submissions_in_queue" => $submissions_in_queue,
             "submissions_grading_in_progress" => $submissions_grading_in_progress,
             "submissions_in_queue_percentage" => $submissions_in_queue_percentage,
-            "submissions_grading_in_progress_percentage" => $submissions_grading_in_progress_percentage
+            "submissions_grading_in_progress_percentage" => $submissions_grading_in_progress_percentage,
+            "total_submissions_all_versions" => $total_submissions_all_versions
         ]);
     }
 

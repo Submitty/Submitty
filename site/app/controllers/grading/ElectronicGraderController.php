@@ -477,32 +477,6 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        //get all graded gradeables for queue stats
-        $submissions_in_queue = 0;
-        $submissions_grading_in_progress = 0;
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-        $order->sort("id", "ASC");
-        $graded_gradeables = [];
-        $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable); // Collect user ids so we know who isn't on a team
-        foreach ($order->getSortedGradedGradeables() as $g) {
-            $graded_gradeables[] = $g;
-            if ($gradeable->isTeamAssignment()) {
-                $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
-            }
-        }
-        foreach ($graded_gradeables as $g) {
-            $display_version = $g->getAutoGradedGradeable()->getActiveVersion();
-            if ($display_version > 0) {
-                $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
-                if ($display_version_instance->isQueued()) {
-                    $submissions_in_queue += 1;
-                }
-                if ($display_version_instance->isGrading()) {
-                    $submissions_grading_in_progress += 1;
-                }
-            }
-        }
-
         if (!$this->core->getAccess()->canI("grading.electronic.status", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -518,6 +492,33 @@ class ElectronicGraderController extends AbstractController {
         $peer = false;
         if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
             $peer = true;
+        }
+
+        //get all graded gradeables for queue stats
+        $submissions_in_queue = 0;
+        $submissions_grading_in_progress = 0;
+        $total_submissions_all_versions = 0;
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+        $order->sort("id", "ASC");
+        $graded_gradeables = [];
+        foreach ($order->getSortedGradedGradeables() as $g) {
+            $graded_gradeables[] = $g;
+        }
+        //check every submission (inactive and active) for every student
+        foreach ($graded_gradeables as $g) {
+            $highest_version = $g->getAutoGradedGradeable()->getHighestVersion();
+            if ($highest_version > 0) {
+                for ($i = 1; $i < $highest_version+1; $i++) {
+                    $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($i);
+                    if ($display_version_instance->isQueued()) {
+                        $submissions_in_queue += 1;
+                    }
+                    if ($display_version_instance->isGrading()) {
+                        $submissions_grading_in_progress += 1;
+                    }
+                    $total_submissions_all_versions += 1;
+                }
+            }
         }
 
         /*
@@ -816,7 +817,8 @@ class ElectronicGraderController extends AbstractController {
             $regrade_requests,
             $show_warnings,
             $submissions_in_queue,
-            $submissions_grading_in_progress
+            $submissions_grading_in_progress,
+            $total_submissions_all_versions
         );
     }
 
