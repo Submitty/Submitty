@@ -101,6 +101,29 @@
     text-transform: capitalize;
 }
 
+#user-secondary-email-change {
+    width: 20em;
+}
+
+.icon {
+    background: none!important;
+    border: none;
+    padding: 0!important;
+    color: var(--external-link-blue);
+    text-decoration: none;
+    font-family: 'Source Sans Pro', 'sans-serif'!important;
+    font-size: 100%;
+    cursor: pointer;
+}
+
+.fas {
+    color: var(--btn-default-text);
+}
+
+.fas:hover {
+    color: var(--external-link-blue);
+}
+
 @media (max-width: 401px) {
     .content {
         margin: 10px 0 0 0;
