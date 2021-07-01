@@ -9,11 +9,11 @@ export function sortTable(n) {
 
     if ($(`#${n}`).children('i').hasClass('fa-angle-up')) {
         $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
-        dir = 'desc';
+        dir = 'asc';
     }
     else {
         $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
-        dir = 'asc';
+        dir = 'desc';
     }
 
     for (i = 0; i < 10; i++) {
@@ -79,10 +79,10 @@ export function comparator (row1, row2, n, dir) {
     }
     // They are not equal
     // Then check for lesser or greater relationships
-    if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
+    if (dir == 'asc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
         return true;
     }
-    else if (dir == 'asc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
+    else if (dir == 'desc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
         return true;
     }
     return false;
