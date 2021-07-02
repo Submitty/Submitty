@@ -414,7 +414,7 @@ class Access {
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !((($group === User::GROUP_STUDENT && $gradeable->isPeerGrading()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        !((($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
@@ -500,7 +500,7 @@ class Access {
 
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Make sure a component allows students to access it via peer grading
-                if (!$component->isPeer()) {
+                if (!$component->isPeerComponent()) {
                     return false;
                 }
             }
@@ -638,7 +638,7 @@ class Access {
             return false;
         }
 
-        if (!$gradeable->isPeerGrading()) {
+        if (!$gradeable->hasPeerComponent()) {
             return false;
         }
         else {

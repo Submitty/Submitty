@@ -10,6 +10,7 @@
 
 .markdown {
     font-family: 'Source Sans Pro', 'sans-serif';
+    position: relative;
 }
 
 .markdown h1,
@@ -18,7 +19,7 @@
 .markdown h4,
 .markdown h5,
 .markdown h6 {
-    margin: 0
+    margin: 0;
 }
 
 .markdown p {

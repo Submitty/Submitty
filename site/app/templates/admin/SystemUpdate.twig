@@ -2,19 +2,34 @@
     <h1>System Update</h1>
     <a target="_blank" href="https://submitty.org/sysadmin/update">Need help with updating Submitty? <i style="font-style:normal;" class="fa-question-circle"></i></a>
 
-    <button 
-        class="btn btn-primary float-right" 
-        onclick="getReleases('{{latest_tag}}');">
-        Check for Updates
-    </button>
+    <div class="float-right">
+        <label>
+            Search:
+            <input id="release-notes-filter" type="textbox" onkeyup="filterReleaseNotes(this.value)">
+        </label>
+        <button class="btn btn-default" onclick="clearFilter()">
+            Clear
+        </button>
+        <button id="toggle-releases"class="btn btn-primary" onclick="toggleAllReleases(this)">
+            Expand All
+        </button>
+    </div>
 
     <div id="update_status" class="box">
-        <p id="current-version"> Current Version Installed: {{ latest_tag }} </p>
+        <p id="current-version"> Current Version Installed: <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}">{{ latest_tag }}</a></p>
         <p id="tag"></p>
         <br> 
         <p id="text"></p>
     </div>
 
-    <div class="box" id="release-notes" hidden>
+    <div class="box" id="loading-text">
+        Loading...
+    </div>
+
+    <div class="box" id="no-filter-results" hidden>
+        No search results found.
     </div>
 </div>
+<script>
+    window.onload = getReleases.bind(this, '{{ latest_tag }}');
+</script>
