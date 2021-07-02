@@ -81,6 +81,7 @@ Required inputs:
             </script>
             <span class="col-no-gutters mark-points">
                 <label for="extra-mark-{{ component.id }}" tabIndex="0" class="screen-reader">Extra Mark</label>
+                <button onclick="gang()">+</button>
                 <input id = "extra-mark-{{ component.id }}"
                        type="number"
                        step="{{ precision }}"
@@ -88,6 +89,9 @@ Required inputs:
                        onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
                         <script>
+                             function gang(){
+                                 $("#extra-mark-{{ component.id }}").val(10);
+                             }
                             {% if f_mark.title == "Full Credit" %}
                                 if(document.getElementById("extra-mark-{{ component.id }}").value>0){
                                     document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
@@ -160,3 +164,4 @@ Required inputs:
         </div>
     {% endif %}
 {% endblock %}
+
