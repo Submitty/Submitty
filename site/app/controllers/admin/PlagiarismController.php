@@ -953,8 +953,8 @@ class PlagiarismController extends AbstractController {
         $gradeables_in_progress = 0;
         $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id']))) {
-                foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id'])) as $config_id) {
+            if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id_title['g_id']))) {
+                foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id_title['g_id'])) as $config_id) {
                     if ($config_id !== '.' && $config_id !== '..' && file_exists(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id_title['g_id'], $config_id), "config.json"))) {
                         if (
                             file_exists($this->getQueuePath($gradeable_id_title['g_id'], $config_id))
