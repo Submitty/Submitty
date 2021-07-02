@@ -58,7 +58,7 @@ class CourseMaterial {
 
     /**
      * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
-     * @var Collection
+     * @var Collection<CourseMaterialSection>
      */
     protected $sections;
 
@@ -74,12 +74,19 @@ class CourseMaterial {
     /**
      * @return Collection
      */
-    public function getSections() {
+    public function getSections(): Collection {
         return $this->sections;
     }
 
     public function getPath(): string {
         return $this->path;
+    }
+
+    /**
+     * @return int
+     */
+    public function getType(): int {
+        return $this->type;
     }
 
     public function isFile(): bool {
