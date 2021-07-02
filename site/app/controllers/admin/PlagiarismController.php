@@ -209,10 +209,10 @@ class PlagiarismController extends AbstractController {
             }
         }
         else {
-            if (!@move_uploaded_file($temporary_file_path, FileUtils::joinPaths($target_dir, $filename))) {
-                FileUtils::recursiveRmdir($target_dir);
+            if (!@copy($temporary_file_path, FileUtils::joinPaths($target_dir, $filename))) {
                 throw new \Exception("Upload failed: Could not copy file");
             }
+            unlink($temporary_file_path);
         }
     }
 
