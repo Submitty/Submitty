@@ -28,7 +28,7 @@
 .course-main {
     display: flex;
     align-items: center;
-    font-size: 0px;
+    font-size: 0;
     margin-bottom: 9px;
     padding-bottom: 5px;
 }
@@ -43,7 +43,8 @@
     float: left;
 }
 
-.collapse-icon, .expand-icon {
+.collapse-icon,
+.expand-icon {
     margin-left: -10px;
     display: none;
 }
@@ -83,7 +84,9 @@
     .course-main .course-title {
         font-size: 16px;
     }
-    .course-button .btn, .subtitle {
+
+    .course-button .btn,
+    .subtitle {
         font-size: 12px;
     }
 }
@@ -104,7 +107,7 @@
     }
 
     .course-section {
-       display: none;
+        display: none;
     }
 
     .panel-head-active {
@@ -112,11 +115,13 @@
         color: white;
     }
 
-    .panel-head-active .expand-icon, .collapse-icon {
+    .panel-head-active .expand-icon,
+    .collapse-icon {
         display: inline;
     }
 
-    .panel-head-active .collapse-icon, .expand-icon {
+    .panel-head-active .collapse-icon,
+    .expand-icon {
         display: none;
     }
 
@@ -139,7 +144,7 @@
     }
 
     .course-section {
-        display: table-row-group!important;
+        display: table-row-group !important;
     }
 
     .gradeable-row {
@@ -148,16 +153,19 @@
         justify-content: space-between;
     }
 
-    .course-main, .course-button {
+    .course-main,
+    .course-button {
         display: table-cell;
         vertical-align: middle;
     }
-    
+
     .course-main {
         padding: 9px;
         min-width: 220px;
+
         /* webkit tables cannot shrink to fit content; it must take a percentage width value */
         width: 40%;
+
         /* this is the logical behavior, that firefox will render (max width overrides width) */
         max-width: max-content;
     }
