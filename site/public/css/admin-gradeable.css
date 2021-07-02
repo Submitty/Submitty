@@ -343,3 +343,8 @@ body::-webkit-scrollbar-track {
     padding-right: 6px;
     color: red;
 }
+
+#custom_marks_warning{
+    color: red;
+    font-style:italic;
+}

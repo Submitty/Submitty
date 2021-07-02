@@ -4458,6 +4458,7 @@ AND gc_id IN (
               g_grade_released_date AS grade_released_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
+              g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
               gc.*,
@@ -5111,7 +5112,8 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
             $gradeable->getMinGradingGroup(),
-            $gradeable->getSyllabusBucket()
+            $gradeable->getSyllabusBucket(),
+            $gradeable->getAllowCustomMarks()
         ];
         $this->course_db->query(
             "
@@ -5127,8 +5129,9 @@ AND gc_id IN (
               g_grade_due_date,
               g_grade_released_date,
               g_min_grading_group,
-              g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              g_syllabus_bucket,
+              g_allow_custom_marks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5262,6 +5265,7 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
+                $gradeable->getAllowCustomMarks(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -5277,7 +5281,8 @@ AND gc_id IN (
                   g_grade_due_date=?,
                   g_grade_released_date=?,
                   g_min_grading_group=?,
-                  g_syllabus_bucket=?
+                  g_syllabus_bucket=?,
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );
@@ -5708,13 +5713,34 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
-     /**
-      * Gets if the provied submitter has a submission for a particular gradeable
-      *
-      * @param  \app\models\gradeable\Gradeable $gradeable
-      * @param  String                     $userid
-      * @return bool
-      */
+
+    /**
+     * checks if there are any custom marks saved for the provided gradeable
+     *
+     * @param string $gradeable_id
+     * @return bool
+     */
+    public function getHasCustomMarks($gradeable_id) {
+        //first get the gc_id's for all components associated with the gradeable
+        $this->course_db->query(
+            "SELECT gc.gc_id FROM gradeable_component AS gc
+                   INNER JOIN gradeable_component_data AS gcd ON gc.gc_id=gcd.gc_id
+                   WHERE gc.g_id=? AND gcd.gcd_component_comment <> '' ",
+            [$gradeable_id]
+        );
+        if (count($this->course_db->rows()) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets if the provied submitter has a submission for a particular gradeable
+     *
+     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param  String                     $userid
+     * @return bool
+     */
     public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
 
         return $this->course_db->query(
