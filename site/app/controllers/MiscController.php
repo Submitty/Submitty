@@ -239,10 +239,9 @@ class MiscController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")
      */
     public function downloadTestCaseResult($gradeable_id, $version, $test_case, $file_name, $user_id) {
-        $user = $this->core->getQueries()->getUserById($user_id);
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user->getId(), false);
-        if ($user !== $this->core->getUser()) {
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($user_id !== $this->core->getUser()->getId()) {
             if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->addErrorMessage("You do not have peremission to download this file!");
                 return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
