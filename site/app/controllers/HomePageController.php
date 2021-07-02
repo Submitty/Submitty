@@ -286,6 +286,7 @@ class HomePageController extends AbstractController {
         }
 
         $this->core->getOutput()->addInternalJs('system-update.js');
+        $this->core->getOutput()->addInternalCss('system-update.css');
         return new WebResponse(
             'HomePage',
             'showSystemUpdatePage',
