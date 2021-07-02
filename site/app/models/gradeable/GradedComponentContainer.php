@@ -91,7 +91,7 @@ class GradedComponentContainer extends AbstractModel {
         $grades_exist = $this->anyGradedComponents();
         if ($grader === null) {
             // If the grader is null and its a peer component, we can't do anything useful
-            if ($this->component->isPeer()) {
+            if ($this->component->isPeerComponent()) {
                 throw new \InvalidArgumentException('Cannot get peer graded component with null grader');
             }
 
@@ -113,7 +113,7 @@ class GradedComponentContainer extends AbstractModel {
         // Grader not null
         //
 
-        if ($this->component->isPeer()) {
+        if ($this->component->isPeerComponent()) {
             // Try to find existing graded component for this component and user...
             foreach ($this->graded_components as $graded_component) {
                 if ($graded_component->getGrader()->getId() === $grader->getId()) {
@@ -234,7 +234,7 @@ class GradedComponentContainer extends AbstractModel {
      * @return bool
      */
     public function isComplete() {
-        if ($this->component->isPeer()) {
+        if ($this->component->isPeerComponent()) {
             if (count($this->graded_components) > 0) {
                 return true;
             }
@@ -363,7 +363,7 @@ class GradedComponentContainer extends AbstractModel {
      * @return float
      */
     public function getScore() {
-        return $this->component->isPeer() ? 0.0 : $this->getGradedComponent()->getScore();
+        return $this->component->isPeerComponent() ? 0.0 : $this->getGradedComponent()->getScore();
     }
 
     /**
@@ -372,6 +372,6 @@ class GradedComponentContainer extends AbstractModel {
      * @return string
      */
     public function getComment() {
-        return $this->component->isPeer() ? '' : $this->getGradedComponent()->getComment();
+        return $this->component->isPeerComponent() ? '' : $this->getGradedComponent()->getComment();
     }
 }

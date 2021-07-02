@@ -6,7 +6,8 @@ body {
     display: flex;
     background: var(--background-blue);
     color: var(--text-black);
-    /*overflow-x: hidden;*/
+
+    /* overflow-x: hidden; */
 }
 
 #submitty-body {
@@ -58,6 +59,7 @@ nav a > i.f {
     padding-left: 20px;
     padding-right: 70px;
 }
+
 @media (max-width: 541px) {
     #breadcrumbs {
         padding-left: 0;
@@ -71,15 +73,15 @@ nav a > i.f {
 }
 
 .centered-icon {
-  line-height: inherit;
+    line-height: inherit;
 }
 
 .external-breadcrumb {
     padding-left: 7px;
 }
 
-.breadcrumb_heading{
-  font-size: 24px
+.breadcrumb_heading {
+    font-size: 24px;
 }
 
 #logout-button {
@@ -133,21 +135,23 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
-#moorthy-duck{
+#moorthy-duck {
     display: block;
 }
 
 @media (max-width: 541px) {
-    #moorthy-duck{
+    #moorthy-duck {
         display: none;
     }
+
     footer {
         font-size: 14px;
     }
 }
 
 @media (min-width: 541px) {
-    #home-button, #logout-button {
+    #home-button,
+    #logout-button {
         display: none;
     }
 
@@ -155,8 +159,9 @@ footer .footer-separator {
         display: block;
     }
 
-    #logo-submitty, #logo-submitty-light {
-      height: 80px;
+    #logo-submitty,
+    #logo-submitty-light {
+        height: 80px;
     }
 
     /* specificity less than no @media since :not stated (for speed) */
@@ -175,13 +180,12 @@ footer .footer-separator {
     }
 }
 
-.loading-bar-wrapper{
+.loading-bar-wrapper {
     padding-left: 3px;
     margin-bottom: 5px;
     display: none;
 }
 
-#loading-bar-percentage{
+#loading-bar-percentage {
     margin-left: 10px;
 }
-
