@@ -496,8 +496,6 @@ class ElectronicGraderController extends AbstractController {
 
         //get all graded gradeables for queue stats
         $submissions_in_queue = 0;
-        $submissions_grading_in_progress = 0;
-        $total_submissions_all_versions = 0;
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
         $order->sort("id", "ASC");
         $graded_gradeables = [];
@@ -513,10 +511,6 @@ class ElectronicGraderController extends AbstractController {
                     if ($display_version_instance->isQueued()) {
                         $submissions_in_queue += 1;
                     }
-                    if ($display_version_instance->isGrading()) {
-                        $submissions_grading_in_progress += 1;
-                    }
-                    $total_submissions_all_versions += 1;
                 }
             }
         }
@@ -816,9 +810,7 @@ class ElectronicGraderController extends AbstractController {
             $section_key,
             $regrade_requests,
             $show_warnings,
-            $submissions_in_queue,
-            $submissions_grading_in_progress,
-            $total_submissions_all_versions
+            $submissions_in_queue
         );
     }
 

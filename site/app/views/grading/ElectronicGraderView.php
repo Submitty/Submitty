@@ -33,7 +33,6 @@ class ElectronicGraderView extends AbstractView {
      * @param int $regrade_requests
      * @param bool $show_warnings
      * @param int $submissions_in_queue
-     * @param int $submissions_grading_in_progress
      * @return string
      */
 
@@ -54,9 +53,7 @@ class ElectronicGraderView extends AbstractView {
         string $section_type,
         int $regrade_requests,
         bool $show_warnings,
-        int $submissions_in_queue,
-        int $submissions_grading_in_progress,
-        int $total_submissions_all_versions
+        int $submissions_in_queue
     ) {
 
         $peer = false;
@@ -89,8 +86,6 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
-        $submissions_grading_in_progress_percentage = 0;
-        $submissions_in_queue_percentage = 0;
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
@@ -112,8 +107,6 @@ class ElectronicGraderView extends AbstractView {
         }
         else {
             $graded_percentage = number_format(($graded / $total) * 100, 1);
-            $submissions_grading_in_progress_percentage = number_format(($submissions_grading_in_progress / $total_submissions_all_versions) * 100, 1);
-            $submissions_in_queue_percentage = number_format(($submissions_in_queue / $total_submissions_all_versions) * 100, 1);
         }
 
         if ($graded_percentage !== -1) {
@@ -327,11 +320,7 @@ class ElectronicGraderView extends AbstractView {
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
-            "submissions_in_queue" => $submissions_in_queue,
-            "submissions_grading_in_progress" => $submissions_grading_in_progress,
-            "submissions_in_queue_percentage" => $submissions_in_queue_percentage,
-            "submissions_grading_in_progress_percentage" => $submissions_grading_in_progress_percentage,
-            "total_submissions_all_versions" => $total_submissions_all_versions
+            "submissions_in_queue" => $submissions_in_queue
         ]);
     }
 
