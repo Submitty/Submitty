@@ -1267,7 +1267,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
         $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
@@ -1713,7 +1712,6 @@ class ElectronicGraderController extends AbstractController {
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
-
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
@@ -1764,7 +1762,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
         // get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
         if ($component === false) {
@@ -1789,7 +1786,16 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
-        //don't allow peer graders to save custom marks
+
+        //don't allow custom marks if they are disabled
+        if ($custom_message != null || $custom_points != null) {
+            if (!$gradeable->getAllowCustomMarks()) {
+                $this->core->getOutput()->renderJsonFail('Custom marks are disabled for this assignment');
+                return;
+            }
+        }
+
+        //don't allow peer graders to save custom marks no matter how gradeable is configured
         if (($custom_message != null || $custom_points != null) && $gradeable->hasPeerComponent()) {
             if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');

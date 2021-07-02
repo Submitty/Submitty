@@ -208,7 +208,7 @@ class AdminGradeableController extends AbstractController {
             }
         }
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
-
+        $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
@@ -267,7 +267,9 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->hasPeerComponent(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $gradeable->getHiddenFiles()
+            'hidden_files' => $gradeable->getHiddenFiles(),
+            'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
+            'has_custom_marks' => $hasCustomMarks
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -904,6 +906,7 @@ class AdminGradeableController extends AbstractController {
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
+                'allow_custom_marks' => true,
 
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
@@ -1013,7 +1016,6 @@ class AdminGradeableController extends AbstractController {
 
     private function updateGradeable(Gradeable $gradeable, $details) {
         $errors = [];
-
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
 
@@ -1021,11 +1023,9 @@ class AdminGradeableController extends AbstractController {
         if (count($details) === 0) {
             throw new \InvalidArgumentException('Request contained no properties, perhaps the name was blank?');
         }
-
         // Trigger a rebuild if the config changes
         $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
-
         $boolean_properties = [
             'ta_grading',
             'scanned_exam',
@@ -1038,7 +1038,8 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date'
+            'has_due_date',
+            'allow_custom_marks'
         ];
 
         $discussion_ids = 'discussion_thread_id';
@@ -1047,7 +1048,6 @@ class AdminGradeableController extends AbstractController {
             'precision',
             'grader_assignment_method'
         ];
-
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;

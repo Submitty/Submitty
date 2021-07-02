@@ -1446,7 +1446,6 @@ HTML;
 
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
-
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1464,6 +1463,7 @@ HTML;
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
+                "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
                 "is_peer_grader" => $is_peer_grader
             ]);
     }
