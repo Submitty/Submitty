@@ -89,7 +89,9 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
                          const std::string &hw_id, std::string &testcase_message, nlohmann::json complete_config,
                          const std::string& username) {
 
-  std::cout << "\nAUTOCHECK #" << which_autocheck+1 << " / " << my_testcase.numFileGraders() << std::endl;
+  std::cout << "\nAUTOCHEEEEEEEEEEEEEECK #" << which_autocheck+1 << " / " << my_testcase.numFileGraders() << std::endl;
+  std::cout << "\ntest message" << std::endl;
+
 
   // details on what the grading is
   const nlohmann::json& tcg = my_testcase.getGrader(which_autocheck);
@@ -165,9 +167,14 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         assert(!(expected_file != "" && expected_string != ""));
         if (expected_file != "") {
           expected = expected_file;
-        } else {
-          expected = "expected_string_file";
+        } else if (expected_string != "") {
+          expected = "expected_string_file.txt";
         }
+        std::cout << "expected: " << expected << std::endl;
+        std::cout << "expected_file" << expected_file << std::endl;
+        std::cout << "expected_string" << expected_string << std::endl;
+
+
         if (expected_file != "") {
           std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
           fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
