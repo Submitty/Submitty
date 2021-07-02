@@ -304,11 +304,19 @@ class ForumController extends AbstractController {
             $lock_thread_date = null;
         }
 
-
         $thread_status = $_POST["thread_status"];
 
         $pinned = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) || (isset($_POST["pinThread"]) && $_POST["pinThread"] == "pinThread" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
+        $expiration = (isset($_POST["expirationDate"]) && $this->core->getUser()->accessFullGrading()) ? $_POST["expirationDate"] : '1900-01-01 00:00:00';
+
+        if (empty($expiration) && $pinned && $this->core->getUser()->accessAdmin()) {
+            $expiration = $this->core->getDateTimeNow();
+            $expiration = $expiration->add(new \DateInterval('P7D'));
+        }
+        elseif (!$pinned) {
+            $expiration = '1900-01-01 00:00:00';
+        }
 
         $categories_ids  = [];
         foreach ($_POST["cat"] as $category_id) {
@@ -329,7 +337,7 @@ class ForumController extends AbstractController {
             }
             else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $expiration);
 
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
@@ -758,6 +766,12 @@ class ForumController extends AbstractController {
             else {
                 $lock_thread_date = null;
             }
+            if (!empty($_POST["expirationDate"]) && $this->core->getUser()->accessAdmin()) {
+                $expiration = $_POST["expirationDate"];
+            }
+            else {
+                $expiration = null;
+            }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
             $categories_ids  = [];
@@ -769,7 +783,7 @@ class ForumController extends AbstractController {
             if (!$this->isValidCategories($categories_ids)) {
                 return false;
             }
-            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date);
+            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration);
         }
         return null;
     }
@@ -1109,6 +1123,7 @@ class ForumController extends AbstractController {
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
+        $output['expiration'] = $result["pinned_expiration"];
     }
 
     /**
