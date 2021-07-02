@@ -225,7 +225,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer').should('not.exist');
     });
 
-    it.only('Should restrict course materials by section', () => {
+    it('Should restrict course materials by section', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
@@ -270,7 +270,7 @@ describe('Test cases revolving around course material uploading and access contr
 
     });
 
-    it.only('Should restrict course materials within folders', () => {
+    it('Should restrict course materials within folders', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile('zip.zip' , { subjectType: 'drag-n-drop' });
