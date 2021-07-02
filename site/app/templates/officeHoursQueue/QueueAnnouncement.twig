@@ -9,13 +9,21 @@
     <span class="option-alt">
       Messages typed here will appear to all students.<br>
       Leave it empty to hide the announcement.<br>
-      <a target="_blank" href="https://submitty.org/student/communication/markdown">
-        Supports Markdown
-        <i style="font-style:normal;" class="fa-question-circle"></i>
-      </a>
     </span>
   </label>
-  <textarea class="announcement-setting" name="queue_announcement_message" id="queue-announcement-message">{{viewer.getQueueAnnouncementMessage()}}</textarea>
+  <br/>
+  {% include "misc/MarkdownArea.twig" with {
+    "markdown_area_id" : "queue-announcement-message",
+    "markdown_area_query" : "$('#queue-announcement-message')",
+    "markdown_area_name" : "queue_announcement_message",
+    "markdown_area_value" : viewer.getQueueAnnouncementMessage(),
+    "placeholder" : "Enter announcement here...",
+    "preview_div_id" : "queue_announcement_message_preview",
+    "preview_div_name" : "queue_announcement_message_preview",
+    "onclick" : "previewQueueMarkdown.call(this)",
+    "render_buttons" : true,
+    "min_height" : min_height,
+  } only %}
 {% endblock %}
 {% block form %}
   <form method="post" id="announcement_form" action="{{base_url}}/update_announcement">

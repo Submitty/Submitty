@@ -7,7 +7,7 @@
             {% if version_instance is null %}
                 <h4>No Submission</h4>
             {% else %}
-                {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true) }}
+                {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true, ta_grading) }}
             {% endif %}
         </div>
     </div>

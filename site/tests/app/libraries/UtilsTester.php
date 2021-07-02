@@ -88,24 +88,6 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));
     }
 
-    public function testStripStringFromArray() {
-        $array = [
-            "test/aa",
-            [
-                "test/test2/aa",
-                "bb"
-            ]
-        ];
-        $expected = ["/aa", ["/2/aa", "bb"]];
-        $this->assertEquals($expected, Utils::stripStringFromArray("test", $array));
-    }
-
-    public function testStripStringFromArrayNull() {
-        $this->assertNull(Utils::stripStringFromArray("test", null));
-        $this->assertNull(Utils::stripStringFromArray(null, []));
-        $this->assertNull(Utils::stripStringFromArray(1, []));
-    }
-
     public function elementDataProvider() {
         return [
             [[], null, null],
@@ -353,6 +335,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
+            'user_email_secondary' => "test@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => null,
             'rotating_section' => null,
@@ -370,6 +354,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Hacker",
             'user_preferred_lastname' => "Hacks",
             'user_email' => "aphacker@example.com",
+            'user_email_secondary' => "aphacker@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => 1,
             'rotating_section' => null,
@@ -399,6 +385,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
+            'user_email_secondary' => "test@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => null,
             'rotating_section' => null,
@@ -416,6 +404,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Hacker",
             'user_preferred_lastname' => "Hacks",
             'user_email' => "aphacker@example.com",
+            'user_email_secondary' => "aphacker@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => 1,
             'rotating_section' => null,
@@ -433,6 +423,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
+            'user_email_secondary' => "test@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => null,
             'rotating_section' => null,
@@ -450,6 +442,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Hacker",
             'user_preferred_lastname' => "Hacks",
             'user_email' => "aphacker@example.com",
+            'user_email_secondary' => "aphacker@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => 1,
             'rotating_section' => null,
@@ -479,6 +473,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
+            'user_email_secondary' => "test@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => null,
             'rotating_section' => null,
@@ -496,6 +492,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Hacker",
             'user_preferred_lastname' => "Hacks",
             'user_email' => "aphacker@example.com",
+            'user_email_secondary' => "aphacker@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => 1,
             'rotating_section' => null,
@@ -529,6 +527,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
+            'user_email_secondary' => "test@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => null,
             'rotating_section' => null,
@@ -546,6 +546,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Hacker",
             'user_preferred_lastname' => "Hacks",
             'user_email' => "aphacker@example.com",
+            'user_email_secondary' => "aphacker@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => 1,
             'rotating_section' => null,
@@ -563,6 +565,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
+            'user_email_secondary' => "test@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => null,
             'rotating_section' => null,
@@ -580,6 +584,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Hacker",
             'user_preferred_lastname' => "Hacks",
             'user_email' => "aphacker@example.com",
+            'user_email_secondary' => "aphacker@exampletwo.com",
+            'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_STUDENT,
             'registration_section' => 1,
             'rotating_section' => null,

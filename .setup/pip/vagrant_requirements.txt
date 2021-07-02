@@ -1,0 +1,2 @@
+# Email catcher
+nullsmtpd==0.5.1

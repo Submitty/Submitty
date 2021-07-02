@@ -2,13 +2,13 @@
  * Styles common to multiple notebook builder widgets
  */
 .notebook-builder-widget {
-    border: 3px solid var(--viewed_content);
-    background-color: var(--viewed_content);
+    border: 3px solid var(--viewed-content);
+    background-color: var(--viewed-content);
     border-radius: 25px;
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 20px;
-    display:flex;
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
@@ -83,7 +83,7 @@
 }
 
 .short-answer-widget .type-options {
-    display:flex;
+    display: flex;
 }
 
 .short-answer-widget .type-options :first-child {
@@ -193,7 +193,7 @@
 }
 
 .image-widget .image-col-large {
-    flex: 7
+    flex: 7;
 }
 
 .image-widget .image-options input,
@@ -206,8 +206,8 @@
  * Form options widget styles
  */
 .form-options-widget {
-    border: 3px solid #F7D8BA;
-    background-color: #F7D8BA;
+    border: 3px solid var(--notebook-builder-form-options-orange);
+    background-color: var(--notebook-builder-form-options-orange);
 }
 
 .form-options-widget,
@@ -225,8 +225,8 @@
  */
 .itempool-widget,
 .itempool-selector {
-    border: 3px solid #CAF1DE;
-    background-color: #CAF1DE;
+    border: 3px solid var(--notebook-builder-itempool-green);
+    background-color: var(--notebook-builder-itempool-green);
 }
 
 .itempool-widget .selector-widget,
@@ -234,8 +234,8 @@
 .itempool-widget .image-widget,
 .itempool-widget .markdown-widget,
 .itempool-widget .short-answer-widget {
-    border: 3px solid #CAF1DE;
-    background-color: #CAF1DE;
+    border: 3px solid var(--notebook-builder-itempool-green);
+    background-color: var(--notebook-builder-itempool-green);
 }
 
 .itempool-widget .group-buttons {
