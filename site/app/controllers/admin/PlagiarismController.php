@@ -209,6 +209,7 @@ class PlagiarismController extends AbstractController {
             }
         }
         else {
+            // we have to use copy() here so that the permissions won't get messed up
             if (!@copy($temporary_file_path, FileUtils::joinPaths($target_dir, $filename))) {
                 throw new \Exception("Upload failed: Could not copy file");
             }
