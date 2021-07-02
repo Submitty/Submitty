@@ -37,6 +37,12 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
         panelHeight = panelEle.getBoundingClientRect().height;
         panelWidth = panelEle.getBoundingClientRect().width;
 
+        document.documentElement.style.setProperty(
+            'cursor',
+            dragBarSel === '.two-panel-drag-bar' ? 'col-resize' : 'ns-resize',
+            'important',
+        );
+
         // Attach the listeners to `document`
         document.addEventListener('mousemove', mouseMoveHandler);
         document.addEventListener('mouseup', mouseUpHandler);
@@ -46,8 +52,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
 
     const mouseUpHandler = () => {
         // remove the dragging CSS props to go back to initial styling
-        dragbar.style.removeProperty('cursor');
-        document.body.style.removeProperty('cursor');
+        document.documentElement.style.removeProperty('cursor');
         document.body.style.removeProperty('user-select');
         document.body.style.removeProperty('pointer-events');
         dragbar.style.removeProperty('filter');
@@ -75,13 +80,9 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
             panelEle.style.width = `${updateValue}%`;
         }
 
-        // consistent mouse pointer during dragging
-        document.body.style.cursor = 'col-resize';
         // Disable text selection when dragging
         document.body.style.userSelect = 'none';
         document.body.style.pointerEvents = 'none';
-        // Add blurry effect on drag-bar
-        dragbar.style.filter = 'blur(5px)';
 
         // Callback function
         if (typeof callback === 'function') {

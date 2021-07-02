@@ -672,7 +672,8 @@ class ForumThreadView extends AbstractView {
             "edit_url" => $this->core->buildCourseUrl(['forum']),
             "current_user" => $this->core->getUser()->getId(),
             "user_group" => $this->core->getUser()->getGroup(),
-            "thread_exists" => $thread_exists
+            "thread_exists" => $thread_exists,
+            "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories'])
         ]);
     }
 

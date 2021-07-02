@@ -17,7 +17,7 @@ use DateTime;
 class CalendarInfo extends AbstractModel {
 
     /**
-     * @var array<string, array<string, string|DateTime>>
+     * @var array<string, array<string, string|bool>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value
      * contains an array with a structure of
      * 'gradeable_id' => string   (the id of the item, reserved row and useless for now)
@@ -25,12 +25,15 @@ class CalendarInfo extends AbstractModel {
      * 'semester'     => string   (the semester of which the item belongs)
      * 'course'       => string   (the title of the course of which the item belongs)
      * 'url'          => string   (the url of the clickable button)
-     * 'submission'   => DateTime (the timestamp of the item, shown in the popup tooltip)
+     * 'onclick'      => string   (the onclick js function of the clickable button)
+     * 'submission'   => string   (the timestamp of the item, shown in the popup tooltip)
      * 'status'       => string   (the status of the gradeable, open/closed/grading..., is used to show different
      *                             colors of item, relation between color and integer are recorded in css)
      * 'status_note'  => string   (a string describing this status)
-     * 'grading_open' => DateTime (reserved, useless for now. Can be empty)
-     * 'grading_due'  => DateTime (reserved, useless for now. Can be empty)
+     * 'grading_open' => string   (reserved, useless for now. Can be empty)
+     * 'grading_due'  => string   (reserved, useless for now. Can be empty)
+     * 'show_due'     => bool     (whether to show the due date when mouse is hovering over),
+     * 'icon'         => string   (the icon showed before the item),
      */
     private $items_by_date = [];
 
@@ -55,11 +58,14 @@ class CalendarInfo extends AbstractModel {
      * from a GradeableList object.
      *
      * @param Core $core
-     * @param GradeableList $gradeable_list container of gradeables in the system
+     * @param array $gradeables_of_user container of gradeables in the system
      * @return CalendarInfo
      */
-    public static function loadGradeableCalendarInfo(Core $core, GradeableList $gradeable_list): CalendarInfo {
+    public static function loadGradeableCalendarInfo(Core $core, array $gradeables_of_user): CalendarInfo {
         $info = new CalendarInfo($core);
+        $date_format = $core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
+
+        $gradeable_list = new GradeableList($core, $core->getUser(), $gradeables_of_user["gradeables"]);
 
         // get the gradeables from the GradeableList and group them by section
         $gradeable_list_sections = [
@@ -77,25 +83,31 @@ class CalendarInfo extends AbstractModel {
             $curr_section["section_id"] = NavigationView::gradeableSections[$section]["section_id"];
             $curr_section['gradeables'] = [];
 
-            $status_note = $curr_section["title"];
-            if ($curr_section["subtitle"] !== '') {
-                $status_note .= " ({$curr_section["subtitle"]})";
-            }
             // Iterate over the Gradeable objects in current section and summarize data
             foreach ($gradeables as $id => $gradeable) {
                 /** @var Gradeable $gradeable */
                 [$semester, $course_title, $gradeable_id] = unserialize($id);
+
+                // Get the submit button for the gradeable to retrieve the gradeable information
+                /** @var Button|null $submit_btn */
+                $submit_btn = $gradeables_of_user["submit_btns"][$id];
+
                 $currGradeable = [
                     'gradeable_id' => $gradeable_id,
                     'title' => $gradeable->getTitle(),
                     'semester' => $semester,
                     'course' => $course_title,
                     'url' => $info->core->buildUrl(['courses', $semester, $course_title, 'gradeable', $gradeable->getId()]),
-                    'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate() : '',
+                    'onclick' => '',
+                    'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format($date_format) : '',
                     'status' => (string) $section,
-                    'status_note' => $status_note,
-                    'grading_open' => $gradeable->getGradeStartDate(),
-                    'grading_due' => $gradeable->getGradeDueDate()
+                    'status_note' => ($submit_btn === null) ? "N/A" : $submit_btn->getTitle(),
+                    'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
+                    'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
+                    'class' => ($submit_btn === null) ? "" : explode(' ', $submit_btn->getClass())[1],
+                    'disabled' => !($submit_btn === null) && $submit_btn->isDisabled(),
+                    'show_due' => true,
+                    'icon' => '',
                 ];
 
                 // Put gradeables in current section by their id which consists of semester, course title and gradeable id

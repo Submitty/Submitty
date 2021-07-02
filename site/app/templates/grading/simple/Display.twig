@@ -34,16 +34,32 @@
     </div>
 
     <div class="column-wrapper" style="margin: 1em 0;">
-        <p>
             {% if action == 'lab' %}
-                No Color - No Credit<br />
-                Dark Blue - Full Credit<br />
-                Light Blue - Half Credit<br />
-                Red - [SAVE ERROR] Refresh Page
+                <ul id="details-legend" class="table-bordered">
+                    <li>
+                        No Color - No Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-full-credit simple-icon"></i>
+                        Full Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-half-credit simple-icon"></i>
+                        Half Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-save-error simple-icon"></i>
+                        [SAVE ERROR] Refresh Page
+                    </li>
+                </ul>
             {% else %}
-                Red - [SAVE ERROR] Refresh Page
+                <ul id="details-legend" class="table-bordered">
+                    <li>
+                        <i class="fas fa-square simple-save-error simple-icon"></i>
+                        [SAVE ERROR] Refresh Page
+                    </li>
+                </ul>
             {% endif %}
-        </p>
 
         <div class="row-wrapper">
             {#
@@ -283,20 +299,32 @@
         </td>
     {% endif %}
 
+    <script>
+        function adjustHeight(el){
+            el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+        }
+        function minimizeHeight(el) {
+            el.style.height = '30px';
+        }
+    </script>
+
     {% set text_start = components_numeric|length %}
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
-            <input
-                class="option-small-box cell-grade" tabindex="0"
-                type="text"
-                id="cell-{{ index }}-{{ text_start + loop.index0 }}"
-                value="{{ component_grade.getComment() }}"
-                onclick="this.select()"
-                data-id="{{ component.getId() }}"
-                aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}" 
-            />
+            <textarea class="option-small-box cell-grade"
+                  tabindex="0" id="cell-{{ index }}-{{ text_start + loop.index0 }}"
+                  contenteditable
+                  onclick="this.select()"
+                  onfocus="adjustHeight(this);"
+                  onblur="minimizeHeight(this);"
+                  onkeyup="adjustHeight(this);"
+                  data-id="{{ component.getId() }}"
+                  aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
+                  rows="1"
+                  style="resize: vertical;"
+            >{{ component_grade.getComment() }}</textarea>
         </td>
     {% endfor %}
 {% endmacro %}

@@ -238,13 +238,25 @@ class NotificationFactory {
                 continue;
             }
             if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
+                $user = $this->core->getQueries()->getUserById($email->getUserId());
+                if ($user->getEmailBoth()) {
+                    $flattened_emails[] = $email->getSubject();
+                    $flattened_emails[] = $email->getBody();
+                    $flattened_emails[] = $email->getUserId();
+                    $flattened_emails[] = $user->getSecondaryEmail();
+                    $flattened_emails[] = $this->core->getConfig()->getSemester();
+                    $flattened_emails[] = $this->core->getConfig()->getCourse();
+                }
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
+                $flattened_emails[] = $user->getEmail();
+                $flattened_emails[] = $this->core->getConfig()->getSemester();
+                $flattened_emails[] = $this->core->getConfig()->getCourse();
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 3);
+            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 6);
         }
     }
 }

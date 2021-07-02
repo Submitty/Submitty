@@ -52,7 +52,7 @@
                                 <tr>
                                     <td>{{ gradeable.course }}</td>
                                     <td><a href="{{ gradeable.url }}">{{ gradeable.title }}</a></td>
-                                    <td>{{ (gradeable.submission != '') ? gradeable.submission|date(date_format) : '' }}</td>
+                                    <td>{{ gradeable.submission }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

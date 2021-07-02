@@ -65,7 +65,7 @@ apt-get install -qqy scrot
 
 apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb \
 p7zip-full patchutils libpq-dev unzip valgrind zip libboost-all-dev gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp flex bison poppler-utils
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 
 apt-get install -qqy ninja-build
 
@@ -79,6 +79,11 @@ apt-get install -qqy cmake
 
 # for Lichen (Plagiarism Detection)
 apt-get install -qqy python-clang-6.0
+
+# Install OpenJDK8 Non-Interactively
+echo "installing java8"
+apt-get install -qqy openjdk-8-jdk
+update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick

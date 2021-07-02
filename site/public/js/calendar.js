@@ -67,6 +67,44 @@ function dateToStr(year, month, day) {
 }
 
 /**
+ * Create a HTML element that contains the calendar item (button/link/text).
+ *
+ * @param item : array the calendar item
+ * @returns {string} the HTML string containing the calendar item
+ */
+function generateCalendarItem(item) {
+    // When hovering over an item, shows the name and due date
+    // Due date information
+    let due_string = '';
+    if (item['submission'] !== '') {
+        due_string = `Due: ${item['submission']}`;
+    }
+
+    // Put detail in the tooltip
+    let tooltip = `Course: ${item['course']}&#10;` +
+                  `Title: ${item['title']}&#10;`;
+    if (item['status_note'] !== '') {
+        tooltip += `Status: ${item['status_note']}&#10;`;
+    }
+    if (due_string !== '') {
+        tooltip += `${due_string}`;
+    }
+    // Put the item in the day cell
+    const link = (!item['disabled']) ? item['url'] : '';
+    const onclick = item['onclick'];
+    const icon = item['icon'];
+    const disabled = item['disabled'] ? 'disabled' : '';
+    return `<a class="btn ${item['class']} cal-gradeable-status-${item['status']} cal-gradeable-item"
+           title="${tooltip}" 
+           ${(link !== '') ? `href="${link}"` : ''} 
+           ${(onclick !== '') ? `onclick="${onclick}"` : ''} 
+           ${disabled}>
+          ${(icon !== '') ? `<i class="fas ${icon} cal-icon"></i>` : ''} 
+          ${item['title']}
+        </a>`;
+}
+
+/**
  * Creates a HTML table cell that contains a date.
  *
  * @param year : int the year of the date
@@ -80,14 +118,13 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     const cell_date_str = dateToStr(year, month ,day);
     let content;
     if (view_semester) {
-        content = `<td class="cal-day-cell cal-cell-expand" id=${cell_date_str}>`;
+        content = `<td class="cal-day-cell cal-cell-expand" id="cell-${cell_date_str}">`;
     }
     else {
-        content = `<td class="cal-day-cell" id=${cell_date_str}>`;
+        content = `<td class="cal-day-cell" id="cell-${cell_date_str}">`;
     }
-    content += '<div>';
     // Title of the day cell
-    content += '<div>';
+    content += '<div class="cal-cell-title-panel">';
     if (view_semester) {
         content += `<span class="cal-curr-month-date cal-day-title">${monthNamesShort[month]} ${day},</span>`;
     }
@@ -113,30 +150,10 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     // List all gradeables of other items
     content += '<div class="cal-cell-items-panel">';
     for (const i in gradeables_by_date[cell_date_str]) {
-        // When hovering over an item, shows the name and due date
-        const gradeable = gradeables_by_date[cell_date_str][i];
-        // Due date information
-        let due_string = '';
-        if (gradeable['submission'] !== '') {
-            const due_time = new Date(`${gradeable['submission']['date'].replace(/\s/, 'T')}Z`);
-            due_string = `Due: ${(due_time.getMonth() + 1)}/${(due_time.getDate())}/${due_time.getFullYear()} @ ${due_time.getHours()}:${due_time.getMinutes()} ${gradeable['submission']['timezone']}`;
-        }
-        // Put detail in the tooltip
-        const tooltip = `Course: ${gradeable['course']}&#10;` +
-                        `Title: ${gradeable['title']}&#10;` +
-                        `Status: ${gradeable['status_note']}&#10;` +
-                        `${due_string}`;
-        // Put the item in the day cell
-        content += `
-        <a class="cal-gradeable-status-${gradeable['status']} cal-gradeable-item"
-           title="${tooltip}"
-           href="${gradeable['url']}">
-          ${gradeable['title']}
-        </a>`;
+        content += generateCalendarItem(gradeables_by_date[cell_date_str][i]);
     }
     content += `
-    </div>
-  </div>
+      </div>
 </td>
     `;
     return content;
