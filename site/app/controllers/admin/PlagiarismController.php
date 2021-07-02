@@ -728,7 +728,7 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        try{
+        try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (\Exception $e) {
