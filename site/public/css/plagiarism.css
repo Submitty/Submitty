@@ -8,6 +8,10 @@
     width: 100%;
 }
 
+.plag-table-cont th {
+    white-space: nowrap;
+}
+
 td .plag-action-btn-cont {
     display: flex;
 }

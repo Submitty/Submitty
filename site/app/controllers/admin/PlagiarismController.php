@@ -66,6 +66,21 @@ class PlagiarismController extends AbstractController {
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
+    /**
+     * This function validates a given gradeable and config ID to make sure they are valid.
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @return bool
+     */
+    private function verifyGradeableAndConfigAreValid(string $gradeable_id, string $config_id): bool {
+        // check for backwards crawling
+        if (str_contains($gradeable_id, '..') || str_contains($config_id, '..')) {
+            echo('Error: path contains invalid component "..".');
+            return false;
+        }
+        return true;
+    }
+
 
     private function getGradeablesFromPriorTerm() {
         // TODO: Implement.
@@ -431,6 +446,13 @@ class PlagiarismController extends AbstractController {
         }
 
 
+        // Check for invalid gradeable/config IDs
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            $this->core->addErrorMessage("Error: Invalid gradeable ID or config ID");
+            $this->core->redirect($return_url);
+        }
+
+
         // Create directory structure //////////////////////////////////////////
         if (!is_dir($this->getConfigDirectoryPath($gradeable_id, $config_id))) {
             FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id), "true", 0770);
@@ -511,14 +533,18 @@ class PlagiarismController extends AbstractController {
             "config_id" => $config_id
         ];
 
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            return "Error: Invalid gradeable ID or config ID";
+        }
+
         $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
 
         if (file_exists($lichen_job_file) && !is_writable($lichen_job_file)) {
-            return "Failed to create lichen job. Try again";
+            return "Error: Failed to create lichen job. Try again";
         }
 
         if (file_put_contents($lichen_job_file, json_encode($lichen_job_data, JSON_PRETTY_PRINT)) === false) {
-            return "Failed to write lichen job file. Try again";
+            return "Error: Failed to write lichen job file. Try again";
         }
         return null;
     }
@@ -588,10 +614,17 @@ class PlagiarismController extends AbstractController {
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
+        // Error checking
         if (!file_exists($config_path)) {
             $this->core->addErrorMessage("Saved configuration not found.");
             $this->core->redirect($return_url);
         }
+
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            $this->core->addErrorMessage("Error: Invalid gradeable ID or config ID");
+            $this->core->redirect($return_url);
+        }
+
 
         $saved_config = json_decode(file_get_contents($config_path), true);
         $title = "";
@@ -612,6 +645,11 @@ class PlagiarismController extends AbstractController {
     public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id) {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
+
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            $this->core->addErrorMessage("Error: Invalid gradeable ID or config ID");
+            $this->core->redirect($return_url);
+        }
 
         if (file_exists($this->getQueuePath($gradeable_id, $config_id)) || file_exists($this->getProcessingQueuePath($gradeable_id, $config_id))) {
             $this->core->addErrorMessage("A job is already running for this configuration. Try again after a while.");
@@ -663,10 +701,8 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        // check for backwards crawling
-        if (str_contains($gradeable_id, '..') || str_contains($config_id, '..')) {
-            echo('Error: path contains invalid component "..".');
-            return;
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            return "Error: Invalid gradeable ID or config ID";
         }
 
         $log_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "logs", "lichen_job_output.txt");
@@ -692,9 +728,15 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null) {
-        $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
+
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            $return = ['error' => 'Error: Invalid gradeable ID or config ID'];
+            $return = json_encode($return);
+            echo($return);
+            return;
+        }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -785,7 +827,11 @@ class PlagiarismController extends AbstractController {
      * @return array
      */
     public function getColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2, string $version_user_2, string $codebox): array {
-        $course_path = $this->core->getConfig()->getCoursePath();
+        // This should never be run because this should be caught in the function which calls this but we check anyway
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            return ["Error: Invalid gradeable ID or config ID"];
+        }
+
         $color_info = [];
 
         //Represents left and right display users
@@ -897,6 +943,16 @@ class PlagiarismController extends AbstractController {
     public function ajaxGetMatchingUsers(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
+
+        // error checking
+        if (!$this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id)) {
+            echo "Error: Invalid gradeableID or config ID";
+            return;
+        }
+        if (str_contains($user_id_1, '..') || str_contains($version_user_1, '..')) {
+            echo('Error: path contains invalid component ".."');
+            return;
+        }
 
         $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "ranking.txt");
 
