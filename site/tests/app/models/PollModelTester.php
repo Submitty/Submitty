@@ -120,7 +120,7 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($my_polls[2]->getResponseString(3), "Green");
         $this->assertEquals($my_polls[2]->getResponseString(-1), "No Response");
         $this->assertEquals($my_polls[1]->getAllResponsesString([0 => 0, 1 => 1, 2 => 2, 3 => 3]), "Red, Blue, Yellow, Green");
-        $this->assertEquals($my_polls[1]->getAllResponsesString([0 => 0, 1 => 2, 2= > 3]), "Red, Yellow, Green");
+        $this->assertEquals($my_polls[1]->getAllResponsesString([0 => 0, 1 => 2, 2 => 3]), "Red, Yellow, Green");
         $this->assertEquals($my_polls[1]->getAllResponsesString([0 => 0, 1 => 1]), "Red, Blue");
         $this->assertEquals($my_polls[1]->getAllResponsesString([0 => 0, 1 => 2]), "Red, Yellow");
         $this->assertEquals($my_polls[1]->getAllResponsesString([0 => 0, 1 => 3]), "Red, Green");
