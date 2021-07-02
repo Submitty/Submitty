@@ -419,6 +419,7 @@
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
+
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
@@ -436,7 +437,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
         else {
@@ -455,17 +457,13 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
     }
     $(function() {
         $("#submit").click(function(e){ // Submit button
-            //don't allow submission if viewing inactive version
-            {% if viewing_inactive_version %}
-                alert('Must be on most recent version to make new submission');
-                return;
-            {% endif %}
             var user_id = "";
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
