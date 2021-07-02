@@ -1069,7 +1069,7 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $can_inquiry
+     * @param bool $can_inquirye
      * @return string
      */
     private function renderRegradeBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
