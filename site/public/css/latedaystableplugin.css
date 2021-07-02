@@ -17,13 +17,13 @@ fieldset > * {
     padding: 5px 10px;
 }
 
-#late-day-table td:nth-of-type(1):before { content: "Assignment"; }
-#late-day-table td:nth-of-type(2):before { content: "Due date"; }
-#late-day-table td:nth-of-type(3):before { content: "Max late days"; }
-#late-day-table td:nth-of-type(4):before { content: "Days submitted late"; }
-#late-day-table td:nth-of-type(5):before { content: "Days from extensions"; }
-#late-day-table td:nth-of-type(6):before { content: "Status"; }
-#late-day-table td:nth-of-type(7):before { content: "Late days used here"; }
+#late-day-table td:nth-of-type(1)::before { content: "Assignment"; }
+#late-day-table td:nth-of-type(2)::before { content: "Due date"; }
+#late-day-table td:nth-of-type(3)::before { content: "Max late days"; }
+#late-day-table td:nth-of-type(4)::before { content: "Days submitted late"; }
+#late-day-table td:nth-of-type(5)::before { content: "Days from extensions"; }
+#late-day-table td:nth-of-type(6)::before { content: "Status"; }
+#late-day-table td:nth-of-type(7)::before { content: "Late days used here"; }
 
 @media (min-width: 831px) {
     #late-day-table {
@@ -38,7 +38,7 @@ fieldset > * {
         background: var(--standard-hover-light-gray);
     }
 
-    #late-day-table td:before {
+    #late-day-table td::before {
         content: none !important;
     }
 }
