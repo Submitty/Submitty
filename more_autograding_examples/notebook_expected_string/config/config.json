@@ -280,7 +280,7 @@ for i in range(2, 100):\n\
         { "title":"C++ Code for Primes -- Testing", "testcase_label":"prime_cpp_testing",
           "points":4,
           "command" : "./cpp_prime.out",
-          "validation":[ { "method":"diff", "actual_file":"STDOUT.txt", "expected_file":"prime_answer.txt",
+          "validation":[ { "method":"diff", "actual_file":"STDOUT.txt", "expected_string":"2\n3\n5\n7\n11\n13\n17\n19\n23\n29\n31\n37\n41\n43\n47\n53\n59\n61\n67\n71\n73\n79\n83\n89\n97",
                            "show_message":"on_failure", "deduction": 1.0, "failure_message":"Incorrect Answer/Output"
                          },
                          {
@@ -293,7 +293,7 @@ for i in range(2, 100):\n\
         { "title":"Python Code for Primes", "testcase_label":"prime_python",
           "points":5,
           "command" : "python3 ./python_codebox.py",
-          "validation":[ { "method":"diff", "actual_file":"STDOUT.txt", "expected_file":"2\n3\n5\n7\n11\n13\n17\n19\n23\n29\n31\n37\n41\n43\n47\n53\n59\n61\n67\n71\n73\n79\n83\n89\n97",
+          "validation":[ { "method":"diff", "actual_file":"STDOUT.txt", "expected_string":"2\n3\n5\n7\n11\n13\n17\n19\n23\n29\n31\n37\n41\n43\n47\n53\n59\n61\n67\n71\n73\n79\n83\n89\n97",
                            "show_message":"on_failure", "deduction" : 1.0, "failure_message":"Incorrect Answer/Output"
                          },
                          {
