@@ -25,7 +25,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      */
     private function verifyGradeableAndConfigAreValid(string $gradeable_id, string $config_id): void {
-        if($gradeable_id !== "" && !$this->core->getQueries()->existsGradeable($gradeable_id)) {
+        if ($gradeable_id !== "" && !$this->core->getQueries()->existsGradeable($gradeable_id)) {
             throw new \Exception("Error: Invalid gradeable ID provided: {$gradeable_id}");
         }
         // check for backwards crawling
@@ -351,7 +351,7 @@ class PlagiarismController extends AbstractController {
         }
 
         // Check for invalid gradeable/config IDs
-        try{
+        try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (\Exception $e) {
@@ -670,7 +670,7 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
 
-        try{
+        try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (\Exception $e) {
@@ -763,7 +763,7 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
 
         // error checking
-        try{
+        try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (\Exception $e) {
@@ -1017,7 +1017,7 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
 
         // error checking
-        try{
+        try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (\Exception $e) {
