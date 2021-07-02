@@ -71,12 +71,11 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
     }
 
-    public function getSections(): Collection {
+    /**
+     * @return Collection
+     */
+    public function getSections() {
         return $this->sections;
-    }
-
-    public function deleteSections(): void {
-        $this->sections->clear();
     }
 
     public function getPath(): string {

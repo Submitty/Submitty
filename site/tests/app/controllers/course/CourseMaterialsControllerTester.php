@@ -2,11 +2,12 @@
 
 namespace tests\app\controllers\course;
 
-use app\controllers\AbstractController;
 use app\controllers\course\CourseMaterialsController;
+use app\entities\course\CourseMaterialSection;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\models\CourseMaterial;
+use app\entities\course\CourseMaterial;
+use Doctrine\ORM\EntityRepository;
 use phpmock\phpunit\PHPMock;
 use tests\BaseUnitTest;
 use ZipArchive;
@@ -86,13 +87,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     public function buildCourseMaterial(string $name): CourseMaterial {
         $details = [
             'path' => $this->upload_path . $name,
-            'section_lock' => false,
             'hidden_from_students' => false,
             'priority' => 0,
-            'release_date' => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
+            'release_date' => $this->core->getDateTimeNow(),
             'type' => 0
         ];
-        return new CourseMaterial($this->core, $details);
+        return new CourseMaterial($details);
     }
 
     public function testCourseMaterialsUpload() {
@@ -106,13 +106,16 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $course_material = $this->buildCourseMaterial("/$name");
 
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->once())
-            ->method('createCourseMaterial')
+            ->method('persist')
             ->with($course_material);
 
+        $this->core->getCourseEntityManager()
+            ->expects($this->once())
+            ->method('flush');
+
         $_POST['requested_path'] = '';
-        $_POST['sections_lock'] = false;
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
 
@@ -153,11 +156,14 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $course_materials[] = $this->buildCourseMaterial($name);
         }
 
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->exactly(4))
-            ->method('createCourseMaterial')
+            ->method('persist')
             ->withConsecutive([$course_materials[0]], [$course_materials[1]], [$course_materials[2]], [$course_materials[3]]);
 
+        $this->core->getCourseEntityManager()
+            ->expects($this->once())
+            ->method('flush');
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -166,7 +172,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         //create a zip file of depth = 2 with 2 files in each level.
         $fake_files = $this->buildFakeZipFile('foo.zip', 1, 2, 2);
         $_POST['requested_path'] = '';
-        $_POST['sections_lock'] = false;
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
 
@@ -204,15 +209,18 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $course_material = $this->buildCourseMaterial("/$name");
 
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->once())
-            ->method('createCourseMaterial')
+            ->method('persist')
             ->with($course_material);
+
+        $this->core->getCourseEntityManager()
+            ->expects($this->exactly(2))
+            ->method('flush');
 
         $controller = new CourseMaterialsController($this->core);
 
         $_POST['requested_path'] = '';
-        $_POST['sections_lock'] = false;
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
 
@@ -222,22 +230,22 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_POST['fn'][] = FileUtils::joinPaths($this->upload_path, $name);
         $new_date = new \DateTime('2005-01-01');
-        $new_date = $new_date->format('Y-m-d H:i:sO');
 
-        $this->core->getQueries()
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
             ->expects($this->once())
-            ->method('getCourseMaterial')
-            ->with($_POST['fn'][0])
+            ->method('findOneBy')
+            ->with(['path' => $this->upload_path . "/" . $name])
             ->willReturn($course_material);
+        $this->core->getCourseEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(CourseMaterial::class)
+            ->willReturn($repository);
 
         $course_material->setReleaseDate($new_date);
 
-        $this->core->getQueries()
-            ->expects($this->once())
-            ->method('updateCourseMaterial')
-            ->with($course_material);
-
-        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date);
+        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date->format('Y-m-d H:i:sO'));
         $exptected_ret = ['status' => 'success', 'data' => 'Time successfully set.'];
         $this->assertEquals($exptected_ret, $ret->json);
     }
@@ -258,15 +266,18 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $course_material = $this->buildCourseMaterial("/$name");
 
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->once())
-            ->method('createCourseMaterial')
+            ->method('persist')
             ->with($course_material);
+
+        $this->core->getCourseEntityManager()
+            ->expects($this->exactly(3))
+            ->method('flush');
 
         $controller = new CourseMaterialsController($this->core);
 
         $_POST['requested_path'] = '';
-        $_POST['sections_lock'] = false;
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
 
@@ -276,23 +287,26 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_POST = [];
 
-        $_POST['sections_lock'] = "true";
         $_POST['sections'] = '1,2';
         $_POST['requested_path'] = FileUtils::joinPaths($this->upload_path, $name);
 
-        $this->core->getQueries()
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
             ->expects($this->once())
-            ->method('getCourseMaterial')
-            ->with($_POST['requested_path'])
+            ->method('findOneBy')
+            ->with(['path' => $this->upload_path . "/" . $name])
             ->willReturn($course_material);
-
-        $course_material->setSectionLock(true);
-        $course_material->setSections(['1','2']);
-
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->once())
-            ->method('updateCourseMaterial')
-            ->with($course_material);
+            ->method('getRepository')
+            ->with(CourseMaterial::class)
+            ->willReturn($repository);
+
+        $sections = ['1', '2'];
+        foreach ($sections as $section) {
+            $course_material_section = new CourseMaterialSection($section, $course_material);
+            $course_material->addSection($course_material_section);
+        }
 
         $ret = $controller->ajaxEditCourseMaterialsFiles();
         $exptected_ret = ['status' => 'success', 'data' => 'Successfully uploaded!'];
@@ -300,7 +314,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     /**
-     *
+     * @runInSeparateProcess
      */
     public function testDeleteCourseMaterial() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
@@ -314,14 +328,16 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         file_put_contents($this->upload_path . "/" .  $name, 'a');
         $this->buildFakeFile($name);
 
-        //$this->buildMockQueries([$name], true);
-
         $course_material = $this->buildCourseMaterial("/$name");
 
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->once())
-            ->method('createCourseMaterial')
+            ->method('persist')
             ->with($course_material);
+
+        $this->core->getCourseEntityManager()
+            ->expects($this->exactly(2))
+            ->method('flush');
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -335,10 +351,24 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $path = $this->upload_path . "/" . $name;
 
         $this->core->getAccess()->method('resolveDirPath')->willReturn($path);
-        $this->core->getQueries()
+
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
             ->expects($this->once())
-            ->method('deleteCourseMaterial')
-            ->with($path);
+            ->method('findOneBy')
+            ->with(['path' => $this->upload_path . "/" . $name])
+            ->willReturn($course_material);
+        $this->core->getCourseEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(CourseMaterial::class)
+            ->willReturn($repository);
+
+        $this->core->getCourseEntityManager()
+            ->expects($this->once())
+            ->method('remove')
+            ->with($course_material);
+
         $controller->deleteCourseMaterial($path);
 
         $files = FileUtils::getAllFiles($this->upload_path);
@@ -359,14 +389,16 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $_POST['hide_from_students'] = false;
         $_POST['sort_priority'] = 0;
 
-        //$this->buildMockQueries(['foo/foo2/' . $name], true);
-
         $course_material = $this->buildCourseMaterial("/foo/foo2/$name");
 
-        $this->core->getQueries()
+        $this->core->getCourseEntityManager()
             ->expects($this->once())
-            ->method('createCourseMaterial')
+            ->method('persist')
             ->with($course_material);
+
+        $this->core->getCourseEntityManager()
+            ->expects($this->once())
+            ->method('flush');
 
         $controller = new CourseMaterialsController($this->core);
 

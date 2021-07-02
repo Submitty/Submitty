@@ -248,7 +248,7 @@ class CourseMaterialsController extends AbstractController {
             else {
                 $sections = explode(",", $_POST['sections']);
             }
-            $course_material->deleteSections();
+            $course_material->getSections()->clear();
             $this->core->getCourseEntityManager()->flush();
             if ($sections != null) {
                 foreach ($sections as $section) {
@@ -258,7 +258,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
         else {
-            $course_material->deleteSections();
+            $course_material->getSections()->clear();
             $this->core->getCourseEntityManager()->flush();
         }
         if (isset($_POST['hide_from_students'])) {
@@ -500,12 +500,10 @@ class CourseMaterialsController extends AbstractController {
                 'priority' => $details['priority']
             ]);
             $this->core->getCourseEntityManager()->persist($course_material);
-            $this->core->getCourseEntityManager()->flush();
             if ($details['section_lock']) {
                 foreach ($details['sections'] as $section) {
                     $course_material_section = new CourseMaterialSection($section, $course_material);
                     $course_material->addSection($course_material_section);
-                    $this->core->getCourseEntityManager()->persist($course_material_section);
                 }
             }
         }

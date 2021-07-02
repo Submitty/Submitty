@@ -20,6 +20,7 @@ class CourseMaterialSection {
     protected $section_id;
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="\app\entities\course\CourseMaterial", inversedBy="sections")
      * @var CourseMaterial
      */

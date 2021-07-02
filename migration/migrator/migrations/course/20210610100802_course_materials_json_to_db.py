@@ -61,6 +61,8 @@ def up(config, database, semester, course):
                     if itemvalue['external_link'] is True:
                         material_type = 1
                     sections = []
+                    if 'sort_priority' not in itemvalue:
+                        itemvalue['sort_priority'] = 0.0
                     if 'sections' in itemvalue:
                         for section in itemvalue['sections']:
                             sections.append(section)
@@ -74,7 +76,7 @@ def up(config, database, semester, course):
                             priority
                         )
                         VALUES (
-                            :type, :path, :release_date, :hidden_from_students, :priority, :section_lock
+                            :type, :path, :release_date, :hidden_from_students, :priority
                         ) ON CONFLICT(path) DO UPDATE SET
                         release_date = EXCLUDED.release_date,
                         hidden_from_students = EXCLUDED.hidden_from_students,
