@@ -1,5 +1,4 @@
 {% import _self as self %} {# Required to use macros in same template #}
-
 <div class="content">
     {#
         Default is viewing your sections
@@ -48,8 +47,8 @@
                     {{ sort == 'random' ? "Default Order" : "Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
-                <a class="btn btn-default"
-                   href="{{ toggle_anon_mode_url }}">
+                <a class="btn btn-default" id="toggle-anon-button"
+                   href="" onclick="changeAnon()">
                     {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
                 </a>
                 {% endif %}
@@ -115,7 +114,7 @@
                             </a>
                         </th>
                     {% else %}
-                        <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">{{ column.title }}</th>
+                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>
@@ -330,7 +329,7 @@
 
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(self, context, section, graded_gradeable, index, info, column) %}
-    <td>
+    <td style="text-align: center">
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
             {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
@@ -339,7 +338,7 @@
 
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) %}
-    <td class="td-graded-questions">
+    <td class="td-graded-questions" style="text-align: center">
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
@@ -687,3 +686,16 @@
 {% endmacro %}
 
 {# /Column functions #}
+<script>
+    function changeAnon() {
+        const status = {{ anon_mode ? 1 : 0}};
+        if (status) {
+            document.cookie = 'anon_mode=off;';
+        }
+        else {
+            document.cookie = 'anon_mode=on;';
+        }
+        location.reload();
+    }
+</script>
+

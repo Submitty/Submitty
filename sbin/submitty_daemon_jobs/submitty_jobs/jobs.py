@@ -169,6 +169,13 @@ class RunLichen(CourseGradeableJob):
 
         lichen_script = Path(INSTALL_DIR, 'sbin', 'run_lichen_plagiarism.py')
 
+        # delete existing data
+        lichen_dir = Path(DATA_DIR, 'courses', semester, course, 'lichen')
+        if not lichen_dir.exists():
+            return
+        for folder in ['ranking', 'tokenized', 'concatenated', 'hashes', 'matches']:
+            shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
+
         # create directory for logging
         logging_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable)
         if(not os.path.isdir(logging_dir)):
@@ -197,16 +204,16 @@ class DeleteLichenResult(CourseGradeableJob):
 
         with log_file.open('w') as open_file:
             lichen_json = 'lichen_{}_{}_{}.json'.format(semester, course, gradeable)
+
             config = Path(lichen_dir, 'config', lichen_json)
             if config.exists():
                 config.unlink()
-            ranking = Path(lichen_dir, 'ranking', '{}.txt'.format(gradeable))
-            if ranking.exists():
-                ranking.unlink()
-            for folder in ['provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
+
+            for folder in ['ranking', 'provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
             open_file.write(msg)
+
 
 class BulkUpload(CourseJob):
     required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']

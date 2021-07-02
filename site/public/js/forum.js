@@ -164,6 +164,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
     }
     var submit_url = form.attr('action');
 
+    form.find("[type=submit]").prop('disabled', true);
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -175,13 +177,11 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 var json = JSON.parse(data);
 
                 if(json["status"] === 'fail') {
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["message"] + '</div>';
-                    $('#messages').append(message);
+                    displayErrorMessage(json['message']);
                     return;
                 }
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             // Now that we've successfully submitted the form, clear autosave data
@@ -206,8 +206,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             window.location.href = json['data']['next_page'];
         },
         error: function(){
-            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + error_message + '</div>';
-            $('#messages').append(message);
+            displayErrorMessage(error_message);
             return;
         }
     });
@@ -286,8 +285,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         uploadImageAttachments('#'+ post_id + '-reply .upload_attachment_box')
 
       } catch (error) {
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new post. Please refresh the page.</div>';
-        $('#messages').append(message);
+        displayErrorMessage('Error parsing new post. Please refresh the page.');
         return;
       }
     }
@@ -351,8 +349,7 @@ function socketNewOrEditThreadHandler(thread_id, edit=false){
         if ($('data#current-thread').val() != thread_id)
           $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
       } catch(err) {
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new thread. Please refresh the page.</div>';
-        $('#messages').append(message);
+        displayErrorMessage('Error parsing new thread. Please refresh the page.');
         return;
       }
     },
@@ -650,20 +647,17 @@ function changeThreadStatus(thread_id) {
             try {
                 var json = JSON.parse(data);
             } catch(err) {
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail') {
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
 
             window.socketClient.send({'type': "resolve_thread", 'thread_id': thread_id});
             window.location.reload();
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
-            $('#messages').append(message);
+            displaySuccessMessage('Thread marked as resolved.');
         },
         error: function() {
             window.alert('Something went wrong when trying to mark this thread as resolved. Please try again.');
@@ -688,13 +682,11 @@ function modifyOrSplitPost(e) {
         var json = JSON.parse(response);
       }
       catch (e) {
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please refresh the page.</div>';
-        $('#messages').append(message);
+        displayErrorMessage('Error parsing data. Please try again.');
         return;
       }
       if(json['status'] === 'fail'){
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-        $('#messages').append(message);
+        displayErrorMessage(json['message']);
         return;
       }
 
@@ -739,13 +731,11 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             try {
                 var json = JSON.parse(data);
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
             json = json['data'];
@@ -1147,13 +1137,11 @@ function showSplit(post_id) {
       try {
         var json = JSON.parse(data);
       } catch (err) {
-        var message = '<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-        $('#messages').append(message);
+        displayErrorMessage('Error parsing data. Please try again.');
         return;
       }
       if(json['status'] === 'fail'){
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-        $('#messages').append(message);
+        displayErrorMessage(json['message']);
         return;
       }
       json = json['data'];
@@ -1205,13 +1193,11 @@ function showHistory(post_id) {
             try {
                 var json = JSON.parse(data);
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
             $("#popup-post-history").show();
@@ -1267,17 +1253,14 @@ function addNewCategory(csrf_token){
             try {
                 var json = JSON.parse(data);
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
-            $('#messages').append(message);
+            displaySuccessMessage(`Successfully created category ${escapeSpecialChars(newCategory)}.`);
             $('#new_category_text').val("");
             // Create new item in #ui-category-list using dummy category
             var category_id = json['data']['new_id'];
@@ -1315,17 +1298,14 @@ function deleteCategory(category_id, category_desc, csrf_token){
             try {
                 var json = JSON.parse(data);
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
-            $('#messages').append(message);
+            displaySuccessMessage(`Successfully deleted category ${escapeSpecialChars(category_desc)}.`);
             $('#categorylistitem-'+category_id).remove();
             refreshCategories();
         },
@@ -1355,17 +1335,14 @@ function editCategory(category_id, category_desc, category_color, csrf_token) {
             try {
                 var json = JSON.parse(data);
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully updated!</div>';
-            $('#messages').append(message);
+            displaySuccessMessage(`Successfully updated category "${category_desc}"!`);
             setTimeout(function() {removeMessagePopup('theid');}, 1000);
             if(category_color !== null) {
                 $("#categorylistitem-"+category_id).css("color",category_color);
@@ -1477,17 +1454,14 @@ function reorderCategories(csrf_token) {
             try {
                 var json = JSON.parse(data);
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again').
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully reordered categories.';
-            $('#messages').append(message);
+            displaySuccessMessage('Successfully reordered categories.');
             setTimeout(function() {removeMessagePopup('theid');}, 1000);
             refreshCategories();
         },
@@ -1525,13 +1499,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                    $('#messages').append(message);
+                    displayErrorMessage('Error parsing data. Please try again').
                     return;
                 }
                 if(json['status'] === 'fail'){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                    $('#messages').append(message);
+                    displayErrorMessage(json['message']);
                     return;
                 }
                 var new_url = "";
@@ -1600,25 +1572,22 @@ function bookmarkThread(thread_id, type){
     });
 }
 
+function toggleMarkdown(post_box_id) {
+  if(!post_box_id) post_box_id = '';
+  $(`#markdown_buttons_${post_box_id}`).toggle();
+  $(this).toggleClass('markdown-active'); 
+  $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
+  $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+}
 
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
-    }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+function previewForumMarkdown(){
+  const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
+  const reply_box = $(`textarea#reply_box_${post_box_num}`);
+  const preview_box = $(`#preview_box_${post_box_num}`);
+  const preview_button = $(this);
+  const post_content = reply_box.val();
+
+  previewMarkdown(reply_box, preview_box, preview_button, { content: post_content });
 }
 
 function checkInputMaxLength(obj){
@@ -1696,13 +1665,11 @@ function loadThreadHandler(){
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                    $('#messages').append(message);
+                    displayErrorMessage('Error parsing data. Please try again').
                     return;
                 }
                 if(json['status'] === 'fail'){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                    $('#messages').append(message);
+                    displayErrorMessage(json['message']);
                     return;
                 }
                 if (typeof json.data.merged !== 'undefined') {
@@ -1732,20 +1699,43 @@ function loadThreadHandler(){
 }
 
 function loadAllInlineImages() {
-  $(".attachment-btn").each(function () {
+  const toggleButton = $('#toggle-attachments-button');
+
+  const allShown = $('.attachment-well').filter(function(){ return $(this).is(':visible') }).length === $('.attachment-well').length;
+  //if the button were to show them all but they have all been individually shown,
+  //we should hide them all
+  if (allShown && toggleButton.hasClass('show-all')) {
+    toggleButton.removeClass('show-all');
+  }
+
+  const allHidden = $('.attachment-well').filter(function(){ return !($(this).is(':visible')) }).length === $('.attachment-well').length;
+  //if the button were to hide them all but they have all been individually hidden,
+  //we should show them all
+  if (allHidden && !(toggleButton.hasClass('show-all'))) {
+    toggleButton.addClass('show-all');
+  }
+
+  $('.attachment-btn').each(function (i) {
     $(this).click();
+
+    //overwrite individual button click behavior to decide if it should be shown/hidden
+    if(toggleButton.hasClass('show-all')){
+      $('.attachment-well').eq(i).show();
+    } else {
+      $('.attachment-well').eq(i).hide();
+    }
   });
-  $(".attachment-well").each(function () {
-    $(this).show();
-  });
+
+  toggleButton.toggleClass('show-all');
 }
 
 function loadInlineImages(encoded_data) {
   var data = JSON.parse(encoded_data);
   var attachment_well = $("#"+data[data.length-1]);
 
-  if (attachment_well.is(':visible'))
+  if (attachment_well.is(':visible')){
     attachment_well.hide();
+  }
   else {
     attachment_well.show();
   }
@@ -1946,14 +1936,12 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
             try {
                 var json = JSON.parse(data);
             } catch(err) {
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again. Error is ' + err +'</div>';
-                $('#messages').append(message);
+                displayErrorMessage(`Error parsing data. Please try again. Error is ${err}`);
                 return;
             }
 
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
 
