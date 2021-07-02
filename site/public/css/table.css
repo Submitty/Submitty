@@ -11,7 +11,7 @@
 
 .mobile-table {
     width: 100%;
-    text-align: center;  
+    text-align: center;
 }
 
 .mobile-table caption {
@@ -32,27 +32,26 @@
     padding: 0.5em;
 }
 
-
 @media (max-width: 830px) {
-    table.mobile-table, 
-    .mobile-table thead, 
-    .mobile-table tbody, 
-    .mobile-table th, 
-    .mobile-table td, 
-    .mobile-table tr { 
-        display: block; 
+    table.mobile-table,
+    .mobile-table thead,
+    .mobile-table tbody,
+    .mobile-table th,
+    .mobile-table td,
+    .mobile-table tr {
+        display: block;
         border: none;
     }
 
     /* Hide table headers */
-    .mobile-table thead tr { 
+    .mobile-table thead tr {
         position: absolute;
         width: 1px;
         height: 1px;
         padding: 0;
         margin: -1px;
         overflow: hidden;
-        clip: rect(0,0,0,0);
+        clip: rect(0, 0, 0, 0);
         border: 0;
     }
 
@@ -61,7 +60,7 @@
         background: none !important;
     }
 
-    .mobile-table td { 
+    .mobile-table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -72,15 +71,15 @@
     .mobile-table tr:nth-child(even) td {
         background: var(--standard-hover-light-gray);
     }
-    
+
     .mobile-table tr:nth-child(odd) td {
         background: var(--standard-light-gray);
     }
 
-    .mobile-table td:before { 
+    .mobile-table td::before {
         padding-right: 1em;
         font-weight: bold;
-    }    
+    }
 }
 
 @media (min-width: 831px) {
@@ -96,7 +95,7 @@
         padding: 0;
     }
 
-    .mobile-table td:before {
+    .mobile-table td::before {
         content: none !important;
     }
 

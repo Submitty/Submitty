@@ -6,10 +6,10 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
-            <label for="poll-name">
+            <label for="poll-name" class="option-title">
                 Poll Name:
-                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             </label>
+            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             <br/> <br/>
 
             <p>Question:</p>
@@ -27,16 +27,20 @@
             } only %}
             <br/><br/>
 
-            <label for="image-file">
+            {% include "polls/PollType.twig" %}
+
+            <br/>
+
+            <label for="image-file" class="option-title">
                 Optional Image:
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
-  	    <br/><br/>
+            <br/><br/>
 
-            <label for="poll-date">
+            <label for="poll-date" class="option-title">
                 Expected release date:
-                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             <br/>
 
             <hr>
@@ -51,10 +55,12 @@
 
             <span id="empty-name-error" class="red-message polls-submit-error">Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+            <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
+            <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
-  	    <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>	
+            <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -65,13 +71,12 @@
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
-            <label for="poll-name">
+            <label for="poll-name" class="option-title">
                 Poll Name:
-                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             </label>
+            <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             <br/> <br/>
 
-            
             <p>Question:</p>
             {% include "misc/MarkdownArea.twig" with {
                 "markdown_area_id" : "poll-question",
@@ -85,7 +90,11 @@
             } only %}
             <br/><br/>
 
-            <label for="image-file">
+            {% include "polls/PollType.twig" %}
+
+            <br/>
+
+            <label for="image-file" class="option-title">
                 Optional Image:
             </label>
             <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
@@ -100,20 +109,21 @@
             {% endif %}
             <br/>
 
-            <label for="poll-date">
+            <label for="poll-date" class="option-title">
                 Expected release date:
-                <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             <br/>
             <hr>
             <h2> Responses: </h2>
             <div id="responses">
                 {% set index = 0%}
+                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
                 {% for response in poll.getResponses() %}
                     <div id="response_{{response}}_wrapper">
                         <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
                         <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
-                        <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
+                        <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
                         <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                         rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
                         <div class="move-btn up-btn">
@@ -137,9 +147,11 @@
 
             <span id="empty-name-error" class="red-message polls-submit-error" hidden>Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+            <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
         </form>
@@ -150,15 +162,29 @@
 <script>
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
-	
+    let poll_type = "{{ poll_type }}";
+
     flatpickr('.poll-date', {
         allowInput: true,
-        dateFormat: "{{ date_format }}",
+        dateFormat: "Y-m-d",
         onReady: (a, b, fp) => {
           fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
         }
     });
-	
+
+    function changePollType() {
+        let count = $(".poll_response").length;
+        for (let i = 0; i < count; i++) {
+            if ($("#poll-type-single-response-survey").is(":checked")
+                || $("#poll-type-multiple-response-survey").is(":checked")) {
+                $("input[name='is_correct_" + i + "']").prop('checked', true);
+                $("input[name='is_correct_" + i + "']").css({"display":"none"});
+            } else {
+                $("input[name='is_correct_" + i + "']").css({"display":"inline-block"});
+            }
+        }
+    }
+
     function checkSize(uploadedFile) {
         if (uploadedFile.files[0].size > MAX_SIZE) {
             size_is_valid = false;
@@ -174,11 +200,18 @@
         while($(`.option_id[value="${first_free_id}"]`).length != 0){
             first_free_id++;
         }
+        let hidden_style = "";
+        let is_checked = "";
+        if ($("#poll-type-single-response-survey").is(":checked")
+            || $("#poll-type-multiple-response-survey").is(":checked")) {
+            hidden_style = "style='display:none'"
+            is_checked = "checked";
+        }
         $("#responses").append(`
             <div id="response_${count}_wrapper">
                 <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
                 <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
-                <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_${count}">
+                <input aria-label="Is correct" class="correct-box" type="checkbox" name="is_correct_${count}" ${hidden_style} ${is_checked}>
                 <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
@@ -259,6 +292,15 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-question-error").show();
+        } else if (!$('#poll-type-single-response-single-correct').is(':checked')
+                   && !$('#poll-type-single-response-multiple-correct').is(':checked')
+                   && !$('#poll-type-single-response-survey').is(':checked')
+                   && !$('#poll-type-multiple-response-exact').is(':checked')
+                   && !$('#poll-type-multiple-response-flexible').is(':checked')
+                   && !$('#poll-type-multiple-response-survey').is(':checked')) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#question-type-error").show();
         } else if (!size_is_valid) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -275,6 +317,11 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#correct-response-count-error").show();
+        } else if ($(".correct-box:checked").length > 1
+                  && $('#poll-type-single-response-single-correct').is(':checked')) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#single-response-error").show();
         } else {
             $("#poll-form-submit").prop("disabled", false);
             $(".polls-submit-error").hide();
@@ -330,6 +377,29 @@
         })
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
+        let submit_form = false;
+        $("#edit-poll-form").submit(function(event) {
+            if (!submit_form) {
+                if ((poll_type != "single-response"
+                    && ($('#poll-type-single-response-single-correct').is(':checked')
+                        || $('#poll-type-single-response-multiple-correct').is(':checked')
+                        || $('#poll-type-single-response-survey').is(':checked')))
+                || (poll_type != "multiple-response"
+                    && ($('#poll-type-multiple-response-exact').is(':checked')
+                        || $('#poll-type-multiple-response-flexible').is(':checked')
+                        || $('#poll-type-multiple-response-survey').is(':checked')))) {
+                    // don't submit yet
+                    event.preventDefault();
+                    // send warning
+                    if (confirm("Changing the poll question type may lead to data of students' answers being " +
+                               "lost if students have already begun submitting responses to this poll. " +
+                               "Are you sure you want to change the type of this poll?")) {
+                        submit_form = true;
+                        $("#edit-poll-form").submit();
+                    }
+                }
+            }
+        });
     });
 
 </script>

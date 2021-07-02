@@ -34,6 +34,7 @@ class MarkdownWidget extends Widget {
                     markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
                     markdown_area_name : '',
                     markdown_area_value : this.state.markdown_string,
+                    class : 'markdown-input',
                     placeholder : 'Enter text or markdown...',
                     preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,

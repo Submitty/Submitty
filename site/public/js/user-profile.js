@@ -64,8 +64,9 @@ function updateUserPreferredNames () {
           const {data} = response;
           displaySuccessMessage(data.message);
           //update the preferred names
-          $("#firstname-row .value").text(data.first_name);
-          $("#lastname-row .value").text(data.last_name);
+          const icon = '<i class="fas fa-pencil-alt"></i>';
+          $("#firstname-row .icon").html(icon + ' ' + data.first_name);
+          $("#lastname-row .icon").html(icon + ' ' + data.last_name);
           //update the data attributes
           first_name_field.data('current-name', data.first_name);
           last_name_field.data('current-name', data.last_name);
@@ -155,8 +156,9 @@ function updateUserSecondaryEmail () {
                     if (response.status === "success") {
                         const { data } = response;
                         displaySuccessMessage(data.message);
-                        $('#secondary-email-row .value').text(data.secondary_email);
-                        $('#secondary-email-notify-row .value').text(data.secondary_email_notify);
+                        const icon = '<i class="fas fa-pencil-alt"></i>';
+                        $('#secondary-email-row .icon').html(icon + ' ' + data.secondary_email);
+                        $('#secondary-email-notify-row .icon').html(icon + ' ' + data.secondary_email_notify);
                         second_email.data('current-second-email', data.secondary_email);
                         second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
                     }
@@ -173,6 +175,19 @@ function updateUserSecondaryEmail () {
     }
     $('.popup-form').css('display', 'none');
     return false;
+}
+
+function changeSecondaryEmail() {
+    const email = $('#user-secondary-email-change').val();
+    const checkbox = $('#user-secondary-email-notify-change');
+
+    if (email.length > 0) {
+        checkbox.prop('disabled', false);
+    }
+    else {
+        checkbox.prop('disabled', true);
+        checkbox.prop('checked', false);
+    }
 }
 
 $(document).ready(function() {

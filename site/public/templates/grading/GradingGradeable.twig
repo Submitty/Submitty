@@ -17,7 +17,7 @@
                 'precision': gradeable.precision,
                 'show_mark_list': false,
                 'component_version_conflict': graded_component.graded_version is defined and graded_component.graded_version != display_version,
-                'peer_component' : component.peer,
+                'peer_component' : component.peer_component,
                 'itempool_id': graded_gradeable.itempool_items[component.id]|default("")
             } %}
         </div>
