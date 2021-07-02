@@ -593,7 +593,7 @@ function gotoMainPage() {
 function gotoPrevStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
-  let force_grading_sections = localStorage.getItem("general-setting-arrow-force-grading-sections") === "true";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -619,8 +619,8 @@ function gotoPrevStudent() {
       break;
   }
 
-  if (force_grading_sections) {
-    window_location += "&force_grading_sections=true";
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {
@@ -640,7 +640,7 @@ function gotoPrevStudent() {
 function gotoNextStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
-  let force_grading_sections = localStorage.getItem("general-setting-arrow-force-grading-sections") === "true";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -666,8 +666,8 @@ function gotoNextStudent() {
       break;
   }
 
-  if (force_grading_sections) {
-    window_location += "&force_grading_sections=true";
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {

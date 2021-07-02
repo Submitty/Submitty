@@ -1251,7 +1251,7 @@ class ElectronicGraderController extends AbstractController {
         $component_id = "-1",
         $anon_mode = false,
         $filter = 'default',
-        $force_grading_sections = false
+        $navigate_assigned_students_only = "true"
     ) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
@@ -1280,7 +1280,7 @@ class ElectronicGraderController extends AbstractController {
 
             // Only need to instantiate this order if the user is a full access grader
             // Limited access graders should never need the order that includes all sections
-            if ($this->core->getUser()->accessFullGrading() && !$force_grading_sections) {
+            if ($this->core->getUser()->accessFullGrading() && $navigate_assigned_students_only === "false") {
                 $order_all_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
                 $order_all_sections->sort($sort, $direction);
             }
@@ -1306,13 +1306,13 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
-            if ($to === 'prev' && !$force_grading_sections && $this->core->getUser()->accessFullGrading()) {
+            if ($to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
                 $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'prev') {
                 $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
-            elseif ($to === 'next' && !$force_grading_sections && $this->core->getUser()->accessFullGrading()) {
+            elseif ($to === 'next' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
                 $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next') {

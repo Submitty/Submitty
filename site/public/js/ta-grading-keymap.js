@@ -31,13 +31,18 @@ let settingsData = [
                 default: "Prev/Next Student"
             },
             {
-                name: "Force prev/next student arrow to only go to assigned sections",
-                storageCode: "general-setting-arrow-force-grading-sections",
-                options: {
-                    "No": "false",
-                    "Yes": "true"
+                name: "Prev/Next buttons navigate through students in assigned registration/rotation sections only",
+                storageCode: "general-setting-navigate-assigned-students-only",
+                options: function() {
+                    if ($('#ta-grading-settings-list').attr("data-full_access") !== "true") {
+                        return {};
+                    }
+                    return {
+                        "No": "false",
+                        "Yes": "true"
+                    };
                 }, 
-                default: "No"
+                default: "Yes"
             }
         ]
     },
@@ -184,6 +189,10 @@ Twig.twig({
 function loadTAGradingSettingData() {
     for(var i = 0; i < settingsData.length; i++) {
         for(var x = 0; x < settingsData[i].values.length; x++) {
+            if(typeof(settingsData[i].values[x].options) === "function") {
+                settingsData[i].values[x].options = settingsData[i].values[x].options();
+            }
+
             settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
             if(settingsData[i].values[x].currValue === null) {
                 localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
