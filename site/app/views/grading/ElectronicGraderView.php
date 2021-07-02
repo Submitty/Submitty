@@ -55,7 +55,7 @@ class ElectronicGraderView extends AbstractView {
     ) {
 
         $peer = false;
-        if ($gradeable->isPeerGrading()) {
+        if ($gradeable->hasPeerComponent()) {
             $peer = true;
         }
         $graded = 0;
@@ -440,7 +440,7 @@ HTML;
      */
     public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode) {
         $peer = false;
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
         //Each table column is represented as an array with the following entries:
@@ -623,7 +623,7 @@ HTML;
                 $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
                 $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}');";
-                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
+                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"] ?? null;
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
                 $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
                 $info["edited_past_lock_date"] = $edited_past_lock_date;
@@ -635,18 +635,18 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
+                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
                     $info["graded_groups"][] = 4;
                 }
-                elseif (($component->isPeer() && $graded_component != null)) {
+                elseif (($component->isPeerComponent() && $graded_component != null)) {
                     //peer submitted and graded
                     $info["graded_groups"][] = 4;
                 }
-                elseif (($component->isPeer() && $graded_component === null)) {
+                elseif (($component->isPeerComponent() && $graded_component === null)) {
                     //peer submitted but not graded
                     $info["graded_groups"][] = "peer-null";
                 }
-                elseif ($component->isPeer() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
+                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
                     //peer not submitted
                     $info["graded_groups"][] = "peer-no-submission";
                 }
@@ -865,10 +865,10 @@ HTML;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
         $isRegradePanel = false;
-        $is_peer_grading = false;
+        $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
-        if ($gradeable->isPeerGrading()) {
+        if ($gradeable->hasPeerComponent()) {
             $anon_mode = false;
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
@@ -877,7 +877,7 @@ HTML;
             else {
                 $isPeerPanel = false;
                 $isStudentInfoPanel = false;
-                $is_peer_grading = true;
+                $is_peer_grader = true;
             }
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
@@ -899,6 +899,9 @@ HTML;
         $return = "";
         $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
 
+        //$ta_grading is used in AutoGradingView to determine if hidden autograding points will be shown, we want to always show them to graders unless they are peer graders
+        $ta_grading = $this->core->getUser()->getGroup() !== User::GROUP_STUDENT;
+
         $this->core->getOutput()->addInternalJs("resizable-panels.js");
 
         $return .= <<<HTML
@@ -906,7 +909,7 @@ HTML;
         		    <div class="content-items-container">
                     <div class="content-item content-item-right">
 HTML;
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
@@ -937,10 +940,10 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grading);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
 
         if ($isPeerPanel) {
@@ -1138,11 +1141,12 @@ HTML;
      * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+            "ta_grading" => $ta_grading
         ]);
     }
 
@@ -1384,7 +1388,7 @@ HTML;
      * @param bool $show_silent_edit
      * @return string
      */
-    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grading) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader) {
         $return = "";
         $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
@@ -1434,7 +1438,7 @@ HTML;
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
-                "is_peer_grading" => $is_peer_grading
+                "is_peer_grader" => $is_peer_grader
             ]);
     }
 
@@ -1450,7 +1454,7 @@ HTML;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
-            if ($value->isPeer() || !$is_student) {
+            if ($value->isPeerComponent() || !$is_student) {
                 $id = $value->getId();
                 $solution_components[] = [
                     'id' => $id,
@@ -1537,7 +1541,7 @@ HTML;
         $peer_details["graders"] = [];
         $marks = [];
         foreach ($components as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 foreach ($peers_to_list as $peer) {
                     $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById([$peer])[$peer]);
                     if ($graded_component !== null) {
