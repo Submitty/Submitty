@@ -6,6 +6,7 @@
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Time</th>
+        <th scope="col">Total Time Paused</th>
         <th scope="col">Queue</th>
         <th scope="col">Remove</th>
         <th scope="col" class="mobile-hide">ID</th>
@@ -23,19 +24,19 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['paused'] %}
-                  <button type="submit" class="btn btn-primary help_btn" title="Student paused">
+                  <button type="submit" class="btn btn-primary help_btn" title="Student paused" data-ready="false">
                     <i class="fas fa-pause"></i>
                     Help</button>
                 {% elseif viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
-                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week">
+                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week" data-ready="true">
                     <i class="fas fa-star"></i>
                     Help</button>
                 {% elseif viewer.firstTimeInQueueToday(entry['last_time_in_queue']) %}
-                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today">
+                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today" data-ready="true">
                     <i class="fas fa-star-half"></i>
                     Help</button>
                 {% else %}
-                  <button type="submit" class="btn btn-primary help_btn">Help</button>
+                  <button type="submit" class="btn btn-primary help_btn" data-ready="true">Help</button>
                 {% endif %}
               </form>
             </td>
@@ -62,6 +63,13 @@
           {% else %}
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
           {% endif %}
+
+          {% if entry['time_paused_start'] == NULL or entry['current_state'] == 'being_helped' %}
+            <td>---</td>
+          {% else %}
+            <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_paused_start']) }}"></td>
+          {% endif %}
+
           <td>{{ entry['queue_code'] }}</td>
           <td>
             <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">

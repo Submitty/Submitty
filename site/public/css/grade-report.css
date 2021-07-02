@@ -2,6 +2,7 @@
     padding: 20px;
     margin: 15px 0;
 }
+
 #grade-report h1 {
     font-weight: 500;
 }
@@ -39,6 +40,7 @@
         padding: 30px;
         margin: 30px;
     }
+
     #grade-report h1 {
         font-weight: bold;
     }
@@ -50,9 +52,11 @@
         text-align: left;
         flex-direction: row;
     }
+
     .card-btn-cont {
         margin: 0;
     }
+
     .card-btn-info {
         margin-top: 0;
     }

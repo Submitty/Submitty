@@ -328,6 +328,7 @@ CREATE TABLE public.gradeable (
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
+    g_allow_custom_marks boolean DEFAULT true NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
@@ -738,7 +739,8 @@ CREATE TABLE public.polls (
     question text NOT NULL,
     status text NOT NULL,
     release_date date NOT NULL,
-    image_path text
+    image_path text,
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
 );
 
 
@@ -821,7 +823,9 @@ CREATE TABLE public.queue (
     contact_info text,
     last_time_in_queue timestamp with time zone,
     time_help_start timestamp with time zone,
-    paused boolean DEFAULT false NOT NULL
+    paused boolean DEFAULT false NOT NULL,
+    time_paused integer DEFAULT 0 NOT NULL,
+    time_paused_start timestamp with time zone
 );
 
 
@@ -1058,6 +1062,7 @@ CREATE TABLE public.threads (
     is_visible boolean NOT NULL,
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
+    pinned_expiration timestamp with time zone DEFAULT '1900-01-01 00:00:00-05'::timestamp with time zone NOT NULL,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 
@@ -2327,4 +2332,3 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
-
