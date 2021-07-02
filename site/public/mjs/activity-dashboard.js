@@ -3,28 +3,8 @@
  * This function will toggle between sorting by ascending order and descending order
  * @param {int} n
  */
-export function sortTable(n) {
-    let i, dir;
+export function sortTable(n, dir) {
     const table = document.getElementById('data-table');
-
-    if ($(`#${n}`).children('i').hasClass('fa-angle-up')) {
-        $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
-        dir = 'desc';
-    }
-    else {
-        $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
-        dir = 'asc';
-    }
-
-    for (i = 0; i < 10; i++) {
-        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
-            $(`#${i}`).children('i').removeClass('fa-angle-up');
-        }
-        else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
-            $(`#${i}`).children('i').removeClass('fa-angle-down');
-        }
-    }
-
     const merge = function(arr1, arr2) {
         const res = [];
         let i = 0, j = 0;
@@ -63,7 +43,7 @@ export function sortTable(n) {
     const rows = table.rows;
     const sorted = mergeSort(Array.prototype.slice.call(rows).slice(1));
     // inserting rows back into table to update the order
-    for (i = 0; i < table.rows.length-1; i++) {
+    for (let i = 0; i < table.rows.length-1; i++) {
         rows[i+1].parentNode.insertBefore(sorted[i], rows[i+1]);
     }
 }
@@ -79,10 +59,10 @@ export function comparator (row1, row2, n, dir) {
     }
     // They are not equal
     // Then check for lesser or greater relationships
-    if (dir == 'desc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
+    if (dir == 'asc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
         return true;
     }
-    else if (dir == 'asc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
+    else if (dir == 'desc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
         return true;
     }
     return false;
@@ -109,6 +89,21 @@ export function helper (x, y, i) {
             }
             return x < y;
         }
+    }
+    else if ((i <= 7 && i >= 4) || i == 9) {
+        const dateX = new Date(x);
+        const dateY = new Date(y);
+        if (dateX.toString() == 'Invalid Date') {
+            return true;
+        }
+        else if (dateY.toString() == 'Invalid Date') {
+            return false;
+        }
+
+        if (dateX < dateY) {
+            return true;
+        }
+        return false;
     }
     else {
         // other columns
@@ -184,21 +179,44 @@ export function clearFields() {
 }
 
 export function init() {
-    sortTable(0);
-    document.getElementById('0').addEventListener('click', () => sortTable(0));
-    document.getElementById('1').addEventListener('click', () => sortTable(1));
-    document.getElementById('2').addEventListener('click', () => sortTable(2));
-    document.getElementById('3').addEventListener('click', () => sortTable(3));
-    document.getElementById('4').addEventListener('click', () => sortTable(4));
-    document.getElementById('5').addEventListener('click', () => sortTable(5));
-    document.getElementById('6').addEventListener('click', () => sortTable(6));
-    document.getElementById('7').addEventListener('click', () => sortTable(7));
-    document.getElementById('8').addEventListener('click', () => sortTable(8));
-    document.getElementById('9').addEventListener('click', () => sortTable(9));
-    document.getElementById('10').addEventListener('click', () => sortTable(10));
+    columnOnClick(0);
+    document.getElementById('0').addEventListener('click', () => columnOnClick(0));
+    document.getElementById('1').addEventListener('click', () => columnOnClick(1));
+    document.getElementById('2').addEventListener('click', () => columnOnClick(2));
+    document.getElementById('3').addEventListener('click', () => columnOnClick(3));
+    document.getElementById('4').addEventListener('click', () => columnOnClick(4));
+    document.getElementById('5').addEventListener('click', () => columnOnClick(5));
+    document.getElementById('6').addEventListener('click', () => columnOnClick(6));
+    document.getElementById('7').addEventListener('click', () => columnOnClick(7));
+    document.getElementById('8').addEventListener('click', () => columnOnClick(8));
+    document.getElementById('9').addEventListener('click', () => columnOnClick(9));
+    document.getElementById('10').addEventListener('click', () => columnOnClick(10));
 
     document.getElementById('clear-btn').addEventListener('click', () => clearFields());
     document.getElementById('apply-btn').addEventListener('click', () => applySettings());
+}
+
+export function columnOnClick(n){
+    let i, dir;
+
+    if ($(`#${n}`).children('i').hasClass('fa-angle-up')) {
+        $(`#${n}`).children('i').removeClass('fa-angle-up').addClass('fa-angle-down');
+        dir = 'asc';
+    }
+    else {
+        $(`#${n}`).children('i').removeClass('fa-angle-down').addClass('fa-angle-up');
+        dir = 'desc';
+    }
+
+    for (i = 0; i < 10; i++) {
+        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
+            $(`#${i}`).children('i').removeClass('fa-angle-up');
+        }
+        else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
+            $(`#${i}`).children('i').removeClass('fa-angle-down');
+        }
+    }
+    sortTable(n, dir);
 }
 
 document.addEventListener('DOMContentLoaded', () => init());
