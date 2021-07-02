@@ -23,7 +23,7 @@ class AutoGradingView extends AbstractView {
      * @param bool $show_hidden_details True to show the details of hidden testcases
      * @return string
      */
-    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false) {
+    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false, bool $ta_grading = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -82,9 +82,10 @@ class AutoGradingView extends AbstractView {
                 }
             }
 
-            $show_hidden_breakdown = $any_visible_hidden && $show_hidden;
+            $show_hidden_breakdown = $ta_grading || ($any_visible_hidden && $show_hidden);
             // &&($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
+
         // testcases should only be visible if autograding is complete
         if (!$incomplete_autograding) {
             foreach ($version_instance->getTestcases() as $testcase) {
@@ -349,7 +350,7 @@ class AutoGradingView extends AbstractView {
 
         // Get just the non-peer components.
         $ta_graded_components = array_filter($gradeable->getComponents(), function (Component $component) {
-            return $component->isPeer() === false;
+            return $component->isPeerComponent() === false;
         });
 
         $ta_grading_earned = 0;
@@ -448,7 +449,7 @@ class AutoGradingView extends AbstractView {
             $display_name = $comment_user->getDisplayedFirstName();
 
             // Skip peers.
-            if ($gradeable->isPeerGrading() && !$comment_user->accessGrading()) {
+            if ($gradeable->hasPeerComponent() && !$comment_user->accessGrading()) {
                 continue;
             }
 
@@ -533,7 +534,7 @@ class AutoGradingView extends AbstractView {
 
         // Get just the peer components.
         $peer_graded_components = array_filter($gradeable->getComponents(), function (Component $component) {
-            return $component->isPeer() === true;
+            return $component->isPeerComponent() === true;
         });
 
         $peer_component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$graders_found, &$peer_grading_earned) {
@@ -691,7 +692,7 @@ class AutoGradingView extends AbstractView {
             $comment_user = $this->core->getQueries()->getUserById($user_id);
 
             // Skip non-peers.
-            if ($gradeable->isPeerGrading() && $comment_user->accessGrading()) {
+            if ($gradeable->hasPeerComponent() && $comment_user->accessGrading()) {
                 continue;
             }
 
@@ -710,7 +711,7 @@ class AutoGradingView extends AbstractView {
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'overall_comments' => $overall_comments,
-            'is_peer' => $gradeable->isPeerGrading(),
+            'is_peer' => $gradeable->hasPeerComponent(),
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,
             'ordered_graders' => $ordered_graders,

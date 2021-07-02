@@ -49,7 +49,10 @@
                         {% else %}
                             <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" disabled/>
                         {% endif %}
-                        {{ poll.getResponseString(response) | markdown}}
+                        {% include "misc/Markdown.twig" with {
+                            "content" : poll.getResponseString(response),
+                            "style": "display: inline-block"
+                        } only %}
                         <br/>
                         <br/>
                     </div>
@@ -72,7 +75,10 @@
                         {% else %}
                             <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" disabled/>
                         {% endif %}
-                        {{ poll.getResponseString(response) | markdown}}
+                        {% include "misc/Markdown.twig" with {
+                            "content" : poll.getResponseString(response),
+                            "style" : "display: inline-block;"
+                        } only %}
                         <br/>
                         <br/>
                     </div>
