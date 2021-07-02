@@ -788,12 +788,17 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 var thread_title = json.title;
                 var thread_lock_date =  json.lock_thread_date;
                 var thread_status = json.thread_status;
+                var expiration = json.expiration;
                 $("#title").prop('disabled', false);
                 $(".edit_thread").show();
                 $('#label_lock_thread').show();
                 $("#title").val(thread_title);
                 $("#thread_status").val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
+                if (Date.parse(expiration) > new Date()) {
+                  $(".expiration").show();
+                }
+                $("#expirationDate").val(expiration);
 
                 // Categories
                 $(".cat-buttons").removeClass('btn-selected');
@@ -810,6 +815,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             else {
                 $("#title").prop('disabled', true);
                 $(".edit_thread").hide();
+                $(".expiration").hide();
                 $('#label_lock_thread').hide();
                 $("#thread_form").prop("ignore-cat",true);
                 $("#category-selection-container").hide();
@@ -1877,6 +1883,7 @@ function updateThread(e) {
     thread_status: $('#thread_status').val(),
     Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
     lock_thread_date: $('input#lock_thread_date').text(),
+    expirationDate: $('input#expirationDate').val(),
     cat,
     markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
   };
@@ -2046,6 +2053,10 @@ function saveCreateThreadToLocal() {
         if (pinThread !== undefined) {
             data.pinThread = pinThread;
         }
+        const expiration = $("#expirationDate").val();
+        if (expiration !== undefined) {
+            data.expiration = expiration;
+        }
 
         localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify(data));
     }
@@ -2074,14 +2085,20 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
+        $(".expiration").hide();
         if (data.hasOwnProperty('lockDate')) {
             $("#lock_thread_date").val(data.lockDate);
         }
-        if (data.hasOwnProperty('isAnnouncement')) {
+        if (data.isAnnouncement) {
             $("#Announcement").prop("checked", data.isAnnouncement);
+            $(".expiration").show();
         }
-        if (data.hasOwnProperty('pinThread')) {
+        if (data.pinThread) {
             $("#pinThread").prop("checked", data.pinThread);
+            $(".expiration").show();
+        }
+        if (data.hasOwnProperty('expiration')) {
+            $("#expirationDate").val(data.expiration);
         }
     }
 }

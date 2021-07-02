@@ -417,7 +417,7 @@ class ForumThreadView extends AbstractView {
         $activeThread = $this->core->getQueries()->getThread($currentThread);
 
         $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . $activeThread['title'];
-        $activeThreadAnnouncement = $activeThread['pinned'];
+        $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
 
         $thread_id = $activeThread['id'];
 
@@ -732,7 +732,7 @@ class ForumThreadView extends AbstractView {
                 $used_active = true;
                 $activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
                 $activeThread = $thread;
-                if ($thread["pinned"]) {
+                if ($thread["pinned_expiration"] > date("Y-m-d H:i:s")) {
                     $activeThreadAnnouncement = true;
                 }
                 if ($thread_id_p == -1) {
@@ -819,7 +819,7 @@ class ForumThreadView extends AbstractView {
                 "categories" => $categories_content,
                 "link" => $link,
                 "class" => $class,
-                "pinned" => $thread["pinned"],
+                "pinned" => $thread["pinned_expiration"] > date("Y-m-d H:i:s"),
                 "favorite" => $favorite,
                 "merged_thread_id" => $thread['merged_thread_id'],
                 "status" => $thread["status"],
@@ -1181,6 +1181,7 @@ class ForumThreadView extends AbstractView {
 
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
+        $expiration = $this->core->getDateTimeNow();
 
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
@@ -1192,7 +1193,8 @@ class ForumThreadView extends AbstractView {
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d')
         ]);
     }
 
