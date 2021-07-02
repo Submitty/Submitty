@@ -20,6 +20,15 @@ td .plag-action-btn-cont a:not(:last-child) {
     margin-right: 40px;
 }
 
+.config-id-title {
+    color: var(--standard-medium-gray);
+    font-weight: normal;
+}
+
+#result-title-bar {
+    margin-bottom: 10px;
+}
+
 .run-log-data {
     text-align: left;
     width: inherit;
