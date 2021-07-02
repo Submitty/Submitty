@@ -149,13 +149,13 @@
       alert("This browser does not support desktop notification");
     }
     else if (Notification.permission === "granted") {
-      new Notification("Notifications have been enabled. You will be notified only if you are not helping a student and a student is now waiting for help when there was previously nobody waiting for help.");
+      new Notification("Notifications have been enabled. You will be notified when a student joins a previously inactive queue.");
       setNotificationState(true);
     }
     else if (Notification.permission !== "denied") {
       Notification.requestPermission().then(function (permission) {
         if (permission === "granted") {
-          new Notification("Notifications have been enabled. You will be notified only if you are not helping a student and a student is now waiting for help when there was previously nobody waiting for help.");
+          new Notification("Notifications have been enabled. You will be notified when a student joins a previously inactive queue.");
           setNotificationState(true);
         }else{
           setNotificationState(false);
