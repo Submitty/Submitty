@@ -441,6 +441,7 @@ jobs:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
+              headless: true
 
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
