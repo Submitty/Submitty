@@ -257,7 +257,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.visit(fileTgt2);
         cy.reload(true);
-        cy.wait(500)
+        cy.wait(500);
         cy.get('.content').contains('Reason: Your section may not access this file');
 
         cy.logout();
