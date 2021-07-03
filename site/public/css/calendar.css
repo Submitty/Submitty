@@ -1,7 +1,7 @@
- /* the entire table of calendar */
+/* the entire table of calendar */
 .table-calendar {
     text-align: left;
-    border:1px solid black
+    border: 1px solid black;
 }
 
 /* the title at the top of the calendar table, showing month, year */
@@ -16,14 +16,14 @@
 
 .cal-btn {
     font-size: 28px;
-    padding-left:10px;
-    padding-right:10px;
+    padding-left: 10px;
+    padding-right: 10px;
     vertical-align: middle;
-    -moz-user-select:none;
-    -webkit-user-select:none;
-    -ms-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
 }
 
 a.cal-btn {
@@ -52,7 +52,6 @@ a.cal-btn:focus {
     margin-right: 20px;
 }
 
-
 #prev-month-switch {
     text-align: right;
 }
@@ -63,29 +62,29 @@ a.cal-btn:focus {
 
 .cal-month-title {
     font-size: 26px;
-    text-transform:uppercase;
-    border:0;
-    margin-top:0;
-    margin-bottom:0;
+    text-transform: uppercase;
+    border: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     line-height: 100%;
 }
 
 h2.cal-month-title {
-    margin-top:0;
-    margin-bottom:0;
+    margin-top: 0;
+    margin-bottom: 0;
     line-height: 100%;
 }
 
 .cal-year-title {
     font-size: 18px;
-    margin-top:0;
-    margin-bottom:0;
+    margin-top: 0;
+    margin-bottom: 0;
     line-height: 100%;
 }
 
 /* the row of Monday, Tuesday, ... */
 .cal-week-title-row {
-    margin-bottom: 20px
+    margin-bottom: 20px;
 }
 
 .cal-week-title {
@@ -93,31 +92,31 @@ h2.cal-month-title {
 }
 
 .cal-week-title-sun {
-    width: 12%
+    width: 12%;
 }
 
 .cal-week-title-mon {
-    width: 15%
+    width: 15%;
 }
 
 .cal-week-title-tue {
-    width: 15%
+    width: 15%;
 }
 
 .cal-week-title-wed {
-    width: 16%
+    width: 16%;
 }
 
 .cal-week-title-thu {
-    width: 15%
+    width: 15%;
 }
 
 .cal-week-title-fri {
-    width: 15%
+    width: 15%;
 }
 
 .cal-week-title-sat {
-    width: 12%
+    width: 12%;
 }
 
 /* the day number in each cell */
@@ -138,7 +137,7 @@ h2.cal-month-title {
 
 /* the day number in each cell if the day belongs to prev/next month of the month the calendar is viewing */
 .cal-next-month-date {
-    color:var(--standard-medium-dark-gray);
+    color: var(--standard-medium-dark-gray);
     font-style: italic;
     font-weight: bold;
 }
@@ -155,16 +154,16 @@ h2.cal-month-title {
 
 /* area in each day cell that lists the items (gradeables, etc) */
 .cal-cell-items-panel {
-    max-height:160px;
-    width:100%;
-    display:block;
-    overflow-y:auto;
+    max-height: 160px;
+    width: 100%;
+    display: block;
+    overflow-y: auto;
     overflow-x: hidden;
 }
 
- /* each item in the day cell */
+/* each item in the day cell */
 .cal-gradeable-item {
-    margin:1px;
+    margin: 1px;
     text-decoration: none;
     white-space: normal;
     font-size: 100%;
@@ -181,15 +180,13 @@ h2.cal-month-title {
     box-shadow: 0 1px 1px 0 var(--box-shadow-very-transparent), 0 2px 1px -1px var(--box-shadow-very-transparent), 0 1px 3px 0 var(--box-shadow-slightly-transparent);
 }
 
- /* each item in the day cell as a button */
-a.cal-gradeable-item {
-}
-
+/* each item in the day cell as a button */
 a.cal-gradeable-item:hover {
-    cursor:pointer;
+    cursor: pointer;
 }
 
 /* Item colors */
+
 /** Pure Text **/
 a.cal-gradeable-status-text {
     color: var(--text-black);
@@ -201,7 +198,7 @@ a.cal-gradeable-status-text {
 a.cal-gradeable-status-text:hover {
     color: var(--text-black);
     padding: 0 0 0 0;
-    cursor:default;
+    cursor: default;
     border: none;
 }
 
@@ -224,7 +221,7 @@ a.cal-gradeable-status-ann:hover {
     color: #218ffd;
     padding: 0 0 0 0;
     font-style: italic;
-    cursor:default;
+    cursor: default;
     border: none;
 }
 
@@ -256,40 +253,16 @@ a.cal-gradeable-status-link:focus {
     border: none;
 }
 
-/* Future homework */
-.cal-gradeable-status-0 {
-}
-
-/* Reserved: Beta homework */
-.cal-gradeable-status-1 {
-}
-
-/* OPEN TO SUBMIT */
-.cal-gradeable-status-2 {
-}
-
-/* PAST DUE / LATE SUBMIT */
-.cal-gradeable-status-3 {
-}
-
-/* CLOSED  being graded by TA/Instructor */
-a.cal-gradeable-status-4 {
-}
-
-/* GRADES AVAILABLE */
-a.cal-gradeable-status-5 {
-}
-
 @media (max-width: 800px) {
-    #calendar-list{
+    #calendar-list {
         margin: 0;
     }
 
-    #calendar-list td:nth-of-type(1):before { content: "Course"; }
-    #calendar-list td:nth-of-type(2):before { content: "Gradeable"; }
-    #calendar-list td:nth-of-type(3):before { content: "Submission Closes"; }
+    #calendar-list td:nth-of-type(1)::before { content: "Course"; }
+    #calendar-list td:nth-of-type(2)::before { content: "Gradeable"; }
+    #calendar-list td:nth-of-type(3)::before { content: "Submission Closes"; }
 
-    #calendar-list thead{
+    #calendar-list thead {
         display: none;
     }
 }
