@@ -8,7 +8,7 @@
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 20px;
-    display:flex;
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
@@ -83,7 +83,7 @@
 }
 
 .short-answer-widget .type-options {
-    display:flex;
+    display: flex;
 }
 
 .short-answer-widget .type-options :first-child {
@@ -193,7 +193,7 @@
 }
 
 .image-widget .image-col-large {
-    flex: 7
+    flex: 7;
 }
 
 .image-widget .image-options input,

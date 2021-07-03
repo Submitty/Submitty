@@ -12,7 +12,7 @@
     font-size: 31px;
 }
 
-.dropdown-btn .down{
+.dropdown-btn .down {
     transform: rotate(90deg);
 }
 
@@ -43,7 +43,7 @@
     display: inline;
 }
 
-input[type="radio"][disabled=""]:checked:before {
+input[type="radio"][disabled=""]:checked::before {
     content: "";
     display: block;
     position: relative;
