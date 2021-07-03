@@ -262,6 +262,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.visit('/');
         cy.wait(500);
         cy.logout();
+        cy.reload(true);
         cy.login();
 
         cy.visit(['sample', 'course_materials']);
@@ -304,6 +305,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.wait(500);
         cy.visit('/');
         cy.logout();
+        cy.reload(true);
 
         cy.login();
         cy.visit(['sample', 'course_materials']);
