@@ -256,7 +256,6 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
 
         cy.visit(fileTgt2);
-        cy.reload(true);
         cy.wait(500);
         cy.get('.content').contains('Reason: Your section may not access this file');
 
