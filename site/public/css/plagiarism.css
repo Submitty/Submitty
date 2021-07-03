@@ -49,7 +49,7 @@ input[type="radio"] {
 }
 
 .plag-data-group .plag-data {
-   flex: 1;
+    flex: 1;
 }
 
 input[type="text"] {
@@ -156,14 +156,14 @@ main#main.full-screen-mode {
     position: absolute;
     top: 0;
     left: 0;
-    margin:0;
+    margin: 0;
     z-index: 10;
     height: 100vh;
-    width:100vw;
+    width: 100vw;
 }
 
 main#main.full-screen-mode .plagiarism-result-cont {
-    margin:0;
+    margin: 0;
 }
 
 .full-screen-btn {
@@ -175,23 +175,23 @@ main#main.full-screen-mode .plagiarism-result-cont {
 }
 
 .code-cont {
-    position:relative;
+    position: relative;
     height: inherit;
-    overflow-y:hidden;
+    overflow-y: hidden;
 }
 
 .code-cont .sub {
     height: 100%;
-    width:100%;
+    width: 100%;
     display: flex;
 }
 
 .code-cont .sub-item {
-    line-height:1.5em;
-    overflow:auto;
-    padding:5px;
-    border: 2px solid #555;
-    background:white;
+    line-height: 1.5em;
+    overflow: auto;
+    padding: 5px;
+    border: 2px solid #555555;
+    background: white;
     min-width: 100px;
 }
 
@@ -210,7 +210,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
     cursor: col-resize;
 }
 
-.plag-drag-bar:after {
+.plag-drag-bar::after {
     content: "";
     width: 10px;
     height: 25%;
@@ -223,7 +223,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
     transform: translate(-50%, -50%);
 }
 
-.plag-drag-bar:hover:after {
+.plag-drag-bar:hover::after {
     filter: blur(5px);
 }
 
@@ -267,7 +267,6 @@ main#main.full-screen-mode .plagiarism-result-cont {
 }
 
 @media (min-width: 660px) {
-
     #save-configuration-form {
         width: 80%;
     }
@@ -296,16 +295,4 @@ main#main.full-screen-mode .plagiarism-result-cont {
         flex: 1;
         white-space: nowrap;
     }
-
-    /*td .plag-action-btn-cont a:not(:last-child) {*/
-    /*    margin-right: 20px;*/
-    /*}*/
-
-    /*.plag-data-group {*/
-    /*    flex-direction: row;*/
-    /*}*/
-
-    /*select[name="user_id_1"], a.toggle {*/
-    /*    max-width: 150px;*/
-    /*}*/
 }
