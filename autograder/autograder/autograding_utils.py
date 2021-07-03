@@ -624,7 +624,7 @@ def allow_only_one_part(path, log_path=os.devnull):
 # go through the testcase folder (e.g. test01/) and remove anything
 # that matches the test input (avoid archiving copies of these files!)
 def remove_test_input_files(overall_log, test_input_path, testcase_folder):
-    for path, subdirs, files in os.walk(test_input_path):
+    for path, _subdirs, files in os.walk(test_input_path):
         for name in files:
             relative = path[len(test_input_path)+1:]
             my_file = os.path.join(testcase_folder, relative, name)
@@ -729,7 +729,7 @@ def untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, my_dir):
 # Used by packer unpacker
 def zip_my_directory(path, zipfilename):
     zipf = zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED)
-    for root, dirs, files in os.walk(path):
+    for root, _dirs, files in os.walk(path):
         for my_file in files:
             relpath = root[len(path)+1:]
             zipf.write(os.path.join(root, my_file), os.path.join(relpath, my_file))
