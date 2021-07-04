@@ -5,14 +5,13 @@ const defaultFilePath = `/var/local/submitty/courses/${coursePath}`;
 
 describe('Test cases revolving around course material uploading and access control', () => {
     before(() => {
-        console.log(buildUrl(['sample', 'course_materials']));
         cy.visit('/');
         cy.login();
         cy.visit(['sample', 'course_materials']);
     });
 
     afterEach(() => {
-        cy.reload();
+        cy.reload(true);
         cy.logout();
         cy.login();
         cy.visit(['sample', 'course_materials']);
