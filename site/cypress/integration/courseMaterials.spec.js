@@ -256,11 +256,11 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
 
         cy.visit(fileTgt2);
-        cy.wait(500);
+        cy.wait(1000);
         cy.get('.content').contains('Reason: Your section may not access this file');
 
         cy.visit('/');
-        cy.wait(500);
+        cy.wait(1000);
         cy.logout();
         cy.reload(true);
         cy.login();
@@ -300,10 +300,10 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/1_1.txt`;
         cy.visit(fileTgt2);
 
-        cy.wait(500);
+        cy.wait(1000);
         cy.get('.content').contains('Reason: Your section may not access this file');
-        cy.wait(500);
         cy.visit('/');
+        cy.wait(1000);
         cy.logout();
         cy.reload(true);
 
