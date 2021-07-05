@@ -12,6 +12,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\User;
 use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\SuperuserEmail;
 
 /**
  * @AccessControl(level="SUPERUSER")
@@ -50,13 +51,19 @@ class SuperuserEmailController extends AbstractController {
             $emailStudent = $_POST['emailStudent'] == "true";
             $emailToSecondary = $_POST['emailToSecondary'] == "true";
             # getRecipients
-            $activeUserIds = json_encode($this->core->getQueries()->getActiveUserIds($semester, $emailInstructor, $emailFullAccess,
-                $emailLimitedAccess, $emailStudent));
+            $activeUserIds = $this->core->getQueries()->getActiveUserIds($semester, $emailInstructor, $emailFullAccess,
+                $emailLimitedAccess, $emailStudent);
             # Set up email here
             $notificationFactory = $this->core->getNotificationFactory();
+            $emails = [];
+            foreach ($activeUserIds as $userId) {
+                $details = ['body' => $_POST['emailContent'], 'subject' => $_POST['emailSubject'], 'to_user_id' => $userId];
+                $emails[] = new SuperuserEmail($this->core, $details);
+            }
+            $notificationFactory->sendEmails($emails);
             return JsonResponse::getSuccessResponse([
                 "message" => "Email queued to be sent!",
-                "data" => $activeUserIds
+                "data" => json_encode($activeUserIds)
             ]);
         }
     }

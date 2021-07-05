@@ -4320,7 +4320,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return $this->submitty_db->row()['active'];
+        $row = $this->submitty_db->row();
+        return count($row) > 0 && $row['active'];
     }
 
     public function checkIsInstructorInCourse($user_id, $course, $semester) {
