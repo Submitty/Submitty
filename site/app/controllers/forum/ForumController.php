@@ -959,6 +959,7 @@ class ForumController extends AbstractController {
         $thread_status = $this->getSavedThreadStatus([]);
         $new_posts = [];
         $unread_threads = $this->showUnreadThreads();
+        $thread_announced = true;
 
         $max_thread = 0;
         $show_deleted = $this->showDeleted();
@@ -982,6 +983,7 @@ class ForumController extends AbstractController {
                 $new_posts[] = $up["id"];
             }
             $thread = $this->core->getQueries()->getThread($thread_id);
+            $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
             if (!empty($thread)) {
                 if ($thread['merged_thread_id'] != -1) {
                     // Redirect merged thread to parent
@@ -1029,10 +1031,10 @@ class ForumController extends AbstractController {
         $threads = $this->getSortedThreads($category_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         if (!empty($_REQUEST["ajax"])) {
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true, $thread_announced);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false, $thread_announced);
         }
     }
 

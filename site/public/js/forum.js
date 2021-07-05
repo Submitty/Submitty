@@ -2148,26 +2148,6 @@ function sendAnnouncement(id){
   });
 }
 
-//Used to decide to hide or show the button to send announcements based on if an announcement is made already
-function checkIfAnnounced(id){
-  call = $.ajax({
-    type: 'GET',
-    url: buildCourseUrl(['forum', 'check_announcement']),
-    data: {'thread_id': id},
-    success: function(res) {
-        const response = JSON.parse(res);
-        try {
-            if (response.status === "success" && response.data["exists"] == false){
-                $('.pin-and-email-message').show();
-            }
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-  });
-}
-
 function pinAnnouncement(thread_id, type, csrf_token){
     if(confirm){
         var url = buildCourseUrl(['forum', 'announcements']) + `?type=${type}`;
