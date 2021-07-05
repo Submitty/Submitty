@@ -71,10 +71,11 @@ class StudentActivityDashboardController extends AbstractController {
         foreach ($data_dump as $rows) {
             fputcsv($fp, $rows);
         }
+        fclose($fp);
 
         return new WebResponse([
             'admin',
             'StudentActivityDashboard'
-        ], 'downloadFile', $file_url, $fp);
+        ], 'downloadFile', $file_url);
     }
 }

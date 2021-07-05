@@ -22,13 +22,12 @@ class StudentActivityDashboardView extends AbstractView {
         ]);
     }
 
-    public function downloadFile($file_url, $fp) {
+    public function downloadFile($file_url) {
         header("Content-type: text/csv");
         header('Content-Disposition: attachment; filename="Student_Activity.csv"');
         header("Content-length: " . filesize($file_url));
         header("Pragma: no-cache");
         header("Expires: 0");
         readfile($file_url);
-        fclose($fp);
     }
 }
