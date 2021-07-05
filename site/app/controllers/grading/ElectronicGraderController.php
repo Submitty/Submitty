@@ -441,7 +441,7 @@ class ElectronicGraderController extends AbstractController {
         try {
             if ($verify_all === 'true') {
                 foreach ($gradeable->getComponents() as $comp) {
-                    if (!$comp->isPeer()) {
+                    if (!$comp->isPeerComponent()) {
                         $graded_component = $ta_graded_gradeable->getGradedComponent($comp);
                         if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()) {
                             $graded_component->setVerifier($grader);
@@ -486,11 +486,11 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
         $isPeerGradeable = false;
-        if ($gradeable->isPeerGrading() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT)) {
+        if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT)) {
             $isPeerGradeable = true;
         }
         $peer = false;
-        if ($gradeable->isPeerGrading() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
+        if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
             $peer = true;
         }
 
@@ -813,7 +813,7 @@ class ElectronicGraderController extends AbstractController {
 
         $this->core->getOutput()->addBreadcrumb('Student Index');
 
-        $peer = ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
+        $peer = ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -1248,10 +1248,9 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_version = null,
         $sort = "id",
         $direction = "ASC",
-        $to_ungraded = null,
         $component_id = "-1",
         $anon_mode = false,
-        $to_same_itempool = false
+        $filter = 'default'
     ) {
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
@@ -1263,12 +1262,11 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
-        $peer = $gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
         $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
@@ -1307,16 +1305,16 @@ class ElectronicGraderController extends AbstractController {
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
             if ($to === 'prev' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'prev') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next' && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, $to_ungraded === 'true', is_numeric($component_id) ? $component_id : -1, $to_same_itempool === "true");
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             // Reassign who_id
             if (!is_null($goToStudent)) {
@@ -1544,7 +1542,6 @@ class ElectronicGraderController extends AbstractController {
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
                 return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
-        //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         $return['components'] = array_values($return['components']);
         return $return;
     }
@@ -1685,7 +1682,7 @@ class ElectronicGraderController extends AbstractController {
         // If it is graded at all, then send ta score information
         $response_data['ta_grading_total'] = $gradeable->getManualGradingPoints();
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
-            if ($gradeable->isPeerGrading()) {
+            if ($gradeable->hasPeerComponent()) {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
             }
             else {
@@ -1715,7 +1712,6 @@ class ElectronicGraderController extends AbstractController {
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
-
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
@@ -1766,7 +1762,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
         // get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
         if ($component === false) {
@@ -1791,8 +1786,17 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
-        //don't allow peer graders to save custom marks
-        if (($custom_message != null || $custom_points != null) && $gradeable->isPeerGrading()) {
+
+        //don't allow custom marks if they are disabled
+        if ($custom_message != null || $custom_points != null) {
+            if (!$gradeable->getAllowCustomMarks()) {
+                $this->core->getOutput()->renderJsonFail('Custom marks are disabled for this assignment');
+                return;
+            }
+        }
+
+        //don't allow peer graders to save custom marks no matter how gradeable is configured
+        if (($custom_message != null || $custom_points != null) && $gradeable->hasPeerComponent()) {
             if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
                 return;
