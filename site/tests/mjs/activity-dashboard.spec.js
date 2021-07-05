@@ -429,7 +429,6 @@ test('sort', () => {
     sortTable(0,'desc');
     expect(document.body.innerHTML).toEqual(expectedSort0Desc);
 
-    expect(document.body.innerHTML).toEqual(expectedSort0Asc);
     const expectedSort1Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
         <thead>
             <tr>
@@ -525,4 +524,488 @@ test('sort', () => {
     </table>`;
     sortTable(1, 'asc');
     expect(document.body.innerHTML).toEqual(expectedSort1Asc);
+
+    const expectedSort1Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+            <tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bitdiddle">
+                <td>3</td>
+                <td class="align-left">bitdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Bitdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bechta">
+                <td>Audit</td>
+                <td class="align-left">bechta</td>
+                <td class="align-left">Abigale</td>
+                <td class="align-left">Bechtelar</td>
+                <td>1971-12-30 23:59:59</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>21</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="batdiddle">
+                <td>4</td>
+                <td class="align-left">batdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Batdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="azhacker">
+                <td>1</td>
+                <td class="align-left">azhacker</td>
+                <td class="align-left">Alyssa Z</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="aphacker">
+                <td>1</td>
+                <td class="align-left">aphacker</td>
+                <td class="align-left">Alyssa P</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr>
+        </tbody>
+    </table>`;
+
+    sortTable(1, 'desc');
+    expect(document.body.innerHTML).toEqual(expectedSort1Desc);
+
+    const expectedSort4Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+            <tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bechta">
+                <td>Audit</td>
+                <td class="align-left">bechta</td>
+                <td class="align-left">Abigale</td>
+                <td class="align-left">Bechtelar</td>
+                <td>1971-12-30 23:59:59</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>21</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="aphacker">
+                <td>1</td>
+                <td class="align-left">aphacker</td>
+                <td class="align-left">Alyssa P</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="azhacker">
+                <td>1</td>
+                <td class="align-left">azhacker</td>
+                <td class="align-left">Alyssa Z</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="batdiddle">
+                <td>4</td>
+                <td class="align-left">batdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Batdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bitdiddle">
+                <td>3</td>
+                <td class="align-left">bitdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Bitdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr>
+        </tbody>
+    </table>`;
+
+    sortTable(4, 'asc');
+    expect(document.body.innerHTML).toEqual(expectedSort4Asc);
+
+    const expectedSort4Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+            <tr id="batdiddle">
+                <td>4</td>
+                <td class="align-left">batdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Batdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bitdiddle">
+                <td>3</td>
+                <td class="align-left">bitdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Bitdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="aphacker">
+                <td>1</td>
+                <td class="align-left">aphacker</td>
+                <td class="align-left">Alyssa P</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="azhacker">
+                <td>1</td>
+                <td class="align-left">azhacker</td>
+                <td class="align-left">Alyssa Z</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bechta">
+                <td>Audit</td>
+                <td class="align-left">bechta</td>
+                <td class="align-left">Abigale</td>
+                <td class="align-left">Bechtelar</td>
+                <td>1971-12-30 23:59:59</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>21</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr>
+        </tbody>
+    </table>`;
+
+    sortTable(4, 'desc');
+    expect(document.body.innerHTML).toEqual(expectedSort4Desc);
+
+    const expectedSort8Asc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+            <tr id="aphacker">
+                <td>1</td>
+                <td class="align-left">aphacker</td>
+                <td class="align-left">Alyssa P</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="azhacker">
+                <td>1</td>
+                <td class="align-left">azhacker</td>
+                <td class="align-left">Alyssa Z</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="batdiddle">
+                <td>4</td>
+                <td class="align-left">batdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Batdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bitdiddle">
+                <td>3</td>
+                <td class="align-left">bitdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Bitdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bechta">
+                <td>Audit</td>
+                <td class="align-left">bechta</td>
+                <td class="align-left">Abigale</td>
+                <td class="align-left">Bechtelar</td>
+                <td>1971-12-30 23:59:59</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>21</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr>
+        </tbody>
+    </table>`;
+
+    sortTable(8, 'asc');
+    expect(document.body.innerHTML).toEqual(expectedSort8Asc);
+
+    const expectedSort8Desc = `<table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-down"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+            <tr id="bechta">
+                <td>Audit</td>
+                <td class="align-left">bechta</td>
+                <td class="align-left">Abigale</td>
+                <td class="align-left">Bechtelar</td>
+                <td>1971-12-30 23:59:59</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>21</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="batdiddle">
+                <td>4</td>
+                <td class="align-left">batdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Batdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bitdiddle">
+                <td>3</td>
+                <td class="align-left">bitdiddle</td>
+                <td class="align-left">Ben</td>
+                <td class="align-left">Bitdiddle</td>
+                <td>2021-07-01 11:35:21</td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>9</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="aphacker">
+                <td>1</td>
+                <td class="align-left">aphacker</td>
+                <td class="align-left">Alyssa P</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="azhacker">
+                <td>1</td>
+                <td class="align-left">azhacker</td>
+                <td class="align-left">Alyssa Z</td>
+                <td class="align-left">Hacker</td>
+                <td>2021-07-01 10:21:31</td>
+                <td></td>
+                <td>2018-05-23 11:55:27</td>
+                <td></td>
+                <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr>
+        </tbody>
+    </table>`;
+    sortTable(8, 'desc');
+    expect(document.body.innerHTML).toEqual(expectedSort8Desc);
 });
