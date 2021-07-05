@@ -15,32 +15,43 @@ class MarkdownWidget extends Widget {
         const container = this.getContainer('Markdown');
         container.classList.add('markdown-widget');
 
-        // Add instructional link to the widget title area
-        const info_link = document.createElement('a');
-        info_link.setAttribute('href', 'https://submitty.org/student/communication/markdown');
-        info_link.setAttribute('title', 'Help using markdown');
-        info_link.setAttribute('target', '_blank');
-        info_link.innerHTML = '<i class="far fa-question-circle"></i>';
-        container.querySelector('.heading-container').appendChild(info_link);
-
         //Add hidden label for screen reader
         const label = document.createElement('label');
         label.setAttribute('for', `notebook-builder-markdown-${NUM_MARKDOWN}`);
         label.style.display = 'none';
         label.innerHTML =  `Markdown Input #${NUM_MARKDOWN}`;
-
-        // Setup text area
-        const text_area = document.createElement('textarea');
-        text_area.classList.add('markdown-input');
-        text_area.setAttribute('placeholder', 'Enter text or markdown');
-        text_area.setAttribute('id', `notebook-builder-markdown-${NUM_MARKDOWN}`);
-        text_area.value = this.state.markdown_string;
         NUM_MARKDOWN++;
 
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
         interactive_area.appendChild(label);
-        interactive_area.appendChild(text_area);
+
+        $.ajax({
+            url: buildCourseUrl(['markdown', 'area']),
+            type: "POST",
+            data: {
+                data: {
+                    markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
+                    markdown_area_name : '',
+                    markdown_area_value : this.state.markdown_string,
+                    class : 'markdown-input',
+                    placeholder : 'Enter text or markdown...',
+                    preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+                    preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+                    preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
+                    onclick : `previewNotebookBuilderMarkdown.call(this, ${NUM_MARKDOWN})`,
+                    render_buttons : true,
+                    min_height : "100px",
+                },
+                csrf_token: csrfToken
+            },
+            success: function(data) {
+                $(interactive_area).append(data);
+            },
+            error: function() {
+                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+            }
+        });
 
         this.dom_pointer = container;
         return container;
@@ -64,3 +75,11 @@ class MarkdownWidget extends Widget {
     }
 }
 
+function previewNotebookBuilderMarkdown(markdown_num) {
+    const markdown_area = $(`#notebook-builder-markdown-${markdown_num}`);
+    const preview_element = $(`#notebook-builder-markdown-preview-${markdown_num}`);
+    const preview_button = $(this);
+    const markdown_content = markdown_area.val();
+
+    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
+}

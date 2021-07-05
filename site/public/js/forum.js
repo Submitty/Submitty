@@ -164,6 +164,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
     }
     var submit_url = form.attr('action');
 
+    form.find("[type=submit]").prop('disabled', true);
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -786,12 +788,17 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 var thread_title = json.title;
                 var thread_lock_date =  json.lock_thread_date;
                 var thread_status = json.thread_status;
+                var expiration = json.expiration;
                 $("#title").prop('disabled', false);
                 $(".edit_thread").show();
                 $('#label_lock_thread').show();
                 $("#title").val(thread_title);
                 $("#thread_status").val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
+                if (Date.parse(expiration) > new Date()) {
+                  $(".expiration").show();
+                }
+                $("#expirationDate").val(expiration);
 
                 // Categories
                 $(".cat-buttons").removeClass('btn-selected');
@@ -808,6 +815,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             else {
                 $("#title").prop('disabled', true);
                 $(".edit_thread").hide();
+                $(".expiration").hide();
                 $('#label_lock_thread').hide();
                 $("#thread_form").prop("ignore-cat",true);
                 $("#category-selection-container").hide();
@@ -1570,25 +1578,22 @@ function bookmarkThread(thread_id, type){
     });
 }
 
+function toggleMarkdown(post_box_id) {
+  if(!post_box_id) post_box_id = '';
+  $(`#markdown_buttons_${post_box_id}`).toggle();
+  $(this).toggleClass('markdown-active'); 
+  $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
+  $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+}
 
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
-    }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+function previewForumMarkdown(){
+  const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
+  const reply_box = $(`textarea#reply_box_${post_box_num}`);
+  const preview_box = $(`#preview_box_${post_box_num}`);
+  const preview_button = $(this);
+  const post_content = reply_box.val();
+
+  previewMarkdown(reply_box, preview_box, preview_button, { content: post_content });
 }
 
 function checkInputMaxLength(obj){
@@ -1878,6 +1883,7 @@ function updateThread(e) {
     thread_status: $('#thread_status').val(),
     Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
     lock_thread_date: $('input#lock_thread_date').text(),
+    expirationDate: $('input#expirationDate').val(),
     cat,
     markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
   };
@@ -2047,6 +2053,10 @@ function saveCreateThreadToLocal() {
         if (pinThread !== undefined) {
             data.pinThread = pinThread;
         }
+        const expiration = $("#expirationDate").val();
+        if (expiration !== undefined) {
+            data.expiration = expiration;
+        }
 
         localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify(data));
     }
@@ -2075,14 +2085,20 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
+        $(".expiration").hide();
         if (data.hasOwnProperty('lockDate')) {
             $("#lock_thread_date").val(data.lockDate);
         }
-        if (data.hasOwnProperty('isAnnouncement')) {
+        if (data.isAnnouncement) {
             $("#Announcement").prop("checked", data.isAnnouncement);
+            $(".expiration").show();
         }
-        if (data.hasOwnProperty('pinThread')) {
+        if (data.pinThread) {
             $("#pinThread").prop("checked", data.pinThread);
+            $(".expiration").show();
+        }
+        if (data.hasOwnProperty('expiration')) {
+            $("#expirationDate").val(data.expiration);
         }
     }
 }

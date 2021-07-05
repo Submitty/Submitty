@@ -1,49 +1,49 @@
-.status-btn{
+.status-btn {
     position: absolute;
     min-width: 10%;
     height: 5vh;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
 }
 
-.button-container{
+.button-container {
     position: relative;
     margin: auto;
     display: inline-flexbox;
 }
 
-.expand{
+.expand {
     display: none;
     padding: 1vh;
     margin-top: 0.5em;
 }
 
-.status{
+.status {
     list-style: none;
     border: 1px solid var(--main-body-white);
 }
 
-.status-error{
+.status-error {
     background-color: var(--danger-red);
 }
 
-.status-warning{
+.status-warning {
     background-color: transparent;
 }
 
-.status-success{
+.status-success {
     background-color: var(--good-green);
 }
 
-.status-container{
-    margin-top: 1em;
-    margin-bottom: 1em;
+.status-container {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
 }
 
-.status-message{
+.status-message {
     word-wrap: break-word;
 }
 
-.divider{
-    border-top: 3px solid var(--standard-deep-dark-gray);
+.divider {
+    border-top: 1px solid black;
 }
