@@ -1089,7 +1089,7 @@ class Course(object):
             gradeable_teams_table.c['team_id'] == unique_team_id)
             res = self.conn.execute(team_in_other_gradeable)
             num = res.rowcount
-            while num is not 0:
+            while num != 0:
                 ucounter += 1
                 unique_team_id = str(ucounter).zfill(5) + "_" + user.get_detail(self.code, "id")
                 team_in_other_gradeable = select([gradeable_teams_table]).where(
