@@ -463,7 +463,3 @@ parameters:
 			count: 1
 			path: app/views/submission/HomeworkView.php
 
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
