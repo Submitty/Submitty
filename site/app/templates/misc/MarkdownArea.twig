@@ -21,7 +21,7 @@
     data_previous_comment: specifically for use in OverallComment.twig
 #}
 <div class="markdown-area fill-available">
-    <div id="{{ markdown_buttons_id ? markdown_buttons_id : "markdown_buttons" }}" style="display:{{ render_buttons ? "block" : "none" }}">
+    <div id="{{ markdown_buttons_id is defined ? markdown_buttons_id : "markdown_buttons" }}" style="display:{{ render_buttons ? "block" : "none" }}">
         {% if markdown_area_query %}
             <button type="button" title="Insert a link" onclick="addMarkdownCode(1, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
             <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
@@ -43,23 +43,31 @@
     {% include "misc/AccessibilityMessage.twig" %}
     <textarea
         id="{{ markdown_area_id }}"
-        class="fill-available {{ class }}"
+        class="fill-available {{ class is defined ? class }}"
         name="{{ markdown_area_name }}"
-        placeholder="{{ placeholder }}"
+        {% if placeholder is defined %}
+            placeholder="{{ placeholder }}"
+        {% endif %}
         rows="10" cols="30"
         maxlength="5000"
         {% if textarea_onchange is defined %}
-        onchange="{{ textarea_onchange }}"
+            onchange="{{ textarea_onchange }}"
         {% endif %}
-        onkeydown="{{ textarea_onkeydown }}"
-        onpaste="{{ textarea_onpaste }}"
-        maxlength="{{ textarea_maxlength }}"
+        {% if textarea_onkeydown is defined %}
+            onkeydown="{{ textarea_onkeydown }}"
+        {% endif %}
+        {% if textarea_onpaste is defined %}
+            onpaste="{{ textarea_onpaste }}"
+        {% endif %}
+        {% if textarea_maxlength is defined %}
+            maxlength="{{ textarea_maxlength }}"
+        {% endif %}
         data-previous-comment="{{ data_previous_comment is defined ? data_previous_comment : '' }}"
         {% if other_textarea_attributes is defined %}
-        {{ other_textarea_attributes }}
+            {{ other_textarea_attributes }}
         {% endif %}
     >{{ markdown_area_value }}</textarea>
-    <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height ? min_height : "0px" }}" hidden></div>
+    <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "0px" }}" hidden></div>
 </div>
 
 <script>
