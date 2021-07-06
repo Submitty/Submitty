@@ -1892,10 +1892,11 @@ function onGetMarkStats(me) {
 /**
  * Called when a component gets clicked (for opening / closing)
  * @param me DOM Element of the component header div
+ * @param edit_mode editing from ta grading page or instructor edit gradeable page
  */
-function onClickComponent(me) {
+function onClickComponent(me, edit_mode = false) {
     let component_id = getComponentIdFromDOMElement(me);
-    toggleComponent(component_id, true)
+    toggleComponent(component_id, true, edit_mode)
         .catch(function (err) {
             console.error(err);
             setComponentInProgress(component_id, false);
@@ -1936,7 +1937,7 @@ function onCancelComponent(me) {
 
 function onCancelEditRubricComponent(me) {
   const component_id = getComponentIdFromDOMElement(me);
-  toggleComponent(component_id, false);
+  toggleComponent(component_id, false, true);
 }
 
 /**
@@ -2460,16 +2461,17 @@ function openCookieComponent() {
 /**
  * Closes all open components and the overall comment
  * @param {boolean} save_changes
+ * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
  * @return {Promise<void>}
  */
-function closeAllComponents(save_changes) {
+function closeAllComponents(save_changes,edit_mode = false) {
     let sequence = Promise.resolve();
 
     // Close all open components.  There shouldn't be more than one,
     //  but just in case there is...
     getOpenComponentIds().forEach(function (id) {
         sequence = sequence.then(function () {
-            return closeComponent(id, save_changes);
+            return closeComponent(id, save_changes, edit_mode);
         });
     });
     return sequence;
@@ -2479,19 +2481,21 @@ function closeAllComponents(save_changes) {
  * Toggles the open/close state of a component
  * @param {int} component_id the component's id
  * @param {boolean} saveChanges
+ * @param {edit_mode} editing from ta grading page or instructor edit gradeable page
  * @return {Promise}
  */
-function toggleComponent(component_id, saveChanges) {
+function toggleComponent(component_id, saveChanges, edit_mode = false) {
     let action = Promise.resolve();
+    console.log(EDIT_MODE_ENABLED);
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         action = action.then(function() {
-            return closeComponent(component_id, saveChanges);
+            return closeComponent(component_id, saveChanges, edit_mode);
         });
     }
     else {
         action = action.then(function () {
-            return closeAllComponents(saveChanges)
+            return closeAllComponents(saveChanges,edit_mode)
                 .then(function () {
                     return openComponent(component_id);
                 });
@@ -2782,9 +2786,10 @@ function closeComponentGrading(component_id, saveChanges) {
  * Closes the requested component and saves any changes if requested
  * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the (graded) component should be saved or discarded
+ * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
  * @return {Promise}
  */
-function closeComponent(component_id, saveChanges = true) {
+function closeComponent(component_id, saveChanges = true, edit_mode = false) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     return (isInstructorEditEnabled()
@@ -2794,9 +2799,11 @@ function closeComponent(component_id, saveChanges = true) {
             setComponentInProgress(component_id, false);
         })
         .then(function () {
-            let gradeable_id = getGradeableId();
-            let anon_id = getAnonId();
-            return updateTotals(gradeable_id, anon_id);
+            if (!edit_mode) {
+                let gradeable_id = getGradeableId();
+                let anon_id = getAnonId();
+                return updateTotals(gradeable_id, anon_id);
+            }
         });
 }
 
