@@ -1,14 +1,14 @@
 #upload-boxes {
     display: table;
     border-spacing: 5px;
-    width:100%;
+    width: 100%;
 }
 
 .file-input {
     cursor: pointer;
     text-align: center;
     border: dashed 2px var(--standard-light-gray);
-    display:table-cell;
+    display: table-cell;
     height: 20px;
 }
 

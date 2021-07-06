@@ -68,6 +68,7 @@ Form
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
 <br />
+{% if electronic %}
 <fieldset>
     <legend>
         How should grading be anonymized for limited access graders?
@@ -79,6 +80,7 @@ Form
         {{ (gradeable.getLimitedAccessBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_limited_access_grading">Blinded Grading</label>
 
 </fieldset>
+{% endif %}
 
 {% if peer %}
 

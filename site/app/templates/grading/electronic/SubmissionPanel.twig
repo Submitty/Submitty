@@ -3,37 +3,39 @@
 <div id="submission_browser" class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}">
     <div >
         <div id="directory_view">
-            <span class="grading_label">Submissions and Results Browser</span>
-            <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
+            <span style="line-height: 40px;">
+                <span class="grading_label">Submissions and Results Browser</span>
+                <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
-            {# check if there are vcs files, if yes display the toggle button, else don't display it #}
-            {% if has_vcs_files %}
-                <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
-            {% endif %}
+                {# check if there are vcs files, if yes display the toggle button, else don't display it #}
+                {% if has_vcs_files %}
+                    <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
+                {% endif %}
 
-            <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
 
-            <script>
-                $(document).ready(function(){
-                    //note the commented out code here along with the code where files are displayed that is commented out
-                    //is intended to allow open and close to change dynamically on click
-                    //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
-                    $(".expand-button").on('click', function(){
-                        openAll( 'openable-element-', $(this).data('linked-type'))
-                    })
+                <script>
+                    $(document).ready(function(){
+                        //note the commented out code here along with the code where files are displayed that is commented out
+                        //is intended to allow open and close to change dynamically on click
+                        //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
+                        $(".expand-button").on('click', function(){
+                            openAll( 'openable-element-', $(this).data('linked-type'))
+                        })
 
-                    var currentCodeStyle = localStorage.getItem('theme');
-                    var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
-                    $('#' + currentCodeStyleRadio).parent().addClass('active');
-                    $('#' + currentCodeStyleRadio).prop('checked', true);
-                });
-            </script>
-            <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
+                        var currentCodeStyle = localStorage.getItem('theme');
+                        var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
+                        $('#' + currentCodeStyleRadio).parent().addClass('active');
+                        $('#' + currentCodeStyleRadio).prop('checked', true);
+                    });
+                </script>
+                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
 
-            <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
+                <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
+            </span>
             <br />
             {# Files #}
-            <div class="inner-container" id="file-container">
+            <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ self.display_files(self, submissions, "s", 0, "submissions") }}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ self.display_files(self, checkout, "c", 0, "checkout") }}
@@ -72,7 +74,7 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|e('js') }}", "{{ path|e('js') }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|e('js') }}", "{{ path|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
@@ -86,7 +88,7 @@
 {% macro display_dir(self, dir, contents, id, indent, title) %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();'>
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>

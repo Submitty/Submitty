@@ -17,19 +17,7 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row position-relative">
-        <div role="button" id="markdown_toggle_{{ post_box_id }}"
-        class="markdown-toggle {{ render_markdown?"markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
-        style="margin-right:10px;padding: unset;cursor: pointer; "
-        title="Render markdown" onclick="$('#markdown_buttons_{{ post_box_id }}').toggle(); $(this).toggleClass('markdown-active'); $('#markdown_input_{{ post_box_id }}').val($('#markdown_input_{{ post_box_id }}').val() == 0? '1':'0');$('#markdown-info-{{ post_box_id }}').toggleClass('disabled');"><i class="fab fa-markdown fa-2x"></i></div>
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown?1:0 }}" />
-        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
-        &nbsp;&nbsp;
-        <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
-            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-        </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
@@ -81,11 +69,35 @@
     {% endif %}
     </div>
     <div class="form-group row">
-        {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea id="reply_box_{{ post_box_id }}" name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" aria-label="{{post_content_placeholder}}" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
-        onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
+        {% set min_height = (post_textarea_large ? "40vmin":"100px") %}
+        <div role="button" id="markdown_toggle_{{ post_box_id }}"
+             class="markdown-toggle {{ render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
+             title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
+        >
+            <i class="fab fa-markdown fa-2x"></i>
+        </div>
+        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+        <a class="skip-btn skip-first-post" href="#{{ first_post_id }}">Skip to first post</a>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "reply_box_" ~ post_box_id,
+            "markdown_area_query" : "$('#reply_box_" ~ post_box_id ~ "')",
+            "markdown_area_name" : "thread_post_content",
+            "markdown_area_value" : "",
+            "class" : "post_content_reply thread_post_content",
+            "placeholder" : post_content_placeholder,
+            "preview_div_id" : "preview_box_" ~ post_box_id,
+            "preview_div_name" : "preview_box_" ~ post_box_id,
+            "onclick" : "previewForumMarkdown.call(this)",
+            "render_buttons" : render_markdown, 
+            "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
+            "min_height" : min_height,
+            "textarea_maxlength" : post_content_limit,
+            "textarea_onkeydown" : "submitNearestForm(event,$(this))",
+            "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
+        } only %}
     </div>
     <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
+    <a class="skip-btn" href="#{{ first_post_id }}">Skip to first post</a>
 <br/>
 {% endif %}
 
@@ -165,6 +177,12 @@
             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
         {% endif %}
+        {% if show_expiration and core.getUser().accessFullGrading() %}
+            <div class = "expiration inline-block" style="display: none;">
+              <label class="inline-block" for="expirationDate">{{ "Expiration Date" }}</label>
+              <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder }}"/>
+            </div>
+        {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
                  $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
@@ -193,21 +211,36 @@
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop('disabled', true);
+                $(".expiration").show();
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop('disabled', false);
+                $(".expiration").hide();
             }
         });
 
         $(".pinThread-checkbox").click(function (){
+            $(".expiration").toggleClass("display-inline");
             if($(".pinThread-checkbox").prop("checked")){
                 $(".pinThread-checkbox").prop("checked", true);
+                $(".expiration").show();
                 $("#thread_status").val(0);
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
+                $(".expiration").hide();
             }
+        });
+
+        //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
+        //from an input with 'post-content-reply' class
+        $('.post_content_reply').focus(function(){
+            $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
+        });
+
+        $(':not(.post_content_reply, .skip-first-post)').focus(function(){
+            $('.skip-first-post').attr('tabindex', '-1');
         });
     });
 

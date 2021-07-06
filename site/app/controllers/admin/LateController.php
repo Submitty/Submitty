@@ -81,7 +81,7 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d H:i:s', $_POST['datestamp']) === false)) {
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d H:i:s";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
@@ -280,6 +280,8 @@ class LateController extends AbstractController {
                 "error" => "Invalid mimetype, must start with 'text/', got '{$mime_type}'"
             ];
         }
+        ini_set("auto_detect_line_endings", true);
+
         $rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($rows === false) {
             $data = null;

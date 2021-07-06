@@ -38,6 +38,10 @@ const taLayoutDet = {
   bottomFourPanelRightHeight: "50%",
 };
 
+let settingsCallbacks = {
+  "general-setting-arrow-function": changeStudentArrowTooltips
+}
+
 // Grading Panel header width
 let maxHeaderWidth = 0;
 // Navigation Toolbar Panel header width
@@ -81,10 +85,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
+  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');
     if(storageCode) {
       localStorage.setItem(storageCode, this.value);
+      if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](this.value);
+      }
     }
   })
 
@@ -137,13 +146,13 @@ $(function () {
   if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
     let notebookPanel = $('#notebook-view');
     if(notebookPanel.length != 0) {
-      let notebookItems = notebookPanel.find('.openAllFilesubmissions'); 
+      let notebookItems = notebookPanel.find('.openAllFilesubmissions');
       for(var i = 0; i < notebookItems.length; i++) {
         notebookItems[i].onclick();
       }
     }
   }
-  
+
 
   // Remove the select options which are open
   function hidePanelPositionSelect() {
@@ -170,6 +179,80 @@ $(function () {
   });
 
 });
+
+function changeStudentArrowTooltips(data) {
+  let component_id = NO_COMPONENT_ID;
+  switch(data) {
+    case "ungraded":
+      component_id = getFirstOpenComponentId(false);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+        if(component_id === NO_COMPONENT_ID) {
+          $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+          $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+        } else {
+          $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+          $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        }
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "active-inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    default:
+      $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+      $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      break;
+  }
+}
+
+let orig_toggleComponent = window.toggleComponent;
+window.toggleComponent = function(component_id, saveChanges) {
+  let ret = orig_toggleComponent(component_id, saveChanges);
+  return ret.then(function() {
+    changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  });
+}
 
 function checkNotebookScroll() {
   if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
@@ -224,7 +307,7 @@ function notebookScrollSave() {
     var notebookTop = $('#notebook-view').offset().top;
     var element = $('#content_0');
     if(notebookView.scrollTop() + notebookView.innerHeight() + 1 > notebookView[0].scrollHeight) {
-      element = $('[id^=content_').last();
+      element = $('[id^=content_]').last();
     } else {
       while (element.length !== 0) {
         if (element.offset().top > notebookTop) {
@@ -233,7 +316,7 @@ function notebookScrollSave() {
         element = element.next();
       }
     }
-    
+
     if (element.length !== 0) {
       if (element.attr('data-item-ref') === undefined) {
         localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
@@ -309,6 +392,7 @@ function initializeTaLayout() {
   }
   updateLayoutDimensions();
   updatePanelOptions();
+  readCookies();
 }
 
 function updateLayoutDimensions() {
@@ -405,8 +489,7 @@ function adjustGradingPanelHeader () {
     navBarBox.removeClass('mobile-view');
   }
   // From the complete content remove the height occupied by navigation-bar and panel-header element
-  // 6 is used for adding some space in the bottom
-  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight() +6) + "px)";
+  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight()) + "px)";
 }
 
 function onAjaxInit() {}
@@ -433,6 +516,7 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
+    $('#autoscroll_id')[0].checked = true;
     let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
       let file_path = element.split('#$SPLIT#$');
@@ -506,22 +590,32 @@ function gotoMainPage() {
   }
 }
 
-function gotoPrevStudent(to_ungraded = false) {
+function gotoPrevStudent() {
 
-  let selector;
-  let window_location;
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
 
-  if(to_ungraded === true) {
-    selector = "#prev-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let selector = "#prev-student";
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-
-  }
-  else {
-    selector = "#prev-student";
-    window_location = $(selector)[0].dataset.href
+  switch(filter) {
+    case "ungraded":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+      }
+      break;
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "active-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
   }
 
   if (getGradeableId() !== '') {
@@ -538,21 +632,32 @@ function gotoPrevStudent(to_ungraded = false) {
   }
 }
 
-function gotoNextStudent(to_ungraded = false) {
+function gotoNextStudent() {
 
-  let selector;
-  let window_location;
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
 
-  if(to_ungraded === true) {
-    selector = "#next-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let selector = "#next-student";
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-  }
-  else {
-    selector = "#next-student";
-    window_location = $(selector)[0].dataset.href
+  switch(filter) {
+    case "ungraded":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+      }
+      break;
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "active-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
   }
 
   if (getGradeableId() !== '') {
@@ -574,14 +679,6 @@ registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
 });
 registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
   gotoNextStudent();
-});
-
-//Navigate to the prev / next student buttons
-registerKeyHandler({name: "Previous Ungraded Student", code: "Shift ArrowLeft"}, function() {
-  gotoPrevStudent(true);
-});
-registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, function() {
-  gotoNextStudent(true);
 });
 
 //-----------------------------------------------------------------------------
@@ -656,6 +753,7 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities () {
+    $("#panel-instructions").hide();
     panelElements.forEach((panel) => {
       let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
 
@@ -690,6 +788,12 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
+      }
+      if (taLayoutDet.currentOpenPanel === null) {
+        $("#panel-instructions").show();
+      }
+      else {
+        $("#panel-instructions").hide();
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
@@ -734,6 +838,9 @@ function toggleFullLeftColumnMode (forceVal = false) {
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   panelsContSelector = newPanelsContSelector;
+
+  $("#grading-panel-student-name").hide();
+
 }
 
 /**
@@ -753,12 +860,21 @@ function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
   initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
   initializeHorizontalTwoPanelDrag();
   togglePanelSelectorModal(false);
+  if (!taLayoutDet.isFullLeftColumnMode) {
+    $("#grading-panel-student-name").show();
+  }
 }
 
 function togglePanelLayoutModes(forceVal = false) {
   const twoPanelCont = $('.two-panel-cont');
   if (!forceVal) {
     taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
+  }
+  if (taLayoutDet.currentOpenPanel === null) {
+    $("#panel-instructions").show();
+  }
+  else {
+    $("#panel-instructions").hide();
   }
 
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
@@ -1097,11 +1213,18 @@ function checkOpenComponentMark(index) {
 
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
-  $("."+click_class + class_modifier).each(function(){
+
+  let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
+  
+  $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
-    let innerText = Object.values($(this))[0].innerText;
-    if (innerText.slice(-4) !== ".pdf") {
-      $(this).click();
+    let viewerID = $(this).attr("data-viewer_id");
+    if(($(this).parent().hasClass("file-viewer") && $("#file_viewer_" + viewerID).hasClass("shown") === toClose) ||
+        ($(this).parent().hasClass("div-viewer") && $("#div_viewer_" + viewerID).hasClass("open") === toClose)) {
+      let innerText = Object.values($(this))[0].innerText;
+      if (innerText.slice(-4) !== ".pdf") {
+        $(this).click();
+      }
     }
   });
 }
@@ -1330,8 +1453,8 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});" 
-                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});"
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
                 width="95%">
         </iframe>
       `;

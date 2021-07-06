@@ -1,6 +1,6 @@
 input[readonly]:not(.btn-danger) {
-    background:var(--default-white);
-    border:none;
+    background: var(--default-white);
+    border: none;
 }
 
 input[disabled]:not(#admin-gradeable-peers-submit) {
@@ -18,11 +18,23 @@ input.readonly.peerstudents {
     width: 200px;
 }
 
+input[type=text]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+[data-theme="dark"] input[type=text]:invalid {
+    background-color: var(--alert-danger-red);
+}
+
+[data-theme="dark"] input[type=text]:invalid::placeholder {
+    color: var(--alert-invalid-entry-pink);
+}
+
 select {
-    margin-top:7px;
+    margin-top: 7px;
     width: -webkit-fill-available;
     width: -moz-available;
-    width:  fill-available;
+    width: fill-available;
     min-width: 60px;
 }
 
@@ -38,8 +50,8 @@ select {
 .question-icon-cross {
     max-width: none;
     position: absolute;
-    top:0;
-    left:-313px;
+    top: 0;
+    left: -313px;
 }
 
 .question-icon-up {
@@ -87,14 +99,14 @@ a.nav-bar.normal-btn:hover {
 }
 
 a.nav-bar.disabled-btn {
-    color: var(--standard-medium-dark-gray) ;
+    color: var(--standard-medium-dark-gray);
     cursor: default;
     border: none !important;
     pointer-events: none;
 }
 
 a.nav-bar.normal-btn {
-    background-color: var(--default-white) ;
+    background-color: var(--default-white);
     color: var(--text-black);
     border: 1px solid gray;
     border-bottom: none;
@@ -107,7 +119,8 @@ a.nav-bar.active-btn {
 }
 
 /* align the radio, buttons and checkboxes with labels */
-input[type="radio"],input[type="checkbox"] {
+input[type="radio"],
+input[type="checkbox"] {
     margin-top: -1px;
     vertical-align: middle;
 }
@@ -129,16 +142,19 @@ input[type="radio"],input[type="checkbox"] {
 .table-wrapper {
     position: relative;
 }
+
 .table-scroll {
     width: 1150px;
     overflow-x: auto;
     margin-top: 20px;
 }
+
 .table-wrapper table {
-    width:100%;
+    width: 100%;
 }
 
-table#grader-history th, table#grader-history td {
+table#grader-history th,
+table#grader-history td {
     padding: 8px;
     border: 3px solid var(--text-black);
     text-align: center;
@@ -157,10 +173,10 @@ table#grader-history th, table#grader-history td {
 }
 
 .config_search_error {
-    font-weight:normal;
+    font-weight: normal;
+
     /* color is danger-red from colors.css can be changed when available */
     color: var(--danger-red);
-
 }
 
 div.log-container {
@@ -188,13 +204,11 @@ div.btn-container {
     display: inline-block;
     background-color: lightgrey;
     color: var(--btn-text-black);
-
     position: relative;
     top: 5px;
     left: 50px;
     height: 34px;
     width: auto;
-
     padding: 5px;
     padding-left: 5px;
     padding-right: 5px;
@@ -202,7 +216,7 @@ div.btn-container {
 }
 
 .popup-form .left-panel {
-    width:50%;
+    width: 50%;
     display: inline-block;
 }
 
@@ -235,26 +249,26 @@ div.btn-container {
 }
 
 #zip_link_limited {
-    text-decoration:none;
-    color:white;
-    padding:10px;
-    padding-left:0px;
+    text-decoration: none;
+    color: var(--text-black);
+    padding: 10px;
+    padding-left: 0;
 }
 
 #zip_link_full {
-    text-decoration:none;
-    color:black;
-    padding:10px;
-    padding-left:0px;
+    text-decoration: none;
+    color: var(--text-black);
+    padding: 10px;
+    padding-left: 0;
 }
 
 #details_button {
-    padding-right:0px;
+    padding-right: 0;
 }
 
 form.dropdown {
-    text-align:left;
-    padding-top:8px;
+    text-align: left;
+    padding-top: 8px;
 }
 
 .notebook-builder-info {
@@ -274,4 +288,63 @@ form.dropdown {
 select[name="component-itempool"] {
     margin-bottom: 15px;
     padding-right: 0;
+}
+
+#config_search {
+    width: 100%;
+}
+
+.drop-down {
+    display: inline-block;
+    width: 64%;
+}
+
+.drop-down-options {
+    border: 0.5px black solid;
+    position: relative;
+    width: 100%;
+    max-height: 30vh;
+    overflow-y: scroll;
+}
+
+.drop-down-options::-webkit-scrollbar {
+    width: 0.7vh;
+}
+
+body::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 3px black;
+    box-shadow: inset 0 0 3px black;
+}
+
+.drop-down-options::-webkit-scrollbar-thumb {
+    background-color: var(--hover-actionable-blue);
+    outline: 1px solid slategrey;
+}
+
+.drop-down-option {
+    padding: 1vh;
+    text-overflow: ellipsis;
+}
+
+.drop-down-option:hover {
+    background-color: var(--hover-active-all-info-blue);
+}
+
+[data-theme="dark"] .drop-down-options {
+    background-color: var(--standard-medium-dark-gray);
+    border: 1px solid var(--standard-focus-cornflowe-blue);
+}
+
+#config_search {
+    padding-right: 45px;
+}
+
+#clear_search_button {
+    padding-right: 6px;
+    color: red;
+}
+
+#custom_marks_warning{
+    color: red;
+    font-style:italic;
 }

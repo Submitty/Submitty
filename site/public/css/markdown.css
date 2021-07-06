@@ -8,25 +8,69 @@
  * Beware when making changes here, as your changes are likely to affect the look and feel of several pages on submitty.
  */
 
+.markdown {
+    font-family: 'Source Sans Pro', 'sans-serif';
+    position: relative;
+}
+
 .markdown h1,
 .markdown h2,
 .markdown h3,
 .markdown h4,
 .markdown h5,
 .markdown h6 {
-    margin: 0
+    margin: 0;
 }
 
 .markdown p {
     margin-top: 12px;
     margin-bottom: 12px;
+    white-space: pre-wrap;
 }
 
 .markdown ol,
 .markdown ul {
     margin-bottom: 12px;
+    white-space: normal;
+    padding-left: 15px;
 }
 
 .markdown li {
     margin-left: 25px;
+    white-space: normal;
+}
+
+.markdown table {
+    border-collapse: collapse;
+    border: 1px solid var(--text-black);
+}
+
+.markdown th {
+    border: 1px solid var(--text-black);
+}
+
+.markdown td {
+    border: 1px solid var(--text-black);
+}
+
+.markdown-preview {
+    border: 1px solid var(--standard-light-gray);
+    background-color: var(--standard-input-background);
+    border-radius: 4px;
+    padding: 4px 6px;
+    height: auto !important;
+    overflow: scroll;
+    resize: none;
+    max-height: 300px;
+}
+
+.markdown-area textarea {
+    resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
+    width: -webkit-fill-available;
+}
+
+.btn-markdown {
+    margin: 5px;
 }
