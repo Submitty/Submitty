@@ -4303,6 +4303,8 @@ AND gc_id IN (
      * a student has dropped a course.  SQL query checks for user_group=4 so
      * that only students are considered.  Returns false when course is dropped.
      * Returns true when course is still active, or user is not a student.
+     * If course or semester is null, this method instead checks for if the student
+     * is 'active' in any course
      *
      * @param  string $user_id
      * @param  string $course
@@ -4310,6 +4312,20 @@ AND gc_id IN (
      * @return boolean
      */
     public function checkStudentActiveInCourse($user_id, $course, $semester) {
+        if ($course == null || $semester == null) {
+            $this->submitty_db->query(
+                "
+                SELECT
+                    CASE WHEN registration_section IS NULL AND user_group=4 THEN FALSE
+                    ELSE TRUE
+                    END
+                AS active
+                FROM courses_users WHERE user_id=?",
+                [$user_id]
+            );
+            $row = $this->submitty_db->row();
+            return count($row) > 0 && $row['active'];
+        }
         $this->submitty_db->query(
             "
             SELECT

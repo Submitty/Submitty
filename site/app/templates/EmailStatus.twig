@@ -5,8 +5,10 @@
                 <div>
                     <div> Email Subject: {{subject}} </div>
                     <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
-                    {% if courses is defined %}
+                    {% if courses is defined and courses[subject] is defined and courses[subject] is not null %}
                         <div> Course: {{courses[subject]}}</div>
+                    {% else %}
+                        <div> Superuser Email </div>
                     {% endif %}
                 </div>
                 {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
@@ -29,21 +31,24 @@
                         <li class="status status-error">
                             <div class="status-message">Recipient: {{row["user_id"]}}</div>
                             <div class="status-message">Time Sent: Not Sent</div>
+                            <div class="status-message">Email Address: {{row["email_address"]}} </div>
                             <div class="status-message">
                                 Error: {{row["error"]}}
                             </div>
                         </li>
                     {% endfor %}
                     {% for row in pending[subject] %}
-                        <li  class="status status-warning status">
+                        <li class="status status-warning">
                             <div class="status-message">Recipient: {{row["user_id"]}}</div>
                             <div class="status-message">Time Sent: Not Sent</div>
+                            <div class="status-message">Email Address: {{row["email_address"]}} </div>
                         </li>
                     {% endfor %}
                     {% for row in successes[subject] %}
-                        <li class="status status-success status"> 
+                        <li class="status status-success"> 
                             <div class="status-message">Recipient: {{row["user_id"]}}</div> 
-                            <div class="status-message">Time Sent: {{row["sent"]|slice(0,19)}}</div> 
+                            <div class="status-message">Time Sent: {{row["sent"]|slice(0,19)}}</div>
+                            <div class="status-message">Email Address: {{row["email_address"]}} </div>
                         </li>
                     {% endfor %}
                 </ul>

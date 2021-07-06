@@ -35,7 +35,9 @@ class EmailStatusModel extends AbstractModel {
         parent::__construct($core);
         foreach ($data as $row) {
             $this->subjects[$row["subject"]] = $row["created"];
-            $this->courses[$row["subject"]] = $row["semester"] . ' ' . $row["course"];
+            if ($row["semester"] != null || $row["course"] != null) {
+                $this->courses[$row["subject"]] = $row["semester"] . ' ' . $row["course"];
+            }
             if ($row["sent"] != null) {
                 $this->successes[$row["subject"]][] = $row;
             }
