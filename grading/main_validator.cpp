@@ -391,6 +391,12 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
       double my_score = 1.0;
       std::cout << "NUM AUTOCHECKS / FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
+      // if(autocheck_j.value("expected_file","") == "") {
+      //     std::cout << "no expected_file specified..." << std::endl;
+      //     std::string expected_string = autocheck_j.value("expected_string", "");
+      //     autocheck_j["expected_file"] = "expected_string_" + autocheck_j.value("actual_file", "").substr(autocheck_j.value("actual_file", "").find('/')+1);
+      //     std::cout << "using filepath: " << autocheck_j["expected_file"];
+      // }
       for (int which_autocheck = 0; which_autocheck < my_testcase.numFileGraders(); which_autocheck++) {
         my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message,config_json, username);
       }

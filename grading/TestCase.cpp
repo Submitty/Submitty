@@ -108,10 +108,6 @@ std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filen
   std::string test_output_path = "test_output/";
   std::string generated_output_path = "generated_output/" + tc.getPrefix();
   std::string random_output_path = "random_output/" + tc.getPrefix();
-  std::cout << "filename: " << filename.c_str() << std::endl;
-  std::cout << "test filename: " << (test_output_path + filename).c_str() << std::endl;
-  std::cout << "gen filename: " << (generated_output_path + filename).c_str() << std::endl;
-  std::cout << "random filename: " << (random_output_path + filename).c_str() << std::endl;
   if (stat((test_output_path + filename).c_str(), &st) >= 0) {
     expectedFolder = test_output_path;
   } else if (stat((generated_output_path + filename).c_str(), &st) >= 0){
@@ -119,7 +115,6 @@ std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filen
   } else if (stat((random_output_path + filename).c_str(), &st) >= 0){
     expectedFolder = random_output_path;
   }
-  std::cout << "error: " << strerror(errno) << std::endl;
   return expectedFolder;
 }
 
@@ -193,25 +188,32 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
+
   std::cout << "opening expected file..." << std::endl;
-  std::string expected = "";
-  std::string expected_file = j.value("expected_file","");
+  std::string expected_file = j.value("expected_file", "");
   std::string expected_string = j.value("expected_string", "");
+  std::string actual_file = j.value("actual_file", "");
+
+  std::cout << "expected_file: " << expected_file << std::endl;
+  std::cout << "expected_string: " << expected_string << std::endl;
+  std::cout << "actual_file: " << expected_string << std::endl;
   assert(!(expected_file != "" && expected_string != ""));
-  if (expected_file != "") {
-    expected = expected_file;
-  } else if (expected_string != "") {
-    expected = "expected_string_file.txt";
-    std::ofstream output_file_stream(expected);
+
+  if (expected_file == "") {
+    expected_file = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
+    std::ofstream output_file_stream("test_output/" + expected_file);
     output_file_stream << expected_string;
   }
 
-  std::cout << "expected: " << expected << std::endl;
-  std::cout << "expected_file: " << expected_file << std::endl;
-  std::cout << "expected_string: " << expected_string << std::endl;
-  std::string filename = getOutputContainingFolderPath(tc, expected) + expected;
-  std::cout << "filename: " << filename << std::endl;
-
+  std::cout << "new expected file: " << expected_file << std::endl;
+  
+  // if(autocheck_j.value("expected_file","") == "") {
+  //     std::cout << "no expected_file specified..." << std::endl;
+  //     std::string expected_string = autocheck_j.value("expected_string", "");
+  //     autocheck_j["expected_file"] = "expected_string_" + autocheck_j.value("actual_file", "").substr(autocheck_j.value("actual_file", "").find('/')+1);
+  //     std::cout << "using filepath: " << autocheck_j["expected_file"];
+  // }
+  std::string filename = getOutputContainingFolderPath(tc, expected_file) + expected_file;
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;
