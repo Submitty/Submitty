@@ -856,8 +856,7 @@ class SubmissionController extends AbstractController {
         $clobber = isset($clobber) && $clobber === 'true';
 
         //don't allow submission if not on most recent version
-        $viewing_inactive_version = $_POST['viewing_inactive_version'];
-        if ($viewing_inactive_version === '1') {
+        if(isset($_POST['viewing_inactive_version']) && $_POST['viewing_inactive_version'] === "1" ) {
             return $this->uploadResult("Must be on most recent version to make a new submission", false);
         }
 
