@@ -86,18 +86,19 @@ Required inputs:
                        type="number"
                        step="{{ precision }}"
                        style="background-color:var(--default-white)"
+                       onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
                 <div class="plus-minus">
                     <i onclick="increment(this)"class="fa fa-caret-up"></i>
                     <i onclick="decrement(this)"class="fa fa-caret-down"></i>
                 </div>
                         <script>
-                             function increment(me){
+                             function increment(me) {
                                  $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() + {{ precision }});
                                  return onCustomMarkChange(me);
                              }
 
-                             function decrement(me){
+                             function decrement(me) {
                                  $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() - {{ precision }});
                                  return onCustomMarkChange(me);
                              }
@@ -114,7 +115,7 @@ Required inputs:
                         </script>
 
             </span>
-            <span class="col-sm mark-title" >
+            <span class="col-sm mark-title">
                 Custom:
                 <textarea onchange="onCustomMarkChange(this)"
                           onkeyup="auto_grow(this)"
@@ -174,4 +175,3 @@ Required inputs:
         </div>
     {% endif %}
 {% endblock %}
-
