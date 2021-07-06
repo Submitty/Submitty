@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\entities\course;
 
 use app\libraries\DateUtils;
@@ -17,6 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 class CourseMaterial {
     const FILE = 0;
     const LINK = 1;
+    const DIR = 2;
 
     /**
      * @ORM\Id
@@ -62,17 +65,17 @@ class CourseMaterial {
      */
     protected $sections;
 
-    public function __construct(array $details) {
-        $this->setType($details['type']);
-        $this->setPath($details['path']);
-        $this->setReleaseDate($details['release_date']);
-        $this->setHiddenFromStudents($details['hidden_from_students']);
-        $this->setPriority($details['priority']);
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority) {
+        $this->setType($type);
+        $this->setPath($path);
+        $this->setReleaseDate($release_date);
+        $this->setHiddenFromStudents($hidden_from_students);
+        $this->setPriority($priority);
         $this->sections = new ArrayCollection();
     }
 
     /**
-     * @return Collection
+     * @return Collection<CourseMaterialSection>
      */
     public function getSections(): Collection {
         return $this->sections;
@@ -82,9 +85,6 @@ class CourseMaterial {
         return $this->path;
     }
 
-    /**
-     * @return int
-     */
     public function getType(): int {
         return $this->type;
     }
@@ -97,23 +97,18 @@ class CourseMaterial {
         return $this->type === self::LINK;
     }
 
-    /**
-     * @return float
-     */
+    public function isDir(): bool {
+        return $this->type === self::DIR;
+    }
+
     public function getPriority(): float {
         return $this->priority;
     }
 
-    /**
-     * @return \DateTime
-     */
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
     }
 
-    /**
-     * @return bool
-     */
     public function isHiddenFromStudents(): bool {
         return $this->hidden_from_students;
     }
@@ -127,37 +122,22 @@ class CourseMaterial {
         return false;
     }
 
-    /**
-     * @param \DateTime $release_date
-     */
     public function setReleaseDate(\DateTime $release_date): void {
         $this->release_date = $release_date;
     }
 
-    /**
-     * @param bool $hidden_from_students
-     */
     public function setHiddenFromStudents(bool $hidden_from_students): void {
         $this->hidden_from_students = $hidden_from_students;
     }
 
-    /**
-     * @param float $priority
-     */
     public function setPriority(float $priority): void {
         $this->priority = $priority;
     }
 
-    /**
-     * @param string $path
-     */
     public function setPath(string $path): void {
         $this->path = $path;
     }
 
-    /**
-     * @param int $type
-     */
     public function setType(int $type): void {
         $this->type = $type;
     }
@@ -166,9 +146,6 @@ class CourseMaterial {
         $this->sections[] = $section;
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int {
         return $this->id;
     }

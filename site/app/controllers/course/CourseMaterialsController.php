@@ -4,8 +4,6 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\entities\course\CourseMaterialSection;
-use app\libraries\Core;
-use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -13,9 +11,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\entities\course\CourseMaterial;
-use app\views\course\CourseMaterialsView;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use app\views\course\NewCourseMaterialsView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
@@ -28,7 +24,7 @@ class CourseMaterialsController extends AbstractController {
             ->getRepository(CourseMaterial::class)
             ->findAll();
         return new WebResponse(
-            CourseMaterialsView::class,
+            NewCourseMaterialsView::class,
             'listCourseMaterials',
             $this->core->getUser(),
             $course_materials
@@ -401,6 +397,26 @@ class CourseMaterialsController extends AbstractController {
             if (!FileUtils::createDir($upload_nested_path, true)) {
                 return JsonResponse::getErrorResponse("Failed to make image path.");
             }
+            $dirs_to_make = [];
+            $dirs = explode('/', $requested_path);
+            $j = count($dirs);
+            foreach ($dirs as $dir) {
+                for ($i = 0; $i < $j; $i++) {
+                    if (!isset($dirs_to_make[$i])) {
+                        $dirs_to_make[$i] = '/' . $dir;
+                    }
+                    else {
+                        $dirs_to_make[$i] .= '/' . $dir;
+                    }
+                }
+                $j--;
+            }
+            $i = -1;
+            foreach ($dirs_to_make as $dir) {
+                $details['type'][$i] = CourseMaterial::DIR;
+                $details['path'][$i] = $upload_path . $dir;
+                $i--;
+            }
             $upload_path = $upload_nested_path;
         }
 
@@ -492,13 +508,13 @@ class CourseMaterialsController extends AbstractController {
         }
 
         foreach ($details['type'] as $key => $value) {
-            $course_material = new CourseMaterial([
-                'type' => $value,
-                'path' => $details['path'][$key],
-                'release_date' => DateUtils::parseDateTime($details['release_date'], $this->core->getUser()->getUsableTimeZone()),
-                'hidden_from_students' => $details['hidden_from_students'],
-                'priority' => $details['priority']
-            ]);
+            $course_material = new CourseMaterial(
+                $value,
+                $details['path'][$key],
+                DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
+                $details['hidden_from_students'],
+                $details['priority']
+            );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
                 foreach ($details['sections'] as $section) {

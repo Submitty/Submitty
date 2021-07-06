@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\entities\CourseMaterial;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;

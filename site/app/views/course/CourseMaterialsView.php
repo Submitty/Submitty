@@ -2,19 +2,16 @@
 
 namespace app\views\course;
 
-use app\libraries\CourseMaterialsUtils;
-use app\libraries\database\DatabaseRowIterator;
-use app\libraries\DateUtils;
+use app\entities\course\CourseMaterial;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\User;
 use app\views\AbstractView;
-use Doctrine\Common\Collections\Collection;
 
 class CourseMaterialsView extends AbstractView {
     /**
      * @param User $user
-     * @param array $course_materials_db
+     * @param CourseMaterial[] $course_materials_db
      */
     public function listCourseMaterials(User $user, array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));

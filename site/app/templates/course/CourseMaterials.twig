@@ -90,7 +90,7 @@
             {% endif %}
             {% if userGroup == 1 %}
 
-               <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ path }}", "{{ priorities[recursiveDir] }}", {{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+               <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ path }}", "{{ priorities[path] }}", {{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
                <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="date_to_release_{{ id }}">Share to student on</label>
@@ -162,7 +162,7 @@
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ folderPath }}", "{{ priorities[recursiveDir] }}", {{ this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ folderPath }}", "{{ priorities[path] }}", {{ this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
