@@ -90,7 +90,7 @@ Required inputs:
                        value="{{ graded_component.score | default('0')}}">
                         <script>
                              function gang(){
-                                 $("#extra-mark-{{ component.id }}").val(10);
+                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val()+ {{ precision }});
                              }
                             {% if f_mark.title == "Full Credit" %}
                                 if(document.getElementById("extra-mark-{{ component.id }}").value>0){

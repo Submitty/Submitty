@@ -2495,15 +2495,22 @@ function toggleCommonMark(component_id, mark_id) {
 /**
  * Call to update the custom mark state when any of the custom mark fields change
  * @param {int} component_id
+ * @return {Promise}
  */
 function updateCustomMark(component_id) {
     if (hasCustomMark(component_id)) {
         // Check the mark if it isn't already
         checkDOMCustomMark(component_id);
+
+        // Uncheck the first mark just in case it's checked
+        return unCheckFirstMark(component_id);
     }
     else {
         // Automatically uncheck the custom mark if it's no longer relevant
         unCheckDOMCustomMark(component_id);
+
+        // Note: this is in the else block since `unCheckFirstMark` calls this function
+        return refreshGradedComponent(component_id, true);
     }
 }
 
