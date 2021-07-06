@@ -27,7 +27,7 @@
     "doctrine/annotations": "1.13.1",
     "php-ds/php-ds": "1.3.0",
     "cboden/ratchet": "0.4.3",
-    "textalk/websocket": "1.5.3",
+    "textalk/websocket": "1.5.4",
     "egulias/email-validator": "3.1.1",
     "maennchen/zipstream-php": "^2.1",
     "doctrine/orm": "2.9.3",
