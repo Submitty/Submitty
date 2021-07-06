@@ -496,12 +496,8 @@ class ElectronicGraderController extends AbstractController {
 
         //get all graded gradeables for queue stats
         $submissions_in_queue = 0;
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-        $order->sort("id", "ASC");
-        $graded_gradeables = [];
-        foreach ($order->getSortedGradedGradeables() as $g) {
-            $graded_gradeables[] = $g;
-        }
+        $gradeables[] = $gradeable;
+        $graded_gradeables = $this->core->getQueries()->getGradedGradeables($gradeables);
         //check every submission (inactive and active) for every student
         foreach ($graded_gradeables as $g) {
             $highest_version = $g->getAutoGradedGradeable()->getHighestVersion();
