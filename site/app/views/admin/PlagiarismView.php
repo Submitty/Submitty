@@ -136,7 +136,7 @@ class PlagiarismView extends AbstractView {
             $gradeable_id = $saved_config['gradeable'];
             $config_id = $saved_config['config_id'];
 
-            if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", "provided_code", $gradeable_id))) {
+            if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code", "files"))) {
                 $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code", "files")), [".", ".."]);
                 $provided_code = count($provided_code_filename_array) > 0;
                 foreach ($provided_code_filename_array as $filename) {
