@@ -37,6 +37,12 @@ aside {
     overflow-y: auto;
 }
 
+.custom-mark-number-input::-webkit-outer-spin-button,
+.custom-mark-number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 #electronic-gradeable-container {
     height: 100%;
     padding: 0;
