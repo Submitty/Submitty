@@ -733,6 +733,11 @@ def zip_my_directory(path, zipfilename):
         for my_file in files:
             relpath = root[len(path)+1:]
             zipf.write(os.path.join(root, my_file), os.path.join(relpath, my_file))
+            try:
+                zipf.write(os.path.join(root,my_file), os.path.join(relpath, my_file))
+            except FileNotFoundError as e:
+                # this can happen if we have a broken symlink
+                pass
     zipf.close()
 
 

@@ -13,7 +13,19 @@ function ExtractBuckets(){
 
 //Forces element's value to be non-negative
 function ClampPoints(el){
+    if(el.value === ""){
+        el.value = el.placeholder;
+        el.classList.remove("override");
+    }
     el.value = Math.max(0.0,el.value);
+}
+
+function DetectMaxOverride(el) {
+    if(el.value !== el.placeholder){
+        el.classList.add("override");
+    } else {
+        el.classList.remove("override");
+    }
 }
 
 function ExtractBucketName(s,offset){
