@@ -859,6 +859,9 @@ class Course(object):
             # This for loop adds submissions for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 for user in self.users:
+                    if gradeable.lichen_sample_path is not None and len(gradeable.plagiarism_submissions) == 0:
+                        continue
+
                     submitted = False
                     team_id = None
                     if gradeable.team_assignment is True:
@@ -885,23 +888,29 @@ class Course(object):
                             # If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to
                             # be the same as the number of assignments defined in users.yml in the lichen_submissions folder.
                             versions_to_submit = len(gradeable.plagiarized_user[user.id])
+                        elif gradeable.lichen_sample_path is not None:
+                            # if we have set a plagiarism configuration but no manually-specified submissions, submit the default number
+                            versions_to_submit = gradeable.plagiarism_versions_per_user
                         else:
                             versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
+
                         if (gradeable.gradeable_config is not None and
                            (gradeable.submission_due_date < NOW or random.random() < 0.5)
                            and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
+
                             # only create these directories if we're actually going to put something in them
                             if not os.path.exists(gradeable_path):
                                 os.makedirs(gradeable_path)
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
+
                             # Reduce the propability to get a canceled submission (active_version = 0)
                             # This is done my making other possibilities three times more likely
                             version_population = []
                             for version in range(1, versions_to_submit+1):
                                 version_population.append((version, 3))
-                            version_population = [(0,1)] + version_population
+                            version_population = [(0, 1)] + version_population
                             version_population = [ver for ver, freq in version_population for i in range(freq)]
                             active_version = random.choice(version_population)
                             if team_id is not None:
@@ -910,7 +919,7 @@ class Course(object):
                                 json_history = {"active_version": active_version, "history": []}
                             random_days = 1
                             if random.random() < 0.3:
-                                random_days = random.choice(range(-3,2))
+                                random_days = random.choice(range(-3, 2))
                             for version in range(1, versions_to_submit+1):
                                 os.system("mkdir -p " + os.path.join(submission_path, str(version)))
                                 submitted = True
@@ -940,6 +949,12 @@ class Course(object):
                                     dst = os.path.join(submission_path, str(version))
                                     # pdb.set_trace()
                                     create_gradeable_submission(src, dst)
+                                elif gradeable.lichen_sample_path is not None:
+                                    if len(gradeable.plagiarism_submissions) > 0:  # check to make sure we haven't run out of data
+                                        # if there were no specified plagiarized users but we have plagiarism submissions, grab a random submisison
+                                        src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarism_submissions.pop())
+                                        dst = os.path.join(submission_path, str(version))
+                                        create_gradeable_submission(src, dst)
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
@@ -1387,6 +1402,8 @@ class Gradeable(object):
         self.team_assignment = False
         self.max_team_size = 1
         self.allow_custom_marks = True
+        self.plagiarism_submissions = []
+        self.plagiarism_versions_per_user = 1
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1424,6 +1441,13 @@ class Gradeable(object):
                     for user in gradeable['eg_plagiarized_users']:
                         temp = user.split(" - ")
                         self.plagiarized_user[temp[0]] = temp[1:]
+                else:  # if we weren't given a list of plagiarized users, make one
+                    self.plagiarism_submissions = os.listdir(self.lichen_sample_path)
+                    random.shuffle(self.plagiarism_submissions)
+
+                if 'eg_plagiarism_versions_per_user' in gradeable:
+                    self.plagiarism_versions_per_user = gradeable['plagiarism_versions_per_user']
+
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
