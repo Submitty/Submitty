@@ -1,10 +1,10 @@
 {#
     --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/public/templates/misc/MarkdownArea.twig ---
-    
+
     markdown_area_id: required
     class: optional, a string with classes separated by a space to be applied to the markdown_area
     onclick: required, onclick event string for the preview_button
-    markdown_area_name: optional, but be careful make sure to maintain preexisting names 
+    markdown_area_name: optional, but be careful make sure to maintain preexisting names
                         when converting forms to use this template otherwise they might not work
     markdown_area_query: optional, a JQuery expression that will return the markdown_area such as $('#my_id')
     markdown_area_value: optional, initial value for markdown_area to have
@@ -31,7 +31,7 @@
             <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
             <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
             <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button> 
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         {% endif %}
         <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
         <a target="_blank" href="https://submitty.org/student/communication/markdown">
@@ -48,12 +48,17 @@
         placeholder="{{ placeholder }}"
         rows="10" cols="30"
         maxlength="5000"
+        {% if textarea_onchange is defined %}
         onchange="{{ textarea_onchange }}"
+        {% endif %}
         onkeydown="{{ textarea_onkeydown }}"
         onpaste="{{ textarea_onpaste }}"
         maxlength="{{ textarea_maxlength }}"
-        data-previous-comment="{{ data_previous_comment }}"
-        {{ other_textarea_attributes }}>{{ markdown_area_value }}</textarea>
+        data-previous-comment="{{ data_previous_comment is defined ? data_previous_comment : '' }}"
+        {% if other_textarea_attributes is defined %}
+        {{ other_textarea_attributes }}
+        {% endif %}
+    >{{ markdown_area_value }}</textarea>
     <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height ? min_height : "0px" }}" hidden></div>
 </div>
 
