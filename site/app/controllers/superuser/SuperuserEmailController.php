@@ -49,10 +49,11 @@ class SuperuserEmailController extends AbstractController {
             $emailFullAccess = $_POST['emailFullAccess'] == "true";
             $emailLimitedAccess = $_POST['emailLimitedAccess'] == "true";
             $emailStudent = $_POST['emailStudent'] == "true";
+            $emailFaculty = $_POST['emailFaculty'] == "true";
             $emailToSecondary = $_POST['emailToSecondary'] == "true";
             # getRecipients
-            $activeUserIds = $this->core->getQueries()->getActiveUserIds($semester, $emailInstructor, $emailFullAccess,
-                $emailLimitedAccess, $emailStudent);
+            $activeUserIds = $this->core->getQueries()->getActiveUserIds($emailInstructor, $emailFullAccess,
+                $emailLimitedAccess, $emailStudent, $emailFaculty);
             # Set up email here
             $notificationFactory = $this->core->getNotificationFactory();
             $emails = [];
@@ -60,7 +61,7 @@ class SuperuserEmailController extends AbstractController {
                 $details = ['body' => $_POST['emailContent'], 'subject' => $_POST['emailSubject'], 'to_user_id' => $userId];
                 $emails[] = new SuperuserEmail($this->core, $details);
             }
-            $notificationFactory->sendEmails($emails);
+            $notificationFactory->sendEmails($emails, $emailToSecondary);
             return JsonResponse::getSuccessResponse([
                 "message" => "Email queued to be sent!",
                 "data" => json_encode($activeUserIds)

@@ -240,7 +240,7 @@ class NotificationFactory {
             }
             if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
                 $user = $this->core->getQueries()->getUserById($email->getUserId());
-                if ($user->getEmailBoth() || $forceSecondary) {
+                if (($user->getEmailBoth() || $forceSecondary) && $user->getSecondaryEmail() != "") {
                     $flattened_emails[] = $email->getSubject();
                     $flattened_emails[] = $email->getBody();
                     $flattened_emails[] = $email->getUserId();

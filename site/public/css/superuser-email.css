@@ -42,3 +42,14 @@
 .course-email{
     padding: 1em;
 }
+
+.option{
+    display: block;
+}
+
+.options-label{
+    vertical-align: top; 
+    display: inline-block;
+    padding-right: 1em;
+    width: 10vw;
+}

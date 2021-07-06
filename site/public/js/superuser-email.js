@@ -16,6 +16,7 @@ function sendEmail(url) {
     const emailLimitedAccess = $('#email-limited-access').is(':checked');
     const emailStudent = $('#email-student').is(':checked');
     const emailToSecondary = $('#email-to-secondary').is(':checked');
+    const emailFaculty = $('#email-faculty').is(':checked');
     $('#email-content').prop('disabled', true);
     $('#send-email').prop('disabled', true);
     console.log(url);
@@ -32,6 +33,7 @@ function sendEmail(url) {
             'emailInstructor': emailInstructor,
             'emailStudent': emailStudent,
             'emailToSecondary': emailToSecondary,
+            'emailFaculty': emailFaculty,
             csrf_token: csrfToken
         },
         cache: false,

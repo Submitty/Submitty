@@ -1,16 +1,43 @@
 <div id="superuser-email" class="content">
     <h1> System Wide Email</h1>
+    <p id= "in-page-doc">
+        You can send an email to all users in an active course by filling out the subject and content field, and then press send to queue the emailf for sending.
+        You can also specify who receives this email using the recipients check boxes. By specifying email to instructors/full access graders/limited access graders/students, you can send the email only
+        to those of the specified role in a current active course. You can also specify email to faculty to send to RPI faculties in an active course. In addition, you can 
+        specify to forcefully send the email to both the primary (rpi) email as well as the secondary (personal) email by checking the Force send to secondary email checkbox.
+    </p>
     <form>
         <div class="checkbox-options">
-            Recipients:
-            <input type="checkbox" id="email-instructor" name="email-instructor" checked> Email to instructors </input>
-            <input type="checkbox" id="email-full-access" name="email-full-access" checked> Email to Full Access Graders </input>
-            <input type="checkbox" id="email-limited-access" name="email-limited-access" checked> Email to Limited Access Graders</input>
-            <input type="checkbox" id="email-student" name="email-student" checked> Email to students </input>
+            <div class = "options-label">
+                Recipients:
+            </div>
+            <div style="display: inline-block">
+                <div class="option">
+                    <input type="checkbox" id="email-instructor" name="email-instructor" checked> Email to Instructors </input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-full-access" name="email-full-access" checked> Email to Full Access Graders </input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-limited-access" name="email-limited-access" checked> Email to Limited Access Graders</input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-student" name="email-student" checked> Email to Students </input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-faculty" name="email-faculty" checked> Email to Faculty </input>
+                </div>
+            </div>
         </div>
         <div class="checkbox-options">
-            Additional Options:
-            <input type="checkbox" id="email-to-secondary" name="email-to-secondary"> Force send to secondary email</input>
+            <div class="options-label">
+                Additional Options:
+            </div>
+            <div style="display: inline-block">
+                <div class="option">
+                    <input type="checkbox" id="email-to-secondary" name="email-to-secondary"> Force send to secondary email</input>
+                </div>
+            </div>
         </div>
         <label for="email-subject"> Subject of your email:</label>
         <br>

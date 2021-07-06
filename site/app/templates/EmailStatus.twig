@@ -8,7 +8,7 @@
                     {% if courses is defined and courses[subject] is defined and courses[subject] is not null %}
                         <div> Course: {{courses[subject]}}</div>
                     {% else %}
-                        <div> Superuser Email </div>
+                        <div> Submitty Administrator Email </div>
                     {% endif %}
                 </div>
                 {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}

@@ -1059,23 +1059,31 @@ WHERE semester=? AND course=? AND user_id=?",
      * @param bool $student To include students or not
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds($semester, $instructor, $fullAccess, $limitedAccess, $student) {
+    public function getActiveUserIds($instructor, $fullAccess, $limitedAccess, $student, $faculty) {
         $result_rows = [];
-        if ($instructor) {
-            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 1", [$semester]);
-            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
-        }
-        if ($fullAccess) {
-            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 2", [$semester]);
-            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
-        }
-        if ($limitedAccess) {
-            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 3", [$semester]);
-            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
-        }
-        if ($student) {
-            $this->submitty_db->query("SELECT DISTINCT user_id FROM courses_users WHERE semester = ? AND user_group = 4", [$semester]);
-            $result_rows = array_merge($result_rows, $this->rowsToArray($this->submitty_db->rows()));
+        $this->submitty_db->query(
+            "SELECT courses_users.user_id as user_id, courses_users.user_group as user_group, users.user_access_level as user_access_level
+                FROM courses_users LEFT JOIN courses 
+                ON courses_users.semester = courses.semester AND courses_users.course = courses.course
+                JOIN users ON courses_users.user_id = users.user_id
+                WHERE courses.status = 1");
+        $results = $this->submitty_db->rows();
+        foreach ($results as $row) {
+            if ($instructor && $row["user_group"] == 1) {
+                $result_rows[] = $row["user_id"];
+            }
+            else if ($fullAccess && $row["user_group"] == 2) {
+                $result_rows[] = $row["user_id"];
+            }
+            else if ($limitedAccess && $row["user_group"] == 3) {
+                $result_rows[] = $row["user_id"];
+            }
+            else if ($student && $row["user_group"] == 4) {
+                $result_rows[] = $row["user_id"];
+            }
+            else if ($faculty && $row["user_access_level"] <= 2) {
+                $result_rows[] = $row["user_id"];
+            }
         }
         return array_unique($result_rows);
     }

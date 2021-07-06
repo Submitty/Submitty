@@ -16,7 +16,8 @@ class EmailStatusView extends AbstractView {
             "subjects" => $emailStatus->getSubjects(),
             "pending" => $emailStatus->getPending(),
             "successes" => $emailStatus->getSuccesses(),
-            "errors" => $emailStatus->getErrors()
+            "errors" => $emailStatus->getErrors(),
+            "courses" => $emailStatus->getCourses()
         ]);
     }
     
