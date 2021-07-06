@@ -22,7 +22,7 @@
 
 ::-webkit-scrollbar-thumb {
     background-color: var(--actionable-blue);
-    border-radius: 5px; 
+    border-radius: 5px;
     height: 10%;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .options-label {
-    vertical-align: top; 
+    vertical-align: top;
     display: inline-block;
     padding-right: 1em;
     width: 10vw;
