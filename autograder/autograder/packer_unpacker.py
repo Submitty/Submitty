@@ -75,11 +75,18 @@ def copytree_if_exists(config, job_id, source, target):
         os.mkdir(target)
     else:
         try:
-            # NOTE: Now that we have ignore_dangling_symlinks there
-            # will be no system failure, but it may be unclear to
-            # students why their files are 'missing'.  It would be
-            # nice to pass a warning message of the dangling symlink
-            # back to the student.
+            # Symlinks should generally not be needed/used in student
+            # repositories, but they appeared accidentally/unintentionally.
+            #
+            # We will not fail on a dangling/broken symlink.  And we will also
+            # not copy / unroll the symlink -- which could be a security risk.
+            #
+            # Note: Broken symlinks or symlinks to files the user does
+            # not have permission to read will not be copied to the
+            # worker machine for autograding and will be 'missing'
+            # from the list of files.  It would be nice to pass a
+            # warning message of the broken symlink back to the
+            # student.
             shutil.copytree(source, target, symlinks=True, ignore_dangling_symlinks=True)
         except Exception as error:
             config.logger.log_message(
