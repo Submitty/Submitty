@@ -204,11 +204,12 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @returns {Promise<string>} the html for the graded component
  */
 
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer) {
+
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer, allowCustomMarks) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
-        if (is_student){
+        if (is_student) {
             component.ta_comment = "";
         } else {
             component.student_comment = "";
@@ -224,8 +225,8 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'decimal_precision': DECIMAL_PRECISION,
             'can_verify_graders': canVerifyGraders,
             'grader_id': grader_id,
-            'component_version_conflict': componentVersionConflict,
-            'peer_component' : component.peer_component,
+            'peer_component' : component.peer,
+            'allow_custom_marks' : allowCustomMarks,
             'itempool_id': itempool_items.hasOwnProperty(component.id) ? itempool_items[component.id] : '',
             'ta_grading_peer': taGradingPeer
         }));

@@ -33,10 +33,12 @@
             "show_anon" : true,
             "show_thread_status" : true,
             "show_announcement" : true,
+            "show_expiration" : true,
             "show_editcat" : true,
             "submit_label" : "Publish thread",
             "manage_categories_url" : manage_categories_url,
-            "email_enabled": email_enabled
+            "email_enabled": email_enabled,
+            "expiration_placeholder" : expiration_placeholder
         } %}
 
     </form>
@@ -51,7 +53,7 @@
         });
         $("#thread_form").submit(createThread);
         $("form").areYouSure();
-        
+
         cleanupAutosaveHistory('-create-autosave');
         restoreCreateThreadFromLocal();
         $("#title").on("input", () => deferredSave(CREATE_THREAD_DEFER_KEY, saveCreateThreadToLocal, 1));
@@ -62,7 +64,8 @@
         $("#pinThread").change(saveCreateThreadToLocal);
         $("#Announcement").change(saveCreateThreadToLocal);
         $("#lock_thread_date").change(saveCreateThreadToLocal);
-        
+        $("#expirationDate").change(saveCreateThreadToLocal);
+
         initSocketClient();
     });
 </script>

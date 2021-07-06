@@ -417,7 +417,7 @@ SQL;
         $query_favorite = "case when sf.user_id is NULL then false else true end";
 
         if ($want_order) {
-            $query_raw_select[]     = "row_number() over(ORDER BY pinned DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
+            $query_raw_select[]     = "row_number() over(ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
         }
         $query_raw_select[]     = "t.*";
         $query_raw_select[]     = "({$query_favorite}) as favorite";
@@ -746,7 +746,7 @@ SQL;
 
     public function getUnviewedPosts($thread_id, $user_id) {
         if ($thread_id == -1) {
-            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
+            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC");
             $rows = $this->course_db->rows();
             if (!empty($rows)) {
                 $thread_id = $rows[0]["max"];
@@ -764,13 +764,13 @@ SQL;
         return $rows;
     }
 
-    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date) {
+    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration) {
 
         $this->course_db->beginTransaction();
 
         try {
             //insert data
-            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date]);
+            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date, pinned_expiration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date, $expiration]);
 
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", [$title, $user]);
@@ -811,7 +811,8 @@ SQL;
     }
 
     public function setAnnouncement(int $thread_id, bool $onOff) {
-        $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", [$onOff, $thread_id]);
+        $expireTime = $onOff ? date("Y-m-d H:i:s", strtotime('+7 days')) : '1900-01-01 00:00:00';
+        $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", [$expireTime, $thread_id]);
     }
 
     public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
@@ -845,7 +846,7 @@ SQL;
     }
 
     public function searchThreads($searchQuery) {
-        $this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", [':q' => $searchQuery]);
+        $this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned_expiration as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", [':q' => $searchQuery]);
         return $this->course_db->rows();
     }
 
@@ -920,10 +921,15 @@ SQL;
         } return true;
     }
 
-    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date) {
+    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration) {
         try {
             $this->course_db->beginTransaction();
-            $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
+            if ($expiration == null) {
+                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
+            }
+            else {
+                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ?, pinned_expiration = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $expiration, $thread_id]);
+            }
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", [$thread_id]);
             foreach ($categories_ids as $category_id) {
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$thread_id, $category_id]);
@@ -3795,7 +3801,7 @@ AND gc_id IN (
 
     public function existsAnnouncements($show_deleted = false) {
         $query_delete = $show_deleted ? "true" : "deleted = false";
-        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned = true");
+        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned_expiration >= current_timestamp");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
@@ -3871,7 +3877,7 @@ AND gc_id IN (
             $param_list[] = $filterOnUser;
         }
         if ($thread_id == -1) {
-            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
+            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC");
             $rows = $this->course_db->rows();
             if (!empty($rows)) {
                 $thread_id = $rows[0]["max"];
@@ -4458,6 +4464,7 @@ AND gc_id IN (
               g_grade_released_date AS grade_released_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
+              g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
               gc.*,
@@ -5111,7 +5118,8 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
             $gradeable->getMinGradingGroup(),
-            $gradeable->getSyllabusBucket()
+            $gradeable->getSyllabusBucket(),
+            $gradeable->getAllowCustomMarks()
         ];
         $this->course_db->query(
             "
@@ -5127,8 +5135,9 @@ AND gc_id IN (
               g_grade_due_date,
               g_grade_released_date,
               g_min_grading_group,
-              g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              g_syllabus_bucket,
+              g_allow_custom_marks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -5262,6 +5271,7 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
+                $gradeable->getAllowCustomMarks(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -5277,7 +5287,8 @@ AND gc_id IN (
                   g_grade_due_date=?,
                   g_grade_released_date=?,
                   g_min_grading_group=?,
-                  g_syllabus_bucket=?
+                  g_syllabus_bucket=?,
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );
@@ -5708,13 +5719,34 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
-     /**
-      * Gets if the provied submitter has a submission for a particular gradeable
-      *
-      * @param  \app\models\gradeable\Gradeable $gradeable
-      * @param  String                     $userid
-      * @return bool
-      */
+
+    /**
+     * checks if there are any custom marks saved for the provided gradeable
+     *
+     * @param string $gradeable_id
+     * @return bool
+     */
+    public function getHasCustomMarks($gradeable_id) {
+        //first get the gc_id's for all components associated with the gradeable
+        $this->course_db->query(
+            "SELECT gc.gc_id FROM gradeable_component AS gc
+                   INNER JOIN gradeable_component_data AS gcd ON gc.gc_id=gcd.gc_id
+                   WHERE gc.g_id=? AND gcd.gcd_component_comment <> '' ",
+            [$gradeable_id]
+        );
+        if (count($this->course_db->rows()) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets if the provied submitter has a submission for a particular gradeable
+     *
+     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param  String                     $userid
+     * @return bool
+     */
     public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
 
         return $this->course_db->query(
@@ -5975,7 +6007,9 @@ AND gc_id IN (
                 help_started_by,
                 removed_by,
                 contact_info,
-                last_time_in_queue
+                last_time_in_queue,
+                time_paused,
+                time_paused_start
             ) VALUES (
                 'waiting',
                 NULL,
@@ -5989,8 +6023,10 @@ AND gc_id IN (
                 NULL,
                 NULL,
                 ?,
-                ?
-            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue]);
+                ?,
+                ?,
+                NULL
+            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue,0]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -6037,7 +6073,27 @@ AND gc_id IN (
     }
 
     public function setQueuePauseState($new_state) {
-        $this->course_db->query("UPDATE queue SET paused = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $this->core->getUser()->getId()]);
+        $time_paused_start = $this->core->getQueries()->getCurrentQueueState()['time_paused_start'];
+        $current_state = $time_paused_start != null;
+        if ($new_state != $current_state) {
+            // The pause state is actually changing
+            $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
+            $time_paused_start = date_create($time_paused_start);
+            if ($new_state) {
+                // The student is pausing
+                $time_paused_start = $this->core->getDateTimeNow();
+                $date_interval = new \DateInterval("PT{$time_paused}S");
+                $time_paused_start = date_sub($time_paused_start, $date_interval);
+            }
+            else {
+                // The student is un-pausing
+                $time_paused_end = $this->core->getDateTimeNow();
+                $date_interval = date_diff($time_paused_start, $time_paused_end);
+                $time_paused = ($date_interval->h * 60 + $date_interval->i) * 60 + $date_interval->s;
+                $time_paused_start = null;
+            }
+            $this->course_db->query("UPDATE queue SET paused = ?, time_paused = ?, time_paused_start = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $time_paused, $time_paused_start, $this->core->getUser()->getId()]);
+        }
     }
 
     public function emptyQueue($queue_code) {

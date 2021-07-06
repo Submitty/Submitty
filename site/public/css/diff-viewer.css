@@ -1,11 +1,5 @@
 @import url("google/inconsolata.css");
 
-/*.diff-container {*/
-/*    background-color: var(--standard-pale-gray);*/
-/*    border: 1px solid var(--standard-light-gray);*/
-/*    width: 100%;*/
-/*}*/
-
 .diff-container-box {
     overflow: auto;
     background-color: var(--standard-pale-gray);
@@ -40,7 +34,8 @@
     width: auto;
 }
 
-.line_number, .line_code {
+.line_number,
+.line_code {
     vertical-align: top;
     max-height: 20px !important;
     height: 20px !important;
