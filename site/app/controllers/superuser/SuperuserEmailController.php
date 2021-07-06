@@ -44,12 +44,12 @@ class SuperuserEmailController extends AbstractController {
         }
         else {
             // Because AJAX stringifies everthing
-            $emailInstructor = $_POST['emailInstructor'] == "true";
-            $emailFullAccess = $_POST['emailFullAccess'] == "true";
-            $emailLimitedAccess = $_POST['emailLimitedAccess'] == "true";
-            $emailStudent = $_POST['emailStudent'] == "true";
-            $emailFaculty = $_POST['emailFaculty'] == "true";
-            $emailToSecondary = $_POST['emailToSecondary'] == "true";
+            $emailInstructor = $_POST['options'][0];
+            $emailFullAccess = $_POST['options'][1];
+            $emailLimitedAccess = $_POST['options'][2];
+            $emailStudent = $_POST['options'][3];
+            $emailFaculty = $_POST['options'][4];
+            $emailToSecondary = $_POST['options'][5];
             # getRecipients
             $activeUserIds = $this->core->getQueries()->getActiveUserIds(
                 $emailInstructor,
