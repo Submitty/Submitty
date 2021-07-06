@@ -35,7 +35,7 @@
     "eslint": "^7.29.0",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-jest": "^24.3.6",
-    "jest": "^27.0.5",
+    "jest": "^27.0.6",
     "regenerator-runtime": "^0.13.7",
     "stylelint": "^13.13.1",
     "stylelint-config-standard": "^22.0.0"
