@@ -20,8 +20,6 @@ function sendEmail(url) {
     const emailFaculty = $('#email-faculty').is(':checked');
     $('#email-content').prop('disabled', true);
     $('#send-email').prop('disabled', true);
-    console.log(url);
-    console.log(getCurrentSemester());
     $.ajax({
         url: url,
         type: 'POST',
@@ -43,7 +41,6 @@ function sendEmail(url) {
             console.error(err);
         },
         success: function(data){
-            console.log(data);
             const parsedData = JSON.parse(data);
             if (parsedData['status'] == 'success') {
                 $('#email-content').val('');
@@ -57,5 +54,4 @@ function sendEmail(url) {
             $('#send-email').prop('disabled', false);
         },
     });
-    console.log(emailContent);
 }
