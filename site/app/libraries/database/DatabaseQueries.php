@@ -1059,7 +1059,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * @param bool $faculty to include faculty level users or not
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds($instructor, $fullAccess, $limitedAccess, $student, $faculty) {
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT courses_users.user_id as user_id, courses_users.user_group as user_group, users.user_access_level as user_access_level
@@ -4318,9 +4318,9 @@ AND gc_id IN (
      * @param  string $user_id
      * @param  string $course
      * @param  string $semester
-     * @return boolean
+     * @return bool
      */
-    public function checkStudentActiveInCourse($user_id, $course, $semester) {
+    public function checkStudentActiveInCourse($user_id, $course, $semester): bool {
         if ($course == null || $semester == null) {
             $this->submitty_db->query(
                 "
@@ -5873,14 +5873,14 @@ AND gc_id IN (
      * @param string $semester
      * @return EmailStatusModel
      */
-    public function getEmailStatusWithCourse($semester, $course) {
+    public function getEmailStatusWithCourse($semester, $course): EmailStatusModel {
         $parameters = [$course, $semester];
         $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
         $details = $this->submitty_db->rows();
         return new EmailStatusModel($this->core, $details);
     }
 
-    public function getAllEmailStatuses() {
+    public function getAllEmailStatuses(): EmailStatusModel {
         $this->submitty_db->query('SELECT * FROM emails ORDER BY created DESC');
         $details = $this->submitty_db->rows();
         return new EmailStatusModel($this->core, $details);

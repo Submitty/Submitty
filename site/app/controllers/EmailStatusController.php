@@ -37,7 +37,7 @@ class EmailStatusController extends AbstractController {
      * @AccessControl(level="SUPERUSER")
      * @return WebResponse
      */
-    public function getSuperuserEmailStatusPage() {
+    public function getSuperuserEmailStatusPage(): WebResponse {
         $results = [];
         $emailStatuses = $this->core->getQueries()->getAllEmailStatuses();
         return new WebResponse(

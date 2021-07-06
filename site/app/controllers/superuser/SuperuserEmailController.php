@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
-use app\libraries\response\RedirectResponse;
 use app\controllers\AbstractController;
 use app\libraries\routers\AccessControl;
 use app\libraries\User;
@@ -27,15 +26,16 @@ class SuperuserEmailController extends AbstractController {
      * @Route("/superuser/email")
      * @return MultiResponse
      */
-    public function showEmailPage() {
+    public function showEmailPage(): MultiResponse {
         return MultiResponse::webOnlyResponse(
             new WebResponse(SuperuserEmailView::class, 'showEmailPage')
         );
     }
     /**
      * @Route("/superuser/email/send", methods={"POST"})
+     * @return JsonResponse
      */
-    public function sendEmail() {
+    public function sendEmail(): JsonResponse {
         if (!isset($_POST['emailContent']) || $_POST['emailContent'] == '') {
             return JsonResponse::getFailResponse("Email content is empty.");
         }
@@ -43,7 +43,6 @@ class SuperuserEmailController extends AbstractController {
             return JsonResponse::getFailResponse("Email subject is empty.");
         }
         else {
-            $semester = $_POST['semester'];
             // Because AJAX stringifies everthing
             $emailInstructor = $_POST['emailInstructor'] == "true";
             $emailFullAccess = $_POST['emailFullAccess'] == "true";

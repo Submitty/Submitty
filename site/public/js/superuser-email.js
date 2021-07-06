@@ -1,12 +1,6 @@
 /* exported sendEmail */
 /* eslint no-undef: "off" */
-function getCurrentSemester() {
-    const today = new Date();
-    const year = today.getFullYear().toString().slice(2,4);	//get last two digits
-    const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
 
-    return semester + year;
-}
 
 function sendEmail(url) {
     const emailContent = $('#email-content').val();
@@ -26,7 +20,6 @@ function sendEmail(url) {
         data: {
             'emailContent': emailContent,
             'emailSubject': emailSubject,
-            'semester': getCurrentSemester(),
             'emailFullAccess': emailFullAcess,
             'emailLimitedAccess': emailLimitedAccess,
             'emailInstructor': emailInstructor,
@@ -40,18 +33,23 @@ function sendEmail(url) {
             window.alert('Something went wrong. Please try again.');
             console.error(err);
         },
-        success: function(data){
-            const parsedData = JSON.parse(data);
-            if (parsedData['status'] == 'success') {
-                $('#email-content').val('');
-                $('#email-subject').val('');
-                displaySuccessMessage(parsedData['data']['message']);
+        success: function(data) {
+            try {
+                const parsedData = JSON.parse(data);
+                if (parsedData['status'] == 'success') {
+                    $('#email-content').val('');
+                    $('#email-subject').val('');
+                    displaySuccessMessage(parsedData['data']['message']);
+                }
+                else {
+                    displayErrorMessage(parsedData['message']);
+                }
+                $('#email-content').prop('disabled', false);
+                $('#send-email').prop('disabled', false);
             }
-            else {
-                displayErrorMessage(parsedData['message']);
+            catch (e) {
+                console.error(e);
             }
-            $('#email-content').prop('disabled', false);
-            $('#send-email').prop('disabled', false);
         },
     });
 }
