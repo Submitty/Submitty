@@ -35,7 +35,7 @@ function sendEmail(url) {
             'emailStudent': emailStudent,
             'emailToSecondary': emailToSecondary,
             'emailFaculty': emailFaculty,
-            csrf_token: csrfToken
+            csrf_token: csrfToken,
         },
         cache: false,
         error: function(err) {
@@ -55,7 +55,7 @@ function sendEmail(url) {
             }
             $('#email-content').prop('disabled', false);
             $('#send-email').prop('disabled', false);
-        }
+        },
     });
     console.log(emailContent);
 }
