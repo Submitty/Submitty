@@ -1052,11 +1052,11 @@ WHERE semester=? AND course=? AND user_id=?",
      * Gets an unique array of active users in courses_users, active users are users enrolled in a course in the current semester
      * Allows the filtering the group of users returned by this function
      *
-     * @param string $semester The current semester
      * @param bool $instructor To include instructors or not
      * @param bool $fullAccess To include full access graders or not
      * @param bool $limitedAccess To include limited access graders or not
      * @param bool $student To include students or not
+     * @param bool $faculty to include faculty level users or not
      * @return array - array of userids active in the specified semester
      */
     public function getActiveUserIds($instructor, $fullAccess, $limitedAccess, $student, $faculty) {
@@ -1066,22 +1066,23 @@ WHERE semester=? AND course=? AND user_id=?",
                 FROM courses_users LEFT JOIN courses 
                 ON courses_users.semester = courses.semester AND courses_users.course = courses.course
                 JOIN users ON courses_users.user_id = users.user_id
-                WHERE courses.status = 1");
+                WHERE courses.status = 1"
+        );
         $results = $this->submitty_db->rows();
         foreach ($results as $row) {
             if ($instructor && $row["user_group"] == 1) {
                 $result_rows[] = $row["user_id"];
             }
-            else if ($fullAccess && $row["user_group"] == 2) {
+            elseif ($fullAccess && $row["user_group"] == 2) {
                 $result_rows[] = $row["user_id"];
             }
-            else if ($limitedAccess && $row["user_group"] == 3) {
+            elseif ($limitedAccess && $row["user_group"] == 3) {
                 $result_rows[] = $row["user_id"];
             }
-            else if ($student && $row["user_group"] == 4) {
+            elseif ($student && $row["user_group"] == 4) {
                 $result_rows[] = $row["user_id"];
             }
-            else if ($faculty && $row["user_access_level"] <= 2) {
+            elseif ($faculty && $row["user_access_level"] <= 2) {
                 $result_rows[] = $row["user_id"];
             }
         }

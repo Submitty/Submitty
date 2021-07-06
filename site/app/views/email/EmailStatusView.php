@@ -20,7 +20,7 @@ class EmailStatusView extends AbstractView {
             "courses" => $emailStatus->getCourses()
         ]);
     }
-    
+
     public function showSuperuserEmailStatus($emailStatuses) {
         $this->core->getOutput()->addBreadcrumb("Superuser Email Statuses", $this->core->buildUrl(["superuser","email"]));
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');

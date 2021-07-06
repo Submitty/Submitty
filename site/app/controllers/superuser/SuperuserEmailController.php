@@ -19,15 +19,15 @@ use app\models\SuperuserEmail;
  */
 class SuperuserEmailController extends AbstractController {
 
-    public function __construct(Core $core){
+    public function __construct(Core $core) {
         parent::__construct($core);
     }
 
     /**
      * @Route("/superuser/email")
-     * @return MultiResponse::webOnlyResponse
+     * @return MultiResponse
      */
-    public function showEmailPage(){
+    public function showEmailPage() {
         return MultiResponse::webOnlyResponse(
             new WebResponse(SuperuserEmailView::class, 'showEmailPage')
         );
@@ -35,11 +35,11 @@ class SuperuserEmailController extends AbstractController {
     /**
      * @Route("/superuser/email/send", methods={"POST"})
      */
-    public function sendEmail(){
+    public function sendEmail() {
         if (!isset($_POST['emailContent']) || $_POST['emailContent'] == '') {
             return JsonResponse::getFailResponse("Email content is empty.");
         }
-        else if (!isset($_POST['emailSubject']) || $_POST['emailSubject'] == '') {
+        elseif (!isset($_POST['emailSubject']) || $_POST['emailSubject'] == '') {
             return JsonResponse::getFailResponse("Email subject is empty.");
         }
         else {
@@ -52,8 +52,13 @@ class SuperuserEmailController extends AbstractController {
             $emailFaculty = $_POST['emailFaculty'] == "true";
             $emailToSecondary = $_POST['emailToSecondary'] == "true";
             # getRecipients
-            $activeUserIds = $this->core->getQueries()->getActiveUserIds($emailInstructor, $emailFullAccess,
-                $emailLimitedAccess, $emailStudent, $emailFaculty);
+            $activeUserIds = $this->core->getQueries()->getActiveUserIds(
+                $emailInstructor,
+                $emailFullAccess,
+                $emailLimitedAccess,
+                $emailStudent,
+                $emailFaculty
+            );
             # Set up email here
             $notificationFactory = $this->core->getNotificationFactory();
             $emails = [];
