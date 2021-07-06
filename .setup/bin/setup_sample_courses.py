@@ -48,7 +48,7 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-with open(os.path.join(SUBMITTY_INSTALL_DIR, "config","database.json")) as database_config:
+with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
     database_config_json = json.load(database_config)
     DB_USER = database_config_json["database_user"]
     DB_PASS = database_config_json["database_password"]
