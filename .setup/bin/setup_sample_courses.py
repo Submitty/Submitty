@@ -859,7 +859,7 @@ class Course(object):
             # This for loop adds submissions for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 for user in self.users:
-                    if gradeable.lichen_sample_path is not None and len(gradeable.plagiarism_submissions) == 0:
+                    if gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) == 0 and len(gradeable.plagiarism_submissions) == 0:
                         continue
 
                     submitted = False
@@ -894,9 +894,10 @@ class Course(object):
                         else:
                             versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
 
-                        if (gradeable.gradeable_config is not None and
-                           (gradeable.submission_due_date < NOW or random.random() < 0.5)
-                           and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
+                        if ((gradeable.gradeable_config is not None
+                           and (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                           and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions))
+                           or (gradeable.gradeable_config is not None and user.id in gradeable.plagiarized_user)):
 
                             # only create these directories if we're actually going to put something in them
                             if not os.path.exists(gradeable_path):
@@ -905,13 +906,17 @@ class Course(object):
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
 
-                            # Reduce the propability to get a canceled submission (active_version = 0)
+                            # Reduce the probability to get a cancelled submission (active_version = 0)
                             # This is done my making other possibilities three times more likely
                             version_population = []
                             for version in range(1, versions_to_submit+1):
                                 version_population.append((version, 3))
-                            version_population = [(0, 1)] + version_population
+
+                            # disallow cancelled submission if this is a manually-specified user
+                            if user.id not in gradeable.plagiarized_user:
+                                version_population = [(0, 1)] + version_population
                             version_population = [ver for ver, freq in version_population for i in range(freq)]
+
                             active_version = random.choice(version_population)
                             if team_id is not None:
                                 json_history = {"active_version": active_version, "history": [], "team_history": []}
