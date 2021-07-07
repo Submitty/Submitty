@@ -40,11 +40,6 @@
 #
 #   rotating_section: [optional] rotating section to place the user into. Defaults to NULL.
 #
-#   eg_lichen_sample_path: the path from which to pull submissions if unique submissions are desired
-#
-#   eg_plagiarized_users: a list of users and individual files for them to submit from the lichen_sample_path
-#                         if this isn't provided but eg_lichen_sample_path is, random submissions will be made from the directory provided
-#
 #   courses: This is a either a list of strings of courses to add the user to or a list of dictionaries that contain
 #         course specific settings for this user (the dictionary can be empty though if you just want the course and
 #         to use the "global" settings for the user. If this is defined, the user will not be added to any course not

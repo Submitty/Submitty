@@ -99,9 +99,10 @@
 #     eg_max_random_submissions: [optional] integer limiting how many random submissions should be generated.
 #         Defaults to no limit.
 #
-#     eg_lichen_sample_path: [optional] WRITEME: refer to setup_sample_courses.py line 1418
+#     eg_lichen_sample_path: the path from which to pull submissions if unique submissions are desired
 #
-#     eg_plagiarized_users: [optional] WRITEME: refer to setup_sample_courses.py line 1418
+#     eg_plagiarized_users: a list of users and individual files for them to submit from the lichen_sample_path
+#                           if this isn't provided but eg_lichen_sample_path is, random submissions will be made from the directory provided
 #
 # To make how the order of the time fields work more explicit:
 # g_ta_view_start_date < eg_submission_open_date < eg_submission_due_date < g_grade_start_date < g_grade_released_date
