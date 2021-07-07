@@ -1,6 +1,8 @@
-<div class="sub" id="incentive_message" style="display: none;">
-    <p class='green-message'>{{ incentive_message }}</p>
-</div>
+{% if incentive_message is defined %}
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{{ incentive_message }}</p>
+    </div>
+{% endif %}
 
 {# Submitted files #}
 {% if hide_submitted_files == false %}
