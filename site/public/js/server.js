@@ -646,7 +646,7 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    window.open(buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`);
+    window.open(buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`, "_blank");
 }
 
 function downloadStudentAnnotations(url, path, dir) {
