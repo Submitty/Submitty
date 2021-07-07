@@ -462,4 +462,3 @@ parameters:
 			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
