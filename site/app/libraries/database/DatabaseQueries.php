@@ -5926,25 +5926,30 @@ AND gc_id IN (
 
         $main_query = "select $id_string from $table where $section_type is not null and $id_string not in";
 
+        $parameters = [];
         // Select which subquery to use
         if ($component_id != "-1") {
             // Use this sub query to select users who do not have a specific component within this gradable graded
             $sub_query = "(select gd_$id_string
                 from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
-                where g_id = '$gradeable_id' and gc_id = $component_id);";
+                where g_id = ? and gc_id = ?);";
+
+            $parameters = [$gradeable_id, $component_id];
         }
         else {
             // Use this sub query to select users who have at least one component not graded
             $sub_query = "(select gradeable_data.gd_$id_string
              from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
-             where g_id = '$gradeable_id' group by gradeable_data.gd_id having count(gradeable_data.gd_id) = $component_count);";
+             where g_id = ? group by gradeable_data.gd_id having count(gradeable_data.gd_id) = ?);";
+
+            $parameters = [$gradeable_id, $component_count];
         }
 
         // Assemble complete query
         $query = "$main_query $sub_query";
 
         // Run query
-        $this->course_db->query($query);
+        $this->course_db->query($query, $parameters);
 
         // Capture results
         $not_fully_graded = $this->course_db->rows();
