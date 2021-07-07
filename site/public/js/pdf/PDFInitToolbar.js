@@ -156,8 +156,8 @@ function renderPDFToolbar() {
             type: 'POST',
             url: url,
             data: {
-                'annotation_layer': annotation_layer,
-                'GENERAL_INFORMATION': GENERAL_INFORMATION,
+                annotation_layer,
+                GENERAL_INFORMATION,
                 'csrf_token': csrfToken
             },
             success: function(data){
