@@ -92,7 +92,12 @@ def main():
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
     for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
+        # only create the plagiarism course if we have a local LichenTestData repo
+        if os.path.basename(course_file) == "plagiarism.yml" and not os.path.isdir(os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "LichenTestData")):
+            continue
+
         course_json = load_data_yaml(course_file)
+
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
             courses[course.code] = course

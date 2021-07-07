@@ -8,7 +8,7 @@
 #   user_id: string representing the id for the user both in the database as well as linux
 #
 #   user_numeric_id: string represented the numeric id, e.g a RIN used in the database
-#         by default this is null in the database, adding this value will populate the numeric_id column 
+#         by default this is null in the database, adding this value will populate the numeric_id column
 #         for the sample user being created, see more_autograding_examples/bulk_upload_pdfs/submissions/04_numeric_ids.txt
 #         for a list of ids to use
 #
@@ -39,6 +39,11 @@
 #   registration_section: [optional] registration section to place the user into. Defaults to NULL.
 #
 #   rotating_section: [optional] rotating section to place the user into. Defaults to NULL.
+#
+#   eg_lichen_sample_path: the path from which to pull submissions if unique submissions are desired
+#
+#   eg_plagiarized_users: a list of users and individual files for them to submit from the lichen_sample_path
+#                         if this isn't provided but eg_lichen_sample_path is, random submissions will be made from the directory provided
 #
 #   courses: This is a either a list of strings of courses to add the user to or a list of dictionaries that contain
 #         course specific settings for this user (the dictionary can be empty though if you just want the course and
