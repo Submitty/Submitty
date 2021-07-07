@@ -32,7 +32,7 @@
     <h1> Viewing poll results for {{ poll.getName() }} </h1>
 
     <h2> Question: </h2>
-    {% include "misc/Markdown" with {
+    {% include "misc/Markdown.twig" with {
       "content" : poll.getQuestion()
     } only %}
     <br/>
