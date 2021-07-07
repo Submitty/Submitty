@@ -992,6 +992,7 @@ class HomeworkView extends AbstractView {
             'user_id' => $this->core->getUser()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
+            'team_name' => $graded_gradeable->getSubmitter()->getTeam()->getTeamName(),
             'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
