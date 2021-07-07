@@ -12,6 +12,38 @@
     margin-top: 10px;
 }
 
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+  
+td, th {
+    border: 1px solid #dddddd;
+    padding: 8px;
+}
+
+th {
+    text-align: left;
+}
+
+td {
+    text-align: center;
+}
+
+.image {
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.machine {
+    font-size: 2em;
+}
+[data-enabled="false"] {
+    background-color: var(--danger-red);
+}
+
 /* desktop view */
 @media (min-width: 550px) {
     .docker-images-container {

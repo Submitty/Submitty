@@ -28,7 +28,7 @@ class DockerView extends AbstractView {
             $image["virtual_size"] = Utils::formatBytes('mb', $image["virtual_size"], true);
             $image["additional_names"] = array_slice($image['tags'], 1);
 
-            $copy[] = $image;
+            $copy[$full_name] = $image;
         }
 
         $docker_data['docker_images'] = $copy;
@@ -75,12 +75,46 @@ class DockerView extends AbstractView {
             "not_found" => sort($not_found)
         ];
 
+        $capabilities = [];
+        $worker_machines = [];
+        foreach ($docker_data['autograding_workers'] as $worker) {
+            $worker_temp = [];
+            $worker_temp['images'] = [];
+            foreach ($worker['capabilities'] as $capability) {
+                $capabilities[] = $capability;
+                $name_temp = [];
+                foreach ($docker_data['autograding_containers'][$capability] as $image) {
+                    $name_temp[] = $image;
+                } 
+                $name_temp = array_unique($name_temp);
+                foreach ($name_temp as $name) {
+                    $worker_temp['images'][] = $docker_data['docker_images'][$name];
+                } 
+            }
+        }
+
+        $capabilities = array_unique($capabilities);
+        asort($capabilities);
+
+        foreach ($docker_data['autograding_workers'] as $name => $worker) {
+            $worker_temp = [];
+            $worker_temp['name'] = $name;
+            $worker_temp['capabilities'] = [];
+            foreach ($capabilities as $capability) {
+                $worker_temp['capabilities'][] = in_array($capability, $worker['capabilities']);
+            }
+            $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
+            $worker_temp['enabled'] = $worker['enabled'];
+            $worker_machines[] = $worker_temp;
+        }
 
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
                 "autograding_containers" => $autograding_containers,
                 "docker_info" => $docker_data['docker_info'],
+                "capabilities" => $capabilities,
+                "worker_machines" => $worker_machines
             ]
         );
     }

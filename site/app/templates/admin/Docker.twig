@@ -9,6 +9,47 @@
 </div>
 
 <div class="content">
+    <h2 class="docker-header">Worker Machines</h2>
+    <table>
+        <tr>
+            <th></th>
+            {% for capability in capabilities %}
+            <td>{{capability}}</td>
+            {% endfor %}
+            <td>Num Autograding Workers</td>
+        </tr>
+        {% for worker in worker_machines %}
+        <tr data-enabled = {{worker['enabled'] == true ? 'true' : 'false'}}>
+            <th>{{worker['name']}}</th>
+            {% for capability in worker['capabilities'] %}
+                {% if capability %}
+                    <td><i class="fas fa-check"></i></td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+            <td>{{worker['num_autograding_workers']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="content">
+    <h2 class ="docker-header">Autograding Docker Images</h2>
+    <div class="machine">Machine 1</div>
+    <div class="image">
+        <h3>submitty/clang</h3>
+        <p> ID:  79ee62d </p>
+        <p> Size:  409MB 
+            <em> (Virtual Size: 409MB ) </em> 
+        </p>
+        <p> Tag: 6.0 </p>
+        <br>
+        <p> Created on: 2019-09-16 23:06:54 </p>
+        <br>
+    </div>
+</div>
+<div class="content">
     <h2 class="docker-header">Autograding Docker Images</h2>
     <button class="btn btn-default" 
             onclick="collapseSection('autograding-images','autograding-images-collapse')"
