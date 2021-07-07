@@ -18,7 +18,6 @@ exclude=
     more_autograding_examples,
     ParseLogFiles,
     sample_files,
-    autograder/autograder/autograding_utils.py,
     sbin/shipper_utils/systemctl_wrapper.py,
     sbin/shipper_utils/update_and_install_workers.py,
     sbin/anonymize.py,
@@ -33,3 +32,4 @@ exclude=
 per-file-ignores =
     .github/workflows/pr_title_tester.py:E501,W605
     sbin/submitty_daemon_jobs/submitty_jobs/jobs.py:E501,E222
+    autograder/autograder/autograding_utils.py:E501,F841
