@@ -782,7 +782,7 @@ SQL;
     public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
 
-        $now = $announcement ? new \DateTime("now") : null;
+        $now = $announcement ? $this->core->getDateTimeNow() : null;
 
         try {
             //insert data
@@ -811,7 +811,7 @@ SQL;
     }
 
     public function setAnnounced($thread_id) {
-        $now = new \DateTime("now");
+        $now = $this->core->getDateTimeNow();
         $this->course_db->query("UPDATE threads SET announced = ? WHERE id = ?", [$now, $thread_id]);
     }
 
