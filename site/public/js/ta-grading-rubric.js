@@ -96,6 +96,7 @@ function displayAjaxError(err) {
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxGetGradeableRubric(gradeable_id) {
+    console.log('here');
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
@@ -1287,23 +1288,9 @@ function getGradedComponentFromDOM(component_id) {
  * @return {Object}
  */
 function getScoresFromDOM() {
-    let gradeable_id = getGradeableId();
     let dataDOMElement = $('#gradeable-scores-id');
-    let user_group_txt = $.ajax({
-        type: 'GET',       
-        url: buildCourseUrl(['gradeable', gradeable_id, 'getUserGroup']),
-        dataType: 'html',
-        context: document.body,
-        global: false,
-        async:false,
-        success: function(res) {
-            return res.data;
-        }
-    }).responseText;
-    let user_group_obj=JSON.parse(user_group_txt);
-    let user_group = user_group_obj.data;
     let scores = {
-        user_group: user_group,
+        user_group: 1,
         ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
         ta_grading_total: getTaGradingTotal(),
@@ -2326,6 +2313,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert("Could not render gradeable: " + err.message);
             console.error(err);
         });
+
 }
 /**
  * Call this to update the totals and subtotals once a grader is done grading a component
