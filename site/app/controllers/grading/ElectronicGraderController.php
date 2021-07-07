@@ -499,6 +499,8 @@ class ElectronicGraderController extends AbstractController {
         $gradeables[] = $gradeable;
         $graded_gradeables = $this->core->getQueries()->getGradedGradeables($gradeables);
         //check every submission (inactive and active) for every student
+        //NOTE: Let's eventually refactor this nested loop to instead look at the items
+        //in the autograding queue and check for matches.
         foreach ($graded_gradeables as $g) {
             $highest_version = $g->getAutoGradedGradeable()->getHighestVersion();
             if ($highest_version > 0) {
