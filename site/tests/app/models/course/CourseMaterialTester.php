@@ -15,7 +15,13 @@ class CourseMaterialTester extends BaseUnitTest {
             'hidden_from_students' => false,
             'priority' => 1.2
         ];
-        $course_material = new CourseMaterial($details);
+        $course_material = new CourseMaterial(
+            $details['type'],
+            $details['path'],
+            $details['release_date'],
+            $details['hidden_from_students'],
+            $details['priority']
+        );
         $sections = ['1', '2'];
         foreach ($sections as $section) {
             $course_material_section = new CourseMaterialSection($section, $course_material);
@@ -41,7 +47,13 @@ class CourseMaterialTester extends BaseUnitTest {
             'hidden_from_students' => true,
             'priority' => 2.4
         ];
-        $course_material = new CourseMaterial($details);
+        $course_material = new CourseMaterial(
+            $details['type'],
+            $details['path'],
+            $details['release_date'],
+            $details['hidden_from_students'],
+            $details['priority']
+        );
         $this->assertEquals($details['type'], $course_material->getType());
         $this->assertEquals($details['path'], $course_material->getPath());
         $this->assertEquals($details['release_date'], $course_material->getReleaseDate());
