@@ -1446,13 +1446,17 @@ function rotateImage(url, rotateBy) {
         img.css("transform", "rotate(" + rotate + "deg)");
       }
       bounds = img.get(0).getBoundingClientRect();
+      console.log(bounds);
       img.css("transform", "translateY(" + (-bounds.top) + "px) rotate(" + rotate + "deg)");
+      console.log(img.get(0).getBoundingClientRect());
+      console.log(img.width());
       if ($(this).css("max-height") === "none" || $(this).css("max-height").length === 0) {
         $(this).height(bounds.height > 500 ? 500 : bounds.height);
       } else if(parseInt($(this).css("max-height")) !== NaN) {
         let height = parseInt($(this).css("max-height"));
         $(this).height(bounds.height > height ? height : bounds.height);
       }
+      img.get(0).offsetHeight;
     }
   });
   sessionStorage.setItem("image-rotate-" + url, rotate);
@@ -1468,6 +1472,8 @@ function imageRotateIcons(iframe) {
                             <a class="image-rotate-icon" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
                             <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
                             </div>`);
+    
+    iframeTarget.contents().find('body').css("overflow-y", "auto");
     if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
       rotateImage(iframeTarget.attr("src"), "none");
     }
