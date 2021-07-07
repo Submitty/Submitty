@@ -324,29 +324,29 @@ gradeables:
 #
 # ########## LARGE -- 10+ submissions ############################################
 # ########## stress-testing (probably challenging/impossible to debug) ###########
-# - g_id: average_class_single_submission
-#   g_title: Average Class Single Submission (Large) # 75 students, 1 submission per student, ~100-line files (3 codewars problems, seperate files, zipped into one file)
-#   gradeable_config: upload_only
-#   components:
-#   - gc_lower_clamp: 0
-#     gc_default: 2
-#     gc_max_value: 2
-#     gc_upper_clamp: 2
-#     gc_title: Placeholder
-#     marks:
-#       - gcm_note: Full Credit
-#         gcm_points: 0
-#   eg_submission_due_date: 1972-01-01 23:59:59
-#   eg_submission_open_date: 1971-01-01 23:59:59
-#   g_grade_due_date: 1974-01-01 23:59:59
-#   g_grade_released_date: 1974-01-01 23:59:59
-#   eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-#   eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-#   g_grade_start_date: 1973-01-01 23:59:59
-#   g_ta_view_start_date: 1970-01-01 23:59:59
-#   eg_use_ta_grading: false
-#   # sample_path: TODO
-#
+- g_id: average_class_single_submission
+  g_title: Average Class Single Submission (Large) # 75 students, 1 submission per student, ~100-line files (3 codewars problems, seperate files, zipped into one file)
+  gradeable_config: upload_only
+  components:
+  - gc_lower_clamp: 0
+    gc_default: 2
+    gc_max_value: 2
+    gc_upper_clamp: 2
+    gc_title: Placeholder
+    marks:
+      - gcm_note: Full Credit
+        gcm_points: 0
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_use_ta_grading: false
+  eg_lichen_sample_path: /usr/local/submitty/GIT_CHECKOUT/LichenTestData/large_tests/average_class_single_submission/data
+
 # - g_id: average_assignment
 #   g_title: Average Class Assignment (Large) # 75 students, 5-20? submissions per student, ~400-line files
 #   gradeable_config: upload_only
@@ -369,30 +369,30 @@ gradeables:
 #   g_ta_view_start_date: 1970-01-01 23:59:59
 #   eg_use_ta_grading: false
 #   # sample_path: TODO
-#
-# - g_id: large_class_test
-#   g_title: Large Class Test (Large) # 400 students, one submission each, ~100-line files
-#   gradeable_config: upload_only
-#   components:
-#   - gc_lower_clamp: 0
-#     gc_default: 2
-#     gc_max_value: 2
-#     gc_upper_clamp: 2
-#     gc_title: Placeholder
-#     marks:
-#       - gcm_note: Full Credit
-#         gcm_points: 0
-#   eg_submission_due_date: 1972-01-01 23:59:59
-#   eg_submission_open_date: 1971-01-01 23:59:59
-#   g_grade_due_date: 1974-01-01 23:59:59
-#   g_grade_released_date: 1974-01-01 23:59:59
-#   eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-#   eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-#   g_grade_start_date: 1973-01-01 23:59:59
-#   g_ta_view_start_date: 1970-01-01 23:59:59
-#   eg_use_ta_grading: false
-#   # sample_path: TODO
-#
+
+- g_id: large_class_test
+  g_title: Large Class Test (Large) # 400 students, one submission each, ~100-line files
+  gradeable_config: upload_only
+  components:
+  - gc_lower_clamp: 0
+    gc_default: 2
+    gc_max_value: 2
+    gc_upper_clamp: 2
+    gc_title: Placeholder
+    marks:
+      - gcm_note: Full Credit
+        gcm_points: 0
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_use_ta_grading: false
+  eg_lichen_sample_path: /usr/local/submitty/GIT_CHECKOUT/LichenTestData/large_tests/large_class_test/data
+
 # - g_id: large_class_large_assignment
 #   g_title: Large Class Large Assignment (Large) # 400 students, 0-20 submissions each, ~600-line files
 #   gradeable_config: upload_only
