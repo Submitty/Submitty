@@ -795,11 +795,13 @@ HTML;
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('details.css');
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('details.js');
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
         $this->core->getOutput()->addInternalCss('admin-team-form.css');
         $this->core->getOutput()->addInternalJs('admin-team-form.js');
-
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -826,7 +828,10 @@ HTML;
             "order_toggle_url" => $details_base_url . '?' .
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "sort" => $sort,
-            "direction" => $direction
+            "direction" => $direction,
+            "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "is_team" => $gradeable->isTeamAssignment(),
+            "is_vcs" => $gradeable->isVcs()
         ]);
     }
 
@@ -863,7 +868,6 @@ HTML;
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
-
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
@@ -944,7 +948,9 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading);
+
+
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
@@ -1143,13 +1149,33 @@ HTML;
      * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading) {
+
+
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $gradeable = $graded_gradeable->getGradeable();
+        //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
+        if ($gradeable->isTeamAssignment()) {
+            $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();
+        }
+        else {
+            $id = $graded_gradeable->getSubmitter()->getId();
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+            "highest_version" =>  $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+            "max_submissions" => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
+            "is_vcs" => $gradeable->isVcs(),
+            "gradeable_id" => $gradeable->getId(),
+            "user_id" => $id,
+            "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "ta_grading" => $ta_grading
         ]);
     }
@@ -1424,7 +1450,6 @@ HTML;
 
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
-
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1442,6 +1467,7 @@ HTML;
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
+                "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
                 "is_peer_grader" => $is_peer_grader
             ]);
     }

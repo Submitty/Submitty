@@ -52,7 +52,7 @@ describe('Test cases revolving around the logging in functionality of the site',
         it('should check if you can access a course', () => {
             cy.login('pearsr');
             cy.visit(['sample']);
-            cy.get('.content').should('have.text', '\n    You don\'t have access to this course. \n    This is sample for Spring 2021. \n    If you think this is a mistake, please contact your instructor to gain access. \n    click  here  to back to homepage and see your courses list.\n');
+            cy.get('.content').contains('You don\'t have access to this course.');
         });
     });
 

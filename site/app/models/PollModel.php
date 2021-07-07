@@ -90,7 +90,7 @@ class PollModel extends AbstractModel {
 
     public function getAllResponsesString($response_id) {
         if (count($this->responses) == 1) {
-            return $this->responses[$response_id][0];
+            return $this->responses[$response_id[0]];
         }
         else {
             $ret_string = "";

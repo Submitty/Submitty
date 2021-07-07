@@ -55,6 +55,17 @@
             </div>
         </div>
     </div>
+    {% if can_regrade and not is_vcs %}
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
+            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">Regrade All Versions for All students</a>
+            </div>
+        </div>
+    {% endif %}
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
@@ -84,7 +95,7 @@
             {% else %}
                 <a class="btn btn-default"
                    href="{{ randomize_team_rotating_sections_url }}"
-                >
+                    >
                     Randomly Re-Assign Teams to Rotating Sections
                 </a>
             {% endif %}
@@ -707,6 +718,63 @@
             document.cookie = 'anon_mode=on;';
         }
         location.reload();
+    }
+
+    //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
+    function ajaxCountRegrade(choice,e,confirmMessage) {
+        const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
+        let formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('gradeable_id', "{{ gradeable.getId }}");
+        //if regrading all versions
+        if (choice) {
+            formData.append('regrade_all', 'true');
+        }
+        else {
+            formData.append('regrade_all', 'false');
+        }
+        $.ajax({
+            url: submit_url,
+            data: formData,
+            processData: false,
+            type: 'POST',
+            headers : {
+                Accept: "application/json"
+            },
+            contentType: false,
+            success: function(data) {
+                data = JSON.parse(data);
+                if (data['status'] === 'success') {
+                    confirmMessage(e, data['data'], choice);
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+        });
+    }
+    function confirmMessage(e,count, choice) {
+        if(count > 50) {
+            e.preventDefault();
+            if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {
+                //if regrading all versions
+                if (choice) {
+                    handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
+                }
+                else {
+                    handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
+                }
+            }
+        }
+        else {
+            //if regrading all versions
+            if (choice) {
+                handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, false, true)
+            }
+            else {
+                handleRegrade(0, csrfToken, "{{ gradeable.getId }}", '', false, false, true)
+            }
+        }
     }
 </script>
 
