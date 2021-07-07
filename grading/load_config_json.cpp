@@ -1024,12 +1024,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
           assert (validShowValue(*itr2));
         }
       }
-      /*else*/ if (grader.find("expected_string") != grader.end()) {
-        // std::string actual_file = grader.value("actual_file", "");
-        // grader["expected_file"] = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
-        // std::cout << "new expected file: " << grader.value("expected_file", "") << std::endl;
-        // std::ofstream output_file_stream(grader.value("expected_file", ""));
-        // output_file_stream << grader.value("expected_string", "");
+      if (grader.find("expected_string") != grader.end()) {
         itr2 = grader.find("show_expected");
         if (itr2 == grader.end()) {
           grader["show_expected"] = "always";
