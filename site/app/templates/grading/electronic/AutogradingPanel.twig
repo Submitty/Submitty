@@ -3,11 +3,22 @@
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
+        {% if can_regrade and not is_vcs%}
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="regrade(1)">Regrade Active Version</button>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="regrade(0)">Regrade All Versions</button>
+                </div>
+            </div>
+        {% endif %}
         <div class="inner-container">
             {% if version_instance is null %}
                 <h4>No Submission</h4>
             {% else %}
-                {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true) }}
+                {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true, ta_grading) }}
             {% endif %}
         </div>
     </div>
@@ -16,4 +27,15 @@
     //used to calculate height for #grading-panel-student-name which requires that a panel has
     //been loaded first
     window.dispatchEvent(new Event('resize'));
+    
+    function regrade(single_regrade) {
+        //if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
+        if(single_regrade) {
+            handleRegrade({{ highest_version }}, csrfToken, "{{ gradeable_id }}", "{{ user_id }}", true)
+        }
+        //regrading all versions
+        else {
+            handleRegrade({{ highest_version }}, csrfToken, "{{ gradeable_id }}", "{{ user_id }}", false, true)
+        }
+    }
 </script>

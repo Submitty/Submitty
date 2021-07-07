@@ -713,6 +713,8 @@ class GradeableListTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
             'user_group' => $access_admin ? 1 : ($access_grading ? 2 : 4)
         ]);
         $core->setUser($user);
@@ -796,7 +798,8 @@ class GradeableListTester extends BaseUnitTest {
             'late_days' => 2,
             'grade_inquiry_start_date' => new \DateTime($grade_released_date, $timezone),
             'grade_inquiry_due_date' => new \DateTime($grade_released_date, $timezone),
-            'allowed_minutes' => null
+            'allowed_minutes' => null,
+            'allow_custom_marks' => true
         ];
 
         return new Gradeable($core, $details);

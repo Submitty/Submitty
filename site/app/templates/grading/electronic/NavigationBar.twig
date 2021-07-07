@@ -22,6 +22,7 @@
                 <a href="javascript:gotoMainPage();"
                    data-href="{{ home_url }}"
                    id="main-page"
+                   aria-label="Main Page"
                 >
                     <i title="Go to the main page" class="fas fa-home icon-header icon-streched" ></i>
                 </a>
@@ -32,6 +33,7 @@
                 <a href="javascript:gotoPrevStudent();"
                    data-href="{{ prev_student_url }}"
                    id="prev-student"
+                   aria-label="Previous Student"
                 >
                     <i title="Previous student" class="fas fa-caret-left icon-header icon-streched"></i>
                 </a>
@@ -40,11 +42,11 @@
                 <a href="javascript:gotoNextStudent();"
                    data-href="{{ next_student_url }}"
                    id="next-student"
+                   aria-label="Next Student"
                 >
                    <i title="Next student" class="fas fa-caret-right icon-header icon-streched"></i>
                 </a>
             </span>
-
             <span class="ta-navlink-cont" id="fullscreen-btn-cont">
                 <button title="Toggle the full screen mode"
                         class="invisible-btn key_to_click"

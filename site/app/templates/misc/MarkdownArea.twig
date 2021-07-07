@@ -39,7 +39,8 @@
             <i style="font-style:normal;" class="fa-question-circle"></i>
         </a>
     </div>
-    <label for="{{ markdown_area_id }}" tabindex="0" class="screen-reader">{{ markdown_area_id }}</label>
+    <label for="{{ markdown_area_id }}" tabindex="-1" class="screen-reader">{{ markdown_area_id }}</label>
+    {% include "misc/AccessibilityMessage.twig" %}
     <textarea
         id="{{ markdown_area_id }}"
         class="fill-available {{ class }}"

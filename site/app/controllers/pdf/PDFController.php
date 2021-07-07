@@ -110,7 +110,7 @@ class PDFController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Could not get gradeable');
         }
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            if ($gradeable->isPeerGrading()) {
+            if ($gradeable->hasPeerComponent()) {
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
                 if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($user_id, $user_ids)) {
@@ -206,7 +206,7 @@ class PDFController extends AbstractController {
         }
         $grader_id = $this->core->getUser()->getId();
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            if ($gradeable->isPeerGrading()) {
+            if ($gradeable->hasPeerComponent()) {
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
                 if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($id, $user_ids)) {
