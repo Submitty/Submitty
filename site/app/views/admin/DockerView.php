@@ -83,8 +83,8 @@ class DockerView extends AbstractView {
             foreach ($worker['capabilities'] as $capability) {
                 $capabilities[] = $capability;
                 $name_temp = [];
-                foreach ($docker_data['autograding_containers'][$capability] as $image) {
-                    $name_temp[] = $image;
+                foreach ($docker_data['autograding_containers'] as $image) {
+                    $name_temp[] = $image[''];
                 } 
                 $name_temp = array_unique($name_temp);
                 foreach ($name_temp as $name) {
