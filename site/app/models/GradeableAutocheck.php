@@ -84,7 +84,6 @@ class GradeableAutocheck extends AbstractModel {
 
 
         if (isset($details["expected_file"])) {
-            var_dump($details["expected_file"]);
             if (substr($details["expected_file"], 0, 11) == "test_output") {
                 if (file_exists($course_path . "/" . $details["expected_file"])) {
                     $expected_file = $course_path . "/" . $details["expected_file"];

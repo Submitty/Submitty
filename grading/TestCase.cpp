@@ -201,23 +201,16 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 
   std::string filename;
   if (expected_file == "") {
+    //if the expected file doesn't exist, write expected_string to it (but where?)
     expected_file = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
-    filename = "test_output/notebook_expected_string/" + expected_file;
-    std::ofstream output_file_stream(filename);
-    output_file_stream << expected_string;
+    filename = "test_output/" + expected_file;
+    std::ofstream expected_file_stream(filename);
+    expected_file_stream << expected_string;
+    expected_file_stream.close();
   } else {
     filename = getOutputContainingFolderPath(tc, expected_file) + expected_file;
   }
 
-  std::cout << "new expected file: " << expected_file << std::endl;
-  std::cout << "filename: " << filename << std::endl;
-  
-  // if(autocheck_j.value("expected_file","") == "") {
-  //     std::cout << "no expected_file specified..." << std::endl;
-  //     std::string expected_string = autocheck_j.value("expected_string", "");
-  //     autocheck_j["expected_file"] = "expected_string_" + autocheck_j.value("actual_file", "").substr(autocheck_j.value("actual_file", "").find('/')+1);
-  //     std::cout << "using filepath: " << autocheck_j["expected_file"];
-  // }
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;

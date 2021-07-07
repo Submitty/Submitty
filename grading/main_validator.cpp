@@ -166,6 +166,8 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         if (expected_file != "") {
           expected = expected_file;
         } else if (expected_string != "") {
+          //if expected file doesn't exist, use actual_file name to get the name of the expected string output file
+          //ex: actual_file = math_1.txt, expected = expected_string_math_1.txt
           expected = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
         }
         std::cout << "expected: " << expected << std::endl;
@@ -205,29 +207,6 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             }
           }
         }
-
-        // if (expected_string != "") {
-        //   std::ofstream output_file_stream(expected);
-        //   output_file_stream << expected_string;
-        //   // PREPARE THE JSON DIFF FILE
-        //   std::stringstream diff_path;
-        //   diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
-        //   std::ofstream diff_stream(diff_path.str().c_str());
-        //   result.printJSON(diff_stream);
-        //   std::stringstream expected_path;
-        //   std::string id = hw_id;
-        //   std::string expected_out_dir = getPathForOutputFile(my_testcase, expected, id);
-        //   expected_path << expected_out_dir << expected;
-        //   if (show_expected) {
-        //     autocheck_j["expected_file"] = expected_path.str();
-        //   }
-        //   if (show_image_diff){
-        //     autocheck_j["image_difference_file"] = my_testcase.getPrefix() + tcg.value("image_difference_file", std::to_string(which_autocheck) + "_difference.png");
-        //   }
-        //   if (show_actual) {
-        //     autocheck_j["difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_diff.json";
-        //   }
-        // }
       }
       if (studentFileExists && !studentFileEmpty) {
         actual_file_to_print = true;
