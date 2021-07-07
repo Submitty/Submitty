@@ -199,13 +199,18 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
   std::cout << "actual_file: " << expected_string << std::endl;
   assert(!(expected_file != "" && expected_string != ""));
 
+  std::string filename;
   if (expected_file == "") {
     expected_file = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
-    std::ofstream output_file_stream("test_output/" + expected_file);
+    filename = "test_output/notebook_expected_string/" + expected_file;
+    std::ofstream output_file_stream(filename);
     output_file_stream << expected_string;
+  } else {
+    filename = getOutputContainingFolderPath(tc, expected_file) + expected_file;
   }
 
   std::cout << "new expected file: " << expected_file << std::endl;
+  std::cout << "filename: " << filename << std::endl;
   
   // if(autocheck_j.value("expected_file","") == "") {
   //     std::cout << "no expected_file specified..." << std::endl;
@@ -213,7 +218,6 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
   //     autocheck_j["expected_file"] = "expected_string_" + autocheck_j.value("actual_file", "").substr(autocheck_j.value("actual_file", "").find('/')+1);
   //     std::cout << "using filepath: " << autocheck_j["expected_file"];
   // }
-  std::string filename = getOutputContainingFolderPath(tc, expected_file) + expected_file;
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;

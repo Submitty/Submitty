@@ -175,10 +175,6 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
 
 
         if (expected != "") {
-          if (expected_string != "") {
-            std::ofstream output_file_stream(expected);
-            output_file_stream << expected_string;
-          }
           std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
           fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
           std::cout << "expectedFileExists: " << expectedFileExists << std::endl;
