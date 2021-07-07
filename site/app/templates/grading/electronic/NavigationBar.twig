@@ -2,7 +2,7 @@
     <div id="grading-panel-student-name">
         <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
-                    Team:<br/>
+                    Team{% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}:<br/>
                     {% for team_member in submitter.getTeam().getMemberUsers() %}
                         &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
                     {% endfor %}
