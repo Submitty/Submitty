@@ -32,6 +32,7 @@ class ElectronicGraderView extends AbstractView {
      * @param string $section_type
      * @param int $regrade_requests
      * @param bool $show_warnings
+     * @param int $submissions_in_queue
      * @return string
      */
 
@@ -51,7 +52,8 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings
+        bool $show_warnings,
+        int $submissions_in_queue
     ) {
 
         $peer = false;
@@ -317,7 +319,8 @@ class ElectronicGraderView extends AbstractView {
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
-            "histograms" => $histogram_data
+            "histograms" => $histogram_data,
+            "submissions_in_queue" => $submissions_in_queue
         ]);
     }
 
@@ -1086,9 +1089,9 @@ HTML;
     /**
      * @param GradedGradeable $graded_gradeable
      * @param float $progress
+     * @param bool $peer
      * @param string $prev_id
      * @param string $next_id
-     * @param bool $peer
      * @param string $sort
      * @param string $direction
      * @return string
