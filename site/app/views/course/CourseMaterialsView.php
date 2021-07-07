@@ -31,12 +31,9 @@ class CourseMaterialsView extends AbstractView {
         $hide_from_students = [];
         $external_link = [];
         $priorities = [];
-        $folders = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        //$path_length = strlen($expected_path) + 1;
-        //$course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
         $course_materials = [];
@@ -45,7 +42,7 @@ class CourseMaterialsView extends AbstractView {
         }
 
         foreach ($course_materials as $path => $material) {
-            $filepath = substr($material->getPath(), strlen($expected_path)+1);
+            $filepath = substr($material->getPath(), strlen($expected_path) + 1);
             $dirs = explode('/', $filepath);
             array_pop($dirs);
             $cur_path = "";
@@ -95,7 +92,7 @@ class CourseMaterialsView extends AbstractView {
         $course_materials_array = [];
         foreach ($course_materials as $course_material) {
             if ($course_material->isDir()) {
-                $filepath = substr($course_material->getPath(), strlen($expected_path)+1);
+                $filepath = substr($course_material->getPath(), strlen($expected_path) + 1);
                 $path = explode('/', $filepath);
                 $working_dir = &$files[$start_dir_name];
                 $filename = array_pop($path);
@@ -132,7 +129,7 @@ class CourseMaterialsView extends AbstractView {
                 }
             }
             $file_release_dates[$course_material->getPath()] = $release_date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
-            $filepath = substr($course_material->getPath(), strlen($expected_path)+1);
+            $filepath = substr($course_material->getPath(), strlen($expected_path) + 1);
             $path = explode('/', $filepath);
             $working_dir = &$files[$start_dir_name];
             $filename = array_pop($path);

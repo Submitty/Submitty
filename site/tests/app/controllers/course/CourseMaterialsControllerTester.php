@@ -92,7 +92,13 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             'release_date' => $this->core->getDateTimeNow(),
             'type' => 0
         ];
-        return new CourseMaterial($details);
+        return new CourseMaterial(
+            CourseMaterial::FILE,
+            $this->upload_path . $name,
+            $this->core->getDateTimeNow(),
+            false,
+            0
+        );
     }
 
     public function testCourseMaterialsUpload() {
@@ -272,7 +278,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->with($course_material);
 
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(2))
             ->method('flush');
 
         $controller = new CourseMaterialsController($this->core);
@@ -288,6 +294,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $_POST = [];
 
         $_POST['sections'] = '1,2';
+        $_POST['sections_lock'] = "true";
         $_POST['requested_path'] = FileUtils::joinPaths($this->upload_path, $name);
 
         $repository = $this->createMock(EntityRepository::class);
@@ -399,6 +406,18 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('flush');
+
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
+            ->expects($this->exactly(2))
+            ->method('findOneBy')
+            ->withConsecutive([['path' => $this->upload_path . "/foo/foo2"]], [['path' => $this->upload_path . "/foo"]])
+            ->willReturn($course_material);
+        $this->core->getCourseEntityManager()
+            ->expects($this->exactly(2))
+            ->method('getRepository')
+            ->with(CourseMaterial::class)
+            ->willReturn($repository);
 
         $controller = new CourseMaterialsController($this->core);
 
