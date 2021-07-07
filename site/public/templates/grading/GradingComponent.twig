@@ -89,8 +89,8 @@ Required inputs:
                        onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
                 <div class="plus-minus">
-                    <i onclick="increment(this)"class="fa fa-caret-up"></i>
-                    <i onclick="decrement(this)"class="fa fa-caret-down"></i>
+                    <i onclick="increment(this)"class="fa fa-caret-up custom-mark-arrow-icon"></i>
+                    <i onclick="decrement(this)"class="fa fa-caret-down custom-mark-arrow-icon"></i>
                 </div>
                         <script>
                              function increment(me) {

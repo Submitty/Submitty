@@ -716,6 +716,10 @@ progress::-webkit-progress-value {
     margin: 0;
 }
 
+.custom-mark-arrow-icon:hover {
+    color: var(--standard-light-medium-gray);
+}
+
 .ta-nav-wrapper {
     width: 100%;
 }
