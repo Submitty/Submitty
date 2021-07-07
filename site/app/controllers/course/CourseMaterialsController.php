@@ -11,7 +11,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\entities\course\CourseMaterial;
-use app\views\course\NewCourseMaterialsView;
+use app\views\course\CourseMaterialsView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
@@ -24,7 +24,7 @@ class CourseMaterialsController extends AbstractController {
             ->getRepository(CourseMaterial::class)
             ->findAll();
         return new WebResponse(
-            NewCourseMaterialsView::class,
+            CourseMaterialsView::class,
             'listCourseMaterials',
             $this->core->getUser(),
             $course_materials
@@ -220,11 +220,28 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
 
+    public function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
+        foreach ($course_materials as $course_material) {
+            if (
+                str_starts_with($course_material->getPath(), $main_course_material->getPath())
+                && $course_material->getPath() != $main_course_material->getPath()
+            ) {
+                if ($course_material->isDir()) {
+                    $this->recursiveEditFolder($course_materials, $course_material);
+                }
+                else {
+                    $_POST['requested_path'] = $course_material->getPath();
+                    $this->ajaxEditCourseMaterialsFiles(false);
+                }
+            }
+        }
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function ajaxEditCourseMaterialsFiles(): JsonResponse {
+    public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
         $requested_path = $_POST['requested_path'] ?? '';
         if ($requested_path === '') {
             return JsonResponse::getErrorResponse("Requested path cannot be empty");
@@ -233,6 +250,26 @@ class CourseMaterialsController extends AbstractController {
             ->findOneBy(['path' => $requested_path]);
         if ($course_material == null) {
             return JsonResponse::getErrorResponse("Course material not found");
+        }
+
+        if ($course_material->isDir()) {
+            if (isset($_POST['sort_priority'])) {
+                $course_material->setPriority($_POST['sort_priority']);
+                unset($_POST['sort_priority']);
+            }
+            if (
+                (isset($_POST['sections_lock'])
+                || isset($_POST['hide_from_students'])
+                || isset($_POST['release_time']))
+                && isset($_POST['folder_update'])
+                && $_POST['folder_update'] == 'true'
+            ) {
+                $course_materials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findAll();
+                $this->recursiveEditFolder($course_materials, $course_material);
+            }
+            $this->core->getCourseEntityManager()->flush();
+            return JsonResponse::getSuccessResponse("Success");
         }
 
         //handle sections here
@@ -244,18 +281,33 @@ class CourseMaterialsController extends AbstractController {
             else {
                 $sections = explode(",", $_POST['sections']);
             }
-            $course_material->getSections()->clear();
-            $this->core->getCourseEntityManager()->flush();
             if ($sections != null) {
+                $keep_ids = [];
+
                 foreach ($sections as $section) {
-                    $course_material_section = new CourseMaterialSection($section, $course_material);
-                    $course_material->addSection($course_material_section);
+                    $keep_ids[] = $section;
+                    $found = false;
+                    foreach ($course_material->getSections() as $course_section) {
+                        if ($section === $course_section->getSectionId()) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        $course_material_section = new CourseMaterialSection($section, $course_material);
+                        $course_material->addSection($course_material_section);
+                    }
+                }
+
+                foreach ($course_material->getSections() as $section) {
+                    if (!in_array($section->getSectionId(), $keep_ids)) {
+                        $course_material->removeSection($section);
+                    }
                 }
             }
         }
-        else {
+        elseif ($_POST['sections_lock'] == "false") {
             $course_material->getSections()->clear();
-            $this->core->getCourseEntityManager()->flush();
         }
         if (isset($_POST['hide_from_students'])) {
             $course_material->setHiddenFromStudents($_POST['hide_from_students'] == 'on');
@@ -264,12 +316,14 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
 
-        if (isset($_POST['release_time'])) {
+        if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getUser()->getUsableTimeZone());
             $course_material->setReleaseDate($date_time);
         }
 
-        $this->core->getCourseEntityManager()->flush();
+        if ($flush) {
+            $this->core->getCourseEntityManager()->flush();
+        }
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
@@ -413,9 +467,14 @@ class CourseMaterialsController extends AbstractController {
             }
             $i = -1;
             foreach ($dirs_to_make as $dir) {
-                $details['type'][$i] = CourseMaterial::DIR;
-                $details['path'][$i] = $upload_path . $dir;
-                $i--;
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
+                    ['path' => $upload_path . $dir]
+                );
+                if ($cm == null) {
+                    $details['type'][$i] = CourseMaterial::DIR;
+                    $details['path'][$i] = $upload_path . $dir;
+                    $i--;
+                }
             }
             $upload_path = $upload_nested_path;
         }

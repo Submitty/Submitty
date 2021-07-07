@@ -162,7 +162,7 @@
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ folderPath }}", "{{ priorities[path] }}", {{ this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folderPath }}", "{{ priorities[folderPath] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
@@ -298,4 +298,5 @@
 {% include('course/SetFolderReleaseForm.twig') %}
 {% include 'course/UploadCourseMaterialsForm.twig' with {reg_sections: reg_sections} %}
 {% include 'course/EditCourseMaterialsForm.twig' %}
+{% include 'course/EditCourseMaterialsFolderForm.twig' %}
 {% include('course/DeleteCourseMaterialForm.twig') %}

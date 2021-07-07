@@ -114,6 +114,9 @@ class CourseMaterial {
     }
 
     public function isSectionAllowed(User $user): bool {
+        if ($this->sections->count() === 0) {
+            return true;
+        }
         foreach ($this->sections->getValues() as $course_material_section) {
             if ($user->getRegistrationSection() === $course_material_section->getSectionId()) {
                 return true;
@@ -148,5 +151,9 @@ class CourseMaterial {
 
     public function getId(): int {
         return $this->id;
+    }
+
+    public function removeSection(CourseMaterialSection $section): void {
+        $this->sections->removeElement($section);
     }
 }
