@@ -97,10 +97,10 @@
         const name_div = $('#grading-panel-student-name');
         //have to calculate the height since the item is positioned absolutely
         const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
-        const padding_bottom = 8;
+        const padding_bottom = 12;
         name_div.css('height', height - padding_bottom);
         name_div.show();
-        const toolbar_bbox = $('.grading_toolbar')[0].getClientRects()[0];
+        const panel_buttons_bbox = $('.panel-header-box')[0].getClientRects()[0];
         const name_div_bbox = name_div[0].getClientRects()[0];
 
         const overlap_margin = 15;

@@ -1100,8 +1100,6 @@ HTML;
      * @return string
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
-        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
-
         $gradeable = $graded_gradeable->getGradeable();
         $isBlind = false;
         if ($gradeable->getLimitedAccessBlind() == 2) {
