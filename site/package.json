@@ -16,6 +16,7 @@
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
     "codemirror": "5.62.0",
+    "codemirror-spell-checker": "^1.1.2",
     "flatpickr": "4.6.6",
     "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",

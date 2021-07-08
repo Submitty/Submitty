@@ -39,7 +39,11 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
     codemirror_config.scrollbarStyle = null;
     codemirror_config.lineNumbers = false;
-    codemirror_config.mode = null;
+    codemirror_config.mode = "spell-checker";
+
+    CodeMirrorSpellChecker({
+        codeMirrorInstance:  CodeMirror,
+    });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
     cm.setSize(150, 30);
