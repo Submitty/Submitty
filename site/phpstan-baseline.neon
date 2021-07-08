@@ -442,4 +442,3 @@ parameters:
 			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns true\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
-
