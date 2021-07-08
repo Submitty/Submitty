@@ -23,8 +23,7 @@
                 "preview_div_id" : "poll_preview_new",
                 "preview_div_name" : "poll_preview_new",
                 "onclick" : "previewPollMarkdown.call(this)",
-                "render_buttons" : true,
-                "min_height" : min_height
+                "render_buttons" : true
             } only %}
             <br/><br/>
 
@@ -41,7 +40,7 @@
             <label for="poll-date" class="option-title">
                 Expected release date:
             </label>
-            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value=""/>
             <br/>
 
             <hr>
@@ -88,8 +87,7 @@
                 "markdown_area_value" : poll.getQuestion(),
                 "preview_div_id" : "poll_preview_edit",
                 "onclick" : "previewPollMarkdown.call(this)",
-                "render_buttons" : true,
-                "min_height" : min_height
+                "render_buttons" : true
             } only %}
             <br/><br/>
 
@@ -335,7 +333,7 @@
                 type: "POST",
                 data: {
                     csrf_token: csrfToken,
-                    poll_id: {{ poll.getId() == null? -1 : poll.getId() }},
+                    poll_id: {{ poll is not defined or poll.getId() == null ? -1 : poll.getId() }},
                     option_id: my_this.siblings(".option_id").attr("value")
                 },
                 success: function(data) {

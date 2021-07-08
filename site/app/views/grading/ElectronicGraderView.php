@@ -86,6 +86,9 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+
+        $warnings = [];
+
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
@@ -138,13 +141,12 @@ class ElectronicGraderView extends AbstractView {
                 $submitted_percentage = round((($submitted_total) / $total_submissions) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
-            $warnings = [];
             if ($section_type === "rotating_section" && $show_warnings) {
                 if ($registered_but_not_rotating > 0) {
-                    array_push($warnings, "There are " . $registered_but_not_rotating . " registered students without a rotating section.");
+                    $warnings[] = "There are " . $registered_but_not_rotating . " registered students without a rotating section.";
                 }
                 if ($rotating_but_not_registered > 0) {
-                    array_push($warnings, "There are " . $rotating_but_not_registered . " unregistered students with a rotating section.");
+                    $warnings[] = "There are " . $rotating_but_not_registered . " unregistered students with a rotating section.";
                 }
             }
 
@@ -320,6 +322,7 @@ class ElectronicGraderView extends AbstractView {
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
+            "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue
         ]);
     }
