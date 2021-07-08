@@ -1321,7 +1321,8 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
             "forumBarData" => $forumBarData,
             "userData" => $userData,
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

@@ -395,6 +395,8 @@ class PlagiarismController extends AbstractController {
 
 
         // Prior terms
+        /*
+        TODO: fix?
         $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
         $prev_term_gradeables = [];
         for ($i = 0; $i < $prev_gradeable_number; $i++) {
@@ -402,6 +404,7 @@ class PlagiarismController extends AbstractController {
                 array_push($prev_term_gradeables, FileUtils::joinPaths($course_path, $_POST['prev_sem_' . $i], $_POST['prev_course_' . $i], "submissions", $_POST['prev_gradeable_' . $i]));
             }
         }
+        */
 
         // Submissions to ignore
         $ignore_submission_option = [];

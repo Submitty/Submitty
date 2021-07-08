@@ -36,7 +36,7 @@
                         <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
                     {% endif %}
                 {% endif %}
-            
+
                 <br/>
                 <br/>
             {% endif %}
@@ -67,7 +67,7 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-            
+
 
             {% if ta_grades_released %}
                 {% if team_assignment %}
@@ -114,7 +114,7 @@
                     {% endif %}
                 </a>
             {% endif %}
-                        
+
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                 <br>
                 <b>Statistics for Completely Graded Assignments: </b>
@@ -164,7 +164,7 @@
                                 Count: {{ component.getCount() }} <br/>
                                 {% for grader, data in component.getGraderInfo() %}
 		                            {% if loop.first == grader %}
-		                                <p> Graders: 
+		                                <p> Graders:
 		                            {% else %}
 		                                <p style="padding-left:3.7em">
 		                            {% endif %}

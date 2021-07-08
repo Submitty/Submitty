@@ -7,7 +7,7 @@
 <div id="container-rubric" class="content" style="display:none;">
     <div id="ajax_debug" style="display: none;"></div>
     <div id="ajax_raw" style="display: none;"></div>
-    <form id="gradeable-form" class="form-signin" {% if submit_url %} action="{{ submit_url }}" {% endif %}
+    <form id="gradeable-form" class="form-signin" {% if submit_url is defined %} action="{{ submit_url }}" {% endif %}
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
 
         <div class="modal-header" style="overflow: auto;">
