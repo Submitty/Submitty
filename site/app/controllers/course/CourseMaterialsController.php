@@ -150,7 +150,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $new_data_time = htmlspecialchars($newdatatime);
-        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
+        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getDateTimeNow()->getTimezone());
         $new_data_time = DateUtils::dateTimeToString($new_data_time);
 
         //Check if the datetime is correct
@@ -158,7 +158,7 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getErrorResponse("Improperly formatted date");
         }
 
-        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
+        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getDateTimeNow()->getTimezone());
 
         //only one will not iterate correctly
         if (is_string($data)) {
@@ -289,7 +289,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
-            $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getUser()->getUsableTimeZone());
+            $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
             $course_material->setReleaseDate($date_time);
         }
 
