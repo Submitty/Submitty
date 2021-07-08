@@ -813,7 +813,12 @@ class HomeworkView extends AbstractView {
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
         $display_version = 0;
 
-        $param = [];
+        $param = [
+            'in_queue' => false,
+            'in_progress_grading' => false,
+            'result_text' => ''
+        ];
+
         $show_testcases = false;
         $show_incentive_message = false;
         $history = null;
