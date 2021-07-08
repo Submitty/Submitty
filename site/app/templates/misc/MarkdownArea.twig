@@ -1,0 +1,77 @@
+{#
+    --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/public/templates/misc/MarkdownArea.twig ---
+
+    markdown_area_id: required
+    class: optional, a string with classes separated by a space to be applied to the markdown_area
+    onclick: required, onclick event string for the preview_button
+    markdown_area_name: optional, but be careful make sure to maintain preexisting names
+                        when converting forms to use this template otherwise they might not work
+    markdown_area_query: optional, a JQuery expression that will return the markdown_area such as $('#my_id')
+    markdown_area_value: optional, initial value for markdown_area to have
+    markdown_buttons_id: optional, id for the span holding the markdown_buttons
+    other_textarea_attributes: optional, string containing any custom attributes you want the textarea to have. (doesn't work very reliably, consider just adding more variables)
+                               The string should not have attribute values wrapped in quotes
+                                ex. "other_textarea_attributes": "required onkeyup='doSomething()'" <----- BAD
+                                    "other_textarea_attributes": "required onkeyup=doSomething()" <----- GOOD
+    render_buttons: optional, boolean
+    placeholder: optional, placeholder text for the markdown_area
+    preview_div_id: technically optional, but giving an id makes getting the div in JS much easier
+    textarea_onchange: optional, event handler for onchange event of the markdown_area
+    textarea_onkeyup: optional, event handler for onkeyup event of the markdown_area
+    data_previous_comment: specifically for use in OverallComment.twig
+#}
+<div class="markdown-area fill-available">
+    <div id="{{ markdown_buttons_id is defined ? markdown_buttons_id : "markdown_buttons" }}" style="display:{{ render_buttons ? "block" : "none" }}">
+        {% if markdown_area_query %}
+            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, {{ markdown_area_query }})" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+        {% else %}
+            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+        {% endif %}
+        <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+        <a target="_blank" href="https://submitty.org/student/communication/markdown">
+            Supports Markdown
+            <i style="font-style:normal;" class="fa-question-circle"></i>
+        </a>
+    </div>
+    <label for="{{ markdown_area_id }}" tabindex="-1" class="screen-reader">{{ markdown_area_id }}</label>
+    {% include "misc/AccessibilityMessage.twig" %}
+    <textarea
+        id="{{ markdown_area_id }}"
+        class="fill-available {{ class is defined ? class }}"
+        name="{{ markdown_area_name }}"
+        {% if placeholder is defined %}
+            placeholder="{{ placeholder }}"
+        {% endif %}
+        rows="10" cols="30"
+        maxlength="5000"
+        {% if textarea_onchange is defined %}
+            onchange="{{ textarea_onchange }}"
+        {% endif %}
+        {% if textarea_onkeydown is defined %}
+            onkeydown="{{ textarea_onkeydown }}"
+        {% endif %}
+        {% if textarea_onpaste is defined %}
+            onpaste="{{ textarea_onpaste }}"
+        {% endif %}
+        {% if textarea_maxlength is defined %}
+            maxlength="{{ textarea_maxlength }}"
+        {% endif %}
+        data-previous-comment="{{ data_previous_comment is defined ? data_previous_comment : '' }}"
+        {% if other_textarea_attributes is defined %}
+            {{ other_textarea_attributes }}
+        {% endif %}
+    >{{ markdown_area_value }}</textarea>
+    <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "0px" }}" hidden></div>
+</div>
+
+<script>
+    $('#{{markdown_area_id}}').ready(function() {
+        enableTabsInTextArea("#{{markdown_area_id}}");
+    })
+</script>

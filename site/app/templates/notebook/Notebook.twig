@@ -15,7 +15,9 @@
             {% if cell.type == "markdown" %}
 
                 {# Render markdown #}
-                {{ cell.markdown_data | markdown }}
+                {% include "misc/Markdown.twig" with {
+                    "content" : cell.markdown_data
+                } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
             {# Handle if cell is image #}
@@ -42,14 +44,17 @@
             {# Handle if cell is short_answer #}
             {% elseif cell.type == "short_answer" %}
 
-                <div class="markdown">
-                    {% if cell.label %}
-                        {{ cell.label | markdown }}
-                    {% else %}
-                        {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
-                        Write your {{ write_your }} below:
-                    {% endif %}
-                </div>
+
+                {% if cell.label %}
+                    {% set content_label = cell.label %}
+                {% else %}
+                    {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                    {% set content_label = "Write your " ~ write_your ~ " below:" %}
+                {% endif %}
+
+                {% include "misc/Markdown.twig" with {
+                    "content" : content_label
+                } only %}
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
@@ -116,9 +121,11 @@
                           class="mc"
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
-                        <legend class="markdown">
+                        <legend>
                             {% if cell.label %}
-                                {{ cell.label | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.label
+                                } only %}
                             {% else %}
                                 You may select many:
                             {% endif %}
@@ -127,7 +134,7 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
 
                                 <input type="checkbox" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
@@ -135,13 +142,17 @@
                                        value="{{ cell.choices[idx].value }}"
                                        onclick="handle_input_keypress();"
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.choices[idx].description
+                                } only %}
                             </label>
                         {% endfor %}
                     {% else %}
                         <legend class="markdown">
                             {% if cell.label %}
-                                {{ cell.label | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.label
+                                } only %}
                             {% else %}
                                 Select one:
                             {% endif %}
@@ -150,14 +161,16 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                 <input type="radio" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
                                        onclick="handle_input_keypress();"
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.choices[idx].description
+                                } only %}
                             </label>
                         {% endfor %}
                     {% endif %}

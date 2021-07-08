@@ -24,11 +24,14 @@ class PlagiarismUtils {
                 foreach ($match['others'] as $other) {
                     if ($other["username"] === $user_id_2 && $other["version"] === $version_user_2) {
                         $interval->updateType("specific-match");
+//                        // this user+version pair will only every occur once so we break
+//                        break;
                         foreach ($other["matchingpositions"] as $mp) {
                             $interval->addOther($user_id_2, $version_user_2, $mp["start"], $mp["end"]);
                         }
-                        // this user+version pair will only every occur once so we break
-                        break;
+                    }
+                    else {
+                        $interval->addOther($other["username"], $other["version"], -1, -1);
                     }
                 }
             }
@@ -61,11 +64,13 @@ class PlagiarismUtils {
                     continue;
                 }
 
-                for ($j = 0; $j < count($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"]); $j++) {
-                    if (intval($currOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) !== intval($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) - $difference) {
-                        // we cannot merge these two regions so move on
-                        $matchingPosCanBeMerged = false;
-                        break;
+                if (isset($prevOthers[$user_id_2 . "_" . $version_user_2])) {
+                    for ($j = 0; $j < count($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"]); $j++) {
+                        if (intval($currOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) !== intval($prevOthers[$user_id_2 . "_" . $version_user_2]["matchingpositions"][$j]["end"]) - $difference) {
+                            // we cannot merge these two regions so move on
+                            $matchingPosCanBeMerged = false;
+                            break;
+                        }
                     }
                 }
             }
@@ -73,7 +78,7 @@ class PlagiarismUtils {
             if ($matchingPosCanBeMerged) {
                 $resultArray[$i - 1]->updateEnd($resultArray[$i]->getEnd());
 
-                if ($user_id_2 != "") {
+                if ($user_id_2 != "" && isset($prevOthers[$user_id_2 . "_" . $version_user_2])) {
                     $resultArray[$i - 1]->updateOthersEndPositions($user_id_2, $version_user_2, $difference);
                 }
 
@@ -86,5 +91,12 @@ class PlagiarismUtils {
         }
 
         return $resultArray;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getSupportedLanguages(): array {
+        return ["plaintext", "python", "java", "cpp", "mips"];
     }
 }

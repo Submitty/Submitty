@@ -1,5 +1,4 @@
-.customization_item
-{
+.customization_item {
     border: 2px solid var(--viewed-content);
     padding: 5px;
     padding-left: 20px;
@@ -7,164 +6,187 @@
     border-radius: 25px;
 }
 
-.customization_item h2
-{
+.customization_item h2 {
     margin-top: 3px;
     margin-bottom: 3px;
     font-size: 1.2em;
     font-style: italic;
 }
 
-.customization_item h3
-{
+.customization_item h3 {
     font-size: 1.1em;
 }
 
-.collapsible_area
-{
+.collapsible_area {
     margin-bottom: 10px;
 }
 
-#cust_messages_textarea
-{
+#cust_messages_textarea {
     width: 80%;
     height: 10vh;
     margin-top: 10px;
 }
 
-#buckets_available_list li{
+#buckets_available_list li {
     font-weight: bold;
     list-style-type: none;
 }
 
-#buckets_used_list li{
+#buckets_used_list li {
     font-style: italic;
     list-style-type: none;
 }
 
-.bucket_detail_div
-{
+.bucket_detail_div {
     padding: 3px;
 }
 
-.bucket_detail_div:nth-child(2n){
+.bucket_detail_div:nth-child(2n) {
     background-color: var(--standard-mediumorchid);
 }
 
-.bucket_detail_div:nth-child(2n+1){
+.bucket_detail_div:nth-child(2n+1) {
     background-color: var(--standard-lightskyblue);
 }
 
-#save_status_container
-{
+#save_status_container {
     display: inline-block;
     width: 100%;
     background-color: var(--standard-hover-light-gray);
     border: none;
 }
 
-#status_label
-{
+#status_label {
     font-weight: bold;
 }
 
-#save_status
-{
+#save_status {
     display: inline;
 }
 
-#save_status_buttons
-{
+#save_status_buttons {
     display: flex;
     flex-direction: row;
     margin-top: 10px;
 }
 
-#save_status_buttons input
-{
+#save_status_buttons input {
     margin-right: 10px;
 }
 
-#show_log_button
-{
+#show_log_button {
     display: none;
 }
 
-#save_status_log
-{
+#save_status_log {
     display: none;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-#limited_func_messages p
-{
-    margin: 12px
+#limited_func_messages p {
+    margin: 12px;
 }
 
-.fa-gradeable-curve
-{
+.fa-gradeable-curve {
     margin-right: 5px;
 }
 
-.fa-rb
-{
-    color: black
+.fa-rb {
+    color: black;
 }
 
-.fa-rb:hover
-{
+.fa-rb:hover {
     color: red;
 }
 
-.gradeable-li
-{
+.gradeable-li {
     display: flex;
     flex-direction: row;
     margin: 3px;
     align-items: center;
 }
 
-.gradeable-li-right-of-input
-{
+.gradeable-li-right-of-input {
     display: flex;
     flex-direction: column;
 }
 
-.gradeable-li-info
-{
+.gradeable-li-right-of-input i.fa-exclamation-triangle {
+    margin-right: 5px;
+    padding-bottom: 2px;
+    display: none;
+    color: var(--standard-vibrant-yellow);
+    position:relative;
+    border-bottom: 1px dotted var(--standard-vibrant-yellow);
+}
+
+[data-theme="dark"] .gradeable-li-right-of-input i.fa-exclamation-triangle {
+    color: var(--standard-light-yellow);
+    border-bottom: 1px dotted var(--standard-light-yellow);
+}
+
+.gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
+    margin-left: -110px;
+    margin-top: 25px;
+    font-family: "Source Sans Pro", sans-serif;
+    color: var(--text-white);
+    font-size: 16px;
+    padding: 5px;
+}
+
+[data-theme="dark"] .gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
+    color: var(--text-black);
+}
+
+.gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom::after {
+    content: "";
+    position: absolute;
+    top: -14%;
+    right: 50%;
+    border: 9px solid transparent;
+    border-bottom-color: var(--standard-dark-gray);
+}
+
+.gradeable-li-info {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.gradeable-id
-{
+.gradeable-id {
     margin-left: 5px;
 }
 
-.gradeable-li-curve
-{
+.gradeable-li-curve {
     display: none;
 }
 
-.gradeable-li-curve input
-{
+.gradeable-li-curve input {
     width: 50px;
 }
 
-hr
-{
+hr {
     margin: 7px 10px;
     border-top: 1px solid var(--viewed-content);
 }
 
-.rg_info_message
-{
+.rg_info_message {
     margin-bottom: 10px;
 }
 
-#rg_web_ui
-{
+#rg_web_ui {
     display: none;
+}
+
+.override {
+    color: var(--active-warning-brown) !important;
+}
+
+[data-theme="dark"] .override {
+    color: var(--standard-vibrant-orange) !important;
+}
+
+.override + div.gradeable-li-right-of-input i.fa-exclamation-triangle {
+    display:inline-block;
 }

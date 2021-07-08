@@ -24,7 +24,12 @@
                 {% for poll in todays_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td align="left">
+                            {% set response_label = poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
+                            {% include "misc/Markdown.twig" with {
+                                content: response_label
+                            } only %}
+                        </td>
                         <td>
                             <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -72,7 +77,12 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        {% set response_label = poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
+                        <td align="left">
+                            {% include "misc/Markdown.twig" with {
+                                content: response_label
+                            } only %}
+                        </td>
                         <td>
                             <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
