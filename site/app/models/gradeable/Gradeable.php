@@ -2143,9 +2143,11 @@ class Gradeable extends AbstractModel {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             if ($dependent_gradeable != null) {
                 $dependent_gradeable_graded = $this->core->getQueries()->getGradedGradeable($dependent_gradeable, $user_id);
-                if ($dependent_gradeable_graded->hasSubmission()) {
-                    if ($dependent_gradeable_graded->getAutoGradingScore() >= $this->depends_on_points) {
-                        return false;
+                if ($dependent_gradeable_graded != null) {
+                    if ($dependent_gradeable_graded->hasSubmission()) {
+                        if ($dependent_gradeable_graded->getAutoGradingScore() >= $this->depends_on_points) {
+                            return false;
+                        }
                     }
                 }
             }
