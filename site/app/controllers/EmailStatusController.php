@@ -39,11 +39,11 @@ class EmailStatusController extends AbstractController {
      */
     public function getSuperuserEmailStatusPage(): WebResponse {
         $results = [];
-        $emailStatuses = $this->core->getQueries()->getAllEmailStatuses();
+        $email_statuses = $this->core->getQueries()->getAllEmailStatuses();
         return new WebResponse(
             EmailStatusView::class,
             'showSuperuserEmailStatus',
-            $emailStatuses
+            $email_statuses
         );
     }
 }

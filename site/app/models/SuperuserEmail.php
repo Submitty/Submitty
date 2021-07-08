@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\models\Email;
 
 class SuperuserEmail extends Email {
     public function __construct(Core $core, array $details = []) {

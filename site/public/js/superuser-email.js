@@ -18,14 +18,14 @@ function sendEmail(url) {
         url: url,
         type: 'POST',
         data: {
-            'emailContent': emailContent,
-            'emailSubject': emailSubject,
-            'emailFullAccess': emailFullAcess,
-            'emailLimitedAccess': emailLimitedAccess,
-            'emailInstructor': emailInstructor,
-            'emailStudent': emailStudent,
-            'emailToSecondary': emailToSecondary,
-            'emailFaculty': emailFaculty,
+            'email_content': emailContent,
+            'email_subject': emailSubject,
+            'email_full_access': emailFullAcess,
+            'email_limited_access': emailLimitedAccess,
+            'email_instructor': emailInstructor,
+            'email_student': emailStudent,
+            'email_to_secondary': emailToSecondary,
+            'email_faculty': emailFaculty,
             csrf_token: csrfToken,
         },
         cache: false,
@@ -35,6 +35,7 @@ function sendEmail(url) {
         },
         success: function(data) {
             try {
+                console.log(data);
                 const parsedData = JSON.parse(data);
                 if (parsedData['status'] == 'success') {
                     $('#email-content').val('');

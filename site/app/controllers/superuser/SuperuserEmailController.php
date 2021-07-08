@@ -36,39 +36,39 @@ class SuperuserEmailController extends AbstractController {
      * @return JsonResponse
      */
     public function sendEmail(): JsonResponse {
-        if (!isset($_POST['emailContent']) || $_POST['emailContent'] == '') {
+        if (!isset($_POST['email_content']) || $_POST['email_content'] == '') {
             return JsonResponse::getFailResponse("Email content is empty.");
         }
-        elseif (!isset($_POST['emailSubject']) || $_POST['emailSubject'] == '') {
+        elseif (!isset($_POST['email_subject']) || $_POST['email_subject'] == '') {
             return JsonResponse::getFailResponse("Email subject is empty.");
         }
         else {
             // Because AJAX stringifies everthing
-            $emailInstructor =  isset($_POST['emailInstructor']) && $_POST['emailInstructor'] == "true";
-            $emailFullAccess = isset($_POST['emailFullAccess']) && $_POST['emailFullAccess'] == "true";
-            $emailLimitedAccess = isset($_POST['emailLimitedAccess']) && $_POST['emailLimitedAccess'] == "true";
-            $emailStudent = isset($_POST['emailStudent']) && $_POST['emailStudent'] == "true";
-            $emailFaculty = isset($_POST['emailFaculty']) && $_POST['emailFaculty'] == "true";
-            $emailToSecondary =  isset($_POST['emailToSecondary']) && $_POST['emailToSecondary'] == "true";
+            $email_instructor =  isset($_POST['email_instructor']) && $_POST['email_instructor'] == "true";
+            $email_full_access = isset($_POST['email_full_access']) && $_POST['email_full_access'] == "true";
+            $emailLimitedAccess = isset($_POST['email_limited_access']) && $_POST['email_limited_access'] == "true";
+            $email_student = isset($_POST['email_student']) && $_POST['email_student'] == "true";
+            $email_faculty = isset($_POST['email_faculty']) && $_POST['email_faculty'] == "true";
+            $email_to_secondary =  isset($_POST['email_to_secondary']) && $_POST['email_to_secondary'] == "true";
             # getRecipients
-            $activeUserIds = $this->core->getQueries()->getActiveUserIds(
-                $emailInstructor,
-                $emailFullAccess,
+            $active_user_ids = $this->core->getQueries()->getActiveUserIds(
+                $email_instructor,
+                $email_full_access,
                 $emailLimitedAccess,
-                $emailStudent,
-                $emailFaculty
+                $email_student,
+                $email_faculty
             );
             # Set up email here
-            $notificationFactory = $this->core->getNotificationFactory();
+            $notification_factory = $this->core->getNotificationFactory();
             $emails = [];
-            foreach ($activeUserIds as $userId) {
-                $details = ['body' => $_POST['emailContent'], 'subject' => $_POST['emailSubject'], 'to_user_id' => $userId];
+            foreach ($active_user_ids as $user_id) {
+                $details = ['body' => $_POST['email_content'], 'subject' => $_POST['email_subject'], 'to_user_id' => $user_id];
                 $emails[] = new SuperuserEmail($this->core, $details);
             }
-            $notificationFactory->sendEmails($emails, $emailToSecondary);
+            $notification_factory->sendEmails($emails, $email_to_secondary);
             return JsonResponse::getSuccessResponse([
                 "message" => "Email queued to be sent!",
-                "data" => json_encode($activeUserIds)
+                "data" => json_encode($active_user_ids)
             ]);
         }
     }

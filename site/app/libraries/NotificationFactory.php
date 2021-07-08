@@ -221,9 +221,9 @@ class NotificationFactory {
     /**
      * prepare array of Email objects as param array
      * @param array $emails
-     * @param bool $forceSecondary
+     * @param bool $force_secondary
      */
-    public function sendEmails(array $emails, bool $forceSecondary = false): void {
+    public function sendEmails(array $emails, bool $force_secondary = false): void {
         if (!$this->core->getConfig()->isEmailEnabled()) {
             throw new LogicException("Email is not enabled");
         }
@@ -240,7 +240,7 @@ class NotificationFactory {
             }
             if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
                 $user = $this->core->getQueries()->getUserById($email->getUserId());
-                if (($user->getEmailBoth() || $forceSecondary) && $user->getSecondaryEmail() != "") {
+                if (($user->getEmailBoth() || $force_secondary) && $user->getSecondaryEmail() != "") {
                     $flattened_emails[] = $email->getSubject();
                     $flattened_emails[] = $email->getBody();
                     $flattened_emails[] = $email->getUserId();
