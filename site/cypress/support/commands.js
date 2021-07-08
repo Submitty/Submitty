@@ -23,6 +23,7 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
+import 'cypress-file-upload';
 import {buildUrl} from './utils.js';
 //These functions can be called like "cy.login(...)" and will yeild a result
 
@@ -32,8 +33,8 @@ import {buildUrl} from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add('login', (username='instructor') => {
-    cy.get('input[name=user_id]').type(username);
-    cy.get('input[name=password]').type(username);
+    cy.get('input[name=user_id]').type(username, {force: true});
+    cy.get('input[name=password]').type(username, {force: true});
     cy.get('input[name=login]').click();
 });
 
@@ -43,14 +44,6 @@ Cypress.Commands.add('login', (username='instructor') => {
 Cypress.Commands.add('logout', () => {
     cy.get('#logout > .flex-line > .icon-title').click();
 });
-
-/**
-* Log out of Submitty, assumes a user is already logged in
-*/
-Cypress.Commands.add('logout', () => {
-    cy.get('#logout > .flex-line > .icon-title').click();
-});
-
 
 /**
 * Visit a url either by an array of parts or a completed url E.g:
