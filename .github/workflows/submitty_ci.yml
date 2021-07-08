@@ -37,7 +37,7 @@ jobs:
               run: npm run css-stylelint
 
 
-    eslint:
+    js-lint:
         runs-on: ubuntu-18.04
         defaults:
             run:
@@ -85,7 +85,7 @@ jobs:
                   flags: js
 
 
-    php-lint-static:
+    php-lint:
         runs-on: ubuntu-18.04
         defaults:
             run:
@@ -108,10 +108,14 @@ jobs:
 
             - name: Install dependencies
               run: composer install --prefer-dist --dev
-            - name: Run php linting and static analysis
-              run : |
+            - name: Check syntax
+              run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+            - name: Lint PHP code
+              run: |
                   php vendor/bin/phpcs --version
                   php vendor/bin/phpcs --standard=tests/ruleset.xml
+            - name: Static analysis
+              run: |
                   php vendor/bin/phpstan  --version
                   php vendor/bin/phpstan analyze app
 
@@ -231,8 +235,8 @@ jobs:
 
     e2e:
         needs:
-          - eslint
-          - php-lint-static
+          - js-lint
+          - php-lint
           - php-unit
           - python-lint
           - python-unit
