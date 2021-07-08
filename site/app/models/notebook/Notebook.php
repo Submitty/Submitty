@@ -175,10 +175,7 @@ class Notebook extends AbstractModel {
                             $question_name = $notebookVal['filename'];
                             $file_path = $this->core->getConfig()->getCoursePath();
                             $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
-                            $file = fopen($file_path, "r");
-                            $version_answer = fread($file, filesize($file_path));
-                            $version_answer = rtrim($version_answer);
-                            fclose($file);
+                            $version_answer = rtrim(file_get_contents($file_path));
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
@@ -204,10 +201,7 @@ class Notebook extends AbstractModel {
                             $question_name = $notebookVal['filename'];
                             $file_path = $this->core->getConfig()->getCoursePath();
                             $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
-                            $file = fopen($file_path, "r");
-                            $version_answer = fread($file, filesize($file_path));
-                            $version_answer = rtrim($version_answer);
-                            fclose($file);
+                            $version_answer = rtrim(file_get_contents($file_path));
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
                             $new_notebook[$notebookKey]['version_submission'] = $version_answer;

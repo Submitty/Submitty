@@ -58,41 +58,25 @@
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
                 {#disable input if viewing inactive version#}
-                {% if viewing_inactive_version %}
-                    <div id="codebox_{{ num_codeboxes }}"
-                         name="codebox_{{ num_codeboxes }}"
-                         autocapitalization="off"
-                         spellcheck="false"
-                         data-initial_value="{{ cell.initial_value }}"
-                         data-recent_submission="{{ cell.recent_submission }}"
-                         data-version_submission="{{ cell.version_submission }}"
-                         onkeyup="handle_input_keypress({{ viewing_inactive_version }});"
-                         style="pointer-events:none;">
-                    </div>
-                {% else %}
-                    <div id="codebox_{{ num_codeboxes }}"
-                         name="codebox_{{ num_codeboxes }}"
-                         autocapitalization="off"
-                         spellcheck="false"
-                         data-initial_value="{{ cell.initial_value }}"
-                         data-recent_submission="{{ cell.recent_submission }}"
-                         data-version_submission="{{ cell.version_submission }}"
-                         onkeyup="handle_input_keypress({{ viewing_inactive_version }});">
-                    </div>
-                {% endif %}
-                {% if cell.initial_value == "" %}
+                <div
+                    id="codebox_{{ num_codeboxes }}"
+                    name="codebox_{{ num_codeboxes }}"
+                    autocapitalization="off"
+                    spellcheck="false"
+                    data-initial_value="{{ cell.initial_value }}"
+                    data-recent_submission="{{ cell.recent_submission }}"
+                    data-version_submission="{{ cell.version_submission }}"
+                    onkeyup="handle_input_keypress();"
                     {% if viewing_inactive_version %}
-                        <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset" data-older_version = "true">Clear</button>
-                    {% else %}
-                        <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset" data-older_version = "false">Clear</button>
+                        style="pointer-events:none;"
                     {% endif %}
-                {% else %}
-                    {% if viewing_inactive_version %}
-                        <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset" data-older_version = "true">Reset</button>
-                    {% else %}
-                        <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset" data-older_version = "false">Reset</button>
-                    {% endif %}
-                {% endif %}
+                >
+                </div>
+                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
+                    data-older_version = "{{ viewing_inactive_version ? true : false }}">
+                    {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
+                </button>
+
                 <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
                 <script>
@@ -104,14 +88,14 @@
                     }
                     config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
 
-                    if ('{{ cell.programming_language }}') {
+                    {% if cell.programming_language is defined%}
                         config_{{ num_codeboxes }}.lineNumbers = true;
                         config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
-                    }
-
-                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
-                        config_{{ num_codeboxes }}.lineWrapping = true;
-                    }
+                    {% else %}
+                        {% if cell.rows > 0 %}
+                            config_{{ num_codeboxes }}.lineWrapping = true;
+                        {% endif %}
+                    {% endif %}
 
                     if ({{ cell.rows }} > 0) {
                         var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
@@ -128,13 +112,8 @@
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
                     {% else %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        {% if viewing_inactive_version %}
-                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                            document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                        {% else %}
-                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                            document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                        {% endif %}
+                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version ? 'true' : 'false'}}
+                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
                     {% endif %}
                 </script>
                 {% set num_codeboxes = num_codeboxes + 1 %}
@@ -165,22 +144,15 @@
 
                         {% for idx in choices_indices %}
                             <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
-                                {% if viewing_inactive_version %}
-                                    <input type="checkbox" class="key_to_click" tabindex="0"
-                                           name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                           value="{{ cell.choices[idx].value }}"
-                                           onclick="handle_input_keypress({{ viewing_inactive_version }});"
+                                <input type="checkbox" class="key_to_click" tabindex="0"
+                                       name="multiple_choice_{{ num_multiple_choice }}"
+                                       id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
+                                       value="{{ cell.choices[idx].value }}"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
+                                       {% if viewing_inactive_version %}
                                            disabled = "disabled"
-                                    />
-                                {% else %}
-                                    <input type="checkbox" class="key_to_click" tabindex="0"
-                                           name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                           value="{{ cell.choices[idx].value }}"
-                                           onclick="handle_input_keypress({{ viewing_inactive_version }});"
-                                    />
-                                {% endif %}
+                                       {% endif %}
+                                />
                                 {{ cell.choices[idx].description | markdown }}
                             </label>
                         {% endfor %}
@@ -214,13 +186,8 @@
                 </fieldset>
 
                 {# Create reset to recent submission button #}
-                {% if viewing_inactive_version %}
-                    <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear" disabled="disabled">Clear</button>
-                    <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent" disabled="disabled">Use Most Recent Submission</button>
-                {% else %}
-                    <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
-                    <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
-                {% endif %}
+                <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
+                <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
                 <script>
                     $("multiple_choice_{{ num_multiple_choice }}_1").attr("disabled", true);
                     {# Populate checkboxes initially #}
@@ -233,13 +200,8 @@
                         $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
                         $("#mc_{{ num_multiple_choice }}_recent_button").hide();
                     {% else %}
-                        {% if viewing_inactive_version %}
-                            $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                            $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
-                        {% else %}
-                            $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
-                            $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
-                        {% endif %}
+                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", {{ viewing_inactive_version ? 'true' : 'false' }});
+                        $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                     {% endif %}
                 </script>
 
@@ -276,19 +238,13 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-
-                {% if viewing_inactive_version %}
-                    <button type="button" class="btn btn-primary
-                        sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
-                        disabled = "disabled">
-                        Clear
-                    </button>
-                {% else %}
-                    <button type="button" class="btn btn-primary
-                        sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});">
-                        Clear
-                    </button>
-                {% endif %}
+                <button type="button" class="btn btn-primary
+                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
+                    {% if viewing_inactive_version %}
+                        disabled = "disabled"
+                    {% endif %}>
+                    Clear
+                </button>
                 <button type="button" 
                     onclick="populatePreviousFiles({{num_file_submissions}});"
                     class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
