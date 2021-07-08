@@ -494,6 +494,25 @@ class ElectronicGraderController extends AbstractController {
             $peer = true;
         }
 
+        //get all graded gradeables for queue stats
+        $submissions_in_queue = 0;
+        $gradeables[] = $gradeable;
+        $graded_gradeables = $this->core->getQueries()->getGradedGradeables($gradeables);
+        //check every submission (inactive and active) for every student
+        //NOTE: Let's eventually refactor this nested loop to instead look at the items
+        //in the autograding queue and check for matches.
+        foreach ($graded_gradeables as $g) {
+            $highest_version = $g->getAutoGradedGradeable()->getHighestVersion();
+            if ($highest_version > 0) {
+                for ($i = 1; $i < $highest_version + 1; $i++) {
+                    $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($i);
+                    if ($display_version_instance->isQueued()) {
+                        $submissions_in_queue += 1;
+                    }
+                }
+            }
+        }
+
         /*
          * we need number of students per section
          */
@@ -795,7 +814,8 @@ class ElectronicGraderController extends AbstractController {
             $viewed_grade,
             $section_key,
             $regrade_requests,
-            $show_warnings
+            $show_warnings,
+            $submissions_in_queue
         );
     }
 
