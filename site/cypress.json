@@ -3,5 +3,6 @@
 	"testFiles" : [
     "*/*.spec.js",
 		"*.spec.js"
-	]
+	],
+	"pageLoadTimeout" : 120000
 }

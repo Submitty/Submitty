@@ -710,6 +710,16 @@ progress::-webkit-progress-value {
     margin: 5px;
 }
 
+.custom-mark-number-input::-webkit-outer-spin-button,
+.custom-mark-number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.custom-mark-arrow-icon:hover {
+    color: var(--standard-light-medium-gray);
+}
+
 .ta-nav-wrapper {
     width: 100%;
 }
