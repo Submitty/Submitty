@@ -63,7 +63,7 @@ def up(config, database, semester, course):
                     sections = []
                     if 'sort_priority' not in itemvalue:
                         itemvalue['sort_priority'] = 0.0
-                    if 'sections' in itemvalue:
+                    if 'sections' in itemvalue and itemvalue['sections'] is not None:
                         for section in itemvalue['sections']:
                             sections.append(section)
                     has_sections = len(sections) != 0
