@@ -1290,7 +1290,6 @@ function getGradedComponentFromDOM(component_id) {
 function getScoresFromDOM() {
     let dataDOMElement = $('#gradeable-scores-id');
     let scores = {
-        user_group: 1,
         ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
         ta_grading_total: getTaGradingTotal(),
@@ -3268,9 +3267,6 @@ function injectGradingComponent(component, graded_component, editable, showMarkL
     return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks())
         .then(function (elements) {
             setComponentContents(component.id, elements);
-        })
-        .then(function () {
-            return refreshTotalScoreBox();
         });
 }
 

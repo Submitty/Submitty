@@ -1694,9 +1694,8 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
             }
         }
-        // If it is graded at all, then send ta score information
+        //send ta score information
         $response_data['ta_grading_total'] = $gradeable->getTaPoints();
-        if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
             if ($gradeable->hasPeerComponent()) {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
                 $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalPeerScore($grading_done_by);
@@ -1711,7 +1710,6 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['user_group'] = $this->core->getUser()->getGroup();
                 $response_data['peer_gradeable'] = false;
             }
-        }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
 
