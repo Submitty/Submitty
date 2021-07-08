@@ -1,4 +1,4 @@
-/* global CodeMirror, CodeMirrorSpellCheck, getFocusableElements */
+/* global CodeMirror, CodeMirrorSpellChecker, getFocusableElements */
 /* exported getLargeCodeMirror, getSmallCodeMirror, rowsToPixels */
 
 /**
