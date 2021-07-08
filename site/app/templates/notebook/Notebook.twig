@@ -79,14 +79,16 @@
                     }
                     config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
 
-                    if ('{{ cell.programming_language }}') {
-                        config_{{ num_codeboxes }}.lineNumbers = true;
-                        config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
-                    }
+                    {% if cell.programming_language is defined and cell.programming_language != '' %}
+                    config_{{ num_codeboxes }}.lineNumbers = true;
+                    config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    {% endif %}
 
+                    {% if cell.programming_language is defined %}
                     if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
                         config_{{ num_codeboxes }}.lineWrapping = true;
                     }
+                    {% endif %}
 
                     if ({{ cell.rows }} > 0) {
                         var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
