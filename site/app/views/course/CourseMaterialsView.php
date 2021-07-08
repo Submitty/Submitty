@@ -51,7 +51,7 @@ class CourseMaterialsView extends AbstractView {
             }
             $priorities[$material->getPath()] += $material->getPriority();
             foreach ($dirs as $dir) {
-                $cur_path .= $dir;
+                $cur_path .= '/' . $dir;
                 $path = FileUtils::joinPaths($expected_path, $cur_path);
                 $priorities[$material->getPath()] += $course_materials[$path]->getPriority();
             }
@@ -102,10 +102,10 @@ class CourseMaterialsView extends AbstractView {
                 if (!isset($working_dir[$filename])) {
                     $working_dir[$filename] = [];
                 }
-                $release_date = $course_material->getReleaseDate();
-                $file_release_dates[$course_material->getPath()] = $release_date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
                 continue;
             }
+
+            array_push($in_dir, $course_material->getPath());
 
             $path = explode('/', $course_material->getPath());
             $filename = array_pop($path);

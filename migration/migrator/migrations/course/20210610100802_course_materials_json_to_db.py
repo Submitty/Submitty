@@ -24,8 +24,8 @@ def up(config, database, semester, course):
             id serial PRIMARY KEY,
             path varchar(255) UNIQUE,
             type smallint NOT NULL,
-            release_date timestamptz NOT NULL,
-            hidden_from_students BOOL NOT NULL,
+            release_date timestamptz,
+            hidden_from_students BOOL,
             priority float8 NOT NULL
         );
         """
@@ -50,6 +50,9 @@ def up(config, database, semester, course):
 
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     json_file = Path(course_dir, 'uploads', 'course_materials_file_data.json')
+    course_materials_dir = Path(course_dir, 'uploads', 'course_materials')
+
+    paths = set()
 
     if json_file.is_file():
         with json_file.open('r') as file:
@@ -58,6 +61,7 @@ def up(config, database, semester, course):
                 for itemkey, itemvalue in data.items():
                     material_type = 0
                     path = itemkey
+                    paths.add(path) # in case json already contains the path
                     if itemvalue['external_link'] is True:
                         material_type = 1
                     sections = []
@@ -81,7 +85,7 @@ def up(config, database, semester, course):
                         release_date = EXCLUDED.release_date,
                         hidden_from_students = EXCLUDED.hidden_from_students,
                         priority = EXCLUDED.priority
-                        RETURNING path
+                        RETURNING id
                         """
                     params = {
                         'path': path,
@@ -107,6 +111,34 @@ def up(config, database, semester, course):
                             'section_id': section
                         }
                         database.session.execute(query, params)
+                    subpath = path[len(str(course_materials_dir))+1:]
+                    dirs = subpath.split('/')
+                    dirs.pop()
+                    curpath = str(course_materials_dir)
+                    for dir in dirs:
+                        curpath += '/' + dir
+                        paths.add(curpath)
+            for dir in paths:
+                query = """
+                    INSERT INTO course_materials (
+                        type,
+                        path,
+                        release_date,
+                        hidden_from_students,
+                        priority
+                    )
+                    VALUES (
+                        :type, :path, :release_date, :hidden_from_students, :priority
+                    ) ON CONFLICT(path) DO NOTHING
+                """
+                params = {
+                    'path': dir,
+                    'type': 2,
+                    'release_date': None,
+                    'hidden_from_students': None,
+                    'priority': 0
+                }
+                database.session.execute(query, params)
 
 
 

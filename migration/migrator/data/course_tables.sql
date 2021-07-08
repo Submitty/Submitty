@@ -176,8 +176,8 @@ CREATE TABLE public.course_materials (
     id integer NOT NULL,
     path character varying(255),
     type smallint NOT NULL,
-    release_date timestamp with time zone NOT NULL,
-    hidden_from_students boolean NOT NULL,
+    release_date timestamp with time zone,
+    hidden_from_students boolean,
     priority double precision NOT NULL
 );
 

@@ -31,27 +31,6 @@ class CourseMaterialsController extends AbstractController {
         );
     }
 
-    public function deleteHelper($file) {
-        if (array_key_exists('name', $file)) {
-            $filepath = $file['path'];
-            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                ->findOneBy(['path' => $filepath]);
-            if ($cm != null) {
-                $this->core->getCourseEntityManager()->remove($cm);
-            }
-        }
-        else {
-            if (array_key_exists('files', $file)) {
-                $this->deleteHelper($file['files']);
-            }
-            else {
-                foreach ($file as $f) {
-                    $this->deleteHelper($f);
-                }
-            }
-        }
-    }
-
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      */
@@ -66,18 +45,11 @@ class CourseMaterialsController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
 
-        $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
+        $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
 
         foreach ($all_files as $file) {
-            if (is_array($file)) {
-                $this->deleteHelper($file);
-            }
-            else {
-                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                    ->findOneBy(['path' => $path]);
-                if ($cm != null) {
-                    $this->core->getCourseEntityManager()->remove($cm);
-                }
+            if (str_starts_with($file->getPath(), $path)) {
+                $this->core->getCourseEntityManager()->remove($file);
             }
         }
         $this->core->getCourseEntityManager()->flush();
@@ -444,7 +416,7 @@ class CourseMaterialsController extends AbstractController {
         if (!FileUtils::createDir($upload_path)) {
             return JsonResponse::getErrorResponse("Failed to make image path.");
         }
-
+        $dirs_to_make = null;
         // create nested path
         if (!empty($requested_path)) {
             $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
@@ -457,7 +429,7 @@ class CourseMaterialsController extends AbstractController {
             foreach ($dirs as $dir) {
                 for ($i = 0; $i < $j; $i++) {
                     if (!isset($dirs_to_make[$i])) {
-                        $dirs_to_make[$i] = '/' . $dir;
+                        $dirs_to_make[$i] = $upload_path . '/' . $dir;
                     }
                     else {
                         $dirs_to_make[$i] .= '/' . $dir;
@@ -465,22 +437,12 @@ class CourseMaterialsController extends AbstractController {
                 }
                 $j--;
             }
-            $i = -1;
-            foreach ($dirs_to_make as $dir) {
-                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
-                    ['path' => $upload_path . $dir]
-                );
-                if ($cm == null) {
-                    $details['type'][$i] = CourseMaterial::DIR;
-                    $details['path'][$i] = $upload_path . $dir;
-                    $i--;
-                }
-            }
             $upload_path = $upload_nested_path;
         }
 
         $count_item = count($status);
         if (isset($uploaded_files[1])) {
+            $index = 0;
             for ($j = 0; $j < $count_item; $j++) {
                 $is_external_link_file = $uploaded_files[1]["name"][$j] == $external_link_file_name;
                 if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j]) || $is_external_link_file) {
@@ -538,12 +500,29 @@ class CourseMaterialsController extends AbstractController {
 
                         $zip->extractTo($upload_path, $entries);
 
-                        $i = 0;
                         foreach ($zfiles as $zfile) {
                             $path = FileUtils::joinPaths($upload_path, $zfile);
-                            $details['type'][$i] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
-                            $details['path'][$i] = $path;
-                            $i++;
+                            $details['type'][$index] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
+                            $details['path'][$index] = $path;
+                            if ($dirs_to_make == null) {
+                                $dirs_to_make = [];
+                            }
+                            $dirs = explode('/', $zfile);
+                            array_pop($dirs);
+                            $j = count($dirs);
+                            $count = count($dirs_to_make);
+                            foreach ($dirs as $dir) {
+                                for ($i = $count; $i < $j + $count; $i++) {
+                                    if (!isset($dirs_to_make[$i])) {
+                                        $dirs_to_make[$i] = $upload_path . '/' . $dir;
+                                    }
+                                    else {
+                                        $dirs_to_make[$i] .= '/' . $dir;
+                                    }
+                                }
+                                $j--;
+                            }
+                            $index++;
                         }
                     }
                     else {
@@ -551,8 +530,9 @@ class CourseMaterialsController extends AbstractController {
                             return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
                         }
                         else {
-                            $details['type'][0] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
-                            $details['path'][0] = $dst;
+                            $details['type'][$index] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
+                            $details['path'][$index] = $dst;
+                            $index++;
                         }
                     }
                 }
@@ -562,6 +542,21 @@ class CourseMaterialsController extends AbstractController {
                 // Is this really an error we should fail on?
                 if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
                     return JsonResponse::getErrorResponse("Failed to delete the uploaded file {$uploaded_files[1]['name'][$j]} from temporary storage.");
+                }
+            }
+        }
+        if ($dirs_to_make != null) {
+            $i = -1;
+            $new_paths = [];
+            foreach ($dirs_to_make as $dir) {
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
+                    ['path' => $dir]
+                );
+                if ($cm == null && !in_array($dir, $new_paths)) {
+                    $details['type'][$i] = CourseMaterial::DIR;
+                    $details['path'][$i] = $dir;
+                    $i--;
+                    $new_paths[] = $dir;
                 }
             }
         }
