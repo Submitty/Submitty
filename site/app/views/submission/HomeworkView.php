@@ -813,7 +813,12 @@ class HomeworkView extends AbstractView {
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
         $display_version = 0;
 
-        $param = [];
+        $param = [
+            'in_queue' => false,
+            'in_progress_grading' => false,
+            'result_text' => ''
+        ];
+
         $show_testcases = false;
         $show_incentive_message = false;
         $history = null;
@@ -1069,7 +1074,7 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $can_inquiry
+     * @param bool $can_inquirye
      * @return string
      */
     private function renderRegradeBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
@@ -1081,7 +1086,7 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $can_inquirye
+     * @param bool $can_inquiry
      * @return string
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
