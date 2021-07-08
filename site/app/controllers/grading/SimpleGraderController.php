@@ -124,11 +124,11 @@ class SimpleGraderController extends AbstractController {
         elseif ($sort === "first") {
             $sort_key = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
-        elseif ($sort == "section_subsection") {
-            $sort_key = "u.registration_subsection";
+        elseif ($sort === "last") {
+            $sort_key = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
         }
         else {
-            $sort_key = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
+            $sort_key = "u.registration_subsection";
         }
 
         if ($gradeable->isGradeByRegistration()) {
