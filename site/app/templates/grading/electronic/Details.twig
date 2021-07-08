@@ -264,7 +264,7 @@
     </tr>
 {% endmacro %}
 
-{% macro render_teamless_user(context, section, user, new_team_onclick, index, columns) %}
+{% macro render_teamless_user(context, section, user, new_team_onclick, index, columns, edited_past_lock_date) %}
     <tr>
         {% for column in columns %}
             {#
@@ -288,7 +288,7 @@
             {% elseif column.function == "section" %}
                 {{ _self.render_column_section(context, section, null, index, null, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, info.edited_past_lock_date) }}
+                {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 <td></td>
             {% elseif column.function == "team_members" %}
