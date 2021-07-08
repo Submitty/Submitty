@@ -36,18 +36,19 @@
 
 <div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
-    <div class="machine">Machine 1</div>
-    <div class="image">
-        <h3>submitty/clang</h3>
-        <p> ID:  79ee62d </p>
-        <p> Size:  409MB 
-            <em> (Virtual Size: 409MB ) </em> 
-        </p>
-        <p> Tag: 6.0 </p>
-        <br>
-        <p> Created on: 2019-09-16 23:06:54 </p>
-        <br>
-    </div>
+    {% for worker in worker_machines %}
+        <div class="machine">{{worker['name']}}</div>
+        {{ _self.renderDockerImage(worker['images']) }}
+    {% endfor %}
+</div>
+<div class="content">
+    <h2 class="docker-header">Capabilities Not Associated With a Container</h2>
+    <p>The follow capabilities were found to not have any containers associated with them:</p>
+    <ul id="capabilities-list">
+        {% for capability in no_container_capabilities %}
+            <li>{{capability}}</li>
+        {% endfor %}
+    </ul>
 </div>
 <div class="content">
     <h2 class="docker-header">Autograding Docker Images</h2>
@@ -101,7 +102,7 @@
 
 {% macro renderDockerImage(data) %}
     {% for key, value in data %}
-        <div class="shadow">
+        <div class="image">
             <h3>{{ value["name"] }}</h3>
             <p> ID:  {{ value["short_id"] | trim("sha256:") }} </p>
             <p> Size:  {{ value["size"] }} 

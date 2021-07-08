@@ -28,7 +28,10 @@ class DockerView extends AbstractView {
             $image["virtual_size"] = Utils::formatBytes('mb', $image["virtual_size"], true);
             $image["additional_names"] = array_slice($image['tags'], 1);
 
-            $copy[$image["name"]] = $image;
+            $copy[$full_name] = $image;
+            foreach ($image["additional_names"] as $additional_name) {
+                $copy[$additional_name] = $image;
+            }
         }
 
         $docker_data['docker_images'] = $copy;
@@ -77,18 +80,38 @@ class DockerView extends AbstractView {
 
         $capabilities = [];
         $worker_machines = [];
+        $no_container_capabilities = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
             $worker_temp = [];
             $worker_temp['name'] = $name;
             $worker_temp['capabilities'] = [];
             $worker_temp['images'] = [];
+            $image_names = [];
             foreach ($worker['capabilities'] as $capability) {
                 $capabilities[] = $capability;
                 $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
                 $worker_temp['enabled'] = $worker['enabled'];
-                $worker_temp['capabilities'][] = $worker['capabilities'];
-                foreach ($docker_data['autograding_containers'][$capability] as $image) {
-                    $worker_temp['images'][] = $image;
+                $worker_temp['capabilities'] = $worker['capabilities'];
+                // list of capabilities without containers
+                $worker_temp['images_not_found'] = [];
+                if (array_key_exists($capability, $docker_data['autograding_containers'])) {
+                    foreach ($docker_data['autograding_containers'][$capability] as $image) {
+                        $image_names[] = $image;
+                    }
+                }
+                else {
+                    $no_container_capabilities[] = $capability;
+                }
+            }
+            // Get ride of duplicate images
+            $image_names = array_unique($image_names);
+            foreach ($image_names as $image) {
+                // Extra precaution since data is quite messy
+                if (array_key_exists($image, $autograding_containers['all_images'])) {
+                    $worker_temp['images'][] = $autograding_containers['all_images'][$image];
+                }
+                else {
+                    $worker_temp['images_not_found'][] = $image;
                 }
             }
             $worker_machines[] = $worker_temp;
@@ -103,13 +126,15 @@ class DockerView extends AbstractView {
             }
         }
 
+        $no_container_capabilities = array_unique($no_container_capabilities);
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
                 "autograding_containers" => $autograding_containers,
                 "docker_info" => $docker_data['docker_info'],
                 "capabilities" => $capabilities,
-                "worker_machines" => $worker_machines
+                "worker_machines" => $worker_machines,
+                "no_container_capabilities" => $no_container_capabilities
             ]
         );
     }

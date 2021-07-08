@@ -1,4 +1,4 @@
-#tag-list {
+#tag-list, #capabilities-list {
     margin-left: 20px;
 }
 
@@ -35,6 +35,7 @@ td {
     border: 1px solid #dddddd;
     border-radius: 8px;
     padding: 8px;
+    margin: 0.5em 0.5em 0 0.5em;
 }
 
 .machine {
