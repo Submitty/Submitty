@@ -72,6 +72,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
             'user_group' => 4
         ]));
 
@@ -183,7 +185,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'grade_inquiry_due_date' => new \DateTime("9995-01-06 01:01:01", $this->core->getConfig()->getTimezone()),
             'allowed_minutes' => null,
             'depends_on' => null,
-            'depends_on_points' => null
+            'depends_on_points' => null,
+            'allow_custom_marks' => true
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {

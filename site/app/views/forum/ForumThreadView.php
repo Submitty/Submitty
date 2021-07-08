@@ -264,6 +264,7 @@ class ForumThreadView extends AbstractView {
                 "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
+                "show_unresolve" => false,
                 "display_option" => $display_option,
                 "render_markdown" => $markdown_enabled,
                 "csrf_token" => $this->core->getCsrfToken(),
@@ -289,6 +290,7 @@ class ForumThreadView extends AbstractView {
                 "first_post_id" => $generatePostContent["first_post_id"],
                 "form_action_link" => $generatePostContent["form_action_link"],
                 "thread_resolve_state" => $thread_resolve_state,
+                "show_unresolve" => false,
                 "merge_thread_content" => $generatePostContent["merge_thread_content"],
                 "csrf_token" => $generatePostContent["csrf_token"],
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
@@ -417,7 +419,7 @@ class ForumThreadView extends AbstractView {
         $activeThread = $this->core->getQueries()->getThread($currentThread);
 
         $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . $activeThread['title'];
-        $activeThreadAnnouncement = $activeThread['pinned'];
+        $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
 
         $thread_id = $activeThread['id'];
 
@@ -732,7 +734,7 @@ class ForumThreadView extends AbstractView {
                 $used_active = true;
                 $activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
                 $activeThread = $thread;
-                if ($thread["pinned"]) {
+                if ($thread["pinned_expiration"] > date("Y-m-d H:i:s")) {
                     $activeThreadAnnouncement = true;
                 }
                 if ($thread_id_p == -1) {
@@ -819,7 +821,7 @@ class ForumThreadView extends AbstractView {
                 "categories" => $categories_content,
                 "link" => $link,
                 "class" => $class,
-                "pinned" => $thread["pinned"],
+                "pinned" => $thread["pinned_expiration"] > date("Y-m-d H:i:s"),
                 "favorite" => $favorite,
                 "merged_thread_id" => $thread['merged_thread_id'],
                 "status" => $thread["status"],
@@ -847,6 +849,7 @@ class ForumThreadView extends AbstractView {
                     "post_id" => $first_post["id"],
                     "is_thread_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
                     "thread_resolve_state" => $this->core->getQueries()->getResolveState($thread['id'])[0]['status'],
+                    "show_unresolve" => false,
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
@@ -1107,6 +1110,7 @@ class ForumThreadView extends AbstractView {
             "userGroup" => $userGroup,
             "includeReply" => $includeReply,
             "thread_resolve_state" => $thread_resolve_state,
+            "show_unresolve" => false,
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
@@ -1180,6 +1184,7 @@ class ForumThreadView extends AbstractView {
 
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
+        $expiration = $this->core->getDateTimeNow();
 
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
@@ -1191,7 +1196,8 @@ class ForumThreadView extends AbstractView {
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d')
         ]);
     }
 
@@ -1319,7 +1325,8 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
             "forumBarData" => $forumBarData,
             "userData" => $userData,
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

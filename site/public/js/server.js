@@ -374,99 +374,6 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 
 }
 
-function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
-    $('.popup-form').css('display', 'none');
-    var form = $("#delete-plagiarism-result-and-config-form");
-    $('[name="gradeable_title"]', form).html('');
-    $('[name="gradeable_title"]', form).append(gradeable_title);
-    $('[name="delete"]', form).attr('action', form_action);
-    form.css("display", "block");
-    form.find('.form-body').scrollTop(0);
-    captureTabInModal("delete-plagiarism-result-and-config-form");
-}
-
-function addMorePriorTermGradeable(prior_term_gradeables) {
-    const form = $("#save-configuration-form");
-    const prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
-    let to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
-    $.each(prior_term_gradeables, function(sem,courses_gradeables){
-        to_append += '<option value="'+ sem +'">'+ sem +'</option>';
-    });
-    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
-    $('#prev_gradeable_div', form).append(to_append);
-    $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
-    $("select", form).change(function(){
-        const select_element_name = $(this).attr("name");
-        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
-    });
-}
-
-function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#save-configuration-form");
-    if(select_element_name == "language") {
-
-        //
-        // Following code is used to set default window size for different languages
-        // that will appear in 'configureNewGradeableForPlagiarismForm'
-        // to change the default values, just change the val attribute for the language.
-        //
-
-        if ($('[name="language"]', form).val() == "python") {
-            $('[name="sequence_length"]', form).val('1');
-        }
-        else if ($('[name="language"]', form).val() == "cpp") {
-            $('[name="sequence_length"]', form).val('2');
-        }
-        else if ($('[name="language"]', form).val() == "java") {
-            $('[name="sequence_length"]', form).val('3');
-        }
-        else if ($('[name="language"]', form).val() == "plaintext") {
-            $('[name="sequence_length"]', form).val('4');
-        }
-        else if ($('[name="language"]', form).val() == "mips") {
-            $('[name="sequence_length"]', form).val('5');
-        }
-    }
-    else if(select_element_name.substring(0, 9) == "prev_sem_") {
-        var i = select_element_name.substring(9);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_sem != '') {
-            var append_options = '';
-            $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });
-                }
-            });
-            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    }
-    else if(select_element_name.substring(0, 12) == "prev_course_") {
-        var i = select_element_name.substring(12);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-        var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
-        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_course != '') {
-            var append_options = '';
-            $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        if(selected_course == course) {
-                            $.each(gradeables, function (index, gradeable) {
-                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });
-                        }
-                    });
-                }
-            });
-            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    }
-}
-
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
@@ -533,7 +440,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -543,7 +450,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -551,7 +458,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -559,7 +466,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -568,17 +475,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -733,35 +640,6 @@ function check_server(url) {
             }
         else {
                 checkRefreshPage(url);
-            }
-        }
-    );
-}
-
-function checkRefreshLichenMainPage(url, semester, course) {
-    // refresh time for lichen main page
-    var refresh_time = 5000;
-    setTimeout(function() {
-        check_lichen_jobs(url, semester, course);
-    }, refresh_time);
-}
-
-function check_lichen_jobs(url, semester, course) {
-    $.get(url,
-        function(data) {
-            var last_data = localStorage.getItem("last_data");
-            if (data === "REFRESH_ME") {
-                last_data= "REFRESH_ME";
-                localStorage.setItem("last_data", last_data);
-                window.location.href = buildCourseUrl(['plagiarism']);
-            }
-            else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
-                last_data= "NO_REFRESH";
-                localStorage.setItem("last_data", last_data);
-                window.location.href = buildCourseUrl(['plagiarism']);
-            }
-            else {
-                checkRefreshLichenMainPage(url, semester, course);
             }
         }
     );
@@ -943,11 +821,12 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
 
 function resizeFrame(id, max_height = 500, force_height=-1) {
     let img = undefined;
+    let visible = $("iframe#" + id).is(":visible");
     img = $("iframe#" + id).contents().find("img");
     if($("iframe#" + id).contents().find("html").length !== 0) {
         $("iframe#" + id).contents().find("html").css("height", "inherit");
         img = $("iframe#" + id).contents().find("img");
-        if(img) {
+        if(img.length !== 0) {
             img.removeAttr("width");
             img.removeAttr("height");
             img.css("width", "");
@@ -967,7 +846,7 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         document.getElementById(id).height = (height+18) + "px";
     }
     //Workarounds for FireFox changing height/width of img sometime after this code runs
-    if(img) {
+    if(img.length !== 0) {
         const observer = new ResizeObserver(function(mutationsList, observer) {
             img.removeAttr("width");
             img.removeAttr("height");
@@ -976,6 +855,20 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
             observer.disconnect();
         })
         observer.observe(img[0]);
+    }
+    if(!visible) {
+        const observer = new IntersectionObserver(function(entries, observer) {
+            if($("iframe#" + id).is(":visible")) {
+                $("iframe#" + id).removeAttr("height");
+                let iframeFunc = $("iframe#" + id)[0].contentWindow.iFrameInit;
+                if(typeof(iframeFunc) === "function") {
+                    iframeFunc();
+                }
+                observer.disconnect();
+                resizeFrame(id, max_height, force_height);
+            }
+        });
+        observer.observe($("iframe#" + id)[0]);
     }
 }
 
@@ -1605,4 +1498,105 @@ function flagUserImage(user_id, flag) {
 function getFocusableElements() {
     let focusable_elements = $(':focusable:tabbable');
     return Array.from(focusable_elements);
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
+ * @param preview_element JQuery element of the span the markdown will be inserted into
+ * @param preview_button JQuery element of the "Preview Markdown" button
+ *                       Should have title="Preview Markdown"
+ * @param data Object whose properties will get sent through a POST request
+ */
+function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
+    const enablePreview = preview_element.is(':hidden');
+
+    $.ajax({
+        url: buildCourseUrl(['markdown', 'preview']),
+        type: 'POST',
+        data: {
+            enablePreview: enablePreview,
+            ...data,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            if (enablePreview) {
+                preview_element.empty();
+                preview_element.append(data);
+                preview_element.show();
+                markdown_textarea.hide();
+
+                preview_button.empty();
+                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+
+            }
+            else {
+                preview_element.hide();
+                markdown_textarea.show();
+
+                preview_button.empty();
+                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdownContainer JQuery element of the textarea where the markdown should be rendered
+ * @param url url to send ajax request to
+ * @param content Text content of the unrendered markdown
+ */
+function renderMarkdown(markdownContainer, url, content) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            enablePreview: true,
+            content: content,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            markdownContainer.empty();
+            markdownContainer.append(data);
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param type Number representing the type of markdown preset to insert
+ *             0: code
+ *             1: link
+ *             2: bold text
+ *             3: italic text
+ * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ */
+function addMarkdownCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[display text](url)";
+    }
+    else if(type == 0){
+        insert = "```" +
+            "\ncode\n```";
+    }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }

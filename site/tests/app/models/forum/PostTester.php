@@ -25,6 +25,8 @@ class PostTester extends \PHPUnit\Framework\TestCase {
             'user_firstname' => 'Tester',
             'user_lastname' => 'Test',
             'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
             'time_zone' => 'America/New_York'
         ]);
         $this->core->setUser($user);

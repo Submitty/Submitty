@@ -95,6 +95,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getPeerBlind()
  * @method void setInstructorBlind($peer_blind)
  * @method int getInstructorBlind()
+ * @method bool getAllowCustomMarks()
+ * @method void setAllowCustomMarks($allow_custom_marks)
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -191,6 +193,8 @@ class Gradeable extends AbstractModel {
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
+    /** @prop @var bool if graders will be allowed to use custom marks */
+    protected $allow_custom_marks = true;
     /** @prop @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed
      */
@@ -299,6 +303,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            $this->setAllowCustomMarks($details['allow_custom_marks']);
             $this->setAllowedMinutes($details['allowed_minutes']);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
@@ -1484,7 +1489,7 @@ class Gradeable extends AbstractModel {
      */
     public function getNonPeerComponents() {
         return array_filter($this->components, function (Component $component) {
-            return !$component->isPeer();
+            return !$component->isPeerComponent();
         });
     }
 
@@ -1494,7 +1499,7 @@ class Gradeable extends AbstractModel {
      */
     public function getPeerComponents() {
         return array_filter($this->components, function (Component $component) {
-            return $component->isPeer();
+            return $component->isPeerComponent();
         });
     }
 
@@ -1649,7 +1654,7 @@ class Gradeable extends AbstractModel {
     public function getTaPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if (!$component->isPeer()) {
+            if (!$component->isPeerComponent()) {
                 $total += $component->getMaxValue();
             }
         }
@@ -1663,16 +1668,20 @@ class Gradeable extends AbstractModel {
     public function getPeerPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 $total += $component->getMaxValue();
             }
         }
         return $total;
     }
 
-    public function isPeerGrading() {
+    /**
+     * Gets if a gradeable has peer component(s)
+     * @return bool
+     */
+    public function hasPeerComponent() {
         foreach ($this->getComponents() as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 return true;
             }
         }
@@ -1685,7 +1694,7 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getGradingSectionsForUser(User $user) {
-        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
+        if ($this->hasPeerComponent() && $user->getGroup() === User::GROUP_STUDENT) {
             if ($this->isTeamAssignment()) {
                 $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
                 $teams = [];
@@ -1778,7 +1787,7 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getAllGradingSections() {
-        if ($this->isPeerGrading()) {
+        if ($this->hasPeerComponent()) {
             //Todo: What are all sections when you have peer grading?
         }
 

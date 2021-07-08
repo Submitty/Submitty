@@ -31,7 +31,7 @@
             </script>
         {% else %}
             {# Has results! #}
-            {% if show_incentive_message %}
+            {% if show_incentive_message is defined and show_incentive_message %}
                 <script>
                     (function() {
                         $('#incentive_message').show();

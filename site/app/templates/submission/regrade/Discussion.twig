@@ -57,11 +57,19 @@
                             {% set text_area_label_text = 'Add comment to grade inquiry:' %}
                         {% endif %}
                         <label for="reply-text-area">{{ text_area_label_text }}</label>
-                        <textarea name="replyTextArea" id="reply-text-area-{{ component.id }}" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ "Type Response Here" }}" required onkeyup="onReplyTextAreaKeyUp(this)"></textarea>
+                        {% include "misc/MarkdownArea.twig" with {
+                            "markdown_area_id" : "reply-text-area-" ~ component.id,
+                            "markdown_area_name" : "replyTextArea",
+                            "markdown_area_value" : "",
+                            "placeholder" : "Enter response here...",
+                            "preview_div_id" : "inquiry_preview",
+                            "preview_div_name" : "inquiry_preview",
+                            "onclick" : "previewInquiryMarkdown.call(this)",
+                            "render_buttons" : true,
+                            "min_height" : "100px",
+                            "other_textarea_attributes" : "required onkeyup=onReplyTextAreaKeyUp(this)"
+                        } only %}
                         <div class="row" style="justify-content: flex-end">
-                        <div style="margin-right: auto">
-                        {{ self.markdown_buttons() }}
-                        </div>
                             {% if grade_inquiries[component.id] is not defined%}
                                 {# No request yet #}
                                 <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
@@ -114,38 +122,3 @@
         $(onReady());
     </script>
 {% endif %}
-
-{% macro markdown_buttons() %}
-    <button type="button"
-            title="Insert a link"
-            onclick="addMarkdownCode(1, '#reply-text-area')"
-            style="margin-right:10px;"
-            class="btn btn-default key_to_click" tabindex="0"> Link
-            <i
-                class="fas fa-link fa-1x">
-            </i>
-    </button>
-    <button title="Insert a code segment"
-            type="button"
-            onclick="addMarkdownCode(0, '#reply-text-area')"
-            class="btn btn-default key_to_click" tabindex="0"> Code
-            <i
-                class="fas fa-code fa-1x">
-            </i>
-    </button>
-    <button title="Insert bold text"
-            type="button"
-            onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))"
-            class="btn btn-default key_to_click" tabindex="0"> Bold
-            <i
-                class="fas fa-bold fa-1x">
-            </i>
-    </button>
-    <button title="Insert italic text"
-            type="button"
-            onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))"class="btn btn-default key_to_click" tabindex="0"> Italics
-            <i
-                class="fas fa-italic fa-1x">
-            </i>
-    </button>
-{% endmacro %}

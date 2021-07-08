@@ -23,6 +23,8 @@ class PamAuthenticationTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
         ]);
         $queries->method('getSubmittyUser')->willReturn($user);
         $core->method('getConfig')->willReturn($config);
@@ -116,6 +118,8 @@ class PamAuthenticationTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
         ]);
         $queries->method('getSubmittyUser')->willReturn($user);
         $core->method('getConfig')->willReturn($config);

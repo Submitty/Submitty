@@ -182,10 +182,10 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
-pip3 install -r ${CURRENT_DIR}/.setup/pip/system_requirements.txt
+pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
 if [ ${VAGRANT} == 1 ]; then
-    pip3 install -r ${CURRENT_DIR}/.setup/pip/vagrant_requirements.txt
+    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
 #################################################################
@@ -629,7 +629,8 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
+25
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi

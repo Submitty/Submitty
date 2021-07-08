@@ -1,0 +1,90 @@
+{# This is a data table #}
+<div class="content">
+    <header>
+        <h1>Student Activity Dashboard</h1>
+        
+                            
+        <div class="btn-wrapper">
+          <a href="{{download_link}}" class="btn btn-primary">Download as CSV</a>
+        </div>
+    </header>
+    <p id="in-page-doc">
+        Click on the column headings below to sort the student data in ascending or descending order.<br>
+        To filter students by recent activity in specific categories, enter date(s) or values and press "Apply".<br>
+        Students highlighted in red do not have the specified recent or minimum levels of activity in one or more categories.
+    </p>
+    <div id="data" data-original="{{data|json_encode}}" hidden></div>
+    <div id="container">
+        <div class="line">
+            <label for="gradeable_access_date">Gradeable Access Date</label>
+            <input type="text" class="date_picker flatpickr-input active" id="gradeable_access_date">
+        </div>
+        <div class="line">
+            <label for="gradeable_submission_date">Gradeable Submission Date</label>
+            <input type="text" class="date_picker flatpickr-input active" id="gradeable_submission_date">
+        </div>
+        <div class="line">
+            <label for="forum_view_date">Forum View Date</label>
+            <input type="text" class="date_picker flatpickr-input active" id="forum_view_date">
+        </div>
+        <div class="line">
+            <label for="forum_post_date">Forum Post Date</label>
+            <input type="text" class="date_picker flatpickr-input active" id="forum_post_date">
+        </div>
+        <div class="line">
+            <label for="num_poll_responses">Number of Poll Responses</label>
+            <input type="number" id="num_poll_responses">
+        </div>
+        <div class="line">
+            <label for="office_hours_queue_date">Office Hours Queue Date</label>
+            <input type="text" class="date_picker" id="office_hours_queue_date">
+        </div>
+
+        <div id="apply-btn" class="btn btn-primary">Apply</div> 
+        <div id="clear-btn" class="btn btn-primary">Clear</div>
+    </div>
+    <table id="data-table" class="table table-striped mobile-table directory-table sortable">
+        <thead>
+            <tr>
+                <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
+                <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
+                <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
+                <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
+                <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
+                <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
+                <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
+                <td id="10"  style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+            </tr>
+        </thead>
+    
+        <tbody id="tbody">
+        {% for row in data %}
+            <tr id="{{row.user_id}}">
+                <td>{{row.registration_section}}</td>
+                <td class='align-left'>{{row.user_id}}</td>
+                <td class='align-left'>{{row.user_firstname}}</td>
+                <td class='align-left'>{{row.user_lastname}}</td>
+                <td>{{row.gradeable_submission}}</td>
+                <td>{{row.forum_view}}</td>
+                <td>{{row.forum_post}}</td>
+                <td>{{row.gradeable_access}}</td>
+                <td>{{row.num_poll_responses}}</td>
+                <td>{{row.office_hours_queue}}</td>
+                <td style="display: none;">False</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        flatpickr('.date_picker', {
+            allowInput: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
+    </script>
+</div>

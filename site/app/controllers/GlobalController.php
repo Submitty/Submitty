@@ -185,6 +185,13 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getUser()->accessAdmin()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['email_status']),
+                "title" => "Email Status",
+                "icon" => "fa-envelope"
+            ]);
+        }
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [
@@ -254,6 +261,16 @@ class GlobalController extends AbstractController {
                 "title" => "Student Photos",
                 "id" => "nav-sidebar-photos",
                 "icon" => "fa-id-card"
+            ]);
+        }
+
+        if ($this->core->getUser()->accessAdmin()) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['activity']),
+                "title" => "Student Activity Dashboard",
+                "class" => "nav-row",
+                "id" => "nav-sizebar-activity-dashboard",
+                "icon" => "fa-table"
             ]);
         }
 
