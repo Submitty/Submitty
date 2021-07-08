@@ -235,8 +235,8 @@ jobs:
 
     e2e:
         needs:
-          - eslint
-          - php-lint-static
+          - js-lint
+          - php-lint
           - php-unit
           - python-lint
           - python-unit
