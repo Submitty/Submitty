@@ -1,4 +1,5 @@
 /* exported sendEmail */
+/* exported updateSuperuserEmailOptions */
 /* eslint no-undef: "off" */
 
 
