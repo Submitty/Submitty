@@ -1460,6 +1460,7 @@ HTML;
                 "is_ta_grading" => $gradeable->isTaGrading(),
                 "show_verify_all" => $show_verify_all,
                 "can_verify" => $can_verify,
+                "verifier_id" => '',
                 "grading_disabled" => $grading_disabled,
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,
