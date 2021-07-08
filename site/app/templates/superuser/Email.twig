@@ -13,19 +13,19 @@
             </div>
             <div style="display: inline-block">
                 <div class="option">
-                    <input type="checkbox" id="email-faculty" name="email-faculty" checked> Email all Superusers and Faculty </input>
+                    <input type="checkbox" id="email-faculty" name="email-faculty" checked> Email all Faculty and all Superusers </input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-instructor" name="email-instructor" checked> Email all Instructors of Non-Archived Courses</input>
+                    <input type="checkbox" id="email-instructor" name="email-instructor" onclick="updateSuperuserEmailOptions('instructor')" checked> Email all Instructors of Non-Archived Courses</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-full-access" name="email-full-access" checked> Email all Full Access Graders of Non-Archived Courses</input>
+                    <input type="checkbox" id="email-full-access" name="email-full-access" onclick="updateSuperuserEmailOptions('full-access')" checked> Email all Full Access Graders of Non-Archived Courses</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-limited-access" name="email-limited-access" checked> Email all Limited Access Graders of Non-Archived Courses</input>
+                    <input type="checkbox" id="email-limited-access" name="email-limited-access" onclick="updateSuperuserEmailOptions('limited-access')" checked> Email all Limited Access Graders of Non-Archived Courses</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-student" name="email-student" checked> Email all Students in Non-Archived Courses </input>
+                    <input type="checkbox" id="email-student" name="email-student" onclick="updateSuperuserEmailOptions('student')" checked> Email all Students in Non-Archived Courses </input>
                 </div>
             </div>
         </div>
@@ -35,14 +35,14 @@
             </div>
             <div style="display: inline-block">
                 <div class="option">
-                    <input type="checkbox" id="email-to-secondary" name="email-to-secondary"> Force send to secondary email</input>
+                    <input type="checkbox" id="email-to-secondary" name="email-to-secondary"> Send email to each user's primary and secondary email addresses, regardless of the user's notification selection</input>
                 </div>
             </div>
         </div>
-        <label for="email-subject"> Subject of your email:</label>
+        <label for="email-subject"> Subject:</label>
         <br>
         <textarea type="text" id="email-subject" class="email-subject custom-scrollbar" style="width:100%;"></textarea>
-        <label for="email-content"> Content of your email:</label>
+        <label for="email-content"> Body:</label>
         <br>
         <textarea type="text" id="email-content" class="email-content custom-scrollbar" style="width:100%;"></textarea>
     </form>
