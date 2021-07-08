@@ -1696,20 +1696,20 @@ class ElectronicGraderController extends AbstractController {
         }
         //send ta score information
         $response_data['ta_grading_total'] = $gradeable->getTaPoints();
-            if ($gradeable->hasPeerComponent()) {
-                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
-                $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalPeerScore($grading_done_by);
-                $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($this->core->getUser());
-                $response_data['peer_total'] = $gradeable->getPeerPoints();
-                $response_data['user_group'] = $this->core->getUser()->getGroup();
-                $response_data['peer_gradeable'] = true;
-                $response_data['combined_peer_score'] = $combined_peer_score;
-            }
-            else {
-                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
-                $response_data['user_group'] = $this->core->getUser()->getGroup();
-                $response_data['peer_gradeable'] = false;
-            }
+        if ($gradeable->hasPeerComponent()) {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
+            $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalPeerScore($grading_done_by);
+            $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($this->core->getUser());
+            $response_data['peer_total'] = $gradeable->getPeerPoints();
+            $response_data['user_group'] = $this->core->getUser()->getGroup();
+            $response_data['peer_gradeable'] = true;
+            $response_data['combined_peer_score'] = $combined_peer_score;
+        }
+        else {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
+            $response_data['user_group'] = $this->core->getUser()->getGroup();
+            $response_data['peer_gradeable'] = false;
+        }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
 
