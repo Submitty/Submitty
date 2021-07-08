@@ -1,4 +1,4 @@
-<div class="notebook">
+<div class="notebook" id="notebook-main-view">
     <script>
         const USER_ID = "{{student_id}}";
     </script>
@@ -15,7 +15,9 @@
             {% if cell.type == "markdown" %}
 
                 {# Render markdown #}
-                {{ cell.markdown_data | markdown }}
+                {% include "misc/Markdown.twig" with {
+                    "content" : cell.markdown_data
+                } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
             {# Handle if cell is image #}
@@ -42,14 +44,17 @@
             {# Handle if cell is short_answer #}
             {% elseif cell.type == "short_answer" %}
 
-                <div class="markdown">
-                    {% if cell.label %}
-                        {{ cell.label | markdown }}
-                    {% else %}
-                        {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
-                        Write your {{ write_your }} below:
-                    {% endif %}
-                </div>
+
+                {% if cell.label %}
+                    {% set content_label = cell.label %}
+                {% else %}
+                    {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                    {% set content_label = "Write your " ~ write_your ~ " below:" %}
+                {% endif %}
+
+                {% include "misc/Markdown.twig" with {
+                    "content" : content_label
+                } only %}
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
@@ -68,7 +73,11 @@
                 <script>
                     const config_{{ num_codeboxes }} = {};
 
-                    config_{{ num_codeboxes }}.theme = 'eclipse';
+                    var theme = localStorage.getItem("theme");
+                    if(theme == null && window.matchMedia("(prefers-color-scheme: dark)").matches){
+                        theme = "dark";
+                    }
+                    config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
 
                     if ('{{ cell.programming_language }}') {
                         config_{{ num_codeboxes }}.lineNumbers = true;
@@ -112,9 +121,11 @@
                           class="mc"
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
-                        <legend class="markdown">
+                        <legend>
                             {% if cell.label %}
-                                {{ cell.label | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.label
+                                } only %}
                             {% else %}
                                 You may select many:
                             {% endif %}
@@ -123,7 +134,7 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
 
                                 <input type="checkbox" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
@@ -131,13 +142,17 @@
                                        value="{{ cell.choices[idx].value }}"
                                        onclick="handle_input_keypress();"
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.choices[idx].description
+                                } only %}
                             </label>
                         {% endfor %}
                     {% else %}
                         <legend class="markdown">
                             {% if cell.label %}
-                                {{ cell.label | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.label
+                                } only %}
                             {% else %}
                                 Select one:
                             {% endif %}
@@ -146,14 +161,16 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                 <input type="radio" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
                                        onclick="handle_input_keypress();"
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.choices[idx].description
+                                } only %}
                             </label>
                         {% endfor %}
                     {% endif %}
@@ -184,7 +201,34 @@
             {% elseif cell.type == "file_submission" %}
                 {% set num_file_submissions = num_file_submissions + 1 %}
 
-                {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
+                {% if is_grader_view | default(null) %}
+                    {% if old_files is empty %}
+                        <p>No files were submitted</p>
+                    {% endif %}
+                {% else %}
+                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
+                {% endif  %}
+                {% if old_files is not empty %}
+                    <p>Current submitted files:</p>
+                    {% for file in old_files %}
+                        {% set id = 'nd' ~ num_file_submissions ~ 'f' ~ loop.index %}
+                        {% if file.part == num_file_submissions %}
+                            <div>
+                                <div class="file-viewer">
+                                    <a class='openAllFilesubmissions openable-element-submissions key_to_click' file-url="{{ file.path|url_encode }}" onclick='openFrame({% if is_grader_view %}"{{ file.name|e('js') }}", "{{ file.path|e('js') }}", "{{ id }}", false{% else %}"{{ file.path|e('js') }}", "{{ id }}", "{{ file.name|e('js') }}", true{% endif %}); {% if is_grader_view %}updateCookies();{% endif %}'>
+                                        <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
+                                        {{ file.name }}</a> &nbsp;
+                                    <a id = 'open_file_{{ file.name|url_encode }}' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                                    {% if is_grader_view %}
+                                    <a onclick='viewFileFullPanel("{{ file.name|e('js') }}", "{{ file.path|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
+                                    {% endif %}
+                                    <a onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+                                </div>
+                                <div id="file_viewer_{{ id }}" style="margin-left: -15px" data-file_name="{{ file.name }}" data-file_url="{{ file.path }}"></div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
 
                 <button type="button" class="btn btn-primary 
                     sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"> 

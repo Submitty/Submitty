@@ -47,6 +47,13 @@ MARK_ID_COUNTER = 0;
 EDIT_MODE_ENABLED = false;
 
 /**
+ * True if a TA is grading a Peer assignment
+ * this allows differentiation between what peers and TA's are allowed to
+ * do with the rubric for a peer assignment
+ */
+TA_GRADING_PEER = false;
+
+/**
  * Count directions for components
  * @type {int}
  */
@@ -834,6 +841,10 @@ function getPointPrecision() {
     return parseFloat($('#point_precision_id').val());
 }
 
+function getAllowCustomMarks() {
+    return $('#allow_custom_marks').attr('data-gradeable_custom_marks');
+}
+
 /**
  * Used to determine if the mark list should be displayed in 'edit' mode
  *  @return {boolean}
@@ -1267,7 +1278,8 @@ function getGradedComponentFromDOM(component_id) {
         graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
-        verifier_id: dataDOMElement.attr('data-verifier_id')
+        verifier_id: dataDOMElement.attr('data-verifier_id'),
+        custom_mark_enabled: CUSTOM_MARK_ID,
     };
 }
 
@@ -1375,11 +1387,20 @@ function getOverallCommentFromDOM(user) {
  * Gets the ids of all open components
  * @return {Array}
  */
-function getOpenComponentIds() {
+function getOpenComponentIds(itempool_only=false) {
     let component_ids = [];
-    $('.ta-rubric-table:visible').each(function () {
-        component_ids.push(parseInt($(this).attr('data-component_id')));
-    });
+    if(itempool_only) {
+        $('.ta-rubric-table:visible').each(function () {
+            let component = $('#component-' + $(this).attr('data-component_id'));
+            if(component && component.attr('data-itempool_id')) {
+                component_ids.push(parseInt($(this).attr('data-component_id')));
+            }
+        });
+    } else {
+        $('.ta-rubric-table:visible').each(function () {
+            component_ids.push(parseInt($(this).attr('data-component_id')));
+        });
+    }
     return component_ids;
 }
 
@@ -1427,8 +1448,8 @@ function getPrevComponentId(component_id) {
  * Gets the first open component on the page
  * @return {int}
  */
-function getFirstOpenComponentId() {
-    let component_ids = getOpenComponentIds();
+function getFirstOpenComponentId(itempool_only=false) {
+    let component_ids = getOpenComponentIds(itempool_only);
     if (component_ids.length === 0) {
         return NO_COMPONENT_ID;
     }
@@ -1833,30 +1854,30 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-  const component_id = getComponentIdFromDOMElement(me);
-  const gradeable_id = getGradeableId();
-  const anon_id = getAnonId();
-  ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
-    // If there is any changes made in comment of a component , prompt the TA
-    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
-      if(confirm( "Are you sure you want to discard all changes to the student message?")){
-        toggleComponent(component_id, false)
-          .catch(function (err) {
-            console.error(err);
-            alert('Error closing component! ' + err.message);
-          });
-      }
-    }
-    // There is no change in comment, i.e it is same as the saved comment (before)
-    else {
-      toggleComponent(component_id, false)
-        .catch(function (err) {
-          console.error(err);
-          alert('Error closing component! ' + err.message);
-        });
-    }
-  });
-
+    const component_id = getComponentIdFromDOMElement(me);
+    const gradeable_id = getGradeableId();
+    const anon_id = getAnonId();
+    ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component) => {
+        const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
+        // If there is any changes made in comment of a component , prompt the TA
+        if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
+            if (confirm('Are you sure you want to discard all changes to the student message?')){
+                toggleComponent(component_id, false)
+                    .catch((err) => {
+                        console.error(err);
+                        alert(`Error closing component! ${err.message}`);
+                    });
+            }
+        }
+        // There is no change in comment, i.e it is same as the saved comment (before)
+        else {
+            toggleComponent(component_id, false)
+                .catch((err) => {
+                    console.error(err);
+                    alert(`Error closing component! ${err.message}`);
+                });
+        }
+    });
 }
 
 function onCancelEditRubricComponent(me) {
@@ -2065,7 +2086,7 @@ function onClickCountDown(me) {
  */
 function onComponentPointsChange(me) {
     if (dividesEvenly($(me).val(), getPointPrecision())) {
-        $(me).css("background-color", "#ffffff");
+        $(me).css("background-color", "var(--standard-input-background)");
         refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
             .catch(function (err) {
                 console.error(err);
@@ -2257,6 +2278,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
  * @return {Promise}
  */
 function reloadPeerRubric(gradeable_id, anon_id) {
+    TA_GRADING_PEER = true;
     let gradeable_tmp = null;
     return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
@@ -2400,10 +2422,37 @@ function toggleComponent(component_id, saveChanges) {
 }
 
 function open_overall_comment_tab(user) {
+    const textarea = $(`#overall-comment-${user}`);
+    const content = textarea.html();
+
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    $('#overall-comment-' + user ).show();
+    textarea.parent().show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
+
+    //if the tab is for the main user of the page
+    if(!textarea.hasClass('markdown-preview')){
+        if($(`#overall-comment-markdown-preview-${user}`).is(':hidden')){
+            textarea.show();
+        }
+    } else {
+        textarea.show();
+    }
+
+    //if it is someone not the current user's comment and it hasn't been rendered yet
+    if(textarea.hasClass('markdown-preview') && !textarea.find('.markdown').length){
+        const url = buildCourseUrl(['markdown', 'preview']);
+        renderMarkdown($(`#overall-comment-${user}`), url, content);
+    }
+}
+
+function previewOverallCommentMarkdown(user){
+    const markdown_area = $(`#overall-comment-${user}`);
+    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
+    const preview_button = $(this);
+    const markdown_content = markdown_area.val();
+
+    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**
@@ -2929,7 +2978,9 @@ function saveComponent(component_id) {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         let gradedComponent = getGradedComponentFromDOM(component_id);
-        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+        //only show error if custom marks are allowed
+        if (gradedComponent.custom_mark_enabled && gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected && getAllowCustomMarks()) {
+
             if (!confirm("Are you sure you want to delete the custom mark?")) {
                 return Promise.reject();
             }
@@ -3125,7 +3176,8 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
+    student_grader = $("#student-grader").attr("is-student-grader"); 
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks())
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })

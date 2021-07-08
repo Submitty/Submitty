@@ -1,0 +1,8 @@
+#toolbox-textarea {
+    width: 100%;
+    height: 300px;
+}
+
+#query-results {
+    overflow-x: auto;
+}

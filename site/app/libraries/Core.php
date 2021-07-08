@@ -11,6 +11,8 @@ use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -30,6 +32,12 @@ class Core {
 
     /** @var AbstractDatabase */
     private $course_db = null;
+
+    /** @var EntityManager */
+    private $submitty_entity_manager;
+
+    /** @var EntityManager */
+    private $course_entity_manager;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -114,8 +122,8 @@ class Core {
      *
      * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
      * @throws \Exception
      */
     public function loadCourseConfig($semester, $course) {
@@ -162,6 +170,22 @@ class Core {
         $this->session_manager = $manager;
     }
 
+    private function createEntityManager(AbstractDatabase $database): EntityManager {
+        $config = Setup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
+            null,
+            null,
+            false
+        );
+
+        $conn = [
+            'driver' => 'pdo_pgsql',
+            'pdo' => $database->getConnection(),
+        ];
+        return EntityManager::create($conn, $config);
+    }
+
     /**
      * Create a connection to the database using the details loaded from the config files. Additionally, we make
      * available queries that all parts of the application should go through. It should never be allowed to directly
@@ -170,7 +194,7 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadMasterDatabase() {
+    public function loadMasterDatabase(): void {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
@@ -181,15 +205,38 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
     }
 
-    public function loadCourseDatabase() {
-        if ($this->config->isCourseLoaded()) {
-            $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
-            $this->course_db->connect();
+    public function setMasterDatabase(AbstractDatabase $database): void {
+        $this->submitty_db = $database;
+    }
 
-            $this->database_queries = $this->database_factory->getQueries($this);
+    public function getSubmittyEntityManager(): EntityManager {
+        return $this->submitty_entity_manager;
+    }
+
+    public function loadCourseDatabase(): void {
+        if (!$this->config->isCourseLoaded()) {
+            return;
         }
+        $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
+        $this->course_db->connect();
+
+        $this->setQueries($this->database_factory->getQueries($this));
+        $this->course_entity_manager = $this->createEntityManager($this->course_db);
+    }
+
+    public function setCourseDatabase(AbstractDatabase $database): void {
+        $this->course_db = $database;
+    }
+
+    public function setCourseEntityManager(EntityManager $entity_manager): void {
+        $this->course_entity_manager = $entity_manager;
+    }
+
+    public function getCourseEntityManager(): EntityManager {
+        return $this->course_entity_manager;
     }
 
     public function loadForum() {
@@ -197,7 +244,7 @@ class Core {
             throw new \Exception("Need to load the config before we can create a forum instance.");
         }
 
-        $this->forum = new Forum($this);
+        //$this->forum = new Forum($this);
     }
 
     /**
@@ -526,8 +573,8 @@ class Core {
     }
 
     /**
-     * @param     $url
-     * @param int $status_code
+     * @param string $url
+     * @param int $http_response_code
      */
     public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {

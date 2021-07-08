@@ -66,6 +66,13 @@ abstract class AbstractDatabase {
 
     abstract public function getDSN();
 
+    public function getConnection(): \PDO {
+        if ($this->link === null) {
+            throw new DatabaseException("Database not yet connected");
+        }
+        return $this->link;
+    }
+
     /**
      * Given a string representation of an array from the database, convert it to a PHP
      * array.
@@ -156,17 +163,15 @@ abstract class AbstractDatabase {
             $this->all_queries[] = [$query, $parameters];
             $statement = $this->link->prepare($query);
             $result = $statement->execute($parameters);
-            $lower = trim(strtolower($query));
 
             $this->row_count = null;
+            $identity = QueryIdentifier::identify($query);
             if (
-                Utils::startsWith($lower, 'update')
-                || Utils::startsWith($lower, 'delete')
-                || Utils::startsWith($lower, 'insert')
+                in_array($identity, [QueryIdentifier::UPDATE, QueryIdentifier::DELETE, QueryIdentifier::INSERT])
             ) {
                 $this->row_count = $statement->rowCount();
             }
-            elseif (Utils::startsWith($lower, 'select')) {
+            elseif ($identity === QueryIdentifier::SELECT) {
                 $columns = $this->getColumnData($statement);
                 $this->results = $statement->fetchAll(\PDO::FETCH_ASSOC);
                 // Under normal circumstances, we don't really need to worry about $this->results being false.

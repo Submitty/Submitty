@@ -16,7 +16,6 @@ public/js/notebook_builder/widgets/multiple-choice-widget.js
 public/js/notebook_builder/widgets/selector-widget.js
 public/js/notebook_builder/widgets/short-answer-widget.js
 public/js/notebook_builder/widgets/widget.js
-public/js/pdf/PDFAnnotate.js
 public/js/pdf/PDFInitToolbar.js
 public/js/plagiarism.js
 public/js/rainbow-customization.js

@@ -374,99 +374,6 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 
 }
 
-function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
-    $('.popup-form').css('display', 'none');
-    var form = $("#delete-plagiarism-result-and-config-form");
-    $('[name="gradeable_title"]', form).html('');
-    $('[name="gradeable_title"]', form).append(gradeable_title);
-    $('[name="delete"]', form).attr('action', form_action);
-    form.css("display", "block");
-    form.find('.form-body').scrollTop(0);
-    captureTabInModal("delete-plagiarism-result-and-config-form");
-}
-
-function addMorePriorTermGradeable(prior_term_gradeables) {
-    const form = $("#save-configuration-form");
-    const prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
-    let to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
-    $.each(prior_term_gradeables, function(sem,courses_gradeables){
-        to_append += '<option value="'+ sem +'">'+ sem +'</option>';
-    });
-    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
-    $('#prev_gradeable_div', form).append(to_append);
-    $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
-    $("select", form).change(function(){
-        const select_element_name = $(this).attr("name");
-        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
-    });
-}
-
-function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#save-configuration-form");
-    if(select_element_name == "language") {
-
-        //
-        // Following code is used to set default window size for different languages
-        // that will appear in 'configureNewGradeableForPlagiarismForm'
-        // to change the default values, just change the val attribute for the language.
-        //
-
-        if ($('[name="language"]', form).val() == "python") {
-            $('[name="sequence_length"]', form).val('1');
-        }
-        else if ($('[name="language"]', form).val() == "cpp") {
-            $('[name="sequence_length"]', form).val('2');
-        }
-        else if ($('[name="language"]', form).val() == "java") {
-            $('[name="sequence_length"]', form).val('3');
-        }
-        else if ($('[name="language"]', form).val() == "plaintext") {
-            $('[name="sequence_length"]', form).val('4');
-        }
-        else if ($('[name="language"]', form).val() == "mips") {
-            $('[name="sequence_length"]', form).val('5');
-        }
-    }
-    else if(select_element_name.substring(0, 9) == "prev_sem_") {
-        var i = select_element_name.substring(9);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_sem != '') {
-            var append_options = '';
-            $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });
-                }
-            });
-            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    }
-    else if(select_element_name.substring(0, 12) == "prev_course_") {
-        var i = select_element_name.substring(12);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-        var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
-        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_course != '') {
-            var append_options = '';
-            $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        if(selected_course == course) {
-                            $.each(gradeables, function (index, gradeable) {
-                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });
-                        }
-                    });
-                }
-            });
-            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    }
-}
-
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
@@ -533,7 +440,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -543,7 +450,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -551,7 +458,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -559,7 +466,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -568,17 +475,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -601,241 +508,6 @@ function downloadCSV(code) {
     $('#downloadlink')[0].click();
     $('#downloadlink').remove();
 }
-
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, 
-    pending_members, multiple_invite_members, max_members, lock_date) {
-    $('.popup-form').css('display', 'none');
-    var form = $("#admin-team-form");
-    form.css("display", "block");
-    captureTabInModal("admin-team-form");
-
-    form.find('.form-body').scrollTop(0);
-    $("#admin-team-form-submit").prop('disabled',false);
-    $('[name="new_team"]', form).val(new_team);
-    $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
-    $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
-    if(new_team) {
-        $('[name="num_users"]', form).val(3);
-    }
-    else if (!new_team) {
-        $('[name="num_users"]', form).val(members.length+pending_members.length+2);
-    }
-
-    var title_div = $("#admin-team-title");
-    title_div.empty();
-    var members_div = $("#admin-team-members");
-    members_div.empty();
-    var team_history_title_div = $("#admin-team-history-title");
-    team_history_title_div.empty();
-    var team_history_div_left = $("#admin-team-history-left");
-    team_history_div_left.empty();
-    var team_history_div_right = $("#admin-team-history-right");
-    team_history_div_right.empty();
-    var team_history_div_bottom = $('#admin-team-history-bottom');
-    team_history_div_bottom.empty();
-    members_div.append('Team Member IDs:<br />');
-    var student_full = JSON.parse($('#student_full_id').val());
-    let exists_multiple_invite_member = false;
-    if (new_team) {
-        $('[name="new_team_user_id"]', form).val(who_id);
-        $('[name="edit_team_team_id"]', form).val("");
-
-        title_div.append('Create New Team: ' + who_id);
-        members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
-        for (var i = 1; i < 3; i++) {
-            members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
-            $('[name="user_id_'+i+'"]', form).autocomplete({
-                source: student_full
-            });
-            $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
-        }
-        members_div.find('[name="reg_section"]').val(reg_section);
-        members_div.find('[name="rot_section"]').val(rot_section);
-    }
-    else {
-        $('[name="new_team_user_id"]', form).val("");
-        $('[name="edit_team_team_id"]', form).val(who_id);
-
-        title_div.append('Edit Team: ' + who_id);
-        for (var i = 0; i < members.length; i++) {
-            members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <input id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
-        }
-        for (var i = members.length; i < members.length+pending_members.length; i++) {
-            if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
-            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
-                name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
-                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
-        }
-        for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
-            members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
-            $('[name="user_id_'+i+'"]', form).autocomplete({
-                source: student_full
-            });
-            $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
-        }
-        if (user_assignment_setting_json != false) {
-            var team_history_len=user_assignment_setting_json.team_history.length;
-            team_history_title_div.append('Team History: ');
-            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_left" readonly="readonly" value="Team formed on: " /><br />');
-            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
-            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;margin-bottom:3mm;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
-            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;margin-bottom:3mm;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
-            let past_lock_date = false;
-            let style_string = "width:100%;";
-            for (var j = 0; j <=team_history_len-1; j++) {
-                let curr_json_entry = user_assignment_setting_json.team_history[j];
-                if (!past_lock_date && curr_json_entry.time > lock_date) {
-                    past_lock_date = true;
-                    style_string += "background-color:var(--alert-invalid-entry-pink);";
-                }
-                if(curr_json_entry.action == "admin_create" && curr_json_entry.first_user != undefined) {
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' created team on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' added '+ curr_json_entry.first_user +' on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                } else if(curr_json_entry.action == "admin_create" || curr_json_entry.action == "admin_add_user"){
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' added '+ curr_json_entry.added_user +' on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                } else if (user_assignment_setting_json.team_history[j].action == "create") {
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.user + ' created team on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                } else if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.admin_user + ' removed '+ curr_json_entry.removed_user +' on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                }
-                else if (user_assignment_setting_json.team_history[j].action == "leave") {
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.user + ' left on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                }
-                else if (user_assignment_setting_json.team_history[j].action == "send_invitation") {
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" readonly="readonly" value="'+ curr_json_entry.sent_by_user + ' invited '+ curr_json_entry.sent_to_user +' on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                }
-                else if (user_assignment_setting_json.team_history[j].action == "accept_invitation") {
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.user + ' accepted invite on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                }
-                else if (user_assignment_setting_json.team_history[j].action == "cancel_invitation") {
-                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.canceled_by_user + ' uninvited '+ curr_json_entry.canceled_user +' on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
-                }
-            }
-            if (past_lock_date) {
-                team_history_div_bottom.append('*History items highlighted in red were performed after team lock date.');
-            }
-        }
-    }
-
-    $(":text",form).change(function() {
-        var found = false;
-        for (var i = 0; i < student_full.length; i++) {
-            if (student_full[i]['value'] == $(this).val()) {
-                found = true;
-                break;
-            }
-        }
-        if (found || $(this).val() == '') {
-            $(this)[0].setCustomValidity('');
-        }
-        else {
-            $(this)[0].setCustomValidity("Invalid user_id");
-        }
-
-        var invalid_entry = false;
-        $(":text",form).each( function() {
-            if (!this.checkValidity())  {
-                invalid_entry = true;
-            }
-        });
-        if (invalid_entry) {
-            $("#admin-team-form-submit").prop('disabled',true);
-        }
-        else {
-            $("#admin-team-form-submit").prop('disabled',false);
-        }
-    });
-    var param = (new_team ? 3 : members.length+2);
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</span>');
-    if (exists_multiple_invite_member) {
-        members_div.append('<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:75%">\
-        *Pending members highlighted in red have invites to multiple teams.');
-    }
-}
-
-function removeTeamMemberInput(i) {
-    var form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
-    $("#remove_member_"+i).remove();
-    var student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
-        source: student_full
-    });
-}
-
-function approveTeamMemberInput(old, i) {
-    var form = $("#admin-team-form");
-    $("#approve_member_"+i).remove();
-    $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
-    $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
-    let user_id = ($('[name="user_id_'+i+'"]', form).val()).substring(9);
-    $('[name="user_id_'+i+'"]', form).attr("value", user_id);
-    var student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
-        source: student_full
-    });
-}
-
-function addTeamMemberInput(old, i) {
-    old.remove()
-    $('#multiple-invites-warning').remove();
-    var form = $("#admin-team-form");
-    $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
-    var members_div = $("#admin-team-members");
-    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</span>');
-    var student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
-        source: student_full
-    });
-}
-
-function addCategory(old, i) {
-    old.remove()
-    var form = $("#admin-team-form");
-    $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
-    var members_div = $("#admin-team-members");
-    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</span>');
-    var student_full = JSON.parse($('#student_full_id').val());
-    $('[name="user_id_'+i+'"]', form).autocomplete({
-        source: student_full
-    });
-}
-
-function importTeamForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#import-team-form");
-    form.css("display", "block");
-    captureTabInModal("import-team-form");
-    form.find('.form-body').scrollTop(0);
-    $('[name="upload_team"]', form).val(null);
-}
-
-
-function randomizeRotatingGroupsButton() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#randomize-button-warning");
-    form.css("display", "block");
-    captureTabInModal("randomize-button-warning");
-    form.find('.form-body').scrollTop(0);
-}
-
 
 /**
  * Toggles the page details box of the page, showing or not showing various information
@@ -973,35 +645,6 @@ function check_server(url) {
     );
 }
 
-function checkRefreshLichenMainPage(url, semester, course) {
-    // refresh time for lichen main page
-    var refresh_time = 5000;
-    setTimeout(function() {
-        check_lichen_jobs(url, semester, course);
-    }, refresh_time);
-}
-
-function check_lichen_jobs(url, semester, course) {
-    $.get(url,
-        function(data) {
-            var last_data = localStorage.getItem("last_data");
-            if (data === "REFRESH_ME") {
-                last_data= "REFRESH_ME";
-                localStorage.setItem("last_data", last_data);
-                window.location.href = buildCourseUrl(['plagiarism']);
-            }
-            else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
-                last_data= "NO_REFRESH";
-                localStorage.setItem("last_data", last_data);
-                window.location.href = buildCourseUrl(['plagiarism']);
-            }
-            else {
-                checkRefreshLichenMainPage(url, semester, course);
-            }
-        }
-    );
-}
-
 function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
@@ -1132,10 +775,27 @@ function changeName(element, user, visible_username, anon){
     }
 }
 
-function openFrame(url, id, filename) {
+function openFrame(url, id, filename, ta_grading_interpret=false) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
         var iframeId = "file_viewer_" + id + "_iframe";
+        if(ta_grading_interpret) {
+            let display_file_url = buildCourseUrl(['display_file']);
+            let directory = "";
+            if (url.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url.includes("results_public")) {
+                directory = "results_public";
+            }
+            else if (url.includes("results")) {
+                directory = "results";
+            }
+            else if (url.includes("checkout")) {
+                directory = "checkout";
+            }
+            url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -1159,13 +819,56 @@ function openFrame(url, id, filename) {
     return false;
 }
 
-function resizeFrame(id) {
-    var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-    if (height > 500) {
-        document.getElementById(id).height= "500px";
+function resizeFrame(id, max_height = 500, force_height=-1) {
+    let img = undefined;
+    let visible = $("iframe#" + id).is(":visible");
+    img = $("iframe#" + id).contents().find("img");
+    if($("iframe#" + id).contents().find("html").length !== 0) {
+        $("iframe#" + id).contents().find("html").css("height", "inherit");
+        img = $("iframe#" + id).contents().find("img");
+        if(img.length !== 0) {
+            img.removeAttr("width");
+            img.removeAttr("height");
+            img.css("width", "");
+            img.css("height", "");
+            img.css("max-width", "100%");
+        }
+        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+    } else { //Handling issue with FireFox and jQuery not being able to access iframe contents for PDF reader
+        var height = max_height;
+    }
+    if (force_height != -1) {
+        document.getElementById(id).height = force_height + "px";
+    } else if (height >= max_height) {
+        document.getElementById(id).height= max_height + "px";
     }
     else {
         document.getElementById(id).height = (height+18) + "px";
+    }
+    //Workarounds for FireFox changing height/width of img sometime after this code runs
+    if(img.length !== 0) {
+        const observer = new ResizeObserver(function(mutationsList, observer) {
+            img.removeAttr("width");
+            img.removeAttr("height");
+            img.css("width", "");
+            img.css("height", "");
+            observer.disconnect();
+        })
+        observer.observe(img[0]);
+    }
+    if(!visible) {
+        const observer = new IntersectionObserver(function(entries, observer) {
+            if($("iframe#" + id).is(":visible")) {
+                $("iframe#" + id).removeAttr("height");
+                let iframeFunc = $("iframe#" + id)[0].contentWindow.iFrameInit;
+                if(typeof(iframeFunc) === "function") {
+                    iframeFunc();
+                }
+                observer.disconnect();
+                resizeFrame(id, max_height, force_height);
+            }
+        });
+        observer.observe($("iframe#" + id)[0]);
     }
 }
 
@@ -1264,7 +967,7 @@ function displaySuccessMessage(message) {
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
+    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
     $('#messages').fadeIn('slow');
     if (type === 'success') {
@@ -1327,21 +1030,18 @@ function updateGradeOverride(data) {
             try {
                 var json = JSON.parse(data);
             } catch(err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
             refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
             $('#comment').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overridden Grades for ' + json['data']['gradeable_id'] + '.</div>';
-            $('#messages').append(message);
+            displaySuccessMessage(`Updated overridden Grades for ${json['data']['gradeable_id']}`);
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1358,13 +1058,11 @@ function loadOverriddenGrades(g_id) {
             try {
                 var json = JSON.parse(data);
             } catch(err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
+                displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
+                displayErrorMessage(json['message']);
                 return;
             }
             refreshOnResponseOverriddenGrades(json);
@@ -1410,12 +1108,10 @@ function deleteOverriddenGrades(user_id, g_id) {
             success: function(data) {
                 var json = JSON.parse(data);
                 if(json['status'] === 'fail'){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                    $('#messages').append(message);
+                    displayErrorMessage(json['message']);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overridden Grades deleted .</div>';
-                $('#messages').append(message);
+                displaySuccessMessage('Overridden Grades deleted.');
                 refreshOnResponseOverriddenGrades(json);
             },
             error: function() {
@@ -1688,6 +1384,29 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
     })
 }
 
+function popOutSubmittedFile(html_file, url_file) {
+    var directory = "";
+    let display_file_url = buildCourseUrl(['display_file']);
+    if (url_file.includes("submissions")) {
+      directory = "submissions";
+      url_file = url_file;
+    }
+    else if (url_file.includes("results_public")) {
+      directory = "results_public";
+    }
+    else if (url_file.includes("results")) {
+      directory = "results";
+    }
+    else if (url_file.includes("checkout")) {
+      directory = "checkout";
+    }
+    else if (url_file.includes("split_pdf")) {
+      directory = "split_pdf";
+    }
+    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    return false;
+  }
+
 /**
  * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
  *
@@ -1779,4 +1498,105 @@ function flagUserImage(user_id, flag) {
 function getFocusableElements() {
     let focusable_elements = $(':focusable:tabbable');
     return Array.from(focusable_elements);
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
+ * @param preview_element JQuery element of the span the markdown will be inserted into
+ * @param preview_button JQuery element of the "Preview Markdown" button
+ *                       Should have title="Preview Markdown"
+ * @param data Object whose properties will get sent through a POST request
+ */
+function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
+    const enablePreview = preview_element.is(':hidden');
+
+    $.ajax({
+        url: buildCourseUrl(['markdown', 'preview']),
+        type: 'POST',
+        data: {
+            enablePreview: enablePreview,
+            ...data,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            if (enablePreview) {
+                preview_element.empty();
+                preview_element.append(data);
+                preview_element.show();
+                markdown_textarea.hide();
+
+                preview_button.empty();
+                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+
+            }
+            else {
+                preview_element.hide();
+                markdown_textarea.show();
+
+                preview_button.empty();
+                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param markdownContainer JQuery element of the textarea where the markdown should be rendered
+ * @param url url to send ajax request to
+ * @param content Text content of the unrendered markdown
+ */
+function renderMarkdown(markdownContainer, url, content) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            enablePreview: true,
+            content: content,
+            csrf_token: csrfToken
+        },
+        success: function(data){
+            markdownContainer.empty();
+            markdownContainer.append(data);
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
+        }
+    });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param type Number representing the type of markdown preset to insert
+ *             0: code
+ *             1: link
+ *             2: bold text
+ *             3: italic text
+ * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ */
+function addMarkdownCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[display text](url)";
+    }
+    else if(type == 0){
+        insert = "```" +
+            "\ncode\n```";
+    }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }

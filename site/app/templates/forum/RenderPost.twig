@@ -1,1 +1,1 @@
-{% if render_markdown %}{{ post_content | markdown }}{% else %}{{ post_content }}{% endif %}
+{% if render_markdown %}{% include "misc/Markdown.twig" with { content: post_content } only %}</span>{% else %}{{ post_content }}{% endif %}

@@ -100,7 +100,7 @@ class HomeworkView extends AbstractView {
 
         // Determine how many grading "parts" there are (e.g. peer grading, ta grading, autograding).
         $num_parts = 0;
-        if ($gradeable->isPeerGrading()) {
+        if ($gradeable->hasPeerComponent()) {
             $num_parts++;
         }
         if ($gradeable->isTaGrading()) {
@@ -140,7 +140,7 @@ class HomeworkView extends AbstractView {
         ) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
 
-            if ($gradeable->isPeerGrading()) {
+            if ($gradeable->hasPeerComponent()) {
                 $return .= $this->renderPeerResultsBox($graded_gradeable, $regrade_available);
             }
         }
@@ -330,6 +330,7 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
         }
+        $this->core->getOutput()->addInternalJs('submission-page.js');
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
@@ -367,7 +368,8 @@ class HomeworkView extends AbstractView {
                         $old_files[] = [
                             'name' => str_replace('\'', '\\\'', $file['name']),
                             'size' => number_format($file['size'] / 1024, 2),
-                            'part' => $i
+                            'part' => $i,
+                            'path' => $file['path']
                         ];
                     }
                 }
@@ -448,6 +450,7 @@ class HomeworkView extends AbstractView {
             'github_user_id' => $github_user_id,
             'github_repo_id' => $github_repo_id,
             'has_due_date' => $gradeable->hasDueDate(),
+            'is_timed' => $gradeable->hasAllowedTime(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
@@ -713,7 +716,7 @@ class HomeworkView extends AbstractView {
 
         foreach ($gradeable->getComponents() as $component) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 $peer_grading_earned += $container->getTotalScore();
             }
             else {
@@ -787,7 +790,7 @@ class HomeworkView extends AbstractView {
                 'ta_grading_earned' => $ta_grading_earned,
                 'ta_grading_max' => $ta_grading_max,
                 // Peer Grading Information
-                'has_peer_grading' => $gradeable->isPeerGrading() && ($peer_grading_max > 0 || $peer_grading_earned > 0),
+                'has_peer_grading' => $gradeable->hasPeerComponent() && ($peer_grading_max > 0 || $peer_grading_earned > 0),
                 'peer_grading_complete' => $peer_grading_complete,
                 'peer_grading_earned' => $peer_grading_earned,
                 'peer_grading_max' => $peer_grading_max,
@@ -970,7 +973,7 @@ class HomeworkView extends AbstractView {
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
-            if ($graded_gradeable->hasTaGradingInfo()) {
+            if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
                 $active_same_as_graded = $graded_gradeable->getTaGradedGradeable()->getGradedVersion() === $active_version_number;
             }
         }
@@ -1003,8 +1006,10 @@ class HomeworkView extends AbstractView {
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
+            'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
-            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds')
+            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
+            'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow()
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
