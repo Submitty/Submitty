@@ -322,7 +322,7 @@ class HomeworkView extends AbstractView {
                         $notebook,
                         $this->core->getUser()->getId(),
                         $version_instance->getVersion() ?? null,
-                        $graded_gradeable->getGradeableId(),
+                        $graded_gradeable->getGradeableId()
                     );
                 }
             }
@@ -333,7 +333,7 @@ class HomeworkView extends AbstractView {
                         $notebook,
                         $this->core->getUser()->getId(),
                         0,
-                        $graded_gradeable->getGradeableId(),
+                        $graded_gradeable->getGradeableId()
                     );
                 }
             }

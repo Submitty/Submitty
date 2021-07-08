@@ -443,27 +443,3 @@ parameters:
 			count: 1
 			path: app/views/AutoGradingView.php
 
-		-
-			message: "#^Variable \\$row might not be defined\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$next_id$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$prev_id$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
