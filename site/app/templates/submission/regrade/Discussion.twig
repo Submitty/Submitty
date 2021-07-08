@@ -55,7 +55,7 @@
                         <input type="hidden" id="gc_id" name="gc_id" value="{{ component.id }}">
                         {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status == 0 %}
                             {% set text_area_label_text = 'Write an inquiry:' %}
-                        {% elseif grade_inquiries[component.id] == -1 %}
+                        {% elseif grade_inquiries[component.id].status == -1 %}
                             {% set text_area_label_text = 'Add comment to grade inquiry:' %}
                         {% endif %}
                         <label for="reply-text-area">{{ text_area_label_text }}</label>
