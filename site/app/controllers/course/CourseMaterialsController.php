@@ -192,7 +192,7 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
 
-    public function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
+    private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
         foreach ($course_materials as $course_material) {
             if (
                 str_starts_with($course_material->getPath(), $main_course_material->getPath())

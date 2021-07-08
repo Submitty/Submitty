@@ -163,13 +163,24 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         }
 
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(4))
+            ->expects($this->exactly(8))
             ->method('persist')
             ->withConsecutive([$course_materials[0]], [$course_materials[1]], [$course_materials[2]], [$course_materials[3]]);
 
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('flush');
+
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
+            ->expects($this->exactly(14))
+            ->method('findOneBy')
+            ->willReturn(null);
+        $this->core->getCourseEntityManager()
+            ->expects($this->exactly(14))
+            ->method('getRepository')
+            ->with(CourseMaterial::class)
+            ->willReturn($repository);
 
         $controller = new CourseMaterialsController($this->core);
 
@@ -362,9 +373,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository = $this->createMock(EntityRepository::class);
         $repository
             ->expects($this->once())
-            ->method('findOneBy')
-            ->with(['path' => $this->upload_path . "/" . $name])
-            ->willReturn($course_material);
+            ->method('findAll')
+            ->willReturn([$course_material]);
         $this->core->getCourseEntityManager()
             ->expects($this->once())
             ->method('getRepository')
