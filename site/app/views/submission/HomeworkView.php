@@ -279,7 +279,7 @@ class HomeworkView extends AbstractView {
     }
 
     private function renderSubmitNotAllowedBox() {
-        return $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
+        $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
     }
 
     /**

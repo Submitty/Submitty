@@ -984,7 +984,7 @@ HTML;
                 $notebook,
                 $graded_gradeable->getSubmitter()->getId(),
                 $display_version,
-                $graded_gradeable->getGradeableId(),
+                $graded_gradeable->getGradeableId()
             );
 
             $old_files = [];
@@ -1089,8 +1089,6 @@ HTML;
      * @param GradedGradeable $graded_gradeable
      * @param float $progress
      * @param bool $peer
-     * @param string $prev_id
-     * @param string $next_id
      * @param string $sort
      * @param string $direction
      * @return string

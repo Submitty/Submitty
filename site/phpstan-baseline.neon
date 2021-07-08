@@ -442,3 +442,9 @@ parameters:
 			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns true\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
+
+		-
+
+			message: "#^Variable \\$row might not be defined\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
