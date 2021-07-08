@@ -918,11 +918,70 @@ HTML;
 
         $this->core->getOutput()->addInternalJs("resizable-panels.js");
 
+        $error_message = [
+            "color" => "",
+            "message" => ""
+        ];
+        if ($graded_gradeable->hasOverriddenGrades()) {
+            $error_message = [
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "message" => "Overridden grades"
+            ];
+        }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+            if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
+                $error_message = [
+                    "color" => "var(--standard-creamsicle-orange)", // mango orange
+                    "message" => "Cancelled Submission"
+                ];
+            }
+            else {
+                $error_message = [
+                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
+                    "message" => "No Submission"
+                ];
+            }
+        }
+        elseif ($rollbackSubmission != -1) {
+            $error_message = [
+                "color" => "var(--standard-creamsicle-orange)", // fire engine red
+                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
+            ];
+        }
+        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
+            $error_message = [
+                "color" => "var(--standard-red-orange)", // fire engine red
+                "message" => "Late Submission (No on time submission available)"
+            ];
+        }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
+
+            $pattern_match_flag = false;
+            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if ($pattern_match_flag == true) {
+                $error_message = [
+                    "message" => "Multiple files within submissions"
+                ];
+            }
+        }
+
         $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
         		    <div class="content-items-container">
                     <div class="content-item content-item-right">
 HTML;
+
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
@@ -932,7 +991,8 @@ HTML;
                 $isDiscussionPanel,
                 $isRegradePanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
-                $graded_gradeable
+                $error_message['color'],
+                $error_message['message']
             );
 
             $return .= <<<HTML
@@ -1031,60 +1091,6 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
 
-        if ($graded_gradeable->hasOverriddenGrades()) {
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "var(--standard-vibrant-yellow)", // canary yellow
-                "message" => "Overridden grades"
-            ]);
-        }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
-            if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "var(--standard-creamsicle-orange)", // mango orange
-                    "message" => "Cancelled Submission"
-                ]);
-            }
-            else {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
-                    "message" => "No Submission"
-                ]);
-            }
-        }
-        elseif ($rollbackSubmission != -1) {
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
-            ]);
-        }
-        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "var(--standard-red-orange)", // fire engine red
-                "message" => "Late Submission (No on time submission available)"
-            ]);
-        }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
-            $pattern1 = "upload.pdf";
-            $pattern2 = "/upload_page_\d+/";
-            $pattern3 = "/upload_version_\d+_page\d+/";
-            $pattern4 = ".submit.timestamp";
-            $pattern5 = "bulk_upload_data.json";
-
-            $pattern_match_flag = false;
-            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
-                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
-                    $pattern_match_flag = true;
-                }
-            }
-
-            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
-            if ($pattern_match_flag == true) {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
-                    "message" => "Multiple files within submissions"
-                ]);
-            }
-        }
-
         return $return . <<<HTML
                                              </div>
                                          </div>
@@ -1140,7 +1146,7 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
@@ -1148,6 +1154,8 @@ HTML;
             'isRegradePanel' => $isRegradePanel,
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
+            "error_color" => $error_color,
+            "error_message" => $error_message
         ]);
     }
 

@@ -2,8 +2,9 @@
     <div id="grading-panel-student-name">
         <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
-                    Team{% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}:<br/>
-                    {% for team_member in submitter.getTeam().getMemberUsers() %}
+                    {% set team_members = submitter.getTeam().getMemberUsers() %}
+                    Team {% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
+                    {% for team_member in team_members %}
                         &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
                     {% endfor %}
                 {% else %}
@@ -91,4 +92,21 @@
         </div>
     </div>
 </div>
+<script>
+    window.addEventListener('resize', function(event) {
+        const name_div = $('#grading-panel-student-name');
+        //have to calculate the height since the item is positioned absolutely
+        const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
+        const padding_bottom = 12;
+        name_div.css('height', height - padding_bottom);
+        name_div.show();
+        const panel_buttons_bbox = $('.panel-header-box')[0].getClientRects()[0];
+        const name_div_bbox = name_div[0].getClientRects()[0];
 
+        const overlap_margin = 15;
+        const overlapping = (toolbar_bbox.left - name_div_bbox.right) < overlap_margin;
+        if (overlapping) {
+            $('#grading-panel-student-name').hide()
+        }
+    });
+</script>

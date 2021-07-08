@@ -117,6 +117,12 @@
 
     </div>
 </div>
+{% if error_message != "" %}
+    {% include "grading/electronic/ErrorMessage.twig" with {
+            "color" : error_color,
+            "message" : error_message
+    } only %}
+{% endif %}
 
 {% macro renderPanelPositionSelector(panelId) %}
     <select class="panel-position-cont" id="{{ panelId }}_select" size="4">
