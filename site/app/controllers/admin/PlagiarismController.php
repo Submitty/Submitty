@@ -395,10 +395,13 @@ class PlagiarismController extends AbstractController {
 
 
         // Prior terms
-        /*
-        TODO: fix?
-        $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
+
         $prev_term_gradeables = [];
+        /*
+        TODO: fix? prior_term_gradeables_number is commented out on the frontend so $_POST['prior_term_gradeables_number'] is always unset / 0
+        See #6650 for where this variable was commented out
+
+        $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
         for ($i = 0; $i < $prev_gradeable_number; $i++) {
             if ($_POST['prev_sem_' . $i] != "" && $_POST['prev_course_' . $i] != "" && $_POST['prev_gradeable_' . $i] != "") {
                 array_push($prev_term_gradeables, FileUtils::joinPaths($course_path, $_POST['prev_sem_' . $i], $_POST['prev_course_' . $i], "submissions", $_POST['prev_gradeable_' . $i]));
