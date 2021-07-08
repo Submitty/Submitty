@@ -31,5 +31,5 @@ exclude=
 
 per-file-ignores =
     .github/workflows/pr_title_tester.py:E501,W605
-    sbin/submitty_daemon_jobs/submitty_jobs/jobs.py:E501,E222
+    sbin/submitty_daemon_jobs/submitty_jobs/jobs.py:E501
     autograder/autograder/autograding_utils.py:E501,F841
