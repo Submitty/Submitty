@@ -1107,6 +1107,7 @@ class ForumThreadView extends AbstractView {
             "userGroup" => $userGroup,
             "includeReply" => $includeReply,
             "thread_resolve_state" => $thread_resolve_state,
+            "show_unresolve" => false,
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
