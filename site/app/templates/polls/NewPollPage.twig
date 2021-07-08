@@ -5,6 +5,7 @@
         <form id="new-poll-form" method="post" action="{{base_url}}/newPoll" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
+            <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
             <label for="poll-name" class="option-title">
                 Poll Name:
@@ -12,7 +13,7 @@
             <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             <br/> <br/>
 
-            <p>Question:</p>
+            <p class="option-title">Question:</p>
             {% include "misc/MarkdownArea.twig" with {
                 "markdown_area_id" : "poll-question",
                 "markdown_area_query" : "$('#poll-question')",
@@ -22,8 +23,7 @@
                 "preview_div_id" : "poll_preview_new",
                 "preview_div_name" : "poll_preview_new",
                 "onclick" : "previewPollMarkdown.call(this)",
-                "render_buttons" : true,
-                "min_height" : min_height
+                "render_buttons" : true
             } only %}
             <br/><br/>
 
@@ -40,7 +40,7 @@
             <label for="poll-date" class="option-title">
                 Expected release date:
             </label>
-            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value=""/>
             <br/>
 
             <hr>
@@ -49,10 +49,9 @@
 
             </div>
             <br/>
-            <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
-            <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
+            <button type="button" class="btn btn-primary" onclick="addResponse()">+ Add Response</button>
             <br/> <br/>
-
+            <hr>
             <span id="empty-name-error" class="red-message polls-submit-error">Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
             <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
@@ -60,7 +59,9 @@
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
+            <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
             <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -70,6 +71,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
+            <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
             <label for="poll-name" class="option-title">
                 Poll Name:
@@ -77,7 +79,7 @@
             <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             <br/> <br/>
 
-            <p>Question:</p>
+            <p class="option-title">Question:</p>
             {% include "misc/MarkdownArea.twig" with {
                 "markdown_area_id" : "poll-question",
                 "markdown_area_query" : "$('#poll-question')",
@@ -85,8 +87,7 @@
                 "markdown_area_value" : poll.getQuestion(),
                 "preview_div_id" : "poll_preview_edit",
                 "onclick" : "previewPollMarkdown.call(this)",
-                "render_buttons" : true,
-                "min_height" : min_height
+                "render_buttons" : true
             } only %}
             <br/><br/>
 
@@ -141,18 +142,19 @@
                 {% endfor %}
             </div>
             <br/>
-            <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
-            <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
+            <button type="button" class="btn btn-primary" onclick="addResponse()">+ Add Response</button>
             <br/> <br/>
-
+            <hr>
             <span id="empty-name-error" class="red-message polls-submit-error" hidden>Please make sure poll name is filled in.<br/></span>
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
             <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+            <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
             <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
+            <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
@@ -173,14 +175,14 @@
     });
 
     function changePollType() {
-        let count = $(".poll_response").length;
+        let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
                 || $("#poll-type-multiple-response-survey").is(":checked")) {
-                $("input[name='is_correct_" + i + "']").prop('checked', true);
-                $("input[name='is_correct_" + i + "']").css({"display":"none"});
+                $($(".correct-box")[i]).prop('checked', true);
+                $($(".correct-box")[i]).css({"display":"none"});
             } else {
-                $("input[name='is_correct_" + i + "']").css({"display":"inline-block"});
+                $($(".correct-box")[i]).css({"display":"inline-block"});
             }
         }
     }
@@ -195,24 +197,28 @@
     };
 
     function addResponse() {
-        let count = $(".poll_response").length
-        let first_free_id = 0
-        while($(`.option_id[value="${first_free_id}"]`).length != 0){
-            first_free_id++;
+        let count = $(".option_id").length;
+        let first_free_id = 0;
+        let curr_max_id = -1;
+        for (let i = 0; i < $(".option_id").length; i++) {
+            if ( parseInt($($(".option_id")[i]).val()) > curr_max_id) {
+                curr_max_id = parseInt($($(".option_id")[i]).val());
+            }
         }
+        first_free_id = curr_max_id + 1;
         let hidden_style = "";
         let is_checked = "";
         if ($("#poll-type-single-response-survey").is(":checked")
             || $("#poll-type-multiple-response-survey").is(":checked")) {
-            hidden_style = "style='display:none'"
+            hidden_style = "style='display:none'";
             is_checked = "checked";
         }
         $("#responses").append(`
-            <div id="response_${count}_wrapper">
-                <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
-                <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
-                <input aria-label="Is correct" class="correct-box" type="checkbox" name="is_correct_${count}" ${hidden_style} ${is_checked}>
-                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+            <div id="response_${first_free_id}_wrapper">
+                <input type="hidden" class="order order-${count}" name="order_${first_free_id}" value="${count}"/>
+                <input type="hidden" class="option_id" name="option_id_${first_free_id}" value="${first_free_id}"/>
+                <input aria-label="Is correct" class="correct-box" type="checkbox" name="is_correct_${first_free_id}" ${hidden_style} ${is_checked}>
+                <textarea aria-label="Response text" class="poll_response" name="response_${first_free_id}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
                     <i class="fa fa-lg fa-chevron-up"></i>
@@ -226,64 +232,19 @@
                 <br/>
             </div>
         `);
-        $(`#response_${count}_wrapper`).children(".up-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            if (curr_pos == 0) {
-                return;
-            }
-            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
-            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
-            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
-            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
-            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
-        $(`#response_${count}_wrapper`).children(".down-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            if (curr_pos == $(".poll_response").length - 1) {
-                return;
-            }
-            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
-            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
-            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
-            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
-            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
-        $(`#response_${count}_wrapper`).children(".delete-btn").on("click", function() {
-            let count = $(".poll_response").length
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
-            for(let i=curr_pos + 1; i < count; i++) {
-                $(".order-" + i).attr("value", i - 1)
-                $(".order-" + i).addClass("order-" + (i - 1));
-                $(".order-" + i).removeClass("order-" + i);
-            }
-            for(let i=wrapper_id + 1; i < count; i++) {
-                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
-                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
-            }
-            $(this).parent().remove()
-            count -= 1
-            $("#response-count").val("" + count)
-        })
-        count += 1
-        $("#response-count").val("" + count)
-    }
-
-    function removeResponse() {
-        let count = $(".poll_response").length
-        count -= 1
-        $(`#response_${count}_wrapper`).remove()
-        $("#response-count").val("" + count)
+        let curr_resp_count = parseInt($("#response-count").val()) + 1;
+        $("#response-count").val("" + curr_resp_count);
+        setEventHandlers();
     }
 
     function submitErrorChecks() {
+        let empty_responses = false;
+        for (let i = 0; i < $(".poll_response").length; i++) {
+            if ($($(".poll_response")[i]).val() === "") {
+                empty_responses = true;
+            }
+        }
+
         if ($("#poll-name").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -308,7 +269,7 @@
         } else if ($("#poll-date").val().length === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
-            $("#empty-date-error").show()
+            $("#empty-date-error").show();
         } else if (parseInt($("#response-count").val()) === 0) {
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
@@ -322,61 +283,109 @@
             $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#single-response-error").show();
+        } else if (empty_responses) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-response-error").show();
         } else {
             $("#poll-form-submit").prop("disabled", false);
             $(".polls-submit-error").hide();
         }
     }
 
-    $(document).ready(function() {
+    function setEventHandlers() {
+        $(".up-btn").off("click");
         $(".up-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
             if (curr_pos == 0) {
                 return;
             }
-            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
-            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent());
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos);
             $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
             $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1);
             $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
+        });
+        $(".down-btn").off("click");
         $(".down-btn").on("click", function() {
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
             if (curr_pos == $(".poll_response").length - 1) {
                 return;
             }
-            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
-            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos);
             $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
             $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
-            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1);
             $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
-        })
+        });
+        $(".delete-btn").off("click");
         $(".delete-btn").on("click", function() {
-            let count = $(".poll_response").length
-            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
-            for(let i=curr_pos + 1; i < count; i++) {
-                $(".order-" + i).attr("value", i - 1)
-                $(".order-" + i).addClass("order-" + (i - 1));
-                $(".order-" + i).removeClass("order-" + i);
-            }
-            for(let i=wrapper_id + 1; i < count; i++) {
-                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
-                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
-                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
-            }
-            $(this).parent().remove()
-            count -= 1
-            $("#response-count").val("" + count)
-        })
+            // first we check if the response option that is about to be deleted
+            // has responses by users, via an ajax request
+            let my_this = $(this);
+            let my_url = "{{base_url}}" + "/hasAnswers";
+            $.ajax({
+                url: my_url,
+                type: "POST",
+                data: {
+                    csrf_token: csrfToken,
+                    poll_id: {{ poll is not defined or poll.getId() == null ? -1 : poll.getId() }},
+                    option_id: my_this.siblings(".option_id").attr("value")
+                },
+                success: function(data) {
+                    // the result is a boolean -- whether or not this options has responses
+                    let parsed_result = JSON.parse(data);
+                    if (parsed_result.data) {
+                        // we cannot delete. send an error to the instructor
+                        alert("Students and/or other staff users have already submitted this response as their answer. " +
+                              "This response cannot be deleted unless they switch their answers to the poll.");
+                    } else {
+                        // delete the response
+                        let count = $(".poll_response").length;
+                        let curr_pos = parseInt($(my_this.siblings(".order")[0]).attr("value"));
+                        let wrapper_id = parseInt(my_this.parent().attr("id").match("response_(.*)?_wrapper")[1]);
+                        for(let i=curr_pos + 1; i < count; i++) {
+                            $(".order-" + i).attr("value", i - 1);
+                            $(".order-" + i).addClass("order-" + (i - 1));
+                            $(".order-" + i).removeClass("order-" + i);
+                        }
+                        for(let i=wrapper_id + 1; i < count; i++) {
+                            $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1));
+                            $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1));
+                            $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1));
+                            $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1));
+                            $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper");
+                        }
+                        my_this.parent().remove();
+                        count -= 1;
+                        $("#response-count").val("" + count);
+                        let temp = $("#removed-responses").val();
+                        if (temp !== "") {
+                            temp += ",";
+                        }
+                        temp += $(my_this.siblings(".option_id")[0]).attr("value");
+                        $("#removed-responses").val(temp);
+                    }
+                },
+                error: function(e) {
+                    alert("Error occured when requesting via ajax. Please refresh the page and try again.");
+                }
+            });
+        });
+    }
+
+    $(document).ready(function() {
+        setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
+        $("#new-poll-form").submit(function() {
+            $("#poll-form-submit").prop("disabled", true);
+            return true;
+        });
         let submit_form = false;
         $("#edit-poll-form").submit(function(event) {
             if (!submit_form) {
@@ -397,7 +406,11 @@
                         submit_form = true;
                         $("#edit-poll-form").submit();
                     }
+                } else {
+                    $("#poll-form-submit").prop("disabled", true);
                 }
+            } else {
+                $("#poll-form-submit").prop("disabled", true);
             }
         });
     });

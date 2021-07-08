@@ -160,6 +160,63 @@ class DatabaseQueries {
 
         return $ret;
     }
+    /**
+     * Retrieves all students from a course and their virtual attendance
+     * information such as logs for the course materials page, and logs
+     * for the discussion forum page.
+     */
+
+    public function getAttendanceInfo(): array {
+        $this->course_db->query("
+        WITH
+        A AS
+        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_firstname,''), user_firstname) as user_firstname, COALESCE(NULLIF(user_preferred_lastname,''), user_lastname) as user_lastname
+        FROM users
+        ORDER BY registration_section, user_lastname, user_firstname, user_id),
+        B AS
+        (SELECT distinct on (user_id) user_id, timestamp
+        FROM gradeable_access where user_id is not NULL
+        ORDER BY user_id, timestamp desc),
+        C AS
+        (SELECT distinct on (user_id) user_id,submission_time
+        FROM electronic_gradeable_data
+        ORDER BY user_id, submission_time),
+        D AS
+        (SELECT distinct on (user_id) user_id, timestamp
+        FROM viewed_responses
+        ORDER BY user_id, timestamp desc),
+        E AS
+        (SELECT distinct on (author_user_id) author_user_id, timestamp
+        FROM posts
+        ORDER BY author_user_id, timestamp desc),
+        F AS
+        (SELECT student_id, count (student_id)
+        FROM poll_responses
+        GROUP BY student_id),
+        G AS
+        (SELECT distinct on (user_id) user_id, time_in
+        FROM queue
+        ORDER BY user_id, time_in desc)
+        SELECT
+        A.registration_section, A.user_id, A.user_firstname, user_lastname,
+        B.timestamp as gradeable_access,
+        C.submission_time as gradeable_submission,
+        D.timestamp as forum_view,
+        E.timestamp as forum_post,
+        F.count as num_poll_responses,
+        G.time_in as office_hours_queue
+        FROM
+        A
+        left join B on A.user_id=B.user_id
+        left join C on A.user_id=C.user_id
+        left join D on A.user_id=D.user_id
+        left join E on A.user_id=E.author_user_id
+        left join F on A.user_id=F.student_id
+        left join G on A.user_id=G.user_id
+        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
+        ");
+        return $this->course_db->rows();
+    }
 
     /**
      * given a string with missing digits, get all similar numeric ids
@@ -5890,25 +5947,30 @@ AND gc_id IN (
 
         $main_query = "select $id_string from $table where $section_type is not null and $id_string not in";
 
+        $parameters = [];
         // Select which subquery to use
         if ($component_id != "-1") {
             // Use this sub query to select users who do not have a specific component within this gradable graded
             $sub_query = "(select gd_$id_string
                 from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
-                where g_id = '$gradeable_id' and gc_id = $component_id);";
+                where g_id = ? and gc_id = ?);";
+
+            $parameters = [$gradeable_id, $component_id];
         }
         else {
             // Use this sub query to select users who have at least one component not graded
             $sub_query = "(select gradeable_data.gd_$id_string
              from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
-             where g_id = '$gradeable_id' group by gradeable_data.gd_id having count(gradeable_data.gd_id) = $component_count);";
+             where g_id = ? group by gradeable_data.gd_id having count(gradeable_data.gd_id) = ?);";
+
+            $parameters = [$gradeable_id, $component_count];
         }
 
         // Assemble complete query
         $query = "$main_query $sub_query";
 
         // Run query
-        $this->course_db->query($query);
+        $this->course_db->query($query, $parameters);
 
         // Capture results
         $not_fully_graded = $this->course_db->rows();
