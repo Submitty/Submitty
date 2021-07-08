@@ -28,7 +28,7 @@ class DockerView extends AbstractView {
             $image["virtual_size"] = Utils::formatBytes('mb', $image["virtual_size"], true);
             $image["additional_names"] = array_slice($image['tags'], 1);
 
-            $copy[$full_name] = $image;
+            $copy[$image["name"]] = $image;
         }
 
         $docker_data['docker_images'] = $copy;
@@ -77,35 +77,30 @@ class DockerView extends AbstractView {
 
         $capabilities = [];
         $worker_machines = [];
-        foreach ($docker_data['autograding_workers'] as $worker) {
+        foreach ($docker_data['autograding_workers'] as $name => $worker) {
             $worker_temp = [];
+            $worker_temp['name'] = $name;
+            $worker_temp['capabilities'] = [];
             $worker_temp['images'] = [];
             foreach ($worker['capabilities'] as $capability) {
                 $capabilities[] = $capability;
-                $name_temp = [];
-                foreach ($docker_data['autograding_containers'] as $image) {
-                    $name_temp[] = $image[''];
-                } 
-                $name_temp = array_unique($name_temp);
-                foreach ($name_temp as $name) {
-                    $worker_temp['images'][] = $docker_data['docker_images'][$name];
-                } 
+                $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
+                $worker_temp['enabled'] = $worker['enabled'];
+                $worker_temp['capabilities'][] = $worker['capabilities'];
+                foreach ($docker_data['autograding_containers'][$capability] as $image) {
+                    $worker_temp['images'][] = $image;
+                }
             }
+            $worker_machines[] = $worker_temp;
         }
 
         $capabilities = array_unique($capabilities);
         asort($capabilities);
 
-        foreach ($docker_data['autograding_workers'] as $name => $worker) {
-            $worker_temp = [];
-            $worker_temp['name'] = $name;
-            $worker_temp['capabilities'] = [];
+        foreach ($worker_machines as $worker) {
             foreach ($capabilities as $capability) {
                 $worker_temp['capabilities'][] = in_array($capability, $worker['capabilities']);
             }
-            $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
-            $worker_temp['enabled'] = $worker['enabled'];
-            $worker_machines[] = $worker_temp;
         }
 
         return $this->output->renderTwigTemplate(
