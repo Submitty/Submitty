@@ -82,12 +82,27 @@ Required inputs:
             <span class="col-no-gutters mark-points">
                 <label for="extra-mark-{{ component.id }}" tabIndex="0" class="screen-reader">Extra Mark</label>
                 <input id = "extra-mark-{{ component.id }}"
+                       class="custom-mark-number-input"
                        type="number"
                        step="{{ precision }}"
                        style="background-color:var(--default-white)"
                        onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
+                <div class="plus-minus">
+                    <i onclick="increment(this)"class="fa fa-caret-up custom-mark-arrow-icon"></i>
+                    <i onclick="decrement(this)"class="fa fa-caret-down custom-mark-arrow-icon"></i>
+                </div>
                         <script>
+                             function increment(me) {
+                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() + {{ precision }});
+                                 return onCustomMarkChange(me);
+                             }
+
+                             function decrement(me) {
+                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() - {{ precision }});
+                                 return onCustomMarkChange(me);
+                             }
+
                             {% if f_mark.title == "Full Credit" %}
                                 if(document.getElementById("extra-mark-{{ component.id }}").value>0){
                                     document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
