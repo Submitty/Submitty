@@ -30,11 +30,11 @@
                 {% endif %}
             </footer>
         </div> {# /#submitty-body #}
-        {% if wrapper_urls['right_sidebar.html'] != null %}
+        {% if wrapper_urls['right_sidebar.html'] is defined %}
             {# uploaded homepage redirect can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
-    {% if wrapper_urls['bottom_bar.html'] != null %}
+    {% if wrapper_urls['bottom_bar.html'] is defined %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}

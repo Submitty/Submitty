@@ -328,7 +328,7 @@
         if ($('#radio_electronic_file').is(':checked')) {
             elecDateBoxes.prop('disabled', false);
             $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
-            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
+            $('#date_team_lock').prop('disabled', {{ gradeable is not null and gradeable.isTeamAssignment() ? 'false' : 'true' }});
             $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
             {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if grade inquiries are not enabled #}

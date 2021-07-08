@@ -1,5 +1,3 @@
-{% import _self as self %}
-
 <div class="content">
 
     <script>
@@ -13,11 +11,14 @@
             {# button to open all of the subfolders and cookie it#}
             <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
             {# button to set the release dates of all files in the page/course materials #}
-            <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
+            <a
+                onclick='setFolderRelease("{{ folderPath }}","","",
                     [{% for file in inDir %}
                         "{{ file }}",
                     {% endfor %}]
-                    )' class="btn btn-primary key_to_click" tabindex="0">Set All Release Dates</a>
+                    )'
+                class="btn btn-primary key_to_click {{ fileReleaseDates[folderPath] is not defined ? 'disabled' }} "
+                tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
         </div>
     {% endif %}
@@ -43,26 +44,27 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "") }}
+        {{ _self.display_files(submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", authorized_by_allow_list) }}
+
     </div>
 </div>
 
-{% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_files(files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) %}
     {# Files on top #}
     {% for dir, path in files %}
         {% if path is not iterable %}
-            {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ _self.display_file(dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir, authorized_by_allow_list) }}
         {% else %}
-            {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ _self.display_dir(dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir, authorized_by_allow_list) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
-    {% set this_file_section = file_sections[path] %}
+{% macro display_file(dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) %}
+    {% set this_file_section = file_sections[path] is defined ? file_sections[path] : null %}
     {% set this_hide_from_students = hide_from_students[path] %}
-    {% set this_external_link = external_link[path] %}
+    {% set this_external_link = external_link[path] is defined ? external_link[path] : null %}
 
     {% set greater_than_student = userGroup < 4 %}
     {% set visible_to_student =
@@ -148,9 +150,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_dir(dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+        {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) }}
     {% else %}
     <div class="folder-container">
 
@@ -165,7 +167,7 @@
                 <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folderPath }}", "{{ priorities[folderPath] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
-                <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
+                <a onclick='setFolderRelease("{{ folderPath }}","","{{ id }}",
                 [{% for file in inDir %}
                         {% if folderPath in file %}
                             "{{ file }}",
@@ -178,7 +180,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+            {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, authorized_by_allow_list) }}
 
         </div>
     </div>
