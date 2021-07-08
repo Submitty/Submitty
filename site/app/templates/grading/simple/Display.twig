@@ -93,7 +93,7 @@
         <select
             id="subsection_sort"
             name="subsection_sorting"
-            onChange="window.location.href='{{ grading_url }}&view={{ view_all ? 'all' }}&sort=' + this.value"
+            onChange="window.location.href='{{ grading_url }}?view={{ view_all ? 'all' }}&sort=' + this.value"
             style="font-size:15px;"
         >
             <option value="section_subsection" aria-label="sort by Section then Subsection" {{ sort == "section_subsection" ? 'selected' }}>
