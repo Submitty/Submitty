@@ -978,6 +978,10 @@ class ElectronicGraderController extends AbstractController {
             $team_id = $vals[3];
             $user_id = $vals[2];
 
+            if ($team_name == '') {
+                $team_name = null;
+            }
+
             if ($this->core->getQueries()->getUserById($user_id) === null) {
                 $error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
                 continue;
