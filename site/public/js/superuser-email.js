@@ -57,7 +57,6 @@ function sendEmail(url) {
 
 
 function updateSuperuserEmailOptions(which) {
-    const faculty = $('#email-faculty');
     const instructor = $('#email-instructor');
     const full = $('#email-full-access');
     const limited = $('#email-limited-access');
@@ -73,7 +72,8 @@ function updateSuperuserEmailOptions(which) {
     else if (which == 'full-access') {
         if (full.prop('checked')) {
             instructor.prop('checked',true);
-        } else {
+        }
+        else {
             limited.prop('checked',false);
             student.prop('checked',false);
         }
@@ -82,7 +82,8 @@ function updateSuperuserEmailOptions(which) {
         if (limited.prop('checked')) {
             instructor.prop('checked',true);
             full.prop('checked',true);
-        } else {
+        }
+        else {
             student.prop('checked',false);
         }
     }
