@@ -1,4 +1,4 @@
-/* global CodeMirror, getFocusableElements */
+/* global CodeMirror, CodeMirrorSpellCheck, getFocusableElements */
 /* exported getLargeCodeMirror, getSmallCodeMirror, rowsToPixels */
 
 /**
@@ -39,7 +39,7 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
     codemirror_config.scrollbarStyle = null;
     codemirror_config.lineNumbers = false;
-    codemirror_config.mode = "spell-checker";
+    codemirror_config.mode = 'spell-checker';
 
     CodeMirrorSpellChecker({
         codeMirrorInstance:  CodeMirror,
