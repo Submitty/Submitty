@@ -161,13 +161,15 @@
                 {# /Section heading #}
                 {# Student list #}
                 <tbody class="details-content panel-content-active">
-                    {% for info in section.rows %}
-                        {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
-                    {% endfor %}
-                    {% if section.teamless_users is defined %}
-                        {% for info in section.teamless_users %}
-                            {{ _self.render_teamless_user(_context, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
+                    {% if section.rows is defined %}
+                        {% for info in section.rows %}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
                         {% endfor %}
+                        {% if section.teamless_users is defined %}
+                            {% for info in section.teamless_users %}
+                                {{ _self.render_teamless_user(_context, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
+                            {% endfor %}
+                        {% endif %}
                     {% endif %}
                 </tbody>
                 {# /Student list #}
@@ -262,7 +264,7 @@
     </tr>
 {% endmacro %}
 
-{% macro render_teamless_user(context, section, user, new_team_onclick, index, columns) %}
+{% macro render_teamless_user(context, section, user, new_team_onclick, index, columns, edited_past_lock_date) %}
     <tr>
         {% for column in columns %}
             {#
@@ -286,7 +288,7 @@
             {% elseif column.function == "section" %}
                 {{ _self.render_column_section(context, section, null, index, null, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, info.edited_past_lock_date) }}
+                {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 <td></td>
             {% elseif column.function == "team_members" %}
@@ -341,7 +343,7 @@
 
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(context, section, graded_gradeable, index, info, column) %}
-    <td style="text-align: center">
+    <td>
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
             {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
