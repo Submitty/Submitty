@@ -356,5 +356,6 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
+        cy.wait(1000);
     });
 });
