@@ -54,7 +54,8 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'max_size' => Utils::returnBytes(ini_get('upload_max_filesize'))
+            'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'poll_type' => 'single-response'
           ]);
     }
 

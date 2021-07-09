@@ -148,6 +148,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/graders', 'Manage Graders'],
             [base_url + '/sections', 'Manage Sections'],
             [base_url + '/student_photos', 'Student Photos'],
+            [base_url + '/activity', 'Student Activity Dashboard'],
             [base_url + '/late_days', 'Late Days Allowed'],
             [base_url + '/extensions', 'Excused Absence Extensions'],
             [base_url + '/grade_override', 'Grade Override'],

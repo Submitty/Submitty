@@ -51,8 +51,10 @@ aside {
 
 #bar_banner {
     position: relative;
-    float: right;
-    margin-right: 10%;
+    display: block;
+    width:100%;
+    margin: auto;
+    margin-bottom: 5px;
 }
 
 .navigation-box {
@@ -506,8 +508,28 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name {
-    display: flex;
-    margin: auto;
+    position: absolute;
+    overflow-y: scroll;
+    border-right: 1px solid var(--standard-light-medium-gray);
+    left: 5px;
+    top: 5px;
+}
+
+#grading-scroll-message {
+    color: var(--standard-medium-gray);
+    margin-left: 5px;
+    font-size:  14px;
+}
+
+#grading-panel-student-name::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+  
+#grading-panel-student-name::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
 #regrade_inner_info .inner-container {
@@ -708,6 +730,16 @@ progress::-webkit-progress-value {
     height: 22px;
     width: 22px;
     margin: 5px;
+}
+
+.custom-mark-number-input::-webkit-outer-spin-button,
+.custom-mark-number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.custom-mark-arrow-icon:hover {
+    color: var(--standard-light-medium-gray);
 }
 
 .ta-nav-wrapper {
