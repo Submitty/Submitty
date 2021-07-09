@@ -67,7 +67,7 @@ class SuperuserEmailController extends AbstractController {
             }
             $notification_factory->sendEmails($emails, $email_to_secondary);
             return JsonResponse::getSuccessResponse([
-                "message" => "Email queued to be sent!",
+                "message" => count($active_user_ids) . " emails queued to be sent!",
                 "data" => json_encode($active_user_ids)
             ]);
         }
