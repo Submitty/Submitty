@@ -53,3 +53,8 @@
     padding-right: 1em;
     width: 10vw;
 }
+
+.email-warning {
+    margin-top: 1em;
+    padding: 10px;
+}

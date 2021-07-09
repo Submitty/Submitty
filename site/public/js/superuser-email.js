@@ -62,6 +62,7 @@ function updateSuperuserEmailOptions(which) {
     const full = $('#email-full-access');
     const limited = $('#email-limited-access');
     const student = $('#email-student');
+    const faculty = $('#email-faculty');
 
     if (which == 'instructor') {
         if (!instructor.prop('checked')) {
@@ -95,4 +96,17 @@ function updateSuperuserEmailOptions(which) {
             limited.prop('checked',true);
         }
     }
+
+    if (!(instructor.prop('checked') || full.prop('checked') || limited.prop('checked') || student.prop('checked') || faculty.prop('checked'))) {
+        $('#send-email').prop('disabled', true);
+        $('#email-warning').show();
+    }
+    else {
+        $('#send-email').prop('disabled', false);
+        $('#email-warning').hide();
+    }
 }
+
+$(document).ready(() => {
+    $('#email-warning').hide();
+});
