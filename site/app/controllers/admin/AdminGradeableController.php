@@ -1071,8 +1071,7 @@ class AdminGradeableController extends AbstractController {
         foreach ($details as $prop => $post_val) {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties)) {
-                $post_val = $post_val 
-                  ='true';
+                $post_val = 'true';
             }
 
             if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
