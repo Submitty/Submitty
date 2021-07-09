@@ -99,14 +99,15 @@ class RainbowCustomization extends AbstractModel {
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
                 "max_score" => $max_score,
-                "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate())
+                "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
+                "override" => false,
+                "override_max" => $max_score
             ];
         }
 
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
             $json_buckets = $this->RCJSON->getGradeables();
-
             foreach ($json_buckets as $json_bucket) {
                 // Place those buckets in $this->used_buckets
                 $this->used_buckets[] = $json_bucket->type;
@@ -125,6 +126,32 @@ class RainbowCustomization extends AbstractModel {
         // Reorder buckets
         $this->reorderBuckets();
 
+        //Now that the buckets are ordered and the customization has been initialized, we can
+        //loop through to find differences between the max_values from the database vs the customization JSON
+        if (!is_null($this->RCJSON) && count($this->RCJSON->getGradeables())) {
+            $json_buckets = $this->RCJSON->getGradeables();
+            //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
+            //has all buckets (even empty ones) while the JSON only has buckets with content in it.
+            $c_bucket = "";
+            foreach ($json_buckets as $json_bucket) {
+                if (property_exists($json_bucket, 'type')) {
+                    $c_bucket = $json_bucket->type;
+                }
+                else {
+                    continue;
+                }
+
+                //loop through all gradeables in bucket and compare them
+                $j_index = 0;
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
+                        $c_gradeable['override'] = true;
+                        $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
+                    }
+                    $j_index++;
+                }
+            }
+        }
         //XXX: Assuming that the contents of these buckets will be lowercase
         $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
     }

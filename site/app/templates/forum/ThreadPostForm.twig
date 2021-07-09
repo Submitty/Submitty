@@ -7,7 +7,7 @@
 <div class="form-group row position-relative">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
 
-    {% if show_title %}
+    {% if show_title is defined and show_title %}
     <span class="edit_thread">
         Title: <input type="text" size="45" placeholder="Title" name="title" id="title" aria-label="Edit thread title" required/>
     </span>
@@ -17,11 +17,11 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row position-relative">
-        <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown?1:0 }}" />
-    {% if show_merge_thread_button and core.getUser().accessGrading() %}
+        <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown is defined and render_markdown ? 1 : 0 }}" />
+    {% if show_merge_thread_button is defined and show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
-    {% if show_lock_date and core.getUser().getGroup() <= 2 %}
+    {% if show_lock_date is defined and show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
             <input class="date_picker" placeholder="Lock Thread Date" name="lock_thread_date" id="lock_thread_date" type="text">
         </label>
@@ -69,17 +69,19 @@
     {% endif %}
     </div>
     <div class="form-group row">
-        {% set min_height = (post_textarea_large ? "40vmin":"100px") %}
+        {% set min_height = (post_textarea_large is defined and post_textarea_large ? "40vmin":"100px") %}
         <div role="button" id="markdown_toggle_{{ post_box_id }}"
-             class="markdown-toggle {{ render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
+             class="markdown-toggle {{ render_markdown is defined and render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
              title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
         >
             <i class="fab fa-markdown fa-2x"></i>
         </div>
         <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+        {% if first_post_id is defined %}
+            <a class="skip-btn skip-first-post" href="#{{ first_post_id }}">Skip to first post</a>
+        {% endif %}
         {% include "misc/MarkdownArea.twig" with {
             "markdown_area_id" : "reply_box_" ~ post_box_id,
-            "markdown_area_query" : "$('#reply_box_" ~ post_box_id ~ "')",
             "markdown_area_name" : "thread_post_content",
             "markdown_area_value" : "",
             "class" : "post_content_reply thread_post_content",
@@ -87,19 +89,24 @@
             "preview_div_id" : "preview_box_" ~ post_box_id,
             "preview_div_name" : "preview_box_" ~ post_box_id,
             "onclick" : "previewForumMarkdown.call(this)",
-            "render_buttons" : render_markdown, 
+            "render_buttons" : render_markdown is defined ? render_markdown : false,
             "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
             "min_height" : min_height,
-            "textarea_maxlength" : post_content_limit,
+            "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
             "textarea_onkeydown" : "submitNearestForm(event,$(this))",
             "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
         } only %}
     </div>
-    <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
+    {% if thread_id is defined %}
+        <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
+    {% endif %}
+    {% if first_post_id is defined %}
+        <a class="skip-btn" href="#{{ first_post_id }}">Skip to first post</a>
+    {% endif %}
 <br/>
 {% endif %}
 
-{% if show_categories %}
+{% if show_categories is defined and show_categories %}
 
     <div id="category-selection-container" class="form-group row thread-category-container inline-block">
         {% if categories | length == 0 %}
@@ -139,7 +146,7 @@
         </div>
         <br style="margin-right:1rem;">
 
-        {% if attachment_script %}
+        {% if attachment_script is defined and attachment_script %}
             {# To be executed at last attachment box #}
             <script>
                 $(function() {
@@ -159,23 +166,29 @@
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
         {% if show_anon %}
-            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
+            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
         {% endif %}
-        {% if show_thread_status %}
+        {% if show_thread_status is defined and show_thread_status %}
         <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status">
             <option value="0">Comment</option>
             <option value="-1" selected="selected">Unresolved</option>
             <option value="1">Resolved</option>
         </select>
         {% endif %}
-        {% if show_announcement and core.getUser().accessFullGrading() %}
+        {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
             {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
         {% endif %}
-        {% if show_cancel_edit_form %}
+        {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
+            <div class = "expiration inline-block" style="display: none;">
+              <label class="inline-block" for="expirationDate">{{ "Expiration Date" }}</label>
+              <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
+            </div>
+        {% endif %}
+        {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
                  $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
                  $('#title').val('');
@@ -184,7 +197,7 @@
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
 
-        {% if thread_resolve_state == 1 and show_unresolve %}
+        {% if thread_resolve_state is defined and thread_resolve_state == 1 and show_unresolve %}
             <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
             <input type="submit" name="post_and_unresolve" class="submit_unresolve btn btn-primary inline-block" {{ post_box_id | length > 0 ? "data-post_box_id=" ~ post_box_id : ""  }} value="{{ submit_label }} and Unresolve" />
         {% endif %}
@@ -203,21 +216,36 @@
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop('disabled', true);
+                $(".expiration").show();
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop('disabled', false);
+                $(".expiration").hide();
             }
         });
 
         $(".pinThread-checkbox").click(function (){
+            $(".expiration").toggleClass("display-inline");
             if($(".pinThread-checkbox").prop("checked")){
                 $(".pinThread-checkbox").prop("checked", true);
+                $(".expiration").show();
                 $("#thread_status").val(0);
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
+                $(".expiration").hide();
             }
+        });
+
+        //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
+        //from an input with 'post-content-reply' class
+        $('.post_content_reply').focus(function(){
+            $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
+        });
+
+        $(':not(.post_content_reply, .skip-first-post)').focus(function(){
+            $('.skip-first-post').attr('tabindex', '-1');
         });
     });
 

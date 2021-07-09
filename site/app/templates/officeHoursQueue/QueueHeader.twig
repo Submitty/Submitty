@@ -1,5 +1,8 @@
 {% if viewer.getQueueMessage() | length > 0 %}
-  <div class="content gradeable_message markdown">{{viewer.getQueueMessage() | markdown}}</div>
+  {% include "misc/MarkdownArea.twig" with {
+    "content" : viewer.getQueueMessage(),
+    "class" : "content gradeable_message"
+  } only %}
 {% endif %}
 
 <div class="content">

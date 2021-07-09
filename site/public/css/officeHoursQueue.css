@@ -3,16 +3,16 @@
     visibility: hidden;
 }
 
-td{
-  vertical-align: middle;
+td {
+    vertical-align: middle;
 }
 
-th{
-  vertical-align: middle;
+th {
+    vertical-align: middle;
 }
 
-.filter_btn{
-  margin-bottom: .5rem;
+.filter_btn {
+    margin-bottom: 0.5rem;
 }
 
 .enable-audible,
@@ -20,8 +20,9 @@ th{
     display: none;
 }
 
-.current_queue_row, a > i.fas{
-  color: var(--btn-text-black);
+.current_queue_row,
+a > i.fas {
+    color: var(--btn-text-black);
 }
 
 .announcement-setting {
@@ -32,12 +33,12 @@ th{
 }
 
 #announcement {
-  background-color: var(--standard-light-gray);
-  padding: .75rem;
+    background-color: var(--standard-light-gray);
+    padding: 0.75rem;
 }
 
 [data-theme="dark"] #announcement {
-  background-color: var(--standard-dark-gray);
+    background-color: var(--standard-dark-gray);
 }
 
 #contact_info {
@@ -45,11 +46,12 @@ th{
 }
 
 .fully-transparent {
-    background:transparent!important;
-    color:white;
+    background: transparent !important;
+    color: white;
 }
 
-.filter-buttons:hover, .filter-buttons:focus{
+.filter-buttons:hover,
+.filter-buttons:focus {
     opacity: 0.8;
     filter: alpha(opacity=80);
 }
@@ -59,29 +61,28 @@ th{
   is not normally needed such as a user id
 */
 @media only screen and (max-width: 479px) {
+    /* Put this on elements you dont need on mobile */
+    .mobile-hide {
+        display: none !important;
+    }
 
-  /* Put this on elements you dont need on mobile */
-  .mobile-hide {
-      display: none !important;
-  }
+    .finish_helping_btn {
+        white-space: normal;
+        width: 5rem;
+    }
 
-  .finish_helping_btn{
-    white-space: normal;
-    width: 5rem;
-  }
+    .filter_settings_btn {
+        width: 4rem;
+    }
 
-  .filter_settings_btn{
-    width: 4rem;
-  }
-
-  .content{
-    padding: 20px;
-  }
+    .content {
+        padding: 20px;
+    }
 }
 
 /* Put this on elements you dont need on desktop */
 @media only screen and (min-width: 480px) {
-  .desktop-hide {
-      display: none !important;
-  }
+    .desktop-hide {
+        display: none !important;
+    }
 }
