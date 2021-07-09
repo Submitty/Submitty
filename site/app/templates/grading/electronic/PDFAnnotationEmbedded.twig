@@ -27,9 +27,9 @@
         console.error(err);
         alert("Can't fetch annotations");
     }
-    {% if student_download %}
+    {% if student_download is defined %}
     download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}" , "{{ rerender_annotated_pdf }}");
-    {% elseif student_popup %}
+    {% elseif student_popup is defined %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}");
     {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");

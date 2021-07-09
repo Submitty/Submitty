@@ -10,6 +10,10 @@
     padding-left: 20px;
 }
 
+#details-table tbody.details-content td {
+    text-align: center;
+}
+
 .expand-icon,
 .collapse-icon {
     display: none;
