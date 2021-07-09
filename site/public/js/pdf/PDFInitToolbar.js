@@ -250,7 +250,7 @@ function renderPDFToolbar() {
     let textSize = 12;
     let textColor = '#FF0000';
     function initText() {
-        let init_size = localStorage.getItem('text/size');
+        let init_size = localStorage.getItem('text/size') || 12;
         let init_color = localStorage.getItem('main_color') || "#000000";
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
