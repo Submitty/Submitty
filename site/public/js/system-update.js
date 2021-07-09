@@ -205,7 +205,7 @@ function injectStyling(markdown_data) {
     //add <hr> after each <ul> or <p><em> tag
     markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>|<\/a><\/p>/g, '$&<hr>');
     //replace normal <li> contents with spans with classes
-    markdown_data = markdown_data.replace(/<li>(\[\w+:(\w+)\].+)(?=<\/li>)|<li>(\[([^\]]+)\].+)(?=<\/li>)/g, (match, p1, p2, p3, p4) => `<li class="release-item"><span class="update-${`${p2}${p4}`.toLowerCase()}}">${p1}${p3}</span>`);
+    markdown_data = markdown_data.replace(/<li>(\[\w+:(\w+)\].+)(?=<\/li>)|<li>(\[([^\]]+)\].+)(?=<\/li>)/g, (match, p1, p2, p3, p4) => `<li class="release-item"><span class="update-${`${p2 ? p2 : p4}`.toLowerCase()}">${p1 ? p1 : p3}</span>`);
     //add class and wrapper to version headers
     markdown_data = markdown_data.replace(/<h1>.+?<\/h1>/g, `<div class="version-header" onclick="$(this).find('.btn-toggle-release').trigger('click')">$&</div>`);
     //wrap release sections in a <div>

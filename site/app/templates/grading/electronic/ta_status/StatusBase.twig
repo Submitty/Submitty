@@ -82,7 +82,7 @@
         betterBuckets=new Map();
         mode=0;
         modeCount=0;
-        {% if overall_average.getAverageScore() != "" %}
+        {% if overall_average is not null and overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
                 let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
                 if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
@@ -100,7 +100,7 @@
                 return mode;
             }
         {% endif %}
-        {% if autograded_average != null or autograded_average.getCount() != 0  %}
+        {% if autograded_average is not null and autograded_average.getCount() != 0 %}
             let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
             if(bucketInputAuto.value!=''){
                 if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {

@@ -82,7 +82,9 @@ class UsersView extends AbstractView {
             'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
             "delete_user_url" => $this->core->buildCourseUrl(['delete_user']) . '?' . http_build_query(['type' => 'graders']),
             "csrf_token" => $this->core->getCsrfToken(),
-            "download_info_json" => json_encode($download_info)
+            "download_info_json" => json_encode($download_info),
+            "course" => $this->core->getConfig()->getCourse(),
+            "semester" => $this->core->getConfig()->getSemester()
         ]);
     }
 

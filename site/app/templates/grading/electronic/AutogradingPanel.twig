@@ -24,6 +24,10 @@
     </div>
 </div>
 <script>
+    //used to calculate height for #grading-panel-student-name which requires that a panel has
+    //been loaded first
+    window.dispatchEvent(new Event('resize'));
+    
     function regrade(single_regrade) {
         //if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
         if(single_regrade) {
@@ -34,5 +38,4 @@
             handleRegrade({{ highest_version }}, csrfToken, "{{ gradeable_id }}", "{{ user_id }}", false, true)
         }
     }
-
 </script>
