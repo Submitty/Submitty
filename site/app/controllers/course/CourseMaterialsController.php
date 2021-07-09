@@ -443,7 +443,8 @@ class CourseMaterialsController extends AbstractController {
                     $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                         ->findOneBy(['path' => $dst]);
                     if ($cm != null) {
-                        return JsonResponse::getErrorResponse("A file already exists with path " . $dst);
+                        return JsonResponse::getErrorResponse("A file already exists with path " .
+                            $dst . ". Please delete the current file if you would like to use this path.");
                     }
 
                     if (strlen($dst) > 255) {
@@ -502,7 +503,7 @@ class CourseMaterialsController extends AbstractController {
                                 ->findOneBy(['path' => $path]);
                             if ($cm != null) {
                                 return JsonResponse::getErrorResponse("A file already exists with path " .
-                                $path);
+                                $path . ". Please delete the current file if you would like to use this path.");
                             }
                         }
 
