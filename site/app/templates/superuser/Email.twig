@@ -6,7 +6,7 @@
         to those of the specified role in a current active course. You can also specify email to faculty to send to RPI faculties in an active course. In addition, you can 
         specify to forcefully send the email to both the primary (rpi) email as well as the secondary (personal) email by checking the Force send to secondary email checkbox.
     </p>
-    <p id="email-warning" class="danger email-warning">
+    <p id="email-warning" class="danger email-warning" style="display: none;">
         At least one recipient groups must be selected.
     </p>
     <form>
@@ -16,19 +16,19 @@
             </div>
             <div style="display: inline-block">
                 <div class="option">
-                    <input type="checkbox" id="email-faculty" name="email-faculty" onclick="updateSuperuserEmailOptions('faculty')" checked> Email all Faculty and all Superusers </input>
+                    <input type="checkbox" id="email-faculty" name="email-faculty" onclick="updateSuperuserEmailOptions('faculty')" checked> Email all Faculty and all Superusers ({{num_faculty}} users)</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-instructor" name="email-instructor" onclick="updateSuperuserEmailOptions('instructor')" checked> Email all Instructors of Non-Archived Courses</input>
+                    <input type="checkbox" id="email-instructor" name="email-instructor" onclick="updateSuperuserEmailOptions('instructor')" checked> Email all Instructors of Active/Non-Archived Courses ({{num_instructor}} users)</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-full-access" name="email-full-access" onclick="updateSuperuserEmailOptions('full-access')" checked> Email all Full Access Graders of Non-Archived Courses</input>
+                    <input type="checkbox" id="email-full-access" name="email-full-access" onclick="updateSuperuserEmailOptions('full-access')" checked> Email all Full Access Graders of Active/Non-Archived Courses ({{num_full_access}} users)</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-limited-access" name="email-limited-access" onclick="updateSuperuserEmailOptions('limited-access')" checked> Email all Limited Access Graders of Non-Archived Courses</input>
+                    <input type="checkbox" id="email-limited-access" name="email-limited-access" onclick="updateSuperuserEmailOptions('limited-access')" checked> Email all Limited Access Graders of Active/Non-Archived Courses ({{num_limited_access}} users)</input>
                 </div>
                 <div class="option">
-                    <input type="checkbox" id="email-student" name="email-student" onclick="updateSuperuserEmailOptions('student')" checked> Email all Students in Non-Archived Courses </input>
+                    <input type="checkbox" id="email-student" name="email-student" onclick="updateSuperuserEmailOptions('student')" checked> Email all Students in Active/Non-Archived Courses  ({{num_student}} users)</input>
                 </div>
             </div>
         </div>
