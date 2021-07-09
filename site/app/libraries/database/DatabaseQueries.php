@@ -1140,10 +1140,9 @@ WHERE semester=? AND course=? AND user_id=?",
     public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
         $result_rows = [];
         $this->submitty_db->query(
-            "SELECT courses_users.user_id as user_id, courses_users.user_group as user_group, users.user_access_level as user_access_level
+            "SELECT courses_users.user_id as user_id, courses_users.user_group as user_group
                 FROM courses_users LEFT JOIN courses 
                 ON courses_users.semester = courses.semester AND courses_users.course = courses.course
-                JOIN users ON courses_users.user_id = users.user_id
                 WHERE courses.status = 1"
         );
         $results = $this->submitty_db->rows();
@@ -1160,7 +1159,13 @@ WHERE semester=? AND course=? AND user_id=?",
             elseif ($student && $row["user_group"] == 4) {
                 $result_rows[] = $row["user_id"];
             }
-            elseif ($faculty && $row["user_access_level"] <= 2) {
+        }
+        if ($faculty) {
+            $this->submitty_db->query(
+                "SELECT user_id FROM users WHERE user_access_level <= 2"
+            );
+            $results = $this->submitty_db->rows();
+            foreach ($results as $row) {
                 $result_rows[] = $row["user_id"];
             }
         }
