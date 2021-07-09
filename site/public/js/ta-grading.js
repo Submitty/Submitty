@@ -690,6 +690,8 @@ function resetSinglePanelLayout() {
   $('.two-panel-cont').removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
 
+  $('.panels-container').append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
+  $('.panels-container > .panel-instructions').hide();
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
@@ -753,7 +755,6 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities () {
-    $("#panel-instructions").hide();
     panelElements.forEach((panel) => {
       let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
 
@@ -788,12 +789,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
-      }
-      if (taLayoutDet.currentOpenPanel === null) {
-        $("#panel-instructions").show();
-      }
-      else {
-        $("#panel-instructions").hide();
+        $('.panels-container > .panel-instructions').toggle(!taLayoutDet.currentOpenPanel);
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
@@ -869,12 +865,6 @@ function togglePanelLayoutModes(forceVal = false) {
   const twoPanelCont = $('.two-panel-cont');
   if (!forceVal) {
     taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
-  }
-  if (taLayoutDet.currentOpenPanel === null) {
-    $("#panel-instructions").show();
-  }
-  else {
-    $("#panel-instructions").hide();
   }
 
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
@@ -1001,20 +991,23 @@ function updatePanelLayoutModes () {
     // Move all the panels from the left and right buckets to the main panels-container
     for (let idx = 0; idx < panelCont.length; idx++) {
       document.querySelector(".panels-container").append(panelCont[idx]);
+      //remove all panel instructions
+      $('.panel-instructions').remove();
     }
   }
-  // finally append the latest panels to their respective buckets
-  if (leftTopPanel) {
-    document.querySelector(panelsBucket.leftTopSelector).append(leftTopPanel);
-  }
-  if (leftBottomPanel) {
-    document.querySelector(panelsBucket.leftBottomSelector).append(leftBottomPanel);
-  }
-  if (rightTopPanel) {
-    document.querySelector(panelsBucket.rightTopSelector).append(rightTopPanel);
-  }
-  if (rightBottomPanel) {
-    document.querySelector(panelsBucket.rightBottomSelector).append(rightBottomPanel);
+
+  //loop through panel positions (topLeft, topRight, etc)
+  for (let panel in taLayoutDet.currentTwoPanels) {
+    //get panel corresponding with the layout position
+    const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
+    //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
+    const dom_panel = document.getElementById(`${taLayoutDet.currentTwoPanels[panel]}`);
+    if (dom_panel) {
+      $(layout_panel).append(dom_panel);
+    }
+    else {
+      $(layout_panel).append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
+    }
   }
   saveTaLayoutDetails();
 }
