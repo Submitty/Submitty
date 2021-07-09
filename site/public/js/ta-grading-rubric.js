@@ -96,7 +96,6 @@ function displayAjaxError(err) {
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxGetGradeableRubric(gradeable_id) {
-    console.log('here');
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
@@ -2477,7 +2476,6 @@ function closeAllComponents(save_changes,edit_mode = false) {
  */
 function toggleComponent(component_id, saveChanges, edit_mode = false) {
     let action = Promise.resolve();
-    console.log(EDIT_MODE_ENABLED);
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         action = action.then(function() {
