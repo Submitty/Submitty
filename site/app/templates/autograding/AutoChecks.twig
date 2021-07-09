@@ -5,41 +5,41 @@
     {% if loop.index0 != 0 %}
         <div class="clear"></div>
     {% endif %}
-    {% if check.pdf %}
+    {% if check.pdf is defined %}
         <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <div class="autocheck-header">
-          {% if check.actual and check.actual.type == "text" %}
+          {% if check.actual is defined and check.actual.type == "text" %}
             <div class="autocheck-header-button">
                 <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ who }}', '{{ display_version }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
             </div>
           {% endif %}
-          {% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and loop.index0 == 0 and publish_actions %}
+          {% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and loop.index0 == 0 and publish_actions is defined and publish_actions %}
             <div class="autocheck-header-button">
                 <a id="show_actions_{{ index }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="openActionsPopup('{{ popup_css_file }}', '{{ actions_id }}');">View test procedure</a>
             </div>
           {% endif %}
         </div>
         <div class="box-block">
-            {% if not check.actual %}
-               <h4 style="margin-bottom: 0">{{ check.description }}</h4>
-               <div>
-               {{ self.render_messages(check.messages) }}
-               </div>
-            {% else %}
-               {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
+            {% if not check.actual is defined and check.description is defined and check.messages is defined%}
+              <h4 style="margin-bottom: 0">{{ check.description }}</h4>
+              <div>
+              {{ self.render_messages(check.messages) }}
+              </div>
+            {% elseif check.actual is defined %}
+              {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
             {% endif %}
-            {% if check.expected %}
+            {% if check.expected is defined %}
                 {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
             {% endif %}
-            {% if check.difference %}
+            {% if check.difference is defined %}
                 {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0) }}
             {% endif %}
 
         </div>
     {% endif %}
 
-{% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and publish_actions %}
+{% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and publish_actions is defined and publish_actions %}
   {% include('autograding/ActionView.twig') with {
       'testcase_name': testcase_name,
       'element_id': actions_id,
