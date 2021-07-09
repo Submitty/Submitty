@@ -494,6 +494,25 @@ class ElectronicGraderController extends AbstractController {
             $peer = true;
         }
 
+        //get all graded gradeables for queue stats
+        $submissions_in_queue = 0;
+        $gradeables[] = $gradeable;
+        $graded_gradeables = $this->core->getQueries()->getGradedGradeables($gradeables);
+        //check every submission (inactive and active) for every student
+        //NOTE: Let's eventually refactor this nested loop to instead look at the items
+        //in the autograding queue and check for matches.
+        foreach ($graded_gradeables as $g) {
+            $highest_version = $g->getAutoGradedGradeable()->getHighestVersion();
+            if ($highest_version > 0) {
+                for ($i = 1; $i < $highest_version + 1; $i++) {
+                    $display_version_instance = $g->getAutoGradedGradeable()->getAutoGradedVersionInstance($i);
+                    if ($display_version_instance->isQueued()) {
+                        $submissions_in_queue += 1;
+                    }
+                }
+            }
+        }
+
         /*
          * we need number of students per section
          */
@@ -649,7 +668,8 @@ class ElectronicGraderController extends AbstractController {
                    'view_peer_graded_components' => $peer_graded_components,
                    'ta_graded_components' => 0,
                    'num_gradeables' => $num_gradeables,
-                   'graders' => []
+                   'graders' => [],
+                   'valid_graders' => []
                 ];
             }
             if ($peer) {
@@ -661,12 +681,14 @@ class ElectronicGraderController extends AbstractController {
                        'graded_components' => $my_grading,
                        'num_gradeables' => $num_gradeables,
                        'ta_graded_components' => 0,
-                       'graders' => []
+                       'graders' => [],
+                       'valid_graders' => []
                     ];
                     $sections['all'] = [
                        'total_components' => 0,
                        'graded_components' => 0,
-                       'graders' => []
+                       'graders' => [],
+                       'valid_graders' => []
                     ];
                     foreach ($total_users as $key => $value) {
                         if ($key == 'NULL') {
@@ -689,12 +711,14 @@ class ElectronicGraderController extends AbstractController {
                         'graded_components' => $my_grading,
                         'num_gradeables' => $num_gradeables,
                         'ta_graded_components' => 0,
-                        'graders' => []
+                        'graders' => [],
+                        'valid_graders' => []
                     ];
                     $sections['all'] = [
                         'total_components' => 0,
                         'graded_components' => 0,
-                        'graders' => []
+                        'graders' => [],
+                        'valid_graders' => []
                     ];
                     foreach ($total_users as $key => $value) {
                         if ($key == 'NULL') {
@@ -711,17 +735,19 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($total_users as $key => $value) {
                     if (array_key_exists($key, $num_submitted)) {
                         $sections[$key] = [
-                        'total_components' => $num_submitted[$key],
-                        'graded_components' => 0,
-                        'ta_graded_components' => 0,
-                        'graders' => []
+                            'total_components' => $num_submitted[$key],
+                            'graded_components' => 0,
+                            'ta_graded_components' => 0,
+                            'graders' => [],
+                            'valid_graders' => []
                         ];
                     }
                     else {
                         $sections[$key] = [
-                        'total_components' => 0,
-                        'graded_components' => 0,
-                        'graders' => []
+                            'total_components' => 0,
+                            'graded_components' => 0,
+                            'graders' => [],
+                            'valid_graders' => []
                         ];
                     }
                     if ($gradeable->isTeamAssignment()) {
@@ -788,7 +814,8 @@ class ElectronicGraderController extends AbstractController {
             $viewed_grade,
             $section_key,
             $regrade_requests,
-            $show_warnings
+            $show_warnings,
+            $submissions_in_queue
         );
     }
 
@@ -1267,7 +1294,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
         $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
@@ -1713,7 +1739,6 @@ class ElectronicGraderController extends AbstractController {
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
-
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
@@ -1764,7 +1789,6 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
         // get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
         if ($component === false) {
@@ -1789,7 +1813,16 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
-        //don't allow peer graders to save custom marks
+
+        //don't allow custom marks if they are disabled
+        if ($custom_message != null || $custom_points != null) {
+            if (!$gradeable->getAllowCustomMarks()) {
+                $this->core->getOutput()->renderJsonFail('Custom marks are disabled for this assignment');
+                return;
+            }
+        }
+
+        //don't allow peer graders to save custom marks no matter how gradeable is configured
         if (($custom_message != null || $custom_points != null) && $gradeable->hasPeerComponent()) {
             if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');

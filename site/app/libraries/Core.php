@@ -172,8 +172,8 @@ class Core {
 
     private function createEntityManager(AbstractDatabase $database): EntityManager {
         $config = Setup::createAnnotationMetadataConfiguration(
-            [FileUtils::joinPaths(__DIR__, '..', 'app', 'entities')],
-            false,
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
             null,
             null,
             false
@@ -244,7 +244,7 @@ class Core {
             throw new \Exception("Need to load the config before we can create a forum instance.");
         }
 
-        $this->forum = new Forum($this);
+        //$this->forum = new Forum($this);
     }
 
     /**

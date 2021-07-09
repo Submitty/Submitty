@@ -39,20 +39,20 @@
     cursor: pointer;
     text-align: center;
     border: dashed 2px var(--standard-light-gray);
-    display:block;
+    display: block;
     min-height: 150px;
     margin: 3px;
 }
 
 #gradeable-submission-cont #submit {
-    color: white!important;
+    color: white !important;
 }
 
 #submitted-files > .flex-row {
     margin-top: 5px;
 }
 
-#submitted-files .flex-row >span:first-child {
+#submitted-files .flex-row > span:first-child {
     min-width: 0;
     word-break: break-all;
 }
@@ -78,19 +78,18 @@
     margin-right: auto;
 }
 
-#gradeable-progress-bar{
+#gradeable-progress-bar {
     width: 5%;
     height: 20px;
     background-color: var(--standard-dark-green);
     border-radius: 10px;
 }
 
-#gradeable-progress{
+#gradeable-progress {
     width: 100%;
     background-color: var(--standard-medium-gray);
     padding: 3px;
     border-radius: 13px;
-
 }
 
 @media (max-width: 401px) {
@@ -153,7 +152,9 @@
         font-size: 1.1rem;
         font-weight: initial;
     }
-    .content h3, .content h4 {
+
+    .content h3,
+    .content h4 {
         font-weight: 500;
     }
 

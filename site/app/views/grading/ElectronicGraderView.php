@@ -32,6 +32,7 @@ class ElectronicGraderView extends AbstractView {
      * @param string $section_type
      * @param int $regrade_requests
      * @param bool $show_warnings
+     * @param int $submissions_in_queue
      * @return string
      */
 
@@ -51,13 +52,12 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings
+        bool $show_warnings,
+        int $submissions_in_queue
     ) {
 
-        $peer = false;
-        if ($gradeable->hasPeerComponent()) {
-            $peer = true;
-        }
+        $peer = $gradeable->hasPeerComponent();
+
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
@@ -84,6 +84,9 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+
+        $warnings = [];
+
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
@@ -136,13 +139,12 @@ class ElectronicGraderView extends AbstractView {
                 $submitted_percentage = round((($submitted_total) / $total_submissions) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
-            $warnings = [];
             if ($section_type === "rotating_section" && $show_warnings) {
                 if ($registered_but_not_rotating > 0) {
-                    array_push($warnings, "There are " . $registered_but_not_rotating . " registered students without a rotating section.");
+                    $warnings[] = "There are " . $registered_but_not_rotating . " registered students without a rotating section.";
                 }
                 if ($rotating_but_not_registered > 0) {
-                    array_push($warnings, "There are " . $rotating_but_not_registered . " unregistered students with a rotating section.");
+                    $warnings[] = "There are " . $rotating_but_not_registered . " unregistered students with a rotating section.";
                 }
             }
 
@@ -215,36 +217,34 @@ class ElectronicGraderView extends AbstractView {
                 $individual_viewed_percent = $total_submissions == 0 ? 0 :
                     number_format(($individual_viewed_grade / $total_submissions) * 100, 1);
             }
-            if (!$peer) {
-                if ($overall_average !== null) {
-                    $overall_total = $overall_average->getMaxValue() + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
-                    if ($overall_total != 0) {
-                        $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
-                    }
+            if ($overall_average !== null) {
+                $overall_total = $overall_average->getMaxValue() + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+                if ($overall_total != 0) {
+                    $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                 }
-                if ($autograded_average !== null) {
-                    if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
-                        $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
-                    }
-                }
-                if (count($component_averages) !== 0) {
-                    foreach ($component_averages as $comp) {
-                        /* @var SimpleStat $comp */
-                        $component_overall_score += $comp->getAverageScore();
-                        $component_overall_max += $comp->getMaxValue();
-                        $percentage = 0;
-                        if ($comp->getMaxValue() != 0) {
-                            $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
-                        }
-                        $component_percentages[] = $percentage;
-                    }
-                    if ($component_overall_max != 0) {
-                        $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
-                    }
-                }
-                //This else encompasses the above calculations for Teamss
-                //END OF ELSE
             }
+            if ($autograded_average !== null) {
+                if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
+                    $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
+                }
+            }
+            if (count($component_averages) !== 0) {
+                foreach ($component_averages as $comp) {
+                    /* @var SimpleStat $comp */
+                    $component_overall_score += $comp->getAverageScore();
+                    $component_overall_max += $comp->getMaxValue();
+                    $percentage = 0;
+                    if ($comp->getMaxValue() != 0) {
+                        $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
+                    }
+                    $component_percentages[] = $percentage;
+                }
+                if ($component_overall_max != 0) {
+                    $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
+                }
+            }
+            //This else encompasses the above calculations for Teamss
+            //END OF ELSE
         }
 
         //determines if there are any valid rotating sections
@@ -317,7 +317,9 @@ class ElectronicGraderView extends AbstractView {
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
-            "histograms" => $histogram_data
+            "histograms" => $histogram_data,
+            "warnings" => $warnings,
+            "submissions_in_queue" => $submissions_in_queue
         ]);
     }
 
@@ -791,11 +793,13 @@ HTML;
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('details.css');
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('details.js');
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
         $this->core->getOutput()->addInternalCss('admin-team-form.css');
         $this->core->getOutput()->addInternalJs('admin-team-form.js');
-
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -822,7 +826,10 @@ HTML;
             "order_toggle_url" => $details_base_url . '?' .
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "sort" => $sort,
-            "direction" => $direction
+            "direction" => $direction,
+            "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "is_team" => $gradeable->isTeamAssignment(),
+            "is_vcs" => $gradeable->isVcs()
         ]);
     }
 
@@ -859,7 +866,6 @@ HTML;
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
-
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
@@ -904,11 +910,70 @@ HTML;
 
         $this->core->getOutput()->addInternalJs("resizable-panels.js");
 
+        $error_message = [
+            "color" => "",
+            "message" => ""
+        ];
+        if ($graded_gradeable->hasOverriddenGrades()) {
+            $error_message = [
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "message" => "Overridden grades"
+            ];
+        }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+            if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
+                $error_message = [
+                    "color" => "var(--standard-creamsicle-orange)", // mango orange
+                    "message" => "Cancelled Submission"
+                ];
+            }
+            else {
+                $error_message = [
+                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
+                    "message" => "No Submission"
+                ];
+            }
+        }
+        elseif ($rollbackSubmission != -1) {
+            $error_message = [
+                "color" => "var(--standard-creamsicle-orange)", // fire engine red
+                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
+            ];
+        }
+        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
+            $error_message = [
+                "color" => "var(--standard-red-orange)", // fire engine red
+                "message" => "Late Submission (No on time submission available)"
+            ];
+        }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
+
+            $pattern_match_flag = false;
+            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if ($pattern_match_flag == true) {
+                $error_message = [
+                    "message" => "Multiple files within submissions"
+                ];
+            }
+        }
+
         $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
         		    <div class="content-items-container">
                     <div class="content-item content-item-right">
 HTML;
+
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
@@ -918,7 +983,8 @@ HTML;
                 $isDiscussionPanel,
                 $isRegradePanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
-                $graded_gradeable
+                $error_message['color'],
+                $error_message['message']
             );
 
             $return .= <<<HTML
@@ -940,7 +1006,9 @@ HTML;
                     </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading);
+
+
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
@@ -1015,60 +1083,6 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
 
-        if ($graded_gradeable->hasOverriddenGrades()) {
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "var(--standard-vibrant-yellow)", // canary yellow
-                "message" => "Overridden grades"
-            ]);
-        }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
-            if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "var(--standard-creamsicle-orange)", // mango orange
-                    "message" => "Cancelled Submission"
-                ]);
-            }
-            else {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
-                    "message" => "No Submission"
-                ]);
-            }
-        }
-        elseif ($rollbackSubmission != -1) {
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
-            ]);
-        }
-        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "var(--standard-red-orange)", // fire engine red
-                "message" => "Late Submission (No on time submission available)"
-            ]);
-        }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
-            $pattern1 = "upload.pdf";
-            $pattern2 = "/upload_page_\d+/";
-            $pattern3 = "/upload_version_\d+_page\d+/";
-            $pattern4 = ".submit.timestamp";
-            $pattern5 = "bulk_upload_data.json";
-
-            $pattern_match_flag = false;
-            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
-                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
-                    $pattern_match_flag = true;
-                }
-            }
-
-            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
-            if ($pattern_match_flag == true) {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
-                    "message" => "Multiple files within submissions"
-                ]);
-            }
-        }
-
         return $return . <<<HTML
                                              </div>
                                          </div>
@@ -1080,9 +1094,9 @@ HTML;
     /**
      * @param GradedGradeable $graded_gradeable
      * @param float $progress
+     * @param bool $peer
      * @param string $prev_id
      * @param string $next_id
-     * @param bool $peer
      * @param string $sort
      * @param string $direction
      * @return string
@@ -1124,7 +1138,7 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
@@ -1132,6 +1146,8 @@ HTML;
             'isRegradePanel' => $isRegradePanel,
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
+            "error_color" => $error_color,
+            "error_message" => $error_message
         ]);
     }
 
@@ -1139,13 +1155,33 @@ HTML;
      * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading) {
+
+
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $gradeable = $graded_gradeable->getGradeable();
+        //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
+        if ($gradeable->isTeamAssignment()) {
+            $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();
+        }
+        else {
+            $id = $graded_gradeable->getSubmitter()->getId();
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+            "highest_version" =>  $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+            "max_submissions" => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
+            "is_vcs" => $gradeable->isVcs(),
+            "gradeable_id" => $gradeable->getId(),
+            "user_id" => $id,
+            "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "ta_grading" => $ta_grading
         ]);
     }
@@ -1420,7 +1456,6 @@ HTML;
 
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
-
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1429,6 +1464,7 @@ HTML;
                 "is_ta_grading" => $gradeable->isTaGrading(),
                 "show_verify_all" => $show_verify_all,
                 "can_verify" => $can_verify,
+                "verifier_id" => '',
                 "grading_disabled" => $grading_disabled,
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,
@@ -1438,6 +1474,7 @@ HTML;
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
+                "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
                 "is_peer_grader" => $is_peer_grader
             ]);
     }
