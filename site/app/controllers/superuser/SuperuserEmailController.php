@@ -65,9 +65,9 @@ class SuperuserEmailController extends AbstractController {
                 $details = ['body' => $_POST['email_content'], 'subject' => $_POST['email_subject'], 'to_user_id' => $user_id];
                 $emails[] = new SuperuserEmail($this->core, $details);
             }
-            $notification_factory->sendEmails($emails, $email_to_secondary);
+            $count = $notification_factory->sendEmails($emails, $email_to_secondary);
             return JsonResponse::getSuccessResponse([
-                "message" => count($active_user_ids) . " emails queued to be sent!",
+                "message" => $count . " emails queued to be sent!",
                 "data" => json_encode($active_user_ids)
             ]);
         }

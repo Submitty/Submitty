@@ -222,14 +222,16 @@ class NotificationFactory {
      * prepare array of Email objects as param array
      * @param array $emails
      * @param bool $force_secondary
+     * @return int emails sent
      */
-    public function sendEmails(array $emails, bool $force_secondary = false): void {
+    public function sendEmails(array $emails, bool $force_secondary = false): int {
         if (!$this->core->getConfig()->isEmailEnabled()) {
             throw new LogicException("Email is not enabled");
         }
         if (empty($emails)) {
-            return;
+            return 0;
         }
+        $count = 0;
         // parametrize email array
         $current_user = $this->core->getUser();
         $flattened_emails = [];
@@ -247,6 +249,7 @@ class NotificationFactory {
                     $flattened_emails[] = $user->getSecondaryEmail();
                     $flattened_emails[] = $this->core->getConfig()->getSemester();
                     $flattened_emails[] = $this->core->getConfig()->getCourse();
+                    $count++;
                 }
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
@@ -254,10 +257,12 @@ class NotificationFactory {
                 $flattened_emails[] = $user->getEmail();
                 $flattened_emails[] = $this->core->getConfig()->getSemester();
                 $flattened_emails[] = $this->core->getConfig()->getCourse();
+                $count++;
             }
         }
         if (!empty($flattened_emails)) {
             $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 6);
         }
+        return $count;
     }
 }
