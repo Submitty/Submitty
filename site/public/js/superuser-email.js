@@ -36,7 +36,6 @@ function sendEmail(url) {
         },
         success: function(data) {
             try {
-                console.log(data);
                 const parsedData = JSON.parse(data);
                 if (parsedData['status'] == 'success') {
                     $('#email-content').val('');
