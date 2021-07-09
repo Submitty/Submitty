@@ -41,7 +41,7 @@ class SuperuserEmailController extends AbstractController {
                 $num_full_access,
                 $num_limited_access,
                 $num_student
-            ),
+            )
         );
     }
     /**
