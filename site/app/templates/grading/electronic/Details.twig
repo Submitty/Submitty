@@ -344,7 +344,7 @@
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(context, section, graded_gradeable, index, info, column) %}
     <td>
-        {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
+        {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null %}
             {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
     </td>
