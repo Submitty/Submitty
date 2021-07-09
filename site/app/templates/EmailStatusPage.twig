@@ -3,35 +3,27 @@
     {% if not subjects|length == 0 %}
         {% for subject in subjects|keys %}
             <div class="status-container">
-                {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
-                    <div class = "button-container">
-                        <div>
-                            <div> Email Subject: {{subject ~ " "}} </div>
-                            <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
-                        </div>
-                        <button class="btn btn-success text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
-                            Show Details
-                        </button>
-                    </div>
-                {% elseif errors[subject]|length != 0 %}
-                    <div class = "button-container">
+                <div class = "button-container">
+                    <div>
                         <div> Email Subject: {{subject ~ " "}} </div>
                         <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
-                        <button class="btn btn-danger  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
-                            Show Details
-                        </button>
                     </div>
-                {% else %}
-                    <div class = "button-container">
-                        <div> Email Subject: {{subject ~ " "}} </div>
-                        <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
-                        <button class="btn btn-primary  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
-                            Show Details
-                        </button>
-                    </div>
-                {% endif %}
+                    <button class="btn
+                    {% if (subject not in errors|keys or errors[subject]|length == 0) and (subject not in pending|keys or
+                        pending[subject]|length == 0) %}
+                        btn-success
+                    {% elseif subject in errors|keys and errors[subject]|length != 0 %}
+                        btn-danger
+                    {% else %}
+                        btn-primary
+                    {% endif %}
+                    text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)">
+                        Show Details
+                    </button>
+                </div>
                 <div class="expand" id={{"collapse"~loop.index}}>
                     <ul>
+                        {% if subject in errors|keys %}
                         {% for row in errors[subject] %}
                             <li class="status status-error">
                                 <div class="status-message">Recipient: {{row["user_id"]}}</div>
@@ -41,18 +33,23 @@
                                 </div>
                             </li>
                         {% endfor %}
+                        {% endif %}
+                        {% if subject in pending|keys %}
                         {% for row in pending[subject] %}
                             <li  class="status status-warning status">
                                 <div class="status-message">Recipient: {{row["user_id"]}}</div>
                                 <div class="status-message">Time Sent: Not Sent</div>
                             </li>
                         {% endfor %}
+                        {% endif %}
+                        {% if subject in successes|keys %}
                         {% for row in successes[subject] %}
                             <li class="status status-success status"> 
                                 <div class="status-message">Recipient: {{row["user_id"]}}</div> 
                                 <div class="status-message">Time Sent: {{row["sent"]|slice(0,19)}}</div> 
                             </li>
                         {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
                 <hr class = "divider">
