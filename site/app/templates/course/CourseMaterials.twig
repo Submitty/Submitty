@@ -17,7 +17,7 @@
                         "{{ file }}",
                     {% endfor %}]
                     )'
-                class="btn btn-primary key_to_click {{ fileReleaseDates[folderPath] is not defined ? 'disabled' }} "
+                class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
                 tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
         </div>

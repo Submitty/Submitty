@@ -169,7 +169,8 @@ class CourseMaterialsView extends AbstractView {
             "reg_sections" => $reg_sections,
             "file_sections" => $file_sections,
             "hide_from_students" => $hide_from_students,
-            "external_link" => $external_link
+            "external_link" => $external_link,
+            "materials_exist" => count($course_materials) != 0
         ]);
     }
 }
