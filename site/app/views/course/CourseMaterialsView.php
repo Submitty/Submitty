@@ -128,7 +128,9 @@ class CourseMaterialsView extends AbstractView {
                     continue;
                 }
             }
-            $file_release_dates[$course_material->getPath()] = $release_date->format($this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
+            $file_release_dates[$course_material->getPath()] = $release_date
+                ->setTimezone($this->core->getConfig()->getTimezone())
+                ->format($this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             $filepath = substr($course_material->getPath(), strlen($expected_path) + 1);
             $path = explode('/', $filepath);
             $working_dir = &$files[$start_dir_name];
