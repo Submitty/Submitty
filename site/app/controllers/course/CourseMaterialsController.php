@@ -151,14 +151,6 @@ class CourseMaterialsController extends AbstractController {
 
         $new_data_time = htmlspecialchars($newdatatime);
         $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getDateTimeNow()->getTimezone());
-        /*$new_data_time = DateUtils::dateTimeToString($new_data_time);
-
-        //Check if the datetime is correct
-        if (\DateTime::createFromFormat('Y-m-d H:i:sO', $new_data_time) === false) {
-            return JsonResponse::getErrorResponse("Improperly formatted date");
-        }
-
-        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getDateTimeNow()->getTimezone());*/
 
         //only one will not iterate correctly
         if (is_string($data)) {
@@ -448,6 +440,12 @@ class CourseMaterialsController extends AbstractController {
                 if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j]) || $is_external_link_file) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
+                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                        ->findOneBy(['path' => $dst]);
+                    if ($cm != null) {
+                        return JsonResponse::getErrorResponse("A file already exists with path " . $dst);
+                    }
+
                     if (strlen($dst) > 255) {
                         return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
                     }
@@ -497,6 +495,16 @@ class CourseMaterialsController extends AbstractController {
                         $zfiles = array_filter($entries, function ($entry) {
                             return substr($entry, -1) !== '/';
                         });
+
+                        foreach ($zfiles as $zfile) {
+                            $path = FileUtils::joinPaths($upload_path, $zfile);
+                            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                                ->findOneBy(['path' => $path]);
+                            if ($cm != null) {
+                                return JsonResponse::getErrorResponse("A file already exists with path " .
+                                $path);
+                            }
+                        }
 
                         $zip->extractTo($upload_path, $entries);
 
