@@ -746,6 +746,27 @@ def valid_github_repo_id(repoid):
     return True
 
 
+def calculate_size_cleanup_symlinks(directory):
+    total_size = 0
+    included_symlinks = False
+    for root, subdirectories, files in os.walk(directory):
+        for subdirectory in subdirectories:
+            sd = os.path.join(root,subdirectory)
+            if (os.path.islink(sd)):
+                os.remove(sd)
+                included_symlinks = True
+        for file in files:
+            f = os.path.join(root,file)
+            if (not os.path.exists(f)):
+                os.remove(f)
+            elif (os.path.islink(f)):
+                os.remove(f)
+                included_symlinks = True
+            else:
+                total_size += os.stat(f).st_size
+    return (total_size, included_symlinks)
+
+
 def checkout_vcs_repo(config, my_file):
     print("SHIPPER CHECKOUT VCS REPO ", my_file)
 
@@ -960,6 +981,16 @@ def checkout_vcs_repo(config, my_file):
                 "And check to be sure the submitty_daemon user has appropriate access "
                 "credentials.\n",
                 file=f)
+
+    # remove the .git directory (storing full history and metafiles)
+    git_path = os.path.join(checkout_path,".git")
+    shutil.rmtree(git_path,ignore_errors=True)
+
+    # calculate total file size, and remove symlinks
+    (checkout_size, checkout_included_symlinks) = calculate_size_cleanup_symlinks(checkout_path)
+
+    obj["checkout_total_size"] = checkout_size
+    obj["checkout_included_symlinks"] = checkout_included_symlinks
 
     return obj
 
