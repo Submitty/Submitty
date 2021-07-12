@@ -19,7 +19,6 @@
     "twig/twig": "2.13.1",
     "ramsey/uuid": "4.1.1",
     "aptoma/twig-markdown": "3.4.0",
-    "erusev/parsedown": "1.7.4",
     "lcobucci/jwt": "3.4.5",
     "symfony/routing": "4.4.25",
     "symfony/config": "4.4.26",
