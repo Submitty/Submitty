@@ -56,10 +56,8 @@ class ElectronicGraderView extends AbstractView {
         int $submissions_in_queue
     ) {
 
-        $peer = false;
-        if ($gradeable->hasPeerComponent()) {
-            $peer = true;
-        }
+        $peer = $gradeable->hasPeerComponent();
+
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
@@ -219,36 +217,34 @@ class ElectronicGraderView extends AbstractView {
                 $individual_viewed_percent = $total_submissions == 0 ? 0 :
                     number_format(($individual_viewed_grade / $total_submissions) * 100, 1);
             }
-            if (!$peer) {
-                if ($overall_average !== null) {
-                    $overall_total = $overall_average->getMaxValue() + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
-                    if ($overall_total != 0) {
-                        $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
-                    }
+            if ($overall_average !== null) {
+                $overall_total = $overall_average->getMaxValue() + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+                if ($overall_total != 0) {
+                    $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                 }
-                if ($autograded_average !== null) {
-                    if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
-                        $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
-                    }
-                }
-                if (count($component_averages) !== 0) {
-                    foreach ($component_averages as $comp) {
-                        /* @var SimpleStat $comp */
-                        $component_overall_score += $comp->getAverageScore();
-                        $component_overall_max += $comp->getMaxValue();
-                        $percentage = 0;
-                        if ($comp->getMaxValue() != 0) {
-                            $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
-                        }
-                        $component_percentages[] = $percentage;
-                    }
-                    if ($component_overall_max != 0) {
-                        $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
-                    }
-                }
-                //This else encompasses the above calculations for Teamss
-                //END OF ELSE
             }
+            if ($autograded_average !== null) {
+                if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
+                    $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
+                }
+            }
+            if (count($component_averages) !== 0) {
+                foreach ($component_averages as $comp) {
+                    /* @var SimpleStat $comp */
+                    $component_overall_score += $comp->getAverageScore();
+                    $component_overall_max += $comp->getMaxValue();
+                    $percentage = 0;
+                    if ($comp->getMaxValue() != 0) {
+                        $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
+                    }
+                    $component_percentages[] = $percentage;
+                }
+                if ($component_overall_max != 0) {
+                    $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
+                }
+            }
+            //This else encompasses the above calculations for Teamss
+            //END OF ELSE
         }
 
         //determines if there are any valid rotating sections
@@ -1468,6 +1464,7 @@ HTML;
                 "is_ta_grading" => $gradeable->isTaGrading(),
                 "show_verify_all" => $show_verify_all,
                 "can_verify" => $can_verify,
+                "verifier_id" => '',
                 "grading_disabled" => $grading_disabled,
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,
