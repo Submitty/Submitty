@@ -986,14 +986,14 @@ function updatePanelLayoutModes () {
   const rightTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightTop);
   const rightBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightBottom);
 
+  //remove all panel instructions
+  $('.panel-instructions').remove();
   setMultiPanelModeVisiblities();
   for (const panelIdx in panelsBucket) {
     const panelCont = document.querySelector(panelsBucket[panelIdx]).childNodes;
     // Move all the panels from the left and right buckets to the main panels-container
     for (let idx = 0; idx < panelCont.length; idx++) {
       document.querySelector(".panels-container").append(panelCont[idx]);
-      //remove all panel instructions
-      $('.panel-instructions').remove();
     }
   }
 
