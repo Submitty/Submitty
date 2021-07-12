@@ -65,7 +65,8 @@
                     <i class="fas fa-window-restore" style="cursor: pointer;"></i>
                 </span>
                 {% if side == 0 %}
-                <span onclick="downloadTestCaseResult({{ index }}, '{{ check.filename }}', {{ display_version }}, '{{ gradeable_id }}', '{{ who }}')" tabindex="0">
+                <span onclick="downloadTestCaseResult({{ index }}, '{{ check.filename }}', {{ display_version }}, '{{ gradeable_id }}', '{{ who }}')" tabindex="0"
+                title="Downloads your test case result file">
                     <i class="fas fa-download" style="cursor: pointer;"></i>
                 </span>
                 {% endif %}
