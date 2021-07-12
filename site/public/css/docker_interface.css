@@ -79,6 +79,20 @@ td {
     margin-top: 1%;
 }
 
+.fully-transparent {
+    background: transparent !important;
+}
+
+.filter-buttons {
+    color: var(--text-black);
+}
+
+.filter-buttons:hover,
+.filter-buttons:focus {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
 .filter {
     margin-bottom: 1em;
   }

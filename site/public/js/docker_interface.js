@@ -17,3 +17,17 @@ function collapseSection(id,btn_id) {
         btn.innerHTML = 'Collapse';
     }
 }
+
+function filterOnClick() {
+    console.log($(this).text());
+    if ($(this).hasClass('fully-transparent')) {
+        $(this).removeClass('fully-transparent');
+    }
+    else {
+        $(this).addClass('fully-transparent');
+    }
+}
+
+$(document).ready(() => {
+    $('.filter-buttons').on('click', filterOnClick);
+});
