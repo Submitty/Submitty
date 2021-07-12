@@ -4,8 +4,7 @@
     <div id="save-configuration-form">
         <form method="post" action="{{ form_action_link }}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-            <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" />
-            <input type="hidden" name="ignore_submission_number" value="{{ ignore_submission_number }}" /><br />
+            {# <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" /> #}
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Select Gradeable:</div>
@@ -30,17 +29,17 @@
                 </div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {{ provided_code ? "" : "checked" }} >
-                        <label for="no_code_provided_id">No</label>
+                        <input type="radio" id="no-code-provided-id" value="no_code_provided" name="provided_code_option" {{ provided_code ? "" : "checked" }} >
+                        <label for="no-code-provided-id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {{ provided_code ? "checked" : "" }}>
-                        <label for="code_provided_id">Yes</label>
+                        <input type="radio" id="code-provided-id" value="code_provided" name="provided_code_option" {{ provided_code ? "checked" : "" }}>
+                        <label for="code-provided-id">Yes</label>
                     </span>
                 </div>
-                <div class="low-margin-top"><input id="provided_code_file" type="file" name="provided_code_file"></div>
+                <div class="low-margin-top"><input id="provided-code-file" type="file" name="provided_code_file"></div>
                 {% if new_or_edit == "edit" and provided_code %}
-                    <div id="current_code_file">
+                    <div id="current-code-file">
                         <br />
                         <div>Current Provided Code:</div>
                         {% for file_name in provided_code_filenames %}
@@ -54,12 +53,12 @@
                 <div class="plag-data-label">Version:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="all_version_id" value="all_versions" name="version_option" {{ version == "all_versions" ? "checked" : "" }} >
-                        <label for="all_version_id">All Versions</label>
+                        <input type="radio" id="all-version-id" value="all_versions" name="version_option" {{ version == "all_versions" ? "checked" : "" }} >
+                        <label for="all-version-id">All Versions</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="active_version_id" value="active_version" name="version_option" {{ version == "all_versions" ? "" : "checked" }}>
-                        <label for="active_version_id">Only Active Version</label>
+                        <input type="radio" id="active-version-id" value="active_version" name="version_option" {{ version == "all_versions" ? "" : "checked" }}>
+                        <label for="active-version-id">Only Active Version</label>
                     </span>
                 </div>
             </div>
@@ -67,7 +66,7 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Files to be Compared:</div>
                 <div class="plag-data">
-                    <div id="files_to_be_compared">
+                    <div id="files-to-be-compared">
                         <span class="option-alt">
                             <a target=_blank href="https://submitty.org/instructor/course_management/plagiarism">How do I specify a regex expression?
                                 <i style="font-style: normal;" class="fa-question-circle"></i>
@@ -75,19 +74,19 @@
                         </span>
                         <span class="right">
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_submissions_dir" name="regex_dir[]" value="submissions" {{ "submissions" in regex_dirs ? "checked" : ""}} />
-                                <label for="regex_submissions_dir">Submissions</label>
+                                <input type="checkbox" id="regex-submissions-dir" name="regex_dir[]" value="submissions" {{ "submissions" in regex_dirs ? "checked" : ""}} />
+                                <label for="regex-submissions-dir">Submissions</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_results_dir" name="regex_dir[]" value="results" {{ "results" in regex_dirs ? "checked" : "" }} />
-                                <label for="regex_results_dir">Results</label>
+                                <input type="checkbox" id="regex-results-dir" name="regex_dir[]" value="results" {{ "results" in regex_dirs ? "checked" : "" }} />
+                                <label for="regex-results-dir">Results</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex_checkout_dir" name="regex_dir[]" value="checkout" {{ "checkout" in regex_dirs ? "checked" : "" }} />
-                                <label for="regex_checkout_dir">Checkout</label>
+                                <input type="checkbox" id="regex-checkout-dir" name="regex_dir[]" value="checkout" {{ "checkout" in regex_dirs ? "checked" : "" }} />
+                                <label for="regex-checkout-dir">Checkout</label>
                             </span>
                         </span>
-                        <input type="text" id="regex_to_select_files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}" placeholder="Leave blank to select all files"/>
+                        <input type="text" id="regex-to-select-files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}" placeholder="Leave blank to select all files"/>
                     </div>
                 </div>
             </div>
@@ -115,9 +114,9 @@
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Sequence Length:</div>
-                <label for="sequence_length">This is the minimum size of matching regions</label>
+                <label for="sequence-length">This is the minimum size of matching regions</label>
                 <div class="plag-data">
-                    <input type="number" id="sequence_length" name="sequence_length" value="{{ sequence_length }}" placeholder="(Required)" min="1"/>
+                    <input type="number" id="sequence-length" name="sequence_length" value="{{ sequence_length }}" placeholder="(Required)" min="1"/>
                 </div>
             </div>
             {##################################################################}
@@ -125,15 +124,15 @@
                 <div class="plag-data-label">Prior Terms Gradeables:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="no_past_terms_id" value="no_past_terms" name="past_terms_option" {{ prior_terms ? "" : "checked" }}>
-                        <label for="no_past_terms_id">No</label>
+                        <input type="radio" id="no-past-terms-id" value="no_past_terms" name="past_terms_option" {{ prior_terms ? "" : "checked" }}>
+                        <label for="no-past-terms-id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="past_terms_id" value="past_terms" name="past_terms_option" {{ prior_terms ? "checked" : "" }}>
-                        <label for="past_terms_id">Yes</label>
+                        <input type="radio" id="past-terms-id" value="past_terms" name="past_terms_option" {{ prior_terms ? "checked" : "" }}>
+                        <label for="past-terms-id">Yes</label>
                     </span>
-                    <div class="past-terms-wrapper" id="prev_gradeable_div">
-                        <div id="add_more_prev_gradeable" class="add-more" aria-label="Add more">
+                    <div class="past-terms-wrapper" id="prev-gradeable-div">
+                        <div id="add-more-prev-gradeable" class="add-more" aria-label="Add more">
                             <i class="fas fa-plus-square"></i>Add more
                         </div>
                         {# {% if new_or_edit == "edit" %}
@@ -203,35 +202,22 @@
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Users to be Ignored:</div>
-                <div id="ignore_submission_div" class="plag-data">
-                    <span class="radio-label-pair">
-                        <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {{ ignore_submissions ? "" : "checked" }}>
-                        <label for="ignore_none_id">No</label>
-                    </span>
-                    <span class="radio-label-pair">
-                        <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {{ ignore_submissions ? "checked" : "" }}>
-                        <label for="ignore_id">Yes</label>
-                    </span>
-
-                    <div id="add_more_ignore" class="add-more" aria-label="Add more">
-                        <i class="fas fa-plus-square"></i>Add more
-                    </div>
-
-                    <div id="text_ignore_submission">
-                        {% if new_or_edit == "edit" %}
-                            {# {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
-                                <div name="wrapper_ignore_submission_{{ loop.index0 }}">
-                                    <input type="text" name="ignore_submission_{{ loop.index0 }}" class="low-margin-top deletable-text" value="{{ saved_ignore_submission }}"/>
-                                    <i class="fa fa-trash delete-btn"></i>
-                                </div>
-                            {% endfor %} #}
-                        {% else %}
-                            <div name="wrapper_ignore_submission_0">
-                                <input type="text" name="ignore_submission_0" class="low-margin-top deletable-text"/>
-                                <i class="fa fa-trash delete-btn"></i>
-                            </div>
-                        {% endif %}
-                    </div>
+                <div class="plag-data radio-label-pair">
+                    <input type="checkbox" id="ignore-instructors" value="ignore_instructors" name="ignore_submission_option[]" {{ "instructors" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore-instructors">Instructors</label>
+                </div>
+                <div class="plag-data radio-label-pair">
+                    <input type="checkbox" id="ignore-full-access-graders" value="ignore_full_access_graders" name="ignore_submission_option[]" {{ "full_access_graders" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore-full-access-graders">Full Access Graders</label>
+                </div>
+                <div class="plag-data radio-label-pair">
+                    <input type="checkbox" id="ignore-limited-access-graders" value="ignore_limited_access_graders" name="ignore_submission_option[]" {{ "limited_access_graders" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore-limited-access-graders">Limited Access Graders</label>
+                </div>
+                <div class="plag-data radio-label-pair" id="ignore-others-container">
+                    <input type="checkbox" id="ignore-others" value="ignore_others" name="ignore_submission_option[]" {{ "others" in ignore_submissions ? "checked" : "" }}>
+                    <label for="ignore-others">Others:</label>
+                    <input type="text" id="ignore-others-list" value="{{ ignore_submissions_list }}" placeholder="List user ID's separated by commas and spaces" name="ignore_others_list">
                 </div>
             </div>
             {##################################################################}
@@ -260,63 +246,27 @@
     });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
-    $("#no_code_provided_id").change(function() {
-        $("#current_code_file").hide();
-        $("#provided_code_file").hide();
+    $("#no-code-provided-id").change(function() {
+        $("#current-code-file").hide();
+        $("#provided-code-file").hide();
     });
 
-    $("#code_provided_id").change(function() {
-        $("#current_code_file").show();
-        $("#provided_code_file").show();
+    $("#code-provided-id").change(function() {
+        $("#current-code-file").show();
+        $("#provided-code-file").show();
     });
 
     // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
-    $('#add_more_prev_gradeable', form).on('click', function(){
+    $('#add-more-prev-gradeable', form).on('click', function(){
         addMorePriorTermGradeable(prior_term_gradeables);
     });
 
-    $("#no_past_terms_id").change(function() {
+    $("#no-past-terms-id").change(function() {
         $(".past-terms-wrapper").hide();
     });
 
-    $("#past_terms_id").change(function() {
+    $("#past-terms-id").change(function() {
         $(".past-terms-wrapper").show();
-    });
-
-    // IGNORED SUBMISSIONS /////////////////////////////////////////////////////
-    $("#ignore_none_id").change(function() {
-        if ($("#ignore_none_id").is(":checked")) {
-            $("#text_ignore_submission").hide();
-            $("#add_more_ignore").hide();
-        }
-    });
-
-    $("#ignore_id").change(function() {
-        if ($("#ignore_id").is(":checked")) {
-            $("#text_ignore_submission").show();
-            $("#add_more_ignore").show();
-        }
-    });
-
-    $('#add_more_ignore', form).on('click', function(){
-        const ignore_submission_number = $('[name="ignore_submission_number"]', form).val();
-        $('#text_ignore_submission', form).append(`
-            <div name="wrapper_ignore_submission_` + ignore_submission_number + `">
-                <input type="text" name="ignore_submission_` + ignore_submission_number + `" class="low-margin-top deletable-text"/>
-                <i class="fa fa-trash delete-btn"></i>
-            </div>
-        `);
-        $('[name="ignore_submission_number"]', form).val(parseInt(ignore_submission_number)+1);
-    });
-
-    $(".delete-btn").on("click", function() {
-        // delete the div with the text field whose delete icon was clicked
-        $(this).parent().remove();
-        // renumber all other fields
-        $(".deletable-text").each(function(index) {
-            $(this).attr("name", "ignore_submission_"+index);
-            $(this).parent().attr("name", "wrapper_ignore_submission_"+index);
-        });
     });
 
     // OTHER RANDOM JS //////////////////////////////////////////////////////////////
@@ -340,7 +290,7 @@
             to_append += '<option value="'+ sem +'">'+ sem +'</option>';
         });
         to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
-        $('#prev_gradeable_div', form).append(to_append);
+        $('#prev-gradeable-div', form).append(to_append);
         $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
         $("select", form).change(function(){
             const select_element_name = $(this).attr("name");

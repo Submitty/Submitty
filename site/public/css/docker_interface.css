@@ -1,26 +1,26 @@
-#tag-list{
+#tag-list {
     margin-left: 20px;
 }
 
-.docker-header{
+.docker-header {
     display: inline-block;
     margin-right: 10px;
 }
 
-.docker-images-container > div{
+.docker-images-container > div {
     padding: 10px;
     margin-top: 10px;
 }
 
-
 /* desktop view */
 @media (min-width: 550px) {
-    .docker-images-container{
+    .docker-images-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px,1fr));
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
         grid-gap: 1rem;
     }
-    .docker-images-container > div{
+
+    .docker-images-container > div {
         padding: 10px;
     }
 }

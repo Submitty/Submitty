@@ -98,7 +98,8 @@ class Output {
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
             'cache' => $debug ? false : $cache_path,
-            'debug' => $debug
+            'debug' => $debug,
+            'strict_variables' => $debug
         ]);
 
         if ($debug) {
