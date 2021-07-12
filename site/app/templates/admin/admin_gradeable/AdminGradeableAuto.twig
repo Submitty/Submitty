@@ -45,9 +45,9 @@
                 </select>
             </div>
         </fieldset>
-        <fieldset>
+        <fieldset id="gradeable-lock-max-points-field" style="{% if gradeable.getDependsOn() is null %}display: none;{% endif %}">
             <legend>Autograder Points Required to Unlock:</legend>
-            <input type="number" name="depends_on_points" value="{{ gradeable.getDependsOnPoints() }}">
+            <input type="number" name="depends_on_points" value="{% if gradeable.getDependsOnPoints() is not null %}{{ gradeable.getDependsOnPoints() }}{% else %}0{% endif %}" id="gradeable-lock-points">
             <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ max_points }} for {{ gradeable.getDependsOn() }}</p>
         </fieldset>
     </div>
@@ -135,6 +135,8 @@
 </div>
 
 <script>
+    var max_autograder_points = {{ max_points }};
+
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
             // $('#pdf_page').show();
@@ -278,25 +280,16 @@
         }
     }
 
-    function calculateMaxPoints() {
-        let gradeable = $('#gradeable-lock').val();
-        if (gradeable !== '') {
-            const url = buildCourseUrl(['gradeable', gradeable, 'max_points']);
-            $.ajax({
-                url,
-                type: 'GET',
-                processData: false,
-                contentType: false,
-                success: function(res) {
-                    let response = JSON.parse(res);
-                    $('#gradeable-lock-max-points').text(`Out of ${response.data} for ${gradeable}`);
-                    $('#gradeable-lock-max-points').show();
-                }
-            });
+    function checkPoints() {
+        let points = $('#gradeable-lock-points').val();
+        if (points === '') {
+            return false;
         }
-        else {
-            $('#gradeable-lock-max-points').hide();
+        points = parseInt(points);
+        if (points < 0 || points > max_autograder_points) {
+            return false;
         }
+        return true;
     }
 
     $(document).ready(function() {
@@ -336,7 +329,5 @@
         $('.drop-down-box').on("click", dropDownBoxOnClick);
         $('#drop-down-arrow').on("click", dropDownArrowOnClick);
         $('.drop-down-option').on("click",dropDownOptionOnClick);
-
-        $('#gradeable-lock').change(calculateMaxPoints);
     });
 </script>

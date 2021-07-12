@@ -4483,6 +4483,8 @@ AND gc_id IN (
     }
 
     public function deleteGradeable($g_id) {
+        $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
+                                eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
     }
 

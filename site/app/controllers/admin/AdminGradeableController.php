@@ -216,7 +216,9 @@ class AdminGradeableController extends AbstractController {
             $depend_gradeable = $this->tryGetGradeable($gradeable->getDependsOn(), false);
             if ($depend_gradeable !== false) {
                 $depend_auto = $depend_gradeable->getAutogradingConfig();
-                $max_points = $depend_auto->getTotalHiddenNonExtraCredit() + $depend_auto->getTotalNonHidden();
+                if ($depend_gradeable != null) {
+                    $max_points = $depend_auto->getTotalHiddenNonExtraCredit() + $depend_auto->getTotalNonHidden();
+                }
             }
         }
         $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
@@ -1062,7 +1064,8 @@ class AdminGradeableController extends AbstractController {
 
         $numeric_properties = [
             'precision',
-            'grader_assignment_method'
+            'grader_assignment_method',
+            'depends_on_points'
         ];
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
@@ -1098,6 +1101,20 @@ class AdminGradeableController extends AbstractController {
                     $temp_gradeable = $this->tryGetGradeable($post_val, false);
                     if ($temp_gradeable == false) {
                         $post_val = null;
+                    }
+                    else {
+                        $depends_on_points = $details['depends_on_points'];
+                        if ($depends_on_points == null) {
+                            $depends_on_points = $gradeable->getDependsOnPoints();
+                        }
+                        if ($depends_on_points == null) {
+                            $gradeable->setDependsOnPoints(0);
+                        }
+                        else {
+                            if ($depends_on_points < 0 || $depends_on_points > $temp_gradeable->getDependsOnPoints()) {
+                                $errors['depends_on_points'] = "Invalid depends on points!";
+                            }
+                        }
                     }
                 }
                 catch (\Exception $e) {

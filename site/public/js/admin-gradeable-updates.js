@@ -1,6 +1,7 @@
 
 let updateInProgressCount = 0;
 let errors = {};
+var previous_gradeable = "";
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
@@ -104,10 +105,44 @@ $(document).ready(function () {
     };
 
     ajaxCheckBuildStatus();
-    $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
+    $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(async function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
+        if (previous_gradeable === '') {
+            previous_gradeable = $('#gradeable-lock').val();
+        }
+        let gradeable = $('#gradeable-lock').val();
+        if (previous_gradeable !== gradeable) {
+            $('#gradeable-lock-points').val(0);
+        }
+        if (gradeable !== '') {
+            $('#gradeable-lock-max-points-field').show();
+            const url = buildCourseUrl(['gradeable', gradeable, 'max_points']);
+            await $.ajax({
+                url,
+                type: 'GET',
+                processData: false,
+                contentType: false,
+                success: await function(res) {
+                    let response = JSON.parse(res);
+                    $('#gradeable-lock-max-points').text(`Out of ${response.data} for ${gradeable}`);
+                    $('#gradeable-lock-max-points').show();
+                    max_autograder_points = response.data;
+                }
+            });
+            previous_gradeable = gradeable;
+        }
+        else {
+            $('#gradeable-lock-points').val(0);
+            $('#gradeable-lock-max-points-field').hide();
+        }
+
+        if (!checkPoints()) {
+            displayErrorMessage("Points must be between 0 and the max autograder points for that gradeable.");
+            return;
+        }
+
         // If its rubric-related, then make different request
         if ($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
             // ... but don't automatically save electronic rubric data
