@@ -66,3 +66,15 @@ td {
 .docker-table tr:nth-child(odd) td {
     background: var(--standard-light-gray);
 }
+
+.image-form {
+    height: 20vh;
+    width: 100%;
+    resize: none;
+    padding: 1%;
+}
+
+.send-button {
+    float: right;
+    margin-top: 1%;
+}

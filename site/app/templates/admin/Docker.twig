@@ -37,6 +37,7 @@
 <div class="content">
     <h2 class="docker-header">Images</h2>
 </div>
+
 <div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
     {% for worker in worker_machines %}
@@ -44,6 +45,7 @@
         {{ _self.renderDockerImage(worker['images']) }}
     {% endfor %}
 </div>
+
 <div class="content">
     <h2 class="docker-header">Capabilities Not Associated With a Container</h2>
     <p>The follow capabilities were found to not have any containers associated with them:</p>
@@ -53,6 +55,13 @@
         {% endfor %}
     </ul>
 </div>
+
+<div class="content">
+    <h2 class="docker-header">Add Image</h2>
+    <textarea class="image-form" type="text"></textarea>
+    <button class="send-button btn btn-primary">Send</button>
+</div>
+
 <div class="content">
     <h2 class="docker-header">Autograding Docker Images</h2>
     <button class="btn btn-default" 
