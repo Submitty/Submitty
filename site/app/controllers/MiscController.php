@@ -248,11 +248,19 @@ class MiscController extends AbstractController {
             }
         }
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
-
-        $name = "details/test" . sprintf("%02d", $test_case) . "/$file_name";
-        $files = $autograde->getResultsFiles();
-        if (isset($files[$name])) {
-            $file_path = $files[$name]['path'];
+        $file_path = null;
+        $testcase = $autograde->getTestcases()[$test_case - 1];
+        if (!$testcase->getTestcase()->isHidden() && $testcase->hasAutochecks()) {
+            foreach ($testcase->getAutochecks() as $autocheck) {
+                $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
+                $actual_file_name = array_pop($path);
+                if ($file_name === $actual_file_name) {
+                    $file_path = $autocheck->getDiffViewer()->getActualFilename();
+                    break;
+                }
+            }
+        }
+        if ($file_path !== null) {
             if (file_exists($file_path)) {
                 $this->core->getOutput()->useHeader(false);
                 $this->core->getOutput()->useFooter(false);
