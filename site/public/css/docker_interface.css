@@ -31,16 +31,10 @@ td {
     text-align: center;
 }
 
-.image {
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    padding: 8px;
-    margin: 0.5em 0.5em 0 0.5em;
-}
-
 .machine {
     font-size: 2em;
 }
+
 [data-enabled="false"] {
     background-color: var(--danger-red);
 }
@@ -56,4 +50,19 @@ td {
     .docker-images-container > div {
         padding: 10px;
     }
+}
+
+.docker-table td:nth-of-type(1)::before { content: "Image Name"; }
+.docker-table td:nth-of-type(2)::before { content: "ID"; }
+.docker-table td:nth-of-type(3)::before { content: "Size"; }
+.docker-table td:nth-of-type(4)::before { content: "Tag"; }
+.docker-table td:nth-of-type(5)::before { content: "Created Date"; }
+.docker-table td:nth-of-type(6)::before { content: "Alias"; }
+
+.docker-table tr:nth-child(even) td {
+    background: var(--standard-hover-light-gray);
+}
+
+.docker-table tr:nth-child(odd) td {
+    background: var(--standard-light-gray);
 }

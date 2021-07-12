@@ -11,6 +11,11 @@ class DockerView extends AbstractView {
         $this->output->addBreadcrumb("Docker Interface");
         $this->output->setPageName('Docker Interface');
 
+        $this->core->getOutput()->addInternalCss('docker_interface.css');
+        $this->core->getOutput()->addInternalJs('docker_interface.js');
+        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->enableMobileViewport();
+
         $found_images = [];
         $not_found = [];
         $autograding_containers = $docker_data['autograding_containers']['default'];

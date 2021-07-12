@@ -33,10 +33,6 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
-        $this->core->getOutput()->addInternalCss('docker_interface.css');
-        $this->core->getOutput()->addInternalJs('docker_interface.js');
-        $this->core->getOutput()->enableMobileViewport();
-
         try {
             $response = $this->core->curlRequest(
                 FileUtils::joinPaths($this->core->getConfig()->getCgiUrl(), "docker_ui.cgi")

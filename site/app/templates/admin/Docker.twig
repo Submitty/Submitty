@@ -14,9 +14,9 @@
         <tr>
             <th></th>
             {% for capability in capabilities %}
-            <td>{{capability}}</td>
+            <th>{{capability}}</th>
             {% endfor %}
-            <td>Num Autograding Workers</td>
+            <th>Num Autograding Workers</th>
         </tr>
         {% for worker in worker_machines %}
         <tr data-enabled = {{worker['enabled'] == true ? 'true' : 'false'}}>
@@ -34,6 +34,9 @@
     </table>
 </div>
 
+<div class="content">
+    <h2 class="docker-header">Images</h2>
+</div>
 <div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
     {% for worker in worker_machines %}
@@ -101,25 +104,37 @@
 
 
 {% macro renderDockerImage(data) %}
-    {% for key, value in data %}
-        <div class="image">
-            <h3>{{ value["name"] }}</h3>
-            <p> ID:  {{ value["short_id"] | trim("sha256:") }} </p>
-            <p> Size:  {{ value["size"] }} 
-                <em> (Virtual Size: {{ value["virtual_size"] }} ) </em> 
-            </p>
-            <p> Tag: {{ value["tag"] }} </p>
-            <br>
-            <p> Created on: {{ value["created"] }} </p>
-            <br>
-            {% if value["additional_names"] | length > 0 %}
-            <p>This container has also been tagged as :</p>
-            <ul id="tag-list">
-                {% for name in value["additional_names"] %}
-                <li>{{ name }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        </div>
-    {% endfor %}
+    <table class="table docker-table mobile-table">
+        <thead>
+            <tr>
+                <th>Image Name</th>
+                <th>ID</th>
+                <th>Size</th>
+                <th>Tag</th>
+                <th>Created Date</th>
+                <th>Alias</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key, value in data %}
+            <tr>
+                <td>{{ value["name"] }}</th>
+                <td>{{ value["short_id"] | trim("sha256:") }} </td>
+                <td>{{ value["size"] }} (Virtual Size: {{ value["virtual_size"] }})
+                </td>
+                <td>{{ value["tag"] }} </td>
+                <td> Created on: {{ value["created"] }} </td>
+                <td>
+                {% if value["additional_names"] | length > 0 %}
+                <ul id="tag-list">
+                    {% for name in value["additional_names"] %}
+                    <li>{{ name }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endmacro %}
