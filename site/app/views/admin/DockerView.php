@@ -86,6 +86,7 @@ class DockerView extends AbstractView {
         $capabilities = [];
         $worker_machines = [];
         $no_container_capabilities = [];
+        $image_to_capability = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
             $worker_temp = [];
             $worker_temp['name'] = $name;
@@ -102,6 +103,7 @@ class DockerView extends AbstractView {
                 if (array_key_exists($capability, $docker_data['autograding_containers'])) {
                     foreach ($docker_data['autograding_containers'][$capability] as $image) {
                         $image_names[] = $image;
+                        $image_to_capability[$image][] = $capability;
                     }
                 }
                 else {
@@ -123,7 +125,16 @@ class DockerView extends AbstractView {
         }
 
         $capabilities = array_unique($capabilities);
+        foreach ($image_to_capability as $map) {
+            $map = array_unique($map);
+        }
         asort($capabilities);
+        $capability_to_color = [];
+        $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
+        for ($i = 0; $i < count($capabilities); $i++) {
+            $i = min($i, 19);
+            $capability_to_color[$capabilities[$i]] = $colors[$i];
+        }        
 
         foreach ($worker_machines as $worker) {
             foreach ($capabilities as $capability) {
@@ -139,7 +150,9 @@ class DockerView extends AbstractView {
                 "docker_info" => $docker_data['docker_info'],
                 "capabilities" => $capabilities,
                 "worker_machines" => $worker_machines,
-                "no_container_capabilities" => $no_container_capabilities
+                "no_container_capabilities" => $no_container_capabilities,
+                "image_to_capability" => $image_to_capability,
+                "capability_to_color" => $capability_to_color
             ]
         );
     }

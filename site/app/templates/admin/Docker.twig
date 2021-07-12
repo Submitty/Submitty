@@ -36,13 +36,41 @@
 
 <div class="content">
     <h2 class="docker-header">Images</h2>
+    <div class="filter">
+        <div style="display:inline-block;">Filter: </div>
+        <div style="display:inline-block;">
+            {% for capability in capabilities %}
+                <button title="{{capability}}" class="btn" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
+                    {{capability}}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+    <table>
+        <thead>
+            <th>Image Name</th>
+            <th style="width:70%">Capabilities</th>
+        </thead>
+        <tbody>
+        {% for key, capabilities in image_to_capability %}
+            <tr>
+                <td>{{key}}</td>
+                <td>
+                {% for capability in capabilities %}
+                    <i title="{{capability}}" class="fas fa-circle" style="color:{{capability_to_color[capability]}}"></i>
+                {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
     {% for worker in worker_machines %}
         <div class="machine">{{worker['name']}}</div>
-        {{ _self.renderDockerImage(worker['images']) }}
+        {{ _self.renderDockerMachine(worker['images']) }}
     {% endfor %}
 </div>
 
@@ -74,7 +102,7 @@
         <p class="black-message">These are the docker images that are installed and listed under autograding_containers.json</p>
 
         <div class="docker-images-container">
-            {{ _self.renderDockerImage(autograding_containers['found']) }}
+            {{ _self.renderDockerMachine(autograding_containers['found']) }}
         </div>
     </div>
 </div>
@@ -90,7 +118,7 @@
     <div id="system-images" style="display:block;">
         <p class="black-message">These are the docker images that are installed on the primary submitty machine</p> 
         <div class="docker-images-container">
-            {{ _self.renderDockerImage(autograding_containers['all_images']) }}
+            {{ _self.renderDockerMachine(autograding_containers['all_images'], capability_to_color) }}
         </div>
     </div>
 </div>
@@ -112,7 +140,7 @@
 {% endif %}
 
 
-{% macro renderDockerImage(data) %}
+{% macro renderDockerMachine(data) %}
     <table class="table docker-table mobile-table">
         <thead>
             <tr>
