@@ -45,6 +45,9 @@ class FileUtils {
         if (is_dir($dir)) {
             foreach (new \FilesystemIterator($dir) as $file) {
                 /** @var \SplFileInfo $file */
+                if ($file->isLink()) {
+                    continue;
+                }
                 $entry = $file->getFilename();
                 $path = FileUtils::joinPaths($dir, $entry);
                 // recurse into subdirectories

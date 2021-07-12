@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -337,8 +338,7 @@ class ForumController extends AbstractController {
             }
             else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $expiration);
-
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $pinned, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date, $expiration, $announcement);
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -375,6 +375,45 @@ class ForumController extends AbstractController {
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
+     * @AccessControl(permission="forum.modify_announcement")
+     */
+    public function makeAnnouncement(): JsonResponse {
+        if (!isset($_POST['id'])) {
+            $this->core->addErrorMessage("thread_id not provided");
+            return JsonResponse::getFailResponse("thread_id not provided");
+        }
+        // Check that the post is the first post of the thread
+        $thread_info = $this->core->getQueries()->findParentPost($_POST['id']);
+        if (count($thread_info) == 0) {
+            $this->core->addErrorMessage("No post found");
+            return JsonResponse::getFailResponse("No post found");
+        }
+        // Check that the post is indeed less than an hour old on the server
+        $dateTime = new \DateTime($thread_info['timestamp']);
+        $now = $this->core->getDateTimeNow();
+
+        if ($dateTime->add(new \DateInterval("PT1H")) < $now) {
+            $this->core->addErrorMessage("Post is too old");
+            return JsonResponse::getFailResponse("Post is too old.");
+        }
+
+        $full_course_name = $this->core->getFullCourseName();
+        $thread_post_content = str_replace("\r", "", $thread_info['content']);
+        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $_POST['id']]), 'thread_id' => $_POST['id']]);
+
+        $thread_title = $this->core->getQueries()->findThread($_POST['id'])['title'];
+        $subject = "New Announcement: " . Notification::textShortner($thread_title);
+        $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
+        $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
+        $this->core->getNotificationFactory()->onNewAnnouncement($event);
+        $this->core->addSuccessMessage("Announcement successfully queued for sending");
+        $this->core->getQueries()->setAnnounced($_POST['id']);
+        $this->core->getQueries()->updateResolveState($_POST['id'], 0);
+        return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
     }
 
     /**
@@ -486,7 +525,7 @@ class ForumController extends AbstractController {
         $GLOBALS['post_box_id'] = $_POST['post_box_id'];
         $unviewed_posts = [$post_id];
         $first = $post['parent_id'] == -1;
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true, $this->core->getQueries()->existsAnnouncementsId($thread_id));
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -920,6 +959,7 @@ class ForumController extends AbstractController {
         $thread_status = $this->getSavedThreadStatus([]);
         $new_posts = [];
         $unread_threads = $this->showUnreadThreads();
+        $thread_announced = true;
 
         $max_thread = 0;
         $show_deleted = $this->showDeleted();
@@ -943,6 +983,7 @@ class ForumController extends AbstractController {
                 $new_posts[] = $up["id"];
             }
             $thread = $this->core->getQueries()->getThread($thread_id);
+            $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
             if (!empty($thread)) {
                 if ($thread['merged_thread_id'] != -1) {
                     // Redirect merged thread to parent
@@ -990,10 +1031,10 @@ class ForumController extends AbstractController {
         $threads = $this->getSortedThreads($category_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         if (!empty($_REQUEST["ajax"])) {
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true, $thread_announced);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false, $thread_announced);
         }
     }
 
