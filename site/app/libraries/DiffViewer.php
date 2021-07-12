@@ -530,13 +530,23 @@ class DiffViewer {
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
 
+        $num_blanks = 0;
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
+                $num_blanks = $this->add[$type][-1];
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
-                for ($k = 0; $k < $this->add[$type][-1]; $k++) {
+                for ($k = 0; $k < $num_blanks; $k++) {
                     $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
                 $html .= "\t</div>\n";
+            }
+        }
+        if (count($lines) + $num_blanks > 1000) {
+            if ($type === self::EXPECTED) {
+                $html = "<p style='color: black;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>" . $html;
+            }
+            elseif ($type === self::ACTUAL) {
+                $html = "<p style='color: black;'>This file has been truncated. Please download it to see the full file.</p>" . $html;
             }
         }
         /*
@@ -544,103 +554,101 @@ class DiffViewer {
          * there's a difference on that line or that the line doesn't exist.
          */
         $max_digits = strlen((string) count($lines));
-        if (count($lines) > 5000) {
-            $html .= "<p>This file is too long to display. Please download it instead.</p>";
-        }
-        else {
-            for ($i = 0; $i < count($lines); $i++) {
-                $j = $i + 1;
-                if ($start === null && isset($this->diff[$type][$i])) {
-                    $start = $i;
-                    $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
-                }
-                if (isset($this->diff[$type][$i])) {
-                    $html .= "\t<div class='bad'>";
-                }
-                else {
-                    $html .= "\t<div>";
-                }
-                $html .= "<span class='line_number'>";
-                $digits_at_line = strlen((string) $j);
-                for ($counter = ($max_digits - $digits_at_line); $counter > 0; $counter--) {
-                    $html .= "&nbsp;";
-                }
-                $html .= "{$j}</span>";
-                $html .= "<span class='line_code'>";
-                if (isset($this->diff[$type][$i])) {
-                    // highlight the line
-                    $current = 0;
-                    // character highlighting
-                    foreach ($this->diff[$type][$i] as $diff) {
-                        $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
-                        $test = str_replace("\0", "null", $html_orig);
-                        $html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
-                        $test2 = str_replace("\0", "null", $html_orig_error);
-                        if ($option == self::SPECIAL_CHARS_ORIGINAL) {
-                            $html .= $html_orig;
-                            $html .= "<span class='highlight-char'>" . $html_orig_error . "</span>";
-                        }
-                        elseif ($option == self::SPECIAL_CHARS_UNICODE) {
-                            $html_no_empty = $this->replaceEmptyChar($html_orig, false);
-                            $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, false);
-                            $html .= $html_no_empty;
-                            $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
-                        }
-                        elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
-                            $html_no_empty = $this->replaceEmptyChar($html_orig, true);
-                            $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, true);
-                            $html .= $html_no_empty;
-                            $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
-                        }
-                        $current = $diff[1] + 1;
+        for ($i = 0; $i < count($lines); $i++) {
+            if ($i === 1000 - $num_blanks) {
+                break;
+            }
+            $j = $i + 1;
+            if ($start === null && isset($this->diff[$type][$i])) {
+                $start = $i;
+                $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
+            }
+            if (isset($this->diff[$type][$i])) {
+                $html .= "\t<div class='bad'>";
+            }
+            else {
+                $html .= "\t<div>";
+            }
+            $html .= "<span class='line_number'>";
+            $digits_at_line = strlen((string) $j);
+            for ($counter = ($max_digits - $digits_at_line); $counter > 0; $counter--) {
+                $html .= "&nbsp;";
+            }
+            $html .= "{$j}</span>";
+            $html .= "<span class='line_code'>";
+            if (isset($this->diff[$type][$i])) {
+                // highlight the line
+                $current = 0;
+                // character highlighting
+                foreach ($this->diff[$type][$i] as $diff) {
+                    $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
+                    $test = str_replace("\0", "null", $html_orig);
+                    $html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
+                    $test2 = str_replace("\0", "null", $html_orig_error);
+                    if ($option == self::SPECIAL_CHARS_ORIGINAL) {
+                        $html .= $html_orig;
+                        $html .= "<span class='highlight-char'>" . $html_orig_error . "</span>";
                     }
-                    $html .= "<span class='line_code_inner'>";
-                    $inner = htmlentities(substr($lines[$i], $current));
-                    if ($option === self::SPECIAL_CHARS_UNICODE) {
-                        $inner = $this->replaceEmptyChar($inner, false);
+                    elseif ($option == self::SPECIAL_CHARS_UNICODE) {
+                        $html_no_empty = $this->replaceEmptyChar($html_orig, false);
+                        $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, false);
+                        $html .= $html_no_empty;
+                        $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
-                    elseif ($option === self::SPECIAL_CHARS_ESCAPE) {
-                        $inner = $this->replaceEmptyChar($inner, true);
+                    elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
+                        $html_no_empty = $this->replaceEmptyChar($html_orig, true);
+                        $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, true);
+                        $html .= $html_no_empty;
+                        $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
-                    $html .= "{$inner}</span>";
+                    $current = $diff[1] + 1;
                 }
-                else {
-                    if (isset($lines[$i])) {
-                        if ($option == self::SPECIAL_CHARS_ORIGINAL) {
-                            $html .= htmlentities($lines[$i]);
-                        }
-                        elseif ($option == self::SPECIAL_CHARS_UNICODE) {
-                            $html .= $this->replaceEmptyChar(htmlentities($lines[$i]), false);
-                        }
-                        elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
-                            $html .= $this->replaceEmptyChar(htmlentities($lines[$i]), true);
-                        }
+                $html .= "<span class='line_code_inner'>";
+                $inner = htmlentities(substr($lines[$i], $current));
+                if ($option === self::SPECIAL_CHARS_UNICODE) {
+                    $inner = $this->replaceEmptyChar($inner, false);
+                }
+                elseif ($option === self::SPECIAL_CHARS_ESCAPE) {
+                    $inner = $this->replaceEmptyChar($inner, true);
+                }
+                $html .= "{$inner}</span>";
+            }
+            else {
+                if (isset($lines[$i])) {
+                    if ($option == self::SPECIAL_CHARS_ORIGINAL) {
+                        $html .= htmlentities($lines[$i]);
+                    }
+                    elseif ($option == self::SPECIAL_CHARS_UNICODE) {
+                        $html .= $this->replaceEmptyChar(htmlentities($lines[$i]), false);
+                    }
+                    elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
+                        $html .= $this->replaceEmptyChar(htmlentities($lines[$i]), true);
                     }
                 }
-                if ($option == self::SPECIAL_CHARS_UNICODE) {
-                    $html .= '<span class="whitespace">&#9166;</span>';
-                }
-                elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
-                    $html .= '<span class="whitespace">\\n</span>';
-                }
-                $html .= "</span></div>\n";
+            }
+            if ($option == self::SPECIAL_CHARS_UNICODE) {
+                $html .= '<span class="whitespace">&#9166;</span>';
+            }
+            elseif ($option == self::SPECIAL_CHARS_ESCAPE) {
+                $html .= '<span class="whitespace">\\n</span>';
+            }
+            $html .= "</span></div>\n";
 
-                if (isset($this->add[$type][$i])) {
-                    if ($start === null) {
-                        $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$i]}'>\n";
-                    }
-                    for ($k = 0; $k < $this->add[$type][$i]; $k++) {
-                        $html .= "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";
-                    }
-                    if ($start === null) {
-                        $html .= "\t</div>\n";
-                    }
+            if (isset($this->add[$type][$i])) {
+                if ($start === null) {
+                    $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$i]}'>\n";
                 }
-
-                if ($start !== null && !isset($this->diff[$type][($i + 1)])) {
-                    $start = null;
+                for ($k = 0; $k < $this->add[$type][$i]; $k++) {
+                    $html .= "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";
+                }
+                if ($start === null) {
                     $html .= "\t</div>\n";
                 }
+            }
+
+            if ($start !== null && !isset($this->diff[$type][($i + 1)])) {
+                $start = null;
+                $html .= "\t</div>\n";
             }
         }
         return $html . "</div></div>\n";
