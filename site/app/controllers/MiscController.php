@@ -465,7 +465,7 @@ class MiscController extends AbstractController {
                         );
                         foreach ($files as $name => $file) {
                             // Skip directories (they would be added automatically)
-                            if (!$file->isDir()) {
+                            if (!$file->isDir() && !$file->isLink()) {
                                 // Get real and relative path for current file
                                 $filePath = $file->getRealPath();
                                 $relativePath = substr($filePath, strlen($gradeable_path) + 1);

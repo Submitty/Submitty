@@ -152,7 +152,7 @@ function renderPDFToolbar() {
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
-        let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
+        let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`) || {};
         $.ajax({
             type: 'POST',
             url: url,
@@ -187,8 +187,8 @@ function renderPDFToolbar() {
         document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
         document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
-        let init_color = localStorage.getItem('main_color');
-        setColor(init_color || '#000000');
+        let init_color = localStorage.getItem('main_color') || "#000000";
+        setColor(init_color);
     }
 
     function colorMenuToggle(e){
@@ -216,8 +216,8 @@ function renderPDFToolbar() {
     let penColor = '#FF0000';
     let scrollLock= false;
     function initPen() {
-        let init_size = localStorage.getItem('pen/size');
-        let init_color = localStorage.getItem('main_color');
+        let init_size = localStorage.getItem('pen/size') || 5.0;
+        let init_color = localStorage.getItem('main_color') || "#000000";
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         if($('#scroll_lock_mode').is(':checked')) {
@@ -250,8 +250,8 @@ function renderPDFToolbar() {
     let textSize = 12;
     let textColor = '#FF0000';
     function initText() {
-        let init_size = localStorage.getItem('text/size');
-        let init_color = localStorage.getItem('main_color');
+        let init_size = localStorage.getItem('text/size') || 12;
+        let init_color = localStorage.getItem('main_color') || "#000000";
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
         document.addEventListener('colorchange', function(e){
