@@ -234,6 +234,7 @@ $(document).ready(() => {
         const index = items[2];
 
         // Enable recent button
+        $(`#mc_${index}_clear_button`).attr('disabled', false);
         $(`#mc_${index}_recent_button`).attr('disabled', false);
         const prev_checked_items = this.getAttribute('data-prev_checked');
         const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');

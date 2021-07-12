@@ -1109,11 +1109,6 @@ class SubmissionController extends AbstractController {
         $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
         $notebook = null;
         if ($is_notebook) {
-            //don't allow submissions if not on most recent version
-            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-            if ($active_version !== $highest_version) {
-                return $this->uploadResult("Must be on the latest version to make a new submission.", false);
-            }
             //need to force re-parse the notebook serverside again
             $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook($who_id);
 
