@@ -217,7 +217,7 @@
                         <p>No files were submitted</p>
                     {% endif %}
                 {% else %}
-                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
+                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label, viewing_inactive_version) }}
                 {% endif  %}
                 {% if old_files is not empty %}
                     <p>Current submitted files:</p>
@@ -342,7 +342,7 @@
 {% endmacro %}
 
 {# File submission for notebooks #}
-{% macro renderFileSubmission(max_file_uploads, index, old_files, label) %}
+{% macro renderFileSubmission(max_file_uploads, index, old_files, label, viewing_inactive_version) %}
     <div id="upload-boxes">
         {# uploadIndex and input-file + Index required for drag-and-drop.js #}
         <div tabindex="0"
@@ -357,7 +357,10 @@
             </h2>
             <input type="file" name="files" id="input-file{{index}}" 
                    class="hide" onchange="addFilesFromInput({{index}})"
-                   multiple aria-label="Select Files to upload" 
+                   multiple aria-label="Select Files to upload"
+                    {% if viewing_inactive_version %}
+                        disabled="disabled"
+                    {% endif %}
             />
             <table class="file-upload-table" id="file-upload-table-{{index}}">
             <tr style="background:transparent; display:none;">

@@ -190,26 +190,14 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', true);
         }
         else {
-            const value = $(clear_button_id).attr('data-older_version');
-            if (value) {
-                $(clear_button_id).attr('disabled', true);
-            }
-            else {
-                $(clear_button_id).attr('disabled', false);
-            }
+            $(clear_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
         }
 
         if (code === recent_submission) {
             $(recent_button_id).attr('disabled', true);
         }
         else {
-            const value = $(recent_button_id).attr('data-older_version');
-            if (value) {
-                $(recent_button_id).attr('disabled', true);
-            }
-            else {
-                $(recent_button_id).attr('disabled', false);
-            }
+            $(recent_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
             window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));

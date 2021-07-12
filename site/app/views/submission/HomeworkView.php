@@ -315,27 +315,14 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-            if ($version_instance) {
-                if ($graded_gradeable !== null) {
-                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                        $notebook,
-                        $this->core->getUser()->getId(),
-                        $version_instance->getVersion() ?? null,
-                        $graded_gradeable->getGradeableId()
-                    );
-                }
-            }
-            else {
-                if ($graded_gradeable !== null) {
-                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                        $notebook,
-                        $this->core->getUser()->getId(),
-                        0,
-                        $graded_gradeable->getGradeableId()
-                    );
-                }
+            if ($graded_gradeable !== null) {
+                $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                    $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                    $notebook,
+                    $this->core->getUser()->getId(),
+                    $version_instance !== null ? $version_instance->getVersion() : 0,
+                    $graded_gradeable->getGradeableId()
+                );
             }
 
             $notebook_inputs = $notebook_model->getInputs();
@@ -432,10 +419,7 @@ class HomeworkView extends AbstractView {
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
-        $viewing_inactive_version = false;
-        if ($highest_version !== $display_version) {
-            $viewing_inactive_version = true;
-        }
+        $viewing_inactive_version = $highest_version !== $display_version;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";

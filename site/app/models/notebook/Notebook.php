@@ -154,10 +154,10 @@ class Notebook extends AbstractModel {
     * @param array $new_notebook a notebook config to parse
     * @param int $version which version to get notebook submission values from
     * @param string $student_id which student's notebook to pull data from
-    * @param int $display_version selected version (may not be active version)
+    * @param ?int $display_version selected version (may not be active version)
     * @param string $gradeable_id
     */
-    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, int $display_version, string $gradeable_id): array {
+    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, ?int $display_version, string $gradeable_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
