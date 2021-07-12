@@ -76,15 +76,10 @@ def main():
     timelimit_case = None
     for testcase in CONFIG_FILE['testcases']:
         if testcase['title'] == "Check Time Limit":
-            timelimit_case = testcase
-            break
-    if timelimit_case is None:
-        for testcase in CONFIG_FILE['testcases']:
-            if 'validation' in testcase:
-                if len(testcase['validation']) > 0:
-                    if 'allowed_minutes' in testcase['validation'][0]:
-                        timelimit_case = testcase
-                        break
+            if 'validation' in testcase and len(testcase['validation']) > 0:
+                if 'allowed_minutes' in testcase['validation'][0]:
+                    timelimit_case = testcase
+                    break
 
     if timelimit_case is not None:
         allowed_minutes = timelimit_case['validation'][0]['allowed_minutes']
