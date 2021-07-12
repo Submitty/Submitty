@@ -2,6 +2,11 @@
 
 namespace app\controllers\admin;
 
+use app\libraries\Core;
+use app\libraries\response\MultiResponse;
+use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
@@ -80,12 +85,6 @@ class PlagiarismController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
-    }
-
-
-    private function getGradeablesFromPriorTerm() {
-        // TODO: Implement.
-        return [];
     }
 
     /**
@@ -631,7 +630,7 @@ class PlagiarismController extends AbstractController {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
         });
 
-        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
+        $prior_term_gradeables = [];
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null, null, null);
     }
 
@@ -662,7 +661,7 @@ class PlagiarismController extends AbstractController {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
         }
 
-        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
+        $prior_term_gradeables = [];
         $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
@@ -722,6 +721,26 @@ class PlagiarismController extends AbstractController {
         // }
         // $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
         // $this->core->redirect($return_url);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorSemesterCourses", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function getPriorSemesterCourses() {
+        // TODO: Implement.
+        // get all the course and term pairs that this course has access to (same group)
+        return JsonResponse::getSuccessResponse(["f19 csci1200", "s18 csci1200", "f20 csci1500"]);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function getPriorGradeables() {
+        // TODO: Implememt.
+        // from the parameter course and term, get the list of gradeables
+        return JsonResponse::getSuccessResponse(["hw1", "hw2", "hw3", "test1", "hw5", "midterm"]);
     }
 
 

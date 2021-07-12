@@ -112,9 +112,6 @@ class PlagiarismView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $this->core->getOutput()->addInternalCss("plagiarism.css");
         $this->core->getOutput()->enableMobileViewport();
-
-        $prior_term_gradeables_json = json_encode($prior_term_gradeables);
-
         // Default values for the form
         $gradeable_id = "";
         $config_id = "";
@@ -127,7 +124,6 @@ class PlagiarismView extends AbstractView {
         $language["plaintext"] = "selected";
         $threshold = 5;
         $sequence_length = 4;
-        //$prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables']) + 1 : 1;
         $prior_terms = false;
         $ignore_submissions_list = null;
 
@@ -151,15 +147,14 @@ class PlagiarismView extends AbstractView {
             $language[$saved_config['language']] = "selected";
             $threshold = (int) $saved_config['threshold'];
             $sequence_length = (int) $saved_config['sequence_length'];
-            $prior_terms = false; // $prior_term_gradeables_number > 1;
             $ignore_submissions_list = implode(", ", $ignore_submissions_others);
         }
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
+            "base_url" => $this->core->buildCourseUrl(['plagiarism', 'configuration']),
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}&config_id={$config_id}",
             "csrf_token" => $this->core->getCsrfToken(),
-            //"prior_term_gradeables_number" => $prior_term_gradeables_number,
             "provided_code" => $provided_code,
             "gradeable_ids_titles" => $gradeable_ids_titles,
             "title" => $title,
@@ -174,8 +169,7 @@ class PlagiarismView extends AbstractView {
             "ignore_submissions" => $ignore_submissions,
             "ignore_submissions_list" => $ignore_submissions_list,
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
-            "prior_term_gradeables" => $prior_term_gradeables,
-            "prior_term_gradeables_json" => $prior_term_gradeables_json
+            "prior_term_gradeables" => $prior_term_gradeables
         ]);
     }
 }

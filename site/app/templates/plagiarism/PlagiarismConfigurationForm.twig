@@ -4,7 +4,6 @@
     <div id="save-configuration-form">
         <form method="post" action="{{ form_action_link }}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-            {# <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" /> #}
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Select Gradeable:</div>
@@ -135,67 +134,20 @@
                         <div id="add-more-prev-gradeable" class="add-more" aria-label="Add more">
                             <i class="fas fa-plus-square"></i>Add more
                         </div>
-                        {# {% if new_or_edit == "edit" %}
-                            {% for saved_prev_term_gradeable_path in saved_config['prev_term_gradeables'] %}
-                                {% set reversed_per_term_grad_path = saved_prev_term_gradeable_path|reverse %}
-                                {% set exploded_reversed_per_term = reversed_per_term_grad_path|split('/') %}
-                                {% set saved_prev_sem = exploded_reversed_per_term[3]|reverse %};
-                                {% set saved_prev_course = exploded_reversed_per_term[2]|reverse %};
-                                {% set saved_prev_gradeable = exploded_reversed_per_term[0]|reverse %};
-
-                                <select name="prev_sem_{{ loop.index0 }}">
-                                    <option value="">None</option>
-                                    {% for sem, sem_courses in prior_term_gradeables %}
-                                        <option value="{{ sem }}"
-                                                {% if sem == saved_prev_sem %}
-                                                    selected
-                                                {% endif %}
-                                        >
-                                            {{ sem }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <select name="prev_course_{{ loop.index0 }}">
-                                    <option value="">None</option>
-                                    {% for sem_course, course_gradeables in prior_term_gradeables[saved_prev_sem] %}
-                                        <option value="{{ sem_course }}"
-                                                {% if sem_course == saved_prev_course %}
-                                                    selected
-                                                {% endif %}
-                                        >
-                                            {{ sem_course }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <select name="prev_gradeable_{{ loop.index0 }}">
-                                    <option value="">None</option>
-                                    {% for course_gradeable in prior_term_gradeables[saved_prev_sem][saved_prev_course] %}
-                                        <option value="{{ course_gradeable }}"
-                                                {% if course_gradeable == saved_prev_gradeable %}
-                                                    selected
-                                                {% endif %}
-                                        >
-                                            {{ course_gradeable }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <br />
+                        {% if new_or_edit == "edit" %}
+                            {# TODO: add the rest of the semester/course for each semester_course dropdown #}
+                            {% for semester_course, gradeable in prior_term_gradeables %}
+                                <div id="prior_g_option_{{ loop_index0 }}">
+                                    <select name="prior_semester_course[]" onchange="getGradeables(this)">
+                                        {% set tokens = semester_course|split(' ') %}
+                                        <option value="{{ semester_course }}">{{ tokens[0] }}, {{ tokens[1] }}</option>
+                                    </select>
+                                    <select name="prior_gradeable[]">
+                                        <option value="{{ gradeable }}">{{ gradeable }}</option>
+                                    </select>
+                                </div>
                             {% endfor %}
-                        {% endif %} #}
-                        {#{% set saved_prev_term_grad_length = saved_config['prev_term_gradeables']|length %}
-                        <select name="prev_sem_{{ saved_prev_term_grad_length }}">
-                            <option value="">None</option>
-                            {% for sem, sem_courses in prior_term_gradeables %}
-                                <option value="{{ sem }}">{{ sem }}</option>
-                            {% endfor %}
-                        </select>
-
-                        <select name="prev_course_{{ saved_prev_term_grad_length }}">
-                            <option value="">None</option>
-                        </select>
-                        <select name="prev_gradeable_{{ saved_prev_term_grad_length }}">
-                            <option value="">None</option>
-                        </select>#}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -231,19 +183,6 @@
 
 <script>
     const form = $("#save-configuration-form");
-    const prior_term_gradeables = JSON.parse('{{ prior_term_gradeables_json }}');
-    $("select").change(function(){
-        const select_element_name = $(this).attr("name");
-        configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
-    });
-
-    // INITIALIZATION //////////////////////////////////////////////////////////
-    $(document).ready(function() {
-        if ({{ provided_code ? "true" : "false" }}) {
-            $("#current_code_file").show();
-            $("#provided_code_file").show();
-        }
-    });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
     $("#no-code-provided-id").change(function() {
@@ -257,7 +196,7 @@
     });
 
     $(document).ready(function() {
-        if ({{ provided_code }} && $("#code-provided-id").is(":checked")) {
+        if ({{ provided_code ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
             $("#current-code-file").show();
             $("#provided-code-file").show();
         }
@@ -265,7 +204,7 @@
 
     // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
     $('#add-more-prev-gradeable', form).on('click', function(){
-        addMorePriorTermGradeable(prior_term_gradeables);
+        addMorePriorTermGradeable();
     });
 
     $("#no-past-terms-id").change(function() {
@@ -276,8 +215,69 @@
         $(".past-terms-wrapper").show();
     });
 
-    // OTHER RANDOM JS //////////////////////////////////////////////////////////////
+    function getGradeables(selectObject) {
+        let semester_course_dropdown = $(selectObject);
+        let gradeable_dropdown = $(selectObject).siblings().first();
+        gradeable_dropdown.empty();
+        if (semester_course_dropdown.val() === "") {
+            gradeable_dropdown.append("<option value=''>None</option>");
+        } else {
+            gradeable_dropdown.append("<option value=''>Loading...</option>");
+            $.ajax({
+                url: "{{ base_url }}" + "/getPriorGradeables",
+                type: "POST",
+                data: {
+                    csrf_token: csrfToken,
+                    semester_course: semester_course_dropdown.val()
+                },
+                success: function(data) {
+                    gradeable_dropdown.empty();
+                    let parsed_result = JSON.parse(data);
+                    $.each(parsed_result.data, function(index, gradeable) {
+                        gradeable_dropdown.append("<option value='" + gradeable + "'>" + gradeable + "</option>");
+                    });
+                },
+                error: function(e) {
+                    gradeable_dropdown.append("<option value=''>Error: Ajax request failed</option>");
+                }
+            });
+        }
+    }
 
+    function addMorePriorTermGradeable() {
+        const form = $("#save-configuration-form");
+        // TODO: assign different indices to divs
+        $('#prev-gradeable-div', form).append(`
+            <div id='prior_g_option_0'>
+                <select name='prior_semester_course[]' onchange='getGradeables(this)'>
+                    <option value=''>Loading...</option>
+                </select>
+                <select name='prior_gradeable[]'>
+                    <option value=''>None</option>
+                </select>
+            </div>
+        `);
+        let semester_course_dropdown = $("#prior_g_option_0").children().first();
+        $.ajax({
+            url: "{{ base_url }}" + "/getPriorSemesterCourses",
+            type: "GET",
+            data: { csrf_token: csrfToken },
+            success: function(data) {
+                semester_course_dropdown.empty();
+                let parsed_result = JSON.parse(data);
+                $.each(parsed_result.data, function(index, semester_course) {
+                    let tokens_array = semester_course.split(" ");
+                    semester_course_dropdown.append("<option value='" + tokens_array[0] + "_" + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
+                });
+                getGradeables(semester_course_dropdown[0]);
+            },
+            error: function(e) {
+                semester_course_dropdown.append("<option value=''>Error: Ajax request failed</option>");
+            }
+        });
+    }
+
+    // LANGUAGE, SEQUENCE LENGTH, THRESHOLD ////////////////////////////////////
     $('[name="threshold"], [name="sequence_length"]').change(function(){
         if($(this).val().length === 0){
             $(this)[0].setCustomValidity('Input is required');
@@ -289,85 +289,26 @@
         }
     });
 
-    function addMorePriorTermGradeable(prior_term_gradeables) {
-        const form = $("#save-configuration-form");
-        const prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
-        let to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
-        $.each(prior_term_gradeables, function(sem,courses_gradeables){
-            to_append += '<option value="'+ sem +'">'+ sem +'</option>';
-        });
-        to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
-        $('#prev-gradeable-div', form).append(to_append);
-        $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
-        $("select", form).change(function(){
-            const select_element_name = $(this).attr("name");
-            PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
-        });
-    }
+    $("select[name='language']").change(function() {
+        var form = $("#save-configuration-form")
+        // Following code is used to set default window size for different languages
+        // that will appear in 'configureNewGradeableForPlagiarismForm'
+        // to change the default values, just change the val attribute for the language.
 
-    function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-        var form = $("#save-configuration-form");
-        if(select_element_name == "language") {
-
-            //
-            // Following code is used to set default window size for different languages
-            // that will appear in 'configureNewGradeableForPlagiarismForm'
-            // to change the default values, just change the val attribute for the language.
-            //
-
-            if ($('[name="language"]', form).val() == "python") {
-                $('[name="sequence_length"]', form).val('10');
-            }
-            else if ($('[name="language"]', form).val() == "cpp") {
-                $('[name="sequence_length"]', form).val('2');
-            }
-            else if ($('[name="language"]', form).val() == "java") {
-                $('[name="sequence_length"]', form).val('3');
-            }
-            else if ($('[name="language"]', form).val() == "plaintext") {
-                $('[name="sequence_length"]', form).val('4');
-            }
-            else if ($('[name="language"]', form).val() == "mips") {
-                $('[name="sequence_length"]', form).val('5');
-            }
+        if ($('[name="language"]', form).val() == "python") {
+            $('[name="sequence_length"]', form).val('10');
         }
-        else if(select_element_name.substring(0, 9) == "prev_sem_") {
-            var i = select_element_name.substring(9);
-            var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-            if(selected_sem != '') {
-                var append_options = '';
-                $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                    if(selected_sem == sem) {
-                        $.each(courses_gradeables, function(course,gradeables){
-                            append_options += '<option value="'+ course +'">'+ course +'</option>';
-                        });
-                    }
-                });
-                $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-            }
+        else if ($('[name="language"]', form).val() == "cpp") {
+            $('[name="sequence_length"]', form).val('2');
         }
-        else if(select_element_name.substring(0, 12) == "prev_course_") {
-            var i = select_element_name.substring(12);
-            var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-            var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
-            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-            if(selected_course != '') {
-                var append_options = '';
-                $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                    if(selected_sem == sem) {
-                        $.each(courses_gradeables, function(course,gradeables){
-                            if(selected_course == course) {
-                                $.each(gradeables, function (index, gradeable) {
-                                    append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                                });
-                            }
-                        });
-                    }
-                });
-                $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-            }
+        else if ($('[name="language"]', form).val() == "java") {
+            $('[name="sequence_length"]', form).val('3');
         }
-    }
+        else if ($('[name="language"]', form).val() == "plaintext") {
+            $('[name="sequence_length"]', form).val('4');
+        }
+        else if ($('[name="language"]', form).val() == "mips") {
+            $('[name="sequence_length"]', form).val('5');
+        }
+    });
 </script>
