@@ -162,6 +162,8 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
             $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
             $this->core->getOutput()->addInternalCss('forum.css');
+            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
             $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
