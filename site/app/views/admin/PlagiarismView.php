@@ -107,70 +107,19 @@ class PlagiarismView extends AbstractView {
         ]);
     }
 
-    public function configurePlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $ignore_submissions, $ignore_submissions_others, $saved_config, $title) {
+    public function configurePlagiarismForm($new_or_edit, $config) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $this->core->getOutput()->addInternalCss("plagiarism.css");
         $this->core->getOutput()->enableMobileViewport();
-        // Default values for the form
-        $gradeable_id = "";
-        $config_id = "";
-        $provided_code = false;
-        $provided_code_filenames = [];
-        $version = "all_versions";
-        $regex = "";
-        $regex_dirs = ["submissions"];
-        $language = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
-        $language["plaintext"] = "selected";
-        $threshold = 5;
-        $sequence_length = 4;
-        $prior_terms = false;
-        $ignore_submissions_list = null;
-
-        // Values which are in saved configuration
-        if ($new_or_edit == "edit") {
-            $gradeable_id = $saved_config['gradeable'];
-            $config_id = $saved_config['config_id'];
-
-            if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code", "files"))) {
-                $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "provided_code", "files")), [".", ".."]);
-                $provided_code = count($provided_code_filename_array) > 0;
-                foreach ($provided_code_filename_array as $filename) {
-                    $provided_code_filenames[] = $filename;
-                }
-            }
-
-            $version = $saved_config['version'];
-            $regex = $saved_config['regex'];
-            $regex_dirs = $saved_config['regex_dirs'];
-            $language["plaintext"] = ""; // Reset value after we set it initially so be selected
-            $language[$saved_config['language']] = "selected";
-            $threshold = (int) $saved_config['threshold'];
-            $sequence_length = (int) $saved_config['sequence_length'];
-            $prior_terms = count($saved_config['prev_term_gradeables']) > 0;
-            $ignore_submissions_list = implode(", ", $ignore_submissions_others);
-        }
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
             "base_url" => $this->core->buildCourseUrl(['plagiarism', 'configuration']),
-            "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}&config_id={$config_id}",
+            "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$config["gradeable_id"]}&config_id={$config["config_id"]}",
             "csrf_token" => $this->core->getCsrfToken(),
-            "provided_code" => $provided_code,
-            "gradeable_ids_titles" => $gradeable_ids_titles,
-            "title" => $title,
-            "provided_code_filenames" => $provided_code_filenames,
-            "version" => $version,
-            "regex" => $regex,
-            "regex_dirs" => $regex_dirs,
-            "language" => $language,
-            "threshold" => $threshold,
-            "sequence_length" => $sequence_length,
-            "prior_terms" => $prior_terms,
-            "ignore_submissions" => $ignore_submissions,
-            "ignore_submissions_list" => $ignore_submissions_list,
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
-            "prior_term_gradeables" => $prior_term_gradeables
+            "config" => $config
         ]);
     }
 }

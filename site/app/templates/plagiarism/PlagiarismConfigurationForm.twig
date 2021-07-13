@@ -11,12 +11,12 @@
 
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id">
-                            {% for gradeable_id_title in gradeable_ids_titles %}
+                            {% for gradeable_id_title in config["gradeable_ids_titles"] %}
                                 <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} (Due {{ gradeable_id_title['g_grade_due_date'] }})</option>
                             {% endfor %}
                         </select>
                     {% else %}
-                        {{ title }}
+                        {{ config["title"] }}
                     {% endif %}
 
                 </div>
@@ -28,20 +28,20 @@
                 </div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="no-code-provided-id" value="no_code_provided" name="provided_code_option" {{ provided_code ? "" : "checked" }} >
+                        <input type="radio" id="no-code-provided-id" value="no_code_provided" name="provided_code_option" {{ config["provided_code"] ? "" : "checked" }} >
                         <label for="no-code-provided-id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="code-provided-id" value="code_provided" name="provided_code_option" {{ provided_code ? "checked" : "" }}>
+                        <input type="radio" id="code-provided-id" value="code_provided" name="provided_code_option" {{ config["provided_code"] ? "checked" : "" }}>
                         <label for="code-provided-id">Yes</label>
                     </span>
                 </div>
                 <div class="low-margin-top"><input id="provided-code-file" type="file" name="provided_code_file"></div>
-                {% if new_or_edit == "edit" and provided_code %}
+                {% if new_or_edit == "edit" and config["provided_code"] %}
                     <div id="current-code-file">
                         <br />
                         <div>Current Provided Code:</div>
-                        {% for file_name in provided_code_filenames %}
+                        {% for file_name in config["provided_code_filenames"] %}
                             <div>{{ file_name }}</div>
                         {% endfor %}
                     </div>
@@ -52,11 +52,11 @@
                 <div class="plag-data-label">Version:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="all-version-id" value="all_versions" name="version_option" {{ version == "all_versions" ? "checked" : "" }} >
+                        <input type="radio" id="all-version-id" value="all_versions" name="version_option" {{ config["version"] == "all_versions" ? "checked" : "" }} >
                         <label for="all-version-id">All Versions</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="active-version-id" value="active_version" name="version_option" {{ version == "all_versions" ? "" : "checked" }}>
+                        <input type="radio" id="active-version-id" value="active_version" name="version_option" {{ config["version"] == "all_versions" ? "" : "checked" }}>
                         <label for="active-version-id">Only Active Version</label>
                     </span>
                 </div>
@@ -73,19 +73,19 @@
                         </span>
                         <span class="right">
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex-submissions-dir" name="regex_dir[]" value="submissions" {{ "submissions" in regex_dirs ? "checked" : ""}} />
+                                <input type="checkbox" id="regex-submissions-dir" name="regex_dir[]" value="submissions" {{ "submissions" in config["regex_dirs"] ? "checked" : ""}} />
                                 <label for="regex-submissions-dir">Submissions</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex-results-dir" name="regex_dir[]" value="results" {{ "results" in regex_dirs ? "checked" : "" }} />
+                                <input type="checkbox" id="regex-results-dir" name="regex_dir[]" value="results" {{ "results" in config["regex_dirs"] ? "checked" : "" }} />
                                 <label for="regex-results-dir">Results</label>
                             </span>
                             <span class="radio-label-pair">
-                                <input type="checkbox" id="regex-checkout-dir" name="regex_dir[]" value="checkout" {{ "checkout" in regex_dirs ? "checked" : "" }} />
+                                <input type="checkbox" id="regex-checkout-dir" name="regex_dir[]" value="checkout" {{ "checkout" in config["regex_dirs"] ? "checked" : "" }} />
                                 <label for="regex-checkout-dir">Checkout</label>
                             </span>
                         </span>
-                        <input type="text" id="regex-to-select-files" name="regex_to_select_files" class="low-margin-top" value="{{ regex }}" placeholder="Leave blank to select all files"/>
+                        <input type="text" id="regex-to-select-files" name="regex_to_select_files" class="low-margin-top" value="{{ config["regex"] }}" placeholder="Leave blank to select all files"/>
                     </div>
                 </div>
             </div>
@@ -94,11 +94,11 @@
                 <div class="plag-data-label">Language:</div>
                 <div class="plag-data">
                     <select name="language">
-                        <option value="plaintext" {{ language["plaintext"] }}>Plain Text</option>
-                        <option value="python" {{ language["python"] }}>Python</option>
-                        <option value="cpp" {{ language["cpp"] }}>C++</option>
-                        <option value="java" {{ language["java"] }}>Java</option>
-                        <option value="mips" {{ language["mips"] }}>MIPS Assembly</option>
+                        <option value="plaintext" {{ config["language"]["plaintext"] }}>Plain Text</option>
+                        <option value="python" {{ config["language"]["python"] }}>Python</option>
+                        <option value="cpp" {{ config["language"]["cpp"] }}>C++</option>
+                        <option value="java" {{ config["language"]["java"] }}>Java</option>
+                        <option value="mips" {{ config["language"]["mips"] }}>MIPS Assembly</option>
                     </select>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                 <div class="plag-data-label">Common Code Threshold:</div>
                 <label for="threshold">More than this number of students with matching code will be considered common code</label>
                 <div class="plag-data">
-                    <input type="number" id="threshold" name="threshold" value="{{ threshold }}" min="2"/>
+                    <input type="number" id="threshold" name="threshold" value="{{ config["threshold"] }}" min="2"/>
                 </div>
             </div>
             {##################################################################}
@@ -115,7 +115,7 @@
                 <div class="plag-data-label">Sequence Length:</div>
                 <label for="sequence-length">This is the minimum size of matching regions</label>
                 <div class="plag-data">
-                    <input type="number" id="sequence-length" name="sequence_length" value="{{ sequence_length }}" placeholder="(Required)" min="1"/>
+                    <input type="number" id="sequence-length" name="sequence_length" value="{{ config["sequence_length"] }}" placeholder="(Required)" min="1"/>
                 </div>
             </div>
             {##################################################################}
@@ -123,11 +123,11 @@
                 <div class="plag-data-label">Prior Terms Gradeables:</div>
                 <div class="plag-data">
                     <span class="radio-label-pair">
-                        <input type="radio" id="no-past-terms-id" value="no_past_terms" name="past_terms_option" {{ prior_terms ? "" : "checked" }}>
+                        <input type="radio" id="no-past-terms-id" value="no_past_terms" name="past_terms_option" {{ config["prior_terms"] ? "" : "checked" }}>
                         <label for="no-past-terms-id">No</label>
                     </span>
                     <span class="radio-label-pair">
-                        <input type="radio" id="past-terms-id" value="past_terms" name="past_terms_option" {{ prior_terms ? "checked" : "" }}>
+                        <input type="radio" id="past-terms-id" value="past_terms" name="past_terms_option" {{ config["prior_terms"] ? "checked" : "" }}>
                         <label for="past-terms-id">Yes</label>
                     </span>
                     <div class="past-terms-wrapper" id="prev-gradeable-div">
@@ -136,14 +136,18 @@
                         </div>
                         {% if new_or_edit == "edit" %}
                             {# TODO: add the rest of the semester/course for each semester_course dropdown #}
-                            {% for semester_course, gradeable in prior_term_gradeables %}
-                                <div id="prior-g-option-{{ loop_index0 }}">
-                                    <select name="prior_semester_course[]" onchange="getGradeables(this)">
+                            {% for row in config["prior_term_gradeables"] %}
+                                <div id="prior-g-option-{{ loop.index0 }}" class="prior-gradeable-wrapper">
+                                    <select name='prior_semester_course[]' onchange='getGradeables(this)'>
+                                        {% for semester_course in config["prior_semester_courses"] %}
                                         {% set tokens = semester_course|split(' ') %}
-                                        <option value="{{ semester_course }}">{{ tokens[0] }}, {{ tokens[1] }}</option>
+                                        <option value="{{ tokens[0] }}/{{ tokens[1] }}" {{ tokens[0] == row["prior_semester"] and tokens[1] == row["prior_course"] ? "selected" : "" }}>{{ tokens[0] }}, {{ tokens[1] }}</option>
+                                        {% endfor %}
                                     </select>
-                                    <select name="prior_gradeable[]">
-                                        <option value="{{ gradeable }}">{{ gradeable }}</option>
+                                    <select name='prior_gradeable[]'>
+                                        {% for other_gradeable in row["other_gradeables"] %}
+                                            <option value="{{ other_gradeable }}" {{ other_gradeable == row["prior_gradeable"] ? "selected" : "" }}>{{ other_gradeable }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             {% endfor %}
@@ -155,21 +159,21 @@
             <div class="plag-data-group">
                 <div class="plag-data-label">Users to be Ignored:</div>
                 <div class="plag-data radio-label-pair">
-                    <input type="checkbox" id="ignore-instructors" value="ignore_instructors" name="ignore_submission_option[]" {{ "instructors" in ignore_submissions ? "checked" : "" }}>
+                    <input type="checkbox" id="ignore-instructors" value="ignore_instructors" name="ignore_submission_option[]" {{ "instructors" in config["ignore_submissions"] ? "checked" : "" }}>
                     <label for="ignore-instructors">Instructors</label>
                 </div>
                 <div class="plag-data radio-label-pair">
-                    <input type="checkbox" id="ignore-full-access-graders" value="ignore_full_access_graders" name="ignore_submission_option[]" {{ "full_access_graders" in ignore_submissions ? "checked" : "" }}>
+                    <input type="checkbox" id="ignore-full-access-graders" value="ignore_full_access_graders" name="ignore_submission_option[]" {{ "full_access_graders" in config["ignore_submissions"] ? "checked" : "" }}>
                     <label for="ignore-full-access-graders">Full Access Graders</label>
                 </div>
                 <div class="plag-data radio-label-pair">
-                    <input type="checkbox" id="ignore-limited-access-graders" value="ignore_limited_access_graders" name="ignore_submission_option[]" {{ "limited_access_graders" in ignore_submissions ? "checked" : "" }}>
+                    <input type="checkbox" id="ignore-limited-access-graders" value="ignore_limited_access_graders" name="ignore_submission_option[]" {{ "limited_access_graders" in config["ignore_submissions"] ? "checked" : "" }}>
                     <label for="ignore-limited-access-graders">Limited Access Graders</label>
                 </div>
                 <div class="plag-data radio-label-pair" id="ignore-others-container">
-                    <input type="checkbox" id="ignore-others" value="ignore_others" name="ignore_submission_option[]" {{ "others" in ignore_submissions ? "checked" : "" }}>
+                    <input type="checkbox" id="ignore-others" value="ignore_others" name="ignore_submission_option[]" {{ "others" in config["ignore_submissions"] ? "checked" : "" }}>
                     <label for="ignore-others">Others:</label>
-                    <input type="text" id="ignore-others-list" value="{{ ignore_submissions_list }}" placeholder="List user ID's separated by commas and spaces" name="ignore_others_list">
+                    <input type="text" id="ignore-others-list" value="{{ config["ignore_submissions_list"] }}" placeholder="List user ID's separated by commas and spaces" name="ignore_others_list">
                 </div>
             </div>
             {##################################################################}
@@ -183,6 +187,7 @@
 
 <script>
     const form = $("#save-configuration-form");
+    const prior_semester_course_list = JSON.parse(`{{ config["prior_semester_courses"] | json_encode() | raw }}`);
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
     $("#no-code-provided-id").change(function() {
@@ -196,9 +201,12 @@
     });
 
     $(document).ready(function() {
-        if ({{ provided_code ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
+        if ({{ config["provided_code"] ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
             $("#current-code-file").show();
             $("#provided-code-file").show();
+        }
+        if ({{ config["prior_terms"] ? "true" : "false" }} && $("#past-terms-id").is(":checked")) {
+            $("#prev-gradeable-div").show();
         }
     });
 
@@ -261,7 +269,6 @@
         $('#prev-gradeable-div', form).append(`
             <div id='prior-g-option-`+first_free_index+`' class='prior-gradeable-wrapper'>
                 <select name='prior_semester_course[]' onchange='getGradeables(this)'>
-                    <option value=''>Loading...</option>
                 </select>
                 <select name='prior_gradeable[]'>
                     <option value=''>None</option>
@@ -269,25 +276,11 @@
             </div>
         `);
         let semester_course_dropdown = $("#prior-g-option-"+first_free_index).children().first();
-        $.ajax({
-            url: "{{ base_url }}" + "/getPriorSemesterCourses",
-            type: "GET",
-            data: { csrf_token: csrfToken },
-            success: function(data) {
-                // TODO: check for fail vs. success message returned from JSON response
-                semester_course_dropdown.empty();
-                let parsed_result = JSON.parse(data);
-                $.each(parsed_result.data, function(index, semester_course) {
-                    let tokens_array = semester_course.split(" ");
-                    semester_course_dropdown.append("<option value='" + tokens_array[0] + "/" + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
-                });
-                getGradeables(semester_course_dropdown[0]);
-            },
-            error: function(e) {
-                semester_course_dropdown.empty();
-                semester_course_dropdown.append("<option value=''>Error: Ajax request failed</option>");
-            }
+        $.each(prior_semester_course_list, function(index, semester_course) {
+            let tokens_array = semester_course.split(" ");
+            semester_course_dropdown.append("<option value='" + tokens_array[0] + "/" + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
         });
+        getGradeables(semester_course_dropdown[0]);
     }
 
     // LANGUAGE, SEQUENCE LENGTH, THRESHOLD ////////////////////////////////////
@@ -295,7 +288,7 @@
         if($(this).val().length === 0){
             $(this)[0].setCustomValidity('Input is required');
         }
-        else if(!(/^[\d]+$/g).test($(this).val())){
+        else if(!(/^[\d]+$/g).test($(this).val())) {
             $(this)[0].setCustomValidity('Input must only contain numeric characters');
         } else {
             $(this)[0].setCustomValidity('');

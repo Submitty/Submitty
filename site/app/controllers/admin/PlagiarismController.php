@@ -87,6 +87,18 @@ class PlagiarismController extends AbstractController {
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
+    private function getPriorSemesterCourses() {
+        // TODO: Implement.
+        // get all the course and term pairs that this course has access to (same group)
+        return ['f19 csci1200', 's18 csci1200', 'f20 csci1500'];
+    }
+
+    private function getOtherPriorGradeables() {
+        // TODO: Implememt.
+        // from the parameter course and term, get the list of gradeables
+        return ["hw1", "hw2", "hw3", "test1", "hw5", "midterm"];
+    }
+
     /**
      * @param array $usernames
      * @return array
@@ -426,6 +438,7 @@ class PlagiarismController extends AbstractController {
                         $this->core->addErrorMessage("Invalid input provided for prior semester and course");
                         $this->core->redirect($return_url);
                     }
+                    // TODO: make sure the semester+course+gradeable actually exists
                     $prev_term_gradeables[] = [
                         "prior_semester" => $tokens[0],
                         "prior_course" => $tokens[1],
@@ -523,7 +536,7 @@ class PlagiarismController extends AbstractController {
             "language" => $language,
             "threshold" => $threshold,
             "sequence_length" => $sequence_length,
-            "prev_term_gradeables" => $prev_term_gradeables,
+            "prior_term_gradeables" => $prev_term_gradeables,
             "ignore_submissions" => $ignore_submission_option
         ];
 
@@ -531,7 +544,6 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
             $this->core->redirect($return_url);
         }
-        die();
 
         // Create the Lichen job ///////////////////////////////////////////////
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
@@ -638,13 +650,33 @@ class PlagiarismController extends AbstractController {
             $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
             $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
         }
-
         usort($gradeable_ids_titles, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
         });
 
-        $prior_term_gradeables = [];
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null, null, null);
+        $config = [];
+
+        // Default values for the form
+        $config["gradeable_id"] = "";
+        $config["config_id"] = "";
+        $config["title"] = null;
+        $config["gradeable_ids_titles"] = $gradeable_ids_titles;
+        $config["provided_code"] = false;
+        $config["provided_code_filenames"] = [];
+        $config["version"] = "all_versions";
+        $config["regex"] = "";
+        $config["regex_dirs"] = ["submissions"];
+        $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
+        $config["language"]["plaintext"] = "selected";
+        $config["threshold"] = 5;
+        $config["sequence_length"] = 4;
+        $config["prior_terms"] = false;
+        $config["prior_semester_courses"] = json_encode($this->getPriorSemesterCourses());
+        $config["prior_term_gradeables"] = [];
+        $config["ignore_submissions"] = [];
+        $config["ignore_submissions_list"] = "";
+
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'new', $config);
     }
 
 
@@ -659,7 +691,7 @@ class PlagiarismController extends AbstractController {
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
             $this->core->addErrorMessage($e);
             $this->core->redirect($return_url);
         }
@@ -668,16 +700,50 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        // get the config from the config file
         $saved_config = json_decode(file_get_contents($config_path), true);
         $title = "";
         if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
         }
 
-        $prior_term_gradeables = [];
-        $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
+        // check to see if there are any provided code files
+        $has_provided_code = false;
+        $provided_code_filenames = [];
+        if (is_dir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files"))) {
+            $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files")), [".", ".."]);
+            $has_provided_code = count($provided_code_filename_array) > 0;
+            foreach ($provided_code_filename_array as $filename) {
+                $provided_code_filenames[] = $filename;
+            }
+        }
+        $ignore = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
+        $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
+        foreach ($prior_term_gradeables_array as &$gradeable) {
+            $gradeable["other_gradeables"] = $this->getOtherPriorGradeables();
+        }
+        $config = [];
 
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
+        $config["gradeable_id"] = $saved_config['gradeable'];
+        $config["config_id"] = $saved_config['config_id'];
+        $config["title"] = $title;
+        $config["gradeable_ids_titles"] = [];
+        $config["provided_code"] = $has_provided_code;
+        $config["provided_code_filenames"] = $provided_code_filenames;
+        $config["version"] = $saved_config['version'];
+        $config["regex"] = $saved_config['regex'];
+        $config["regex_dirs"] = $saved_config['regex_dirs'];
+        $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
+        $config["language"][$saved_config['language']] = "selected";
+        $config["threshold"] = (int) $saved_config['threshold'];
+        $config["sequence_length"] = (int) $saved_config['sequence_length'];
+        $config["prior_terms"] = count($saved_config['prior_term_gradeables']) > 0; // TODO
+        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
+        $config["prior_term_gradeables"] = $prior_term_gradeables_array;
+        $config["ignore_submissions"] = $ignore[0];
+        $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
+
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'edit', $config);
     }
 
 
@@ -736,24 +802,12 @@ class PlagiarismController extends AbstractController {
         // $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorSemesterCourses", methods={"GET"})
-     * @AccessControl(role="INSTRUCTOR")
-     */
-    public function getPriorSemesterCourses() {
-        // TODO: Implement.
-        // get all the course and term pairs that this course has access to (same group)
-        return JsonResponse::getSuccessResponse(["f19 csci1200", "s18 csci1200", "f20 csci1500"]);
-    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
      */
     public function getPriorGradeables() {
-        // TODO: Implememt.
-        // from the parameter course and term, get the list of gradeables
-        return JsonResponse::getSuccessResponse(["hw1", "hw2", "hw3", "test1", "hw5", "midterm"]);
+        return JsonResponse::getSuccessResponse($this->getOtherPriorGradeables());
     }
 
 
