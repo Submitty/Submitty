@@ -3,7 +3,7 @@
         <b>{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}
                 {% if team_assignment %}
                     {% set team_members = submitter.getTeam().getMemberUsers() %}
-                    Team ({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
+                    Team {% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
                     {% for team_member in team_members %}
                         &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
                     {% endfor %}

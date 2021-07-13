@@ -444,7 +444,7 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
-
 			message: "#^Variable \\$row might not be defined\\.$#"
-			count: 1
+			count: 2
 			path: app/views/grading/ElectronicGraderView.php
+
