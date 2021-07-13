@@ -32,6 +32,12 @@ const taLayoutDet = {
     rightTop: null,
     rightBottom: null,
   },
+  currentActivePanels: {
+    leftTop: false,
+    leftBottom: false,
+    rightTop: false,
+    rightBottom: false,
+  },
   dividedColName: "LEFT",
   leftPanelWidth: "50%",
   bottomPanelHeight: "50%",
@@ -872,85 +878,36 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    // If there is any panel opened just use that and fetch the next one for left side...
-    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
-      taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
-      panelElements.every((panel, idx) => {
-        if (taLayoutDet.currentTwoPanels.leftTop === panel.str) {
-          let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          taLayoutDet.currentTwoPanels.rightTop = panelElements[nextIdx].str;
-          return false;
-        }
-        return true;
-      });
-
-    } else if(!taLayoutDet.currentOpenPanel) {
-      // if there is no currently opened panel fill the panels with the first two
-      taLayoutDet.currentTwoPanels = {
-        leftTop: panelElements[0].str,
-        leftBottom: null,
-        rightTop: panelElements[1].str,
-        rightBottom: null,
-      };
+    
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: false,
+      rightTop: true,
+      rightBottom: false,
     }
+
     updatePanelLayoutModes();
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    let topPanel = taLayoutDet.currentTwoPanels.leftTop;
-    let bottomPanel = taLayoutDet.currentTwoPanels.leftBottom;
 
-    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
-    let prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.rightTop;
-
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: false,
+      rightTop: true,
+      rightBottom: false,
+    }
+  
     if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
-      topPanel = taLayoutDet.currentTwoPanels.rightTop;
-      bottomPanel = taLayoutDet.currentTwoPanels.rightBottom;
-      taLayoutDet.currentTwoPanels.leftBottom = null;
-      prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.leftTop;
+      taLayoutDet.currentActivePanels.rightBottom = true;
     }
     else {
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").removeClass("active");
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
-      taLayoutDet.currentTwoPanels.rightBottom = null;
-    }
-
-    let nextIdx = -1;
-    if (!bottomPanel) {
-      panelElements.every((panel, idx) => {
-        if (prevPanel === panel.str) {
-            nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-            // Now check if panel indexed with nextIdx is already open in somewhere
-            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.rightTop === panelElements[nextIdx].str) {
-              // If yes update the nextIdx
-              nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
-            }
-            if (taLayoutDet.dividedColName === "RIGHT") {
-              taLayoutDet.currentTwoPanels.rightBottom = panelElements[nextIdx].str;
-            }
-            else {
-              taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
-            }
-            return false; // Break the loop
-        }
-        return true;
-      })
-      if (nextIdx === -1) {
-        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-          leftTop: panelElements[0].str,
-          leftBottom: panelElements[1].str,
-          rightTop: panelElements[2].str,
-          rightBottom: null,
-        } : {
-          leftTop: panelElements[0].str,
-            leftBottom: null,
-            rightTop: panelElements[1].str,
-            rightBottom: panelElements[2].str,
-        };
-      }
+      taLayoutDet.currentActivePanels.leftBottom = true;
     }
 
     initializeHorizontalTwoPanelDrag();
@@ -958,6 +915,13 @@ function togglePanelLayoutModes(forceVal = false) {
   } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+    
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: true,
+      rightTop: true,
+      rightBottom: true,
+    }
 
     $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
@@ -999,10 +963,15 @@ function updatePanelLayoutModes () {
 
   //loop through panel positions (topLeft, topRight, etc)
   for (let panel in taLayoutDet.currentTwoPanels) {
+    //if the panel isn't active, skip it
+    if(!taLayoutDet.currentActivePanels[panel]) {
+      continue;
+    }
+    const panel_type = taLayoutDet.currentTwoPanels[panel];
     //get panel corresponding with the layout position
     const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
     //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
-    const dom_panel = document.getElementById(`${taLayoutDet.currentTwoPanels[panel]}`);
+    const dom_panel = document.getElementById(`${panel_type}`);
     if (dom_panel) {
       $(layout_panel).append(dom_panel);
     }
