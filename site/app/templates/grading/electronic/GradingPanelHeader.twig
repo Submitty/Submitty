@@ -96,7 +96,7 @@
                         class="invisible-btn key_to_click"
                         tabindex="0"
                 >
-                   <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
+                   <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    <span>Grade Inquiry</span>
                 </button>
             {{ self.renderPanelPositionSelector('regrade_info') }}
