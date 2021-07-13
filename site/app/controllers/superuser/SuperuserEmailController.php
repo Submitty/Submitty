@@ -18,9 +18,6 @@ use app\models\SuperuserEmail;
  */
 class SuperuserEmailController extends AbstractController {
 
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
 
     /**
      * @Route("/superuser/email")
