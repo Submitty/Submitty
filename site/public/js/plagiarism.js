@@ -187,11 +187,12 @@ function requestAjaxData(url, f, es) {
         url: url,
         success: function(data) {
             data = JSON.parse(data);
-            if(data.error){
-                alert(data.error);
+            if (data.status !== "success") {
+                alert(data.data);
                 return;
             }
-            f(data, es);
+
+            f(data.data, es);
         },
         error: function(e) {
             alert("Error occured when requesting via ajax. Please refresh the page and try again.");
@@ -202,7 +203,6 @@ function requestAjaxData(url, f, es) {
 function createRightUsersList(data, select = null) {
     let position = 0;
     let append_options;
-    data = JSON.parse(data);
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select === users[0]) {
