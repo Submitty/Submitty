@@ -76,7 +76,7 @@
 {% macro renderPlagiarismRow(row) %}
     <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
         <td>
-            {% if row['ranking_available'] %}
+            {% if row['ranking_available'] is defined %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
             {% else %}
                 {{ row['title'] }}
@@ -87,7 +87,7 @@
         <td>
             {{ row['config_id'] }}
         </td>
-        {% if row['in_queue'] %}
+        {% if row['in_queue'] is defined %}
             <td colspan=4>
                 {% if row['processing'] %}
                     <i>Running</i>
@@ -121,8 +121,8 @@
         {% endif %}
         <td>
             <input type="checkbox"
-                   onclick='window.location.href = {{ row['nightly_rerun_link'] }};'
-                   {{ row['nightly_rerun_status'] }}>
+                   onclick='window.location.href = {{ row['nightly_rerun_link'] ?? '' }};'
+                   {{ row['nightly_rerun_status'] ?? '' }}>
         </td>
         <td>
             <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
