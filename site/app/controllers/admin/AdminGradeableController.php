@@ -211,14 +211,13 @@ class AdminGradeableController extends AbstractController {
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
-        $max_points = 0;
-        if ($gradeable->getDependsOn() !== null) {
-            $depend_gradeable = $this->tryGetGradeable($gradeable->getDependsOn(), false);
-            if ($depend_gradeable !== false) {
-                $depend_auto = $depend_gradeable->getAutogradingConfig();
-                if ($depend_gradeable != null) {
-                    $max_points = $depend_auto->getTotalHiddenNonExtraCredit() + $depend_auto->getTotalNonHidden();
-                }
+        $gradeable_max_points = [];
+        $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
+        /** @var Gradeable $a_gradeable */
+        foreach ($gradeables as $a_gradeable) {
+            $auto_config = $a_gradeable->getAutogradingConfig();
+            if ($auto_config != null) {
+                $gradeable_max_points[$a_gradeable->getId()] = $auto_config->getTotalNonHiddenNonExtraCredit();
             }
         }
         $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
@@ -282,7 +281,7 @@ class AdminGradeableController extends AbstractController {
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
             'hidden_files' => $gradeable->getHiddenFiles(),
             'template_list' => $template_list,
-            'max_points' =>  $max_points,
+            'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks
         ]);
