@@ -293,7 +293,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         if (localStorage.key(i).includes('annotations')) {
             let annotations = JSON.parse(localStorage.getItem(localStorage.key(i)));
             for (let i = annotations.length-1; i >= 0; i--) {
-                if(annotations[i] && annotations[i].size === null) {
+                if(annotations[i] && Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null).length > 0) {
                     if(!remove_faulty){
                         remove_faulty = confirm(`A faulty annotation has been detected which may cause features on this page to not work properly. Would you like to detect and remove all faulty annotations for this pdf?\n\nFile:${window.RENDER_OPTIONS.documentId}`);
                     }
@@ -307,7 +307,8 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
     }
     //if the user specified to remove faulty annotations, we should save the file for them now.
     if (remove_faulty) {
-        debounce(saveFile, 500);
+        const save_button_bbox = $('.toolbar-action[value=save]')[0].getBoundingClientRect()
+        document.elementFromPoint(save_button_bbox.left, save_button_bbox.top).click();
     }
 }
 

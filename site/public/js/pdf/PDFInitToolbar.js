@@ -183,6 +183,7 @@ function renderPDFToolbar() {
 
 
     function handleToolbarClick(e){
+        console.log('toolbar click...', e)
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
 
@@ -239,8 +240,8 @@ function renderPDFToolbar() {
     }
 
     function setPen(pen_size, pen_color) {
-        penSize = pen_size;
-        penColor = pen_color;
+        penSize = pen_size || 5;
+        penColor = pen_color || '#000000';
         
         if (scrollLock) {
             $('#file-content').css('overflow', 'hidden');
@@ -254,7 +255,7 @@ function renderPDFToolbar() {
     let textSize = 12;
     let textColor = '#FF0000';
     function initText() {
-        let init_size = localStorage.getItem('text/size');
+        let init_size = localStorage.getItem('text/size') || 12;
         let init_color = localStorage.getItem('main_color') || "#000000";
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
@@ -267,7 +268,7 @@ function renderPDFToolbar() {
     }
 
     function setText(text_size, text_color) {
-        text_size = text_size;
+        text_size = text_size || 12;
         text_color = text_color || '#000000';
         textSize = text_size;
         textColor = text_color;
