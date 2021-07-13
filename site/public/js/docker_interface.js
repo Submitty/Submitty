@@ -19,7 +19,6 @@ function collapseSection(id,btn_id) {
 }
 
 function filterOnClick() {
-    console.log($(this).text());
     if ($(this).hasClass('fully-transparent')) {
         $(this).removeClass('fully-transparent');
     }
@@ -28,6 +27,20 @@ function filterOnClick() {
     }
 }
 
+function addFieldOnChange() {
+    const command = $(this).val();
+    const regex = new RegExp('^([a-z0-9]+/)+[a-z0-9]+$');
+    if (!regex.test(command)) {
+        $('#send-button').attr('disabled',true);
+        $('#docker-warning').css('display', '');
+    }
+    else {
+        $('#send-button').attr('disabled',false);
+        $('#docker-warning').css('display', 'none');
+    }
+}
+
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
+    $('#add-field').on('input', addFieldOnChange);
 });

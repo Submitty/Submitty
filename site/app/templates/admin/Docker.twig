@@ -35,42 +35,10 @@
 </div>
 
 <div class="content">
-    <h2 class="docker-header">Images</h2>
-    <div class="filter">
-        <div style="display:inline-block;">Filter: </div>
-        <div style="display:inline-block;">
-            {% for capability in capabilities %}
-                <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
-                    {{capability}}
-                </button>
-            {% endfor %}
-        </div>
-    </div>
-    <table>
-        <thead>
-            <th>Image Name</th>
-            <th style="width:70%">Capabilities</th>
-        </thead>
-        <tbody>
-        {% for key, capabilities in image_to_capability %}
-            <tr>
-                <td>{{key}}</td>
-                <td>
-                {% for capability in capabilities %}
-                    <i title="{{capability}}" class="fas fa-circle" style="color:{{capability_to_color[capability]}}"></i>
-                {% endfor %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
     {% for worker in worker_machines %}
         <div class="machine">{{worker['name']}}</div>
-        {{ _self.renderDockerMachine(worker['images']) }}
+        {{ _self.renderDockerMachine(worker['images'], image_to_capability, capability_to_color, capabilities) }}
     {% endfor %}
 </div>
 
@@ -85,9 +53,28 @@
 </div>
 
 <div class="content">
-    <h2 class="docker-header">Add Image</h2>
-    <textarea class="image-form" type="text"></textarea>
-    <button class="send-button btn btn-primary">Send</button>
+    <div> </div>
+    <h2 class="docker-header">Add Image to Capability</h2>
+    <p id="docker-warning" class="danger docker-warning" style="display: none;">
+        Not a proper docker image name
+    </p>
+    <div style="margin-bottom: 1em">
+        <div style="display: inline-block; margin-right: 1em; width: 5%;">
+            Capability:
+        </div> 
+        <select class="form-control form-control-lg" style="width:93%; display: inline-block;">
+            {% for capability in capabilities %}
+                <option>{{capability}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <div style="display: inline-block; margin-right: 1em; width: 5%">
+            Image:
+        </div> 
+        <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
+    </div>
+    <button class="send-button btn btn-primary" id="send-button">Send</button>
 </div>
 
 <div class="content">
@@ -140,7 +127,20 @@
 {% endif %}
 
 
-{% macro renderDockerMachine(data) %}
+{% macro renderDockerMachine(data, image_to_capability, capability_to_color, capabilities) %}
+    {% if capabilities is not null %}
+        <div class="filter">
+            <div style="display:inline-block;">Capability Filter: </div>
+            <div style="display:inline-block;">
+                {% for capability in capabilities %}
+                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
+                        {{capability}}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
     <table class="table docker-table mobile-table">
         <thead>
             <tr>
@@ -150,6 +150,7 @@
                 <th>Tag</th>
                 <th>Created Date</th>
                 <th>Alias</th>
+                <th>Capabilities Containing This Image</th>
             </tr>
         </thead>
         <tbody>
@@ -169,6 +170,21 @@
                     {% endfor %}
                 </ul>
                 {% endif %}
+                </td>
+                <td>
+                    {% if value["name"] ~':'~value["tag"] in image_to_capability|keys %}
+                        {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
+                            <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                        {% endfor %}
+                    {% else %}
+                        {% for name in value["additional_names"] %}
+                            {% if name in image_to_capability|keys %}
+                                {% for capability in image_to_capability[name] %}
+                                    <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
