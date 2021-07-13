@@ -33,6 +33,7 @@ function buildCourseUrl(parts = []) {
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
 function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
+    console.log('render student...')
     // set the values for default view through submission page
     window.RENDER_OPTIONS.scale = 1;
     window.RENDER_OPTIONS.rotate = 0;
@@ -282,11 +283,32 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 PDFAnnotate.UI.disablePen();
                             }
                         });
-                    });
+                    })
                 }
             });
         },
     });
+    let remove_faulty = false;
+    for (let i = 0; i < localStorage.length; i++) {
+        if (localStorage.key(i).includes('annotations')) {
+            let annotations = JSON.parse(localStorage.getItem(localStorage.key(i)));
+            for (let i = annotations.length-1; i >= 0; i--) {
+                if(annotations[i] && annotations[i].size === null) {
+                    if(!remove_faulty){
+                        remove_faulty = confirm(`A faulty annotation has been detected which may cause features on this page to not work properly. Would you like to detect and remove all faulty annotations for this pdf?\n\nFile:${window.RENDER_OPTIONS.documentId}`);
+                    }
+                    if (remove_faulty) {
+                        annotations.splice(i, 1);
+                    }
+                }
+            }
+            localStorage.setItem(localStorage.key(i), JSON.stringify(annotations))
+        }
+    }
+    //if the user specified to remove faulty annotations, we should save the file for them now.
+    if (remove_faulty) {
+        debounce(saveFile, 500);
+    }
 }
 
 // TODO: Stretch goal, find a better solution to load/unload
