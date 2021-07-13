@@ -230,7 +230,7 @@ class PlagiarismController extends AbstractController {
      * @param string $refresh_page
      * @return WebResponse
      */
-    public function plagiarismMainPage($refresh_page = "NO_REFRESH"): WebResponse {
+    public function plagiarismMainPage(string $refresh_page = "NO_REFRESH"): WebResponse {
         $course_path = $this->core->getConfig()->getCoursePath();
         $all_configurations = [];
 
@@ -306,10 +306,10 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     *
+     * @return WebResponse|RedirectResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
-    public function showPlagiarismResult(string $gradeable_id, string $config_id) {
+    public function showPlagiarismResult(string $gradeable_id, string $config_id): WebResponse|RedirectResponse {
         $error_return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -665,15 +665,24 @@ class PlagiarismController extends AbstractController {
         return new WebResponse(
             ['admin', 'Plagiarism'],
             'configurePlagiarismForm',
-            'new', $gradeable_ids_titles, $prior_term_gradeables, null, null, null, null
+            'new',
+            $gradeable_ids_titles,
+            $prior_term_gradeables,
+            null,
+            null,
+            null,
+            null
         );
     }
 
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @return WebResponse|RedirectResponse
      */
-    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id) {
+    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): WebResponse|RedirectResponse {
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
@@ -699,14 +708,27 @@ class PlagiarismController extends AbstractController {
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
         $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
 
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configurePlagiarismForm', 'edit', null, $prior_term_gradeables, $ignore_submissions[0], $ignore_submissions[1], $saved_config, $title);
+        return new WebResponse(
+            ['admin', 'Plagiarism'],
+            'configurePlagiarismForm',
+            'edit',
+            null,
+            $prior_term_gradeables,
+            $ignore_submissions[0],
+            $ignore_submissions[1],
+            $saved_config,
+            $title
+        );
     }
 
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @return RedirectResponse
      */
-    public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id) {
+    public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id): RedirectResponse {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
 
@@ -742,6 +764,8 @@ class PlagiarismController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
+     * @param string $gradeable_id
+     * @param string $config_id
      */
     public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
         // $semester = $this->core->getConfig()->getSemester();
