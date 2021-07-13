@@ -1138,38 +1138,70 @@ WHERE semester=? AND course=? AND user_id=?",
      * @return array - array of userids active in the specified semester
      */
     public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+        $args = ['-1'];
+        $extra_join = '';
+        $extra_where = '';
+        if ($instructor) {
+            $args[] = '1';
+        }
+        if ($fullAccess) {
+            $args[] = '2';
+        }
+        if ($limitedAccess) {
+            $args[] = '3';
+        }
+        if ($student) {
+            $args[] = '4';
+        }
+
+        if ($faculty) {
+            $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
+            $extra_where = ' OR users.user_access_level <= 2';
+        }
         $result_rows = [];
         $this->submitty_db->query(
-            "SELECT courses_users.user_id as user_id, courses_users.user_group as user_group
-                FROM courses_users LEFT JOIN courses 
+            "SELECT DISTINCT courses_users.user_id as user_id
+                FROM courses_users INNER JOIN courses 
                 ON courses_users.semester = courses.semester AND courses_users.course = courses.course
-                WHERE courses.status = 1"
+                " . $extra_join . "
+                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
         );
-        $results = $this->submitty_db->rows();
-        foreach ($results as $row) {
-            if ($instructor && $row["user_group"] == 1) {
-                $result_rows[] = $row["user_id"];
+        return array_map(function ($row) { return $row['user_id']; }, $this->submitty_db->rows());
+    }
+
+    /**
+     * Count number of each group of faculty, instructors in active course, full access graders in active course, limited access graders in active course, students in active course
+     * @return array
+     */
+    public function countActiveUsersByGroup(): array {
+        $this->submitty_db->query(
+            "WITH A as (SELECT DISTINCT ON(user_id) user_id, user_group FROM courses_users JOIN courses
+            on courses.course = courses_users.course
+            and courses.semester = courses_users.semester
+            WHERE courses.status = 1
+            ORDER BY user_id, courses_users.user_group ASC)
+            SELECT A.user_group, COUNT(A.user_group) FROM A GROUP BY A.user_group"
+        );
+        $result = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            if ($row['user_group'] == 1) {
+                $result['instructor'] = $row['count'];
             }
-            elseif ($fullAccess && $row["user_group"] == 2) {
-                $result_rows[] = $row["user_id"];
+            elseif ($row['user_group'] == 2) {
+                $result['full_access'] = $row['count'];
             }
-            elseif ($limitedAccess && $row["user_group"] == 3) {
-                $result_rows[] = $row["user_id"];
+            elseif ($row['user_group'] == 3) {
+                $result['limited_access'] = $row['count'];
             }
-            elseif ($student && $row["user_group"] == 4) {
-                $result_rows[] = $row["user_id"];
+            else {
+                $result['student'] = $row['count'];
             }
         }
-        if ($faculty) {
-            $this->submitty_db->query(
-                "SELECT user_id FROM users WHERE user_access_level <= 2"
-            );
-            $results = $this->submitty_db->rows();
-            foreach ($results as $row) {
-                $result_rows[] = $row["user_id"];
-            }
-        }
-        return array_unique($result_rows);
+        $this->submitty_db->query(
+            "SELECT COUNT(user_access_level) FROM users WHERE user_access_level <= 2"
+        );
+        $result['faculty'] = $this->submitty_db->row()['count'];
+        return $result;
     }
 
     /**

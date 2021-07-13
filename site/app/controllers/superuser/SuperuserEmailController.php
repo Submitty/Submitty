@@ -27,11 +27,12 @@ class SuperuserEmailController extends AbstractController {
      * @return MultiResponse
      */
     public function showEmailPage(): MultiResponse {
-        $num_faculty = count($this->core->getQueries()->getActiveUserIds(false, false, false, false, true));
-        $num_instructor = count($this->core->getQueries()->getActiveUserIds(true, false, false, false, false));
-        $num_full_access = count($this->core->getQueries()->getActiveUserIds(true, true, false, false, false)) - $num_instructor;
-        $num_limited_access = count($this->core->getQueries()->getActiveUserIds(true, true, true, false, false)) - $num_instructor - $num_full_access;
-        $num_student = count($this->core->getQueries()->getActiveUserIds(true, true, true, true, false)) - $num_instructor - $num_full_access - $num_limited_access;
+        $query_result = $this->core->getQueries()->countActiveUsersByGroup();
+        $num_faculty = $query_result['faculty'];
+        $num_instructor = $query_result['instructor'];
+        $num_full_access = $query_result['full_access'];
+        $num_limited_access = $query_result['limited_access'];
+        $num_student = $query_result['student'];
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 SuperuserEmailView::class,
