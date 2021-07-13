@@ -1273,6 +1273,7 @@ HTML;
                 foreach ($new_files as $file) {
                     $skipping = false;
                     foreach (explode(",", $hidden_files) as $file_regex) {
+                        $file_regex = trim($file_regex);
                         if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
                             $skipping = true;
                         }
