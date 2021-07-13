@@ -7,6 +7,7 @@ describe('Test cases revolving around course material uploading and access contr
     before(() => {
         cy.visit('/');
         cy.login();
+        cy.wait(500);
         cy.visit(['sample', 'course_materials']);
     });
 
@@ -356,6 +357,5 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
-        cy.wait(1000);
     });
 });
