@@ -135,7 +135,6 @@
                             <i class="fas fa-plus-square"></i>Add more
                         </div>
                         {% if new_or_edit == "edit" %}
-                            {# TODO: add the rest of the semester/course for each semester_course dropdown #}
                             {% for row in config["prior_term_gradeables"] %}
                                 <div id="prior-g-option-{{ loop.index0 }}" class="prior-gradeable-wrapper">
                                     <select name='prior_semester_course[]' onchange='getGradeables(this)'>

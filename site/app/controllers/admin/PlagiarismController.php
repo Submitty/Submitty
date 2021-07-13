@@ -691,7 +691,7 @@ class PlagiarismController extends AbstractController {
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
-        catch (Exception $e) {
+        catch (\Exception $e) {
             $this->core->addErrorMessage($e);
             $this->core->redirect($return_url);
         }
