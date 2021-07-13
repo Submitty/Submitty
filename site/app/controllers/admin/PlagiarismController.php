@@ -309,7 +309,7 @@ class PlagiarismController extends AbstractController {
      * @return WebResponse|RedirectResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
-    public function showPlagiarismResult(string $gradeable_id, string $config_id): MultiResponse {
+    public function showPlagiarismResult(string $gradeable_id, string $config_id) {
         $error_return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -682,7 +682,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      * @return WebResponse|RedirectResponse
      */
-    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): MultiResponse {
+    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id) {
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
