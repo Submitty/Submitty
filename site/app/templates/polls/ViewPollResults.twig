@@ -32,7 +32,9 @@
     <h1> Viewing poll results for {{ poll.getName() }} </h1>
 
     <h2> Question: </h2>
-    {{ poll.getQuestion() | markdown }}
+    {% include "misc/Markdown.twig" with {
+      "content" : poll.getQuestion()
+    } only %}
     <br/>
     <div id="chartContainer" style="height: 370px; width: 100%;"></div>
 </div>

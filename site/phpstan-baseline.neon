@@ -41,26 +41,6 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: "#^Variable \\$threshold might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$sequence_length might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$regex_for_selecting_files might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			message: "#^Variable \\$instructor_provided_code_path might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
 			count: 4
 			path: app/controllers/admin/PlagiarismController.php
@@ -464,27 +444,7 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
+
 			message: "#^Variable \\$row might not be defined\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$next_id$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$prev_id$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
-			count: 1
-			path: app/views/submission/HomeworkView.php
-

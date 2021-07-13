@@ -374,99 +374,6 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 
 }
 
-function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
-    $('.popup-form').css('display', 'none');
-    var form = $("#delete-plagiarism-result-and-config-form");
-    $('[name="gradeable_title"]', form).html('');
-    $('[name="gradeable_title"]', form).append(gradeable_title);
-    $('[name="delete"]', form).attr('action', form_action);
-    form.css("display", "block");
-    form.find('.form-body').scrollTop(0);
-    captureTabInModal("delete-plagiarism-result-and-config-form");
-}
-
-function addMorePriorTermGradeable(prior_term_gradeables) {
-    const form = $("#save-configuration-form");
-    const prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
-    let to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
-    $.each(prior_term_gradeables, function(sem,courses_gradeables){
-        to_append += '<option value="'+ sem +'">'+ sem +'</option>';
-    });
-    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
-    $('#prev_gradeable_div', form).append(to_append);
-    $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
-    $("select", form).change(function(){
-        const select_element_name = $(this).attr("name");
-        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
-    });
-}
-
-function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#save-configuration-form");
-    if(select_element_name == "language") {
-
-        //
-        // Following code is used to set default window size for different languages
-        // that will appear in 'configureNewGradeableForPlagiarismForm'
-        // to change the default values, just change the val attribute for the language.
-        //
-
-        if ($('[name="language"]', form).val() == "python") {
-            $('[name="sequence_length"]', form).val('1');
-        }
-        else if ($('[name="language"]', form).val() == "cpp") {
-            $('[name="sequence_length"]', form).val('2');
-        }
-        else if ($('[name="language"]', form).val() == "java") {
-            $('[name="sequence_length"]', form).val('3');
-        }
-        else if ($('[name="language"]', form).val() == "plaintext") {
-            $('[name="sequence_length"]', form).val('4');
-        }
-        else if ($('[name="language"]', form).val() == "mips") {
-            $('[name="sequence_length"]', form).val('5');
-        }
-    }
-    else if(select_element_name.substring(0, 9) == "prev_sem_") {
-        var i = select_element_name.substring(9);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_sem != '') {
-            var append_options = '';
-            $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });
-                }
-            });
-            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    }
-    else if(select_element_name.substring(0, 12) == "prev_course_") {
-        var i = select_element_name.substring(12);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
-        var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
-        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_course != '') {
-            var append_options = '';
-            $.each(prior_term_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        if(selected_course == course) {
-                            $.each(gradeables, function (index, gradeable) {
-                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });
-                        }
-                    });
-                }
-            });
-            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    }
-}
-
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
@@ -533,7 +440,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -543,7 +450,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -551,7 +458,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -559,7 +466,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -568,17 +475,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -738,46 +645,16 @@ function check_server(url) {
     );
 }
 
-function checkRefreshLichenMainPage(url, semester, course) {
-    // refresh time for lichen main page
-    var refresh_time = 5000;
-    setTimeout(function() {
-        check_lichen_jobs(url, semester, course);
-    }, refresh_time);
-}
-
-function check_lichen_jobs(url, semester, course) {
-    $.get(url,
-        function(data) {
-            var last_data = localStorage.getItem("last_data");
-            if (data === "REFRESH_ME") {
-                last_data= "REFRESH_ME";
-                localStorage.setItem("last_data", last_data);
-                window.location.href = buildCourseUrl(['plagiarism']);
-            }
-            else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
-                last_data= "NO_REFRESH";
-                localStorage.setItem("last_data", last_data);
-                window.location.href = buildCourseUrl(['plagiarism']);
-            }
-            else {
-                checkRefreshLichenMainPage(url, semester, course);
-            }
-        }
-    );
-}
-
 function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
 function downloadStudentAnnotations(url, path, dir) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
-    //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
 function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
-    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`;
+    window.open(buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`, "_blank");
     return false;
 }
 

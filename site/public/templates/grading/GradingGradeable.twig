@@ -2,6 +2,7 @@
 
 {% block header_content %}
     <span id="anon-id" data-anon_id="{{ graded_gradeable.anon_id }}" hidden></span>
+    <label for="point_precision_id" tabIndex="0" class="screen-reader">Point Precision:</label>
     <input id="point_precision_id" value="{{ gradeable.precision }}" hidden/>
     <span id="gradeable-scores-id"
           data-auto_grading_earned="{{ graded_gradeable.auto_grading_earned }}"
@@ -16,7 +17,7 @@
                 'precision': gradeable.precision,
                 'show_mark_list': false,
                 'component_version_conflict': graded_component.graded_version is defined and graded_component.graded_version != display_version,
-                'peer_component' : component.peer,
+                'peer_component' : component.peer_component,
                 'itempool_id': graded_gradeable.itempool_items[component.id]|default("")
             } %}
         </div>
