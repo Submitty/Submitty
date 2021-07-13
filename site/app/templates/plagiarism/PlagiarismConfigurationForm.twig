@@ -141,7 +141,7 @@
                                     <select name='prior_semester_course[]' onchange='getGradeables(this)'>
                                         {% for semester_course in config["prior_semester_courses"] %}
                                         {% set tokens = semester_course|split(' ') %}
-                                        <option value="{{ tokens[0] }}/{{ tokens[1] }}" {{ tokens[0] == row["prior_semester"] and tokens[1] == row["prior_course"] ? "selected" : "" }}>{{ tokens[0] }}, {{ tokens[1] }}</option>
+                                            <option value="{{ tokens[0] }}/{{ tokens[1] }}" {{ tokens[0] == row["prior_semester"] and tokens[1] == row["prior_course"] ? "selected" : "" }}>{{ tokens[0] }}, {{ tokens[1] }}</option>
                                         {% endfor %}
                                     </select>
                                     <select name='prior_gradeable[]'>
@@ -149,6 +149,9 @@
                                             <option value="{{ other_gradeable }}" {{ other_gradeable == row["prior_gradeable"] ? "selected" : "" }}>{{ other_gradeable }}</option>
                                         {% endfor %}
                                     </select>
+                                    <span class="remove-prev-gradeable" onclick="deletePrevGradeable(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </span>
                                 </div>
                             {% endfor %}
                         {% endif %}
@@ -223,63 +226,66 @@
         $(".past-terms-wrapper").show();
     });
 
+    function deletePrevGradeable(clickedElement) {
+        // remove element
+        $($(clickedElement).parent()).remove();
+        // renumber the rest of the rows
+        for (let i = 0; i < $(".prior-gradeable-wrapper").length; i++) {
+            $($(".prior-gradeable-wrapper")[i]).attr("id", "prior-g-option-" + i);
+        }
+    }
+
     function getGradeables(selectObject) {
         let semester_course_dropdown = $(selectObject);
         let gradeable_dropdown = $(selectObject).siblings().first();
+        // clear the dropdown and display a "loading" message
         gradeable_dropdown.empty();
-        if (semester_course_dropdown.val() === "") {
-            gradeable_dropdown.append("<option value=''>None</option>");
-        } else {
-            gradeable_dropdown.append("<option value=''>Loading...</option>");
-            $.ajax({
-                url: "{{ base_url }}" + "/getPriorGradeables",
-                type: "POST",
-                data: {
-                    csrf_token: csrfToken,
-                    semester_course: semester_course_dropdown.val()
-                },
-                success: function(data) {
-                    // TODO: check for fail vs. success message returned from JSON response
-                    gradeable_dropdown.empty();
-                    let parsed_result = JSON.parse(data);
-                    $.each(parsed_result.data, function(index, gradeable) {
-                        gradeable_dropdown.append("<option value='" + gradeable + "'>" + gradeable + "</option>");
-                    });
-                },
-                error: function(e) {
-                    gradeable_dropdown.empty();
-                    gradeable_dropdown.append("<option value=''>Error: Ajax request failed</option>");
-                }
-            });
-        }
+        gradeable_dropdown.append("<option value=''>Loading...</option>");
+        $.ajax({
+            url: "{{ base_url }}" + "/getPriorGradeables",
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                semester_course: semester_course_dropdown.val()
+            },
+            success: function(data) {
+                // TODO: check for fail vs. success message returned from JSON response
+                // clear the loading message and attach all the options returned by the request
+                gradeable_dropdown.empty();
+                let parsed_result = JSON.parse(data);
+                $.each(parsed_result.data, function(index, gradeable) {
+                    gradeable_dropdown.append("<option value='" + gradeable + "'>" + gradeable + "</option>");
+                });
+            },
+            error: function(e) {
+                gradeable_dropdown.empty();
+                gradeable_dropdown.append("<option value=''>Error: Ajax request failed</option>");
+            }
+        });
     }
 
     function addMorePriorTermGradeable() {
         const form = $("#save-configuration-form");
+        // add a new row with the next index, with empty dropdowns
         let first_free_index = $(".prior-gradeable-wrapper").length;
-        let count = 0;
-        for (let i = 0; count < $(".prior-gradeable-wrapper").length; i++) {
-            if ($($(".prior-gradeable-wrapper")[i]).attr('id') === "prior-g-option-" + i) {
-                count++;
-                if (i > first_free_index) {
-                    first_free_index = i + 1;
-                }
-            }
-        }
         $('#prev-gradeable-div', form).append(`
             <div id='prior-g-option-`+first_free_index+`' class='prior-gradeable-wrapper'>
                 <select name='prior_semester_course[]' onchange='getGradeables(this)'>
                 </select>
                 <select name='prior_gradeable[]'>
-                    <option value=''>None</option>
                 </select>
+                <span class="remove-prev-gradeable" onclick="deletePrevGradeable(this)">
+                    <i class="fas fa-trash"></i>
+                </span>
             </div>
         `);
+        // fill in the left dropdown
         let semester_course_dropdown = $("#prior-g-option-"+first_free_index).children().first();
         $.each(prior_semester_course_list, function(index, semester_course) {
             let tokens_array = semester_course.split(" ");
             semester_course_dropdown.append("<option value='" + tokens_array[0] + "/" + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
         });
+        // fill in the right dropdown
         getGradeables(semester_course_dropdown[0]);
     }
 

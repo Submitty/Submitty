@@ -671,7 +671,7 @@ class PlagiarismController extends AbstractController {
         $config["threshold"] = 5;
         $config["sequence_length"] = 4;
         $config["prior_terms"] = false;
-        $config["prior_semester_courses"] = json_encode($this->getPriorSemesterCourses());
+        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
         $config["prior_term_gradeables"] = [];
         $config["ignore_submissions"] = [];
         $config["ignore_submissions_list"] = "";
