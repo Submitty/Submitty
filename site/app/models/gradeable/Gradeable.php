@@ -1626,6 +1626,7 @@ class Gradeable extends AbstractModel {
     public function canStudentSubmit() {
         return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
             (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
+        //this needs to make a call to the database queries and check if the user has an extension yahurd
     }
 
     /**

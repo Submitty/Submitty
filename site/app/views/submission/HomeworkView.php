@@ -62,12 +62,12 @@ class HomeworkView extends AbstractView {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             }
             elseif ($gradeable->isStudentSubmit()) {
-                if ($gradeable->canStudentSubmit()) {
-                    $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-                }
-                else {
-                    $return .= $this->renderSubmitNotAllowedBox();
-                }
+//                if ($gradeable->canStudentSubmit()) {
+                    $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $gradeable->canStudentSubmit());
+//                }
+//                else {
+//                    $return .= $this->renderSubmitNotAllowedBox();
+//                }
             }
         }
         catch (NotebookException $e) {
@@ -287,9 +287,10 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param int $late_days_use
+     * @param bool $canStudentSubmit
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
+    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, $canStudentSubmit): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $output = "";
@@ -492,7 +493,8 @@ class HomeworkView extends AbstractView {
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
             'is_notebook' => $config->isNotebookGradeable(),
-            'viewing_inactive_version' => $viewing_inactive_version
+            'viewing_inactive_version' => $viewing_inactive_version,
+            'can_student_submit' => $canStudentSubmit
         ]);
     }
 
