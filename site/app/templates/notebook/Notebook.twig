@@ -57,17 +57,26 @@
                 } only %}
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
-
-                <div id="codebox_{{ num_codeboxes }}"
-                     name="codebox_{{ num_codeboxes }}"
-                     autocapitalization="off"
-                     spellcheck="false"
-                     data-initial_value="{{ cell.initial_value }}"
-                     data-recent_submission="{{ cell.recent_submission }}"
-                     onkeyup="handle_input_keypress();">
+                {#disable input if viewing inactive version#}
+                <div
+                    id="codebox_{{ num_codeboxes }}"
+                    name="codebox_{{ num_codeboxes }}"
+                    autocapitalization="off"
+                    spellcheck="false"
+                    data-initial_value="{{ cell.initial_value }}"
+                    data-recent_submission="{{ cell.recent_submission }}"
+                    data-version_submission="{{ cell.version_submission }}"
+                    onkeyup="handle_input_keypress();"
+                    {% if viewing_inactive_version %}
+                        style="pointer-events:none;"
+                    {% endif %}
+                >
                 </div>
+                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
+                    data-older_version = "{{ viewing_inactive_version ? true : false }}">
+                    {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
+                </button>
 
-                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
                 <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
                 <script>
@@ -80,14 +89,14 @@
                     config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
 
                     {% if cell.programming_language is defined and cell.programming_language != '' %}
-                    config_{{ num_codeboxes }}.lineNumbers = true;
-                    config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                      config_{{ num_codeboxes }}.lineNumbers = true;
+                      config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
                     {% endif %}
 
                     {% if cell.programming_language is defined %}
-                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
-                        config_{{ num_codeboxes }}.lineWrapping = true;
-                    }
+                      if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                          config_{{ num_codeboxes }}.lineWrapping = true;
+                      }
                     {% endif %}
 
                     if ({{ cell.rows }} > 0) {
@@ -105,7 +114,7 @@
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
                     {% else %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version ? 'true' : 'false'}}
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
                     {% endif %}
                 </script>
@@ -121,7 +130,7 @@
 
                 <fieldset id="mc_field_{{ num_multiple_choice }}"
                           class="mc"
-                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
+                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
                         <legend>
                             {% if cell.label %}
@@ -136,17 +145,17 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
                                 <input type="checkbox" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress();"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
+                                       {% if viewing_inactive_version %}
+                                           disabled = "disabled"
+                                       {% endif %}
                                 />
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.choices[idx].description
-                                } only %}
+                                {{ cell.choices[idx].description | markdown }}
                             </label>
                         {% endfor %}
                     {% else %}
@@ -168,7 +177,7 @@
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress();"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
                                 />
                                 {% include "misc/Markdown.twig" with {
                                     "content" : cell.choices[idx].description
@@ -181,11 +190,11 @@
                 {# Create reset to recent submission button #}
                 <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
                 <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
-
                 <script>
+                    $("multiple_choice_{{ num_multiple_choice }}_1").attr("disabled", true);
                     {# Populate checkboxes initially #}
                     {% if cell.recent_submission is defined %}
-                        setMultipleChoices("mc_field_{{ num_multiple_choice }}");
+                        setMultipleChoices("mc_field_{{ num_multiple_choice }}", {{ viewing_inactive_version }});
                     {% endif %}
 
                     {# Configure initial state for the button #}
@@ -193,7 +202,7 @@
                         $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
                         $("#mc_{{ num_multiple_choice }}_recent_button").hide();
                     {% else %}
-                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", {{ viewing_inactive_version ? 'true' : 'false' }});
                         $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                     {% endif %}
                 </script>
@@ -208,7 +217,7 @@
                         <p>No files were submitted</p>
                     {% endif %}
                 {% else %}
-                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
+                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label, viewing_inactive_version) }}
                 {% endif  %}
                 {% if old_files is not empty %}
                     <p>Current submitted files:</p>
@@ -231,12 +240,13 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-
-                <button type="button" class="btn btn-primary 
-                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"> 
+                <button type="button" class="btn btn-primary
+                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
+                    {% if viewing_inactive_version %}
+                        disabled = "disabled"
+                    {% endif %}>
                     Clear
                 </button>
-
                 <button type="button" 
                     onclick="populatePreviousFiles({{num_file_submissions}});"
                     class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
@@ -332,7 +342,7 @@
 {% endmacro %}
 
 {# File submission for notebooks #}
-{% macro renderFileSubmission(max_file_uploads, index, old_files, label) %}
+{% macro renderFileSubmission(max_file_uploads, index, old_files, label, viewing_inactive_version) %}
     <div id="upload-boxes">
         {# uploadIndex and input-file + Index required for drag-and-drop.js #}
         <div tabindex="0"
@@ -347,7 +357,10 @@
             </h2>
             <input type="file" name="files" id="input-file{{index}}" 
                    class="hide" onchange="addFilesFromInput({{index}})"
-                   multiple aria-label="Select Files to upload" 
+                   multiple aria-label="Select Files to upload"
+                    {% if viewing_inactive_version %}
+                        disabled="disabled"
+                    {% endif %}
             />
             <table class="file-upload-table" id="file-upload-table-{{index}}">
             <tr style="background:transparent; display:none;">

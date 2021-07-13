@@ -288,7 +288,8 @@
             "gradeable_id" : gradeable_id,
             "highest_version" : highest_version,
             "max_file_uploads" : max_file_uploads,
-            "old_files" : old_files
+            "old_files" : old_files,
+            'viewing_inactive_version' : viewing_inactive_version
         } %}
     {% endif %}
 
@@ -341,9 +342,9 @@
                 "content" : upload_message
             } only %}
         </div>
-
-        <button type="button" id="submit" class="btn btn-success">Submit</button>
-
+            <button type="button" id="submit" class="btn btn-success">
+                {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
+            </button>
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
@@ -415,6 +416,7 @@
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
+
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
@@ -432,7 +434,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
         else {
@@ -451,7 +454,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
     }
