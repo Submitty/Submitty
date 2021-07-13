@@ -76,7 +76,7 @@
 {% macro renderPlagiarismRow(row) %}
     <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
         <td>
-            {% if row['ranking_available'] %}
+            {% if row['ranking_available'] is defined %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
             {% else %}
                 {{ row['title'] }}

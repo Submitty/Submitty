@@ -410,17 +410,30 @@ class PlagiarismController extends AbstractController {
 
         // Prior terms /////////////////////////////////////////////////////////
         $prev_term_gradeables = [];
-        /*
-        TODO: fix? prior_term_gradeables_number is commented out on the frontend so $_POST['prior_term_gradeables_number'] is always unset / 0
-        See #6650 for where this variable was commented out
-
-        $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
-        for ($i = 0; $i < $prev_gradeable_number; $i++) {
-            if ($_POST['prev_sem_' . $i] != "" && $_POST['prev_course_' . $i] != "" && $_POST['prev_gradeable_' . $i] != "") {
-                array_push($prev_term_gradeables, FileUtils::joinPaths($course_path, $_POST['prev_sem_' . $i], $_POST['prev_course_' . $i], "submissions", $_POST['prev_gradeable_' . $i]));
+        if ($_POST["past_terms_option"] === "past_terms") {
+            if (isset($_POST["prior_semester_course"]) !== isset($_POST["prior_gradeable"])) {
+                $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                $this->core->redirect($return_url);
+            }
+            foreach ($_POST["prior_semester_course"] as $index => $sem_course) {
+                if (!isset($_POST["prior_gradeable"][$index])) {
+                    $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                    $this->core->redirect($return_url);
+                }
+                else {
+                    $tokens = explode("/", $sem_course);
+                    if (count($tokens) !== 2) {
+                        $this->core->addErrorMessage("Invalid input provided for prior semester and course");
+                        $this->core->redirect($return_url);
+                    }
+                    $prev_term_gradeables[] = [
+                        "prior_semester" => $tokens[0],
+                        "prior_course" => $tokens[1],
+                        "prior_gradeable" => $_POST["prior_gradeable"][$index]
+                    ];
+                }
             }
         }
-        */
 
 
         // Submissions to ignore ///////////////////////////////////////////////
@@ -518,7 +531,7 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
             $this->core->redirect($return_url);
         }
-
+        die();
 
         // Create the Lichen job ///////////////////////////////////////////////
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);

@@ -137,7 +137,7 @@
                         {% if new_or_edit == "edit" %}
                             {# TODO: add the rest of the semester/course for each semester_course dropdown #}
                             {% for semester_course, gradeable in prior_term_gradeables %}
-                                <div id="prior_g_option_{{ loop_index0 }}">
+                                <div id="prior-g-option-{{ loop_index0 }}">
                                     <select name="prior_semester_course[]" onchange="getGradeables(this)">
                                         {% set tokens = semester_course|split(' ') %}
                                         <option value="{{ semester_course }}">{{ tokens[0] }}, {{ tokens[1] }}</option>
@@ -248,9 +248,18 @@
 
     function addMorePriorTermGradeable() {
         const form = $("#save-configuration-form");
-        // TODO: assign different indices to divs
+        let first_free_index = $(".prior-gradeable-wrapper").length;
+        let count = 0;
+        for (let i = 0; count < $(".prior-gradeable-wrapper").length; i++) {
+            if ($($(".prior-gradeable-wrapper")[i]).attr('id') === "prior-g-option-" + i) {
+                count++;
+                if (i > first_free_index) {
+                    first_free_index = i + 1;
+                }
+            }
+        }
         $('#prev-gradeable-div', form).append(`
-            <div id='prior_g_option_0'>
+            <div id='prior-g-option-`+first_free_index+`' class='prior-gradeable-wrapper'>
                 <select name='prior_semester_course[]' onchange='getGradeables(this)'>
                     <option value=''>Loading...</option>
                 </select>
@@ -259,7 +268,7 @@
                 </select>
             </div>
         `);
-        let semester_course_dropdown = $("#prior_g_option_0").children().first();
+        let semester_course_dropdown = $("#prior-g-option-"+first_free_index).children().first();
         $.ajax({
             url: "{{ base_url }}" + "/getPriorSemesterCourses",
             type: "GET",
@@ -270,7 +279,7 @@
                 let parsed_result = JSON.parse(data);
                 $.each(parsed_result.data, function(index, semester_course) {
                     let tokens_array = semester_course.split(" ");
-                    semester_course_dropdown.append("<option value='" + tokens_array[0] + "_" + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
+                    semester_course_dropdown.append("<option value='" + tokens_array[0] + "/" + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
                 });
                 getGradeables(semester_course_dropdown[0]);
             },
