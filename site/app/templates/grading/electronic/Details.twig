@@ -507,12 +507,14 @@
         {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
-            {{ contents }}
-            {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
-                <span class="notification-badge">{{ badge_count }}</span>
-            {% endif %}
-        </a>
+        {% if badge_count is defined %}
+            <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+                {{ contents }}
+                {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
+                    <span class="notification-badge">{{ badge_count }}</span>
+                {% endif %}
+            </a>
+        {% endif %}
     </td>
 {% endmacro %}
 
@@ -604,18 +606,18 @@
 
 {# Total Point Summary (peer) #}
 {% macro render_column_total_peer(context, section, graded_gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently) #}
-    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
+     todo: test this (no way to create peer assignments currently)
+     todo: this is a lot of math for the view, we should move this into the Gradeable model
     {% set graded = gradeable.getGradedNonHiddenPoints() %}
     {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
     {% for component in components %}
-        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
+         getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score
         {% set graded = graded + component.getScore() %}
     {% endfor %}
-    {#
+
         instead of autograding_score it should be total autograding possible
         I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
-    #}
+
     {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
