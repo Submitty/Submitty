@@ -128,6 +128,14 @@ class OfficeHoursQueueController extends AbstractController {
             }
             else {
                 $contact_info = $_POST['contact_info'];
+                $webex_pattern = "#webex.com/meet#";
+                $skype_pattern = "#join.skype.com#";
+                if (preg_match($webex_pattern,$contact_info) == 0 && preg_match($skype_pattern,$contact_info) == 0) {
+                    $this->core->addErrorMessage("Invalid contact info");
+                    return MultiResponse::RedirectOnlyResponse(
+                        new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                    );
+                }
             }
         }
 
