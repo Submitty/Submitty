@@ -602,8 +602,8 @@ echo Beginning Submitty Setup
 
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
-    echo  Running configure submitty in worker mode
-    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    echo "Running configure submitty in worker mode"
+    echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
@@ -639,6 +639,12 @@ fi
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
     SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if id "${SUPERVISOR_USER}" &>/dev/null; then
+        echo "Supervisor user found"
+    else
+        echo "Supervisor user not found... creating user: ${SUPERVISOR_USER}"
+        adduser ${SUPERVISOR_USER}
+    fi
     if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers

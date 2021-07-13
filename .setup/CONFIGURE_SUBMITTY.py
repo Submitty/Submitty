@@ -210,7 +210,8 @@ print('Hit enter to use default in []')
 print()
 
 if args.worker:
-    SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
+    SUPERVISOR_USER = get_input('What is the id for your submitty user?', 'submitty')
+    print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER)) 
 else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
