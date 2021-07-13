@@ -105,7 +105,7 @@
 
         const overlap_margin = 15;
         const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
-        if (overlapping) {
+        if (overlapping || taLayoutDet.isFullLeftColumnMode) {
             $('#grading-panel-student-name').hide()
         }
     });
