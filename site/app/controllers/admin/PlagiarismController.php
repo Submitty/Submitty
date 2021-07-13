@@ -750,7 +750,7 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
-        try{
+        try {
             $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id, $config_id);
         }
         catch (Exception $e) {
