@@ -231,6 +231,7 @@
                     semester_course: semester_course_dropdown.val()
                 },
                 success: function(data) {
+                    // TODO: check for fail vs. success message returned from JSON response
                     gradeable_dropdown.empty();
                     let parsed_result = JSON.parse(data);
                     $.each(parsed_result.data, function(index, gradeable) {
@@ -238,6 +239,7 @@
                     });
                 },
                 error: function(e) {
+                    gradeable_dropdown.empty();
                     gradeable_dropdown.append("<option value=''>Error: Ajax request failed</option>");
                 }
             });
@@ -263,6 +265,7 @@
             type: "GET",
             data: { csrf_token: csrfToken },
             success: function(data) {
+                // TODO: check for fail vs. success message returned from JSON response
                 semester_course_dropdown.empty();
                 let parsed_result = JSON.parse(data);
                 $.each(parsed_result.data, function(index, semester_course) {
@@ -272,6 +275,7 @@
                 getGradeables(semester_course_dropdown[0]);
             },
             error: function(e) {
+                semester_course_dropdown.empty();
                 semester_course_dropdown.append("<option value=''>Error: Ajax request failed</option>");
             }
         });
