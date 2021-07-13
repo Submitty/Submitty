@@ -212,6 +212,7 @@ function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclic
                 id="${id_prefix + user_num}"
                 class="btn ${button_class} admin-team-form-button" 
                 onclick="${onclick.name}(${onclickArgs.join(', ')})" 
+                type="button"
             >
                 ${text}
             </button>`;
@@ -223,6 +224,7 @@ function getTeamFormAddMoreUsersButtonString(user_num){
                 onclick="addTeamMemberInput(this, ${user_num});" 
                 aria-label="Add More Users"
                 class="btn btn-primary"
+                type="button"
             >
                 <i class="fas fa-plus-square"></i>
                 Add More Users
