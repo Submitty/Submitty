@@ -27,8 +27,20 @@
     <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
       <i class="fas fa-sync"></i>
     </a>
-    <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Access Code</button>
+    <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Token</button>
   </form>
+  <br>
+    <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
+            <option value="">Queue Name</option>
+            {% for queue in viewer.getAllQueues() %}
+                <option value="{{queue['code']}}">{{queue['code']}}</option>
+            {% endfor %}
+        </select>
+        <input type="text" id="old_queue_regex" name="regex" placeholder="Regex" aria-label="New Access Code" required="required">
+        <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Regex Pattern</button>
+    </form>
   <br>
   <span class="option-title">Modify queue status</span>
   <table class="table table-striped" style="width:100%;">
@@ -45,7 +57,8 @@
           <tr>
           <td style="text-align: left;">
               <b>Name:</b>{{queue['code']}}<br>
-              <b>Access Code:</b>{{queue['token']}}</td>
+              <b>Access Code:</b>{{queue['token']}}<br>
+              <b>Regex Pattern:</b>{{queue['regex_pattern']}}</td>
           <td>
               <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
           </td>
