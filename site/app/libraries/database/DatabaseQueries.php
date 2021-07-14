@@ -1166,7 +1166,12 @@ WHERE semester=? AND course=? AND user_id=?",
                 " . $extra_join . "
                 WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
         );
-        return array_map(function ($row) { return $row['user_id']; }, $this->submitty_db->rows());
+        return array_map(
+            function ($row) {
+                return $row['user_id'];
+            },
+            $this->submitty_db->rows()
+        );
     }
 
     /**
