@@ -1391,6 +1391,9 @@ function rotateImage(url, rotateBy) {
   let rotate = sessionStorage.getItem("image-rotate-" + url);
   if (rotate) {
     rotate = parseInt(rotate);
+    if (rotate === NaN) {
+      rotate = 0;
+    }
   } else {
     rotate = 0;
   }
@@ -1407,8 +1410,7 @@ function rotateImage(url, rotateBy) {
       } else {
         img.css("transform", "rotate(" + rotate + "deg)");
       }
-      bounds = img.get(0).getBoundingClientRect();
-      img.css("transform", "translateY(" + (-bounds.top) + "px) rotate(" + rotate + "deg)");
+      img.css("transform", "translateY(" + (-img.get(0).getBoundingClientRect().top) + "px) rotate(" + rotate + "deg)");
       boundsHeight = -1;
       if (rotate % 180 == 0) {
         boundsHeight = img.parent().height();
