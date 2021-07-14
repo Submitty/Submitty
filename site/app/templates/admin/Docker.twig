@@ -43,10 +43,10 @@
 </div>
 
 <div class="content">
-    <h2 class="docker-header">Capabilities Not Associated With a Container</h2>
-    <p>The follow capabilities were found to not have any containers associated with them:</p>
+    <h2 class="docker-header">Capabilities Not Associated With a Image</h2>
+    <p>The follow capabilities were found to not have any images associated with them:</p>
     <ul id="capabilities-list">
-        {% for capability in no_container_capabilities %}
+        {% for capability in no_image_capabilities %}
             <li>{{capability}}</li>
         {% endfor %}
     </ul>
@@ -62,7 +62,7 @@
         <div style="display: inline-block; margin-right: 1em; width: 5%;">
             Capability:
         </div> 
-        <select class="form-control form-control-lg" style="width:93%; display: inline-block;">
+        <select class="form-control form-control-lg" style="width:93%; display: inline-block;" id="capability-form">
             {% for capability in capabilities %}
                 <option>{{capability}}</option>
             {% endfor %}
@@ -74,7 +74,7 @@
         </div> 
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
-    <button class="send-button btn btn-primary" id="send-button">Send</button>
+    <button class="send-button btn btn-primary" id="send-button" onclick="addImage({{"\"" ~ url ~ "\""}})" disabled="disabled">Send</button>
 </div>
 
 <div class="content">

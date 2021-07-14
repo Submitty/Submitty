@@ -85,7 +85,7 @@ class DockerView extends AbstractView {
 
         $capabilities = [];
         $worker_machines = [];
-        $no_container_capabilities = [];
+        $no_image_capabilities = [];
         $image_to_capability = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
             $worker_temp = [];
@@ -107,7 +107,7 @@ class DockerView extends AbstractView {
                     }
                 }
                 else {
-                    $no_container_capabilities[] = $capability;
+                    $no_image_capabilities[] = $capability;
                 }
             }
             // Get ride of duplicate images
@@ -142,7 +142,7 @@ class DockerView extends AbstractView {
             }
         }
 
-        $no_container_capabilities = array_unique($no_container_capabilities);
+        $no_image_capabilities = array_unique($no_image_capabilities);
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
@@ -150,9 +150,10 @@ class DockerView extends AbstractView {
                 "docker_info" => $docker_data['docker_info'],
                 "capabilities" => $capabilities,
                 "worker_machines" => $worker_machines,
-                "no_container_capabilities" => $no_container_capabilities,
+                "no_image_capabilities" => $no_image_capabilities,
                 "image_to_capability" => $image_to_capability,
-                "capability_to_color" => $capability_to_color
+                "capability_to_color" => $capability_to_color,
+                "url" => $this->core->buildUrl(["admin","add_image"])
             ]
         );
     }
