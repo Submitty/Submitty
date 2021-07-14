@@ -33,6 +33,7 @@ if ENV.has_key?('EXTRA')
 end
 if ENV.has_key?('WORKER')
     autostart_worker = true
+    extra_command << '--worker-helper '
 end
   
 
@@ -41,12 +42,13 @@ GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
-if $autostart_worker; then
-  su submitty_daemon
-  cd ~/
-  ssh-keygen
-  ssh-copy-id -i ~/.ssh/id_rsa.pub submitty@192.168.1.8
-fi
+SCRIPT
+
+$worker_script = <<SCRIPT
+GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
+DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+bash ${GIT_PATH}/.setup/install_worker.sh --worker 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
 Vagrant.configure(2) do |config|
@@ -61,6 +63,13 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
+    ubuntu.vm.provision 'shell', inline: $script
+  end
+
+  config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-20.04'
+    ubuntu.vm.network "private_network", ip: "192.168.1.8"
+    ubuntu.vm.provision 'shell', inline: $worker_script
   end
 
   # Our primary development target, RPI uses it as of Fall 2021
@@ -69,18 +78,6 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
-    ubuntu.vm.provision 'shell', inline: $script
-  end
-  
-  config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
-    ubuntu.vm.box = 'bento/ubuntu-20.04'
-    ubuntu.vm.network "private_network", ip: "192.168.1.8"
-    $script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/install_worker.sh --worker 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
-SCRIPT
     ubuntu.vm.provision 'shell', inline: $script
   end
 
