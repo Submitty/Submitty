@@ -8,11 +8,11 @@ use app\libraries\FileUtils;
 use app\models\EmailStatusModel;
 
 class EmailStatusView extends AbstractView {
-    public function showEmailStatus($emailStatus) {
+    public function showEmailStatus($email_status) {
         $this->core->getOutput()->addBreadcrumb("Email Statuses", $this->core->buildCourseUrl(["email"]));
         return $this->renderStatusPage($email_status);
     }
-    public function showSuperuserEmailStatus($emailStatuses) {
+    public function showSuperuserEmailStatus($email_status) {
         $this->core->getOutput()->addBreadcrumb("Superuser Email Statuses", $this->core->buildUrl(["superuser","email"]));
         return $this->renderStatusPage($email_status);
     }
