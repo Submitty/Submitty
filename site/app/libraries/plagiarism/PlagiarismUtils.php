@@ -24,11 +24,14 @@ class PlagiarismUtils {
                 foreach ($match['others'] as $other) {
                     if ($other["username"] === $user_id_2 && $other["version"] === $version_user_2) {
                         $interval->updateType("specific-match");
+//                        // this user+version pair will only every occur once so we break
+//                        break;
                         foreach ($other["matchingpositions"] as $mp) {
                             $interval->addOther($user_id_2, $version_user_2, $mp["start"], $mp["end"]);
                         }
-                        // this user+version pair will only every occur once so we break
-                        break;
+                    }
+                    else {
+                        $interval->addOther($other["username"], $other["version"], -1, -1);
                     }
                 }
             }

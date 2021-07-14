@@ -10,6 +10,8 @@
 
 .markdown {
     font-family: 'Source Sans Pro', 'sans-serif';
+    white-space: normal;
+    position: relative;
 }
 
 .markdown h1,
@@ -18,7 +20,7 @@
 .markdown h4,
 .markdown h5,
 .markdown h6 {
-    margin: 0
+    margin: 0;
 }
 
 .markdown p {
@@ -42,6 +44,31 @@
 .markdown table {
     border-collapse: collapse;
     border: 1px solid var(--text-black);
+}
+
+.markdown pre {
+    position: relative;
+    background: var(--code-box-background-light-gray);
+    color: var(--code-box-font-color-dark-gray);
+}
+
+.markdown pre + pre:not(.line-numbers) {
+    border-top: 1px dashed var(--text-black);
+}
+
+.markdown .line-numbers {
+    position:absolute;
+    top: 1em;
+    padding-right: 1px;
+    text-align: right;
+    border-right: 0.5px solid var(--standard-medium-gray);
+}
+
+.markdown code {
+    display: block;
+    white-space: pre;
+    padding: 1em 1em 1em 2em;
+    overflow-x: scroll;
 }
 
 .markdown th {

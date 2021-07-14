@@ -14,6 +14,7 @@ use app\models\gradeable\Gradeable;
  * @method string[] getInvitedUserIds()
  * @method User[] getMemberUsers()
  * @method User[] getInvitedUsers()
+ * @method string getTeamName()
  */
 class Team extends AbstractModel {
 
@@ -37,6 +38,8 @@ class Team extends AbstractModel {
     protected $assignment_settings;
     /** @var string $anon_id */
     protected $anon_id;
+    /** @prop @var string The name of the team */
+    protected $team_name;
 
     /**
      * Team constructor.
@@ -75,6 +78,7 @@ class Team extends AbstractModel {
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
+        $this->team_name = $details['team_name'];
     }
 
     /**
@@ -202,6 +206,6 @@ class Team extends AbstractModel {
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $this->getId(), "user_assignment_settings.json");
             $this->assignment_settings = FileUtils::readJsonFile($settings_file);
         }
-        return $this->assignment_settings;
+        return $this->assignment_settings ?: ["team_history" => null];
     }
 }

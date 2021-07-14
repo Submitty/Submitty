@@ -1,10 +1,10 @@
-.float-right{
+.float-right {
     float: right;
 }
 
 .forum_content {
     flex-grow: 1;
-    padding: 0px;
+    padding: 0;
 }
 
 .forum_show_threads {
@@ -19,27 +19,29 @@
 
 .forum_bar {
     margin-right: 10px;
-    padding-left:15px;
+    padding-left: 15px;
     margin-top: 10px;
 }
 
 #thread_list {
-    padding-right: 0px;
+    padding-right: 0;
     overflow-y: auto;
-    height:81vh;
+    height: 81vh;
 }
 
 #posts_list {
     overflow-y: auto;
 }
 
-.first_post .post_content{
+.first_post .post_content {
     margin-top: 10px;
 }
 
 .post_content {
     margin-right: 5px;
+    white-space: pre;
 }
+
 .post_viewed_btn {
     background-color: #dcdcdcb5 !important;
 }
@@ -48,19 +50,19 @@
 }
 
 .post_user_id {
-    left:5px;
+    left: 5px;
 }
 
 .post_button {
-    position:relative;
+    position: relative;
     right: 5px;
-    margin-left:5px;
+    margin-left: 5px;
 }
 
 .post_box {
     position: relative;
     box-shadow: 0 2px 15px -5px #888888;
-    padding:7px;
+    padding: 7px;
     margin-top: 20px;
     word-wrap: break-word;
     overflow-y: auto;
@@ -71,19 +73,19 @@
     text-decoration: none;
 }
 
-.first_post{
+.first_post {
     padding-left: 10px !important;
-    margin-top: 0px !important;
+    margin-top: 0 !important;
 }
 
 .thread_box {
-    padding:5px;
+    padding: 5px;
     overflow-y: auto;
     word-wrap: break-word;
     align-items: stretch;
 }
 
-.thread_box h5{
+.thread_box h5 {
     font-weight: normal;
 }
 
@@ -98,36 +100,36 @@
     min-width: 40px;
     min-height: 40px;
     position: relative;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     box-shadow: 2px 2px 4px -3px #dddddd;
 }
 
-.reply-box{
+.reply-box {
     display: none;
     margin-right: 15px;
     margin-bottom: 60px;
 }
 
-#new_category_text{
+#new_category_text {
     resize: none;
 }
 
-#ui-category-list{
+#ui-category-list {
     padding-left: 1em;
 }
 
-.category-color-picker{
+.category-color-picker {
     color: white;
     font-size: 14px;
     height: 18px;
-    padding: 0px;
+    padding: 0;
 }
 
-.categorylistitem-desc span{
+.categorylistitem-desc span {
     word-wrap: break-word;
 }
 
-.categorylistitem-editdesc input{
+.categorylistitem-editdesc input {
     padding: 0;
 }
 
@@ -143,7 +145,7 @@
     background-color: var(--always-default-white) !important;
 }
 
-.create-post-head{
+.create-post-head {
     max-width: 95%;
     display: inline-block;
     word-wrap: break-word;
@@ -152,12 +154,12 @@
     font-size: 1.17em;
 }
 
-.active-thread-remove-announcement{
+.active-thread-remove-announcement {
     display: inline-block;
     color: orange;
 }
 
-.active-thread-announcement{
+.active-thread-announcement {
     position: relative;
     display: inline-block;
     color: gold;
@@ -165,13 +167,15 @@
     -webkit-text-stroke-color: black;
 }
 
-.not-active-thread-announcement, .current-favorite, .pinned-thread{
+.not-active-thread-announcement,
+.current-favorite,
+.pinned-thread {
     position: relative;
     display: inline-block;
     color: orange;
 }
 
-.not-active-thread-announcement{
+.not-active-thread-announcement {
     position: relative;
     display: inline-block;
     color: #e0e0e0;
@@ -179,63 +183,67 @@
     -webkit-text-stroke-color: black;
 }
 
-.not-active-thread-announcement i.fas, .pinned-thread i.fas{
+.not-active-thread-announcement i.fas,
+.pinned-thread i.fas {
     color: #e0e0e0;
     -webkit-text-stroke: 1px black;
 }
 
-.golden_hover{
-  color:#e0e0e0!important;
+.golden_hover {
+    color: #e0e0e0 !important;
 }
 
-.golden_hover:hover{
-  color:gold!important;
+.golden_hover:hover {
+    color: gold !important;
 }
 
-.reverse_golden_hover{
-  color:gold!important;
+.reverse_golden_hover {
+    color: gold !important;
 }
 
-.reverse_golden_hover:hover{
-  color:#e0e0e0!important;
+.reverse_golden_hover:hover {
+    color: #e0e0e0 !important;
 }
 
-.text-decoration-none{
+.text-decoration-none {
     text-decoration: none !important;
 }
 
-.post-action-container{
+.post-action-container {
     margin-top: 8px;
     margin-left: 10px;
     float: right;
 }
 
-.post-email-toggle, .post-user-info{
+.post-email-toggle,
+.post-user-info {
     margin-right: 2px;
     display: inline-block;
 }
 
-.delete-post-button, .edit-post-button{
+.delete-post-button,
+.edit-post-button {
     position: relative;
     display: inline-block;
 }
 
-.delete-post-button{
+.delete-post-button {
     bottom: 1px;
 }
 
-.last-edit{
+.last-edit {
     position: relative;
     right: 5px;
 }
 
-.forum-file-open{
+.forum-file-open {
     text-decoration: none;
     display: inline-block;
     white-space: nowrap;
 }
 
-.current-favorite i.fas, .active-thread-remove-announcement i.fas{
+.current-favorite i.fas,
+.active-thread-remove-announcement i.fas {
     position: relative;
     display: inline-block;
     color: gold;
@@ -243,12 +251,12 @@
     -webkit-text-stroke-color: black;
 }
 
-#thread_form{
+#thread_form {
     margin-right: 15px;
     margin-left: 15px;
 }
 
-.create-thread-title{
+.create-thread-title {
     margin-left: 15px;
     margin-bottom: 10px;
 }
@@ -260,7 +268,10 @@
     word-break: break-word;
 }
 
-.thread-announcement, .thread-favorite, .thread-merged, .thread-locked{
+.thread-announcement,
+.thread-favorite,
+.thread-merged,
+.thread-locked {
     padding-left: 3px;
     position: relative;
     float: right;
@@ -269,189 +280,195 @@
     -webkit-text-stroke-color: black;
 }
 
-.thread-announcement, .thread-favorite{
+.thread-announcement,
+.thread-favorite {
     color: gold;
 }
 
-.thread-merged, .thread-locked{
+.thread-merged,
+.thread-locked {
     color: white;
 }
 
-.thead-content{
+.thead-content {
     font-weight: normal;
 }
 
-.thread-date{
+.thread-date {
     float: right;
     font-weight: normal;
     margin-top: 5px;
     font-size: smaller;
 }
 
-.thread-status{
+.thread-status {
     padding-left: 3px;
     position: relative;
     float: right;
     display: inline-block;
 }
 
-.post_reply_form{
+.post_reply_form {
     margin-right: 17px;
 }
 
-.height-auto{
+.height-auto {
     height: auto;
 }
 
-.inline-block{
+.inline-block {
     display: inline-block;
 }
 
-#unread{
-    margin-right:15px;
-    display:inline-block;
+#unread {
+    margin-right: 15px;
+    display: inline-block;
 }
 
 .forum_bar div div.col-6,
 #search_block div div,
-.forum_bar div div.col-5{
+.forum_bar div div.col-5 {
     padding: 0;
-    top: 0px;
+    top: 0;
 }
 
-#search_block div div.col-6{
-    margin-right:5px;
+#search_block div div.col-6 {
+    margin-right: 5px;
 }
 
-#search_block div div.col-6 input{
-    width:100%;
-    height:34px;
+#search_block div div.col-6 input {
+    width: 100%;
+    height: 34px;
 }
 
-#search_block div{
-    position:relative;
-    top:3px;
+#search_block div {
+    position: relative;
+    top: 3px;
 }
 
-.more-dropdown{
-    position:absolute;
-    right:118px;
-    top:3px;
+.more-dropdown {
+    position: absolute;
+    right: 118px;
+    top: 3px;
 }
 
-#post-hr{
-    border-top:1px solid #999;
+#post-hr {
+    border-top: 1px solid #999999;
     margin-bottom: 5px;
 }
 
-.history-container{
-    margin-left:0px;
+.history-container {
+    margin-left: 0;
     display: none;
 }
 
-.history-container hr{
-    margin-bottom:3px;
+.history-container hr {
+    margin-bottom: 3px;
 }
 
-.history-container span{
-    margin-top:8px;
-    margin-left:10px;
-    float:right;
+.history-container span {
+    margin-top: 8px;
+    margin-left: 10px;
+    float: right;
 }
 
-.history-container span h7{
-    position:relative;
-    right:5px;
+.history-container span h7 {
+    position: relative;
+    right: 5px;
 }
 
-#merge_thread_parent{
-    width:200px;
+#merge_thread_parent {
+    width: 200px;
 }
 
 .hoverable:hover {
     -webkit-filter: brightness(85%);
-    -webkit-transition: all .5s ease;
-    -moz-transition: all .5s ease;
-    -o-transition: all .5s ease;
-    -ms-transition: all .5s ease;
-    transition: all .5s ease;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    -ms-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
-.cursor-pointer{
+.cursor-pointer {
     cursor: pointer !important;
 }
 
-#search-hr{
-    padding-bottom:20px;
-    text-align:center;
-    margin-top:20px;
+#search-hr {
+    padding-bottom: 20px;
+    text-align: center;
+    margin-top: 20px;
 }
 
-#thread-container{
-    position:relative;
-    height:100%;
-    overflow-y:hidden;
+#thread-container {
+    position: relative;
+    height: 100%;
+    overflow-y: hidden;
 }
 
-.stats-table-container{
-    padding-left:20px;
+.stats-table-container {
+    padding-left: 20px;
     padding-bottom: 10px;
-    border-radius:3px;
-    padding-right:20px;
+    border-radius: 3px;
+    padding-right: 20px;
 }
 
-.position-relative{
+.position-relative {
     position: relative !important;
 }
 
-.position-absolute{
+.position-absolute {
     position: absolute !important;
 }
 
-.right-zero{
+.right-zero {
     right: 0 !important;
 }
 
-#merge-thread-btn{
-    position:absolute;
-    right: 0px;
-    top:3px;
-    display:inline-block;
+#merge-thread-btn {
+    position: absolute;
+    right: 0;
+    top: 3px;
+    display: inline-block;
 }
 
-#label_lock_thread{
-    position:absolute;
-    right: 0px;
-    display:inline-block;
-    margin: 0 2px
+#label_lock_thread {
+    position: absolute;
+    right: 0;
+    display: inline-block;
+    margin: 0 2px;
 }
 
-.thread-anon-checkbox, #thread_status, .thread-announcement-checkbox, .pinThread-checkbox{
-    margin-right:15px;
-    display:inline-block;
+.thread-anon-checkbox,
+#thread_status,
+.thread-announcement-checkbox,
+.pinThread-checkbox {
+    margin-right: 15px;
+    display: inline-block;
 }
 
-.email-announcement-checkbox{
-    margin-right:18px;
-    display:inline-block;
+.email-announcement-checkbox {
+    margin-right: 18px;
+    display: inline-block;
 }
 
-.thread-attachment-container, .thread-category-container{
-    margin-bottom:10px;
+.thread-attachment-container,
+.thread-category-container {
+    margin-bottom: 10px;
     position: relative;
 }
 
-.category-list-no-element{
+.category-list-no-element {
     margin-left: 1em;
 }
 
-.thread-list-item{
+.thread-list-item {
     font-weight: bold;
     display: block;
     margin-bottom: 0.5em;
 }
 
-.thread-content{
+.thread-content {
     display: block;
     margin-bottom: 0.25em;
 }
@@ -480,31 +497,33 @@
 }
 
 .well {
-  min-height: 20px;
-  padding: 19px;
-  margin-bottom: 20px;
-  background-color: var(--attachment-box-color);
-  border: 1px solid #e3e3e3;
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: var(--attachment-box-color);
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .well blockquote {
-  border-color: #ddd;
-  border-color: rgba(0, 0, 0, .15);
+    border-color: #dddddd;
+    border-color: rgba(0, 0, 0, 0.15);
 }
+
 .well-lg {
-  padding: 24px;
-  border-radius: 6px;
+    padding: 24px;
+    border-radius: 6px;
 }
+
 .well-sm {
-  padding: 9px;
-  border-radius: 3px;
+    padding: 9px;
+    border-radius: 3px;
 }
 
 .attachment-img {
-    border: 1px solid #ddd;
+    border: 1px solid #dddddd;
     border-radius: 4px;
     padding: 5px;
     max-width: 400px;
@@ -524,38 +543,41 @@
     display: none;
 }
 
-.post_content pre{
+.post_content pre {
     white-space: pre-wrap;
 }
 
-.post_content p img{
+.post_content p img {
     max-width: 100%;
 }
 
-.markdown-inactive{
+.markdown-inactive {
     color: var(--standard-light-gray);
 }
-.markdown-active{
+
+.markdown-active {
     color: var(--submitty-logo-blue);
 }
 
-#clear_filter_button, #unread{
+#clear_filter_button,
+#unread {
     display: none;
 }
 
-.filter-active, .filter-active:hover{
+.filter-active,
+.filter-active:hover {
     background: var(--actionable-blue);
     color: white;
 }
 
-.filter-inactive{
-    background: #fff;
+.filter-inactive {
+    background: #ffffff;
     color: var(--actionable-blue);
 }
 
 .thread-resolved {
     color: var(--good-green);
-    margin-right: 0px;
+    margin-right: 0;
     font-size: 1.5em;
 }
 
@@ -566,23 +588,23 @@
 }
 
 .category-sortable {
-  background-color: var(--always-default-white);
+    background-color: var(--always-default-white);
 }
 
 [data-theme="dark"] .post_box,
 [data-theme="dark"] .create_thread_button,
 [data-theme="dark"] .well {
-  box-shadow: none;
+    box-shadow: none;
 }
 
 [data-theme="dark"] .post_box:not(.important) {
-    border: 1px solid #bbb;
+    border: 1px solid #bbbbbb;
 }
 
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
-    box-shadow: 4px 7px 5px #ccc;
+    box-shadow: 4px 7px 5px #cccccc;
 }
 
 .thread_box .flex-row,
@@ -608,7 +630,7 @@
     flex: 3;
 }
 
-.viewed_post{
+.viewed_post {
     background-color: var(--default-white);
 }
 
@@ -634,17 +656,18 @@
 
 .active {
     background-color: var(--default-white);
-    /*    color: #4a4a4a;*/
+
+    /*    color: #4a4a4a; */
     border: 4px solid var(--submitty-logo-blue);
 }
 
-.new_thread{
+.new_thread {
     background-color: var(--viewed-content);
-    color: var(--text-black)
+    color: var(--text-black);
 }
 
 .markdown-toggle {
-    margin-right:10px; 
-    padding:unset; 
-    cursor:pointer;
+    margin-right: 10px;
+    padding: unset;
+    cursor: pointer;
 }

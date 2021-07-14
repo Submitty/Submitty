@@ -23,17 +23,6 @@
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
                     <span>Basic Information</span>
-                    <span>
-                        <a class="icon" tabindex="0" href="javascript:showUpdatePrefNameForm()" aria-label="Edit user preferred names" title="Edit user preferred names">
-                            <i class="fas fa-pencil-alt"></i> Edit Preferred Names
-                        </a>
-                    </span>
-                    <span>&nbsp;&nbsp;&nbsp;</span>
-                    <span>
-                        <a class="icon" tabindex="0" href="javascript:showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
-                            <i class="fas fa-pencil-alt"></i> Edit Secondary Email
-                        </a>
-                    </span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row" id="username-row">
@@ -48,17 +37,17 @@
                         <span class="label">
                             First Name:
                         </span>
-                        <span class="value">
-                            {{ user.getDisplayedFirstName() }}
-                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFirstName() }}
+                        </button>
                     </div>
                     <div class="flex-row" id="lastname-row">
                         <span class="label">
                             Last Name:
                         </span>
-                        <span class="value">
-                            {{ user.getDisplayedLastName() }}
-                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
+                        </button>
                     </div>
                     <div class="flex-row" id="email-row">
                         <span class="label">
@@ -72,21 +61,17 @@
                         <span class="label">
                             Secondary Email:
                         </span>
-                        <span class="value">
-                            {{ user.getSecondaryEmail() }}
-                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getSecondaryEmail() }}
+                        </button>
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
                             Send Email to Secondary Address:
                         </span>
-                        <span class="value">
-                            {% if user.getEmailBoth() %}
-                                True
-                            {% else %}
-                                False
-                            {% endif %}
-                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
+                            <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}True{% else %}False{% endif %}
+                        </button>
                     </div>
                     {% if display_access_level %}
                         <div class="flex-row" id="access-row">

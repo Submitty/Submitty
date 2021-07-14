@@ -4,7 +4,7 @@
 {% if hide_submitted_files == false or team_assignment == true or hide_version_and_test_details == false %}
     <div class="content">
         {% if team_assignment %}
-            <h3>Team: {{ team_members }}</h3><br />
+            <h3>Team{% if team_name is not null %} ({{ team_name }}){% endif %}: {{ team_members }}</h3><br />
         {% endif %}
 
         {% if hide_version_and_test_details == false %}
@@ -79,8 +79,13 @@
                     </p>
                 {% elseif active_version > 0 %}
                     <p class="red-message">
-                        Note: This version of your assignment will not be graded the instructor/TAs. <br />
-                        Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+                        {% if after_ta_open %}
+                            Warning: TA grading has already begun and your grade will automatically be set to zero if the active
+                            submission version does not match the version graded by instructor or teaching assistant.
+                        {% else %}
+                            Note: This version of your assignment will not be graded the instructor/TAs. <br />
+                            Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+                        {% endif %}
                     </p>
                 {% else %}
                     <p class="red-message">

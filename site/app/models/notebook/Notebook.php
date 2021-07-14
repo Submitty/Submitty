@@ -154,29 +154,39 @@ class Notebook extends AbstractModel {
     * @param array $new_notebook a notebook config to parse
     * @param int $version which version to get notebook submission values from
     * @param string $student_id which student's notebook to pull data from
+    * @param ?int $display_version selected version (may not be active version)
+    * @param string $gradeable_id
     */
-    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id): array {
+    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, ?int $display_version, string $gradeable_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
                     // If no previous submissions set string to default initial_value
                     if ($version === 0) {
                         $recentSubmission = $notebookVal['initial_value'] ?? "";
+                        $version_answer = $notebookVal['initial_value'] ?? "";
                     }
                     else {
                         // Else there has been a previous submission try to get it
                         try {
                             // Try to get the most recent submission
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
+                            //get answer for the selected display version
+                            $question_name = $notebookVal['filename'];
+                            $file_path = $this->core->getConfig()->getCoursePath();
+                            $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
+                            $version_answer = rtrim(file_get_contents($file_path));
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
                             $recentSubmission = $notebookVal['initial_value'] ?? "";
+                            $version_answer = $notebookVal['initial_value'] ?? "";
                         }
                     }
 
                     // Add field to the array
                     $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                    $new_notebook[$notebookKey]['version_submission'] = $version_answer;
                 }
                 elseif ($notebookVal['type'] == "multiple_choice") {
                     // If no previous submissions do nothing, else there has been, so try and get it
@@ -187,9 +197,14 @@ class Notebook extends AbstractModel {
                         try {
                             // Try to get the most recent submission
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
-
+                            //get answer for the selected display version
+                            $question_name = $notebookVal['filename'];
+                            $file_path = $this->core->getConfig()->getCoursePath();
+                            $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
+                            $version_answer = rtrim(file_get_contents($file_path));
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                            $new_notebook[$notebookKey]['version_submission'] = $version_answer;
                         }
                         catch (AuthorizationException $e) {
                             // If failed to get the most recent submission then skip
