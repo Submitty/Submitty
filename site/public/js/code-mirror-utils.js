@@ -19,7 +19,10 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
     // If no mode is set must explicitly set it to null otherwise codemirror will attempt to guess the language and
     // highlight.  This is not desirable when collecting plain text.
     if (!codemirror_config.mode) {
-        codemirror_config.mode = null;
+        CodeMirrorSpellChecker({
+            codeMirrorInstance:  CodeMirror,
+        });
+        codemirror_config.mode = 'spell-checker';
     }
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
