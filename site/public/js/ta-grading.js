@@ -1447,14 +1447,17 @@ function rotateImage(url, rotateBy) {
       }
       bounds = img.get(0).getBoundingClientRect();
       img.css("transform", "translateY(" + (-bounds.top) + "px) rotate(" + rotate + "deg)");
+      boundsHeight = -1;
       if (rotate % 180 == 0) {
-        bounds = img.parent().get(0).getBoundingClientRect();
+        boundsHeight = img.parent().height();
+      } else {
+        boundsHeight = img.parent().width();
       }
       if ($(this).css("max-height").length !== 0 && parseInt($(this).css("max-height")) !== NaN) {
         let height = parseInt($(this).css("max-height"));
-        $(this).height(bounds.height > height ? height : bounds.height);
+        $(this).height(boundsHeight > height ? height : boundsHeight);
       } else {
-        $(this).height(bounds.height > 500 ? 500 : bounds.height);
+        $(this).height(boundsHeight > 500 ? 500 : boundsHeight);
       }
     }
   });
