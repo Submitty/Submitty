@@ -21,11 +21,15 @@ class TeamView extends AbstractView {
     public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $invites_received, bool $seeking_partner, bool $lock): string {
         $gradeable_id = $gradeable->getId();
 
+        $this->core->getOutput()->addInternalModuleJs('team.js');
+
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
             "seeking_enabled" => $this->core->getConfig()->isSeekMessageEnabled(),
             "seeking_instructions" => $this->core->getConfig()->getSeekMessageInstructions(),
             "team" => $team,
+            "team_name" => $team == null ? null : $team->getTeamName(),
+            "change_team_name_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'setname']),
             "user" => $this->core->getUser(),
             "lock" => $lock,
             "members" => $members,
