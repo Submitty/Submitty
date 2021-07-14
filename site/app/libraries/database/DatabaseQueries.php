@@ -160,6 +160,63 @@ class DatabaseQueries {
 
         return $ret;
     }
+    /**
+     * Retrieves all students from a course and their virtual attendance
+     * information such as logs for the course materials page, and logs
+     * for the discussion forum page.
+     */
+
+    public function getAttendanceInfo(): array {
+        $this->course_db->query("
+        WITH
+        A AS
+        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_firstname,''), user_firstname) as user_firstname, COALESCE(NULLIF(user_preferred_lastname,''), user_lastname) as user_lastname
+        FROM users
+        ORDER BY registration_section, user_lastname, user_firstname, user_id),
+        B AS
+        (SELECT distinct on (user_id) user_id, timestamp
+        FROM gradeable_access where user_id is not NULL
+        ORDER BY user_id, timestamp desc),
+        C AS
+        (SELECT distinct on (user_id) user_id,submission_time
+        FROM electronic_gradeable_data
+        ORDER BY user_id, submission_time),
+        D AS
+        (SELECT distinct on (user_id) user_id, timestamp
+        FROM viewed_responses
+        ORDER BY user_id, timestamp desc),
+        E AS
+        (SELECT distinct on (author_user_id) author_user_id, timestamp
+        FROM posts
+        ORDER BY author_user_id, timestamp desc),
+        F AS
+        (SELECT student_id, count (student_id)
+        FROM poll_responses
+        GROUP BY student_id),
+        G AS
+        (SELECT distinct on (user_id) user_id, time_in
+        FROM queue
+        ORDER BY user_id, time_in desc)
+        SELECT
+        A.registration_section, A.user_id, A.user_firstname, user_lastname,
+        B.timestamp as gradeable_access,
+        C.submission_time as gradeable_submission,
+        D.timestamp as forum_view,
+        E.timestamp as forum_post,
+        F.count as num_poll_responses,
+        G.time_in as office_hours_queue
+        FROM
+        A
+        left join B on A.user_id=B.user_id
+        left join C on A.user_id=C.user_id
+        left join D on A.user_id=D.user_id
+        left join E on A.user_id=E.author_user_id
+        left join F on A.user_id=F.student_id
+        left join G on A.user_id=G.user_id
+        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
+        ");
+        return $this->course_db->rows();
+    }
 
     /**
      * given a string with missing digits, get all similar numeric ids
@@ -636,6 +693,21 @@ SQL;
         return $this->course_db->rows()[0]["max_id"];
     }
 
+    public function findParentPost($thread_id) {
+        $this->course_db->query("SELECT * from posts where thread_id = ? and parent_id = -1", [$thread_id]);
+        return $this->course_db->row();
+    }
+    public function findThread($thread_id) {
+        $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
+        return $this->course_db->row();
+    }
+
+    public function existsAnnouncementsId($thread_id) {
+        $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
+        $row = $this->course_db->row();
+        return count($row) > 0 && $row['announced'] != null;
+    }
+
     public function getResolveState($thread_id) {
         $this->course_db->query("SELECT status from threads where id = ?", [$thread_id]);
         return $this->course_db->rows();
@@ -764,14 +836,14 @@ SQL;
         return $rows;
     }
 
-    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration) {
-
+    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
+
+        $now = $announcement ? $this->core->getDateTimeNow() : null;
 
         try {
             //insert data
-            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date, pinned_expiration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date, $expiration]);
-
+            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date, pinned_expiration, announced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date, $expiration, $now]);
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", [$title, $user]);
         }
@@ -781,6 +853,7 @@ SQL;
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
+
         foreach ($categories_ids as $category_id) {
             $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$id, $category_id]);
         }
@@ -792,6 +865,11 @@ SQL;
         $this->visitThread($user, $id);
 
         return ["thread_id" => $id, "post_id" => $post_id];
+    }
+
+    public function setAnnounced($thread_id) {
+        $now = $this->core->getDateTimeNow();
+        $this->course_db->query("UPDATE threads SET announced = ? WHERE id = ?", [$now, $thread_id]);
     }
 
     public function getThreadsBefore($timestamp, $page) {
@@ -1394,7 +1472,7 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
                 FROM gradeable_teams gt
                   JOIN
                     (SELECT t.team_id, t.state, u.*
@@ -1433,7 +1511,7 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
                 FROM gradeable_teams gt
                   JOIN
                     (SELECT t.team_id, t.state, u.*
@@ -2739,7 +2817,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  integer $rotating_section
      * @return string $team_id
      */
-    public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
+    public function createTeam($g_id, $user_id, $registration_section, $rotating_section, $team_name) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
         if (strlen($team_id_prefix) < 5) {
@@ -2747,8 +2825,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         }
         $team_id = "{$team_id_prefix}_{$user_id}";
 
-        $params = [$team_id, $g_id, $registration_section, $rotating_section];
-        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
+        $params = [$team_id, $g_id, $registration_section, $rotating_section, $team_name];
+        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section, team_name) VALUES(?,?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", [$team_id, $user_id]);
         return $team_id;
     }
@@ -2775,6 +2853,16 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
     public function updateTeamRotatingSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
+    }
+
+    /**
+     * Set team $team_id's team_name
+     *
+     * @param string $team_id
+     * @param string $team_name
+     */
+    public function updateTeamName($team_id, $team_name) {
+        $this->course_db->query("UPDATE gradeable_teams SET team_name=? WHERE team_id=?", [$team_name, $team_id]);
     }
 
     /**
@@ -2854,7 +2942,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamById($team_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
               (SELECT t.team_id, t.state, u.*
@@ -2883,7 +2971,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
               (SELECT t.team_id, t.state, u.*
@@ -2934,7 +3022,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
@@ -4720,7 +4808,7 @@ AND gc_id IN (
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
         $query = "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
@@ -5869,25 +5957,30 @@ AND gc_id IN (
 
         $main_query = "select $id_string from $table where $section_type is not null and $id_string not in";
 
+        $parameters = [];
         // Select which subquery to use
         if ($component_id != "-1") {
             // Use this sub query to select users who do not have a specific component within this gradable graded
             $sub_query = "(select gd_$id_string
                 from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
-                where g_id = '$gradeable_id' and gc_id = $component_id);";
+                where g_id = ? and gc_id = ?);";
+
+            $parameters = [$gradeable_id, $component_id];
         }
         else {
             // Use this sub query to select users who have at least one component not graded
             $sub_query = "(select gradeable_data.gd_$id_string
              from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
-             where g_id = '$gradeable_id' group by gradeable_data.gd_id having count(gradeable_data.gd_id) = $component_count);";
+             where g_id = ? group by gradeable_data.gd_id having count(gradeable_data.gd_id) = ?);";
+
+            $parameters = [$gradeable_id, $component_count];
         }
 
         // Assemble complete query
         $query = "$main_query $sub_query";
 
         // Run query
-        $this->course_db->query($query);
+        $this->course_db->query($query, $parameters);
 
         // Capture results
         $not_fully_graded = $this->course_db->rows();
@@ -6398,13 +6491,15 @@ AND gc_id IN (
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.rotating_section';
+               team.rotating_section,
+               team.team_name';
 
             $submitter_inject = '
               JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
                   gt.rotating_section,
+                  gt.team_name,
                   json_agg(tu) AS array_team_users
                 FROM gradeable_teams gt
                   JOIN (
