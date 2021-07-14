@@ -682,7 +682,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      * @return WebResponse|RedirectResponse
      */
-    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id) {
+    public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): ResponseInterface {
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
