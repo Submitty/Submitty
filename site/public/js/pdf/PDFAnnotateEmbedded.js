@@ -24,6 +24,18 @@ window.GENERAL_INFORMATION = {
     file_name: '',
 };
 
+const ANNOTATION_DEFAULTS = {
+    size: 12,
+    color: "#000000",
+    class: "Annotation",
+    page: 1,
+    rotation: 0,
+    x: 50,
+    y: 50,
+    content: "DEFAULT VALUE",
+    width: 5
+}
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 function buildCourseUrl(parts = []) {
@@ -293,12 +305,21 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         if (localStorage.key(i).includes('annotations')) {
             let annotations = JSON.parse(localStorage.getItem(localStorage.key(i)));
             for (let i = annotations.length-1; i >= 0; i--) {
-                if(annotations[i] && Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null).length > 0) {
+                const faulty_properties = Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null);
+                if(annotations[i] && faulty_properties.length > 0) {
                     if(!remove_faulty){
-                        remove_faulty = confirm(`A faulty annotation has been detected which may cause features on this page to not work properly. Would you like to detect and remove all faulty annotations for this pdf?\n\nFile:${window.RENDER_OPTIONS.documentId}`);
+                        remove_faulty = confirm(`A faulty annotation has been detected which may cause features on this page to not work properly. Would you like to reset all faulty annotations to their default values?\n\nFile:${window.RENDER_OPTIONS.documentId}`);
                     }
                     if (remove_faulty) {
-                        annotations.splice(i, 1);
+                        for(const faulty_property of faulty_properties) {
+                            if (ANNOTATION_DEFAULTS.hasOwnProperty(faulty_property)) {
+                                annotations[i][faulty_property] = ANNOTATION_DEFAULTS[faulty_property];
+                            } 
+                            //if there is no default value for this property, just dedlete the annotation
+                            else {
+                                annotations.splice(i, 1);
+                            }
+                        }
                     }
                 }
             }
