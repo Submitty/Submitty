@@ -282,7 +282,7 @@
         let semester_course_dropdown = $("#prior-g-option-"+first_free_index).children().first();
         $.each(prior_semester_course_list, function(index, semester_course) {
             let tokens_array = semester_course.split(" ");
-            semester_course_dropdown.append("<option value='" + tokens_array[0] + " " + tokens_array[1] + "'>" + tokens_array[0] + " " + tokens_array[1] + "</option>");
+            semester_course_dropdown.append("<option value='" + tokens_array[0] + " " + tokens_array[1] + "'>" + tokens_array[0] + ", " + tokens_array[1] + "</option>");
         });
         // fill in the right dropdown
         getGradeables(semester_course_dropdown[0]);
