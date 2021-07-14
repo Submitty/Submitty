@@ -139,7 +139,7 @@ class PlagiarismController extends AbstractController {
     private function getOverallRankings(string $gradeable_id, string $config_id): array {
         $file_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "overall_ranking.txt");
         if (!file_exists($file_path)) {
-            throw new Exception("Unable to read ranking file");
+            throw new Exception("Unable to read overall ranking file for gradeable {$gradeable_id} config {$config_id}");
         }
 
         $content = file_get_contents($file_path);
@@ -159,9 +159,28 @@ class PlagiarismController extends AbstractController {
      * @throws Exception
      */
     private function getRankingsForUser(string $gradeable_id, string $config_id, string $user_id_1, string $user_1_version): array {
+        // TODO: temporary fix, should make a proper PR overhauling all of plagiarism.js to fix this.
+        if ($user_1_version === "max_matching") {
+            $max_percent = 0;
+            foreach (scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)) as $version) {
+                $file_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1, $version, "ranking.txt");
+                if ($version !== "." && $version !== ".." && file_exists($file_path)) {
+                    $content = file_get_contents($file_path);
+                    $content = trim(str_replace(["\r", "\n"], ' ', $content));
+                    $rankings = preg_split('/ +/', $content);
+                    $rankings = array_chunk($rankings, 3);
+
+                    if ($rankings[0][0] > $max_percent) {
+                        $user_1_version = $version;
+                        $max_percent = $rankings[0][0];
+                    }
+                }
+            }
+        }
+
         $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $user_1_version), "ranking.txt");
         if (!file_exists($file_path)) {
-            throw new Exception("Unable to read ranking file");
+            throw new Exception("Unable to read ranking file for {$user_id_1} version {$user_1_version} in gradeable {$gradeable_id} config {$config_id}");
         }
 
         $content = file_get_contents($file_path);
@@ -1062,28 +1081,8 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
-        $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "ranking.txt");
-
-        $i = 1;
-        $max_matching_version = 1;
-        $max_matching_percent = 0;
-        while (is_dir($file_path . $i)) {
-            try {
-                $ranking = $this->getRankingsForUser($gradeable_id, $config_id, $user_id_1, strval($i));
-            }
-            catch (Exception $e) {
-                return JsonResponse::getErrorResponse($e->getMessage());
-            }
-
-            if ($ranking[0][0] > $max_matching_percent) {
-                $max_matching_percent = $ranking[0][0];
-                $max_matching_version = $i;
-            }
-            $i++;
-        }
-
         try {
-            $ranking = $this->getRankingsForUser($gradeable_id, $config_id, $user_id_1, strval($max_matching_version));
+            $ranking = $this->getRankingsForUser($gradeable_id, $config_id, $user_id_1, $version_user_1);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
