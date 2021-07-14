@@ -309,7 +309,7 @@ class PlagiarismController extends AbstractController {
      * @return WebResponse|RedirectResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
-    public function showPlagiarismResult(string $gradeable_id, string $config_id) {
+    public function showPlagiarismResult(string $gradeable_id, string $config_id): ResponseInterface {
         $error_return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
