@@ -32,11 +32,21 @@ const taLayoutDet = {
     rightTop: null,
     rightBottom: null,
   },
+  currentActivePanels: {
+    leftTop: false,
+    leftBottom: false,
+    rightTop: false,
+    rightBottom: false,
+  },
   dividedColName: "LEFT",
   leftPanelWidth: "50%",
   bottomPanelHeight: "50%",
   bottomFourPanelRightHeight: "50%",
 };
+
+let settingsCallbacks = {
+  "general-setting-arrow-function": changeStudentArrowTooltips
+}
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
@@ -81,10 +91,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
+  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');
     if(storageCode) {
       localStorage.setItem(storageCode, this.value);
+      if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](this.value);
+      }
     }
   })
 
@@ -171,6 +186,80 @@ $(function () {
 
 });
 
+function changeStudentArrowTooltips(data) {
+  let component_id = NO_COMPONENT_ID;
+  switch(data) {
+    case "ungraded":
+      component_id = getFirstOpenComponentId(false);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+        if(component_id === NO_COMPONENT_ID) {
+          $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+          $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+        } else {
+          $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+          $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        }
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "active-inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    default:
+      $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+      $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      break;
+  }
+}
+
+let orig_toggleComponent = window.toggleComponent;
+window.toggleComponent = function(component_id, saveChanges) {
+  let ret = orig_toggleComponent(component_id, saveChanges);
+  return ret.then(function() {
+    changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  });
+}
+
 function checkNotebookScroll() {
   if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
     || taLayoutDet.currentTwoPanels.leftBottom === 'notebook-view'
@@ -224,7 +313,7 @@ function notebookScrollSave() {
     var notebookTop = $('#notebook-view').offset().top;
     var element = $('#content_0');
     if(notebookView.scrollTop() + notebookView.innerHeight() + 1 > notebookView[0].scrollHeight) {
-      element = $('[id^=content_').last();
+      element = $('[id^=content_]').last();
     } else {
       while (element.length !== 0) {
         if (element.offset().top > notebookTop) {
@@ -309,6 +398,7 @@ function initializeTaLayout() {
   }
   updateLayoutDimensions();
   updatePanelOptions();
+  readCookies();
 }
 
 function updateLayoutDimensions() {
@@ -432,6 +522,7 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
+    $('#autoscroll_id')[0].checked = true;
     let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
       let file_path = element.split('#$SPLIT#$');
@@ -505,22 +596,32 @@ function gotoMainPage() {
   }
 }
 
-function gotoPrevStudent(to_ungraded = false) {
+function gotoPrevStudent() {
 
-  let selector;
-  let window_location;
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
 
-  if(to_ungraded === true) {
-    selector = "#prev-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let selector = "#prev-student";
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-
-  }
-  else {
-    selector = "#prev-student";
-    window_location = $(selector)[0].dataset.href
+  switch(filter) {
+    case "ungraded":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+      }
+      break;
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "active-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
   }
 
   if (getGradeableId() !== '') {
@@ -537,21 +638,32 @@ function gotoPrevStudent(to_ungraded = false) {
   }
 }
 
-function gotoNextStudent(to_ungraded = false) {
+function gotoNextStudent() {
 
-  let selector;
-  let window_location;
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
 
-  if(to_ungraded === true) {
-    selector = "#next-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let selector = "#next-student";
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-  }
-  else {
-    selector = "#next-student";
-    window_location = $(selector)[0].dataset.href
+  switch(filter) {
+    case "ungraded":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+      }
+      break;
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "active-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
   }
 
   if (getGradeableId() !== '') {
@@ -575,14 +687,6 @@ registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
   gotoNextStudent();
 });
 
-//Navigate to the prev / next student buttons
-registerKeyHandler({name: "Previous Ungraded Student", code: "Shift ArrowLeft"}, function() {
-  gotoPrevStudent(true);
-});
-registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, function() {
-  gotoNextStudent(true);
-});
-
 //-----------------------------------------------------------------------------
 // Panel show/hide
 //
@@ -592,6 +696,8 @@ function resetSinglePanelLayout() {
   $('.two-panel-cont').removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
 
+  $('.panels-container').append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
+  $('.panels-container :not(.panel-instructions').css('z-index', '2');
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
@@ -655,7 +761,6 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities () {
-    $("#panel-instructions").hide();
     panelElements.forEach((panel) => {
       let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
 
@@ -690,12 +795,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
-      }
-      if (taLayoutDet.currentOpenPanel === null) {
-        $("#panel-instructions").show();
-      }
-      else {
-        $("#panel-instructions").hide();
+        $('.panels-container > .panel-instructions').toggle(!taLayoutDet.currentOpenPanel);
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
@@ -740,6 +840,9 @@ function toggleFullLeftColumnMode (forceVal = false) {
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   panelsContSelector = newPanelsContSelector;
+
+  $("#grading-panel-student-name").hide();
+
 }
 
 /**
@@ -759,6 +862,9 @@ function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
   initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
   initializeHorizontalTwoPanelDrag();
   togglePanelSelectorModal(false);
+  if (!taLayoutDet.isFullLeftColumnMode) {
+    $("#grading-panel-student-name").show();
+  }
 }
 
 function togglePanelLayoutModes(forceVal = false) {
@@ -766,97 +872,42 @@ function togglePanelLayoutModes(forceVal = false) {
   if (!forceVal) {
     taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
   }
-  if (taLayoutDet.currentOpenPanel === null) {
-    $("#panel-instructions").show();
-  }
-  else {
-    $("#panel-instructions").hide();
-  }
 
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
     twoPanelCont.addClass("active");
     $("#two-panel-exchange-btn").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    // If there is any panel opened just use that and fetch the next one for left side...
-    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
-      taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
-      panelElements.every((panel, idx) => {
-        if (taLayoutDet.currentTwoPanels.leftTop === panel.str) {
-          let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          taLayoutDet.currentTwoPanels.rightTop = panelElements[nextIdx].str;
-          return false;
-        }
-        return true;
-      });
-
-    } else if(!taLayoutDet.currentOpenPanel) {
-      // if there is no currently opened panel fill the panels with the first two
-      taLayoutDet.currentTwoPanels = {
-        leftTop: panelElements[0].str,
-        leftBottom: null,
-        rightTop: panelElements[1].str,
-        rightBottom: null,
-      };
+    
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: false,
+      rightTop: true,
+      rightBottom: false,
     }
+
     updatePanelLayoutModes();
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    let topPanel = taLayoutDet.currentTwoPanels.leftTop;
-    let bottomPanel = taLayoutDet.currentTwoPanels.leftBottom;
 
-    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
-    let prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.rightTop;
-
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: false,
+      rightTop: true,
+      rightBottom: false,
+    }
+  
     if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
-      topPanel = taLayoutDet.currentTwoPanels.rightTop;
-      bottomPanel = taLayoutDet.currentTwoPanels.rightBottom;
-      taLayoutDet.currentTwoPanels.leftBottom = null;
-      prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.leftTop;
+      taLayoutDet.currentActivePanels.rightBottom = true;
     }
     else {
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").removeClass("active");
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
-      taLayoutDet.currentTwoPanels.rightBottom = null;
-    }
-
-    let nextIdx = -1;
-    if (!bottomPanel) {
-      panelElements.every((panel, idx) => {
-        if (prevPanel === panel.str) {
-            nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-            // Now check if panel indexed with nextIdx is already open in somewhere
-            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.rightTop === panelElements[nextIdx].str) {
-              // If yes update the nextIdx
-              nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
-            }
-            if (taLayoutDet.dividedColName === "RIGHT") {
-              taLayoutDet.currentTwoPanels.rightBottom = panelElements[nextIdx].str;
-            }
-            else {
-              taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
-            }
-            return false; // Break the loop
-        }
-        return true;
-      })
-      if (nextIdx === -1) {
-        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-          leftTop: panelElements[0].str,
-          leftBottom: panelElements[1].str,
-          rightTop: panelElements[2].str,
-          rightBottom: null,
-        } : {
-          leftTop: panelElements[0].str,
-            leftBottom: null,
-            rightTop: panelElements[1].str,
-            rightBottom: panelElements[2].str,
-        };
-      }
+      taLayoutDet.currentActivePanels.leftBottom = true;
     }
 
     initializeHorizontalTwoPanelDrag();
@@ -864,6 +915,13 @@ function togglePanelLayoutModes(forceVal = false) {
   } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+    
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: true,
+      rightTop: true,
+      rightBottom: true,
+    }
 
     $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
@@ -885,12 +943,15 @@ function togglePanelLayoutModes(forceVal = false) {
 
 // Handles the DOM manipulation to update the two panel layout
 function updatePanelLayoutModes () {
+  $('.panels-container *').css('z-index', '');
   // fetch the panels by their ids
   const leftTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftTop);
   const leftBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftBottom);
   const rightTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightTop);
   const rightBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightBottom);
 
+  //remove all panel instructions
+  $('.panel-instructions').remove();
   setMultiPanelModeVisiblities();
   for (const panelIdx in panelsBucket) {
     const panelCont = document.querySelector(panelsBucket[panelIdx]).childNodes;
@@ -899,18 +960,24 @@ function updatePanelLayoutModes () {
       document.querySelector(".panels-container").append(panelCont[idx]);
     }
   }
-  // finally append the latest panels to their respective buckets
-  if (leftTopPanel) {
-    document.querySelector(panelsBucket.leftTopSelector).append(leftTopPanel);
-  }
-  if (leftBottomPanel) {
-    document.querySelector(panelsBucket.leftBottomSelector).append(leftBottomPanel);
-  }
-  if (rightTopPanel) {
-    document.querySelector(panelsBucket.rightTopSelector).append(rightTopPanel);
-  }
-  if (rightBottomPanel) {
-    document.querySelector(panelsBucket.rightBottomSelector).append(rightBottomPanel);
+
+  //loop through panel positions (topLeft, topRight, etc)
+  for (let panel in taLayoutDet.currentTwoPanels) {
+    //if the panel isn't active, skip it
+    if(!taLayoutDet.currentActivePanels[panel]) {
+      continue;
+    }
+    const panel_type = taLayoutDet.currentTwoPanels[panel];
+    //get panel corresponding with the layout position
+    const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
+    //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
+    const dom_panel = document.getElementById(`${panel_type}`);
+    if (dom_panel) {
+      $(layout_panel).append(dom_panel);
+    }
+    else {
+      $(layout_panel).append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
+    }
   }
   saveTaLayoutDetails();
 }
@@ -1109,11 +1176,18 @@ function checkOpenComponentMark(index) {
 
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
-  $("."+click_class + class_modifier).each(function(){
+
+  let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
+  
+  $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
-    let innerText = Object.values($(this))[0].innerText;
-    if (innerText.slice(-4) !== ".pdf") {
-      $(this).click();
+    let viewerID = $(this).attr("data-viewer_id");
+    if(($(this).parent().hasClass("file-viewer") && $("#file_viewer_" + viewerID).hasClass("shown") === toClose) ||
+        ($(this).parent().hasClass("div-viewer") && $("#div_viewer_" + viewerID).hasClass("open") === toClose)) {
+      let innerText = Object.values($(this))[0].innerText;
+      if (innerText.slice(-4) !== ".pdf") {
+        $(this).click();
+      }
     }
   });
 }
