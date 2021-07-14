@@ -475,7 +475,7 @@ class PlagiarismController extends AbstractController {
                     $this->core->redirect($return_url);
                 }
                 else {
-                    $tokens = explode("/", $sem_course);
+                    $tokens = explode(" ", $sem_course);
                     if (count($tokens) !== 2) {
                         $this->core->addErrorMessage("Invalid input provided for prior semester and course");
                         $this->core->redirect($return_url);
@@ -884,7 +884,10 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
      */
     public function getPriorGradeables() {
-        return JsonResponse::getSuccessResponse($this->getOtherPriorGradeables());
+        $tokens = explode(' ', $_POST["semester_course"]);
+        $semester = $tokens[0];
+        $course = $tokens[1];
+        return JsonResponse::getSuccessResponse($this->getOtherPriorGradeables($semester, $course));
     }
 
 
