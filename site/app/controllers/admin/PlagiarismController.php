@@ -87,6 +87,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
+     * Gets a list of courses which have the same group as the current course and are thus eligible prior terms
      * @return array
      * @throws Exception
      */
@@ -115,10 +116,37 @@ class PlagiarismController extends AbstractController {
         return $valid_courses;
     }
 
+    /**
+     * Get a list of gradeables for the given term+course
+     * @param string $term
+     * @param string $course
+     * @return array
+     * @throws Exception
+     */
     private function getOtherPriorGradeables(string $term, string $course): array {
-        // TODO: Implememt.
-        // from the parameter course and term, get the list of gradeables
-        return ["hw1", "hw2", "hw3", "test1", "hw5", "midterm"];
+        // check for backwards crawling
+        if (str_contains($term, '..') || str_contains($course, '..')) {
+            throw new Exception('Error: path contains invalid component ".."');
+        }
+
+        // check to make sure the group is the same as the group for the current course
+        $this_course_group = filegroup($this->core->getConfig()->getCoursePath());
+        if (!$this_course_group) {
+            throw new Exception("Unable to obtain group for current course");
+        }
+        if ($this_course_group !== filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course))) {
+            throw new Exception("Group for requested course {$term}/{$course} does not match group for current course");
+        }
+
+        // actually do the collection of gradeables here
+        $gradeables = [];
+        foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course)) as $gradeable) {
+            if ($term !== '.' && $term !== '..') {
+                $gradeables[] = $gradeable;
+            }
+        }
+
+        return $gradeables;
     }
 
     /**
