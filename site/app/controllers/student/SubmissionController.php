@@ -1051,7 +1051,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
+        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit($gradeable->getId(), $this->core->getUser()->getId())) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
