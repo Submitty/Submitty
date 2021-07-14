@@ -2,14 +2,12 @@
 
 namespace app\controllers\admin;
 
-use app\libraries\response\MultiResponse;
+use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\libraries\DateUtils;
-use app\libraries\plagiarism\Interval;
 use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
