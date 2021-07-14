@@ -1438,7 +1438,6 @@ function rotateImage(url, rotateBy) {
   }
   $('iframe[src="' + url + '"]').each(function() {
     let img = $(this).contents().find('img');
-    console.log(img);
     if (img) {
       if (rotate === 0) {
         img.css("transform", "");
