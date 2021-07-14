@@ -86,13 +86,36 @@ class PlagiarismController extends AbstractController {
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
-    private function getPriorSemesterCourses() {
-        // TODO: Implement.
-        // get all the course and term pairs that this course has access to (same group)
-        return ['f19 csci1200', 's18 csci1200', 'f20 csci1500'];
+    /**
+     * @return array
+     * @throws Exception
+     */
+    private function getPriorSemesterCourses(): array {
+        // holds the group for this course's directory so we can check it against all the other directories
+        $this_course_group = filegroup($this->core->getConfig()->getCoursePath());
+        if (!$this_course_group) {
+            throw new Exception("Unable to obtain group for current course");
+        }
+
+        $valid_courses = [];
+
+        // loop over all of the semesters
+        foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses")) as $term) {
+            if ($term !== '.' && $term !== '..') {
+                // loop over each of the courses in the term
+                foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term)) as $course) {
+                    $course_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course);
+                    if ($term !== '.' && $term !== '..' && filegroup($course_path) === $this_course_group) {
+                        $valid_courses[] =  "{$term} {$course}";
+                    }
+                }
+            }
+        }
+
+        return $valid_courses;
     }
 
-    private function getOtherPriorGradeables() {
+    private function getOtherPriorGradeables(string $term, string $course): array {
         // TODO: Implememt.
         // from the parameter course and term, get the list of gradeables
         return ["hw1", "hw2", "hw3", "test1", "hw5", "midterm"];
