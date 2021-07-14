@@ -1010,6 +1010,11 @@ class SubmissionController extends AbstractController {
         $merge_previous = isset($merge) && $merge === 'true';
         $clobber = isset($clobber) && $clobber === 'true';
 
+        //don't allow submission if not on most recent version
+        if (isset($_POST['viewing_inactive_version']) && $_POST['viewing_inactive_version'] === "1") {
+            return $this->uploadResult("Must be on most recent version to make a new submission", false);
+        }
+
         $vcs_checkout = isset($_POST['vcs_checkout']) ? $_POST['vcs_checkout'] === "true" : false;
         if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
