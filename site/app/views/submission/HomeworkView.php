@@ -63,7 +63,7 @@ class HomeworkView extends AbstractView {
             }
             elseif ($gradeable->isStudentSubmit()) {
 //                if ($gradeable->canStudentSubmit()) {
-                    $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $gradeable->canStudentSubmit());
+                    $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $gradeable->canStudentSubmit($gradeable->getId(), $graded_gradeable->getSubmitter()->getId()));
 //                }
 //                else {
 //                    $return .= $this->renderSubmitNotAllowedBox();

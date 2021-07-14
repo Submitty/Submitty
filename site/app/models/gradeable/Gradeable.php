@@ -1621,12 +1621,25 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets if students can make submissions at this time
+     * @param string $gradeable_id
+     * @param string $user_id
      * @return bool
      */
-    public function canStudentSubmit() {
+    public function canStudentSubmit(string $gradeable_id, string $user_id): bool {
+        $students = $this->core->getQueries()->getUsersWithExtensions($gradeable_id);
+        $allowed_late_submit = false;
+        foreach ($students as $student) {
+            if ($student->getId() === $user_id) {
+                $late_days = $student->getLateDayExceptions();
+                $due_date = $this->submission_due_date;
+                date_add($due_date, date_interval_create_from_date_string($late_days.' days'));
+                if ($due_date < $this->core->getDateTimeNow()) {
+                    $allowed_late_submit = true;
+                }
+            }
+        }
         return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
-            (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
-        //this needs to make a call to the database queries and check if the user has an extension yahurd
+            ($allowed_late_submit || !$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
     }
 
     /**
