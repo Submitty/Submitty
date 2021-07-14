@@ -7,6 +7,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048">
     <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
+    <input type="text" id="regex" name="regex" placeholder="Regex" aria-label="Regex" maxlength="2048">
     <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
       <i class="fas fa-sync"></i>
     </a>
