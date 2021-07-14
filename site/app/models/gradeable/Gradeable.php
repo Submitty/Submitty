@@ -1621,11 +1621,20 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets if students can make submissions at this time
+     * @return bool
+     */
+    public function canStudentSubmit(): bool {
+        return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
+            (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
+    }
+
+    /**
+     * Gets if the user has an extension for the gradeable
      * @param string $gradeable_id
      * @param string $user_id
      * @return bool
      */
-    public function canStudentSubmit(string $gradeable_id, string $user_id): bool {
+    public function getStudentExtension(string $gradeable_id, string $user_id): bool{
         $students = $this->core->getQueries()->getUsersWithExtensions($gradeable_id);
         $allowed_late_submit = false;
         foreach ($students as $student) {
@@ -1638,10 +1647,8 @@ class Gradeable extends AbstractModel {
                 }
             }
         }
-        return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
-            ($allowed_late_submit || !$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
+        return $allowed_late_submit;
     }
-
     /**
      * Gets the total possible non-extra-credit manual grading (ta + peer) points
      * @return float

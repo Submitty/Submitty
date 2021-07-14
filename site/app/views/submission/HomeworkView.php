@@ -452,7 +452,7 @@ class HomeworkView extends AbstractView {
             'has_due_date' => $gradeable->hasDueDate(),
             'is_timed' => $gradeable->hasAllowedTime(),
             'repository_path' => $my_repository,
-            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
+            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed()),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),
@@ -489,7 +489,8 @@ class HomeworkView extends AbstractView {
             'max_file_uploads' => ini_get('max_file_uploads'),
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
-            'can_student_submit' => $canStudentSubmit
+            'can_student_submit' => $canStudentSubmit,
+            'show_extension_message' => $gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && $canStudentSubmit)
         ]);
     }
 
