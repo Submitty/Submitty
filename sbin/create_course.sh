@@ -308,6 +308,8 @@ if [[ $? -ne "0" ]] ; then
     echo "       To fix, try running 'create_term.sh'."
     exit
 fi
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses_groups (semester, course, group_name)
+VALUES ('${semester}', '${course}', '${ta_www_group}');"
 echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################
