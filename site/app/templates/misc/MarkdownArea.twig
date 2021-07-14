@@ -35,7 +35,7 @@
     {% include "misc/AccessibilityMessage.twig" %}
     <textarea
         id="{{ markdown_area_id }}"
-        class="fill-available {{ class is defined ? class : 'markdown-input'}}"
+        class="fill-available {{ class is defined ? class }}"
         name="{{ markdown_area_name is defined ? markdown_area_name : "markdown_area" }}"
         {% if placeholder is defined %}
             placeholder="{{ placeholder }}"
