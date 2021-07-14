@@ -1642,7 +1642,7 @@ class Gradeable extends AbstractModel {
                 $late_days = $student->getLateDayExceptions();
                 $due_date = $this->submission_due_date;
                 date_add($due_date, date_interval_create_from_date_string($late_days.' days'));
-                if ($due_date < $this->core->getDateTimeNow()) {
+                if ($due_date > $this->core->getDateTimeNow()) {
                     $allowed_late_submit = true;
                 }
             }

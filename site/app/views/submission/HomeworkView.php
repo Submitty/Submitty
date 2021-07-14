@@ -62,7 +62,7 @@ class HomeworkView extends AbstractView {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             }
             elseif ($gradeable->isStudentSubmit()) {
-                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $gradeable->canStudentSubmit($gradeable->getId(), $this->core->getUser()->getId()));
+                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $gradeable->canStudentSubmit());
             }
         }
         catch (NotebookException $e) {
@@ -490,7 +490,7 @@ class HomeworkView extends AbstractView {
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
             'can_student_submit' => $canStudentSubmit,
-            'show_extension_message' => $gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && $canStudentSubmit)
+            'show_extension_message' => $gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && $gradeable->getStudentExtension($gradeable->getId(),$this->core->getUser()->getId()))
         ]);
     }
 
