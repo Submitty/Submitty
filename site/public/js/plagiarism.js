@@ -188,7 +188,7 @@ function requestAjaxData(url, f, es) {
         success: function(data) {
             data = JSON.parse(data);
             if (data.status !== "success") {
-                alert(data.data);
+                alert(data.message);
                 return;
             }
 
