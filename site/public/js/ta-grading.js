@@ -1446,17 +1446,16 @@ function rotateImage(url, rotateBy) {
         img.css("transform", "rotate(" + rotate + "deg)");
       }
       bounds = img.get(0).getBoundingClientRect();
-      console.log(bounds);
       img.css("transform", "translateY(" + (-bounds.top) + "px) rotate(" + rotate + "deg)");
-      console.log(img.get(0).getBoundingClientRect());
-      console.log(img.width());
-      if ($(this).css("max-height") === "none" || $(this).css("max-height").length === 0) {
-        $(this).height(bounds.height > 500 ? 500 : bounds.height);
-      } else if(parseInt($(this).css("max-height")) !== NaN) {
+      if (rotate % 180 == 0) {
+        bounds = img.parent().get(0).getBoundingClientRect();
+      }
+      if ($(this).css("max-height").length !== 0 && parseInt($(this).css("max-height")) !== NaN) {
         let height = parseInt($(this).css("max-height"));
         $(this).height(bounds.height > height ? height : bounds.height);
+      } else {
+        $(this).height(bounds.height > 500 ? 500 : bounds.height);
       }
-      img.get(0).offsetHeight;
     }
   });
   sessionStorage.setItem("image-rotate-" + url, rotate);
@@ -1465,15 +1464,16 @@ function rotateImage(url, rotateBy) {
 function imageRotateIcons(iframe) {
   let iframeTarget = $('iframe#' + iframe);
   let contentType = iframeTarget.contents().get(0).contentType;
-  if (contentType != undefined && contentType.startsWith('image')) {
-    iframeTarget.before(`<div>
+  if (contentType != undefined && contentType.startsWith('image') && iframeTarget.parent().data("image-rotate-icons") !== true) {
+    iframeTarget.parent().data("image-rotate-icons", true);
+    iframeTarget.parent().css("margin-left", "");
+    iframeTarget.before(`<div class="image-rotate-icons-bar">
                             <a class="image-rotate-icon" onclick="rotateImage('${iframeTarget.attr('src')}', 'ccw')">
                             <i class="fas fa-undo" title="Rotate image counterclockwise"></i></a>
                             <a class="image-rotate-icon" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
                             <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
                             </div>`);
     
-    iframeTarget.contents().find('body').css("overflow-y", "auto");
     if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
       rotateImage(iframeTarget.attr("src"), "none");
     }
