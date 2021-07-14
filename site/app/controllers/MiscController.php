@@ -148,7 +148,8 @@ class MiscController extends AbstractController {
             $contents = file_get_contents($corrected_name);
             if (!is_null($ta_grading) && $ta_grading === "true") {
                 $newlines = substr_count($contents, "\n");
-                if ($newlines > 5000) {
+                $carriage_returns = substr_count($contents, "\r");
+                if (max($newlines, $carriage_returns) > 5000) {
                     return new WebResponse(MiscView::class, 'tooLarge');
                 }
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
@@ -243,7 +244,7 @@ class MiscController extends AbstractController {
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($user_id !== $this->core->getUser()->getId()) {
             if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-                $this->core->addErrorMessage("You do not have peremission to download this file!");
+                $this->core->addErrorMessage("You do not have permission to download this file!");
                 return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
             }
         }
