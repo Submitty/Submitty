@@ -740,7 +740,7 @@ class PlagiarismController extends AbstractController {
 
         if (file_exists($this->getQueuePath($gradeable_id, $config_id)) || file_exists($this->getProcessingQueuePath($gradeable_id, $config_id))) {
             $this->core->addErrorMessage("A job is already running for this configuration. Try again after a while.");
-            $this->core->redirect($return_url);
+            return new RedirectResponse($return_url);
         }
 
         if (!file_exists($config_path)) {
@@ -790,9 +790,6 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
      */
     public function getRunLog(string $gradeable_id, string $config_id): JsonResponse {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
@@ -823,9 +820,6 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null): JsonResponse {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
@@ -1057,9 +1051,6 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      */
     public function ajaxGetMatchingUsers(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
@@ -1124,9 +1115,6 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      */
     public function checkRefreshLichenMainPage(): JsonResponse {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
         $gradeables_in_progress = 0;
         $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
