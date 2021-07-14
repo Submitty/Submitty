@@ -1325,6 +1325,22 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             if (is_null($who_id) || $who_id == '') {
+                $message = "There are no students";
+                if ($to === 'prev') {
+                    $message .= " before";
+                } else {
+                    $message .= " after";
+                }
+                $message .= " the last selected student using the student index ordering";
+                if ($navigate_assigned_students_only !== "false") {
+                    $message .= " assigned to you";
+                }
+                
+                if ($filter !== 'default') {
+                    $message .= " (using filter '" . $filter . "')";
+                }
+                $message .= ".";
+                $this->core->addSuccessMessage($message);
                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             }
         }
