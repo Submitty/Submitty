@@ -82,7 +82,6 @@
         {% endif %}
         {% include "misc/MarkdownArea.twig" with {
             "markdown_area_id" : "reply_box_" ~ post_box_id,
-            "markdown_area_query" : "$('#reply_box_" ~ post_box_id ~ "')",
             "markdown_area_name" : "thread_post_content",
             "markdown_area_value" : "",
             "class" : "post_content_reply thread_post_content",
