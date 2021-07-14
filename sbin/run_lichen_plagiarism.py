@@ -37,9 +37,7 @@ def main():
 
     log_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/logs/{gradeable}/run_results.json"
     log_json = open(log_path, 'w+')
-
-    rank_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/ranking/{gradeable}.txt"
-
+    rank_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/ranking/{gradeable}/overall_ranking.txt"
     matches_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/matches/{gradeable}"
 
     hashes_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/hashes/{gradeable}"

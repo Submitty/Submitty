@@ -91,6 +91,13 @@
           Pause position in queue
         {% endif %}
       </button>
+      <p>Total time paused since you entered the queue:</p>
+      {% if viewer.getCurrentTimePausedStart() == NULL %}
+        <p>{{viewer.intToStringTimePaused(viewer.getCurrentTimePaused())}}</p>
+      {% else %}
+        <p id="student_timer" help_time="{{ viewer.timeToISO(viewer.getCurrentTimePausedStart()) }}"></p>
+      {% endif %}
+      <p>WARNING: If you remain paused for more than a few minutes, you may be removed by the teaching staff. Please refer to the course syllabus for office hour queue usage policies.</p>
     </form>
   </div>
 {% else %}
@@ -108,4 +115,3 @@
     </form>
   </div>
 {% endif %}
-

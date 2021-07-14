@@ -284,6 +284,7 @@ CREATE TABLE public.gradeable (
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
+    g_allow_custom_marks boolean DEFAULT true NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
@@ -516,7 +517,8 @@ CREATE TABLE public.gradeable_teams (
     g_id character varying(255) NOT NULL,
     anon_id character varying(255),
     registration_section character varying(255),
-    rotating_section integer
+    rotating_section integer,
+    team_name character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -559,7 +561,7 @@ CREATE TABLE public.late_day_exceptions (
 CREATE TABLE public.late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp(6) with time zone NOT NULL
+    since_timestamp date NOT NULL
 );
 
 
@@ -694,7 +696,8 @@ CREATE TABLE public.polls (
     question text NOT NULL,
     status text NOT NULL,
     release_date date NOT NULL,
-    image_path text
+    image_path text,
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
 );
 
 
@@ -777,7 +780,9 @@ CREATE TABLE public.queue (
     contact_info text,
     last_time_in_queue timestamp with time zone,
     time_help_start timestamp with time zone,
-    paused boolean DEFAULT false NOT NULL
+    paused boolean DEFAULT false NOT NULL,
+    time_paused integer DEFAULT 0 NOT NULL,
+    time_paused_start timestamp with time zone
 );
 
 
@@ -1014,6 +1019,8 @@ CREATE TABLE public.threads (
     is_visible boolean NOT NULL,
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
+    pinned_expiration timestamp with time zone DEFAULT '1900-01-01 00:00:00-05'::timestamp with time zone NOT NULL,
+    announced timestamp(6) with time zone DEFAULT NULL::timestamp with time zone,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 
@@ -1061,6 +1068,8 @@ CREATE TABLE public.users (
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary_notify boolean DEFAULT false,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -2234,4 +2243,3 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
-

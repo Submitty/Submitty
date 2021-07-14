@@ -115,7 +115,7 @@ class UserSpecificNotebook extends Notebook {
         }
 
         if (count($multiple_selected) > 0) {
-            $seen = implode($multiple_selected, ",");
+            $seen = implode(",", $multiple_selected);
             $this->warning = "Warning: The item_pool \"{$seen}\" has been selected multiple times, this could lead to notebooks with the same question given more than once.";
         }
 

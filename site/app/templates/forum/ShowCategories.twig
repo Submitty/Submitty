@@ -1,11 +1,12 @@
 <div class="content forum_content">
 
     {% include "forum/ForumBar.twig" with {
-        "forum_bar_buttons_right" : forumBarData.forum_bar_buttons_right,
-        "forum_bar_buttons_left" : forumBarData.forum_bar_buttons_left,
-        "show_threads" : forumBarData.show_threads,
+        "forum_bar_buttons_right" : forumBarData is defined ? forumBarData.forum_bar_buttons_right : null,
+        "forum_bar_buttons_left" : forumBarData is defined ? forumBarData.forum_bar_buttons_left : null,
+        "show_threads" : forumBarData is defined ? forumBarData.show_threads : false,
         "thread_exists" : false,
-        "show_filter": false
+        "show_filter": false,
+        "show_more": false
     } %}
 
     <div id="manage-categories-view" style="margin: 0 auto; max-width: 750px; padding-bottom: 20px">
