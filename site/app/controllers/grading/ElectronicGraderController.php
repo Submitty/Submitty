@@ -1328,14 +1328,14 @@ class ElectronicGraderController extends AbstractController {
                 $message = "There are no students";
                 if ($to === 'prev') {
                     $message .= " before";
-                } else {
+                }
+                else {
                     $message .= " after";
                 }
                 $message .= " the last selected student using the student index ordering";
                 if ($navigate_assigned_students_only !== "false") {
                     $message .= " assigned to you";
                 }
-                
                 if ($filter !== 'default') {
                     $message .= " (using filter '" . $filter . "')";
                 }
