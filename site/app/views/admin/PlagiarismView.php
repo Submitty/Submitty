@@ -109,7 +109,12 @@ class PlagiarismView extends AbstractView {
 
     public function configurePlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $ignore_submissions, $ignore_submissions_others, $saved_config, $title) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
-        $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
+        if ($new_or_edit === "edit") {
+            $this->core->getOutput()->addBreadcrumb('Edit Gradeable Configuration');
+        }
+        else {
+            $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
+        }
         $this->core->getOutput()->addInternalCss("plagiarism.css");
         $this->core->getOutput()->enableMobileViewport();
 
