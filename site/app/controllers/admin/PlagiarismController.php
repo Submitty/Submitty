@@ -457,11 +457,23 @@ class PlagiarismController extends AbstractController {
                         $this->core->addErrorMessage("Invalid input provided for prior semester and course");
                         $this->core->redirect($return_url);
                     }
-                    // TODO: make sure the semester+course+gradeable actually exists
+                    $prior_semester = $tokens[0];
+                    $prior_course = $tokens[1];
+                    $prior_gradeable = $_POST["prior_gradeable"][$index];
+                    // Error checking
+                    if (str_contains($prior_semester, '..') || str_contains($prior_course, '..') || str_contains($prior_gradeable, '..')) {
+                        $this->core->addErrorMessage("Error: prior term gradeables string contains invalid component '..'");
+                        return new RedirectResponse($return_url);
+                    }
+                    $prior_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $prior_semester, $prior_course, "submissions", $prior_gradeable);
+                    if (!is_dir($prior_g_submissions_path) || count(scandir($prior_g_submissions_path)) === 2) {
+                        $this->core->addErrorMessage("Error: submssions to prior term gradeable provided not found");
+                        return new RedirectResponse($return_url);
+                    }
                     $prev_term_gradeables[] = [
-                        "prior_semester" => $tokens[0],
-                        "prior_course" => $tokens[1],
-                        "prior_gradeable" => $_POST["prior_gradeable"][$index]
+                        "prior_semester" => $prior_semester,
+                        "prior_course" => $prior_course,
+                        "prior_gradeable" => $prior_gradeable
                     ];
                 }
             }
@@ -767,7 +779,7 @@ class PlagiarismController extends AbstractController {
         $config["language"][$saved_config['language']] = "selected";
         $config["threshold"] = (int) $saved_config['threshold'];
         $config["sequence_length"] = (int) $saved_config['sequence_length'];
-        $config["prior_terms"] = count($saved_config['prior_term_gradeables']) > 0; // TODO
+        $config["prior_terms"] = count($saved_config['prior_term_gradeables']) > 0;
         $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
         $config["prior_term_gradeables"] = $prior_term_gradeables_array;
         $config["ignore_submissions"] = $ignore[0];
