@@ -151,9 +151,6 @@ def main():
                               user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
-    # Sort alphabetically extra students. Shouldn't affect randomness....
-    extra_students.sort(key=lambda x: x.id)
-
     for user in extra_students:
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
@@ -191,8 +188,9 @@ def main():
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
-        students = random.sample(extra_students, course.registered_students + course.no_registration_students +
-                                 course.no_rotating_students + course.unregistered_students)
+        total_students = course.registered_students + course.no_registration_students + \
+            course.no_rotating_students + course.unregistered_students
+        students = extra_students[:total_students]
         key = 0
         for i in range(course.registered_students):
             reg_section = (i % course.registration_sections) + 1
