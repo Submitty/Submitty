@@ -561,7 +561,8 @@ CREATE TABLE public.gradeable_teams (
     g_id character varying(255) NOT NULL,
     anon_id character varying(255),
     registration_section character varying(255),
-    rotating_section integer
+    rotating_section integer,
+    team_name character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1063,6 +1064,7 @@ CREATE TABLE public.threads (
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
     pinned_expiration timestamp with time zone DEFAULT '1900-01-01 00:00:00-05'::timestamp with time zone NOT NULL,
+    announced timestamp(6) with time zone DEFAULT NULL::timestamp with time zone,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 

@@ -664,11 +664,10 @@ function downloadFile(path, dir) {
 
 function downloadStudentAnnotations(url, path, dir) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
-    //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
 function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
-    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`;
+    window.open(buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`, "_blank");
     return false;
 }
 
