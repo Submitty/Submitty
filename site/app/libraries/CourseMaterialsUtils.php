@@ -20,12 +20,10 @@ class CourseMaterialsUtils {
         if ($course_material == null) {
             return false;
         }
-        else {
-            $current_time = new \DateTime('now');
-            $release_time = $course_material->getReleaseDate();
+        $current_time = new \DateTime('now');
+        $release_time = $course_material->getReleaseDate();
 
-            return $current_time > $release_time;
-        }
+        return $current_time > $release_time;
     }
 
     /**
@@ -39,9 +37,7 @@ class CourseMaterialsUtils {
         if ($course_material == null) {
             return false;
         }
-        else {
-            return ($current_user->getGroup() < 4 || $course_material->isSectionAllowed($current_user));
-        }
+        return ($current_user->getGroup() < 4 || $course_material->isSectionAllowed($current_user));
     }
 
     /**

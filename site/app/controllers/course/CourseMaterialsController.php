@@ -48,7 +48,7 @@ class CourseMaterialsController extends AbstractController {
         $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
 
         foreach ($all_files as $file) {
-            if (str_starts_with($file->getPath(), $path)) {
+            if (Utils::startsWith($file->getPath(), $path)) {
                 $this->core->getCourseEntityManager()->remove($file);
             }
         }
@@ -105,7 +105,7 @@ class CourseMaterialsController extends AbstractController {
                 $file_path = $file->getRealPath();
                 $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $file_path]);
-                if ($course_material != null) {
+                if ($course_material !== null) {
                     if (!$this->core->getUser()->accessGrading()) {
                         // only add the file if the section of student is allowed and course material is released!
                         if ($course_material->isSectionAllowed($this->core->getUser()) && $course_material->getReleaseDate() < $this->core->getDateTimeNow()) {
@@ -168,7 +168,7 @@ class CourseMaterialsController extends AbstractController {
             $file_name = htmlspecialchars($filename);
             $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                 ->findOneBy(['path' => $file_name]);
-            if ($course_material != false) {
+            if ($course_material !== null) {
                 $course_material->setReleaseDate($new_data_time);
             }
             else {
@@ -187,7 +187,7 @@ class CourseMaterialsController extends AbstractController {
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
         foreach ($course_materials as $course_material) {
             if (
-                str_starts_with($course_material->getPath(), $main_course_material->getPath())
+                Utils::startsWith($course_material->getPath(), $main_course_material->getPath())
                 && $course_material->getPath() != $main_course_material->getPath()
             ) {
                 if ($course_material->isDir()) {
