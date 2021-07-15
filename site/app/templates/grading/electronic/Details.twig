@@ -348,7 +348,7 @@
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(context, section, graded_gradeable, index, info, column) %}
     <td>
-        {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
+        {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null %}
             {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
     </td>
@@ -511,12 +511,14 @@
         {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
-            {{ contents }}
-            {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
-                <span class="notification-badge">{{ badge_count }}</span>
-            {% endif %}
-        </a>
+        {% if badge_count is defined %}
+            <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+                {{ contents }}
+                {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
+                    <span class="notification-badge">{{ badge_count }}</span>
+                {% endif %}
+            </a>
+        {% endif %}
     </td>
 {% endmacro %}
 
