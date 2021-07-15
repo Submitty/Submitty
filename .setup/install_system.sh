@@ -650,7 +650,7 @@ localhost
 " | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
     else
         if [ ${WORKER_HELPER} == 1 ]; then
-            python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker-helper
+            python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker-helper 1
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
         fi
