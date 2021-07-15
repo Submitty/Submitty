@@ -77,7 +77,6 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        
         $regex_pattern = isset($_POST['regex']) ? $_POST['regex'] : '';
         if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern)) {
             $this->core->addSuccessMessage("New queue added");
@@ -135,11 +134,11 @@ class OfficeHoursQueueController extends AbstractController {
                     $invalid = false;
                     //if checking for any email address
                     if ($regex_pattern === 'email' || $regex_pattern === 'Email') {
-                        if(!filter_var($contact_info, FILTER_VALIDATE_EMAIL)) {
+                        if (!filter_var($contact_info, FILTER_VALIDATE_EMAIL)) {
                             $invalid = true;
                         }
                     }
-                    else if (preg_match($regex_pattern,$contact_info) == 0) {
+                    elseif (preg_match($regex_pattern, $contact_info) == 0) {
                         $invalid = true;
                     }
                     if ($invalid) {
