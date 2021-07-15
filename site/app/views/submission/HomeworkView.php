@@ -431,7 +431,6 @@ class HomeworkView extends AbstractView {
             $graded_gradeable->hasOverriddenGrades();
         }
         $numberUtils = new NumberUtils();
-
         // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
@@ -490,7 +489,6 @@ class HomeworkView extends AbstractView {
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
             'can_student_submit' => $canStudentSubmit,
-            'show_extension_message' => $gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && $gradeable->getStudentExtension($gradeable->getId(),$this->core->getUser()->getId()))
         ]);
     }
 

@@ -1629,27 +1629,6 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the user has an extension for the gradeable
-     * @param string $gradeable_id
-     * @param string $user_id
-     * @return bool
-     */
-    public function getStudentExtension(string $gradeable_id, string $user_id): bool{
-        $students = $this->core->getQueries()->getUsersWithExtensions($gradeable_id);
-        $allowed_late_submit = false;
-        foreach ($students as $student) {
-            if ($student->getId() === $user_id) {
-                $late_days = $student->getLateDayExceptions();
-                $due_date = $this->submission_due_date;
-                date_add($due_date, date_interval_create_from_date_string($late_days.' days'));
-                if ($due_date > $this->core->getDateTimeNow()) {
-                    $allowed_late_submit = true;
-                }
-            }
-        }
-        return $allowed_late_submit;
-    }
-    /**
      * Gets the total possible non-extra-credit manual grading (ta + peer) points
      * @return float
      */
