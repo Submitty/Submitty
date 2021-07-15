@@ -51,7 +51,13 @@
 </div>
 
 <script>
-    $(".popup-window").draggable();
+    let draggable = $(".popup-window").draggable();
+    //allow users to copy regex patterns from office hours queue settings
+    $('.regex-help', draggable).mousedown(function(ev) {
+        draggable.draggable('disable');
+    }).mouseup(function(ev) {
+        draggable.draggable('enable');
+    });
 
     function closePopup(id) {
         $('#' + id).hide();

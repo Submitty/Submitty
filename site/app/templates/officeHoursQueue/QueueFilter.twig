@@ -15,10 +15,8 @@
         <b>Webex link:</b> #webex.com/meet#<br>
         <b>Skype link:</b> #join.skype#<br>
         <b>Zoom link:</b> #zoom.us#<br>
-        <b>General Email:</b> Enter "email" <br>
+        <b>General Email:</b>Just Enter "email" <br>
         <b>gmail address:</b> #@gmail.com#<br>
-        <b>Phone number:</b> Enter "phone" <br>
-
     </div>
     <br>
   <span class="option-title">Open new queue</span>
@@ -30,7 +28,7 @@
       <i class="fas fa-sync"></i>
     </a>
       <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex" maxlength="2048">
-    <button id="open_new_queue_btn" type="submit" class="btn btn-primary">Open New Queue</button>
+    <button id="open_new_queue_btn" type="submit" class="btn btn-primary" style="margin-top: 1rem;">Open New Queue</button>
   </form>
   <br>
   <span class="option-title">Modify old queue</span>
@@ -49,7 +47,7 @@
     <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Token</button>
   </form>
   <br>
-    <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
+    <form method="post" id="change_queue_regex" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
             <option value="">Queue Name</option>
@@ -58,7 +56,7 @@
             {% endfor %}
         </select>
         <input type="text" id="old_queue_regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="New Access Code" required="required">
-        <button id="change_code_btn" type="submit" class="btn btn-primary" style="margin-left: 1rem;">Change Queue Regex Pattern</button>
+        <button id="change_regex_btn" type="submit" class="btn btn-primary" style="margin-left: 1rem;">Change Queue Regex Pattern</button>
     </form>
   <br>
   <span class="option-title">Modify queue status</span>
