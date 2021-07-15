@@ -14,6 +14,7 @@ class TeamTester extends BaseUnitTest {
     public function testTeamCreation() {
         $details = [
             'team_id' => 'test',
+            'team_name' => 'TEST NAME',
             'registration_section' => 'test',
             'rotating_section' => 0,
             'users' => [
@@ -41,6 +42,7 @@ class TeamTester extends BaseUnitTest {
         ];
         $team = new Team($this->core, $details);
         $this->assertEquals($details['team_id'], $team->getId());
+        $this->assertEquals($details['team_name'], $team->getTeamName());
         $this->assertEquals($details['registration_section'], $team->getRegistrationSection());
         $this->assertEquals($details['rotating_section'], $team->getRotatingSection());
         $this->assertEquals($details['users'][0]['user_id'], $team->getMemberUsers()[0]->getId());
@@ -53,6 +55,7 @@ class TeamTester extends BaseUnitTest {
     public function testAnonID() {
         $details = [
             'team_id' => 'test',
+            'team_name' => null,
             'registration_section' => 'test',
             'rotating_section' => 0,
             'users' => [
