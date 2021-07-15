@@ -55,6 +55,9 @@ class HomeworkView extends AbstractView {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
+        if (!$gradeable->canStudentSubmit()) {
+            $return .= $this->renderSubmissionsClosedBox();
+        }
 
         try {
             // showing submission if user is a grader or student can submit
@@ -277,6 +280,9 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
     }
 
+    private function renderSubmissionsClosedBox() {
+        $this->core->getOutput()->renderTwigOutput("submission/homework/SubmissionsClosedBox.twig");
+    }
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -285,7 +291,7 @@ class HomeworkView extends AbstractView {
      * @param bool $canStudentSubmit
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, $canStudentSubmit): string {
+    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, bool $canStudentSubmit = true): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $output = "";
@@ -451,7 +457,7 @@ class HomeworkView extends AbstractView {
             'has_due_date' => $gradeable->hasDueDate(),
             'is_timed' => $gradeable->hasAllowedTime(),
             'repository_path' => $my_repository,
-            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed()),
+            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && !$gradeable->isTaGradeReleased()),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),

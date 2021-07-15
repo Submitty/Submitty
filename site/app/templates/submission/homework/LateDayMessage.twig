@@ -69,7 +69,6 @@
             {% elseif message.type == 'would_allowed' %}
                 {# SUBMISSION NOW WOULD BE LATE #}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
-                If you {{ self.submit_or_resubmit(message.info.active_version) }} to this assignment now,
                 you will be charged {{ message.info.charged }} further late {{ self.day_or_days(message.info.charged) }},
                 and have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for future assignments.
             {% elseif message.type == 'would_get_zero' %}
