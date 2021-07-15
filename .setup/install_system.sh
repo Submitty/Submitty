@@ -163,6 +163,11 @@ else
 fi
 
 if [ ${WORKER} == 1 ]; then
+    # Setting it up to allow SSH as root by default
+    mkdir -p -m 700 /root/.ssh
+    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+
+    sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
     echo "Installing Submitty in worker mode."
 else
     echo "Installing primary Submitty."
@@ -291,7 +296,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
         su submitty_daemon -c "echo 'successfully created ssh key'"
-        su submitty_daemon -c "ssh-copy-id -i ~/.ssh/id_rsa.pub submitty@192.168.1.8"
+        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@192.168.1.8"
     fi
 fi
 
@@ -644,19 +649,23 @@ localhost
 25
 " | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
     else
-        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+        if [ ${WORKER_HELPER} == 1 ]; then
+            python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker-helper
+        else
+            python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+        fi
     fi
 fi
 
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
     SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    if id "${SUPERVISOR_USER}" &>/dev/null; then
-        echo "Supervisor user found"
-    else
-        echo "Supervisor user not found... creating user: ${SUPERVISOR_USER}"
-        adduser ${SUPERVISOR_USER}
-    fi
+    # if id "${SUPERVISOR_USER}" &>/dev/null; then
+    #     echo "Supervisor user found"
+    # else
+    #     echo "Supervisor user not found... creating user: ${SUPERVISOR_USER}"
+    #     useradd ${SUPERVISOR_USER} -d /home/${SUPERVISOR_USER} -p $(openssl passwd -crypt submitty) ${SUPERVISOR_USER}
+    # fi
     if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers

@@ -69,6 +69,7 @@ Vagrant.configure(2) do |config|
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-20.04'
     ubuntu.vm.network "private_network", ip: "192.168.1.8"
+    #ubuntu.ssh.username = 'root'
     ubuntu.vm.provision 'shell', inline: $worker_script
   end
 

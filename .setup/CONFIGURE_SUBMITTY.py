@@ -51,6 +51,7 @@ parser.add_argument('--setup-for-sample-courses', action='store_true', default=F
                     help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
                          "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
+parser.add_argument('--worker-helper', default=False, help='Configure Submitty alongside a worker VM')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 
@@ -461,10 +462,19 @@ if not args.worker:
                 "capabilities": ["default"],
                 "address": "localhost",
                 "username": "",
-                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+                "num_autograding_workers": 0,
                 "enabled" : True
             }
         }
+
+        if args.worker_helper:
+            worker_dict["submitty-worker"] = {
+                "capabilities": ['default'],
+                "address": "192.168.1.8",
+                "username": "submitty",
+                "num_autograding_workers": 5,
+                "enabled": True
+            }
 
         if args.setup_for_sample_courses:
             worker_dict['primary']['capabilities'].extend([
