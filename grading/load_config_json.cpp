@@ -1280,7 +1280,9 @@ void FileCheck_Helper(nlohmann::json &single_testcase) {
     }
     single_testcase["validation"].push_back(v);
     single_testcase.erase(f_itr);
-    single_testcase.erase(o_itr);
+    if (o_itr != single_testcase.end()) {
+      single_testcase.erase(o_itr);
+    }
   } else if (v_itr != single_testcase.end()) {
     // already has a validation
   } else {
