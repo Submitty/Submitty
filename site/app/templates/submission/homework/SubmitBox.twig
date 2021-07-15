@@ -61,7 +61,7 @@
     {% endif %}
 
     {% if show_no_late_submission_warning %}
-        <i class="red-message">Late Submissions are not accepted for this assignment</i>
+        <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
