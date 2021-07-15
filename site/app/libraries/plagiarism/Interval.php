@@ -37,18 +37,18 @@ class Interval {
      * @param int $start_pos
      * @param int $end_pos
      */
-    public function addOther(string $user_id, int $version, int $start_pos, int $end_pos): void {
+    public function addOther(string $user_id, int $version, string $source_gradeable, int $start_pos, int $end_pos): void {
         $pair = [];
         $pair["start"] = $start_pos;
         $pair["end"] = $end_pos;
 
         // add user+version pair if it doesn't already exist
-        if (!isset($this->others[$user_id . "_" . $version])) {
-            $this->others[$user_id . "_" . $version] = [];
+        if (!isset($this->others["{$user_id}__{$version}__{$source_gradeable}"])) {
+            $this->others["{$user_id}__{$version}__{$source_gradeable}"] = [];
         }
 
         // add the matching position
-        $this->others[$user_id . "_" . $version]["matchingpositions"][] = $pair;
+        $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"][] = $pair;
     }
 
     public function updateStart(int $new_start): void {
@@ -68,8 +68,8 @@ class Interval {
      * @param int $version
      * @param int $endIncrement
      */
-    public function updateOthersEndPositions(string $user_id, int $version, int $endIncrement): void {
-        foreach ($this->others[$user_id . "_" . $version]["matchingpositions"] as $i) {
+    public function updateOthersEndPositions(string $user_id, int $version, string $source_gradeable, int $endIncrement): void {
+        foreach ($this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"] as $i) {
             $i += $endIncrement;
         }
     }
@@ -79,8 +79,8 @@ class Interval {
      * @param int $version
      * @return array
      */
-    public function getMatchingPositions(string $user_id, int $version): array {
-        return $this->others[$user_id . "_" . $version]["matchingpositions"];
+    public function getMatchingPositions(string $user_id, int $version, string $source_gradeable): array {
+        return $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"];
     }
 
     /**
