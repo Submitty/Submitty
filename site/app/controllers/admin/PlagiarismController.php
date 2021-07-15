@@ -832,7 +832,7 @@ class PlagiarismController extends AbstractController {
         $ignore = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
         $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
         foreach ($prior_term_gradeables_array as &$gradeable) {
-            $gradeable["other_gradeables"] = $this->getOtherPriorGradeables();
+            $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($prior_term_gradeables_array["prior_semester"], $prior_term_gradeables_array["prior_course"]);
         }
         $config = [];
 
@@ -1106,7 +1106,9 @@ class PlagiarismController extends AbstractController {
         $dummyToken = [];
         $dummyToken["char"] = 99999999999; // set it to a big number of negligible significance
 
-        $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2));
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2), "{$semester}__{$course}__{$gradeable_id}");
 
         $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "tokens.json");
         if (!file_exists($file_path)) {
