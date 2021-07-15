@@ -51,8 +51,10 @@ aside {
 
 #bar_banner {
     position: relative;
-    float: right;
-    margin-right: 10%;
+    display: block;
+    width:100%;
+    margin: auto;
+    margin-bottom: 5px;
 }
 
 .navigation-box {
@@ -389,6 +391,7 @@ progress::-webkit-progress-value {
 .panels-container {
     margin: 0;
     background: var(--standard-medium-gray);
+    position:relative;
 }
 
 .two-panel-cont {
@@ -404,6 +407,11 @@ progress::-webkit-progress-value {
 .two-panel-item {
     min-width: 200px;
     width: 50%;
+    position: relative;
+}
+
+.panel-item-section {
+    position: relative;
 }
 
 .panel-item-section.left-top,
@@ -498,16 +506,37 @@ progress::-webkit-progress-value {
     width: 9px;
 }
 
-#panel-instructions {
+.panel-instructions {
     color: dimgray;
-    display: flex;
-    justify-content: center;
-    padding-top: 20%;
+    position: absolute;
+    top: 50%;
+    width:100%;
+    text-align: center;
 }
 
 #grading-panel-student-name {
-    display: flex;
-    margin: auto;
+    position: absolute;
+    overflow-y: scroll;
+    border-right: 1px solid var(--standard-light-medium-gray);
+    left: 5px;
+    top: 5px;
+}
+
+#grading-scroll-message {
+    color: var(--standard-medium-gray);
+    margin-left: 5px;
+    font-size:  14px;
+}
+
+#grading-panel-student-name::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+  
+#grading-panel-student-name::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
 #regrade_inner_info .inner-container {

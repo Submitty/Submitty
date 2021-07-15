@@ -25,9 +25,11 @@
 	    	<button type="button" class="btn" onclick="clearPeerMarks('{{submitter_id}}', '{{gradeable_id}}', '{{csrf_token}}')">Clear All Grading</button>
 	    	</br>
 	    	{% for component in components %}
+				{% if component_scores[component.id] is defined and component_scores[component.id][peer] is defined %}
 	    		<div class="box-badge">
 	        		{{ Badge.render(component_scores[component.id][peer], component.max, false) }}
 	        	</div>
+				{% endif %}
 	        	<span class="component-title col-no-gutters">
     				<b>{{ component.title|escape }}</b>
 				</span>
@@ -35,7 +37,7 @@
 			        {% for mark in component.marks %}
 		                <div class="row">
 		                    <div class="col-no-gutters indicator">
-		                    	{% if mark in peer_details.marks_assigned[component.id][peer] %}
+		                    	{% if peer_details.marks_assigned is defined and mark in peer_details.marks_assigned[component.id][peer] %}
 		                        	<i class="far fa-check-square fa-1g"></i>
 		                        {% else %}
 		                        	<i class="far fa-square fa-1g"></i>
