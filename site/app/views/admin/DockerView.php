@@ -34,9 +34,7 @@ class DockerView extends AbstractView {
             $image["additional_names"] = array_slice($image['tags'], 1);
 
             $copy[$full_name] = $image;
-            foreach ($image["additional_names"] as $additional_name) {
-                $copy[$additional_name] = $image;
-            }
+            
         }
 
         $docker_data['docker_images'] = $copy;

@@ -29,7 +29,7 @@ function filterOnClick() {
 
 function addFieldOnChange() {
     const command = $(this).val();
-    const regex = new RegExp('^([a-z0-9]+/)+[a-z0-9]+:[a-zA-Z0-9]+[a-zA-Z0-9._-]*$');
+    const regex = new RegExp('^([a-z0-9][a-z0-9._(__)-]+[a-z0-9]/)+[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
     if (!regex.test(command)) {
         $('#send-button').attr('disabled',true);
         $('#docker-warning').css('display', '');
@@ -51,7 +51,8 @@ function addImage(url) {
             'image': image,
             csrf_token: csrfToken
         },
-        success: function() {
+        success: function(data) {
+            console.log(data);
             location.reload();
         },
         error: function(err) {

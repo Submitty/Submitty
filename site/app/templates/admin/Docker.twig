@@ -36,15 +36,12 @@
 
 <div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
-    {% for worker in worker_machines %}
-        <div class="machine">{{worker['name']}}</div>
-        {{ _self.renderDockerMachine(worker['images'], image_to_capability, capability_to_color, capabilities) }}
-    {% endfor %}
+    {{ _self.renderDockerMachine(autograding_containers['all_images'], image_to_capability, capability_to_color, capabilities) }}
 </div>
 
 <div class="content">
-    <h2 class="docker-header">Capabilities Not Associated With a Image</h2>
-    <p>The follow capabilities were found to not have any images associated with them:</p>
+    <h2 class="docker-header">Capabilities With No Image Associated</h2>
+    <p>The follow capabilities were found to not have any images associated with them under autograding_containers.json:</p>
     <ul id="capabilities-list">
         {% for capability in no_image_capabilities %}
             <li>{{capability}}</li>
@@ -145,9 +142,9 @@
         <thead>
             <tr>
                 <th>Image Name</th>
+                <th>Tag</th>
                 <th>ID</th>
                 <th>Size</th>
-                <th>Tag</th>
                 <th>Created Date</th>
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
@@ -157,10 +154,10 @@
         {% for key, value in data %}
             <tr>
                 <td>{{ value["name"] }}</th>
+                <td>{{ value["tag"] }} </td>
                 <td>{{ value["short_id"] | trim("sha256:") }} </td>
                 <td>{{ value["size"] }} (Virtual Size: {{ value["virtual_size"] }})
                 </td>
-                <td>{{ value["tag"] }} </td>
                 <td> Created on: {{ value["created"] }} </td>
                 <td>
                 {% if value["additional_names"] | length > 0 %}
@@ -172,7 +169,7 @@
                 {% endif %}
                 </td>
                 <td>
-                    {% if value["name"] ~':'~value["tag"] in image_to_capability|keys %}
+                    {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
                         {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
                             <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
                         {% endfor %}
