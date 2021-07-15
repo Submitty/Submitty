@@ -3,7 +3,7 @@
 {% block title %}Queue Settings{% endblock %}
 {% block body %}
   <b>Help With Regex Patterns</b>
-    <a id="new_queue_rand_token" onclick="toggleRegexHelp()" onkeypress="toggleRegexHelp()" title="Help with regex patterns" aria-label="help with regex patterns" tabindex="0" style="padding:.5rem;">
+    <a id="regex-help-icon" onclick="toggleRegexHelp()" onkeypress="toggleRegexHelp()" title="Help with regex patterns" aria-label="help with regex patterns" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-question"></i>
     </a>
     <div class="regex-help" style="display: none;">
@@ -49,7 +49,7 @@
   <br>
     <form method="post" id="change_queue_regex" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
+        <select id="old_queue_code_2" class="form-control" name="code" aria-label="Access Code" required="required">
             <option value="">Queue Name</option>
             {% for queue in viewer.getAllQueues() %}
                 <option value="{{queue['code']}}">{{queue['code']}}</option>
