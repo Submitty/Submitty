@@ -1,5 +1,5 @@
 describe('Plagiarism tests', () => {
-    before(() => {
+    beforeEach(() => {
         // login
         cy.visit('/');
         cy.login();
@@ -49,6 +49,18 @@ describe('Plagiarism tests', () => {
         cy.get('.btn-danger').click();
 
         // Check that the URL is the main page
-        cy.url().should('include', ['sample', 'plagiarism'])
+        cy.url().should('include', 'sample/plagiarism')
+    });
+
+    it('Tests creating a new gradeable configuration', () => {
+        // click add config button
+        cy.get('.nav-buttons > .btn').click();
+
+        // We just create a gradeble config with the default settings
+        cy.get(':nth-child(2) > .plag-data > select').contains('Autograder Hidden and Extra Credit (C++ Hidden Tests) (Due January 01 1974 23:59:59)')
+        cy.get(':nth-child(2) > .plag-data > select').select('Autograder Hidden and Extra Credit (C++ Hidden Tests) (Due January 01 1974 23:59:59)');
+
+        cy.get('input[type=submit]').click()
+
     });
 });
