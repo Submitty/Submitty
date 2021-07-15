@@ -295,7 +295,10 @@ CREATE TABLE public.courses (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     status smallint DEFAULT 1 NOT NULL,
-    group_name character varying(255) NOT NULL
+    group_name character varying(255) NOT NULL,
+    owner_name character varying(255) NOT NULL,
+    CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
+    CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
 );
 
 
