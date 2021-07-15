@@ -7,11 +7,18 @@
         <i class="fas fa-question"></i>
     </a>
     <div class="regex-help" style="display: none;">
-        Copy the patterns associated with the type of information you wish
+        Regex Patterns are to make sure your students enter the correct information
+        into the "contact information" field. Copy the patterns associated with the type of information you wish
         your students to provide.<br>
+        <b>NOTE: REGEX PATTERNS ARE NOT REQUIRED</b><br>
         <a href="https://www.php.net/manual/en/reference.pcre.pattern.syntax.php" target="_blank">Write Your Own Pattern</a><br>
         <b>Webex link:</b> #webex.com/meet#<br>
         <b>Skype link:</b> #join.skype#<br>
+        <b>Zoom link:</b> #zoom.us#<br>
+        <b>General Email:</b> Enter "email" <br>
+        <b>gmail address:</b> #@gmail.com#<br>
+        <b>Phone number:</b> Enter "phone" <br>
+
     </div>
     <br>
   <span class="option-title">Open new queue</span>
@@ -19,10 +26,10 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048">
     <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
-    <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex" maxlength="2048">
     <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
       <i class="fas fa-sync"></i>
     </a>
+      <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex" maxlength="2048">
     <button id="open_new_queue_btn" type="submit" class="btn btn-primary">Open New Queue</button>
   </form>
   <br>
@@ -51,7 +58,7 @@
             {% endfor %}
         </select>
         <input type="text" id="old_queue_regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="New Access Code" required="required">
-        <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Regex Pattern</button>
+        <button id="change_code_btn" type="submit" class="btn btn-primary" style="margin-left: 1rem;">Change Queue Regex Pattern</button>
     </form>
   <br>
   <span class="option-title">Modify queue status</span>
@@ -70,7 +77,9 @@
           <td style="text-align: left;">
               <b>Name:</b>{{queue['code']}}<br>
               <b>Access Code:</b>{{queue['token']}}<br>
-              <b>Regex Pattern:</b>{{queue['regex_pattern']}}</td>
+              {% if queue['regex_pattern'] != '' %}
+                <b>Regex Pattern:</b>{{queue['regex_pattern']}}</td>
+              {% endif %}
           <td>
               <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
           </td>
