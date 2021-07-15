@@ -294,17 +294,7 @@ SET default_with_oids = false;
 CREATE TABLE public.courses (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
-    status smallint DEFAULT 1 NOT NULL
-);
-
-
---
--- Name: courses_groups; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.courses_groups (
-    semester character varying(255) NOT NULL,
-    course character varying(255) NOT NULL,
+    status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL
 );
 
@@ -464,14 +454,6 @@ CREATE TABLE public.users (
 --
 
 ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.emails_id_seq'::regclass);
-
-
---
--- Name: courses_groups courses_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.courses_groups
-    ADD CONSTRAINT courses_groups_pkey PRIMARY KEY (semester, course, group_name);
 
 
 --

@@ -300,7 +300,7 @@ if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit
 fi
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (semester, course) VALUES ('${semester}', '${course}');"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (semester, course, group_name) VALUES ('${semester}', '${course}', '${ta_www_group}');"
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to add this course to the master Submitty database."
     echo "HINT:  'insert or update on table \"courses\" violates foreign key constraint...'"
@@ -308,8 +308,6 @@ if [[ $? -ne "0" ]] ; then
     echo "       To fix, try running 'create_term.sh'."
     exit
 fi
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses_groups (semester, course, group_name)
-VALUES ('${semester}', '${course}', '${ta_www_group}');"
 echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################

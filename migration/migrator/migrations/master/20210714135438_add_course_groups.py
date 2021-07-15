@@ -12,26 +12,19 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute(
-    """
-        CREATE TABLE IF NOT EXISTS courses_groups (
-            semester varchar(255) NOT NULL,
-            course varchar(255) NOT NULL,
-            group_name varchar(255) NOT NULL,
-            PRIMARY KEY (semester, course, group_name)
-        )
-    """
-    )
+    database.execute("ALTER TABLE courses ADD COLUMN IF NOT EXISTS group_name varchar(255);")
     semester_dir = Path(config.submitty['submitty_data_dir'], 'courses')
     for semester in semester_dir.iterdir():
         for course in semester.iterdir():
-            query = "INSERT INTO courses_groups (semester, course, group_name) VALUES (:s, :c, :g);"
+            query = "UPDATE courses SET group_name=:g WHERE semester = :s AND course = :c;"
             params = {
                 's': semester.name,
                 'c': course.name,
                 'g': course.group()
             }
             database.session.execute(text(query), params)
+    # we should be able to force the not null constraint now
+    database.execute("ALTER TABLE courses ALTER COLUMN group_name SET NOT NULL;")
 
 
 def down(config, database):
