@@ -262,6 +262,17 @@
 </div>
 
 <script>
+    //for displaying popup submit button
+    window.onload = function(){
+        setInterval(count, 1000);
+    };
+
+    let counter = 0;
+    function count(){
+        counter++;
+        //do stuff
+    }
+
     function populatePreviousFiles(part){
         let prev_files = {
             {% for file in old_files %}
