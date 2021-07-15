@@ -68,11 +68,6 @@ class OfficeHoursQueueController extends AbstractController {
         $queue_code = trim($_POST['code']);
         $token = trim($_POST['token']);
 
-        if (isset($_POST['regex'])) {
-            $regex_pattern = $_POST['regex'];
-        }
-
-
         $re = '/^[\sa-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
         preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
@@ -82,7 +77,8 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-
+        
+        $regex_pattern = isset($_POST['regex']) ? $_POST['regex'] : '';
         if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern)) {
             $this->core->addSuccessMessage("New queue added");
             Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
@@ -146,7 +142,7 @@ class OfficeHoursQueueController extends AbstractController {
                     else if (preg_match($regex_pattern,$contact_info) == 0) {
                         $invalid = true;
                     }
-                    if($invalid) {
+                    if ($invalid) {
                         $this->core->addErrorMessage("Invalid contact info");
                         return MultiResponse::RedirectOnlyResponse(
                             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
