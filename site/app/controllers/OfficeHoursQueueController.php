@@ -132,13 +132,16 @@ class OfficeHoursQueueController extends AbstractController {
                 );
             }
             else {
+                //make sure contact information matches instructors regex pattern
                 $regex_pattern = $this->core->getQueries()->getQueueRegex($queue_code)[0]['regex_pattern'];
-                $contact_info = $_POST['contact_info'];
-                if (preg_match($regex_pattern,$contact_info) == 0) {
-                    $this->core->addErrorMessage("Invalid contact info");
-                    return MultiResponse::RedirectOnlyResponse(
-                        new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-                    );
+                if ($regex_pattern !== '') {
+                    $contact_info = $_POST['contact_info'];
+                    if (preg_match($regex_pattern,$contact_info) == 0) {
+                        $this->core->addErrorMessage("Invalid contact info");
+                        return MultiResponse::RedirectOnlyResponse(
+                            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                        );
+                    }
                 }
             }
         }

@@ -2,12 +2,24 @@
 {% block popup_id %}filter-settings{% endblock %}
 {% block title %}Queue Settings{% endblock %}
 {% block body %}
+  <b>Help With Regex Patterns</b>
+    <a id="new_queue_rand_token" onclick="toggleRegexHelp()" onkeypress="toggleRegexHelp()" title="Help with regex patterns" aria-label="help with regex patterns" tabindex="0" style="padding:.5rem;">
+        <i class="fas fa-question"></i>
+    </a>
+    <div class="regex-help" style="display: none;">
+        Copy the patterns associated with the type of information you wish
+        your students to provide.<br>
+        <a href="https://www.php.net/manual/en/reference.pcre.pattern.syntax.php" target="_blank">Write Your Own Pattern</a><br>
+        <b>Webex link:</b> #webex.com/meet#<br>
+        <b>Skype link:</b> #join.skype#<br>
+    </div>
+    <br>
   <span class="option-title">Open new queue</span>
   <form method="post" id="open_new_queue" action="{{base_url}}" style="height:auto;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048">
     <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
-    <input type="text" id="regex" name="regex" placeholder="Regex" aria-label="Regex" maxlength="2048">
+    <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex" maxlength="2048">
     <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
       <i class="fas fa-sync"></i>
     </a>
@@ -38,7 +50,7 @@
                 <option value="{{queue['code']}}">{{queue['code']}}</option>
             {% endfor %}
         </select>
-        <input type="text" id="old_queue_regex" name="regex" placeholder="Regex" aria-label="New Access Code" required="required">
+        <input type="text" id="old_queue_regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="New Access Code" required="required">
         <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Regex Pattern</button>
     </form>
   <br>
@@ -80,6 +92,11 @@
       {% endfor %}
     </tbody>
   </table>
+    <script>
+        function toggleRegexHelp(){
+            $(".regex-help").toggle();
+        }
+    </script>
 {% endblock %}
 {% block form %}
   <div style="height: 100%">
