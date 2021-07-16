@@ -60,6 +60,20 @@ class PlagiarismController extends AbstractController {
         return FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "users", $user_id, $version);
     }
 
+    /**
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @param string $other_semester
+     * @param string $other_course
+     * @param string $other_gradeable_id
+     * @param string $user_id
+     * @param string $version
+     * @return string
+     */
+    private function getOtherGradeablePath(string $gradeable_id, string $config_id, string $other_semester, string $other_course, string $other_gradeable_id, string $user_id, string $version): string {
+        return FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "other_gradeables", "{$other_semester}__{$other_course}__{$other_gradeable_id}", $user_id, $version);
+    }
+
 
     /**
      * @param string $gradeable_id
@@ -225,7 +239,7 @@ class PlagiarismController extends AbstractController {
                     $content = file_get_contents($file_path);
                     $content = trim(str_replace(["\r", "\n"], ' ', $content));
                     $rankings = preg_split('/ +/', $content);
-                    $rankings = array_chunk($rankings, 3);
+                    $rankings = array_chunk($rankings, 4);
 
                     if ($rankings[0][0] > $max_percent) {
                         $user_1_version = $version;
@@ -243,7 +257,7 @@ class PlagiarismController extends AbstractController {
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], ' ', $content));
         $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+        $rankings = array_chunk($rankings, 4);
         return $rankings;
     }
 
@@ -963,18 +977,17 @@ class PlagiarismController extends AbstractController {
         return JsonResponse::getSuccessResponse($log_data);
     }
 
-
     /**
+     * returns info for the user versions, to be displayed in the left pane of
+     * PlagiarismResult. Grabs the list of versions, the max matching version,
+     * and the active version of that user.
      * @param string $gradeable_id
      * @param string $config_id
      * @param string $user_id_1
-     * @param string $version_user_1
-     * @param string|null $user_id_2
-     * @param string|null $version_user_2
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist")
      */
-    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null): JsonResponse {
+    public function ajaxGetVersionList(string $gradeable_id, string $config_id, string $user_id_1): JsonResponse {
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
@@ -983,7 +996,7 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
         // check for backwards crawling
-        if (str_contains($user_id_1, '..') || str_contains($version_user_1, '..') || ($user_id_2 !== null && str_contains($user_id_2, '..')) || ($version_user_2 !== null && str_contains($version_user_2, '..'))) {
+        if (str_contains($user_id_1, '..')) {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
@@ -996,7 +1009,73 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse('Error: unable to get user "' . $user_id_1 . '" submission for gradeable "' . $gradeable_id . '"');
         }
 
-        $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $active_version_user_1 = (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        try {
+            $rankings = $this->getOverallRankings($gradeable_id, $config_id);
+        }
+        catch (Exception $e) {
+            return JsonResponse::getErrorResponse("Rankings file not found or no matches found for selected user");
+        }
+
+        $max_matching_version = 0;
+        foreach ($rankings as $ranking) {
+            if ($ranking[1] == $user_id_1) {
+                $max_matching_version = $ranking[2];
+                break;
+            }
+        }
+
+        $all_versions_user_1 = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)), [".", ".."]);
+
+        $data = [];
+        $data["versions"] = all_versions_user_1;
+        $data["max_matching"] = str_val($max_matching_version);
+        $data["active_version"] = str_val($active_version_user_1);
+        return JsonResponse::getSuccessResponse($data);
+    }
+
+
+    /**
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @param string $user_id_1
+     * @param string $version_user_1
+     * @param string|null $user_id_2
+     * @param string|null $version_user_2
+     * @param string|null $source_gradeable_user_2
+     * @return JsonResponse
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
+     */
+    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): JsonResponse {
+        // error checking
+        try {
+            $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
+        }
+        catch (Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+        // check for backwards crawling
+        if (
+            str_contains($user_id_1, '..')
+            || str_contains($version_user_1, '..')
+            || ($user_id_2 !== null && str_contains($user_id_2, '..'))
+            || ($version_user_2 !== null && str_contains($version_user_2, '..'))
+            || ($source_gradeable_user_2 !== null && str_contains($source_gradeable_user_2, '..'))
+            ) {
+            return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
+        }
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return JsonResponse::getErrorResponse('Error: unable to get gradeable "' . $gradeable_id);
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id_1);
+        if ($graded_gradeable === false) {
+            return JsonResponse::getErrorResponse('Error: unable to get user "' . $user_id_1 . '" submission for gradeable "' . $gradeable_id . '"');
+        }
+
+        $active_version_user_1 = (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         try {
             $rankings = $this->getOverallRankings($gradeable_id, $config_id);
@@ -1020,7 +1099,7 @@ class PlagiarismController extends AbstractController {
         if (file_exists($file_name)) {
             if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
                 try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '1');
+                    $color_info = $this->getColorInfo($gradeable_id, $config_id, '1', $user_id_1, $version_user_1, $user_id_2, $version_user_2, $source_gradeable_user_2);
                 }
                 catch (Exception $e) {
                     return JsonResponse::getErrorResponse($e->getMessage());
@@ -1028,7 +1107,7 @@ class PlagiarismController extends AbstractController {
             }
             else {
                 try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, $user_id_1, $version_user_1, '', '', '1');
+                    $color_info = $this->getColorInfo($gradeable_id, $config_id, '1', $user_id_1, $version_user_1);
                 }
                 catch (Exception $e) {
                     return JsonResponse::getErrorResponse($e->getMessage());
@@ -1052,7 +1131,7 @@ class PlagiarismController extends AbstractController {
 
             if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
                 try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
+                    $color_info = $this->getColorInfo($gradeable_id, $config_id, '2', $user_id_1, $version_user_1, $user_id_2, $version_user_2, $source_gradeable_user_2);
                 }
                 catch (Exception $e) {
                     return JsonResponse::getErrorResponse($e->getMessage());
@@ -1073,26 +1152,22 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
+     * @param string $codebox
      * @param string $user_id_1
      * @param string $version_user_1
-     * @param string $user_id_2
-     * @param string $version_user_2
-     * @param string $codebox
+     * @param string|null $user_id_2
+     * @param string|null $version_user_2
+     * @param string|null $source_gradeable_user_2
      * @return array
      * @throws Exception
      */
-    private function getColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2, string $version_user_2, string $codebox): array {
+    private function getColorInfo(string $gradeable_id, string $config_id, string $codebox, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): array {
         // error checking
         $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
 
         $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "matches.json");
         if (!file_exists($file_path)) {
             throw new Exception("Error: Unable to find matches.json");
-        }
-
-        // check for backwards crawling
-        if (str_contains($user_id_1, '..') || str_contains($version_user_1, '..') || str_contains($user_id_2, '..') || str_contains($version_user_2, '..')) {
-            throw new Exception('Error: path contains invalid component ".."');
         }
 
 
@@ -1108,7 +1183,14 @@ class PlagiarismController extends AbstractController {
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2), "{$semester}__{$course}__{$gradeable_id}");
+
+        if (isset($source_gradeable_user_2)) {
+            $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2), $source_gradeable_user_2);
+        }
+        else {
+            $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, "", 0, "{$semester}__{$course}__{$gradeable_id}");
+        }
+
 
         $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "tokens.json");
         if (!file_exists($file_path)) {
@@ -1117,8 +1199,14 @@ class PlagiarismController extends AbstractController {
         $tokens_user_1 = json_decode(file_get_contents($file_path), true);
 
         $tokens_user_2 = [];
-        if ($user_id_2 != "") {
-            $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "tokens.json");
+        if (isset($user_id_2)) {
+            if ($source_gradeable_user_2 === "{$semester}__{$course}__{$gradeable_id}") {
+                $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "tokens.json");
+            }
+            else {
+                $file_path = $this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable_user_2, $user_id_2, $version_user_2);
+            }
+
             if (!file_exists($file_path)) {
                 throw new Exception("Error: Unable to find tokens.json for user 2");
             }
@@ -1167,8 +1255,8 @@ class PlagiarismController extends AbstractController {
                 //Color is orange -- general match from selected match
                 $color = '#ffa500';
 
-                if ($codebox == "2" && $user_id_2 != "") {
-                    foreach ($match->getMatchingPositions($user_id_2, $version_user_2) as $pos) {
+                if ($codebox == "2" && isset($user_id_2)) {
+                    foreach ($match->getMatchingPositions($user_id_2, $version_user_2, $source_gradeable_user_2) as $pos) {
                         $matchPosStart = $pos['start'];
                         $matchPosEnd =  $pos['end'];
                         $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
@@ -1240,6 +1328,7 @@ class PlagiarismController extends AbstractController {
                 array_push($temp, "");
             }
             array_push($temp, $item[0]);
+            array_push($temp, $item[3]);
             array_push($return, $temp);
         }
 
