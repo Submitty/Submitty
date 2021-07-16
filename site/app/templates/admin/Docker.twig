@@ -5,6 +5,7 @@
     {% if docker_info is not null %}
         {# TODO: include worker information here in the future #}
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
+        <p>{{last_updated}}</p>
     {% endif %}
 </div>
 

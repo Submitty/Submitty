@@ -140,6 +140,16 @@ class DockerView extends AbstractView {
             }
         }
 
+        // Scan log directory for the last log
+        $log_files = scandir("/var/local/submitty/logs/docker/");
+        $last_ran_log = fopen(max($log_files));
+        $last_ran = "";
+        while (($buffer = fgets($handle, filesize($last_ran_log))) !== false) {
+            if (preg_match("^[Last ran on: [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$", $buffer)) {
+                $last_ran = $buffer;
+            }
+        }
+        
         $no_image_capabilities = array_unique($no_image_capabilities);
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
@@ -151,7 +161,8 @@ class DockerView extends AbstractView {
                 "no_image_capabilities" => $no_image_capabilities,
                 "image_to_capability" => $image_to_capability,
                 "capability_to_color" => $capability_to_color,
-                "url" => $this->core->buildUrl(["admin","add_image"])
+                "url" => $this->core->buildUrl(["admin","add_image"]),
+                "last_updated" => $last_ran
             ]
         );
     }
