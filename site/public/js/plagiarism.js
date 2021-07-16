@@ -6,6 +6,8 @@
  * @param {array} user_1_list
  */
 function setUpPlagView(gradeable_id, config_id, user_1_list) {
+    initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
+
     // initialize editors
     const editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
@@ -47,6 +49,7 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
         },
         'editor1': editor1,
         'editor2': editor2,
+        'color_info': []
     };
 
     // force the page to load default data for user 1 with highest % match
@@ -105,6 +108,7 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
 
         // load new content for the editor
         loadConcatenatedFileForEditor(state, 2);
+        loadColorInfo(state);
     });
 }
 
@@ -136,6 +140,7 @@ function loadUser2DropdownList(state) {
 
         refreshUser2Dropdown(state);
         loadConcatenatedFileForEditor(state, 2);
+        loadColorInfo(state);
     });
 }
 
@@ -166,12 +171,12 @@ function loadConcatenatedFileForEditor(state, editor) {
 }
 
 
-/**
- * @param {int} editor
- */
-function loadColorInfoForEditor(editor) {
-    // makes an ajax request to get the color info for the submissions of the
-    // selected user + version in panel number #editor
+function loadColorInfo(state) {
+    const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
+    requestAjaxData(url, (data) => {
+        state.color_info = data;
+        refreshColorInfo(state);
+    });
 }
 
 
@@ -232,6 +237,66 @@ function refreshUser2Dropdown(state) {
         append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version})</option>`;
     });
     $('#user-2-dropdown-list').append(append_options);
+}
+
+
+function refreshColorInfo(state) {
+    $.each(state.color_info, (i, interval) => {
+        let color = "";
+        if (interval.type === 'match') {
+            color = 'yellow';
+        }
+        else if (interval.type === "specific-match") {
+            color = 'orange';
+        }
+        else if (interval.type === "provided") {
+            color = 'green';
+        }
+        else if (interval.type === "common") {
+            color = 'gray';
+        }
+        else {
+            color = 'transparent';
+        }
+        state.editor1.markText(
+            { // start position
+                line: interval.start_line - 1,
+                ch: interval.start_char - 1
+            },
+            { // end position
+                line: interval.end_line - 1,
+                ch: interval.end_char - 1
+            },
+            {
+                attributes: {
+                    //"data_prev_color": element[4],
+                },
+                css: "background: " + color + "; " + (interval.type === "specific-match" ? "border: solid black 1px;" : "")
+            }
+        );
+
+        // $.each(interval['matching_positions'], (i, mp) => {
+        //     const color = "orange";
+        //     state.editor2.markText(
+        //         { // start position
+        //             line: mp["start_line"],
+        //             ch: mp["start_char"] - 1
+        //         },
+        //         { // end position
+        //             line: interval["end_line"] - 1,
+        //             ch: interval["end_char"]
+        //         },
+        //         {
+        //             attributes: {
+        //                 //"data_prev_color": element[4],
+        //             },
+        //             css: "background: " + color + "; " + (interval["type"] === "specific-match" ? "border: solid black 1px;" : "")
+        //         }
+        //     );
+        // });
+    });
+    state.editor1.refresh();
+    state.editor2.refresh();
 }
 
 

@@ -80,7 +80,12 @@ class Interval {
      * @return array
      */
     public function getMatchingPositions(string $user_id, int $version, string $source_gradeable): array {
-        return $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"];
+        if (isset($this->others["{$user_id}__{$version}__{$source_gradeable}"])) {
+            return $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"];
+        }
+        else {
+            return [];
+        }
     }
 
     /**
