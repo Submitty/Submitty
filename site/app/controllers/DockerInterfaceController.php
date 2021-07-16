@@ -154,31 +154,22 @@ class DockerInterfaceController extends AbstractController {
                 $json
             );
             $now = $this->core->getDateTimeNow()->format('Ymd');
+            $docker_job_file = "/var/local/submitty/daemon_job_queue/docker" . $now . ".json";
             $docker_data = [
                 "job" => "UpdateDockerImages"
             ];
+
             if (
-                (!is_writable($docker_file) && file_exists($docker_file))
+                (!is_writable($docker_job_file) && file_exists($docker_job_file))
+                || file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT)) === false
             ) {
-                $this->core->addErrorMessage("Could not queue job to update system");
-                return JsonResponse::getFailResponse("Failed to write to file {$docker_file}");
+                return JsonResponse::getFailResponse("Failed to write to file {$docker_job_file}");
             }
-            FileUtils::writeJsonFile(
-                FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyPath(),
-                    "daemon_job_queue",
-                    "docker_update_{$now}.json"
-                ),
-                $docker_data
-            );
+
             $open = FileUtils::readJsonFile(
-                FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyPath(),
-                    "daemon_job_queue",
-                    "docker_update_{$now}.json"
-                )
+                $docker_job_file
             );
-            //file_put_contents($docker_file, json_encode($docker_data, JSON_PRETTY_PRINT));
+            //file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT));
             $this->core->addSuccessMessage("Image found on dockerhub!\n" . $_POST['image'] . " queued to be added.");
             return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub');
         }

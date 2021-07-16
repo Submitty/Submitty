@@ -360,8 +360,14 @@ class UpdateDockerImages(AbstractJob):
     def run_job(self):
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "docker")
-        log_file_path = os.path.join(log_path,
-                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
-                                today.day))
-        with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "python3", "/usr/local/submitty/sbin/shipper_utils/update_and_install_workers.py", "--docker_images"], stdout=output_file, stderr=output_file)
+        try:
+            os.mkdir(log_path, mode=0o600)
+        except FileExistsError:
+            pass
+        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file_path):
+            flag = flag | os.O_CREAT
+        log_fd = os.open(log_file_path, flag)
+        with os.fdopen(log_fd, 'w') as output_file:
+            subprocess.run(["python3", "/usr/local/submitty/sbin/shipper_utils/update_and_install_workers.py", "--docker_images"], stdout=output_file, stderr=output_file)
