@@ -84,6 +84,17 @@ function renderPDFToolbar() {
                     currentTool = 'text';
                     PDFAnnotate.UI.enableText();
                     break;
+                // case 'clear':
+                //     const clear = confirm("Are you sure you want to clear all annotations on this page?\n\nWARNING: This action CANNOT be undone.");
+                //     if (clear) {
+                //         for (let i = 0; i < localStorage.length; i++) {
+                //             if (localStorage.key(i).includes('annotations')) {
+                //                 localStorage.setItem(localStorage.key(i), '{}');
+                //             }
+                //         }
+                //     }
+                //     debounce(saveFile, 500);
+                //     break;
             }
         }
         else {
