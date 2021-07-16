@@ -70,8 +70,8 @@ class PlagiarismController extends AbstractController {
      * @param string $version
      * @return string
      */
-    private function getOtherGradeablePath(string $gradeable_id, string $config_id, string $other_semester, string $other_course, string $other_gradeable_id, string $user_id, string $version): string {
-        return FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "other_gradeables", "{$other_semester}__{$other_course}__{$other_gradeable_id}", $user_id, $version);
+    private function getOtherGradeablePath(string $gradeable_id, string $config_id, string $source_gradeable, string $user_id, string $version): string {
+        return FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "other_gradeables", $source_gradeable, $user_id, $version);
     }
 
 
@@ -1058,9 +1058,9 @@ class PlagiarismController extends AbstractController {
      * @param string|null $version_user_2
      * @param string|null $source_gradeable_user_2
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/concat")
      */
-    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): JsonResponse {
+    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id, string $version, string $source_gradeable = null): JsonResponse {
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
@@ -1069,96 +1069,125 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
         // check for backwards crawling
-        if (
-            str_contains($user_id_1, '..')
-            || str_contains($version_user_1, '..')
-            || ($user_id_2 !== null && str_contains($user_id_2, '..'))
-            || ($version_user_2 !== null && str_contains($version_user_2, '..'))
-            || ($source_gradeable_user_2 !== null && str_contains($source_gradeable_user_2, '..'))
-            ) {
+        if (str_contains($user_id, '..') || str_contains($version, '..') || ($source_gradeable !== null && str_contains($source_gradeable, '..'))) {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return JsonResponse::getErrorResponse('Error: unable to get gradeable "' . $gradeable_id);
-        }
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id_1);
-        if ($graded_gradeable === false) {
-            return JsonResponse::getErrorResponse('Error: unable to get user "' . $user_id_1 . '" submission for gradeable "' . $gradeable_id . '"');
-        }
-
-        $active_version_user_1 = (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-
-        try {
-            $rankings = $this->getOverallRankings($gradeable_id, $config_id);
-        }
-        catch (Exception $e) {
-            return JsonResponse::getErrorResponse("Rankings file not found or no matches found for selected user");
-        }
-
-        $max_matching_version = 1;
-        foreach ($rankings as $ranking) {
-            if ($ranking[1] == $user_id_1) {
-                $max_matching_version = $ranking[2];
-            }
-        }
-        if ($version_user_1 == "max_matching" || $version_user_1 == "") {
-            $version_user_1 = $max_matching_version;
-        }
-        $all_versions_user_1 = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)), [".", ".."]);
-
-        $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "submission.concatenated");
-        if (file_exists($file_name)) {
-            if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-                try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, '1', $user_id_1, $version_user_1, $user_id_2, $version_user_2, $source_gradeable_user_2);
-                }
-                catch (Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
-            }
-            else {
-                try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, '1', $user_id_1, $version_user_1);
-                }
-                catch (Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
-            }
-            $data = [
-                'display_code1' => file_get_contents($file_name),
-                'code_version_user_1' => $version_user_1,
-                'max_matching_version' => $max_matching_version,
-                'active_version_user_1' => $active_version_user_1,
-                'all_versions_user_1' => $all_versions_user_1,
-                'ci' => $color_info
-            ];
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        if (isset($source_gradeable) && $source_gradeable !== "{$semester}__{$course}__{$gradeable_id}") {
+            $file_name = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable, $user_id, $version), "submission.concatenated");
         }
         else {
-            return JsonResponse::getErrorResponse("User 1 submission.concatenated for specified version not found.");
+            $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id, $version), "submission.concatenated");
         }
 
-        if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-            $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "submission.concatenated");
-
-            if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-                try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, '2', $user_id_1, $version_user_1, $user_id_2, $version_user_2, $source_gradeable_user_2);
-                }
-                catch (Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
-                $data['display_code2'] = file_get_contents($file_name);
-            }
-            else {
-                return JsonResponse::getErrorResponse("User 2 submission.concatenated for specified version not found.");
-            }
+        if (!file_exists($file_name)) {
+            return JsonResponse::getErrorResponse("Unable to open submission.concatenated for user {$user_id}, version {$version}");
         }
 
-        $data['ci'] = $color_info[0];
-        $data['si'] = $color_info[1];
-        return JsonResponse::getSuccessResponse($data);
+        return JsonResponse::getSuccessResponse(file_get_contents($file_name));
+
+
+
+        // // error checking
+        // try {
+        //     $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
+        // }
+        // catch (Exception $e) {
+        //     return JsonResponse::getErrorResponse($e->getMessage());
+        // }
+        // // check for backwards crawling
+        // if (
+        //     str_contains($user_id_1, '..')
+        //     || str_contains($version_user_1, '..')
+        //     || ($user_id_2 !== null && str_contains($user_id_2, '..'))
+        //     || ($version_user_2 !== null && str_contains($version_user_2, '..'))
+        //     || ($source_gradeable_user_2 !== null && str_contains($source_gradeable_user_2, '..'))
+        //     ) {
+        //     return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
+        // }
+        //
+        // $gradeable = $this->tryGetGradeable($gradeable_id);
+        // if ($gradeable === false) {
+        //     return JsonResponse::getErrorResponse('Error: unable to get gradeable "' . $gradeable_id);
+        // }
+        // $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id_1);
+        // if ($graded_gradeable === false) {
+        //     return JsonResponse::getErrorResponse('Error: unable to get user "' . $user_id_1 . '" submission for gradeable "' . $gradeable_id . '"');
+        // }
+        //
+        // $active_version_user_1 = (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        //
+        // try {
+        //     $rankings = $this->getOverallRankings($gradeable_id, $config_id);
+        // }
+        // catch (Exception $e) {
+        //     return JsonResponse::getErrorResponse("Rankings file not found or no matches found for selected user");
+        // }
+        //
+        // $max_matching_version = 1;
+        // foreach ($rankings as $ranking) {
+        //     if ($ranking[1] == $user_id_1) {
+        //         $max_matching_version = $ranking[2];
+        //     }
+        // }
+        // if ($version_user_1 == "max_matching" || $version_user_1 == "") {
+        //     $version_user_1 = $max_matching_version;
+        // }
+        // $all_versions_user_1 = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)), [".", ".."]);
+        //
+        // $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "submission.concatenated");
+        // if (file_exists($file_name)) {
+        //     if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
+        //         try {
+        //             $color_info = $this->getColorInfo($gradeable_id, $config_id, '1', $user_id_1, $version_user_1, $user_id_2, $version_user_2, $source_gradeable_user_2);
+        //         }
+        //         catch (Exception $e) {
+        //             return JsonResponse::getErrorResponse($e->getMessage());
+        //         }
+        //     }
+        //     else {
+        //         try {
+        //             $color_info = $this->getColorInfo($gradeable_id, $config_id, '1', $user_id_1, $version_user_1);
+        //         }
+        //         catch (Exception $e) {
+        //             return JsonResponse::getErrorResponse($e->getMessage());
+        //         }
+        //     }
+        //     $data = [
+        //         'display_code1' => file_get_contents($file_name),
+        //         'code_version_user_1' => $version_user_1,
+        //         'max_matching_version' => $max_matching_version,
+        //         'active_version_user_1' => $active_version_user_1,
+        //         'all_versions_user_1' => $all_versions_user_1,
+        //         'ci' => $color_info
+        //     ];
+        // }
+        // else {
+        //     return JsonResponse::getErrorResponse("User 1 submission.concatenated for specified version not found.");
+        // }
+        //
+        // if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
+        //     $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "submission.concatenated");
+        //
+        //     if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
+        //         try {
+        //             $color_info = $this->getColorInfo($gradeable_id, $config_id, '2', $user_id_1, $version_user_1, $user_id_2, $version_user_2, $source_gradeable_user_2);
+        //         }
+        //         catch (Exception $e) {
+        //             return JsonResponse::getErrorResponse($e->getMessage());
+        //         }
+        //         $data['display_code2'] = file_get_contents($file_name);
+        //     }
+        //     else {
+        //         return JsonResponse::getErrorResponse("User 2 submission.concatenated for specified version not found.");
+        //     }
+        // }
+        //
+        // $data['ci'] = $color_info[0];
+        // $data['si'] = $color_info[1];
+        // return JsonResponse::getSuccessResponse($data);
     }
 
 
