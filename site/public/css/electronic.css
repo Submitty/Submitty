@@ -1463,6 +1463,26 @@ tr.is_publish {
     resize: none;
 }
 
+/* pdf annotator */
+#content-wrapper {
+    position: relative;
+}
+
+#grading-pdf-repair {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    margin: 2% 0 2% 0;
+    color: var(--danger-red);
+    font-size: 16px;
+}
+
+#grading-pdf-repair-btn {
+    margin-left: 8px;
+}
+
 /* Notebook panel */
 #notebook-main-view {
     padding: 10px;

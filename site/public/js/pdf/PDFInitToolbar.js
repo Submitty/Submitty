@@ -84,17 +84,6 @@ function renderPDFToolbar() {
                     currentTool = 'text';
                     PDFAnnotate.UI.enableText();
                     break;
-                // case 'clear':
-                //     const clear = confirm("Are you sure you want to clear all annotations on this page?\n\nWARNING: This action CANNOT be undone.");
-                //     if (clear) {
-                //         for (let i = 0; i < localStorage.length; i++) {
-                //             if (localStorage.key(i).includes('annotations')) {
-                //                 localStorage.setItem(localStorage.key(i), '{}');
-                //             }
-                //         }
-                //     }
-                //     debounce(saveFile, 500);
-                //     break;
             }
         }
         else {
@@ -151,12 +140,10 @@ function renderPDFToolbar() {
     }
 
     function clearCanvas(){
-        if (confirm('Are you sure you want to clear annotations?')) {
-            for (let i=0; i<NUM_PAGES; i++) {
-                document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
-            }
-
-            localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        if (confirm('Are you sure you want to clear all of your annotations and refresh the page?\n\nWARNING: This action CANNOT be undone.')) {
+            localStorage.setItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`, '[]');
+            saveFile();
+            window.location.reload();
         }
     }
     
@@ -164,7 +151,7 @@ function renderPDFToolbar() {
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`) || {};
-        console.log('saving annotations...');
+        console.log('saving annotations...', JSON.parse(annotation_layer));
         // console.log('annotation_layer', annotation_layer);
         // console.log(JSON.parse(annotation_layer));
         // console.log([...(JSON.parse(annotation_layer).map(o => Object.assign({}, o)))]);
@@ -266,7 +253,7 @@ function renderPDFToolbar() {
     let textSize = 12;
     let textColor = '#FF0000';
     function initText() {
-        let init_size = localStorage.getItem('text/size') || 12;
+        let init_size = localStorage.getItem('text/size'); //|| 12;
         let init_color = localStorage.getItem('main_color') || "#000000";
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
@@ -279,7 +266,7 @@ function renderPDFToolbar() {
     }
 
     function setText(text_size, text_color) {
-        text_size = text_size || 12;
+        text_size = null//text_size || 12;
         text_color = text_color || '#000000';
         textSize = text_size;
         textColor = text_color;
