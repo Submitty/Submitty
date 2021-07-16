@@ -8,6 +8,13 @@
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% set data_non_item_ref = 0 %}
+    <div class="notebook-submit-popup" style="border-radius: 1rem; padding: 1rem; background-color: #888888; display: none;position: fixed;top: 0;right: 2rem;">
+        Submit often and save your progress !<br>
+        <hr>
+        <button class="btn btn-success">Submit</button>
+        <button class="btn btn-primary" onclick="closePopup()">Close</button>
+        <button class="btn btn-danger">Don't Ask Me Again</button>
+    </div>
     {% for cell in notebook %}
         <div id="content_{{ loop.index0 }}" class="{{ cell.type }}" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
@@ -270,7 +277,16 @@
     let counter = 0;
     function count(){
         counter++;
-        //do stuff
+        if (counter === 10) {
+            $(".notebook-submit-popup").show();
+            counter = 0;
+        }
+    }
+
+    function closePopup() {
+        $(".notebook-submit-popup").hide();
+        counter = 0;
+        count();
     }
 
     function populatePreviousFiles(part){
