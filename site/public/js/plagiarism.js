@@ -6,6 +6,23 @@
  * @param {array} user_1_list
  */
 function setUpPlagView(gradeable_id, config_id, user_1_list) {
+    // initialize codeboxes
+    editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    editor2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+
+    editor1.setSize("100%", "100%");
+    editor2.setSize("100%", "100%");
+
     // this is the global state for the entire program.  All functions will read and modify this object.
     let state = {
         "gradeable_id": gradeable_id,
@@ -39,34 +56,56 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
 
     // set event handler for user 1 dropdown onchange event
     $('#user-1-dropdown-list').change(function() {
+        // update the state
         state.user_1_selected.user_id = $('#user-1-dropdown-list').val();
+        // refresh the user 2 dropdown
+        $("#user-2-dropdown-list").empty();
+        $("#user-2-dropdown-list").append(`<option>Loading...</option>`);
+        // refresh the user 1 version dropdown
+        $("#user-1-version-dropdown-list").empty();
+        $("#user-1-version-dropdown-list").append(`<option>Loading...</option>`);
+        // the call to trigger the chain of updates
         loadUser1VersionDropdownList(state);
+    });
+
+    // set event handler for user 1 version dropdown onchange event
+    $('#user-1-version-dropdown-list').change(function() {
+        // update the state
+        state.user_1_selected.version = $('#user-1-version-dropdown-list').val();
+
+        // refresh the user 2 dropdown
+        $("#user-2-dropdown-list").empty();
+        $("#user-2-dropdown-list").append(`<option>Loading...</option>`);
+
+        // the call to trigger the chain of updates
+        loadUser2DropdownList(state);
     });
 }
 
 
 function loadUser1VersionDropdownList(state) {
-    ///courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist
     url = buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist']) + `?user_id_1=${state.user_1_selected.user_id}`;
     requestAjaxData(url, function(data) {
         state.user_1_version_dropdown_list = data;
+        state.user_1_selected.version = data.max_matching;
 
         refreshUser1VersionDropdown(state);
         // reload conents of panel 1 (async)
         //loadConcatenatedFileForCodebox(1);
         // update user 2 dropdown, will call other functions to update panel 2 (async)
-        //refreshUser2Dropdown();
+        loadUser2DropdownList(state);
     });
 }
 
 
-// TODO
 function loadUser2DropdownList(state) {
-    // update contents of codebox 2
-    loadConcatenatedFileForCodebox(2);
-    // update color info of the two codeboxes
-    loadColorInfoForCodebox(1);
-    loadColorInfoForCodebox(2);
+    // acquire ajax data for user 2 dropdown and send to the refresher
+    url = buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'match']) + `?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}`;
+    requestAjaxData(url, function(data) {
+        state.user_2_dropdown_list = data;
+        state.user_2_selected = data[0];
+        refreshUser2Dropdown(state);
+    });
 }
 
 
@@ -115,19 +154,19 @@ function refreshUser1VersionDropdown(state) {
 }
 
 
-// function refreshUser2Dropdown(state) {
-//     // grab users from user_2_dropdown_list and append to the html element
-//     $("#user-2-dropdown-list").empty();
-//     let append_options;
-//     $.each(state.user_2_dropdown_list, function(i, users) {
-//         append_options += `<option value="${users}"`;
-//         if (users === state.user_2_selected) {
-//             append_options += ` selected`;
-//         }
-//         append_options += `(${users.percent} Match) ${users.display_name} <${users.user_id}> (version: ${users.version})</option>`;
-//     }
-//     $("#user-2-dropdown-list").append(append_options);
-// }
+function refreshUser2Dropdown(state) {
+    // grab users from user_2_dropdown_list and append to the html element
+    $("#user-2-dropdown-list").empty();
+    let append_options;
+    $.each(state.user_2_dropdown_list, function(i, users) {
+        append_options += `<option value="${users}"`;
+        if (users === state.user_2_selected) {
+            append_options += ` selected`;
+        }
+        append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version})</option>`;
+    });
+    $("#user-2-dropdown-list").append(append_options);
+}
 
 
 /**

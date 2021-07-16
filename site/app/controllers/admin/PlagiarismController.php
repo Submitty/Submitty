@@ -1301,14 +1301,14 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/match")
      * @param string $gradeable_id
      * @param string $config_id
      * @param string $user_id_1
      * @param string $version_user_1
      * @return JsonResponse
      */
-    public function ajaxGetMatchingUsers(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
+    public function ajaxGetUser2DropdownList(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
