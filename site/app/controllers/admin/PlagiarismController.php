@@ -412,27 +412,32 @@ class PlagiarismController extends AbstractController {
         }
 
         try {
-            $rankings = $this->getOverallRankings($gradeable_id, $config_id);
+            $rankings_data = $this->getOverallRankings($gradeable_id, $config_id);
         }
         catch (Exception $e) {
             $this->core->addErrorMessage("Plagiarism Detection job is already running for this gradeable.");
             return new RedirectResponse($error_return_url);
         }
 
-        if (count($rankings) === 0) {
+        if (count($rankings_data) === 0) {
             $this->core->addSuccessMessage("There are no matches (plagiarism) for the gradeable with current configuration");
         }
 
-        foreach ($rankings as $i => $ranking) {
-            if (!$gradeable_config->isTeamAssignment()) {
-                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
-                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+        $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
+        $rankings = [];
+        foreach ($rankings_data as $item) {
+            if (!$is_team_assignment) {
+                $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
             }
-            else {
-                array_push($rankings[$i], "");
-                array_push($rankings[$i], "");
-            }
+            $temp = [
+                "percent" => $item[0],
+                "user_id" => $item[1],
+                "display_name" => $is_team_assignment ? "" : $display_name,
+                "version" => $item[2],
+            ];
+            array_push($rankings, $temp);
         }
+
 
         return new WebResponse(
             ['admin', 'Plagiarism'],
@@ -1026,12 +1031,20 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        $all_versions_user_1 = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)), [".", ".."]);
+        // TODO: only return the versions that have a "ranking.txt" file!!!
+        $user_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1);
+        $files = scandir($user_path);
+        $all_versions_user_1 = [];
+        foreach ($files as $version) {
+            if ($version !== "." && $version !== ".." && file_exists(FileUtils::joinPaths($user_path, $version, "ranking.txt"))) {
+                $all_versions_user_1[] = $version;
+            }
+        }
 
         $data = [];
-        $data["versions"] = all_versions_user_1;
-        $data["max_matching"] = str_val($max_matching_version);
-        $data["active_version"] = str_val($active_version_user_1);
+        $data["versions"] = array_values($all_versions_user_1);
+        $data["max_matching"] = strval($max_matching_version);
+        $data["active_version"] = strval($active_version_user_1);
         return JsonResponse::getSuccessResponse($data);
     }
 
@@ -1315,20 +1328,18 @@ class PlagiarismController extends AbstractController {
         }
 
         $return = [];
+        $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
         foreach ($ranking as $item) {
-            $temp = [];
-            array_push($temp, $item[1]);
-            array_push($temp, $item[2]);
-            if (!$this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
-                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
-                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            if (!$is_team_assignment) {
+                $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
             }
-            else {
-                array_push($temp, "");
-                array_push($temp, "");
-            }
-            array_push($temp, $item[0]);
-            array_push($temp, $item[3]);
+            $temp = [
+                "percent" => $item[0],
+                "user_id" => $item[1],
+                "display_name" => $is_team_assignment ? "" : $display_name,
+                "version" => $item[2],
+                "source_gradeable" => $item[3]
+            ];
             array_push($return, $temp);
         }
 

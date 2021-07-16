@@ -1,70 +1,72 @@
+// MODEL + CONTROLLERS /////////////////////////////////////////////////////////
 /**
  * On document.ready, JS in PlagiarismResult.twig will call this function
  * @param {string} gradeable_id
  * @param {string} config_id
+ * @param {array} user_1_list
  */
-function setUpPlagView(gradeable_id, config_id) {
+function setUpPlagView(gradeable_id, config_id, user_1_list) {
+    // this is the global state for the entire program.  All functions will read and modify this object.
+    let state = {
+        "gradeable_id": gradeable_id,
+        "config_id": config_id,
+        "user_1_dropdown_list": user_1_list,
+        "user_1_version_dropdown_list": {
+            "versions": [],
+            "max_matching": "",
+            "active_version": ""
+        },
+        "user_2_dropdown_list": [],
+        "user_1_selected": {
+            "user_id": user_1_list[0].user_id,
+            "version": user_1_list[0].version
+        },
+        "user_2_selected": {
+            "percent": "",
+            "user_id": "",
+            "display_name" : "",
+            "version": "",
+            "source_gradeable": ""
+        },
+        "codebox_1_text": "",
+        "codebox_2_text": "",
+        "codebox_1_color_info": [],
+        "codebox_2_color_info": []
+    }
+
     // force the page to load default data for user 1 with highest % match
-    refreshUser1VersionDropdown();
+    loadUser1VersionDropdownList(state);
 
-    // set event handler for user 1 dropdown onchange event (calls refreshUser1VersionDropdown())
-}
-
-
-function refreshUser1VersionDropdown() {
-    // grab ajax data for the version dropdown and append them as options to the html element
-    requestAjaxData(url, function(data) {
-        let append_options;
-        $.each(data.versions, function(i, version_to_append) {
-            if(version_to_append === data.active_version && version_to_append === data.max_matching){
-                append_options += `<option value="${version_to_append}">${version_to_append} (Active)(Max Match)</option>`;
-            }
-            if(version_to_append === data.active_version && version_to_append !== data.max_matching){
-                append_options += `<option value="${version_to_append}">${version_to_append} (Active)</option>`;
-            }
-            if(version_to_append !== data.active_version && version_to_append === data.max_matching){
-                append_options += `<option value="${version_to_append}">${version_to_append} (Max Match)</option>`;
-            }
-
-            if(version_to_append !== data.active_version && version_to_append !== data.max_matching){
-                append_options += append_options += `<option value="${version_to_append}">${version_to_append}</option>`;
-            }
-        });
-        $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(code_version_user_1);
-
-
-        // reload conents of panel 1
-        loadConcatenatedFileForCodebox(1);
-        // update user 2 dropdown, will call other functions to update panel 2
-        refreshUser2Dropdown();
+    // set event handler for user 1 dropdown onchange event
+    $('#user-1-dropdown-list').change(function() {
+        state.user_1_selected.user_id = $('#user-1-dropdown-list').val();
+        loadUser1VersionDropdownList(state);
     });
 }
 
 
-function refreshUser2Dropdown() {
+function loadUser1VersionDropdownList(state) {
+    ///courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist
+    url = buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist']) + `?user_id_1=${state.user_1_selected.user_id}`;
+    requestAjaxData(url, function(data) {
+        state.user_1_version_dropdown_list = data;
+
+        refreshUser1VersionDropdown(state);
+        // reload conents of panel 1 (async)
+        //loadConcatenatedFileForCodebox(1);
+        // update user 2 dropdown, will call other functions to update panel 2 (async)
+        //refreshUser2Dropdown();
+    });
+}
+
+
+// TODO
+function loadUser2DropdownList(state) {
     // update contents of codebox 2
     loadConcatenatedFileForCodebox(2);
     // update color info of the two codeboxes
     loadColorInfoForCodebox(1);
     loadColorInfoForCodebox(2);
-}
-
-
-/**
- * @param {int} codebox
- */
-function loadConcatenatedFileForCodebox(codebox) {
-    // makes an ajax request to get the concatenated file with respsect
-    // to the selected user + version in panel number #codebox
-}
-
-
-/**
- * @param {int} codebox
- */
-function loadColorInfoForCodebox(codebox) {
-    // makes an ajax request to get the color info for the submissions of the
-    // selected user + version in panel number #codebox
 }
 
 
@@ -88,8 +90,67 @@ function requestAjaxData(url, f, es) {
 }
 
 
+// VIEWS ///////////////////////////////////////////////////////////////////////
+// functions that get data from the global state and load it into UI elements
+
+function refreshUser1VersionDropdown(state) {
+    // grab data for the version dropdown and append them as options to the html element
+    $("#user-1-version-dropdown-list").empty();
+    let append_options;
+    $.each(state.user_1_version_dropdown_list.versions, function(i, version_to_append) {
+        if (version_to_append === state.user_1_version_dropdown_list.active_version && version_to_append === state.user_1_version_dropdown_list.max_matching) {
+            append_options += `<option value="${version_to_append}">${version_to_append} (Active)(Max Match)</option>`;
+        }
+        else if (version_to_append === state.user_1_version_dropdown_list.active_version && version_to_append !== state.user_1_version_dropdown_list.max_matching) {
+            append_options += `<option value="${version_to_append}">${version_to_append} (Active)</option>`;
+        }
+        else if (version_to_append !== state.user_1_version_dropdown_list.active_version && version_to_append === state.user_1_version_dropdown_list.max_matching) {
+            append_options += `<option value="${version_to_append}">${version_to_append} (Max Match)</option>`;
+        }
+        else {
+            append_options += `<option value="${version_to_append}">${version_to_append}</option>`;
+        }
+    });
+    $("#user-1-version-dropdown-list").append(append_options);
+}
 
 
+// function refreshUser2Dropdown(state) {
+//     // grab users from user_2_dropdown_list and append to the html element
+//     $("#user-2-dropdown-list").empty();
+//     let append_options;
+//     $.each(state.user_2_dropdown_list, function(i, users) {
+//         append_options += `<option value="${users}"`;
+//         if (users === state.user_2_selected) {
+//             append_options += ` selected`;
+//         }
+//         append_options += `(${users.percent} Match) ${users.display_name} <${users.user_id}> (version: ${users.version})</option>`;
+//     }
+//     $("#user-2-dropdown-list").append(append_options);
+// }
+
+
+/**
+ * @param {int} codebox
+ */
+function loadConcatenatedFileForCodebox(codebox) {
+    // makes an ajax request to get the concatenated file with respsect
+    // to the selected user + version in panel number #codebox
+}
+
+
+/**
+ * @param {int} codebox
+ */
+function loadColorInfoForCodebox(codebox) {
+    // makes an ajax request to get the color info for the submissions of the
+    // selected user + version in panel number #codebox
+}
+
+
+function showPlagiarismHighKey() {
+    $('#Plagiarism-Highlighting-Key').css('display', 'block');
+}
 
 
 
