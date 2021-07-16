@@ -8,7 +8,7 @@
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% set data_non_item_ref = 0 %}
-    {% if is_timed and allowed_minutes > 25%}
+    {% if is_timed and allowed_minutes > 25 %}
         <div class="notebook-submit-popup">
             Submit often and save your progress !<br>
             <hr>
@@ -281,10 +281,8 @@
         let counter = 0;
         function count(){
             counter++;
-            //interval is 20 % of overall time allowed or 10 minutes, whichever is greater
+            //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
             let interval = ((({{ allowed_minutes * 60 }}) / 5) > 600 ? ({{ allowed_minutes * 60 }}) / 5 : 600);
-            console.log(interval);
-            console.log(counter);
             if (counter > interval) {
                 if (sessionStorage.getItem("show_popup_submit") === 'yes') {
                     $(".notebook-submit-popup").show();
