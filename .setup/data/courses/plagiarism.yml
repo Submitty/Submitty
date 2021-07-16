@@ -187,29 +187,28 @@ gradeables:
 
 ########## MEDIUM -- 3-10 submissions ##########################################
 ########## can be debugged from the UI by a human ##############################
-# - g_id: multiple_matches
-#   g_title: Multiple Matches (Medium) # 5 users, 7 submissions -- users match several other users
-#   gradeable_config: upload_only
-#   components:
-#   - gc_lower_clamp: 0
-#     gc_default: 2
-#     gc_max_value: 2
-#     gc_upper_clamp: 2
-#     gc_title: Placeholder
-#     marks:
-#       - gcm_note: Full Credit
-#         gcm_points: 0
-#   eg_submission_due_date: 1972-01-01 23:59:59
-#   eg_submission_open_date: 1971-01-01 23:59:59
-#   g_grade_due_date: 1974-01-01 23:59:59
-#   g_grade_released_date: 1974-01-01 23:59:59
-#   eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-#   eg_grade_inquiry_due_date: 1974-01-08 23:59:59
-#   g_grade_start_date: 1973-01-01 23:59:59
-#   g_ta_view_start_date: 1970-01-01 23:59:59
-#   eg_use_ta_grading: false
-#   # eg_lichen_sample_path: TODO
-#   # eg_plagiarized_users: TODO
+- g_id: multiple_matches
+  g_title: Multiple Matches (Medium) # 5 users, 7 submissions -- users match several other users
+  gradeable_config: upload_only
+  components:
+  - gc_lower_clamp: 0
+    gc_default: 2
+    gc_max_value: 2
+    gc_upper_clamp: 2
+    gc_title: Placeholder
+    marks:
+      - gcm_note: Full Credit
+        gcm_points: 0
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  eg_use_ta_grading: false
+  eg_lichen_sample_path: /usr/local/submitty/GIT_CHECKOUT/LichenTestData/medium_tests/multiple_matches/data
 
 - g_id: common_code
   g_title: Common Code (Medium) # 10 submissions
