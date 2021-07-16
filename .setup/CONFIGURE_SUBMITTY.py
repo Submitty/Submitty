@@ -462,7 +462,7 @@ if not args.worker:
                 "capabilities": ["default"],
                 "address": "localhost",
                 "username": "",
-                "num_autograding_workers": 0,
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
                 "enabled" : True
             }
         }
@@ -472,12 +472,18 @@ if not args.worker:
                 "capabilities": ['default'],
                 "address": "192.168.1.8",
                 "username": "submitty",
-                "num_autograding_workers": 5,
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
                 "enabled": True
             }
 
         if args.setup_for_sample_courses:
             worker_dict['primary']['capabilities'].extend([
+                'cpp',
+                'python',
+                'et-cetera',
+                'notebook',
+            ])
+            worker_dict['submitty-worker']['capabilities'].extend([
                 'cpp',
                 'python',
                 'et-cetera',

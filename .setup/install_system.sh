@@ -628,6 +628,7 @@ else
         if [ -z "${SUBMISSION_URL}" ]; then
             SUBMISSION_URL='http://192.168.56.101'
         fi
+        #TODO: make this string into variable so i can only pass worker helper arg when needed
         echo -e "/var/run/postgresql
 ${DB_USER}
 ${DATABASE_PASSWORD}
@@ -647,13 +648,9 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --worker-helper 1
     else
-        if [ ${WORKER_HELPER} == 1 ]; then
-            python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker-helper 1
-        else
-            python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
-        fi
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi
 
