@@ -9,17 +9,8 @@ window.onbeforeunload = function() {
 };
 //Toolbar stuff
 function renderPDFToolbar() {
-    let active_toolbar = true;
-    const debounce = (fn, time, ...args) => {
-        if (active_toolbar) {
-            fn(args);
-            active_toolbar = false;
-            setTimeout(function() {
-                active_toolbar = true;
-            }, time);
-        }
-    }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    $('#zoom-custom').val(Number(localStorage.getItem('scale'))*100 || '1');
     sessionStorage.setItem('toolbar_loaded', true);
     function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
@@ -66,20 +57,19 @@ function renderPDFToolbar() {
                     clearCanvas();
                     break;
                 case 'save':
-                    debounce(saveFile, 500);
+                    saveFile();
                     break;
                 case 'zoomin':
-                    debounce(zoom, 500, 'in');
+                    zoom(Math.round((window.RENDER_OPTIONS.scale + 0.1) * 100));
                     break;
                 case 'zoomout':
-                    debounce(zoom, 500, 'out');
+                    zoom(Math.round((window.RENDER_OPTIONS.scale - 0.1) * 100));
                     break;
-                case 'zoomcustom':
-                    debounce(zoom, 500, 'custom');
+                case 'rotate-right':
+                    rotate(90);
                     break;
-                case 'rotate':
-                    debounce(rotate, 500);
-                    break;
+                case 'rotate-left':
+                    rotate(-90);
                 case 'text':
                     currentTool = 'text';
                     PDFAnnotate.UI.enableText();
@@ -99,44 +89,12 @@ function renderPDFToolbar() {
         }
     }
 
-    function rotate(){
-        window.RENDER_OPTIONS.rotate += 90;
+    function rotate(amount) {
+        window.RENDER_OPTIONS.rotate += amount;
         if (!window.RENDER_OPTIONS.studentPopup) {
           localStorage.setItem('rotate', window.RENDER_OPTIONS.rotate);
         }
         render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-    }
-
-    function zoom(option, custom_val){
-        let zoom_flag = true;
-        let zoom_level = window.RENDER_OPTIONS.scale;
-        if(option == 'in'){
-            zoom_level += 0.1;
-        }
-        else if(option == 'out'){
-            zoom_level -= 0.1;
-        }
-        else {
-            if(custom_val != null){
-                zoom_level = custom_val/100;
-            }
-            else {
-                zoom_flag = false;
-            }
-            $('#zoom_selection').toggle();
-        }
-        if(zoom_level > 10 || zoom_level < 0.25){
-            alert("Cannot zoom more");
-            return;
-        }
-        if(zoom_flag){
-            $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
-            window.RENDER_OPTIONS.scale = zoom_level;
-            if (!window.RENDER_OPTIONS.studentPopup) {
-              localStorage.setItem('scale', window.RENDER_OPTIONS.scale);
-            }
-            render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-        }
     }
 
     function clearCanvas(){
@@ -253,7 +211,7 @@ function renderPDFToolbar() {
     let textSize = 12;
     let textColor = '#FF0000';
     function initText() {
-        let init_size = localStorage.getItem('text/size'); //|| 12;
+        let init_size = localStorage.getItem('text/size') || 12;
         let init_color = localStorage.getItem('main_color') || "#000000";
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
@@ -266,7 +224,7 @@ function renderPDFToolbar() {
     }
 
     function setText(text_size, text_color) {
-        text_size = null//text_size || 12;
+        text_size = text_size || 12;
         text_color = text_color || '#000000';
         textSize = text_size;
         textColor = text_color;
@@ -277,4 +235,21 @@ function renderPDFToolbar() {
     initColors();
     initPen();
     initText();
+}
+
+function zoom(zoom_level){
+    if(isNaN(zoom_level)) {
+        zoom_level = 100;
+    }
+
+    $('#zoom-custom').val(zoom_level);
+
+    zoom_level = Math.min(Math.max(10, zoom_level), 500);
+    zoom_level /= 100;
+
+    window.RENDER_OPTIONS.scale = zoom_level;
+    if (!window.RENDER_OPTIONS.studentPopup) {
+        localStorage.setItem('scale', window.RENDER_OPTIONS.scale);
+    }
+    render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
 }

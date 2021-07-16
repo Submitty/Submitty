@@ -1,22 +1,27 @@
 <link rel="stylesheet" type="text/css" href="{{ toolbar_css }}"/>
 <div id="pdf_annotation_bar">
     <div id="pdf_annotation_icons">
-        <a value="cursor" class="fas fa-mouse-pointer toolbar-item"></a>
-        <a value="pen" class="fas fa-pencil-alt toolbar-item"></a>
-        <a value="eraser" class="fas fa-eraser toolbar-item"></a>
+        <a title="Cursor Tool" value="cursor" class="fas fa-mouse-pointer toolbar-item"></a>
+        <a title="Pen Tool" value="pen" class="fas fa-pencil-alt toolbar-item"></a>
+        <a title="Eraser Tool" value="eraser" class="fas fa-eraser toolbar-item"></a>
         {#TODO: In the future, we want a erase function rather than a clear function#}
         {#<a value="clear" class="fas fa-ban toolbar-action" style="text-align: center; margin-left: 8px; font-size: 25px; padding-bottom: 10px"></a>#}
         {#<a value="rect" class="far fa-object-group toolbar-item"></a>#}
-        <a value="rotate" class="fas fa-redo toolbar-action"></a>
-        <a value="text" class="fas fa-font toolbar-item"></a>
-        <a value="zoomin" class="fas fa-plus toolbar-action"></a>
-        <a value="zoomcustom" class="toolbar-action"></a>
-        <a value="zoomout" class="fas fa-minus toolbar-action"></a>
-        <a value="save" class="toolbar-action">Save</a>
+        <a title="Rotate Left" value="rotate-left" class="fas fa-undo toolbar-action"></a>
+        <a title="Rotate Right" value="rotate-right" class="fas fa-redo toolbar-action"></a>
+        <a title="Text Tool" value="text" class="fas fa-font toolbar-item"></a>
+        <a title="Zoom In" value="zoomin" class="fas fa-plus toolbar-action"></a>
+        <div class="input-suffix suffix-percent">
+            <input aria-label="Zoom Custom" type="number" id="zoom-custom" step="10" min="10" max="500" placeholder="100" value="100" onchange="zoom(this.value)"></input>
+        </div>
+        {# <a value="zoomcustom" class="toolbar-action"></a> #}
+        <a title="Zoom Out" value="zoomout" class="fas fa-minus toolbar-action"></a>
+        {# <a title="Save" value="save" class="toolbar-action">Save</a> #}
         {#<a value="download" class="fas fa-download toolbar-action"></a>#}
-        <a value="color" id="color_selector" class="toolbar-action"></a>
-        <a value="size" id="size_selector" class="fas fa-expand-arrows-alt toolbar-action"></a>
-        <a value="clear" class="toolbar-action">Clear</a>
+        <a title="Change Color" value="color" id="color_selector" class="toolbar-action"></a>
+        <a title="Change Size" value="size" id="size_selector" class="fas fa-expand-arrows-alt toolbar-action"></a>
+        <button id="save-pdf-btn" aria-label="Save" value="save" class="btn btn-primary toolbar-action">Save <i class="fas fa-save"></i></button>
+        <button id="clear-pdf-btn" aria-label="Clear" value="clear" class="btn btn-default toolbar-action">Clear <i class="fas fa-trash-alt"></i></a>
     </div>
     <div id="size_selector_menu" class="selection-menu">
         Pen size:
