@@ -103,6 +103,13 @@
         function toggleRegexHelp(){
             $(".regex-help").toggle();
         }
+        let queueDraggable = $(".popup-window").draggable();
+        //allow users to copy regex patterns from office hours queue settings
+        $('.regex-help', queueDraggable).mousedown(function(ev) {
+            queueDraggable.draggable('disable');
+        }).mouseup(function(ev) {
+            queueDraggable.draggable('enable');
+        });
     </script>
 {% endblock %}
 {% block form %}
