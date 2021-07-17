@@ -1130,7 +1130,9 @@ class PlagiarismController extends AbstractController {
             "value" => ""
         ];
         array_push($tokens_user_1, $dummyToken);
-        array_push($tokens_user_2, $dummyToken);
+        if (!empty($tokens_user_2)) {
+            array_push($tokens_user_2, $dummyToken);
+        }
 
 
         // get the contents of matches.json as an array of Intervals
