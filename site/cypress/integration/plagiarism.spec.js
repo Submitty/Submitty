@@ -1,3 +1,7 @@
+// This section contains tests for the plagiarism detection interface, excluding the
+// results page.  All of these tests require submissions to be made to each of the
+// gradeables in the sample course.  These tests are run against the sample course
+// gradeables so that we can run tests against the plagiarism course gradeables in parallel.
 describe('Plagiarism tests', () => {
     beforeEach(() => {
         // login
@@ -57,10 +61,67 @@ describe('Plagiarism tests', () => {
         cy.get('.nav-buttons > .btn').click();
 
         // We just create a gradeble config with the default settings
-        cy.get(':nth-child(2) > .plag-data > select').contains('Autograder Hidden and Extra Credit (C++ Hidden Tests) (Due January 01 1974 23:59:59)')
+        cy.get(':nth-child(2) > .plag-data > select').contains('Autograder Hidden and Extra Credit (C++ Hidden Tests) (Due January 01 1974 23:59:59)');
         cy.get(':nth-child(2) > .plag-data > select').select('Autograder Hidden and Extra Credit (C++ Hidden Tests) (Due January 01 1974 23:59:59)');
 
-        cy.get('input[type=submit]').click()
+        cy.get('input[type=submit]').click();
+
+        // wait for Lichen to finish running and then make sure table looks good
+        cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(1)')
+            .contains('Autograder Hidden and Extra Credit (C++ Hidden Tests)')
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(1)')
+            .contains('Due: January 01 1974 23:59:59')
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(2)')
+            .contains('1')
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(5)')
+            .contains('127 students, 172 submissions')
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(7)')
+            .should('not.be.checked')
+
+        cy.get(':nth-child(8) > .btn').click() // run log
+
+        cy.get('.run-log-data > pre').contains('finished writing rankings in') // a crude check to see if Lichen succeeded
+
+        // go back and edit the configuration, then rerun
+        cy.get('[aria-label="Edit Autograder Hidden and Extra Credit (C++ Hidden Tests)"]').click()
+
+        cy.get('#threshold').clear().type(7)
+        cy.get('#sequence-length').clear().type(10)
+        cy.get('#active-version-id').check();
+
+        // submit edited form
+        cy.get('input[type=submit]').click();
+
+        // wait for Lichen to finish running and then make sure table looks good again
+        cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(1)')
+            .contains('Autograder Hidden and Extra Credit (C++ Hidden Tests)')
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(1)')
+            .contains('Due: January 01 1974 23:59:59')
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(2)')
+            .contains('1')
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(5)')
+            .contains('127 students, 172 submissions')
+
+        cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(7)')
+            .should('not.be.checked')
+
+        cy.get(':nth-child(8) > .btn').click() // run log
+
+        cy.get('.run-log-data > pre').contains('finished writing rankings in') // a crude check to see if Lichen succeeded
+
+
+        // delete gradeable config to clean up behind ourselves
+        cy.get('[aria-label="Delete Autograder Hidden and Extra Credit (C++ Hidden Tests)"]').click()
+        cy.get('.btn-danger').click() // delete button on modal
 
     });
 });
