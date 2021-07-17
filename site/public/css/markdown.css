@@ -64,7 +64,7 @@
     border-right: 0.5px solid var(--standard-medium-gray);
 }
 
-.markdown code {
+.markdown code:not(.inline-code) {
     display: block;
     white-space: pre;
     padding: 1em 1em 1em 2em;
