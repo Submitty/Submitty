@@ -294,6 +294,8 @@ function refreshColorInfo(state) {
                         {
                             attributes: {
                                 'original_color': color,
+                                'start_line': mp.start_line - 1,
+                                'end_line': mp.start_line - 1,
                             },
                             className: color,
                         },
@@ -375,6 +377,8 @@ function handleClickedMarks(state) {
                 $.each(clickedMark.attributes.matching_positions, (i, mp) => {
                     mp.className = 'selected-style-red';
                 });
+                state.editor2.scrollIntoView(clickedMark.attributes.matching_positions[0].attributes.start_line, 0);
+                state.editor2.scrollIntoView(clickedMark.attributes.matching_positions[0].attributes.end_line + 1, 0);
             });
         }
         else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
@@ -410,7 +414,6 @@ function handleClickedMarks(state) {
             });
             $('#popup_to_show_matches_id').css('display', 'block');
         }
-
 
         // Refresh editors
         state.editor1.refresh();
