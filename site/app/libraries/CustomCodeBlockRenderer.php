@@ -15,7 +15,7 @@ class CustomCodeBlockRenderer implements BlockRendererInterface {
     protected $baseRenderer;
 
     public function __construct($baseRenderer) {
-        $this->baseRenderer = new $baseRenderer();
+        $this->baseRenderer = new $baseRenderer(['default']);
     }
 
     public function render(AbstractBlock $block, ElementRendererInterface $htmlRenderer, bool $inTightList = false) {
@@ -26,6 +26,9 @@ class CustomCodeBlockRenderer implements BlockRendererInterface {
     }
 
     private function addLineNumbers(HtmlElement $element, int $num_lines) {
+        if ($num_lines < 5) {
+            return $element->getContents();
+        }
         $line_numbers_content = "";
         for ($num = 1; $num <= $num_lines; $num++) {
             $line_numbers_content .= strval($num) . "\n";
