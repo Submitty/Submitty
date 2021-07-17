@@ -267,21 +267,21 @@ function refreshColorInfo(state) {
             $.each(state.color_info, (i, interval) => {
                 let color = '';
                 if (interval.type === 'match') {
-                    color = 'yellow';
+                    color = 'match-style';
                 } else if (interval.type === 'specific-match') {
-                    color = 'orange';
+                    color = 'specific-match-style';
                 } else if (interval.type === 'provided') {
-                    color = 'green';
+                    color = 'provided-code-style';
                 } else if (interval.type === 'common') {
-                    color = 'gray';
+                    color = 'common-code-style';
                 } else {
-                    color = 'transparent';
+                    color = '';
                 }
 
                 const mp_text_marks = [];
 
                 $.each(interval['matching_positions'], (i, mp) => {
-                    const color = 'orange';
+                    const color = 'specific-match-style';
                     mp_text_marks[i] = state.editor2.markText(
                         { // start position
                             line: mp.start_line - 1,
@@ -295,7 +295,7 @@ function refreshColorInfo(state) {
                             attributes: {
                                 'original_color': color,
                             },
-                            css: `background: ${color}; ${interval.type === 'specific-match' ? 'border: solid black 1px;' : ''}`,
+                            className: color,
                         },
                     );
                 });
@@ -317,7 +317,7 @@ function refreshColorInfo(state) {
                             'matching_positions': mp_text_marks,
                             'others': interval.others,
                         },
-                        css: `background: ${color}; ${interval.type === 'specific-match' ? 'border: solid black 1px;' : ''}`,
+                        className: color,
                     },
                 );
             });
@@ -348,7 +348,7 @@ function handleClickedMarks(state) {
         state.editor1.operation(() => {
             marks_editor1.forEach(mark => {
                 if (mark !== clickedMark) {
-                    mark.css = `background-color: ${mark.attributes.original_color}`;
+                    mark.className = mark.attributes.original_color;
                     mark.attributes.selected = false;
                 }
             });
@@ -356,47 +356,56 @@ function handleClickedMarks(state) {
         const marks_editor2 = state.editor2.getAllMarks();
         state.editor2.operation(() => {
             marks_editor2.forEach(mark => {
-                mark.css = `background-color: ${mark.attributes.original_color}`;
+                mark.className = mark.attributes.original_color;
             });
         });
+
+
+        // hide the "others" popup in case it was visible
+        $('#popup_to_show_matches_id').css('display', 'none');
 
 
         // mark the clicked mark on both sides
         if (clickedMark.attributes.type === 'specific-match' && !clickedMark.attributes.selected) {
             clickedMark.attributes.selected = true;
-            clickedMark.css = 'background-color: red;';
+            clickedMark.className = 'selected-style-red';
 
             // highlight the matching regions on the right side
             state.editor2.operation(() => {
                 $.each(clickedMark.attributes.matching_positions, (i, mp) => {
-                    mp.css = 'background-color: red;';
+                    mp.className = 'selected-style-red';
                 });
             });
         }
         else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
             clickedMark.attributes.selected = true;
-            clickedMark.css = 'background-color: lightblue;';
+            clickedMark.className = 'selected-style-blue';
 
             $('#popup_to_show_matches_id').css('left', e.clientX + 'px');
             $('#popup_to_show_matches_id').css('top', e.clientY + 'px');
             $('#popup_to_show_matches_id').empty();
 
-            $.each(clickedMark.attributes.others, function(i, other) {
+            $.each(clickedMark.attributes.others, (i, other) => {
                 $('#popup_to_show_matches_id').append($.parseHTML(`<li id="others_menu_${i}" class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper">${other.user_id}:${other.version}</div></li>`));
                 $(`#others_menu_${i}`).on('click', () => {
+                    // hiding the popup and resetting the text color immediately makes the page feel faster
+                    $('#popup_to_show_matches_id').css('display', 'none');
+                    clickedMark.className = clickedMark.attributes.original_color;
+                    state.editor2.getDoc().setValue('');
+                    state.editor2.refresh();
+                    state.editor1.refresh();
+
+                    // set the selected user in the user 2 dropdown
                     $.each(state.user_2_dropdown_list, (i, item) => {
                         if (item.user_id === other.user_id && item.version === other.version && item.source_gradeable === other.source_gradeable) {
                             state.user_2_selected = item;
                         }
                     });
-                    state.editor2.getDoc().setValue('');
-                    state.editor2.refresh();
-                    // load new content for the editor
+
+                    // all async so order doesn't particularly matter
                     loadConcatenatedFileForEditor(state, 2);
                     loadColorInfo(state);
-
                     refreshUser2Dropdown(state);
-                    $('#popup_to_show_matches_id').css('display', 'none');
                 });
             });
             $('#popup_to_show_matches_id').css('display', 'block');

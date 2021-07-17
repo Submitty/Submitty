@@ -1,4 +1,4 @@
-/* Main Page */
+/* ==== Main Page =========================================================== */
 .nav-buttons .btn-primary {
     white-space: normal;
 }
@@ -43,7 +43,7 @@ td .plag-action-btn-cont a:not(:last-child) {
     max-width: 100%;
 }
 
-/* Configuration form page */
+/* ==== Configuration form page ============================================= */
 .plag-data-group {
     display: flex;
     flex-direction: column;
@@ -151,7 +151,35 @@ input[type=text]:invalid {
     margin-right: 10px;
 }
 
-/* Results Page */
+/* ==== Results Page ======================================================== */
+.match-style {
+    background-color: yellow;
+    border: 1px solid black;
+}
+
+.specific-match-style {
+    background-color: orange;
+    border: 1px solid black;
+}
+
+.common-code-style {
+    background-color: lightgray;
+}
+
+.provided-code-style {
+    background-color: lightgreen;
+}
+
+.selected-style-red {
+    background-color: red;
+    border: 1px solid black;
+}
+
+.selected-style-blue {
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
 .plagiarism-result-cont {
     display: flex;
     flex-direction: column;
