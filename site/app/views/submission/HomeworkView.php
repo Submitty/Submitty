@@ -279,7 +279,7 @@ class HomeworkView extends AbstractView {
     }
 
     private function renderSubmitNotAllowedBox() {
-        return $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
+        $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
     }
 
     /**
@@ -319,9 +319,12 @@ class HomeworkView extends AbstractView {
                 $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
                     $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
                     $notebook,
-                    $this->core->getUser()->getId()
+                    $this->core->getUser()->getId(),
+                    $version_instance !== null ? $version_instance->getVersion() : 0,
+                    $graded_gradeable->getGradeableId()
                 );
             }
+
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
@@ -400,7 +403,6 @@ class HomeworkView extends AbstractView {
             }
         }
 
-
         $component_names = array_map(function (Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
@@ -416,6 +418,8 @@ class HomeworkView extends AbstractView {
         }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
+
+        $viewing_inactive_version = $highest_version !== $display_version;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
@@ -487,7 +491,8 @@ class HomeworkView extends AbstractView {
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
-            'is_notebook' => $config->isNotebookGradeable()
+            'is_notebook' => $config->isNotebookGradeable(),
+            'viewing_inactive_version' => $viewing_inactive_version
         ]);
     }
 
@@ -997,6 +1002,7 @@ class HomeworkView extends AbstractView {
             'user_id' => $this->core->getUser()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
+            'team_name' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '',
             'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
@@ -1074,7 +1080,7 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $can_inquirye
+     * @param bool $can_inquiry
      * @return string
      */
     private function renderRegradeBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
