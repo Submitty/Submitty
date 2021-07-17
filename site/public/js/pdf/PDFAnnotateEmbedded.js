@@ -211,14 +211,13 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
 }
 
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
-    window.GENERAL_INFORMATION = {
+    Object.assign(window.GENERAL_INFORMATION, {
         grader_id: grader_id,
         user_id: user_id,
         gradeable_id: gradeable_id,
         file_name: file_name,
         file_path: file_path,
-        broken: window.GENERAL_INFORMATION.broken
-    };
+    });
 
     window.RENDER_OPTIONS.documentId = file_name;
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
@@ -329,42 +328,32 @@ function loadPDFToolbar() {
     PDFAnnotate.UI.setText(init_text_size, init_color);
 }
 
+function toggleOtherAnnotations(hide_others) {
+    for (let i = 0; i < localStorage.length; i++) {
+        if (localStorage.key(i).includes('annotations')) {
+            const annotator = localStorage.key(i).split('/')[1];
+            const from_other_user = annotator !== window.GENERAL_INFORMATION.grader_id;
+            if (from_other_user) {
+                if (hide_others) {
+                    if (!window.GENERAL_INFORMATION.hidden_annotations) {
+                        window.GENERAL_INFORMATION.hidden_annotations = {}
+                    }
+                    window.GENERAL_INFORMATION.hidden_annotations[annotator] = localStorage.getItem(localStorage.key(i));
+                    localStorage.setItem(localStorage.key(i), '[]');
+                }
+                else {
+                    localStorage.setItem(localStorage.key(i), window.GENERAL_INFORMATION.hidden_annotations[annotator]);
+                }
+            }
+        }
+    }
+    render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+}
+
 function repairPDF() {
     let remove_faulty = false;
     let found_faulty = false;
     let found_faulty_other = false;
-    function clearAllAnnotations() {
-        if (!found_faulty) return;
-        let graders = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            if (localStorage.key(i).includes('annotations')) {
-                localStorage.setItem(localStorage.key(i), '[]');
-                graders.push(localStorage.key(i).split('/')[2]);
-            }
-        }
-        console.log('graders', graders);
-        const url = buildCourseUrl(['gradeable', window.GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations', 'clear']);
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: {
-                user_id: window.GENERAL_INFORMATION.user_id,
-                'csrf_token': csrfToken
-            },
-            success: function(data){
-                let response = JSON.parse(data);
-                if (response.status === "success") {
-                    displaySuccessMessage(response.data);
-                }
-                else {
-                    displayErrorMessage(response.message);
-                }
-            },
-            error: function(){
-                alert('Something went wrong. Please refresh the page and try again');
-            }
-        });
-    }
     $('#grading-pdf-repair').hide();
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i).includes('annotations')) {
@@ -394,22 +383,6 @@ function repairPDF() {
             for (let i = annotations.length-1; i >= 0; i--) {
                 const faulty_properties = Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null);
                 if(annotations[i] && faulty_properties.length > 0) {
-                    // if (from_other_user) {
-                    //     const clear_all = confirm('Faulty annotations from another user have been detected on this pdf. In order to repair this pdf, ALL ANNOTATIONS must be cleared. It may be a good idea to contact others who have graded this pdf in case they need to annotate again.\n\nAre you sure you want to clear all annotations? This action CANNOT be undone.');
-                    //     if (clear_all) {
-                    //         clearAllAnnotations();
-                    //         window.location.reload();
-                    //         return;
-                    //     }
-                    //     else {
-                    //         $('#viewer').remove();
-                    //         if(!$('#grading-pdf-repair-btn').length) {
-                    //             $('#file-view').find('.file-view-header').append('<button id="grading-pdf-repair-btn" class="btn btn-primary" onclick="repairPDF()">Repair <i class="fas fa-tools"></i></button>');
-                    //         }
-                    //         $('#grading-pdf-repair').show();
-                    //         return;
-                    //     }
-                    // }
                     if (from_other_user) {
                         found_faulty_other = true;
                         alert(`Faulty annotations from user ${annotator} have been detected. \nThey will be temporarily repaired for you, but please contact them so they can come to this page and repair them fully.`);

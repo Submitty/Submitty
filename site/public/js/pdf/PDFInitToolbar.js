@@ -59,6 +59,17 @@ function renderPDFToolbar() {
                 case 'save':
                     saveFile();
                     break;
+                case 'toggle-annotations':
+                    const hide_other = $('#toggle-annotations-btn').hasClass('hide-other-annotations');
+                    $('#toggle-annotations-btn').toggleClass('hide-other-annotations');
+                    if(hide_other) {
+                        $('#toggle-annotations-btn').html('Show All Annotations <i class="fas fa-eye"></i>');
+                    }
+                    else {
+                        $('#toggle-annotations-btn').html('Hide Other Annotations <i class="fas fa-eye-slash"></i>');
+                    }
+                    toggleOtherAnnotations(hide_other);
+                    break;
                 case 'zoomin':
                     zoom(Math.round((window.RENDER_OPTIONS.scale + 0.1) * 100));
                     break;
@@ -110,9 +121,6 @@ function renderPDFToolbar() {
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`) || {};
         console.log('saving annotations...', JSON.parse(annotation_layer));
-        // console.log('annotation_layer', annotation_layer);
-        // console.log(JSON.parse(annotation_layer));
-        // console.log([...(JSON.parse(annotation_layer).map(o => Object.assign({}, o)))]);
         $.ajax({
             type: 'POST',
             url: url,
