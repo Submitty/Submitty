@@ -49,7 +49,7 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
         },
         'editor1': editor1,
         'editor2': editor2,
-        'color_info': []
+        'color_info': [],
     };
 
     // force the page to load default data for user 1 with highest % match
@@ -110,11 +110,13 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
         loadConcatenatedFileForEditor(state, 2);
         loadColorInfo(state);
     });
+
+    handleClickedMarks(state);
 }
 
 
 function loadUser1VersionDropdownList(state) {
-    url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist'])}?user_id_1=${state.user_1_selected.user_id}`;
+    const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist'])}?user_id_1=${state.user_1_selected.user_id}`;
     requestAjaxData(url, (data) => {
         state.user_1_version_dropdown_list = data;
         state.user_1_selected.version = data.max_matching;
@@ -171,11 +173,29 @@ function loadConcatenatedFileForEditor(state, editor) {
 }
 
 
+/**
+ * Prevents a race condition where the editor could still be waiting on data when the color info results come back.
+ * We wait until the contents of both editors are set before attempting to make colored marks
+ * @param state
+ */
+function colorRefreshAfterConcatLoad(state) {
+    if (state.editor1.getDoc().getValue() !== '' && state.editor2.getDoc().getValue() !== '') {
+        refreshColorInfo(state);
+    }
+    else {
+        setTimeout(() => {
+            colorRefreshAfterConcatLoad(state);
+        }, 50);
+    }
+}
+
+
 function loadColorInfo(state) {
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
     requestAjaxData(url, (data) => {
         state.color_info = data;
-        refreshColorInfo(state);
+
+        colorRefreshAfterConcatLoad(state);
     });
 }
 
@@ -241,62 +261,93 @@ function refreshUser2Dropdown(state) {
 
 
 function refreshColorInfo(state) {
-    $.each(state.color_info, (i, interval) => {
-        let color = "";
-        if (interval.type === 'match') {
-            color = 'yellow';
-        }
-        else if (interval.type === "specific-match") {
-            color = 'orange';
-        }
-        else if (interval.type === "provided") {
-            color = 'green';
-        }
-        else if (interval.type === "common") {
-            color = 'gray';
-        }
-        else {
-            color = 'transparent';
-        }
-        state.editor1.markText(
-            { // start position
-                line: interval.start_line - 1,
-                ch: interval.start_char - 1
-            },
-            { // end position
-                line: interval.end_line - 1,
-                ch: interval.end_char - 1
-            },
-            {
-                attributes: {
-                    //"data_prev_color": element[4],
-                },
-                css: "background: " + color + "; " + (interval.type === "specific-match" ? "border: solid black 1px;" : "")
-            }
-        );
 
-        // $.each(interval['matching_positions'], (i, mp) => {
-        //     const color = "orange";
-        //     state.editor2.markText(
-        //         { // start position
-        //             line: mp["start_line"],
-        //             ch: mp["start_char"] - 1
-        //         },
-        //         { // end position
-        //             line: interval["end_line"] - 1,
-        //             ch: interval["end_char"]
-        //         },
-        //         {
-        //             attributes: {
-        //                 //"data_prev_color": element[4],
-        //             },
-        //             css: "background: " + color + "; " + (interval["type"] === "specific-match" ? "border: solid black 1px;" : "")
-        //         }
-        //     );
-        // });
+    state.editor1.operation(() => {
+        state.editor2.operation(() => {
+            $.each(state.color_info, (i, interval) => {
+                let color = '';
+                if (interval.type === 'match') {
+                    color = 'yellow';
+                } else if (interval.type === 'specific-match') {
+                    color = 'orange';
+                } else if (interval.type === 'provided') {
+                    color = 'green';
+                } else if (interval.type === 'common') {
+                    color = 'gray';
+                } else {
+                    color = 'transparent';
+                }
+
+                const mp_text_marks = [];
+
+                $.each(interval['matching_positions'], (i, mp) => {
+                    const color = 'orange';
+                    mp_text_marks[i] = state.editor2.markText(
+                        { // start position
+                            line: mp['start_line'] - 1,
+                            ch: mp['start_char'] - 1,
+                        },
+                        { // end position
+                            line: interval['end_line'] - 1,
+                            ch: interval['end_char'] - 1,
+                        },
+                        {
+                            attributes: {
+                                //"data_prev_color": element[4],
+                            },
+                            css: `background: ${color}; ${interval['type'] === 'specific-match' ? 'border: solid black 1px;' : ''}`,
+                        },
+                    );
+                });
+
+                state.editor1.markText(
+                    { // start position
+                        line: interval.start_line - 1,
+                        ch: interval.start_char - 1,
+                    },
+                    { // end position
+                        line: interval.end_line - 1,
+                        ch: interval.end_char - 1,
+                    },
+                    {
+                        attributes: {
+                            'data_prev_color': color,
+                            'matching_positions': mp_text_marks,
+                        },
+                        css: `background: ${color}; ${interval.type === 'specific-match' ? 'border: solid black 1px;' : ''}`,
+                    },
+                );
+            });
+        });
     });
     state.editor1.refresh();
     state.editor2.refresh();
+}
+
+
+function handleClickedMarks(state) {
+    state.editor1.getWrapperElement().onmouseup = function(e) {
+        const lineCh = state.editor1.coordsChar({ left: e.clientX, top: e.clientY });
+        const markers = state.editor1.findMarksAt(lineCh);
+
+        // Did not select a marker
+        if (markers.length === 0) {
+            return;
+        }
+
+        // Only grab the first one if there is overlap...
+        const clickedMark = markers[markers.length - 1];
+
+        markers[markers.length - 1].css = 'background-color: red;';
+        $.each(clickedMark.attributes.matching_positions, (i, mp) => {
+            mp.css = 'background-color: red;';
+            console.log(mp);
+        });
+
+        // Refresh editors
+        state.editor1.refresh();
+        state.editor2.refresh();
+    };
 }
 
 
