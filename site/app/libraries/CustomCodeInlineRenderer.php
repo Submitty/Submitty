@@ -8,8 +8,7 @@ use League\CommonMark\ElementRendererInterface;
 use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
 use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 use League\CommonMark\HtmlElement;
-use \League\CommonMark\Inline\Renderer\CodeRenderer;
-
+use League\CommonMark\Inline\Renderer\CodeRenderer;
 
 class CustomCodeInlineRenderer implements InlineRendererInterface {
 
@@ -22,8 +21,9 @@ class CustomCodeInlineRenderer implements InlineRendererInterface {
 
     public function render(AbstractInline $inline, ElementRendererInterface $htmlRenderer) {
         $element = $this->baseRenderer->render($inline, $htmlRenderer);
-        $attrs = array();
-        $attrs["class"] = "inline-code";
+        $attrs = [
+            "class" => "inline-code"
+        ];
         return new HtmlElement('code', $attrs, $element->getContents());
     }
 }
