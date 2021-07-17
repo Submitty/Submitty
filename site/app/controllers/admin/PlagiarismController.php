@@ -63,9 +63,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     * @param string $other_semester
-     * @param string $other_course
-     * @param string $other_gradeable_id
+     * @param string $source_gradeable
      * @param string $user_id
      * @param string $version
      * @return string
@@ -407,13 +405,14 @@ class PlagiarismController extends AbstractController {
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
         $rankings = [];
         foreach ($rankings_data as $item) {
+            $display_name = "";
             if (!$is_team_assignment) {
                 $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
             }
             $temp = [
                 "percent" => $item[0],
                 "user_id" => $item[1],
-                "display_name" => $is_team_assignment ? "" : $display_name,
+                "display_name" => $display_name,
                 "version" => $item[2],
             ];
             array_push($rankings, $temp);
@@ -1072,7 +1071,6 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     * @param string $codebox
      * @param string $user_id_1
      * @param string $version_user_1
      * @param string|null $user_id_2
@@ -1210,13 +1208,14 @@ class PlagiarismController extends AbstractController {
         $return = [];
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
         foreach ($ranking as $item) {
+            $display_name = "";
             if (!$is_team_assignment) {
                 $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
             }
             $temp = [
                 "percent" => $item[0],
                 "user_id" => $item[1],
-                "display_name" => $is_team_assignment ? "" : $display_name,
+                "display_name" => $display_name,
                 "version" => $item[2],
                 "source_gradeable" => $item[3]
             ];

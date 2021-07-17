@@ -268,13 +268,17 @@ function refreshColorInfo(state) {
                 let color = '';
                 if (interval.type === 'match') {
                     color = 'match-style';
-                } else if (interval.type === 'specific-match') {
+                }
+                else if (interval.type === 'specific-match') {
                     color = 'specific-match-style';
-                } else if (interval.type === 'provided') {
+                }
+                else if (interval.type === 'provided') {
                     color = 'provided-code-style';
-                } else if (interval.type === 'common') {
+                }
+                else if (interval.type === 'common') {
                     color = 'common-code-style';
-                } else {
+                }
+                else {
                     color = '';
                 }
 
@@ -385,8 +389,8 @@ function handleClickedMarks(state) {
             clickedMark.attributes.selected = true;
             clickedMark.className = 'selected-style-blue';
 
-            $('#popup_to_show_matches_id').css('left', e.clientX + 'px');
-            $('#popup_to_show_matches_id').css('top', e.clientY + 'px');
+            $('#popup_to_show_matches_id').css('left', `${e.clientX}px`);
+            $('#popup_to_show_matches_id').css('top', `${e.clientY}px`);
             $('#popup_to_show_matches_id').empty();
 
             $.each(clickedMark.attributes.others, (i, other) => {
