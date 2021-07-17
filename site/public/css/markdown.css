@@ -60,8 +60,13 @@
     position:absolute;
     top: 1em;
     padding-right: 1px;
+    font-size: 13px;
     text-align: right;
     border-right: 0.5px solid var(--standard-medium-gray);
+}
+
+.markdown code {
+    font-size: 13px;
 }
 
 .markdown code:not(.inline-code) {
