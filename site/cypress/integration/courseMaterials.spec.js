@@ -7,6 +7,7 @@ describe('Test cases revolving around course material uploading and access contr
     before(() => {
         cy.visit('/');
         cy.login();
+        cy.wait(500);
         cy.visit(['sample', 'course_materials']);
     });
 
@@ -346,7 +347,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#upload1').attachFile('file5.txt' , { subjectType: 'drag-n-drop' });
         cy.get('#upload_sort').clear().type('0');
         cy.get('#submit-materials').click();
-        cy.reload();
+        cy.reload(true);
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
 
 
