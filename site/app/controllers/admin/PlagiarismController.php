@@ -373,7 +373,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     * @return WebResponse|RedirectResponse
+     * @return ResponseInterface
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult(string $gradeable_id, string $config_id): ResponseInterface {
@@ -792,7 +792,7 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
      * @param string $gradeable_id
      * @param string $config_id
-     * @return WebResponse|RedirectResponse
+     * @return ResponseInterface
      */
     public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): ResponseInterface {
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
@@ -831,7 +831,13 @@ class PlagiarismController extends AbstractController {
         $ignore = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
         $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
         foreach ($prior_term_gradeables_array as &$gradeable) {
-            $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($prior_term_gradeables_array["prior_semester"], $prior_term_gradeables_array["prior_course"]);
+            try {
+                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($prior_term_gradeables_array["prior_semester"], $prior_term_gradeables_array["prior_course"]);
+            }
+            catch (Exception $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($return_url);
+            }
         }
         $config = [];
 
@@ -929,11 +935,19 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
      */
-    public function getPriorGradeables() {
+    public function getPriorGradeables(): JsonResponse {
         $tokens = explode(' ', $_POST["semester_course"]);
         $semester = $tokens[0];
         $course = $tokens[1];
-        return JsonResponse::getSuccessResponse($this->getOtherPriorGradeables($semester, $course));
+
+        try {
+            $return = $this->getOtherPriorGradeables($semester, $course);
+        }
+        catch (Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+
+        return JsonResponse::getSuccessResponse($return);
     }
 
 
@@ -1089,10 +1103,12 @@ class PlagiarismController extends AbstractController {
         }
 
 
+        // get the contents of matches.json as an array of Intervals
         $matches_file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "matches.json");
         if (!file_exists($matches_file_path)) {
             return JsonResponse::getErrorResponse("Error: Unable to find matches.json for user {$user_id_1}, version {$version_user_1}");
         }
+        $intervals = PlagiarismUtils::constructIntervalsForUserPair($matches_file_path, $user_id_2, intval($version_user_2), $source_gradeable_user_2);
 
         // get the list of tokens for user 1
         $user_1_tokens_file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "tokens.json");
@@ -1132,13 +1148,6 @@ class PlagiarismController extends AbstractController {
             array_push($tokens_user_2, $dummyToken);
         }
 
-
-        // get the contents of matches.json as an array of Intervals
-        $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "matches.json");
-        if (!file_exists($file_path)) {
-            return JsonResponse::getErrorResponse("Unable to find matches.json for user {$user_id_1}, config {$config_id}");
-        }
-        $intervals = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2), $source_gradeable_user_2);
 
         $return = [];
         foreach ($intervals as $interval) {
