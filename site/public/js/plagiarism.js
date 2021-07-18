@@ -305,6 +305,13 @@ function refreshUser2Dropdown(state) {
 function refreshColorInfo(state) {
     state.editor1.operation(() => {
         state.editor2.operation(() => {
+            // codemirror doesn't preovide an easy way to remove text marks so we just wipe the contents of the document and reset
+            const val = state.editor1.getDoc().getValue();
+            const scrollPos = state.editor1.getScrollInfo();
+            state.editor1.getDoc().setValue('');
+            state.editor1.getDoc().setValue(val);
+            state.editor1.scrollTo(0, scrollPos.top);
+
             $.each(state.color_info, (i, interval) => {
                 let color = '';
                 if (interval.type === 'match') {
@@ -425,8 +432,7 @@ function handleClickedMarks(state) {
                 $.each(clickedMark.attributes.matching_positions, (i, mp) => {
                     mp.className = 'selected-style-red';
                 });
-                state.editor2.scrollIntoView(clickedMark.attributes.matching_positions[0].attributes.start_line, 0);
-                state.editor2.scrollIntoView(clickedMark.attributes.matching_positions[0].attributes.end_line + 1, 0);
+                state.editor2.scrollIntoView({line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0}, 400);
             });
         }
         else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
