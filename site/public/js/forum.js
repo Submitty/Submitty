@@ -1581,9 +1581,16 @@ function bookmarkThread(thread_id, type){
 function toggleMarkdown(post_box_id) {
   if(post_box_id === undefined) post_box_id = '';
   $(`#markdown_buttons_${post_box_id}`).toggle();
-  $(this).toggleClass('markdown-active'); 
+  $(this).toggleClass('markdown-active markdown-inactive'); 
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+  // const show_markdown_buttons = localStorage.getItem('render_markdown_buttons');
+  // if (show_markdown_buttons === null) {
+  //   localStorage.setItem('render_markdown_buttons', true);
+  // } 
+  // else {
+  //   localStorage.setItem('render_markdown_buttons', !JSON.parse(show_markdown_buttons));
+  // }
 }
 
 function previewForumMarkdown(){
@@ -1888,7 +1895,7 @@ function updateThread(e) {
     lock_thread_date: $('input#lock_thread_date').text(),
     expirationDate: $('input#expirationDate').val(),
     cat,
-    markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
+    markdown_status: parseInt($("input#markdown_input_").val()),
   };
 
   $.ajax({
