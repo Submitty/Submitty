@@ -1121,7 +1121,7 @@ class PlagiarismController extends AbstractController {
         }
 
 
-        // // Used to prevent an out of bounds error on the tokens arrays
+        // Used to prevent an out of bounds error on the tokens arrays
         $dummyToken = [
             "char" => 99999999999,
             "line" => 99999999999,

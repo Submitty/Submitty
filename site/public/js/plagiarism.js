@@ -261,10 +261,11 @@ function refreshUser2Dropdown(state) {
 
 
 function refreshColorInfo(state) {
-
     state.editor1.operation(() => {
         state.editor2.operation(() => {
             $.each(state.color_info, (i, interval) => {
+                console.log(JSON.stringify(interval, null, 4));
+
                 let color = '';
                 if (interval.type === 'match') {
                     color = 'match-style';
@@ -284,7 +285,7 @@ function refreshColorInfo(state) {
 
                 const mp_text_marks = [];
 
-                $.each(interval['matching_positions'], (i, mp) => {
+                $.each(interval.matching_positions, (i, mp) => {
                     const color = 'specific-match-style';
                     mp_text_marks[i] = state.editor2.markText(
                         { // start position
@@ -292,8 +293,8 @@ function refreshColorInfo(state) {
                             ch: mp.start_char - 1,
                         },
                         { // end position
-                            line: interval.end_line - 1,
-                            ch: interval.end_char - 1,
+                            line: mp.end_line - 1,
+                            ch: mp.end_char - 1,
                         },
                         {
                             attributes: {
@@ -339,21 +340,20 @@ function handleClickedMarks(state) {
         const lineCh = state.editor1.coordsChar({ left: e.clientX, top: e.clientY });
         const markers = state.editor1.findMarksAt(lineCh);
 
-        // Did not select a marker
-        if (markers.length === 0) {
-            return;
-        }
+
+        // hide the "others" popup in case it was visible
+        $('#popup_to_show_matches_id').css('display', 'none');
 
 
         // Only grab the first one if there is overlap...
-        const clickedMark = markers[markers.length - 1];
+        const clickedMark = markers[0];
 
 
         // reset all previous marks
         const marks_editor1 = state.editor1.getAllMarks();
         state.editor1.operation(() => {
             marks_editor1.forEach(mark => {
-                if (mark !== clickedMark) {
+                if (markers.length === 0 || mark !== clickedMark) {
                     mark.className = mark.attributes.original_color;
                     mark.attributes.selected = false;
                 }
@@ -367,8 +367,12 @@ function handleClickedMarks(state) {
         });
 
 
-        // hide the "others" popup in case it was visible
-        $('#popup_to_show_matches_id').css('display', 'none');
+        // Did not select a marker
+        if (markers.length === 0) {
+            state.editor1.refresh();
+            state.editor2.refresh();
+            return;
+        }
 
 
         // mark the clicked mark on both sides

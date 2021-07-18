@@ -4,28 +4,43 @@ namespace app\libraries\plagiarism;
 
 class Interval {
     /** @var int */
-    private $start;
+    private int $start;
     /** @var int */
-    private $end;
+    private int $end;
     /** @var string */
-    private $type;
+    private string $type;
     /** @var array */
-    private $others = [];
+    private array $others = [];
 
+    /**
+     * Interval constructor.
+     * @param int $start
+     * @param int $end
+     * @param string $type
+     */
     public function __construct(int $start, int $end, string $type) {
         $this->start = $start;
         $this->end = $end;
         $this->type = $type;
     }
 
+    /**
+     * @return int
+     */
     public function getEnd(): int {
         return $this->end;
     }
 
+    /**
+     * @return int
+     */
     public function getStart(): int {
         return $this->start;
     }
 
+    /**
+     * @return string
+     */
     public function getType(): string {
         return $this->type;
     }
@@ -34,10 +49,11 @@ class Interval {
     /**
      * @param string $user_id
      * @param int $version
+     * @param string $source_gradeable
      * @param int $start_pos
      * @param int $end_pos
      */
-    public function addOther(string $user_id, int $version, string $source_gradeable, int $start_pos, int $end_pos): void {
+    public function addOther(string $user_id, int $version, string $source_gradeable, int $start_pos = -1, int $end_pos = -1): void {
         $pair = [];
         $pair["start"] = $start_pos;
         $pair["end"] = $end_pos;
@@ -48,17 +64,31 @@ class Interval {
         }
 
         // add the matching position
-        $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"][] = $pair;
+        if ($start_pos === -1 && $end_pos === -1) {
+            $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"] = [];
+        }
+        else {
+            $this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"][] = $pair;
+        }
     }
 
+    /**
+     * @param int $new_start
+     */
     public function updateStart(int $new_start): void {
         $this->start = $new_start;
     }
 
+    /**
+     * @param int $new_end
+     */
     public function updateEnd(int $new_end): void {
         $this->end = $new_end;
     }
 
+    /**
+     * @param string $type
+     */
     public function updateType(string $type): void {
         $this->type = $type;
     }
@@ -66,17 +96,7 @@ class Interval {
     /**
      * @param string $user_id
      * @param int $version
-     * @param int $endIncrement
-     */
-    public function updateOthersEndPositions(string $user_id, int $version, string $source_gradeable, int $endIncrement): void {
-        foreach ($this->others["{$user_id}__{$version}__{$source_gradeable}"]["matchingpositions"] as $i) {
-            $i += $endIncrement;
-        }
-    }
-
-    /**
-     * @param string $user_id
-     * @param int $version
+     * @param string $source_gradeable
      * @return array
      */
     public function getMatchingPositions(string $user_id, int $version, string $source_gradeable): array {
