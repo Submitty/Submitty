@@ -5,16 +5,20 @@
  * @param {string} config_id
  * @param {array} user_1_list
  */
+// eslint-disable-next-line no-unused-vars
 function setUpPlagView(gradeable_id, config_id, user_1_list) {
+    // eslint-disable-next-line no-undef
     initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
 
     // initialize editors
+    // eslint-disable-next-line no-undef
     const editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
     });
+    // eslint-disable-next-line no-undef
     const editor2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
         lineNumbers: true,
         readOnly: true,
@@ -116,6 +120,7 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
 
 
 function loadUser1VersionDropdownList(state) {
+    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist'])}?user_id_1=${state.user_1_selected.user_id}`;
     requestAjaxData(url, (data) => {
         state.user_1_version_dropdown_list = data;
@@ -134,6 +139,7 @@ function loadUser1VersionDropdownList(state) {
 
 function loadUser2DropdownList(state) {
     // acquire ajax data for user 2 dropdown and send to the refresher
+    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'match'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}`;
     requestAjaxData(url, (data) => {
 
@@ -155,9 +161,11 @@ function loadConcatenatedFileForEditor(state, editor) {
     // to the selected user + version in panel number #editor
     let url = '';
     if (editor === 1) {
+        // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_1_selected.user_id}&version=${state.user_1_selected.version}`;
     }
     else {
+        // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_2_selected.user_id}&version=${state.user_2_selected.version}&source_gradeable=${state.user_2_selected.source_gradeable}`;
     }
     requestAjaxData(url, (data) => {
@@ -191,6 +199,7 @@ function colorRefreshAfterConcatLoad(state) {
 
 
 function loadColorInfo(state) {
+    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
     requestAjaxData(url, (data) => {
         state.color_info = data;
@@ -200,11 +209,16 @@ function loadColorInfo(state) {
 }
 
 
+/**
+ * Makes a request to the specified URL and passes the list of parameters (es) to the specified callback function (f)
+ * @param url
+ * @param f
+ * @param es
+ */
 function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
         success: function(data) {
-            $('#_test').append(data);
             data = JSON.parse(data);
             if (data.status !== 'success') {
                 alert(data.message);
@@ -213,7 +227,7 @@ function requestAjaxData(url, f, es) {
 
             f(data.data, es);
         },
-        error: function(e) {
+        error: function() {
             alert('Error occured when requesting via ajax. Please refresh the page and try again.');
         },
     });
@@ -264,8 +278,6 @@ function refreshColorInfo(state) {
     state.editor1.operation(() => {
         state.editor2.operation(() => {
             $.each(state.color_info, (i, interval) => {
-                console.log(JSON.stringify(interval, null, 4));
-
                 let color = '';
                 if (interval.type === 'match') {
                     color = 'match-style';
@@ -430,6 +442,7 @@ function handleClickedMarks(state) {
 }
 
 
+// eslint-disable-next-line no-unused-vars
 function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
 }

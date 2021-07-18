@@ -4,13 +4,13 @@ namespace app\libraries\plagiarism;
 
 class Interval {
     /** @var int */
-    private int $start;
+    private $start;
     /** @var int */
-    private int $end;
+    private $end;
     /** @var string */
-    private string $type;
+    private $type;
     /** @var array */
-    private array $others = [];
+    private $others = [];
 
     /**
      * Interval constructor.
