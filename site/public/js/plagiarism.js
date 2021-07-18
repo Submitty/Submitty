@@ -2,11 +2,12 @@
 /**
  * On document.ready, JS in PlagiarismResult.twig will call this function
  * @param {string} gradeable_id
+ * @param {string} term_course_gradeable
  * @param {string} config_id
  * @param {array} user_1_list
  */
 // eslint-disable-next-line no-unused-vars
-function setUpPlagView(gradeable_id, config_id, user_1_list) {
+function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_list) {
     // eslint-disable-next-line no-undef
     initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
 
@@ -33,6 +34,7 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
     const state = {
         'gradeable_id': gradeable_id,
         'config_id': config_id,
+        'curr_course_term_course_gradeable': term_course_gradeable,
         'user_1_dropdown_list': user_1_list,
         'user_1_version_dropdown_list': {
             'versions': [],
@@ -61,61 +63,89 @@ function setUpPlagView(gradeable_id, config_id, user_1_list) {
 
     // set event handler for user 1 dropdown onchange event
     $('#user-1-dropdown-list').change(() => {
-        // update the state
-        state.user_1_selected.user_id = $('#user-1-dropdown-list').val();
-
-        // refresh the user 2 dropdown
-        $('#user-2-dropdown-list').empty();
-        $('#user-2-dropdown-list').append('<option>Loading...</option>');
-
-        // refresh the user 1 version dropdown
-        $('#user-1-version-dropdown-list').empty();
-        $('#user-1-version-dropdown-list').append('<option>Loading...</option>');
-
-        // clear editors
-        state.editor1.getDoc().setValue('');
-        state.editor1.refresh();
-        state.editor2.getDoc().setValue('');
-        state.editor2.refresh();
-
-        // the call to trigger the chain of updates
-        loadUser1VersionDropdownList(state);
+        user1DropdownChanged(state);
     });
 
     // set event handler for user 1 version dropdown onchange event
     $('#user-1-version-dropdown-list').change(() => {
-        // update the state
-        state.user_1_selected.version = $('#user-1-version-dropdown-list').val();
-
-        // refresh the user 2 dropdown
-        $('#user-2-dropdown-list').empty();
-        $('#user-2-dropdown-list').append('<option>Loading...</option>');
-
-        // clear editors
-        state.editor1.getDoc().setValue('');
-        state.editor1.refresh();
-        state.editor2.getDoc().setValue('');
-        state.editor2.refresh();
-
-        // the call to trigger the chain of updates
-        loadUser2DropdownList(state);
-        loadConcatenatedFileForEditor(state, 1);
+        user1VersionDropdownChanged(state);
     });
 
     $('#user-2-dropdown-list').change(() => {
-        // update the state
-        state.user_2_selected = JSON.parse($('#user-2-dropdown-list').val());
+        user2DropdownChanged(state);
+    });
 
-        // clear editor 2
-        state.editor2.getDoc().setValue('');
-        state.editor2.refresh();
+    $('#swap-students-button').click(() => {
+        const prev_user_1 = state.user_1_selected;
+        state.user_1_selected.user_id = state.user_2_selected.user_id;
+        state.user_1_selected.version = state.user_2_selected.version;
 
-        // load new content for the editor
-        loadConcatenatedFileForEditor(state, 2);
-        loadColorInfo(state);
+        $.each(state.user_2_dropdown_list, (i, user) => {
+            if (user.user_id === prev_user_1.user_id && user.version === prev_user_1.version && user.source_gradeable === state.curr_course_term_course_gradeable) {
+                state.user_2_selected = user;
+                user1DropdownChanged(state);
+            }
+        });
     });
 
     handleClickedMarks(state);
+}
+
+
+function user1DropdownChanged(state) {
+    // update the state
+    state.user_1_selected.user_id = $('#user-1-dropdown-list').val();
+
+    // refresh the user 2 dropdown
+    $('#user-2-dropdown-list').empty();
+    $('#user-2-dropdown-list').append('<option>Loading...</option>');
+
+    // refresh the user 1 version dropdown
+    $('#user-1-version-dropdown-list').empty();
+    $('#user-1-version-dropdown-list').append('<option>Loading...</option>');
+
+    // clear editors
+    state.editor1.getDoc().setValue('');
+    state.editor1.refresh();
+    state.editor2.getDoc().setValue('');
+    state.editor2.refresh();
+
+    // the call to trigger the chain of updates
+    loadUser1VersionDropdownList(state);
+}
+
+
+function user1VersionDropdownChanged(state) {
+    // update the state
+    state.user_1_selected.version = $('#user-1-version-dropdown-list').val();
+
+    // refresh the user 2 dropdown
+    $('#user-2-dropdown-list').empty();
+    $('#user-2-dropdown-list').append('<option>Loading...</option>');
+
+    // clear editors
+    state.editor1.getDoc().setValue('');
+    state.editor1.refresh();
+    state.editor2.getDoc().setValue('');
+    state.editor2.refresh();
+
+    // the call to trigger the chain of updates
+    loadUser2DropdownList(state);
+    loadConcatenatedFileForEditor(state, 1);
+}
+
+
+function user2DropdownChanged(state) {
+    // update the state
+    state.user_2_selected = JSON.parse($('#user-2-dropdown-list').val());
+
+    // clear editor 2
+    state.editor2.getDoc().setValue('');
+    state.editor2.refresh();
+
+    // load new content for the editor
+    loadConcatenatedFileForEditor(state, 2);
+    loadColorInfo(state);
 }
 
 
@@ -445,4 +475,15 @@ function handleClickedMarks(state) {
 // eslint-disable-next-line no-unused-vars
 function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
+}
+
+
+// eslint-disable-next-line no-unused-vars
+function toggleFullScreenMode() {
+    $('main#main').toggleClass('full-screen-mode');
+}
+
+
+function swapStudents(state) {
+
 }

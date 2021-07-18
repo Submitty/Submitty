@@ -101,6 +101,7 @@ class PlagiarismView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismResult.twig', [
             "gradeable_id" => $gradeable_id,
+            "term_course_gradeable" => "{$this->core->getConfig()->getSemester()}__{$this->core->getConfig()->getCourse()}__{$gradeable_id}",
             "config_id" => $config_id,
             "gradeable_title" => $gradeable_title,
             "rankings" => $rankings,

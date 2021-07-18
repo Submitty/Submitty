@@ -1,13 +1,13 @@
 <script>
     $(document).ready(function() {
-        setUpPlagView("{{ gradeable_id }}", "{{ config_id }}", {{ rankings|json_encode()|raw }});
+        setUpPlagView("{{ gradeable_id }}", "{{ term_course_gradeable }}", "{{ config_id }}", {{ rankings|json_encode()|raw }});
     });
 </script>
 <div class="content plagiarism-result-cont">
     <div id="result-title-bar">
         <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span> </h2>
         <span class="plag-results-header-right">
-            <a class="btn btn-primary" onclick="toggle();">Swap Students</a> {# TODO: Disable "Swap Students" button when no user selected #}
+            <a id="swap-students-button" class="btn btn-primary">Swap Students</a>
             <a class="btn btn-primary" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
             <a class="btn btn-primary" title="View Key" onclick="showPlagiarismHighKey()">View Key</a>
         </span>
