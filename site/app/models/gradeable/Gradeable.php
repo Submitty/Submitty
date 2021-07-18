@@ -1876,7 +1876,7 @@ class Gradeable extends AbstractModel {
      * @throws \Exception If creating directories for the team fails, or writing team history fails
      *  Note: The team in the database may have already been created if an exception is thrown
      */
-    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1, string $team_name = null) {
         $all_members = $members;
         $all_members[] = $leader;
 
@@ -1906,7 +1906,7 @@ class Gradeable extends AbstractModel {
         }
 
         // Create the team in the database
-        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section);
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section, $team_name);
 
         // Force the other team members to accept the invitation from this newly created team
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());

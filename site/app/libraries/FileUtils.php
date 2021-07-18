@@ -45,6 +45,9 @@ class FileUtils {
         if (is_dir($dir)) {
             foreach (new \FilesystemIterator($dir) as $file) {
                 /** @var \SplFileInfo $file */
+                if ($file->isLink()) {
+                    continue;
+                }
                 $entry = $file->getFilename();
                 $path = FileUtils::joinPaths($dir, $entry);
                 // recurse into subdirectories
@@ -186,7 +189,7 @@ class FileUtils {
      *
      * @return bool
      */
-    public static function createDir($dir, $recursive = false, $mode = null) {
+    public static function createDir($dir, $recursive = false, $mode = null): bool {
         $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
