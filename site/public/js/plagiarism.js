@@ -76,16 +76,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
     });
 
     $('#swap-students-button').click(() => {
-        const prev_user_1 = state.user_1_selected;
-        state.user_1_selected.user_id = state.user_2_selected.user_id;
-        state.user_1_selected.version = state.user_2_selected.version;
-
-        $.each(state.user_2_dropdown_list, (i, user) => {
-            if (user.user_id === prev_user_1.user_id && user.version === prev_user_1.version && user.source_gradeable === state.curr_course_term_course_gradeable) {
-                state.user_2_selected = user;
-                user1DropdownChanged(state);
-            }
-        });
+        swapStudents(state);
     });
 
     handleClickedMarks(state);
@@ -301,6 +292,13 @@ function refreshUser2Dropdown(state) {
         append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version})</option>`;
     });
     $('#user-2-dropdown-list').append(append_options);
+
+    if (state.user_2_selected.source_gradeable !== state.curr_course_term_course_gradeable) {
+        $('#swap-students-button').addClass('disabled');
+    }
+    else {
+        $('#swap-students-button').removeClass('disabled');
+    }
 }
 
 
@@ -484,6 +482,11 @@ function toggleFullScreenMode() {
 }
 
 
+// currently selects user 2 in the user 1 dropdown and then reloads everything without selecting the proper user 2
+// further discussion is necessary regarding whether this behavior is a good or bad thing and whether this should
+// be a "swap students" button or a "move user 2 to the left side" button
 function swapStudents(state) {
-
+    $('#user-1-version-dropdown-list').val(state.user_2_selected.version);
+    $('#user-1-dropdown-list').val(state.user_2_selected.user_id);
+    user1DropdownChanged(state);
 }
