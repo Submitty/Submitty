@@ -129,7 +129,10 @@ def up(config, database, semester, course):
                     )
                     VALUES (
                         :type, :path, :release_date, :hidden_from_students, :priority
-                    ) ON CONFLICT(path) DO NOTHING
+                    ) ON CONFLICT(path) DO UPDATE SET
+                    release_date = EXCLUDED.release_date,
+                    hidden_from_students = EXCLUDED.hidden_from_students,
+                    priority = EXCLUDED.priority
                 """
                 params = {
                     'path': dir,
@@ -155,6 +158,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE IF EXISTS course_materials CASCADE")
-    database.execute("DROP TABLE IF EXISTS course_materials_sections CASCADE")
     pass
