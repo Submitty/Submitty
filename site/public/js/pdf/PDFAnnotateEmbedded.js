@@ -364,7 +364,7 @@ function repairPDF() {
                 found_faulty = true;
                 //set broken flag to stop pdf from rendering
                 window.GENERAL_INFORMATION.broken = true;
-                //ask user if they would like to reset their annotations to 
+                //ask user if they would like to reset their annotations to
                 const irreparable = confirm('The annotations for this pdf are in an irreparable state.\nWould you like to reset them and refresh the page?');
                 if (irreparable) {
                     localStorage.setItem(localStorage.key(i), '[]');
@@ -405,7 +405,7 @@ function repairPDF() {
                         for (const faulty_property of faulty_properties) {
                             if (Object.prototype.hasOwnProperty.call(ANNOTATION_DEFAULTS, faulty_property)) {
                                 annotations[i][faulty_property] = ANNOTATION_DEFAULTS[faulty_property];
-                            } 
+                            }
                             //if there is no default value for this property, just delete the annotation
                             else {
                                 annotations.splice(i, 1);
@@ -415,26 +415,26 @@ function repairPDF() {
                 }
             }
             //update the annotations in storage
-            localStorage.setItem(localStorage.key(i), JSON.stringify(annotations))
+            localStorage.setItem(localStorage.key(i), JSON.stringify(annotations));
         }
     }
     //if the user specified to repair their faulty annotations, we should save the file for them now.
     if (repair_faulty) {
         saveFile();
         window.location.reload();
-    } 
+    }
     //if faulty annotations from the current user were found but they declined, show Repair button
     //and a warning message
     else if (found_faulty) {
         $('#grading-pdf-repair').show();
-        if(!$('#grading-pdf-repair-btn').length) {
+        if (!$('#grading-pdf-repair-btn').length) {
             $('#file-view').find('.file-view-header').append('<button id="grading-pdf-repair-btn" class="btn btn-primary" onclick="repairPDF()">Repair <i class="fas fa-tools"></i></button>');
         }
     }
     //if everything looks good
     else {
         $('#grading-pdf-repair').hide();
-        $('#grading-pdf-repair-btn').remove();    
+        $('#grading-pdf-repair-btn').remove();
     }
 }
 
