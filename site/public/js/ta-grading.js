@@ -494,8 +494,16 @@ function adjustGradingPanelHeader () {
   } else {
     navBarBox.removeClass('mobile-view');
   }
-  // From the complete content remove the height occupied by navigation-bar and panel-header element
-  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight()) + "px)";
+
+  // From the complete content remove the height occupied by other elements
+  let height = 0;
+  $(".panels-container").first().siblings().each(function() {
+    if ($(this).css("display") !== 'none') {
+      height += $(this).outerHeight(true);
+    }
+  });
+  
+  document.querySelector('.panels-container').style.height = "calc(100% - " + (height) + "px)";
 }
 
 function onAjaxInit() {}

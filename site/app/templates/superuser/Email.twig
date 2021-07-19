@@ -1,0 +1,47 @@
+<div id="superuser-email" class="content">
+    <h1> System Wide Email</h1>
+    <p id="email-warning" class="danger email-warning" style="display: none;">
+        At least one recipient groups must be selected.
+    </p>
+    <form>
+        <div class="checkbox-options">
+            <div class = "options-label">
+                Recipients:
+            </div>
+            <div style="display: inline-block">
+                <div class="option">
+                    <input type="checkbox" id="email-faculty" name="email-faculty" onclick="updateSuperuserEmailOptions('faculty')" checked> Email all Faculty and all Superusers ({{num_faculty}} users)</input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-instructor" name="email-instructor" onclick="updateSuperuserEmailOptions('instructor')" checked> Email all Instructors of Active/Non-Archived Courses ({{num_instructor}} users)</input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-full-access" name="email-full-access" onclick="updateSuperuserEmailOptions('full-access')" checked> Email all Full Access Graders of Active/Non-Archived Courses ({{num_full_access}} users)</input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-limited-access" name="email-limited-access" onclick="updateSuperuserEmailOptions('limited-access')" checked> Email all Limited Access Graders of Active/Non-Archived Courses ({{num_limited_access}} users)</input>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="email-student" name="email-student" onclick="updateSuperuserEmailOptions('student')" checked> Email all Students in Active/Non-Archived Courses  ({{num_student}} users)</input>
+                </div>
+            </div>
+        </div>
+        <div class="checkbox-options">
+            <div class="options-label">
+                Additional Options:
+            </div>
+            <div style="display: inline-block">
+                <div class="option">
+                    <input type="checkbox" id="email-to-secondary" name="email-to-secondary"> Send email to each user's primary and secondary email addresses, regardless of the user's notification selection</input>
+                </div>
+            </div>
+        </div>
+        <label for="email-subject"> Subject:</label>
+        <br>
+        <textarea type="text" id="email-subject" class="email-subject custom-scrollbar" style="width:100%;"></textarea>
+        <label for="email-content"> Body:</label>
+        <br>
+        <textarea type="text" id="email-content" class="email-content custom-scrollbar" style="width:100%;"></textarea>
+    </form>
+    <button class="btn btn-primary" id="send-email" onclick="sendEmail({{"\"" ~ sendUrl ~ "\""}})"> Send</button>
+</div>
