@@ -119,7 +119,7 @@ $(document).ready(function () {
         }
         if (gradeable !== '') {
             $('#gradeable-lock-max-points-field').show();
-            $('#gradeable-lock-max-points').text(`Out of ${gradeable_max_autograder_points[gradeable]} for ${gradeable}`);
+            $('#gradeable-lock-max-points').text(`Out of ${gradeable_max_autograder_points[gradeable]} Maximum Autograding Points`);
             previous_gradeable = gradeable;
         }
         else {
