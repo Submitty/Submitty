@@ -56,6 +56,10 @@
     background-size: initial;
 }
 
+#color-selector-container {
+    display: inline;
+}
+
 #color_selector_menu {
     left: 295px;
 }
@@ -122,6 +126,10 @@
 
 #grading-pdf-repair-btn {
     margin-left: 8px;
+}
+
+#pdf-buttons {
+    display: inline-block;
 }
 
 /* Notebook panel */

@@ -26,8 +26,8 @@ window.GENERAL_INFORMATION = {
 };
 
 const ANNOTATION_DEFAULTS = {
-    size: 20,
-    color: "#FF0000",
+    size: 12,
+    color: "#000000",
     class: "Annotation",
     page: 1,
     rotation: 0,
