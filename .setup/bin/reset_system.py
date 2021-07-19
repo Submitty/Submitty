@@ -15,7 +15,9 @@ import shutil
 import subprocess
 import tempfile
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ='safe')
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
@@ -30,7 +32,7 @@ def load_data_yaml(file_path):
     if not os.path.isfile(file_path):
         raise IOError("Missing the yaml file {}".format(file_path))
     with open(file_path) as open_file:
-        yaml_file = yaml.safe_load(open_file)
+        yaml_file = yaml.load(open_file)
     return yaml_file
 
 

@@ -30,17 +30,16 @@ import subprocess
 import uuid
 import os.path
 import string
-import sys
-import configparser
-import csv
 import pdb
 import docker
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
+from ruamel.yaml import YAML
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
-import yaml
+
+yaml = YAML(typ='safe')
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
@@ -267,7 +266,7 @@ def generate_random_student_note():
 
 def generate_random_marks(default_value, max_value):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.yml')) as f:
-        marks_yml = yaml.safe_load(f)
+        marks_yml = yaml.load(f)
     if default_value == max_value and default_value > 0:
         key = 'count_down'
     else:
@@ -377,7 +376,7 @@ def load_data_yaml(file_path):
     if not os.path.isfile(file_path):
         raise IOError("Missing the yaml file {}".format(file_path))
     with open(file_path) as open_file:
-        yaml_file = yaml.safe_load(open_file)
+        yaml_file = yaml.load(open_file)
     return yaml_file
 
 
@@ -1578,7 +1577,7 @@ class Gradeable(object):
                 length=len(graders)
                 for i in range(length):
                     conn.execute(peer_assign.insert(), g_id=self.id, grader_id=graders[i], user_id=students[i])
-            
+
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
