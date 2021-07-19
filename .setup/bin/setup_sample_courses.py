@@ -30,17 +30,16 @@ import subprocess
 import uuid
 import os.path
 import string
-import sys
-import configparser
-import csv
 import pdb
 import docker
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
+from ruamel.yaml import YAML
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
-import yaml
+
+yaml = YAML(typ='safe')
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
@@ -264,7 +263,7 @@ def generate_random_student_note():
 
 def generate_random_marks(default_value, max_value):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.yml')) as f:
-        marks_yml = yaml.safe_load(f)
+        marks_yml = yaml.load(f)
     if default_value == max_value and default_value > 0:
         key = 'count_down'
     else:
@@ -374,7 +373,7 @@ def load_data_yaml(file_path):
     if not os.path.isfile(file_path):
         raise IOError("Missing the yaml file {}".format(file_path))
     with open(file_path) as open_file:
-        yaml_file = yaml.safe_load(open_file)
+        yaml_file = yaml.load(open_file)
     return yaml_file
 
 
@@ -1385,6 +1384,7 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.allow_custom_marks = True
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1555,6 +1555,7 @@ class Gradeable(object):
                      g_grade_due_date=self.grade_due_date,
                      g_grade_released_date=self.grade_released_date,
                      g_syllabus_bucket=self.syllabus_bucket,
+                     g_allow_custom_marks=self.allow_custom_marks,
                      g_min_grading_group=self.min_grading_group,
                      g_closed_date=None)
 
@@ -1572,7 +1573,7 @@ class Gradeable(object):
                 length=len(graders)
                 for i in range(length):
                     conn.execute(peer_assign.insert(), g_id=self.id, grader_id=graders[i], user_id=students[i])
-            
+
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
@@ -1689,7 +1690,7 @@ class Component(object):
         self.ta_comment = ""
         self.student_comment = ""
         self.is_text = False
-        self.is_peer = False
+        self.is_peer_component = False
         self.page = 0
         self.order = order
         self.marks = []
@@ -1697,7 +1698,7 @@ class Component(object):
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
         if 'gc_is_peer' in component:
-            self.is_peer = component['gc_is_peer']
+            self.is_peer_component = component['gc_is_peer']
         if 'gc_student_comment' in component:
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
@@ -1730,7 +1731,7 @@ class Component(object):
                                     gc_student_comment=self.student_comment,
                                     gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value,
                                     gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
-                                    gc_is_peer=self.is_peer, gc_order=self.order, gc_page=self.page)
+                                    gc_is_peer=self.is_peer_component, gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 

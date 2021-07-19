@@ -1,26 +1,26 @@
+/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, gatherInputAnswersByType, saveAndWarnUnsubmitted */
+
 /**
  * Checks all radio buttons or checkboxes that were previously checked in the recent submission
  *
  * @param mc_field_id The id of the multiple choice fieldset
  */
-function setMultipleChoices(mc_field_id)
-{
-    var prev_checked = $("#" + mc_field_id).attr("data-prev_checked");
-
-    prev_checked = prev_checked.split("\n");
-
+function setMultipleChoices(mc_field_id, viewing_inactive_version) {
+    let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
+    prev_checked = prev_checked.split('\n');
     // For each input inside the fieldset see if its value is inside the prev checked array
-    $("#" + mc_field_id + " :input").each(function(index,element) {
+    $(`#${mc_field_id} :input`).each((index,element) => {
 
-        var value = element.getAttribute("value");
+        const value = element.getAttribute('value');
 
-        if(prev_checked.includes(value))
-        {
-            $(element).prop("checked", true);
+        if (prev_checked.includes(value)) {
+            $(element).prop('checked', true);
         }
-        else
-        {
-            $(element).prop("checked", false);
+        else {
+            if (viewing_inactive_version) {
+                $(element).prop('disabled', true);
+            }
+            $(element).prop('checked', false);
         }
     });
 }
@@ -30,12 +30,11 @@ function setMultipleChoices(mc_field_id)
  *
  * @param mc_field_id The id of the multiple choice fieldset
  */
-function clearMultipleChoices(mc_field_id)
-{
+function clearMultipleChoices(mc_field_id) {
     // For each input inside the fieldset remove the 'checked' attribute
-    $("#" + mc_field_id + " :input").each(function(index,element) {
+    $(`#${mc_field_id} :input`).each((index,element) => {
 
-        $(element).prop("checked", false);
+        $(element).prop('checked', false);
 
     });
 }
@@ -46,22 +45,18 @@ function clearMultipleChoices(mc_field_id)
  * @param codebox_id The id of the codebox div
  * @param state May be either clear (set to initial_value) or recent (set to recent submission)
  */
-function setCodeBox(codebox_id, state)
-{
+function setCodeBox(codebox_id, state) {
     // Get initial and previous submission values
-    var initial_value = $("#" + codebox_id).attr("data-initial_value");
-    var recent_submission = $("#" + codebox_id).attr("data-recent_submission");
-
+    const initial_value = $(`#${codebox_id}`).attr('data-initial_value');
+    const version_submission =  $(`#${codebox_id}`).attr('data-version_submission');
     // Get the codebox
-    var codebox = $("#" + codebox_id + " .CodeMirror").get(0).CodeMirror;
+    const codebox = $(`#${codebox_id} .CodeMirror`).get(0).CodeMirror;
 
-    if(state == "clear")
-    {
+    if (state == 'clear') {
         codebox.setValue(initial_value);
     }
-    else
-    {
-        codebox.setValue(recent_submission);
+    else {
+        codebox.setValue(version_submission);
     }
 }
 
@@ -71,7 +66,7 @@ const NOTEBOOK_AUTOSAVE_KEY_SUFFIX = `${window.location.pathname}-notebook-autos
 
 /**
  * Get the autosave key for the notebook.
- * 
+ *
  * This is a function because USER_ID is defined *after* this script is
  * loaded -- thus, simply defining the constant w/ USER_ID results in an
  * error since USER_ID is not yet defined.
@@ -84,11 +79,11 @@ function notebookAutosaveKey() {
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
-    if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
+    if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
         localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
             timestamp: Date.now(),
-            multiple_choice: gatherInputAnswersByType("multiple_choice"),
-            codebox: gatherInputAnswersByType("codebox")
+            multiple_choice: gatherInputAnswersByType('multiple_choice'),
+            codebox: gatherInputAnswersByType('codebox'),
         }));
     }
 }
@@ -98,9 +93,9 @@ function saveNotebookToLocal() {
  * autosave data exists yet, then this function does nothing.
  */
 function restoreNotebookFromLocal() {
-    if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
+    if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
         const state = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
-        
+
         if (state === null) {
             return;
         }
@@ -110,7 +105,7 @@ function restoreNotebookFromLocal() {
             const values = state.multiple_choice[id];
             // Extract the index from the ID generated from gatherInputAnswersByType()
             // Index is stored after multiple_choice_, so substring it out
-            const index = id.substring("multiple_choice_".length);
+            const index = id.substring('multiple_choice_'.length);
             $(`#mc_field_${index} :input`).each((_index, element) => {
                 $(element).prop('checked', values.includes(element.value)).change();
             });
@@ -140,157 +135,143 @@ function restoreNotebookFromLocal() {
     }
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
 
     // If any button inside the notebook has been clicked then enable the submission button
-    $(".notebook button").click(function() {
+    $('.notebook button').click(() => {
 
         // Set global javascript variable to allow submission for notebook
         window.is_notebook = true;
-
-        // Enable submit button
-        $("#submit").attr("disabled", false);
-
     });
 
-    $("#submit").click(() => {
+    $('#submit').click(() => {
         localStorage.removeItem(notebookAutosaveKey());
         // Changes have been submitted; we don't need to warn the user anymore
         window.onbeforeunload = null;
     });
 
     // Register click handler for codebox clear and recent buttons
-    $(".codebox-clear-reset").click(function() {
+    $('.codebox-clear-reset').click(function() {
 
         // Collect the id of the button and split it apart to find out which field it is bound to
-        var items = this.id.split("_");
-        var index = items[1];
-        var action = items[2];
-        var button_selector = "#codebox_" + index +  "_";
+        const items = this.id.split('_');
+        const index = items[1];
+        const action = items[2];
+        const button_selector = `#codebox_${index}_`;
 
-        setCodeBox("codebox_" + index, action);
+        setCodeBox(`codebox_${index}`, action);
 
-        if(action == "clear")
-        {
-            $(button_selector + "clear_button").attr("disabled", true);
-            $(button_selector + "recent_button").attr("disabled", false);
+        if (action == 'clear') {
+            $(`${button_selector}clear_button`).attr('disabled', true);
+            $(`${button_selector}recent_button`).attr('disabled', false);
         }
-        else
-        {
-            $(button_selector + "clear_button").attr("disabled", false);
-            $(button_selector + "recent_button").attr("disabled", true);
+        else {
+            $(`${button_selector}clear_button`).attr('disabled', false);
+            $(`${button_selector}recent_button`).attr('disabled', true);
         }
 
         saveNotebookToLocal();
     });
 
     // Register handler to detect changes inside codeboxes and then enable buttons
-    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", codebox => {
+    $('.CodeMirror').each((_index, cm) => cm.CodeMirror.on('changes', codebox => {
         // Select the <div> that wraps the actual codebox element and contains
         // the data-initial_value and data-recent_submission attributes.
         const codeboxWrapper = codebox.getWrapperElement().parentElement;
 
-        var initial_value = codeboxWrapper.getAttribute("data-initial_value");
-        var recent_submission = codeboxWrapper.getAttribute("data-recent_submission");
+        const initial_value = codeboxWrapper.getAttribute('data-initial_value');
+        const recent_submission = codeboxWrapper.getAttribute('data-recent_submission');
 
-        var code = codebox.getValue();
-        var clear_button_id = `#${codeboxWrapper.id}_clear_button`;
-        var recent_button_id = `#${codeboxWrapper.id}_recent_button`;
+        const code = codebox.getValue();
+        const clear_button_id = `#${codeboxWrapper.id}_clear_button`;
+        const recent_button_id = `#${codeboxWrapper.id}_recent_button`;
 
-        if(code === initial_value)
-        {
-            $(clear_button_id).attr("disabled", true);
+        if (code === initial_value) {
+            $(clear_button_id).attr('disabled', true);
         }
-        else
-        {
-            $(clear_button_id).attr("disabled", false);
+        else {
+            $(clear_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
         }
 
-        if(code === recent_submission)
-        {
-            $(recent_button_id).attr("disabled", true);
+        if (code === recent_submission) {
+            $(recent_button_id).attr('disabled', true);
         }
-        else
-        {
-            $(recent_button_id).attr("disabled", false);
-            $("#submit").attr("disabled", false);
+        else {
+            $(recent_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
             window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));
 
-    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal)));
+    $('.CodeMirror').each((_index, cm) => cm.CodeMirror.on('changes', () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal)));
 
     // Register click handler for multiple choice buttons
-    $(".mc-clear, .mc-recent").click(function() {
+    $('.mc-clear, .mc-recent').click(function() {
 
         // Collect the id of the button and split it apart to find out which field it is bound to
-        var items = this.id.split("_");
-        var index = items[1];
-        var action = items[2];
-        var field_set_id = "mc_field_" + index;
+        const items = this.id.split('_');
+        const index = items[1];
+        const action = items[2];
+        const field_set_id = `mc_field_${index}`;
 
-        if(action == "clear")
-        {
+        if (action == 'clear') {
             clearMultipleChoices(field_set_id);
-            $("#mc_" + index + "_clear_button").attr("disabled", true);
-            $("#mc_" + index + "_recent_button").attr("disabled", false);
+            $(`#mc_${index}_clear_button`).attr('disabled', true);
+            $(`#mc_${index}_recent_button`).attr('disabled', false);
         }
-        else if(action == "recent")
-        {
+        else if (action == 'recent') {
             setMultipleChoices(field_set_id);
-            $("#mc_" + index + "_clear_button").attr("disabled", false);
-            $("#mc_" + index + "_recent_button").attr("disabled", true);
+            $(`#mc_${index}_clear_button`).attr('disabled', true);
+            $(`#mc_${index}_recent_button`).attr('disabled', true);
         }
 
         saveNotebookToLocal();
     });
 
     // Register change handler to enable buttons when multiple choice inputs change
-    $(".mc").change(function() {
+    $('.mc').change(function() {
 
-        var items = this.id.split("_");
-        var index = items[2];
+        const items = this.id.split('_');
+        const index = items[2];
 
         // Enable recent button
-        $("#mc_" + index + "_clear_button").attr("disabled", false);
-        const prev_checked_items = this.getAttribute("data-prev_checked");
-        const curr_checked_items = $(this).serializeArray().map(v => v.value).join("\n");
+        $(`#mc_${index}_clear_button`).attr('disabled', false);
+        $(`#mc_${index}_recent_button`).attr('disabled', false);
+        const prev_checked_items = this.getAttribute('data-prev_checked');
+        const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');
         if (curr_checked_items !== prev_checked_items) {
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $("#submit").attr("disabled", false);
-            $("#mc_" + index + "_recent_button").attr("disabled", false);
-        } else {
-            $("#mc_" + index + "_recent_button").attr("disabled", true);
+            $(`#mc_${index}_recent_button`).attr('disabled', false);
+        }
+        else {
+            $(`#mc_${index}_recent_button`).attr('disabled', true);
         }
 
         saveNotebookToLocal();
     });
 
     // Setup click events for short answer buttons
-    $(".sa-clear-reset").click(function() {
+    $('.sa-clear-reset').click(function() {
 
         // Collect the id of the button and split it apart to find out which short answer it is bound to
         // and which action it preforms
-        var items = this.id.split("_");
+        const items = this.id.split('_');
 
-        var index_num = items[2];
-        var button_action = items[3];
-        var field_id = "#short_answer_" + index_num;
+        const index_num = items[2];
+        const button_action = items[3];
+        const field_id = `#short_answer_${index_num}`;
 
-        var data_to_set = "";
+        let data_to_set = '';
 
         // Collect data from the data-* attribute of the text box
-        if(button_action == "clear")
-        {
-            var data_to_set = $(field_id).attr("data-initial_value");
-            $(field_id + "_clear_button").attr("disabled", true);
-            $(field_id + "_recent_button").attr("disabled", false);
+        if (button_action == 'clear') {
+            data_to_set = $(field_id).attr('data-initial_value');
+            $(`${field_id}_clear_button`).attr('disabled', true);
+            $(`${field_id}_recent_button`).attr('disabled', false);
         }
-        else
-        {
-            var data_to_set = $(field_id).attr("data-recent_submission");
-            $(field_id + "_clear_button").attr("disabled", false);
-            $(field_id + "_recent_button").attr("disabled", true);
+        else {
+            data_to_set = $(field_id).attr('data-recent_submission');
+            $(`${field_id}_clear_button`).attr('disabled', false);
+            $(`${field_id}_recent_button`).attr('disabled', true);
         }
 
         // Set the data into the textbox
@@ -300,43 +281,38 @@ $(document).ready(function () {
     });
 
     // Setup keyup event for short answer boxes
-    $(".sa-box").on("input", function() {
+    $('.sa-box').on('input', function() {
 
-        var index_num = this.id.split("_")[2];
+        const index_num = this.id.split('_')[2];
 
-        var initial_value = this.getAttribute("data-initial_value");
-        var recent_submission = this.getAttribute("data-recent_submission");
+        const initial_value = this.getAttribute('data-initial_value');
+        const recent_submission = this.getAttribute('data-recent_submission');
 
-        var text_box_id = "#short_answer_" + index_num;
-        var clear_button_id = "#short_answer_" + index_num + "_clear_button";
-        var recent_button_id = "#short_answer_" + index_num + "_recent_button";
+        const text_box_id = `#short_answer_${index_num}`;
+        const clear_button_id = `#short_answer_${index_num}_clear_button`;
+        const recent_button_id = `#short_answer_${index_num}_recent_button`;
 
-        if($(text_box_id).val() == initial_value)
-        {
-            $(clear_button_id).attr("disabled", true);
+        if ($(text_box_id).val() == initial_value) {
+            $(clear_button_id).attr('disabled', true);
         }
-        else
-        {
-            $(clear_button_id).attr("disabled", false);
+        else {
+            $(clear_button_id).attr('disabled', false);
         }
 
-        if($(text_box_id).val() == recent_submission)
-        {
-            $(recent_button_id).attr("disabled", true);
+        if ($(text_box_id).val() == recent_submission) {
+            $(recent_button_id).attr('disabled', true);
         }
-        else
-        {
-            $(recent_button_id).attr("disabled", false);
+        else {
+            $(recent_button_id).attr('disabled', false);
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $("#submit").attr("disabled", false);
         }
     });
 
-    $(".sa-box").on('input', () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal));
+    $('.sa-box').on('input', () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal));
 
     restoreNotebookFromLocal();
 
-    if(typeof cleanupAutosaveHistory === "function"){
-        cleanupAutosaveHistory("-notebook-autosave");
+    if (typeof cleanupAutosaveHistory === 'function'){
+        cleanupAutosaveHistory('-notebook-autosave');
     }
 });

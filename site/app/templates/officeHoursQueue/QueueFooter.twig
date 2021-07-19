@@ -11,9 +11,15 @@
   }
 
   var timers = []; //keep track of the current running timers on the page
+  var timerInterval = null; //keep track of the interval that updates the timers
 
   //Runs the function that gets and fills in the old filter settings
-  filterQueues();
+  {% if viewer.isGrader() %}
+    filterQueues();
+  {% else %}
+    setupStudentTimer()
+  {% endif %}
+
   //Unide the checkboxes now that they have been set
   $(".page_loading").removeClass("page_loading");
 
@@ -52,8 +58,8 @@
 
         current_elements.show();
         current_elements.each(function(i, obj) {
-          let timer = $(obj).find(".help_timer")
-          if (timer) {
+          let timer = $(obj).find(".help_timer");
+          if (timer.length) {
             timers.push([
               timer,
               new Date(timer.attr("help_time"))
@@ -66,7 +72,8 @@
         current_elements.removeClass("shown_queue_row");
       }
     }
-    updateTimers();
+    updateTimers(); // This singular call prevents the timer element from being momentarily blank before it is properly set up below
+    updateTimerInterval();
 
     var queue_rows = document.getElementsByClassName('shown_queue_row');
     var row_count = 0;
@@ -85,18 +92,38 @@
     }
   }
 
+  function setupStudentTimer() {
+    timers = [];
+    const timer = $("#student_timer");
+    if (timer.length) {
+      timers.push([
+        timer,
+        new Date(timer.attr("help_time"))
+      ]);
+      updateTimerInterval();
+    }
+  }
+
   function unhideId(element, id) {
     element.parentElement.innerHTML = id;
   }
 
-  //update the timers few seconds
-  updateTimers();
-  setInterval(updateTimers, 1000);
+  function updateTimerInterval() {
+    if (timers.length > 0 && timerInterval == null) {
+      updateTimers();
+      timerInterval = setInterval(updateTimers, 1000);
+    }
+    else if(timers.length == 0 && timerInterval != null) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
   function updateTimers() {
     for (var i = 0; i < timers.length; i++) {
-      timer = (new Date() - timers[i][1]) / 1000
-      var min = Math.floor(timer / 60)
-      var sec = Math.floor(timer % 60).toString().padStart(2, '0')
+      timer = (new Date() - timers[i][1]) / 1000;
+      var min = Number(Math.floor(timer / 60));
+      var sec = Math.floor(timer % 60).toString().padStart(2, '0');
       var timerstring = min + ":" + sec;
       if (min >= 100) {
         timerstring = "∞";
@@ -146,13 +173,13 @@
       alert("This browser does not support desktop notification");
     }
     else if (Notification.permission === "granted") {
-      new Notification("Notifications have been enabled. You will be notified only when somebody joins the queue and there was nobody previously waiting for help.");
+      new Notification("Notifications have been enabled. You will be notified when a student joins a previously inactive queue.");
       setNotificationState(true);
     }
     else if (Notification.permission !== "denied") {
       Notification.requestPermission().then(function (permission) {
         if (permission === "granted") {
-          new Notification("Notifications have been enabled. You will be notified only when somebody joins the queue and there was nobody previously waiting for help.");
+          new Notification("Notifications have been enabled. You will be notified when a student joins a previously inactive queue.");
           setNotificationState(true);
         }else{
           setNotificationState(false);
@@ -203,15 +230,17 @@
       window.socketClient.open('office_hours_queue');
   }
 
-  window.isAudibleAlertEnabled = false;
+  {% if viewer.isGrader() %}
+    window.isAudibleAlertEnabled = false;
 
-  try {
-      window.notificationSound = new NotificationSound();
-      document.querySelector('.disable-audible').style.display = 'none';
-      document.querySelector('.enable-audible').style.display = 'inline-block';
-  } catch (e) {
-      console.error(e);
-  }
+    try {
+        window.notificationSound = new NotificationSound();
+        document.querySelector('.disable-audible').style.display = 'none';
+        document.querySelector('.enable-audible').style.display = 'inline-block';
+    } catch (e) {
+        console.error(e);
+    }
+  {% endif %}
 
   function toggleAudibleAlert() {
       if (window.isAudibleAlertEnabled) {
@@ -227,9 +256,18 @@
   }
 
   function updateCurrentQueue() {
+      var queue_empty_before = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
+
       $.get("{{base_url}}/current_queue", function(newQueue) {
           $("#current_queue").replaceWith(newQueue);
           filterQueues();
+
+          var queue_empty_after = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
+          var helping_student = $( '.finish_helping_btn.btn-success:visible').length > 0;
+
+          if(notifications_enabled && queue_empty_before && !queue_empty_after && !helping_student) {
+              new Notification("A student is now waiting for help.");
+          }
       });
 
       if (window.isAudibleAlertEnabled) {
@@ -239,9 +277,13 @@
 
   function updateQueueStatus() {
       $.get("{{base_url}}/new_status", function(newStatus) {
-          if ($('#queue_status').length !== 0)
-              $("#queue_status").replaceWith(newStatus);
-          else $("#add_to_queue").replaceWith(newStatus);
+          if ($('#queue_status').length !== 0) {
+            $("#queue_status").replaceWith(newStatus);
+            setupStudentTimer();
+          }
+          else {
+            $("#add_to_queue").replaceWith(newStatus);
+          }
       });
   }
 
@@ -253,8 +295,7 @@
 
   function updateAnnouncement() {
       $.get("{{base_url}}/new_announcement", function(newAnnouncement) {
-          if ($('#announcement').length > 0){
-              $('#announcement').next().remove();
+          if ($('#announcement').length > 0) {
               $('#announcement').replaceWith(newAnnouncement);
           }
           else $(newAnnouncement).insertAfter($('h1').next());

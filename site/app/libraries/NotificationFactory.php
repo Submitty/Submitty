@@ -221,30 +221,45 @@ class NotificationFactory {
     /**
      * prepare array of Email objects as param array
      * @param array $emails
+     * @param bool $force_secondary
+     * @return int emails sent
      */
-    public function sendEmails(array $emails): void {
+    public function sendEmails(array $emails, bool $force_secondary = false, bool $skip_check = false): int {
         if (!$this->core->getConfig()->isEmailEnabled()) {
             throw new LogicException("Email is not enabled");
         }
         if (empty($emails)) {
-            return;
+            return 0;
         }
         // parametrize email array
         $current_user = $this->core->getUser();
         $flattened_emails = [];
         foreach ($emails as $email) {
             // check if user is in the null section
-            if (!$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
+            if (!$skip_check && !$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
                 continue;
             }
-            if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
+            if ($skip_check || $email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
+                $user = $this->core->getQueries()->getUserById($email->getUserId());
+                if (($user->getEmailBoth() || $force_secondary) && $user->getSecondaryEmail() != "") {
+                    $flattened_emails[] = $email->getSubject();
+                    $flattened_emails[] = $email->getBody();
+                    $flattened_emails[] = $email->getUserId();
+                    $flattened_emails[] = $user->getSecondaryEmail();
+                    $flattened_emails[] = $this->core->getConfig()->getSemester();
+                    $flattened_emails[] = $this->core->getConfig()->getCourse();
+                }
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
+                $flattened_emails[] = $user->getEmail();
+                $flattened_emails[] = $this->core->getConfig()->getSemester();
+                $flattened_emails[] = $this->core->getConfig()->getCourse();
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 3);
+            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 6);
         }
+        return count($flattened_emails) / 6;
     }
 }

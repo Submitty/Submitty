@@ -1,7 +1,8 @@
 {
-	"baseUrl" : "http://localhost:1501",
+	"baseUrl" : "http://localhost:1511",
 	"testFiles" : [
-        "*/*.spec.js",
+    "*/*.spec.js",
 		"*.spec.js"
-	]
+	],
+	"pageLoadTimeout" : 120000
 }

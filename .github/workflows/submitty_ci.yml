@@ -12,18 +12,41 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
-  
+  NODE_VERSION: 10
+
 jobs:
-    eslint:
+    css-lint:
         runs-on: ubuntu-18.04
         defaults:
             run:
                 working-directory: site
         steps:
             - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2.1.2
+            - uses: actions/setup-node@v2
               with:
-                node-version: '10'
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - name: Run stylelint
+              run: npm run css-stylelint
+
+
+    js-lint:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
               uses: actions/cache@v2
               with:
@@ -33,10 +56,36 @@ jobs:
                        ${{ runner.os }}-cache-node-modules-
             - run: npm install
             - name: Run eslint
-              run: npm run lint
+              run: npm run eslint
 
 
-    php-lint-static:
+    js-unit:
+        runs-on: ubuntu-18.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
+
+
+    php-lint:
         runs-on: ubuntu-18.04
         defaults:
             run:
@@ -59,10 +108,14 @@ jobs:
 
             - name: Install dependencies
               run: composer install --prefer-dist --dev
-            - name: Run php linting and static analysis
-              run : |
+            - name: Check syntax
+              run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+            - name: Lint PHP code
+              run: |
                   php vendor/bin/phpcs --version
                   php vendor/bin/phpcs --standard=tests/ruleset.xml
+            - name: Static analysis
+              run: |
                   php vendor/bin/phpstan  --version
                   php vendor/bin/phpstan analyze app
 
@@ -111,9 +164,9 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
             python3 -m pip install --upgrade pip
@@ -133,28 +186,41 @@ jobs:
           uses: actions/cache@v2
           with:
             path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
             restore-keys: |
-                ${{ runner.os }}-pip-
+                ${{ runner.os }}-${{ github.job }}-pip-
         - name: Install python libraries
           run : |
-            python3 -m pip install --upgrade pip setuptools wheel
-            python3 -m pip install SQLAlchemy jsonschema jsonref pytz tzlocal
-            python3 -m pip install coverage
-            python3 -m pip install paramiko 
-            python3 -m pip install docker 
-            python3 -m pip install python-dateutil 
-        - name: Run migrator python unit tests
-          working-directory: migration
-          run : |
-            coverage run -m unittest discover
-            coverage xml
+            python3 -m pip install -r .setup/pip/system_requirements.txt
+            python3 -m pip install coverage # Testing util.
+
+        # Submitty utils install & unit testing, must be put before auto grader
+        # testing as auto grader depends on submitty utils to function.
         - name: Run python_submitty_utils python unit tests
           working-directory: python_submitty_utils
           run : |
             pip3 install .
             coverage run -m unittest discover
             coverage xml
+        - name: Upload submitty python utils Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: python_submitty_utils/coverage.xml
+            flags: python_submitty_utils
+
+        # Migrator unit test
+        - name: Run migrator python unit tests
+          working-directory: migration
+          run : |
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload migrator Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: migration/coverage.xml
+            flags: migrator
+
+        # Auto grader unit test
         - name: Run autograder python unit tests
           working-directory: autograder
           run : |
@@ -165,26 +231,21 @@ jobs:
           with:
             files: autograder/coverage.xml
             flags: autograder
-        - name: Upload submitty python utils Coverage
-          uses: codecov/codecov-action@v1
-          with:
-            files: python_submitty_utils/coverage.xml
-            flags: python_submitty_utils
-        - name: Upload migrator Coverage
-          uses: codecov/codecov-action@v1
-          with:
-            files: migration/coverage.xml
-            flags: migrator
-
 
 
     e2e:
-        needs: [eslint, php-lint-static, php-unit, python-lint, python-unit]
+        needs:
+          - js-lint
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - js-unit
         runs-on: ubuntu-18.04
         services:
           postgres:
             image: postgres
-            env: 
+            env:
               POSTGRES_PASSWORD: submitty_dbuser
               POSTGRES_USER: postgres
             options: >-
@@ -218,57 +279,31 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
+
           - name: Cache pip
             uses: actions/cache@v2
             with:
-              path: path ~/.cache/pip
-              key: ${{ runner.os }}-py-pip-${{ hashFiles('**/requirements.txt') }}
+              path: ~/.cache/pip
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
               restore-keys: |
-                ${{ runner.os }}-py-pip
+                ${{ runner.os }}-${{ github.job }}-pip-
+
+          - name: Install Test-specific python dependencies
+            run: |
+              # Install for local
+              python3 -m pip install --upgrade pip setuptools wheel
+              pip3 -V
+              pip3 install selenium websocket_client
+              # Install globally
+              sudo python3 -m pip install --upgrade pip setuptools wheel
+              sudo pip3 -V
+
           - name: Install python dependencies
             run: |
-              python3 -m pip install --upgrade pip setuptools wheel  
-              sudo python3 -m pip install --upgrade pip setuptools wheel
-              pip3 -V
-              sudo pip3 -V
-              pip3 install cryptography
-              pip3 install python-pam
-              pip3 install sqlalchemy
-              pip3 install selenium
-              pip3 install tzlocal
-              pip3 install jsonschema
-              pip3 install jsonref
-              pip3 install websocket_client
-              pip3 install psycopg2
-              pip3 install docker
-              pip3 install pyyaml
-              pip3 install selenium
-              pip3 install websocket_client
-              pip3 install python-pam
-              pip3 install python-dateutil
-              pip3 install paramiko
-              pip3 install pyzbar
-              pip3 install watchdog
-              #needs to be globally available for all users
-              sudo pip3 install docker
-              sudo pip3 install paramiko
-              sudo pip3 install tzlocal
-              sudo pip3 install sqlalchemy
-              sudo pip3 install jsonref
-              sudo pip3 install numpy
-              sudo pip3 install opencv-python
-              sudo pip3 install pyPdf
-              sudo apt-get install libzbar0
-              sudo pip3 install pyzbar
-              sudo pip3 install PyPDF2
-              sudo pip3 install pdf2image
-              sudo pip3 install onnxruntime
-              sudo pip3 install watchdog
-              sudo pip3 install python-dateutil
-              sudo pip3 install psutil
-              sudo pip3 install psycopg2
-              sudo pip3 install python-pam
-              sudo pip3 install sqlalchemy
+              # Install for local
+              pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+              # Install globally
+              sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
 
           - name: Get composer cache dir
             id: composer-cache
@@ -338,7 +373,7 @@ jobs:
 
           - name: Set up test suite
             run: |
-              cd $SUBMITTY_REPOSITORY 
+              cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
           - name: Set up apache
@@ -409,6 +444,8 @@ jobs:
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              headless: true
 
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
@@ -437,5 +474,3 @@ jobs:
 
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
-
-

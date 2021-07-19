@@ -1,46 +1,39 @@
 <script>
     $(document).ready(function() {
-        setUpPlagView("{{ gradeable_id }}");
+        setUpPlagView("{{ gradeable_id }}", "{{ config_id }}");
     });
 </script>
 <div class="content plagiarism-result-cont">
-    <div class="plag-flex">
-        <span>
-            Gradeable: <b>{{ gradeable_title }}</b>
+    <div id="result-title-bar">
+        <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span> </h2>
+        <span class="plag-results-header-right">
+            <a class="btn btn-primary" onclick="toggle();">Swap Students</a> {# TODO: Disable "Swap Students" button when no user selected #}
+            <a class="btn btn-primary" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
+            <a class="btn btn-primary" title="View Key" onclick="showPlagiarismHighKey()">View Key</a>
         </span>
-        <a class="btn btn-primary"
-           title="View Key"
-           onclick="showPlagiarismHighKey()"
-        >
-            View Key
-        </a>
     </div>
     <hr />
     <form id="users_with_plagiarism" class="plag-flex">
-        <span class="plag-flex-item">User 1 (sorted by %match):
-            <select name="user_id_1">
-                <option value="">None</option>
+        <div class="plag-flex-row">
+            <span class="plag-flex-item">
+                <select name="user_id_1" class="user1-select">
+                    {% for ranking in rankings %}
+                        <option value="{{ ranking[1] }}">(Max Match: {{ ranking[0] }}) {{ ranking[3] }} {{ ranking[4] }} &lt;{{ ranking[1] }}&gt;</option>
+                    {% endfor %}
+                </select>
+            </span>
+            <span class="plag-flex-item">
+                <select name="user_id_2" class="user2-select"></select>
+            </span>
+        </div>
 
-                {% for ranking in rankings %}
-                    <option value="{{ ranking[1] }}">{{ ranking[3] }} {{ ranking[4] }} &lt;{{ ranking[1] }}&gt; ({{ ranking[1] }})</option>
-                {% endfor %}
-
-            </select>
-        </span>
-        <span class="plag-flex-item">Version:
-            <select name="version_user_1">
-                <option value="">None</option>
-            </select>
-        </span>
-        <span class="plag-flex-item">User 2:
-            <select name="user_id_2">
-                <option value="">None</option>
-            </select>
-        </span>
-        <span class="flex-row">
-            <a class="btn btn-primary plag-flex-item toggle" onclick="toggle();">Toggle Student</a>
-            <a class="btn btn-primary plag-flex-item full-screen-btn" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
-        </span>
+        <div class="plag-flex-row">
+            <span class="plag-flex-item">Version:
+                <select name="version_user_1">
+                    <option value="">None</option>
+                </select>
+            </span>
+        </div>
     </form>
     <div class="code-cont">
         <div class="sub">
@@ -56,3 +49,4 @@
 </div>
 
 {% include("admin/PlagiarismHighlightingKey.twig") %}
+{% include("plagiarism/ShowPlagiarismMatches.twig") %}

@@ -32,8 +32,6 @@ class SessionManager {
      * no such row exists or returning true if the row does exist. If the row exists, additionally
      * update when it'll expire by 24 hours
      *
-     * @param $session_id
-     *
      * @return bool|string
      */
     public function getSession(string $session_id) {
@@ -48,7 +46,7 @@ class SessionManager {
     }
 
     /**
-     * @param $user_id
+     * Create a new session for the user
      *
      * @return string
      */

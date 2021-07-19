@@ -23,21 +23,27 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
+import 'cypress-file-upload';
 import {buildUrl} from './utils.js';
 //These functions can be called like "cy.login(...)" and will yeild a result
 
 /**
-* Log into Submitty, assumes no one is logged in already
+* Log into Submitty, assumes no one is logged in already and at login page
 *
 * @param {String} [username=instructor] - username & password of who to log in as
 */
-Cypress.Commands.add("login", (username="instructor") => { 
-	cy.visit('/');
-	cy.get('input[name=user_id]').type(username);
-	cy.get('input[name=password]').type(username);
-	cy.get('input[name=login]').click();
+Cypress.Commands.add('login', (username='instructor') => {
+    cy.get('input[name=user_id]').type(username, {force: true});
+    cy.get('input[name=password]').type(username, {force: true});
+    cy.get('input[name=login]').click();
 });
 
+/**
+* Log out of Submitty, assumes a user is already logged in
+*/
+Cypress.Commands.add('logout', () => {
+    cy.get('#logout > .flex-line > .icon-title').click();
+});
 
 /**
 * Visit a url either by an array of parts or a completed url E.g:
@@ -48,16 +54,18 @@ Cypress.Commands.add("login", (username="instructor") => {
 *
 * @param {String|String[]}
 */
-Cypress.Commands.overwrite("visit", (originalFn, options) => { 
-	let url = '';
+Cypress.Commands.overwrite('visit', (originalFn, options) => {
+    let url = '';
 
-	if(Array.isArray(options)){
-		url = buildUrl(options);
-	}else if((typeof options) === 'string'){
-		url = options;
-	}else{
-		url = buildUrl([]);
-	}
+    if (Array.isArray(options)){
+        url = buildUrl(options);
+    }
+    else if ((typeof options) === 'string'){
+        url = options;
+    }
+    else {
+        url = buildUrl([]);
+    }
 
-	originalFn(url);
+    originalFn(url);
 });

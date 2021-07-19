@@ -9,11 +9,11 @@ insert_final_newline = true
 indent_style = space
 charset = utf-8
 
-[*.{py,php,java,sh,css,html}]
+[*.{py,php,java,sh,css,html,js}]
 indent_size = 4
 
 [{MakefileHelper,SAMPLE_Makefile}]
 indent_size = 2
 
-[*.{c,h,cpp,hpp,js,json,yml,txt,md}]
+[*.{c,h,cpp,hpp,json,yml,txt,md}]
 indent_size = 2

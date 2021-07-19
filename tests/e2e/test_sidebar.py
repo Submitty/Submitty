@@ -75,10 +75,13 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
+            [self.test_url + '/superuser/email', 'Email All'],
+            [self.test_url + '/superuser/email_status', 'Email Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]
@@ -89,6 +92,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -119,6 +123,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -134,14 +140,17 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/gradeable', 'New Gradeable'],
             [base_url + '/config', 'Course Settings'],
+            [base_url + '/sql_toolbox', 'SQL Toolbox'],
             # the office hours queue is not initially enabled in the sample course
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
+            [base_url + '/email_status', 'Email Status'],
             [base_url + '/users', 'Manage Students'],
             [base_url + '/graders', 'Manage Graders'],
             [base_url + '/sections', 'Manage Sections'],
             [base_url + '/student_photos', 'Student Photos'],
+            [base_url + '/activity', 'Student Activity Dashboard'],
             [base_url + '/late_days', 'Late Days Allowed'],
             [base_url + '/extensions', 'Excused Absence Extensions'],
             [base_url + '/grade_override', 'Grade Override'],
@@ -150,6 +159,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -162,6 +173,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -179,6 +192,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -199,6 +214,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -209,6 +226,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
@@ -225,6 +244,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
@@ -244,6 +265,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            # calendar will show only in debug mode
+            [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]

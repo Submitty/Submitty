@@ -16,7 +16,7 @@ class Client extends WebSocket\Client {
         ]);
     }
 
-    public function send($payload, string $opcode = 'text', bool $masked = true): void {
+    public function send($payload, $opcode = 'text', $masked = true): void {
         parent::send(json_encode($payload), $opcode, $masked);
     }
 }

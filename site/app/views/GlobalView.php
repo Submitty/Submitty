@@ -69,7 +69,8 @@ class GlobalView extends AbstractView {
             "wrapper_urls" => $wrapper_urls,
             "latest_tag" => $this->core->getConfig()->getLatestTag(),
             "latest_commit" => $this->core->getConfig()->getLatestCommit(),
-            "footer_links" => $footer_links
+            "footer_links" => $footer_links,
+            "module_js" => $this->output->getModuleJs(),
         ]);
     }
 }

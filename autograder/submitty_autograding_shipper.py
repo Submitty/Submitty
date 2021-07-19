@@ -635,9 +635,19 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
 
     # Try to short-circuit this job. If it's possible, then great! Clean
     # everything up and return.
-    if try_short_circuit(config, queue_file):
-        grading_cleanup(config, my_name, queue_file, grading_file)
-        return
+    try:
+        if try_short_circuit(config, queue_file):
+            grading_cleanup(config, my_name, queue_file, grading_file)
+            return
+    except Exception as e:
+        # Catch-all to help prevent the shipper from getting into a weird stuck state.
+        config.logger.log_message(
+            f"Unexpected error when attempting to short-circuit {queue_file}: {e}. "
+            f"Attempting to grade normally. See stack traces for more details."
+        )
+        config.logger.log_stack_trace(
+            traceback.format_exc()
+        )
 
     # TODO: break which_machine into id, address, and passphrase.
 
@@ -734,6 +744,27 @@ def valid_github_repo_id(repoid):
     if not repoid == filtered_repoid:
         return False
     return True
+
+
+def calculate_size_cleanup_symlinks(directory):
+    total_size = 0
+    included_symlinks = False
+    for root, subdirectories, files in os.walk(directory):
+        for subdirectory in subdirectories:
+            sd = os.path.join(root, subdirectory)
+            if (os.path.islink(sd)):
+                os.remove(sd)
+                included_symlinks = True
+        for file in files:
+            f = os.path.join(root, file)
+            if (not os.path.exists(f)):
+                os.remove(f)
+            elif (os.path.islink(f)):
+                os.remove(f)
+                included_symlinks = True
+            else:
+                total_size += os.stat(f).st_size
+    return (total_size, included_symlinks)
 
 
 def checkout_vcs_repo(config, my_file):
@@ -951,6 +982,16 @@ def checkout_vcs_repo(config, my_file):
                 "credentials.\n",
                 file=f)
 
+    # remove the .git directory (storing full history and metafiles)
+    git_path = os.path.join(checkout_path, ".git")
+    shutil.rmtree(git_path, ignore_errors=True)
+
+    # calculate total file size, and remove symlinks
+    (checkout_size, checkout_included_symlinks) = calculate_size_cleanup_symlinks(checkout_path)
+
+    obj["checkout_total_size"] = checkout_size
+    obj["checkout_included_symlinks"] = checkout_included_symlinks
+
     return obj
 
 
@@ -1140,7 +1181,7 @@ def is_testcase_submission_limit(testcase: dict) -> bool:
     )
 
 
-def can_short_circuit(config_obj: str) -> bool:
+def can_short_circuit(config_obj: dict) -> bool:
     """Check if a job can be short-circuited.
 
     Currently, a job can be short-circuited if either:
@@ -1281,6 +1322,8 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
 
+    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
+
     course_path = os.path.join(
         config.submitty['submitty_data_dir'],
         'courses',
@@ -1299,18 +1342,29 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
         course_path, 'config', 'form', f'form_{queue_obj["gradeable"]}.json'
     )
 
-    with open(config_path) as fd:
-        config_obj = json.load(fd)
-
-    if not can_short_circuit(config_obj):
+    # Some of the config files may disappear if we're running this step and the gradeable is
+    # currently in the process of being re-built. In this case, we give up on trying to
+    # short-circuit and let the full autograder handle it. Best-case scenario, the config once
+    # again exists and we can grade it normally. Worst-case scenario, the config is still out of
+    # commission, but the grader is better-equipped to handle this scenario.
+    try:
+        with open(config_path) as fd:
+            config_obj = json.load(fd)
+        with open(gradeable_config_path) as fd:
+            gradeable_config_obj = json.load(fd)
+    except FileNotFoundError as e:
+        config.logger.log_message(
+            f"Error when short-circuiting: could not find configs for {gradeable_id}: {e}. "
+            f"Attempting to grade normally.",
+            jobname=gradeable_id,
+        )
         return False
 
     job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
     config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
 
-    with open(gradeable_config_path) as fd:
-        gradeable_config_obj = json.load(fd)
+    if not can_short_circuit(config_obj):
+        return False
 
     # Augment the queue object
     base, path = os.path.split(queue_file)

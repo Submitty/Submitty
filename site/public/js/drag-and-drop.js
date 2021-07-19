@@ -382,9 +382,11 @@ function addLabel(filename, filesize, part, previous){
     label_array[part-1].push(filename);
 }
 
-function handle_input_keypress() {
+function handle_input_keypress(inactive_version) {
     empty_inputs = false;
-    setButtonStatus();
+    if (!inactive_version) {
+        setButtonStatus();
+    }
 }
 
 // BULK UPLOAD
@@ -849,6 +851,66 @@ function gatherInputAnswersByType(type){
 }
 
 /**
+ * @param versions_used
+ * @param versions_allowed
+ * @param csrf_token
+ * @param gradeable_id
+ * @param user_id
+ * @param regrade
+ * @param regrade_all
+ * @param submissions
+ * @param regrade_all_students
+ * @param regrade_all_students_all
+ * differences between regrade, regrade_all, regrade_all_students and regrade_all_students_all
+ * regrade - regrade the active version for one selected student who submitted a certain gradeable
+ * regrade_all - regrade every version for one selected student who submitted a certain gradeable
+ * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
+ * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
+ */
+function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all=false, regrade_all_students = false, regrade_all_students_all = false) {
+    const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
+    let formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+    formData.append('regrade', regrade);
+    formData.append('regrade_all', regrade_all);
+    formData.append('version_to_regrade', versions_used);
+    formData.append('regrade_all_students', regrade_all_students);
+    formData.append('regrade_all_students_all', regrade_all_students_all);
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        headers : {
+            Accept: "application/json"
+        },
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['status'] === 'success') {
+                    window.location.reload();
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function(error) {
+            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not regrade files.");
+        }
+    });
+}
+
+/**
  * @param days_late
  * @param late_days_allowed
  * @param versions_used
@@ -862,11 +924,10 @@ function gatherInputAnswersByType(type){
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
     var return_url = buildCourseUrl(['gradeable', gradeable_id]);
-
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
@@ -897,6 +958,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('git_user_id', git_user_id);
     formData.append('git_repo_id', git_repo_id);
     formData.append('student_page', student_page)
+    formData.append('viewing_inactive_version', viewing_inactive_version);
 
     let filesize = 0;
 

@@ -5,7 +5,6 @@ particular submission (including initial grading of it and all regrades).
 """
 
 import os
-import sys
 import collections
 import json
 from datetime import datetime
@@ -77,7 +76,7 @@ class Logger:
         time_unit = "" if elapsed_time < 0 else "sec"
         job_id = job_id or self.job_id
         parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
-                f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
+                 f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
         write_to_log(self.log_path, ' | '.join((str(x) for x in parts)))
 
     def log_stack_trace(
@@ -121,9 +120,9 @@ class Logger:
         write_to_log(self.stack_trace_path, message)
 
 
-def just_write_grade_history(json_file,assignment_deadline,submission_time,seconds_late,
-                             first_access_time,access_duration,queue_time,batch_regrade,grading_began,
-                             wait_time,grading_finished,grade_time,autograde_total,
+def just_write_grade_history(json_file, assignment_deadline, submission_time, seconds_late,
+                             first_access_time, access_duration, queue_time, batch_regrade, grading_began,
+                             wait_time, grading_finished, grade_time, autograde_total,
                              revision):
 
     #####################################
@@ -162,7 +161,6 @@ def just_write_grade_history(json_file,assignment_deadline,submission_time,secon
     if revision:
         blob["revision"] = revision
 
-
     #####################################
     #  ADD IT TO THE HISTORY
     obj.append(blob)
@@ -194,7 +192,7 @@ def write_to_log(log_path, message):
             fcntl.flock(log_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
             print(message, file=log_file)
             fcntl.flock(log_file, fcntl.LOCK_UN)
-        except:
+        except Exception as e:
             print("Could not gain a lock on the log file.")
 
 
@@ -207,16 +205,16 @@ def write_to_log(log_path, message):
 def setup_for_validation(config, working_directory, complete_config, is_vcs, testcases, job_id):
     """ Prepare a directory for validation by copying in and permissioning the required files. """
 
-    tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
-    tmp_work = os.path.join(working_directory,"TMP_WORK")
-    tmp_results = os.path.join(working_directory,"TMP_RESULTS")
+    tmp_submission = os.path.join(working_directory, "TMP_SUBMISSION")
+    tmp_work = os.path.join(working_directory, "TMP_WORK")
+    tmp_results = os.path.join(working_directory, "TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
-    checkout_subdirectory = complete_config["autograding"].get("use_checkout_subdirectory","")
-    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
+    checkout_subdirectory = complete_config["autograding"].get("use_checkout_subdirectory", "")
+    tmp_logs = os.path.join(working_directory, "TMP_SUBMISSION", "tmp_logs")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
     tmp_work_generated_output = os.path.join(tmp_work, "generated_output")
     tmp_work_instructor_solution = os.path.join(tmp_work, "instructor_solution")
-    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
+    tmp_autograding = os.path.join(working_directory, "TMP_AUTOGRADING")
 
     os.mkdir(tmp_work_test_output)
     os.mkdir(tmp_work_generated_output)
@@ -234,7 +232,7 @@ def setup_for_validation(config, working_directory, complete_config, is_vcs, tes
     pattern_copy("submission_to_validation", patterns['submission_to_validation'], submission_path, tmp_work, tmp_logs)
     checkout_subdir_path = os.path.join(tmp_submission, 'checkout', checkout_subdirectory)
     if os.path.exists(checkout_subdir_path):
-        pattern_copy("checkout_to_validation", patterns['submission_to_validation'],checkout_subdir_path,tmp_work,tmp_logs)
+        pattern_copy("checkout_to_validation", patterns['submission_to_validation'], checkout_subdir_path, tmp_work, tmp_logs)
 
     for c in testcases:
         if c.type == 'Compilation':
@@ -262,10 +260,9 @@ def setup_for_validation(config, working_directory, complete_config, is_vcs, tes
             os.path.join(tmp_work, '.submit.notebook')
         )
 
-
     # Copy the validation script into this directory.
-    bin_runner = os.path.join(tmp_autograding, "bin","validate.out")
-    my_runner  = os.path.join(tmp_work, "my_validator.out")
+    bin_runner = os.path.join(tmp_autograding, "bin", "validate.out")
+    my_runner = os.path.join(tmp_work, "my_validator.out")
 
     shutil.copy(bin_runner, my_runner)
 
@@ -273,7 +270,7 @@ def setup_for_validation(config, working_directory, complete_config, is_vcs, tes
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-    add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
 # ==================================================================================
 #
@@ -281,49 +278,50 @@ def setup_for_validation(config, working_directory, complete_config, is_vcs, tes
 #
 # ==================================================================================
 
+
 def add_all_permissions(path):
     """ Recursively chmod a directory or file 777. """
     if os.path.isdir(path):
         add_permissions_recursive(path,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+                                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
     elif os.path.isfile(path):
         add_permissions(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
 
 def lock_down_folder_permissions(top_dir):
     # Chmod a directory to take away group and other rwx.
-    os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
+    os.chmod(top_dir, os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
+
 
 def cleanup_stale_containers(user_id_of_runner, my_log_function):
     # Remove any docker containers left over from past runs.
     client = docker.from_env(timeout=60)
     try:
-
-        old_containers = []
-        for c in client.containers.list(all=True):
-            if user_id_of_runner in c.name:
-                my_log_function(f'Removing stale container {c.name}')
-                old_containers.append(c)
-
-        if len(old_containers) > 0:
-            print('REMOVING STALE CONTAINERS')
-
+        # Get all containers (running or not) with user_id_of_runner in their name
+        # sparse=True gets containers without fully evaluating them. This is important,
+        # as race conditions with other grading threads can cause this call to fail otherwise.
+        old_containers = client.containers.list(all=True, filters={"name": user_id_of_runner}, sparse=True)
         for old_container in old_containers:
-            old_container.remove(force=True)
+            try:
+                my_log_function(f'Removing stale container {old_container.name}')
+                old_container.remove(force=True)
+            except docker.errors.NotFound:
+                # This is an expected case which does not constitute an error, caused
+                # by the use of sparse=True
+                pass
+            except Exception:
+                my_log_function("ERROR: Could not remove docker container")
 
-        old_networks = []
-        for n in client.networks.list():
-            if user_id_of_runner in n.name:
-                my_log_function(f'Removing stale network {n.name}')
-                old_networks.append(n)
-
-        if len(old_networks) > 0:
-            print('REMOVING STALE NETWORKS')
-
+        # Get all networks with user_id_of_runner in their name
+        old_networks = client.networks.list(filters={"name": user_id_of_runner})
         for old_network in old_networks:
-            old_network.remove()
+            try:
+                my_log_function(f'Removing stale network {old_network.name}')
+                old_network.remove()
+            except Exception:
+                my_log_function("ERROR: Could not remove docker network")
     finally:
         client.close()
 
@@ -342,16 +340,16 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
                 config.submitty['submitty_install_dir'], user_id_of_runner, working_directory
             )
         add_all_permissions(working_directory)
-        shutil.rmtree(working_directory,ignore_errors=True)
+        shutil.rmtree(working_directory, ignore_errors=True)
 
     # Create the working directory
     os.mkdir(working_directory)
 
     # Important directory variables.
-    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
-    tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
-    tmp_work = os.path.join(working_directory,"TMP_WORK")
-    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
+    tmp_autograding = os.path.join(working_directory, "TMP_AUTOGRADING")
+    tmp_submission = os.path.join(working_directory, "TMP_SUBMISSION")
+    tmp_work = os.path.join(working_directory, "TMP_WORK")
+    tmp_logs = os.path.join(working_directory, "TMP_SUBMISSION", "tmp_logs")
     submission_path = os.path.join(tmp_submission, "submission")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
 
@@ -359,18 +357,17 @@ def prepare_directory_for_autograding(config, working_directory, user_id_of_runn
     os.mkdir(tmp_work_test_input)
 
     # Unzip the autograding and submission folders
-    unzip_this_file(autograding_zip_file,tmp_autograding)
-    unzip_this_file(submission_zip_file,tmp_submission)
-
+    unzip_this_file(autograding_zip_file, tmp_autograding)
+    unzip_this_file(submission_zip_file, tmp_submission)
 
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
     # Handle the case where a student errantly submits to multiple parts of a one part only gradeable.
-    if complete_config_obj.get('one_part_only', False) == True:
+    if complete_config_obj.get('one_part_only', False) is True:
         allow_only_one_part(submission_path, log_path=os.path.join(tmp_logs, "overall.txt"))
 
-    with open(os.path.join(tmp_submission,"queue_file.json"), 'r') as infile:
+    with open(os.path.join(tmp_submission, "queue_file.json"), 'r') as infile:
         queue_obj = json.load(infile)
     job_id = queue_obj["job_id"]
 
@@ -398,20 +395,20 @@ def archive_autograding_results(
 ):
     """ After grading is finished, archive the results. """
 
-    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
-    tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
-    tmp_work = os.path.join(working_directory,"TMP_WORK")
-    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
-    tmp_results = os.path.join(working_directory,"TMP_RESULTS")
+    tmp_autograding = os.path.join(working_directory, "TMP_AUTOGRADING")
+    tmp_submission = os.path.join(working_directory, "TMP_SUBMISSION")
+    tmp_work = os.path.join(working_directory, "TMP_WORK")
+    tmp_logs = os.path.join(working_directory, "TMP_SUBMISSION", "tmp_logs")
+    tmp_results = os.path.join(working_directory, "TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
     random_output_path = os.path.join(tmp_work, 'random_output')
 
     if "generate_output" not in queue_obj:
-        partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
-        item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
+        partial_path = os.path.join(queue_obj["gradeable"], queue_obj["who"], str(queue_obj["version"]))
+        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "submissions", partial_path)
     elif queue_obj["generate_output"]:
-        item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"generated_output",queue_obj["gradeable"])
-    results_public_dir = os.path.join(tmp_results,"results_public")
+        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "generated_output", queue_obj["gradeable"])
+    results_public_dir = os.path.join(tmp_results, "results_public")
     results_details_dir = os.path.join(tmp_results, "details")
     patterns = complete_config_obj['autograding']
 
@@ -423,14 +420,14 @@ def archive_autograding_results(
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
     if os.path.exists(random_output_path):
-        pattern_copy("work_to_random_output", [os.path.join(random_output_path, '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
+        pattern_copy("work_to_random_output", [os.path.join(random_output_path, '**', '*.txt'), ], tmp_work, tmp_results, tmp_logs)
     # timestamp of first access to the gradeable page
     first_access_string = ""
     # grab the submission time
     if "generate_output" in queue_obj and queue_obj["generate_output"]:
         submission_string = ""
     else:
-        with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
+        with open(os.path.join(tmp_submission, 'submission', ".submit.timestamp"), 'r') as submission_time_file:
             submission_string = submission_time_file.read().rstrip()
         # grab the first access to the gradeable page (if it exists)
         user_assignment_access_filename = os.path.join(tmp_submission, ".user_assignment_access.json")
@@ -439,27 +436,27 @@ def archive_autograding_results(
                 obj = json.load(access_file)
                 first_access_string = obj[0]["timestamp"]
 
-    history_file_tmp = os.path.join(tmp_submission,"history.json")
-    history_file = os.path.join(tmp_results,"history.json")
+    history_file_tmp = os.path.join(tmp_submission, "history.json")
+    history_file = os.path.join(tmp_results, "history.json")
     if os.path.isfile(history_file_tmp) and not is_test_environment:
         shutil.move(history_file_tmp, history_file)
         # fix permissions
         ta_group_id = os.stat(tmp_results).st_gid
-        os.chown(history_file, int(config.submitty_users['daemon_uid']),ta_group_id)
+        os.chown(history_file, int(config.submitty_users['daemon_uid']), ta_group_id)
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
     grade_result = ""
     if "generate_output" not in queue_obj:
         try:
             shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
-            with open(os.path.join(tmp_work,"grade.txt")) as f:
+            with open(os.path.join(tmp_work, "grade.txt")) as f:
                 lines = f.readlines()
                 for line in lines:
                     line = line.rstrip('\n')
                     if line.startswith("Automatic grading total:"):
                         grade_result = line
-        except:
-            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        except Exception as e:
+            with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
                 f.write(f"\n\nERROR: Grading incomplete -- Could not process {os.path.join(tmp_work,'grade.txt')}")
             config.logger.log_message(
                 "ERROR: could not process grade.txt. See stack trace entry for more details.",
@@ -491,15 +488,15 @@ def archive_autograding_results(
         # note: negative = not late
         grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
-        with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
+        with open(os.path.join(tmp_submission, ".grading_began"), 'r') as f:
             grading_began_longstring = f.read()
         grading_began = dateutils.read_submitty_date(grading_began_longstring)
 
         gradingtime = (grading_finished - grading_began).total_seconds()
 
-        queue_obj["gradingtime"]=gradingtime
-        queue_obj["grade_result"]=grade_result
-        queue_obj["which_untrusted"]=which_untrusted
+        queue_obj["gradingtime"] = gradingtime
+        queue_obj["grade_result"] = grade_result
+        queue_obj["which_untrusted"] = which_untrusted
         waittime = queue_obj["waittime"]
 
         try:
@@ -513,8 +510,8 @@ def archive_autograding_results(
                 json.dump(results_obj, outfile, indent=4)
 
             shutil.move(results_json_path, os.path.join(tmp_results, "results.json"))
-        except:
-            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        except Exception as e:
+            with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
                 f.write(f"\n\nERROR: Grading incomplete -- Could not open/write {os.path.join(tmp_work,'results.json')}")
             config.logger.log_message(
                 "ERROR: results.json read/write error",
@@ -533,26 +530,26 @@ def archive_autograding_results(
 
         # Rescue custom validator files
         custom_validator_output_directory = os.path.join(tmp_results, "custom_validator_output")
-        pattern_copy("rescue_custom_validator_validation_jsons", [os.path.join(tmp_work, 'validation_results_*.json'),], tmp_work, custom_validator_output_directory, tmp_logs)
-        pattern_copy("rescue_custom_validator_logs", [os.path.join(tmp_work, 'validation_logfile_*.txt'),], tmp_work, custom_validator_output_directory, tmp_logs)
-        pattern_copy("rescue_custom_validator_errors", [os.path.join(tmp_work, 'validation_stderr_*.txt'),], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_validation_jsons", [os.path.join(tmp_work, 'validation_results_*.json'), ], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_logs", [os.path.join(tmp_work, 'validation_logfile_*.txt'), ], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_errors", [os.path.join(tmp_work, 'validation_stderr_*.txt'), ], tmp_work, custom_validator_output_directory, tmp_logs)
 
         just_write_grade_history(history_file,
-                                gradeable_deadline_longstring,
-                                submission_longstring,
-                                seconds_late,
-                                first_access_string,
-                                access_duration,
-                                queue_obj["queue_time"],
-                                "BATCH" if is_batch_job else "INTERACTIVE",
-                                grading_began_longstring,
-                                int(waittime),
-                                grading_finished_longstring,
-                                int(gradingtime),
-                                grade_result,
-                                queue_obj.get("revision", None))
+                                 gradeable_deadline_longstring,
+                                 submission_longstring,
+                                 seconds_late,
+                                 first_access_string,
+                                 access_duration,
+                                 queue_obj["queue_time"],
+                                 "BATCH" if is_batch_job else "INTERACTIVE",
+                                 grading_began_longstring,
+                                 int(waittime),
+                                 grading_finished_longstring,
+                                 int(gradingtime),
+                                 grade_result,
+                                 queue_obj.get("revision", None))
 
-        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
             f.write("FINISHED GRADING!\n")
 
         config.logger.log_message(
@@ -565,11 +562,11 @@ def archive_autograding_results(
             elapsed_time=gradingtime
         )
 
-    with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
-        json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    with open(os.path.join(tmp_results, "queue_file.json"), 'w') as outfile:
+        json.dump(queue_obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
     # save the logs!
-    shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
+    shutil.copytree(tmp_logs, os.path.join(tmp_results, "logs"))
 
     # Save the .submit.notebook
     # Copy the .submit.notebook to tmp_work for validation
@@ -623,32 +620,33 @@ def allow_only_one_part(path, log_path=os.devnull):
                     print("  -> {}".format(entry))
                 shutil.rmtree(clean_directories[i])
 
+
 # go through the testcase folder (e.g. test01/) and remove anything
 # that matches the test input (avoid archiving copies of these files!)
 def remove_test_input_files(overall_log, test_input_path, testcase_folder):
-    for path, subdirs, files in os.walk(test_input_path):
+    for path, _subdirs, files in os.walk(test_input_path):
         for name in files:
             relative = path[len(test_input_path)+1:]
             my_file = os.path.join(testcase_folder, relative, name)
             if os.path.isfile(my_file):
-                print ("removing (likely) stale test_input file: ", my_file, file=overall_log)
+                print("removing (likely) stale test_input file: ", my_file, file=overall_log)
                 overall_log.flush()
                 os.remove(my_file)
 
 
-def add_permissions(item,perms):
+def add_permissions(item, perms):
     if os.getuid() == os.stat(item).st_uid:
-        os.chmod(item,os.stat(item).st_mode | perms)
+        os.chmod(item, os.stat(item).st_mode | perms)
     # else, can't change permissions on this file/directory!
 
 
-def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
+def add_permissions_recursive(top_dir, root_perms, dir_perms, file_perms):
     for root, dirs, files in os.walk(top_dir):
-        add_permissions(root,root_perms)
+        add_permissions(root, root_perms)
         for d in dirs:
-            add_permissions(os.path.join(root, d),dir_perms)
+            add_permissions(os.path.join(root, d), dir_perms)
         for f in files:
-            add_permissions(os.path.join(root, f),file_perms)
+            add_permissions(os.path.join(root, f), file_perms)
 
 
 # copy the files & directories from source to target
@@ -664,29 +662,29 @@ def copy_contents_into(config, job_id, source, target, tmp_logs):
         raise RuntimeError("ERROR: the target directory does not exist: '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
-            if os.path.isdir(os.path.join(source,item)):
-                if os.path.isdir(os.path.join(target,item)):
+            if os.path.isdir(os.path.join(source, item)):
+                if os.path.isdir(os.path.join(target, item)):
                     # recurse
-                    copy_contents_into(config, job_id,os.path.join(source,item),os.path.join(target,item),tmp_logs)
-                elif os.path.isfile(os.path.join(target,item)):
+                    copy_contents_into(config, job_id, os.path.join(source, item), os.path.join(target, item), tmp_logs)
+                elif os.path.isfile(os.path.join(target, item)):
                     config.logger.log_message(
                         "ERROR: the target subpath is a file not a directory "
                         f"'{os.path.join(target,item)}'",
                         job_id=job_id,
                     )
-                    raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
+                    raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target, item), "'")
                 else:
                     # copy entire subtree
-                    shutil.copytree(os.path.join(source,item),os.path.join(target,item))
+                    shutil.copytree(os.path.join(source, item), os.path.join(target, item))
             else:
-                if os.path.exists(os.path.join(target,item)):
-                    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                        print ("\nWARNING: REMOVING DESTINATION FILE" , os.path.join(target,item),
-                               " THEN OVERWRITING: ", os.path.join(source,item), "\n", file=f)
-                    os.remove(os.path.join(target,item))
+                if os.path.exists(os.path.join(target, item)):
+                    with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+                        print("\nWARNING: REMOVING DESTINATION FILE", os.path.join(target, item),
+                              " THEN OVERWRITING: ", os.path.join(source, item), "\n", file=f)
+                    os.remove(os.path.join(target, item))
                 try:
-                    shutil.copy(os.path.join(source,item),target)
-                except:
+                    shutil.copy(os.path.join(source, item), target)
+                except Exception as e:
                     config.logger.log_stack_trace(traceback.format_exc(), job_id=job_id)
                     return
     else:
@@ -696,21 +694,21 @@ def copy_contents_into(config, job_id, source, target, tmp_logs):
 # copy files that match one of the patterns from the source directory
 # to the target directory.
 def pattern_copy(what, patterns, source, target, tmp_logs):
-    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
+    with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+        print(what, " pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
-            for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
+            for my_file in glob.glob(os.path.join(source, pattern), recursive=True):
                 if (os.path.isfile(my_file)):
                     # grab the matched name
-                    relpath = os.path.relpath(my_file,source)
+                    relpath = os.path.relpath(my_file, source)
                     # make the necessary directories leading to the file
-                    os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
+                    os.makedirs(os.path.join(target, os.path.dirname(relpath)), exist_ok=True)
                     # copy the file
-                    shutil.copy(my_file,os.path.join(target,relpath))
-                    print ("    COPY ",my_file,
-                           " -> ",os.path.join(target,relpath), file=f)
+                    shutil.copy(my_file, os.path.join(target, relpath))
+                    print("    COPY ", my_file,
+                          " -> ", os.path.join(target, relpath), file=f)
                 else:
-                    print ("skip this directory (will recurse into it later)", my_file, file=f)
+                    print("skip this directory (will recurse into it later)", my_file, file=f)
 
 
 # give permissions to all created files to the DAEMON_USER
@@ -727,20 +725,26 @@ def untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, my_dir):
                      "{}",
                      ";"])
 
-# Used by packer unpacker
-def zip_my_directory(path,zipfilename):
-    zipf = zipfile.ZipFile(zipfilename,'w',zipfile.ZIP_DEFLATED)
-    for root,dirs,files in os.walk(path):
-        for my_file in files:
-            relpath = root[len(path)+1:]
-            zipf.write(os.path.join(root,my_file),os.path.join(relpath,my_file))
-    zipf.close()
 
 # Used by packer unpacker
-def unzip_this_file(zipfilename,path):
+def zip_my_directory(path, zipfilename):
+    zipf = zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED)
+    for root, _dirs, files in os.walk(path):
+        for my_file in files:
+            relpath = root[len(path)+1:]
+            try:
+                zipf.write(os.path.join(root, my_file), os.path.join(relpath, my_file))
+            except FileNotFoundError as e:
+                # this can happen if we have a broken symlink
+                pass
+    zipf.close()
+
+
+# Used by packer unpacker
+def unzip_this_file(zipfilename, path):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
-    zip_ref = zipfile.ZipFile(zipfilename,'r')
+    zip_ref = zipfile.ZipFile(zipfilename, 'r')
     zip_ref.extractall(path)
     zip_ref.close()
 
@@ -775,7 +779,7 @@ def pre_command_copy_file(config, source_testcase, source_directory, destination
         copy_contents_into(config, job_id, source, target, tmp_logs)
 
     # Separate ** and * for simplicity.
-    elif not '**' in source:
+    elif '**' not in source:
         # Grab all of the files that match the pattern
         files = glob.glob(source, recursive=True)
 
@@ -804,7 +808,7 @@ def pre_command_copy_file(config, source_testcase, source_directory, destination
 
         # For every file matched
         for file_source in files:
-            file_target = os.path.join(target, file_source.replace(source_base,''))
+            file_target = os.path.join(target, file_source.replace(source_base, ''))
             # Remove the file path.
             file_target_dir = '/'.join(file_target.split('/')[:-1])
             # If the target directory doesn't exist, create it.

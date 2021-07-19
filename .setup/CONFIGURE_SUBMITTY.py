@@ -47,6 +47,9 @@ parser = argparse.ArgumentParser(description='Submitty configuration script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty to be in debug mode. '
                                                                         'This should not be used in production!')
+parser.add_argument('--setup-for-sample-courses', action='store_true', default=False,
+                    help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
+                         "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
@@ -161,6 +164,7 @@ defaults = {
     'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
     'email_server_hostname': 'mail.myuniversity.edu',
     'email_server_port': 25,
+    'email_internal_domain': 'example.com',
     'course_code_requirements': "Please follow your school's convention for course code.",
     'sys_admin_email': '',
     'sys_admin_url': ''
@@ -295,6 +299,7 @@ else:
                 EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
             except ValueError:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
+            EMAIL_INTERNAL_DOMAIN = get_input("What is the internal email address format?", defaults['email_internal_domain'])
             break
 
         elif (is_email_enabled.lower() in ['no', 'n']):
@@ -460,6 +465,14 @@ if not args.worker:
             }
         }
 
+        if args.setup_for_sample_courses:
+            worker_dict['primary']['capabilities'].extend([
+                'cpp',
+                'python',
+                'et-cetera',
+                'notebook',
+            ])
+
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
 
@@ -597,6 +610,7 @@ if not args.worker:
     config['email_reply_to'] = EMAIL_REPLY_TO
     config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
     config['email_server_port'] = EMAIL_SERVER_PORT
+    config['email_internal_domain'] = EMAIL_INTERNAL_DOMAIN
 
     with open(EMAIL_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)

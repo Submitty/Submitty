@@ -32,7 +32,7 @@ class DateTimeFormat extends AbstractModel {
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
-            'late_days_allowed' => 'm/d/Y h:i:s A T'
+            'late_days_allowed' => 'm/d/Y'
         ],
         'DMY' => [
             'gradeable' => 'd/m/Y @ h:i A T',

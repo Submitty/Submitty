@@ -846,7 +846,7 @@ void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
       assert(source_name.find("\'") == std::string::npos);
 
       if(!pre_command["pattern"].is_string()){
-         (*my_testcase)["pattern"] = "";
+         pre_command["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
         //The pattern must not container .. or $
@@ -1412,12 +1412,8 @@ void Execution_Helper(nlohmann::json &single_testcase) {
     std::string method = j.value("method","");
     std::string description = j.value("description","");
     if (description=="") {
-      if (method == "EmmaInstrumentationGrader") {
-        j["description"] = "EMMA instrumentation output";
-      } else if (method =="JUnitTestGrader") {
+      if (method =="JUnitTestGrader") {
         j["description"] = "JUnit output";
-      } else if (method =="EmmaCoverageReportGrader") {
-        j["description"] = "EMMA coverage report";
       } else if (method =="JaCoCoCoverageReportGrader") {
         j["description"] = "JaCoCo coverage report";
       } else if (method =="MultipleJUnitTestGrader") {

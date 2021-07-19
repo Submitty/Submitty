@@ -3,85 +3,115 @@
     <div class="nav-buttons">
         <a class="btn btn-primary"
            href="{{ new_plagiarism_config_link }}"
-        >+ Configure New Gradeable for Plagiarism Detection</a>
+        ><i class="fas fa-plus"></i><span style="margin-left:0.5em;"></span>Configure New Gradeable for Plagiarism Detection</a>
     </div>
-
-    <div class="sub plag-table-cont">
-        <table class="plag-table">
-            {% for row in plagiarism_results_info %}
-                {{ _self.renderPlagiarismRow(row) }}
-            {% endfor %}
-        </table>
-    </div>
+    {% if plagiarism_results_info|length > 0 %}
+        <div class="plag-table-cont">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Gradeable</th>
+                        <th>Config #</th>
+                        <th></th>
+                        <th>Last Run</th>
+                        <th>Submissions</th>
+                        <th>Students Matched</th>
+                        <th>Nightly<br/>Re-run</th>
+                        <th>Run Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in plagiarism_results_info %}
+                        {{ _self.renderPlagiarismRow(row) }}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="plag-table-no-cont">No gradeables configured to display...</div>
+    {% endif %}
 </div>
 <script>
-    checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
-</script>
+    function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+        $('.popup-form').css('display', 'none');
+        var form = $("#delete-plagiarism-result-and-config-form");
+        $('[name="gradeable_title"]', form).html('');
+        $('[name="gradeable_title"]', form).append(gradeable_title);
+        $('[name="delete"]', form).attr('action', form_action);
+        form.css("display", "block");
+        form.find('.form-body').scrollTop(0);
+        captureTabInModal("delete-plagiarism-result-and-config-form");
+    }
 
-{# refresh page ensures atleast one refresh of lichen mainpage when delete, rerun, edit or new configuration is saved #}
-{% if refresh_page == "REFRESH_ME" %}
-    <script>
-        localStorage.setItem("last_data", "REFRESH_ME");
-    </script>
-{% endif %}
+    function checkRefreshLichenMainPage(url, semester, course) {
+        // refresh time for lichen main page
+        let refresh_time = 1000;
+        setInterval(function() {
+            check_lichen_jobs(url, semester, course);
+        }, refresh_time);
+    }
+
+    let waiting_gradeables = -1;
+
+    function check_lichen_jobs(url, semester, course) {
+        $.get(url,
+            function(data) {
+                data = JSON.parse(data);
+                if (waiting_gradeables === -1 || (data.data === waiting_gradeables && data.data !== 0)) {
+                    waiting_gradeables = data.data;
+                }
+                else {
+                    // We can't just reload because we need to get rid of the REFRESH_ME part of the URL
+                    window.location.href = buildCourseUrl(['plagiarism']);
+                }
+            }
+        );
+    }
+    {% if refresh_page == "REFRESH_ME" %}
+        checkRefreshLichenMainPage("{{ refreshLichenMainPageLink }}");
+    {% endif %}
+</script>
 
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 
 {% macro renderPlagiarismRow(row) %}
-    {% if row['in_queue'] %}
-        <tr>
-            <td>{{ row['title'] }}
-            </td>
-            <td colspan=3>
+    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
+        <td>
+            {% if row['ranking_available'] is defined %}
+                <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
+            {% else %}
+                {{ row['title'] }}
+            {% endif %}
+            <br/>
+            Due: {{ row['duedate'] }}
+        </td>
+        <td>
+            {{ row['config_id'] }}
+        </td>
+        {% if row['in_queue'] is defined %}
+            <td colspan=4>
                 {% if row['processing'] %}
                     <i>Running</i>
                 {% else %}
                     <i>In queue</i>
                 {% endif %}
             </td>
-            <td>
-                Last run: {{ row['timestamp'] }}
-            </td>
-            <td>
-                {{ row['students'] }} students, {{ row['submissions'] }} submissions
-            </td>
-            <td>
-                <label>
-                    <input type="checkbox" {{ row['nightly_rerun_status'] }}>
-                    Nightly Re-run
-                </label>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-        {% if row['ranking_available'] %}
-            <td>
-                <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
-            </td>
         {% else %}
-            <td>{{ row['title'] }}</td>
-        {% endif %}
             <td>
                 <span class="plag-action-btn-cont">
-                    <a href="{{ row['edit_plagiarism_link'] }}"
-                       aria-label="Edit {{ row['title'] }}"
-                    >
+                    <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}">
                         <i class="fas fa-pencil-alt"></i>
                     </a>
-                    <a href="{{ row['rerun_plagiarism_link'] }}"
-                       aria-label="Rerun {{ row['title'] }}"
-                    >
+                    <a href="{{ row['rerun_plagiarism_link'] }}" aria-label="Rerun {{ row['title'] }}">
                         <i class="fas fa-sync"></i>
                     </a>
-                    <a aria-label="Delete {{ row['title'] }}"
-                       onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');"
-                    >
+                    <a aria-label="Delete {{ row['title'] }}" onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');">
                         <i class="fas fa-trash"></i>
                     </a>
                 </span>
             </td>
             <td>
-                Last run: {{ row['timestamp'] }}
+                {{ row['timestamp'] }}
             </td>
             <td>
                 {{ row['students'] }} students, {{ row['submissions'] }} submissions
@@ -89,14 +119,40 @@
             <td>
                 {{ row['matches_and_topmatch'] }}
             </td>
-            <td>
-                <label>
-                    <input type="checkbox"
-                           onclick='window.location.href = {{ row['nightly_rerun_link'] }};'
-                           {{ row['nightly_rerun_status'] }}>
-                    Nightly Re-run
-                </label>
-            </td>
-        </tr>
-    {% endif %}
+        {% endif %}
+        <td>
+            <input type="checkbox"
+                   onclick='window.location.href = {{ row['nightly_rerun_link'] ?? '' }};'
+                   {{ row['nightly_rerun_status'] ?? '' }}>
+        </td>
+        <td>
+            <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
+        </td>
+    </tr>
 {% endmacro %}
+
+<script>
+    // This is a hacky way to ensure that the run log is set to the width of the original table.
+    //  Otherwise, the run log row will expand to contain the text within and make the table bigger because there isn't a fixed width on the table.
+    let originalTableWidth;
+    $(document).ready(function() {
+        originalTableWidth = $(".plag-table-cont").width();
+    });
+
+    function viewRunLog(gradeable_id, config_id) {
+        if ($(`#${gradeable_id}_${config_id}_table_row`).next().hasClass("run-log-results")) {
+            $(`#${gradeable_id}_${config_id}_table_row`).next().remove();
+        }
+        else {
+            const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}&config_id=${config_id}`;
+            $.get(url, function (data) {
+                data = JSON.parse(data);
+                $(`<tr class="run-log-results">
+                <td colspan="8" class="run-log-data">
+                    <pre style="width:${originalTableWidth}px">${data.data}</pre>
+                </td>
+            </tr>`).insertAfter(`#${gradeable_id}_${config_id}_table_row`);
+            });
+        }
+    }
+</script>
