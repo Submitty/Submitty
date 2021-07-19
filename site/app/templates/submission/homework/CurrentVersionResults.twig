@@ -1,6 +1,8 @@
-<div class="sub" id="incentive_message" style="display: none;">
-    <p class='green-message'>{{ incentive_message }}</p>
-</div>
+{% if incentive_message is defined %}
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{{ incentive_message }}</p>
+    </div>
+{% endif %}
 
 {# Submitted files #}
 {% if hide_submitted_files == false %}
@@ -34,7 +36,7 @@
             {% endif %}
         </div>
         <div class="box col-md-6 submission-details">
-            {% if first_access_time is not null and first_access_time is not empty %}
+            {% if first_access_time is defined and first_access_time is not null and first_access_time is not empty %}
                 <span class="flex-row">
                     <span>First access timestamp:</span>
                     <span>{{ first_access_time|date(date_time_format) }}</span>

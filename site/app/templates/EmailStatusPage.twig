@@ -1,0 +1,11 @@
+<div id="email" class="content">
+    <h1>Email Status</h1>
+    {% include "EmailStatus.twig" with {
+        "subjects": subjects,
+        "errors": errors,
+        "pending": pending,
+        "successes": successes,
+        "courses": courses
+    } %}
+</div>
+

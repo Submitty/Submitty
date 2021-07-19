@@ -15,7 +15,9 @@
             {% if cell.type == "markdown" %}
 
                 {# Render markdown #}
-                {{ cell.markdown_data | markdown }}
+                {% include "misc/Markdown.twig" with {
+                    "content" : cell.markdown_data
+                } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
             {# Handle if cell is image #}
@@ -42,42 +44,60 @@
             {# Handle if cell is short_answer #}
             {% elseif cell.type == "short_answer" %}
 
-                <div class="markdown">
-                    {% if cell.label %}
-                        {{ cell.label | markdown }}
-                    {% else %}
-                        {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
-                        Write your {{ write_your }} below:
-                    {% endif %}
-                </div>
+
+                {% if cell.label %}
+                    {% set content_label = cell.label %}
+                {% else %}
+                    {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                    {% set content_label = "Write your " ~ write_your ~ " below:" %}
+                {% endif %}
+
+                {% include "misc/Markdown.twig" with {
+                    "content" : content_label
+                } only %}
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
-
-                <div id="codebox_{{ num_codeboxes }}"
-                     name="codebox_{{ num_codeboxes }}"
-                     autocapitalization="off"
-                     spellcheck="false"
-                     data-initial_value="{{ cell.initial_value }}"
-                     data-recent_submission="{{ cell.recent_submission }}"
-                     onkeyup="handle_input_keypress();">
+                {#disable input if viewing inactive version#}
+                <div
+                    id="codebox_{{ num_codeboxes }}"
+                    name="codebox_{{ num_codeboxes }}"
+                    autocapitalization="off"
+                    spellcheck="false"
+                    data-initial_value="{{ cell.initial_value }}"
+                    data-recent_submission="{{ cell.recent_submission }}"
+                    data-version_submission="{{ cell.version_submission }}"
+                    onkeyup="handle_input_keypress();"
+                    {% if viewing_inactive_version %}
+                        style="pointer-events:none;"
+                    {% endif %}
+                >
                 </div>
+                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset"
+                    data-older_version = "{{ viewing_inactive_version ? true : false }}">
+                    {{ cell.initial_value == "" ? 'Clear' : 'Reset'}}
+                </button>
 
-                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
                 <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
                 <script>
                     const config_{{ num_codeboxes }} = {};
 
-                    config_{{ num_codeboxes }}.theme = 'eclipse';
-
-                    if ('{{ cell.programming_language }}') {
-                        config_{{ num_codeboxes }}.lineNumbers = true;
-                        config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    var theme = localStorage.getItem("theme");
+                    if(theme == null && window.matchMedia("(prefers-color-scheme: dark)").matches){
+                        theme = "dark";
                     }
+                    config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
 
-                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
-                        config_{{ num_codeboxes }}.lineWrapping = true;
-                    }
+                    {% if cell.programming_language is defined and cell.programming_language != '' %}
+                      config_{{ num_codeboxes }}.lineNumbers = true;
+                      config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    {% endif %}
+
+                    {% if cell.programming_language is defined %}
+                      if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                          config_{{ num_codeboxes }}.lineWrapping = true;
+                      }
+                    {% endif %}
 
                     if ({{ cell.rows }} > 0) {
                         var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
@@ -94,7 +114,7 @@
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
                     {% else %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version ? 'true' : 'false'}}
                         document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
                     {% endif %}
                 </script>
@@ -110,11 +130,13 @@
 
                 <fieldset id="mc_field_{{ num_multiple_choice }}"
                           class="mc"
-                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
+                          {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
-                        <legend class="markdown">
+                        <legend>
                             {% if cell.label %}
-                                {{ cell.label | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.label
+                                } only %}
                             {% else %}
                                 You may select many:
                             {% endif %}
@@ -124,12 +146,14 @@
 
                         {% for idx in choices_indices %}
                             <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
-
                                 <input type="checkbox" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress();"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
+                                       {% if viewing_inactive_version %}
+                                           disabled = "disabled"
+                                       {% endif %}
                                 />
                                 {{ cell.choices[idx].description | markdown }}
                             </label>
@@ -137,7 +161,9 @@
                     {% else %}
                         <legend class="markdown">
                             {% if cell.label %}
-                                {{ cell.label | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.label
+                                } only %}
                             {% else %}
                                 Select one:
                             {% endif %}
@@ -146,14 +172,16 @@
                         {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
                         {% for idx in choices_indices %}
-                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}" class="markdown">
+                            <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                 <input type="radio" class="key_to_click" tabindex="0"
                                        name="multiple_choice_{{ num_multiple_choice }}"
                                        id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                        value="{{ cell.choices[idx].value }}"
-                                       onclick="handle_input_keypress();"
+                                       onclick="handle_input_keypress({{ viewing_inactive_version }});"
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : cell.choices[idx].description
+                                } only %}
                             </label>
                         {% endfor %}
                     {% endif %}
@@ -162,11 +190,11 @@
                 {# Create reset to recent submission button #}
                 <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
                 <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
-
                 <script>
+                    $("multiple_choice_{{ num_multiple_choice }}_1").attr("disabled", true);
                     {# Populate checkboxes initially #}
                     {% if cell.recent_submission is defined %}
-                        setMultipleChoices("mc_field_{{ num_multiple_choice }}");
+                        setMultipleChoices("mc_field_{{ num_multiple_choice }}", {{ viewing_inactive_version }});
                     {% endif %}
 
                     {# Configure initial state for the button #}
@@ -174,7 +202,7 @@
                         $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
                         $("#mc_{{ num_multiple_choice }}_recent_button").hide();
                     {% else %}
-                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", {{ viewing_inactive_version ? 'true' : 'false' }});
                         $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                     {% endif %}
                 </script>
@@ -189,7 +217,7 @@
                         <p>No files were submitted</p>
                     {% endif %}
                 {% else %}
-                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
+                    {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label, viewing_inactive_version) }}
                 {% endif  %}
                 {% if old_files is not empty %}
                     <p>Current submitted files:</p>
@@ -198,12 +226,12 @@
                         {% if file.part == num_file_submissions %}
                             <div>
                                 <div class="file-viewer">
-                                    <a class='openAllFilesubmissions openable-element-submissions key_to_click' file-url="{{ file.path|url_encode }}" onclick='openFrame({% if is_grader_view %}"{{ file.name|e('js') }}", "{{ file.path|e('js') }}", "{{ id }}", false{% else %}"{{ file.path|e('js') }}", "{{ id }}", "{{ file.name|e('js') }}", true{% endif %}); {% if is_grader_view %}updateCookies();{% endif %}'>
+                                    <a class='openAllFilesubmissions openable-element-submissions key_to_click' file-url="{{ file.path|url_encode }}" onclick='openFrame({% if is_grader_view %}"{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", "{{ id }}", false{% else %}"{{ file.path|url_encode|e('js') }}", "{{ id }}", "{{ file.name|url_encode|e('js') }}", true{% endif %}); {% if is_grader_view %}updateCookies();{% endif %}'>
                                         <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                                         {{ file.name }}</a> &nbsp;
                                     <a id = 'open_file_{{ file.name|url_encode }}' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                                     {% if is_grader_view %}
-                                    <a onclick='viewFileFullPanel("{{ file.name|e('js') }}", "{{ file.path|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
+                                    <a onclick='viewFileFullPanel("{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
                                     {% endif %}
                                     <a onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                                 </div>
@@ -212,12 +240,13 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-
-                <button type="button" class="btn btn-primary 
-                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"> 
+                <button type="button" class="btn btn-primary
+                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"
+                    {% if viewing_inactive_version %}
+                        disabled = "disabled"
+                    {% endif %}>
                     Clear
                 </button>
-
                 <button type="button" 
                     onclick="populatePreviousFiles({{num_file_submissions}});"
                     class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
@@ -313,7 +342,7 @@
 {% endmacro %}
 
 {# File submission for notebooks #}
-{% macro renderFileSubmission(max_file_uploads, index, old_files, label) %}
+{% macro renderFileSubmission(max_file_uploads, index, old_files, label, viewing_inactive_version) %}
     <div id="upload-boxes">
         {# uploadIndex and input-file + Index required for drag-and-drop.js #}
         <div tabindex="0"
@@ -328,7 +357,10 @@
             </h2>
             <input type="file" name="files" id="input-file{{index}}" 
                    class="hide" onchange="addFilesFromInput({{index}})"
-                   multiple aria-label="Select Files to upload" 
+                   multiple aria-label="Select Files to upload"
+                    {% if viewing_inactive_version %}
+                        disabled="disabled"
+                    {% endif %}
             />
             <table class="file-upload-table" id="file-upload-table-{{index}}">
             <tr style="background:transparent; display:none;">

@@ -1,4 +1,7 @@
-a, a:hover, a:link, a:visited {
+a,
+a:hover,
+a:link,
+a:visited {
     cursor: pointer;
 }
 
@@ -9,6 +12,7 @@ a.fa:hover,
 a > i.fa:hover {
     color: #2627ee;
 }
+
 a,
 a:visited,
 a:link,
@@ -16,6 +20,7 @@ a.fas:hover,
 a > i.fas:hover {
     color: #2627ee;
 }
+
 a,
 a:visited,
 a:link,
@@ -27,23 +32,44 @@ a > i.far:hover {
 a:hover {
     color: #131399;
 }
+
 a:active {
     color: #991313;
 }
 
-a.btn-success, a.btn-primary, a.btn-danger,
-a.fa.btn-success, a.btn-primary, a.btn-danger,
-a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
+a.btn-success,
+a.btn-primary,
+a.btn-danger,
+a.fa.btn-success,
+a.btn-primary,
+a.btn-danger,
+a.btn-success > i.fa,
+a.btn-primary > i.fa,
+a.btn-danger > i.fa {
     color: var(--text-white);
 }
-a.btn-success, a.btn-primary, a.btn-danger,
-a.fas.btn-success, a.btn-primary, a.btn-danger,
-a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
+
+a.btn-success,
+a.btn-primary,
+a.btn-danger,
+a.fas.btn-success,
+a.btn-primary,
+a.btn-danger,
+a.btn-success > i.fas,
+a.btn-primary > i.fas,
+a.btn-danger > i.fas {
     color: var(--text-white);
 }
-a.btn-success, a.btn-primary, a.btn-danger,
-a.far.btn-success, a.btn-primary, a.btn-danger,
-a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
+
+a.btn-success,
+a.btn-primary,
+a.btn-danger,
+a.far.btn-success,
+a.btn-primary,
+a.btn-danger,
+a.btn-success > i.far,
+a.btn-primary > i.far,
+a.btn-danger > i.far {
     color: var(--text-white);
 }
 
@@ -72,17 +98,20 @@ a.btn {
     text-decoration: none;
 }
 
-.black-btn, .black-btn > i.fas {
+.black-btn,
+.black-btn > i.fas {
     color: var(--text-black) !important;
     border-color: var(--text-black) !important;
 }
 
-.black-btn:hover, .black-btn > i.fas:hover {
-    color: #405E90 !important;
-    border-color: #405E90 !important;
+.black-btn:hover,
+.black-btn > i.fas:hover {
+    color: #405e90 !important;
+    border-color: #405e90 !important;
 }
 
-.black-btn:active, .black-btn > i.fas:active {
+.black-btn:active,
+.black-btn > i.fas:active {
     color: #991313 !important;
     border-color: #991313 !important;
 }

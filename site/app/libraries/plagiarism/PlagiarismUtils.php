@@ -6,51 +6,50 @@ use Ds\Stack;
 
 class PlagiarismUtils {
     /**
-     * @return Interval[]
+     * @param string $filename
+     * @param string $user_id_2
+     * @param int $version_user_2
+     * @return array
      */
-    public static function constructIntervals($filename): array {
+    public static function constructIntervalsForUserPair(string $filename, string $user_id_2, int $version_user_2): array {
         $content = file_get_contents($filename);
-        $arr = json_decode($content, true);
+        $content = json_decode($content, true);
+
         $resultArray = [];
-        foreach ($arr as $match) {
-            $interval = new Interval($match['start'], $match['end']);
-            foreach ($match['others'] as $o) {
-                $interval->addUser(new Submission(
-                    $o['username'],
-                    $o['version'],
-                    $o['matchingpositions'],
-                    $match['start'],
-                    $match['end']
-                ));
+        foreach ($content as $match) {
+            $interval = new Interval($match['start'], $match['end'], $match['type']);
+
+            // loop through, checking to see if this is a specific match between the two users
+            if ($match['type'] === "match" && $user_id_2 !== "") {
+                foreach ($match['others'] as $other) {
+                    if ($other["username"] === $user_id_2 && $other["version"] === $version_user_2) {
+                        $interval->updateType("specific-match");
+                        foreach ($other["matchingpositions"] as $mp) {
+                            $interval->addOther($user_id_2, $version_user_2, $mp["start"], $mp["end"]);
+                        }
+                    }
+                    else {
+                        $interval->addOther($other["username"], $other["version"], -1, -1);
+                    }
+                }
             }
+
+            // append interval to result array
             $resultArray[] = $interval;
         }
+
+        // sort array before we merge
         usort($resultArray, function (Interval $a, Interval $b) {
             return $a->getStart() > $b->getStart();
         });
+
         return $resultArray;
     }
 
     /**
-     * @param Interval[] $intervalArray
+     * @return string[]
      */
-    public static function mergeIntervals(array $intervalArray): Stack {
-        $stack = new Stack();
-        $stack->push($intervalArray[0]);
-        for ($i = 1; $i < count($intervalArray); $i++) {
-            $current = $stack->peek();
-            if ($current->getEnd() < $intervalArray[$i]->getStart()) {
-                $stack->push($intervalArray[$i]);
-            }
-            elseif ($current->getEnd() < $intervalArray[$i]->getEnd()) {
-                $current->updateEnd($intervalArray[$i]->getEnd());
-                foreach ($intervalArray[$i]->getUsers() as $user) {
-                    $current->addUser($user);
-                }
-                $stack->pop();
-                $stack->push($current);
-            }
-        }
-        return $stack;
+    public static function getSupportedLanguages(): array {
+        return ["plaintext", "python", "java", "cpp", "mips"];
     }
 }

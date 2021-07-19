@@ -2,7 +2,10 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message markdown'>{{ gradeable_message | markdown }}</div>
+    {% include "misc/Markdown.twig" with {
+        "content" : gradeable_message,
+        "class" : "content gradeable_message"
+    } only %}
 {% endif %}
 
 {% if has_overridden_grades %}
@@ -19,6 +22,15 @@
                 </a>
             {% endif %}
         </h1>
+        {% if is_timed %}
+            <div id="gradeable-timer">
+                <div id="gradeable-progress">
+                    <div id="gradeable-progress-bar"></div>
+                </div>
+                <h2 id="time-remaining-text">Your Time Remaining: </h2>
+            </div>
+
+        {% endif %}
         {% if has_due_date %}
             {% set diff_time_zone = server_time_zone_string != user_time_zone_string %}
 
@@ -33,6 +45,7 @@
                 {% if diff_time_zone %}
                     <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
                 {% endif %}
+                <h2 id="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
             </div>
         {% endif %}
         <div class="loading-bar-wrapper">
@@ -275,7 +288,8 @@
             "gradeable_id" : gradeable_id,
             "highest_version" : highest_version,
             "max_file_uploads" : max_file_uploads,
-            "old_files" : old_files
+            "old_files" : old_files,
+            'viewing_inactive_version' : viewing_inactive_version
         } %}
     {% endif %}
 
@@ -324,13 +338,13 @@
         {# /Page selector #}
 
         <div class="upload-message">
-            <p>
-                {{ upload_message | markdown}}
-            </p>
+            {% include "misc/Markdown.twig" with {
+                "content" : upload_message
+            } only %}
         </div>
-
-        <button type="button" id="submit" class="btn btn-success">Submit</button>
-
+            <button type="button" id="submit" class="btn btn-success">
+                {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
+            </button>
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
@@ -402,6 +416,7 @@
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
+
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
@@ -419,7 +434,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
         else {
@@ -438,7 +454,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
     }
@@ -518,6 +535,7 @@
             e.stopPropagation();
         });
     });
+    initializeTimer('{{ gradeable_id }}');
 </script>
 
 
