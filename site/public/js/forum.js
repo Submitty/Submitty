@@ -1584,6 +1584,7 @@ function toggleMarkdown(post_box_id) {
   $(this).toggleClass('markdown-active markdown-inactive'); 
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+  document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
 }
 
 function previewForumMarkdown(){
