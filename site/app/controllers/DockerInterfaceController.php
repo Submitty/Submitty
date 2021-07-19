@@ -103,7 +103,7 @@ class DockerInterfaceController extends AbstractController {
         }
 
         // check for proper format
-        $match = preg_match('/^([a-z0-9][a-z0-9._(__)-]+[a-z0-9]\/)+[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/', $_POST['image']);
+        $match = preg_match('/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/', $_POST['image']);
         if ($match == 0) {
             $this->core->addErrorMessage("Improper docker image name");
             return JsonReponse::getErrorResponse("Improper docker image name");

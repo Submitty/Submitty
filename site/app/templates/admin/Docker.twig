@@ -6,6 +6,13 @@
         {# TODO: include worker information here in the future #}
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
         <p>Updated on: {{last_updated}}</p>
+        {% if error_logs | length > 0 %}
+            <textarea disabled="disabled" style="resize: none; width: 100%">
+                {% for error_log in error_logs %}
+                    {{error_log ~ "\n"}}
+                {% endfor %}
+            </textarea>
+        {% endif %}
         <button class="btn btn-primary" id="update-machines" onclick="updateImage({{"\"" ~ url ~ "/update_docker" ~ "\""}})" style="margin-top: 1em"> Update dockers and machines</button>
     {% endif %}
 </div>
@@ -21,7 +28,7 @@
             <th>Num Autograding Workers</th>
         </tr>
         {% for worker in worker_machines %}
-        <tr data-enabled = {{worker['enabled'] == true ? 'true' : 'false'}}>
+        <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th>{{worker['name']}}</th>
             {% for capability in worker['capabilities'] %}
                 {% if capability %}
@@ -38,7 +45,68 @@
 
 <div class="content">
     <h2 class ="docker-header">Autograding Docker Images</h2>
-    {{ _self.renderDockerMachine(autograding_containers['all_images'], image_to_capability, capability_to_color, capabilities) }}
+    {% if capabilities is not null %}
+        <div class="filter">
+            <div style="display:inline-block;">Capability Filter: </div>
+            <div style="display:inline-block;">
+                {% for capability in capabilities %}
+                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
+                        {{capability}}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
+    <table class="table docker-table mobile-table">
+        <thead>
+            <tr>
+                <th>Image Name</th>
+                <th>Tag</th>
+                <th>ID</th>
+                <th>Size</th>
+                <th>Created Date</th>
+                <th>Alias</th>
+                <th>Capabilities Containing This Image</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key, value in autograding_containers['all_images'] %}
+            <tr class="image-row" data-error={{value["name"] in fail_images ? "true" : "false"}}>
+                <td>{{ value["name"] }}</th>
+                <td>{{ value["tag"] }} </td>
+                <td>{{ value["short_id"] | trim("sha256:") }} </td>
+                <td>{{ value["size"] }} (Virtual Size: {{ value["virtual_size"] }})
+                </td>
+                <td> Created on: {{ value["created"] }} </td>
+                <td>
+                {% if value["additional_names"] | length > 0 %}
+                <ul id="tag-list">
+                    {% for name in value["additional_names"] %}
+                    <li>{{ name }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                </td>
+                <td>
+                    {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
+                        {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
+                            <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                        {% endfor %}
+                    {% else %}
+                        {% for name in value["additional_names"] %}
+                            {% if name in image_to_capability|keys %}
+                                {% for capability in image_to_capability[name] %}
+                                    <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 {% if no_image_capabilities | length > 0 %}
@@ -77,68 +145,3 @@
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick="addImage({{"\"" ~ url ~ "/add_image" ~ "\""}})" disabled="disabled">Send</button>
 </div>
-
-{% macro renderDockerMachine(data, image_to_capability, capability_to_color, capabilities) %}
-    {% if capabilities is not null %}
-        <div class="filter">
-            <div style="display:inline-block;">Capability Filter: </div>
-            <div style="display:inline-block;">
-                {% for capability in capabilities %}
-                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
-                        {{capability}}
-                    </button>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
-    
-    <table class="table docker-table mobile-table">
-        <thead>
-            <tr>
-                <th>Image Name</th>
-                <th>Tag</th>
-                <th>ID</th>
-                <th>Size</th>
-                <th>Created Date</th>
-                <th>Alias</th>
-                <th>Capabilities Containing This Image</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for key, value in data %}
-            <tr>
-                <td>{{ value["name"] }}</th>
-                <td>{{ value["tag"] }} </td>
-                <td>{{ value["short_id"] | trim("sha256:") }} </td>
-                <td>{{ value["size"] }} (Virtual Size: {{ value["virtual_size"] }})
-                </td>
-                <td> Created on: {{ value["created"] }} </td>
-                <td>
-                {% if value["additional_names"] | length > 0 %}
-                <ul id="tag-list">
-                    {% for name in value["additional_names"] %}
-                    <li>{{ name }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                </td>
-                <td>
-                    {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
-                        {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
-                            <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
-                        {% endfor %}
-                    {% else %}
-                        {% for name in value["additional_names"] %}
-                            {% if name in image_to_capability|keys %}
-                                {% for capability in image_to_capability[name] %}
-                                    <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
-                                {% endfor %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}

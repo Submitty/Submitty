@@ -19,17 +19,42 @@ function collapseSection(id,btn_id) {
 }
 
 function filterOnClick() {
+    const this_filter = new Map();
+
     if ($(this).hasClass('fully-transparent')) {
         $(this).removeClass('fully-transparent');
     }
     else {
         $(this).addClass('fully-transparent');
     }
+
+    $(".filter-buttons").each(function (){
+        this_filter.set($(this).data("capability"), !$(this).hasClass("fully-transparent"));
+    });
+
+    $(".image-row").each(function() {
+        const this_row = $(this);
+        let hide = true;
+        if ($(this).find(".badge").length == 0) {
+            hide = false;
+        }
+        $(this).find(".badge").each(function (){
+            if (this_filter.get($(this).text())) {
+                hide = false;
+            }
+        });
+        if (hide) {
+            this_row.hide();
+        }
+        else {
+            this_row.show();
+        }
+    });
 }
 
 function addFieldOnChange() {
     const command = $(this).val();
-    const regex = new RegExp('^([a-z0-9][a-z0-9._(__)-]+[a-z0-9]/)+[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
+    const regex = new RegExp('^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
     if (!regex.test(command)) {
         $('#send-button').attr('disabled',true);
         $('#docker-warning').css('display', '');

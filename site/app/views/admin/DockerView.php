@@ -142,6 +142,10 @@ class DockerView extends AbstractView {
 
         $array_list = scandir("/var/local/submitty/logs/docker/");
         $last_ran = "";
+        $machine_to_update = [];
+        $fail_images = [];
+        $error_logs = [];
+        
         if (count($array_list) > 2) {
             $last_ran = "sometime";
             $most_recent = max($array_list);
@@ -150,6 +154,14 @@ class DockerView extends AbstractView {
                 $match = [];
                 if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $match)) {
                     $last_ran = $match[1];
+                }
+                else if (preg_match("/FAILURE TO UPDATE MACHINE (.+)/", $buffer, $match)) {
+                    $machine_to_update[$match[1]] = false;
+                    $error_logs[] = $buffer;
+                }
+                else if (preg_match("/ERROR: Could not pull (.+)/", $buffer, $match)) {
+                    $fail_images = $match[1];
+                    $error_logs[] = $buffer;
                 }
             }
             fclose($fd);
@@ -166,7 +178,10 @@ class DockerView extends AbstractView {
                 "image_to_capability" => $image_to_capability,
                 "capability_to_color" => $capability_to_color,
                 "url" => $this->core->buildUrl(["admin"]),
-                "last_updated" => $last_ran
+                "last_updated" => $last_ran,
+                "machine_to_update" => $machine_to_update,
+                "fail_images" => $fail_images,
+                "error_logs" => $error_logs
             ]
         );
     }
