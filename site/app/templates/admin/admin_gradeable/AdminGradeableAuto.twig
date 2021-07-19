@@ -31,16 +31,18 @@
 <br><br>
 
     <div class="option-title">
-        Should this gradeable be locked until a score is reached?
+        Should this gradeable be locked from students until they satisfactorily complete a prerequisite assignment?
     </div>
     <div>
         <fieldset>
             <legend>Previous Gradeable:</legend>
             <div class="option-input col-md-6" style="padding: 0;">
                 <select name="depends_on" id="gradeable-lock">
-                    <option value="">Select an option (Off)</option>
+                    <option value="">Select prerequisite gradeable (Off)</option>
                     {% for template in template_list %}
-                        <option value="{{ template.g_id }}" {% if template.g_id == gradeable.getDependsOn() %} selected {% endif %}>{{ template.g_title }}-{{ template.g_id }}</option>
+                        {% if template.g_id != gradeable.getId() %}
+                            <option value="{{ template.g_id }}" {% if template.g_id == gradeable.getDependsOn() %} selected {% endif %}>{{ template.g_title }} [ {{ template.g_id }} ]</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </div>
@@ -48,7 +50,7 @@
         <fieldset id="gradeable-lock-max-points-field" style="{% if gradeable.getDependsOn() is null %}display: none;{% endif %}">
             <legend>Autograder Points Required to Unlock:</legend>
             <input type="number" name="depends_on_points" value="{% if gradeable.getDependsOnPoints() is not null %}{{ gradeable.getDependsOnPoints() }}{% else %}0{% endif %}" id="gradeable-lock-points">
-            <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ gradeable_max_points[gradeable.getId()] }} for {{ gradeable.getDependsOn() }}</p>
+            <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ gradeable_max_points[gradeable.getId()] }} for [ {{ gradeable.getDependsOn() }} ]</p>
         </fieldset>
     </div>
 <br><br>
