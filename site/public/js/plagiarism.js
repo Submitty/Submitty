@@ -134,6 +134,13 @@ function user2DropdownChanged(state) {
     state.editor2.getDoc().setValue('');
     state.editor2.refresh();
 
+    if (state.user_2_selected.source_gradeable !== state.this_term_course_gradeable) {
+        $('#swap-students-button').addClass('disabled');
+    }
+    else {
+        $('#swap-students-button').removeClass('disabled');
+    }
+
     // load new content for the editor
     loadConcatenatedFileForEditor(state, 2);
     loadColorInfo(state);
@@ -289,13 +296,13 @@ function refreshUser2Dropdown(state) {
         if (users === state.user_2_selected) {
             append_options += ' selected';
         }
-        append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `
+        append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `;
         if (users.source_gradeable !== state.this_term_course_gradeable) {
             let humanified_source_gradeable = users.source_gradeable;
-            humanified_source_gradeable = humanified_source_gradeable.replace('__', '/');
-            append_options += `${users.source_gradeable}`;
+            humanified_source_gradeable = humanified_source_gradeable.replaceAll('__', '/');
+            append_options += `(${humanified_source_gradeable})`;
         }
-        append_options += `</option>`;
+        append_options += '</option>';
     });
     $('#user-2-dropdown-list').append(append_options);
 
@@ -450,7 +457,18 @@ function handleClickedMarks(state) {
             $('#popup_to_show_matches_id').empty();
 
             $.each(clickedMark.attributes.others, (i, other) => {
-                $('#popup_to_show_matches_id').append($.parseHTML(`<li id="others_menu_${i}" class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper">${other.user_id}:${other.version}</div></li>`));
+                let humanified_source_gradeable = other.source_gradeable;
+                humanified_source_gradeable = humanified_source_gradeable.replaceAll('__', '/');
+
+                const sg = other.source_gradeable === state.this_term_course_gradeable ? '' : ` (${humanified_source_gradeable})`;
+
+                $('#popup_to_show_matches_id').append(`
+                    <li id="others_menu_${i}" class="ui-menu-item">
+                        <div tabindex="-1" class="ui-menu-item-wrapper">
+                            ${other.user_id}: ${other.version}${sg}
+                        </div>
+                    </li>
+                `);
                 $(`#others_menu_${i}`).on('click', () => {
                     // hiding the popup and resetting the text color immediately makes the page feel faster
                     $('#popup_to_show_matches_id').css('display', 'none');
