@@ -10,7 +10,7 @@ window.onbeforeunload = function() {
 //Toolbar stuff
 function renderPDFToolbar() {
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-    $('#zoom-custom').val(Number(localStorage.getItem('scale'))*100 || '1');
+    $('#zoom-custom').val(Number(localStorage.getItem('scale'))*100 || '100');
     sessionStorage.setItem('toolbar_loaded', true);
     function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
@@ -71,10 +71,10 @@ function renderPDFToolbar() {
                     toggleOtherAnnotations(hide_other);
                     break;
                 case 'zoomin':
-                    zoom(Math.round((window.RENDER_OPTIONS.scale + 0.1) * 100));
+                    zoom(Math.round((Number(window.RENDER_OPTIONS.scale) + 0.1) * 100));
                     break;
                 case 'zoomout':
-                    zoom(Math.round((window.RENDER_OPTIONS.scale - 0.1) * 100));
+                    zoom(Math.round((Number(window.RENDER_OPTIONS.scale) - 0.1) * 100));
                     break;
                 case 'rotate-right':
                     rotate(90);
@@ -246,13 +246,16 @@ function renderPDFToolbar() {
 }
 
 function zoom(zoom_level){
+    console.log('adjusting zoom...');
     if(isNaN(zoom_level)) {
+        console.log('no zoom level... setting 100');
         zoom_level = 100;
     }
 
     $('#zoom-custom').val(zoom_level);
 
     zoom_level = Math.min(Math.max(10, zoom_level), 500);
+    console.log('zoom level after constraint', zoom_level);
     zoom_level /= 100;
 
     window.RENDER_OPTIONS.scale = zoom_level;
