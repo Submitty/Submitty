@@ -120,7 +120,6 @@ function renderPDFToolbar() {
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`) || {};
-        console.log('saving annotations...', JSON.parse(annotation_layer));
         $.ajax({
             type: 'POST',
             url: url,
@@ -147,12 +146,10 @@ function renderPDFToolbar() {
 
 
     function handleToolbarClick(e){
-        console.log('toolbar click...', e)
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
 
     $(document).on('click', function() {
-        console.log('clicked');
         $('.selection-menu').hide();
     });
 
@@ -257,16 +254,13 @@ function renderPDFToolbar() {
 }
 
 function zoom(zoom_level){
-    console.log('adjusting zoom...');
     if(isNaN(zoom_level)) {
-        console.log('no zoom level... setting 100');
         zoom_level = 100;
     }
 
     $('#zoom-custom').val(zoom_level);
 
     zoom_level = Math.min(Math.max(10, zoom_level), 500);
-    console.log('zoom level after constraint', zoom_level);
     zoom_level /= 100;
 
     window.RENDER_OPTIONS.scale = zoom_level;

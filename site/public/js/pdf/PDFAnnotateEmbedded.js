@@ -46,7 +46,6 @@ function buildCourseUrl(parts = []) {
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
 function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
-    console.log('render student...')
     // set the values for default view through submission page
     window.RENDER_OPTIONS.scale = 1;
     window.RENDER_OPTIONS.rotate = 0;
