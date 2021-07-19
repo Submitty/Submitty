@@ -479,14 +479,16 @@ HTML;
             // See also note in ElectronicGradeController.php
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
-                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
+                if ($peer === 'false') {
+                    $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
+                }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
-                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                    $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
                 }
                 else {
-                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
+                    $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading_blind"];
                 }
-                $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
@@ -1276,6 +1278,7 @@ HTML;
                 foreach ($new_files as $file) {
                     $skipping = false;
                     foreach (explode(",", $hidden_files) as $file_regex) {
+                        $file_regex = trim($file_regex);
                         if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
                             $skipping = true;
                         }
