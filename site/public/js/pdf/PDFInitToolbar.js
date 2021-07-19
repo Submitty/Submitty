@@ -173,7 +173,7 @@ function renderPDFToolbar() {
     }
 
     function changeColor(e){
-        setColor(e.srcElement.getAttribute('value'))
+        setColor(e.target.value);
     }
 
     function setColor(color){
@@ -196,10 +196,10 @@ function renderPDFToolbar() {
         setPen(init_size, init_color);
         
         document.getElementById('pen_size_selector').addEventListener('change', function(e){
-            setPen(e.target.value || e.srcElement.value, penColor);
+            setPen(e.target.value, penColor);
         });
         document.addEventListener('colorchange', function(e){
-            setPen(penSize, e.srcElement.getAttribute('value'));
+            setPen(penSize, e.target.value);
         });
     }
 

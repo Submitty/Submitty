@@ -666,7 +666,7 @@ function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.code ? pos + 1 : 0;
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
             setInterval(function() { $("*").addClass("rainbow"); }, 100);
             $(document.body).off('keyup', colorEvent);
