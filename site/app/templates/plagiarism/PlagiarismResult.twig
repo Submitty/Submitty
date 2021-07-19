@@ -7,9 +7,8 @@
     <div id="result-title-bar">
         <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span> </h2>
         <span class="plag-results-header-right">
-            <a id="swap-students-button" class="btn btn-primary">Swap Students</a>
-            <a class="btn btn-primary" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
-            <a class="btn btn-primary" title="View Key" onclick="showPlagiarismHighKey()">View Key</a>
+            <a class="btn btn-secondary" title="View Key" onclick="showPlagiarismHighKey()"><i class="fa fa-info-circle fa-lg"></i></a>
+            <a class="btn btn-secondary" onclick="toggleFullScreenMode();"><i class="fa fa-expand fa-lg"></i></a>
         </span>
     </div>
     <hr />
@@ -22,6 +21,7 @@
                     {% endfor %}
                 </select>
             </span>
+            <a id="swap-students-button" class="btn btn-secondary"><i class="fa fa-reply fa-lg"></i></a>
             <span class="plag-flex-item">
                 <select id="user-2-dropdown-list" name="user_id_2" class="user2-select">
                     <option>Loading...</option>
