@@ -50,7 +50,7 @@
         <fieldset id="gradeable-lock-max-points-field" style="{% if gradeable.getDependsOn() is null %}display: none;{% endif %}">
             <legend>Autograder Points Required to Unlock:</legend>
             <input type="number" name="depends_on_points" value="{% if gradeable.getDependsOnPoints() is not null %}{{ gradeable.getDependsOnPoints() }}{% else %}0{% endif %}" id="gradeable-lock-points">
-            <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ gradeable_max_points[gradeable.getId()] }} Maximum Autograding Points</p>
+            <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ gradeable_max_points[gradeable.getDependsOn()] }} Maximum Autograding Points</p>
         </fieldset>
     </div>
 <br><br>

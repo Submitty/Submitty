@@ -211,7 +211,7 @@ class AdminGradeableController extends AbstractController {
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
-        $gradeable_max_points = [];
+        $gradeable_max_points = ["" => 0];
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
         /** @var Gradeable $a_gradeable */
         foreach ($gradeables as $a_gradeable) {
