@@ -5,7 +5,7 @@
     {% if docker_info is not null %}
         {# TODO: include worker information here in the future #}
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
-        <p>{{last_updated}}</p>
+        <p>Updated on: {{last_updated}}</p>
         <button class="btn btn-primary" id="update-machines" onclick="updateImage({{"\"" ~ url ~ "/update_docker" ~ "\""}})" style="margin-top: 1em"> Update dockers and machines</button>
     {% endif %}
 </div>

@@ -148,8 +148,8 @@ class DockerView extends AbstractView {
             $fd = fopen("/var/local/submitty/logs/docker/" . $most_recent, "r");
             while (($buffer = fgets($fd)) !== false) {
                 $match = [];
-                if (preg_match("/^\[Last ran on: ([0-9:]{19})\]$/", $buffer, $match)) {
-                    $last_ran = $match[0][0];
+                if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $match)) {
+                    $last_ran = $match[1];
                 }
             }
             fclose($fd);
