@@ -96,7 +96,7 @@
     z-index: 2;
     border-radius: 1rem;
     padding: 1rem;
-    background-color: #888888;
+    background-color: var(--standard-light-medium-gray);
     display: none;
     position: fixed;
     top: 0;
