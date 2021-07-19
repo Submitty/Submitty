@@ -34,7 +34,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
     const state = {
         'gradeable_id': gradeable_id,
         'config_id': config_id,
-        'curr_course_term_course_gradeable': term_course_gradeable,
+        'this_term_course_gradeable': term_course_gradeable,
         'user_1_dropdown_list': user_1_list,
         'user_1_version_dropdown_list': {
             'versions': [],
@@ -289,11 +289,17 @@ function refreshUser2Dropdown(state) {
         if (users === state.user_2_selected) {
             append_options += ' selected';
         }
-        append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version})</option>`;
+        append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `
+        if (users.source_gradeable !== state.this_term_course_gradeable) {
+            let humanified_source_gradeable = users.source_gradeable;
+            humanified_source_gradeable = humanified_source_gradeable.replace('__', '/');
+            append_options += `${users.source_gradeable}`;
+        }
+        append_options += `</option>`;
     });
     $('#user-2-dropdown-list').append(append_options);
 
-    if (state.user_2_selected.source_gradeable !== state.curr_course_term_course_gradeable) {
+    if (state.user_2_selected.source_gradeable !== state.this_term_course_gradeable) {
         $('#swap-students-button').addClass('disabled');
     }
     else {
