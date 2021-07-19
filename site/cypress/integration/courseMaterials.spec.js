@@ -1,4 +1,5 @@
 import {buildUrl, getCurrentSemester} from '../support/utils.js';
+import {skipOn} from '@cypress/skip-test';
 
 const coursePath = `${getCurrentSemester()}/sample/uploads/course_materials`;
 const defaultFilePath = `/var/local/submitty/courses/${coursePath}`;
@@ -313,8 +314,8 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.btn-danger').click();
     });
 
-    if (Cypress.env('run_area') !== 'CI'){
-        it.only('Should sort course materials', () => {
+    skipOn(Cypress.env('run_area') === 'CI', () => {
+        it('Should sort course materials', () => {
             cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
             cy.get('#input-provide-full-path').type('a');
             cy.get('#upload1').attachFile('file1.txt' , { subjectType: 'drag-n-drop' });
@@ -359,5 +360,5 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('.fa-trash').first().click();
             cy.get('.btn-danger').click();
         });
-    }
+    });
 });
