@@ -1,22 +1,21 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}filter-settings{% endblock %}
 {% block title %}Queue Settings{% endblock %}
+
 {% block body %}
-  <b>Help With Regex Patterns</b>
-    <a id="regex-help-icon" onclick="toggleRegexHelp()" onkeypress="toggleRegexHelp()" title="Help with regex patterns" aria-label="help with regex patterns" tabindex="0" style="padding:.5rem;">
-        <i class="fas fa-question"></i>
-    </a>
+    <a onclick="toggleRegexHelp()" style="text-decoration-line: underline; position:relative; float:right; margin-right: 1rem;">Help With Regex Patterns <i style="font-style:normal;" class="fa-question-circle"></i></a>
     <div class="regex-help" style="display: none;">
-        Regex Patterns are to make sure your students enter the correct information
+        <br>Regex Patterns are to make sure your students enter the correct information
         into the "contact information" field. Copy the patterns associated with the type of information you wish
         your students to provide (copy the pound symbols too).<br>
         <b>NOTE: REGEX PATTERNS ARE NOT REQUIRED</b><br>
         <a href="https://www.php.net/manual/en/reference.pcre.pattern.syntax.php" target="_blank">Write Your Own Pattern</a><br>
-        <b>Webex link:</b> #webex.com/meet#<br>
+        <b>Webex link:</b> #webex.com#<br>
         <b>Skype link:</b> #join.skype#<br>
         <b>Zoom link:</b> #zoom.us#<br>
         <b>Email Address:</b> Just Enter "email" <br>
         <b>Gmail address:</b> #@gmail.com#<br>
+        <a onclick="toggleRegexHelp()">close</a>
     </div>
     <br>
   <span class="option-title">Open new queue</span>
