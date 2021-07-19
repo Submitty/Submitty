@@ -15,7 +15,7 @@
 			let deleteActive = typeof del[0] !== typeof undefined && del[0].hasAttribute('class') && del.attr('class').includes('active');
 			let deleteMerge  = merge[0].hasAttribute('class')  && merge.attr('class').includes('active');
 
-			if(('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) || {{is_full_threads_page}}) {
+			if(('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) || {{is_full_threads_page is defined ? is_full_threads_page : ''}}) {
 				$('#dropdownLabel').removeClass("active");
 			}
 			else {
@@ -95,7 +95,7 @@
 						<div class="dropdown-divider"></div>
 						<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" >Edit Categories</a>
 					{% endif %}
-					{% if thread_exists and not is_full_threads_page %}
+					{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 						<div class="dropdown-divider"></div>
 						<a class="dropdown-item" href="#" id="toggle-attachments-button" class="key_to_click show-all" tabindex="0" title="Click to toggle all post attachments" onclick="loadAllInlineImages()">
 							Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
@@ -200,8 +200,8 @@
 			$('#clear_filter_button').css('display', 'inline-block');
 		}
 
-		{% if display_option in ['tree', 'time', 'alpha'] %}
-		$("#{{display_option }}_label").addClass('active');
+		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
+			$("#{{display_option }}_label").addClass('active');
 		{% endif %}
 
 		window.csrfToken = "{{ csrf_token }}" ;

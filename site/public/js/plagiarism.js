@@ -7,6 +7,7 @@ let editor1 = null;
 let form = null;
 let si = null;
 let gradeableId = null;
+let configId = null;
 let blueClickedMark = null;
 
 
@@ -147,9 +148,10 @@ function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
 }
 
-function setUpPlagView(gradeable_id) {
+function setUpPlagView(gradeable_id, config_id) {
 
     gradeableId = gradeable_id;
+    configId = config_id;
 	form = $("#users_with_plagiarism");
     editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
@@ -185,11 +187,12 @@ function requestAjaxData(url, f, es) {
         url: url,
         success: function(data) {
             data = JSON.parse(data);
-            if(data.error){
-                alert(data.error);
+            if (data.status !== "success") {
+                alert(data.message);
                 return;
             }
-            f(data, es);
+
+            f(data.data, es);
         },
         error: function(e) {
             alert("Error occured when requesting via ajax. Please refresh the page and try again.");
@@ -200,7 +203,6 @@ function requestAjaxData(url, f, es) {
 function createRightUsersList(data, select = null) {
     let position = 0;
     let append_options;
-    data = JSON.parse(data);
     $.each(data, function(i,users){
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select === users[0]) {
@@ -238,7 +240,7 @@ function createLeftUserVersionDropdown(version_data, active_version_user_1, max_
 }
 
 function updateRightUserLists(user_id_1, version_id_1, select = null) {
-    let url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    let url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}&config_id=${configId}`;
     const f2 = function(data, select) {
         createRightUsersList(data, select);
     }
@@ -258,7 +260,7 @@ function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 =
         }
         colorEditors(data);
     };
-    let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    let url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}&config_id=${configId}`;
     let es = false;
     if (user_id_2 != null) {
         editor1.getDoc().setValue('');

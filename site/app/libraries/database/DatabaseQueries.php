@@ -693,6 +693,21 @@ SQL;
         return $this->course_db->rows()[0]["max_id"];
     }
 
+    public function findParentPost($thread_id) {
+        $this->course_db->query("SELECT * from posts where thread_id = ? and parent_id = -1", [$thread_id]);
+        return $this->course_db->row();
+    }
+    public function findThread($thread_id) {
+        $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
+        return $this->course_db->row();
+    }
+
+    public function existsAnnouncementsId($thread_id) {
+        $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
+        $row = $this->course_db->row();
+        return count($row) > 0 && $row['announced'] != null;
+    }
+
     public function getResolveState($thread_id) {
         $this->course_db->query("SELECT status from threads where id = ?", [$thread_id]);
         return $this->course_db->rows();
@@ -821,14 +836,14 @@ SQL;
         return $rows;
     }
 
-    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration) {
-
+    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date, $expiration, $announcement) {
         $this->course_db->beginTransaction();
+
+        $now = $announcement ? $this->core->getDateTimeNow() : null;
 
         try {
             //insert data
-            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date, pinned_expiration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date, $expiration]);
-
+            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date, pinned_expiration, announced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [$title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date, $expiration, $now]);
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", [$title, $user]);
         }
@@ -838,6 +853,7 @@ SQL;
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
+
         foreach ($categories_ids as $category_id) {
             $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$id, $category_id]);
         }
@@ -849,6 +865,11 @@ SQL;
         $this->visitThread($user, $id);
 
         return ["thread_id" => $id, "post_id" => $post_id];
+    }
+
+    public function setAnnounced($thread_id) {
+        $now = $this->core->getDateTimeNow();
+        $this->course_db->query("UPDATE threads SET announced = ? WHERE id = ?", [$now, $thread_id]);
     }
 
     public function getThreadsBefore($timestamp, $page) {
@@ -1103,6 +1124,89 @@ WHERE semester=? AND course=? AND user_id=?",
     public function getGroupForUserInClass($semester, $course_name, $user_id) {
         $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ? AND semester = ?", [$user_id, $course_name, $semester]);
         return intval($this->submitty_db->row()['user_group']);
+    }
+
+    /**
+     * Gets an unique array of active users in courses_users, active users are users enrolled in a course in the current semester
+     * Allows the filtering the group of users returned by this function
+     *
+     * @param bool $instructor To include instructors or not
+     * @param bool $fullAccess To include full access graders or not
+     * @param bool $limitedAccess To include limited access graders or not
+     * @param bool $student To include students or not
+     * @param bool $faculty to include faculty level users or not
+     * @return array - array of userids active in the specified semester
+     */
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+        $args = ['-1'];
+        $extra_join = '';
+        $extra_where = '';
+        if ($instructor) {
+            $args[] = '1';
+        }
+        if ($fullAccess) {
+            $args[] = '2';
+        }
+        if ($limitedAccess) {
+            $args[] = '3';
+        }
+        if ($student) {
+            $args[] = '4';
+        }
+
+        if ($faculty) {
+            $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
+            $extra_where = ' OR users.user_access_level <= 2';
+        }
+        $result_rows = [];
+        $this->submitty_db->query(
+            "SELECT DISTINCT courses_users.user_id as user_id
+                FROM courses_users INNER JOIN courses 
+                ON courses_users.semester = courses.semester AND courses_users.course = courses.course
+                " . $extra_join . "
+                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
+        );
+        return array_map(
+            function ($row) {
+                return $row['user_id'];
+            },
+            $this->submitty_db->rows()
+        );
+    }
+
+    /**
+     * Count number of each group of faculty, instructors in active course, full access graders in active course, limited access graders in active course, students in active course
+     * @return array
+     */
+    public function countActiveUsersByGroup(): array {
+        $this->submitty_db->query(
+            "WITH A as (SELECT DISTINCT ON(user_id) user_id, user_group FROM courses_users JOIN courses
+            on courses.course = courses_users.course
+            and courses.semester = courses_users.semester
+            WHERE courses.status = 1
+            ORDER BY user_id, courses_users.user_group ASC)
+            SELECT A.user_group, COUNT(A.user_group) FROM A GROUP BY A.user_group"
+        );
+        $result = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            if ($row['user_group'] == 1) {
+                $result['instructor'] = $row['count'];
+            }
+            elseif ($row['user_group'] == 2) {
+                $result['full_access'] = $row['count'];
+            }
+            elseif ($row['user_group'] == 3) {
+                $result['limited_access'] = $row['count'];
+            }
+            else {
+                $result['student'] = $row['count'];
+            }
+        }
+        $this->submitty_db->query(
+            "SELECT COUNT(user_access_level) FROM users WHERE user_access_level <= 2"
+        );
+        $result['faculty'] = $this->submitty_db->row()['count'];
+        return $result;
     }
 
     /**
@@ -1451,7 +1555,7 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
                 FROM gradeable_teams gt
                   JOIN
                     (SELECT t.team_id, t.state, u.*
@@ -1490,7 +1594,7 @@ ORDER BY {$orderby}",
 
             $this->course_db->query(
                 "
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
                 FROM gradeable_teams gt
                   JOIN
                     (SELECT t.team_id, t.state, u.*
@@ -2796,7 +2900,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  integer $rotating_section
      * @return string $team_id
      */
-    public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
+    public function createTeam($g_id, $user_id, $registration_section, $rotating_section, $team_name) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
         if (strlen($team_id_prefix) < 5) {
@@ -2804,8 +2908,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         }
         $team_id = "{$team_id_prefix}_{$user_id}";
 
-        $params = [$team_id, $g_id, $registration_section, $rotating_section];
-        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
+        $params = [$team_id, $g_id, $registration_section, $rotating_section, $team_name];
+        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section, team_name) VALUES(?,?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", [$team_id, $user_id]);
         return $team_id;
     }
@@ -2832,6 +2936,16 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
     public function updateTeamRotatingSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
+    }
+
+    /**
+     * Set team $team_id's team_name
+     *
+     * @param string $team_id
+     * @param string $team_name
+     */
+    public function updateTeamName($team_id, $team_name) {
+        $this->course_db->query("UPDATE gradeable_teams SET team_name=? WHERE team_id=?", [$team_name, $team_id]);
     }
 
     /**
@@ -2911,7 +3025,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamById($team_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
               (SELECT t.team_id, t.state, u.*
@@ -2940,7 +3054,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
               (SELECT t.team_id, t.state, u.*
@@ -2991,7 +3105,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
@@ -4328,13 +4442,29 @@ AND gc_id IN (
      * a student has dropped a course.  SQL query checks for user_group=4 so
      * that only students are considered.  Returns false when course is dropped.
      * Returns true when course is still active, or user is not a student.
+     * If course or semester is null, this method instead checks for if the student
+     * is 'active' in any course
      *
      * @param  string $user_id
      * @param  string $course
      * @param  string $semester
-     * @return boolean
+     * @return bool
      */
-    public function checkStudentActiveInCourse($user_id, $course, $semester) {
+    public function checkStudentActiveInCourse($user_id, $course, $semester): bool {
+        if ($course == null || $semester == null) {
+            $this->submitty_db->query(
+                "
+                SELECT
+                    CASE WHEN registration_section IS NULL AND user_group=4 THEN FALSE
+                    ELSE TRUE
+                    END
+                AS active
+                FROM courses_users WHERE user_id=?",
+                [$user_id]
+            );
+            $row = $this->submitty_db->row();
+            return count($row) > 0 && $row['active'];
+        }
         $this->submitty_db->query(
             "
             SELECT
@@ -4345,7 +4475,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return $this->submitty_db->row()['active'];
+        $row = $this->submitty_db->row();
+        return count($row) > 0 && $row['active'];
     }
 
     public function checkIsInstructorInCourse($user_id, $course, $semester) {
@@ -4777,7 +4908,7 @@ AND gc_id IN (
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
         $query = "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
@@ -5870,10 +6001,17 @@ AND gc_id IN (
      *
      * @param string $course
      * @param string $semester
+     * @return EmailStatusModel
      */
-    public function getEmailStatusWithCourse($semester, $course) {
+    public function getEmailStatusWithCourse($semester, $course): EmailStatusModel {
         $parameters = [$course, $semester];
         $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
+        $details = $this->submitty_db->rows();
+        return new EmailStatusModel($this->core, $details);
+    }
+
+    public function getAllEmailStatuses(): EmailStatusModel {
+        $this->submitty_db->query('SELECT * FROM emails ORDER BY created DESC');
         $details = $this->submitty_db->rows();
         return new EmailStatusModel($this->core, $details);
     }
@@ -6460,13 +6598,15 @@ AND gc_id IN (
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.rotating_section';
+               team.rotating_section,
+               team.team_name';
 
             $submitter_inject = '
               JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
                   gt.rotating_section,
+                  gt.team_name,
                   json_agg(tu) AS array_team_users
                 FROM gradeable_teams gt
                   JOIN (

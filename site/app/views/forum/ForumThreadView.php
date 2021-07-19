@@ -136,12 +136,12 @@ class ForumThreadView extends AbstractView {
     }
 
     /** Shows Forums thread splash page, including all posts
-        for a specific thread, in addition to head of the threads
-        that have been created after applying filter and to be
-        displayed in the left panel.
+     * for a specific thread, in addition to head of the threads
+     * that have been created after applying filter and to be
+     * displayed in the left panel.
      */
 
-    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax = false) {
+    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax = false, $thread_announced = true) {
 
         if (!$this->forumAccess()) {
             $this->core->redirect($this->core->buildCourseUrl([]));
@@ -162,6 +162,8 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
             $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
             $this->core->getOutput()->addInternalCss('forum.css');
+            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
             $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
@@ -222,7 +224,7 @@ class ForumThreadView extends AbstractView {
 
             $currentThreadArrValues = array_values($currentThreadArr);
             $currentThreadFavorite = !empty($currentThreadArrValues) ? $currentThreadArrValues[0]['favorite'] : false;
-            $generatePostContent = $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite, false);
+            $generatePostContent = $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite, false, $thread_announced);
         }
 
         if (!empty($activeThread['id'])) {
@@ -264,6 +266,7 @@ class ForumThreadView extends AbstractView {
                 "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
+                "show_unresolve" => false,
                 "display_option" => $display_option,
                 "render_markdown" => $markdown_enabled,
                 "csrf_token" => $this->core->getCsrfToken(),
@@ -289,6 +292,7 @@ class ForumThreadView extends AbstractView {
                 "first_post_id" => $generatePostContent["first_post_id"],
                 "form_action_link" => $generatePostContent["form_action_link"],
                 "thread_resolve_state" => $thread_resolve_state,
+                "show_unresolve" => false,
                 "merge_thread_content" => $generatePostContent["merge_thread_content"],
                 "csrf_token" => $generatePostContent["csrf_token"],
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
@@ -412,7 +416,7 @@ class ForumThreadView extends AbstractView {
     }
 
 
-    public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false, $render = true) {
+    public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false, $render = true, $thread_announced = false) {
 
         $activeThread = $this->core->getQueries()->getThread($currentThread);
 
@@ -470,7 +474,7 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
 
                         break;
                     }
@@ -489,7 +493,7 @@ class ForumThreadView extends AbstractView {
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced);
 
                 if ($first) {
                     $first = false;
@@ -847,6 +851,7 @@ class ForumThreadView extends AbstractView {
                     "post_id" => $first_post["id"],
                     "is_thread_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
                     "thread_resolve_state" => $this->core->getQueries()->getResolveState($thread['id'])[0]['status'],
+                    "show_unresolve" => false,
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
@@ -915,7 +920,7 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false) {
+    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false, $thread_announced = false) {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
         $parent_id = $post["parent_id"];
@@ -1107,6 +1112,7 @@ class ForumThreadView extends AbstractView {
             "userGroup" => $userGroup,
             "includeReply" => $includeReply,
             "thread_resolve_state" => $thread_resolve_state,
+            "show_unresolve" => false,
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
@@ -1121,7 +1127,8 @@ class ForumThreadView extends AbstractView {
             "parent_id" => $parent_id,
             "render_markdown" => $markdown,
             "has_history" => $has_history,
-            "thread_previously_merged" => $merged_thread
+            "thread_previously_merged" => $merged_thread,
+            "thread_announced" => $thread_announced
         ];
 
         if ($render) {
@@ -1321,7 +1328,8 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
             "forumBarData" => $forumBarData,
             "userData" => $userData,
-            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }
