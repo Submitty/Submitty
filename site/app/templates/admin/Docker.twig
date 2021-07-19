@@ -6,6 +6,7 @@
         {# TODO: include worker information here in the future #}
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
         <p>{{last_updated}}</p>
+        <button class="btn btn-primary" id="update-machines" onclick="updateImage({{"\"" ~ url ~ "/update_docker" ~ "\""}})" style="margin-top: 1em"> Update dockers and machines</button>
     {% endif %}
 </div>
 
@@ -40,6 +41,7 @@
     {{ _self.renderDockerMachine(autograding_containers['all_images'], image_to_capability, capability_to_color, capabilities) }}
 </div>
 
+{% if no_image_capabilities | length > 0 %}
 <div class="content">
     <h2 class="docker-header">Capabilities With No Image Associated</h2>
     <p>The follow capabilities were found to not have any images associated with them under autograding_containers.json:</p>
@@ -49,6 +51,7 @@
         {% endfor %}
     </ul>
 </div>
+{% endif %}
 
 <div class="content">
     <div> </div>
@@ -72,58 +75,8 @@
         </div> 
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
-    <button class="send-button btn btn-primary" id="send-button" onclick="addImage({{"\"" ~ url ~ "\""}})" disabled="disabled">Send</button>
+    <button class="send-button btn btn-primary" id="send-button" onclick="addImage({{"\"" ~ url ~ "/add_image" ~ "\""}})" disabled="disabled">Send</button>
 </div>
-
-<div class="content">
-    <h2 class="docker-header">Autograding Docker Images</h2>
-    <button class="btn btn-default" 
-            onclick="collapseSection('autograding-images','autograding-images-collapse')"
-            id="autograding-images-collapse">
-            Collapse
-    </button>
-
-    <div id="autograding-images" style="display:block;">
-        <p class="black-message">These are the docker images that are installed and listed under autograding_containers.json</p>
-
-        <div class="docker-images-container">
-            {{ _self.renderDockerMachine(autograding_containers['found']) }}
-        </div>
-    </div>
-</div>
-
-<div class="content">
-    <h2 class="docker-header">System Wide Docker Images </h2>
-    <button class="btn btn-default"
-            onclick="collapseSection('system-images','system-images-collapse')"
-            id="system-images-collapse">
-            Collapse
-    </button>
-
-    <div id="system-images" style="display:block;">
-        <p class="black-message">These are the docker images that are installed on the primary submitty machine</p> 
-        <div class="docker-images-container">
-            {{ _self.renderDockerMachine(autograding_containers['all_images'], capability_to_color) }}
-        </div>
-    </div>
-</div>
-
-{% if autograding_containers['not_found'] | length > 0 %}
-<div class="content">
-    <h2 class="docker-header">Other</h2>
-
-    <p class="red-message">The following Docker images were listed in the autograding_config.json file but were not found installed system wide</p>
-    <p>This could mean that the image(s) are not installed yet or have been installed incorrectly </p>
-
-    <br>
-        {% for image in autograding_containers['not_found'] %}
-            <p class="black-message"> {{ image }} </p>
-        {% endfor %}
-
-</div>  
-
-{% endif %}
-
 
 {% macro renderDockerMachine(data, image_to_capability, capability_to_color, capabilities) %}
     {% if capabilities is not null %}

@@ -70,6 +70,7 @@ class DockerInterfaceController extends AbstractController {
                 "autograding_workers.json"
             )
         );
+
         return new MultiResponse(
             JsonResponse::getSuccessResponse($json),
             new WebResponse(
@@ -153,22 +154,10 @@ class DockerInterfaceController extends AbstractController {
                 ),
                 $json
             );
-            $now = $this->core->getDateTimeNow()->format('Ymd');
-            $docker_job_file = "/var/local/submitty/daemon_job_queue/docker" . $now . ".json";
-            $docker_data = [
-                "job" => "UpdateDockerImages"
-            ];
-
-            if (
-                (!is_writable($docker_job_file) && file_exists($docker_job_file))
-                || file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT)) === false
-            ) {
-                return JsonResponse::getFailResponse("Failed to write to file {$docker_job_file}");
+            
+            if (!$this->updateDocker()) {
+                return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
             }
-
-            $open = FileUtils::readJsonFile(
-                $docker_job_file
-            );
             //file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT));
             $this->core->addSuccessMessage("Image found on dockerhub!\n" . $_POST['image'] . " queued to be added.");
             return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub');
@@ -178,5 +167,35 @@ class DockerInterfaceController extends AbstractController {
             return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
         }
         
+    }
+
+    /**
+     * @Route("/admin/update_docker", methods={"GET"})
+     * @return JsonResponse
+     */
+    public function updateDockerCall() {
+        if (!$this->updateDocker()) {
+            return JsonResponse::getFailResponse("Failed to write to file {$docker_job_file}");
+        }
+        return JsonResponse::getSuccessResponse("Successfully updated docker images and machines");
+    }
+
+    /**
+     * @return bool
+     */
+    private function updateDocker() {
+        $now = $this->core->getDateTimeNow()->format('Ymd');
+        $docker_job_file = "/var/local/submitty/daemon_job_queue/docker" . $now . ".json";
+        $docker_data = [
+            "job" => "UpdateDockerImages"
+        ];
+
+        if (
+            (!is_writable($docker_job_file) && file_exists($docker_job_file))
+            || file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT)) === false
+        ) {
+            return false;
+        }
+        return true;
     }
 }

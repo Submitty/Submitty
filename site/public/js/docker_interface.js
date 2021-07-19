@@ -62,6 +62,24 @@ function addImage(url) {
     });
 }
 
+function updateImage(url) {
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: {
+            csrf_token: csrfToken
+        },
+        success: function(data) {
+            console.log(data);
+            location.reload();
+        },
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
+}
+
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
     $('#add-field').on('input', addFieldOnChange);
