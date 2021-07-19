@@ -272,30 +272,36 @@
 
 <script>
     {% if is_timed and allowed_minutes > 25 %}
+        //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
+        //let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
+        let interval = 5;
+
         //for displaying popup submit button
-        window.onload = function(){
+        function initializeTimer1(){
             sessionStorage.setItem("show_popup_submit", "yes");
-            setInterval(count, 1000);
+            syncWithServer(true);
+            count();
         };
 
-        let counter = 0;
         function count(){
-            counter++;
-            //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
-            //let interval = ((({{ allowed_minutes * 60 }}) / 5) > 600 ? ({{ allowed_minutes * 60 }}) / 5 : 600);
-            let interval = 10;
-            if (counter > interval) {
+            const time_taken = Math.floor((curTime - startTime)/1000);
+            const minutes_taken = Math.floor(time_taken / 60);
+            console.log(minutes_taken);
+            if (minutes_taken % interval === 0 && minutes_taken > 0 ) {
+                console.log(minutes_taken);
                 if (sessionStorage.getItem("show_popup_submit") === 'yes') {
                     $(".notebook-submit-popup").show();
-                    counter = 0;
                 }
+                setTimeout(count, 70000);
+            }
+            else {
+                setTimeout(count,100);
             }
         }
 
         function closePopup() {
             $(".notebook-submit-popup").hide();
-            counter = 0;
-            count();
+
         }
 
         function DontShowPopupSubmit() {
