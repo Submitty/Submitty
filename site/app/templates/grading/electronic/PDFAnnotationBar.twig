@@ -36,10 +36,12 @@
                             '#F0592B',
                             '#F06291',
                             '#FF0000'] %}
-            {% for color in colors %}
-                <a class="color key_to_click" tabindex="0" value="{{ color }}" style="background: {{ color }}" onclick="emitEvent(this)"></a>
-            {% endfor %}
-                Custom: <input id="custom-color" tabIndex="0" class="color key_to_click" type="color" onchange="emitEvent(this)">
+                <div id="color-selector-grid">
+                {% for color in colors %}
+                    <a class="color key_to_click" tabindex="0" value="{{ color }}" style="background: {{ color }}" onclick="emitEvent(this)"></a>
+                {% endfor %}
+                </div>
+                Custom: <input id="custom-color" tabIndex="0" class="fill-available key_to_click" type="color" onchange="emitEvent(this)">
             </div>
         </div>
         <a title="Change Size" value="size" id="size_selector" class="fas fa-expand-arrows-alt toolbar-action"></a>

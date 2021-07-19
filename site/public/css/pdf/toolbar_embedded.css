@@ -41,8 +41,6 @@
 .selection-menu {
     display: none;
     position: absolute;
-    width: 150px;
-    height: 80px;
     border: 1px solid var(--standard-medium-dark-lime-green);
     background: var(--standard-light-seafoam);
     top: auto;
@@ -60,6 +58,11 @@
     display: inline;
 }
 
+#color-selector-grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+}
+
 #color_selector_menu {
     left: 295px;
 }
@@ -75,6 +78,16 @@
     border: 1px solid var(--text-black);
     vertical-align: middle;
     margin: 2px;
+}
+
+#custom-color {
+    width: revert;
+    padding: 0px;
+}
+
+.color:hover,
+#custom-color:hover {
+    cursor: pointer;
 }
 
 #content-wrapper {

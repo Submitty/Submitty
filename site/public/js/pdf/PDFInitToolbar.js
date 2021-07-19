@@ -151,6 +151,15 @@ function renderPDFToolbar() {
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
 
+    $(document).on('click', function() {
+        console.log('clicked');
+        $('.selection-menu').hide();
+    });
+
+    $('.selection-menu').on('click', function(e) {
+        e.stopPropagation();
+    })
+
 // Color/size selection
     function initColors(){
         document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
@@ -163,13 +172,15 @@ function renderPDFToolbar() {
     function colorMenuToggle(e){
         let shouldShow = !$('#color_selector_menu').is(':visible');
         $('.selection-menu').hide();
-        shouldShow && $('#color_selector_menu').toggle();
+        shouldShow && $('#color_selector_menu').show();
+        e.stopPropagation();
     }
 
-    function sizeMenuToggle(){
+    function sizeMenuToggle(e){
         let shouldShow = !$('#size_selector_menu').is(':visible');
         $('.selection-menu').hide();
-        shouldShow && $('#size_selector_menu').toggle();
+        shouldShow && $('#size_selector_menu').show();
+        e.stopPropagation();
     }
 
     function changeColor(e){
