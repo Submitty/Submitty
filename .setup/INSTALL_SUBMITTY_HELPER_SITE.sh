@@ -9,4 +9,8 @@ CONF_DIR=${THIS_DIR}/../../../config
 
 DEBUG_ENABLED=$(jq -r '.debugging_enabled' ${CONF_DIR}/database.json)
 
-bash ${THIS_DIR}/install_submitty/install_site.sh
+if [[ "$#" -ge 1 && $1 == "skip_rsync" ]]; then
+    bash ${THIS_DIR}/install_submitty/install_site.sh skip_rsync
+else
+    bash ${THIS_DIR}/install_submitty/install_site.sh
+fi

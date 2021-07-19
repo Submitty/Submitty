@@ -40,13 +40,14 @@ set_permissions () {
 
 echo -e "Copy the submission website"
 
+if [[ "$#" -ge 1 && $1 == "skip_rsync" ]]; then
+    SKIP_RSYNC=1
+else
+    SKIP_RSYNC=0
+fi
+
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/../bin/versions.sh
-
-VAGRANT=0
-if [ -d ${THIS_DIR}/../../.vagrant ]; then
-    VAGRANT=1
-fi
 
 # This is run under /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
@@ -97,6 +98,10 @@ for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
 
+if [ ${SKIP_RSYNC} == 1 ]; then
+    chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/site"
+fi
+
 # Update permissions & ownership for cache directory
 chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
 chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
@@ -130,7 +135,7 @@ for entry in "${result_array[@]}"; do
     fi
 done
 
-if echo "${result}" | grep -E -q "composer\.(json|lock)" || [ ${VAGRANT} == 1 ]; then
+if echo "${result}" | grep -E -q "composer\.(json|lock)" || [ ${SKIP_RSYNC} == 1 ]; then
     # install composer dependencies and generate classmap
     su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader --no-suggest"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
@@ -142,7 +147,7 @@ find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
-if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
+if echo "{$result}" | grep -E -q "package(-lock)?.json" || [ ${SKIP_RSYNC} == 1 ]; then
     # Install JS dependencies and then copy them into place
     # We need to create the node_modules folder initially if it
     # doesn't exist, or else submitty_php won't be able to make it
