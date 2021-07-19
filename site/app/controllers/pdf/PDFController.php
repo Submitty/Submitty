@@ -95,56 +95,6 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderOutput($pdf_array, 'downloadPDFEmbedded', $gradeable_id, $id, $filename, $path, $annotation_jsons, $rerender_annotated_pdf, true, 1, true);
     }
 
-    /**
-     * 
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/annotations/clear", methods={"POST"})
-     */ 
-    public function clearAllAnnotations(string $gradeable_id) {
-
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $grader_id = $this->core->getUser()->getId();
-        $user_id = $_POST['user_id'];
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return $this->core->getOutput()->renderJsonFail('Could not get gradeable');
-        }
-
-        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            $can_grade = canStudentGrade($gradeable_id, $grader_id, $user_id);
-            if (!$can_grade) {
-                return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
-            }
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
-        if ($graded_gradeable === false) {
-            return $this->core->getOutput()->renderJsonFail('Could not get graded gradeable');
-        }
-
-        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-
-        $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $gradeable_id);
-        if (!is_dir($annotation_gradeable_path)) {
-            return $this->core->getOutput()->renderJsonFail('No annotation gradeable folder found.');
-        }
-        $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $user_id);
-        if (!is_dir($annotation_user_path)) {
-            return $this->core->getOutput()->renderJsonFail('No annotation user folder found. Tried: ' . $annotation_user_path);
-        }
-        $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
-        if (!is_dir($annotation_version_path)) {
-            return $this->core->getOutput()->renderJsonFail('No annotation version folder found');
-        }
-        
-        try {
-            FileUtils::emptyDir($annotation_version_path);
-            return $this->core->getOutput()->renderJsonSuccess('Succesfully cleared all annotations for ' . $gradeable_id . ' version ' . $active_version);
-        } catch (Exception $e) {
-            return $this->core->getOutput()->renderJsonFail('There was a problem clearing all annotations.\nPlease refresh the page and try again.');
-        }
-    }
-
     private function canStudentGrade($gradeable_id, $grader_id, $user_id) {
         if ($gradeable->hasPeerComponent()) {
             $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);

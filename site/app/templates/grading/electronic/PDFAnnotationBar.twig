@@ -4,9 +4,6 @@
         <a title="Cursor Tool" value="cursor" class="fas fa-mouse-pointer toolbar-item"></a>
         <a title="Pen Tool" value="pen" class="fas fa-pencil-alt toolbar-item"></a>
         <a title="Eraser Tool" value="eraser" class="fas fa-eraser toolbar-item"></a>
-        {#TODO: In the future, we want a erase function rather than a clear function#}
-        {#<a value="clear" class="fas fa-ban toolbar-action" style="text-align: center; margin-left: 8px; font-size: 25px; padding-bottom: 10px"></a>#}
-        {#<a value="rect" class="far fa-object-group toolbar-item"></a>#}
         <a title="Rotate Left" value="rotate-left" class="fas fa-undo toolbar-action"></a>
         <a title="Rotate Right" value="rotate-right" class="fas fa-redo toolbar-action"></a>
         <a title="Text Tool" value="text" class="fas fa-font toolbar-item"></a>
@@ -14,10 +11,7 @@
         <div class="input-suffix suffix-percent">
             <input aria-label="Zoom Custom" type="number" id="zoom-custom" step="10" min="10" max="500" placeholder="100" value="100" onchange="zoom(this.value)"></input>
         </div>
-        {# <a value="zoomcustom" class="toolbar-action"></a> #}
         <a title="Zoom Out" value="zoomout" class="fas fa-minus toolbar-action"></a>
-        {# <a title="Save" value="save" class="toolbar-action">Save</a> #}
-        {#<a value="download" class="fas fa-download toolbar-action"></a>#}
         <div id="color-selector-container">
         <a title="Change Color" value="color" id="color_selector" class="toolbar-action"></a>
             <div id="color_selector_menu" class="selection-menu">

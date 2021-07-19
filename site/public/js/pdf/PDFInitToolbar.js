@@ -14,7 +14,7 @@ function renderPDFToolbar() {
     sessionStorage.setItem('toolbar_loaded', true);
     function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
-        let clicked_button = $("a[value="+option+"]");
+        let clicked_button = $(`a[value=${option}]`);
         if(option != selected.attr('value')){
             //There are two classes for the icons; toolbar-action and toolbar-item.
             //toolbar-action are single use buttons such as download and clear
@@ -91,10 +91,10 @@ function renderPDFToolbar() {
             //For color and size select
             switch(option){
                 case 'pen':
-                    $("#pen_selection").toggle();
+                    $('#pen_selection').toggle();
                     break;
                 case 'text':
-                    $("#text_selection").toggle();
+                    $('#text_selection').toggle();
                     break;
             }
         }
@@ -130,8 +130,8 @@ function renderPDFToolbar() {
             },
             success: function(data){
                 let response = JSON.parse(data);
-                if(response.status === "success"){
-                    $('#save_status').text("Saved");
+                if(response.status === 'success'){
+                    $('#save_status').text('Saved');
                     $('#save_status').css('color', 'inherit');
                 }
                 else {
@@ -139,7 +139,7 @@ function renderPDFToolbar() {
                 }
             },
             error: function(){
-                alert("Something went wrong, please contact a administrator.");
+                alert('Something went wrong, please contact a administrator.');
             }
         });
     }
@@ -159,10 +159,10 @@ function renderPDFToolbar() {
 
 // Color/size selection
     function initColors(){
-        document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
-        document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+        document.getElementById('color_selector').addEventListener('click', colorMenuToggle);
+        document.getElementById('size_selector').addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
-        let init_color = localStorage.getItem('main_color') || "#000000";
+        let init_color = localStorage.getItem('main_color') || '#000000';
         setColor(init_color);
     }
 
@@ -194,7 +194,7 @@ function renderPDFToolbar() {
     let scrollLock= false;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 5.0;
-        let init_color = localStorage.getItem('main_color') || "#000000";
+        let init_color = localStorage.getItem('main_color') || '#000000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         if($('#scroll_lock_mode').is(':checked')) {
@@ -212,8 +212,10 @@ function renderPDFToolbar() {
     }
 
     function setPen(pen_size, pen_color) {
-        penSize = pen_size || 5;
-        penColor = pen_color || '#000000';
+        pen_size = pen_size || 5;
+        pen_color = pen_color || '#000000';
+        penSize = pen_size;
+        penColor = pen_color;
         
         if (scrollLock) {
             $('#file-content').css('overflow', 'hidden');
@@ -228,14 +230,14 @@ function renderPDFToolbar() {
     let textColor = '#FF0000';
     function initText() {
         let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('main_color') || "#000000";
+        let init_color = localStorage.getItem('main_color') || '#000000';
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
         document.addEventListener('colorchange', function(e){
-            setText(textSize, e.srcElement.getAttribute('value'));
+            setText(textSize, e.target.value);
         });
         document.getElementById('text_size_selector').addEventListener('change', function(e) {
-            setText(e.target.value || e.srcElement.value, textColor);
+            setText(e.target.value, textColor);
         });
     }
 

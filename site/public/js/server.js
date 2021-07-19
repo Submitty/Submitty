@@ -965,7 +965,6 @@ function displaySuccessMessage(message) {
  * @param {string} type either 'error' or 'success'
  */
 function displayMessage(message, type) {
-    console.log(message, type);
     const id = `${type}-js-${messages}`;
     message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);

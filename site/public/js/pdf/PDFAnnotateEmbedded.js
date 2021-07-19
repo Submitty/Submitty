@@ -1,5 +1,5 @@
-/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf, displaySuccessMessage, displayErrorMessage */
-/* exported render_student, download_student, loadPDFToolbar */
+/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
+/* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations */
 if (PDFAnnotate.default) {
     // eslint-disable-next-line no-global-assign
     PDFAnnotate = PDFAnnotate.default;
@@ -27,15 +27,15 @@ window.GENERAL_INFORMATION = {
 
 const ANNOTATION_DEFAULTS = {
     size: 12,
-    color: "#000000",
-    class: "Annotation",
+    color: '#000000',
+    class: 'Annotation',
     page: 1,
     rotation: 0,
     x: 50,
     y: 50,
     content: "DEFAULT VALUE",
-    width: 5
-}
+    width: 5,
+};
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
@@ -253,7 +253,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                 cMapPacked: true,
             }).promise.then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;
-                if(window.GENERAL_INFORMATION.broken) {
+                if (window.GENERAL_INFORMATION.broken) {
                     return;
                 }
                 const viewer = document.getElementById('viewer');
@@ -298,7 +298,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 PDFAnnotate.UI.disablePen();
                             }
                         });
-                    })
+                    });
                 }
             });
         },
