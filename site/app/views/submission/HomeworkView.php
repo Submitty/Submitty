@@ -428,6 +428,8 @@ class HomeworkView extends AbstractView {
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         $has_overridden_grades = false;
