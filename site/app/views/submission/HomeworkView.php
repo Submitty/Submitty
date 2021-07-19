@@ -428,6 +428,8 @@ class HomeworkView extends AbstractView {
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         $has_overridden_grades = false;
@@ -1002,6 +1004,7 @@ class HomeworkView extends AbstractView {
             'user_id' => $this->core->getUser()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
+            'team_name' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '',
             'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,

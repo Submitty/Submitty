@@ -41,11 +41,6 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
-			count: 4
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$gg in PHPDoc tag @var does not match any variable in the foreach loop\\: \\$user_id$#"
 			count: 1
 			path: app/controllers/admin/ReportController.php
@@ -444,7 +439,7 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
-
 			message: "#^Variable \\$row might not be defined\\.$#"
-			count: 1
+			count: 2
 			path: app/views/grading/ElectronicGraderView.php
+

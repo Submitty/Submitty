@@ -200,6 +200,16 @@ class ElectronicGraderController extends AbstractController {
         return $final_grading_info;
     }
     /**
+     * Route for Getting Gradeable
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getUserGroup", methods={"GET"})
+     * @param string $gradeable_id
+     * @return JsonResponse
+     */
+    public function getUserGroup($gradeable_id) {
+        $user_group = $this->core->getUser()->getGroup();
+        return JsonResponse::getSuccessResponse($user_group);
+    }
+    /**
      * Route for randomizing peer assignments with 'One Grades Many'
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
@@ -989,10 +999,11 @@ class ElectronicGraderController extends AbstractController {
         $row_num = 1;
         $error_message = "";
         $new_teams_members = [];
+        $team_names = [];
         foreach ($contents as $content) {
             $vals = str_getcsv($content);
             $vals = array_map('trim', $vals);
-            if (count($vals) != 6) {
+            if (count($vals) != 7) {
                 $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
                 continue;
             }
@@ -1000,8 +1011,13 @@ class ElectronicGraderController extends AbstractController {
                 $row_num += 1;
                 continue;
             }
+            $team_name = $vals[4];
             $team_id = $vals[3];
             $user_id = $vals[2];
+
+            if ($team_name == '') {
+                $team_name = null;
+            }
 
             if ($this->core->getQueries()->getUserById($user_id) === null) {
                 $error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
@@ -1011,6 +1027,7 @@ class ElectronicGraderController extends AbstractController {
                 $new_teams_members[$team_id] = [];
             }
             array_push($new_teams_members[$team_id], $user_id);
+            $team_names[$team_id] = $team_name;
         }
 
         if ($error_message != "") {
@@ -1030,7 +1047,7 @@ class ElectronicGraderController extends AbstractController {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             $members = $this->core->getQueries()->getUsersById(array_slice($members, 1));
             try {
-                $gradeable->createTeam($leader, $members);
+                $gradeable->createTeam($leader, $members, '', -1, $team_names[$team_id]);
             }
             catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized ($leader_id): {$e->getMessage()}");
@@ -1059,7 +1076,7 @@ class ElectronicGraderController extends AbstractController {
 
         $all_teams = $gradeable->getTeams();
         $nl = "\n";
-        $csvdata = "First Name,Last Name,User ID,Team ID,Team Registration Section,Team Rotating Section" . $nl;
+        $csvdata = "First Name,Last Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
         foreach ($all_teams as $team) {
             if ($team->getSize() != 0) {
                 foreach ($team->getMemberUsers() as $user) {
@@ -1068,6 +1085,7 @@ class ElectronicGraderController extends AbstractController {
                         $user->getDisplayedLastName(),
                         $user->getId(),
                         $team->getId(),
+                        $team->getTeamName(),
                         $team->getRegistrationSection(),
                         $team->getRotatingSection()
                     ]);
@@ -1169,10 +1187,12 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        $team_name = $_POST['team_name'] ?? null;
+
         if ($new_team) {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             try {
-                $gradeable->createTeam($leader, $users, $reg_section, $rot_section);
+                $gradeable->createTeam($leader, $users, $reg_section, $rot_section, $team_name);
                 $this->core->addSuccessMessage("Created New Team {$team_id}");
             }
             catch (\Exception $e) {
@@ -1206,6 +1226,7 @@ class ElectronicGraderController extends AbstractController {
 
             $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section === 'NULL' ? null : $reg_section);
             $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section === 0 ? null : $rot_section);
+            $this->core->getQueries()->updateTeamName($team_id, $team_name);
             foreach ($add_user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
@@ -1682,10 +1703,16 @@ class ElectronicGraderController extends AbstractController {
         // Passing null returns grading for all graders.
         $grading_done_by = ($all_peers ? null : $grader);
         $response_data = $ta_graded_gradeable->toArray($grading_done_by);
-
+        $response_data_with_peer = $ta_graded_gradeable->toArray();
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
+        $combined_score = 0;
+        foreach ($response_data_with_peer['peer_scores'] as $score) {
+            $combined_score += $score;
+        }
+        //remove non peer component scores from combined score to get the combined peer score
+        $combined_peer_score = $combined_score - $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
         if (count($gradeable->getAutogradingConfig()->getPersonalizedTestcases($submitter)) > 1) {
@@ -1705,16 +1732,21 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
             }
         }
-
-        // If it is graded at all, then send ta score information
-        $response_data['ta_grading_total'] = $gradeable->getManualGradingPoints();
-        if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
-            if ($gradeable->hasPeerComponent()) {
-                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
-            }
-            else {
-                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
-            }
+        //send ta score information
+        $response_data['ta_grading_total'] = $gradeable->getTaPoints();
+        if ($gradeable->hasPeerComponent()) {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
+            $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalPeerScore($grading_done_by);
+            $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($this->core->getUser());
+            $response_data['peer_total'] = $gradeable->getPeerPoints();
+            $response_data['user_group'] = $this->core->getUser()->getGroup();
+            $response_data['peer_gradeable'] = true;
+            $response_data['combined_peer_score'] = $combined_peer_score;
+        }
+        else {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
+            $response_data['user_group'] = $this->core->getUser()->getGroup();
+            $response_data['peer_gradeable'] = false;
         }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
