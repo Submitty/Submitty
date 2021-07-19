@@ -181,7 +181,8 @@ function renderPDFToolbar() {
     }
 
     function changeColor(e){
-        setColor(e.target.value);
+        setColor(e.srcElement ? e.srcElement.getAttribute('value') : e.target.value);
+        $('#color_selector_menu').hide();
     }
 
     function setColor(color){
@@ -207,6 +208,7 @@ function renderPDFToolbar() {
             setPen(e.target.value, penColor);
         });
         document.addEventListener('colorchange', function(e){
+            console.log(e);
             setPen(penSize, e.target.value);
         });
     }
