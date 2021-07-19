@@ -30,6 +30,8 @@ def up(config, database):
             }
             database.session.execute(text(query), params)
     # we should be able to force the not null constraint now
+    database.execute("UPDATE courses SET group_name='root' WHERE group_name IS NULL;")
+    database.execute("UPDATE courses SET owner_name='root' WHERE owner_name IS NULL;")
     database.execute("ALTER TABLE courses ALTER COLUMN group_name SET NOT NULL;")
     database.execute("ALTER TABLE courses ALTER COLUMN owner_name SET NOT NULL;")
 
