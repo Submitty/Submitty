@@ -1,0 +1,51 @@
+.status-btn {
+    position: absolute;
+    min-width: 10%;
+    height: 5vh;
+    top: 0;
+    right: 0;
+}
+
+.button-container {
+    position: relative;
+    margin: auto;
+    display: inline-flexbox;
+}
+
+.expand {
+    display: none;
+    padding: 1vh;
+    margin-top: 0.5em;
+}
+
+.status {
+    list-style: none;
+    border: 1px solid var(--text-black);
+}
+
+.status-error {
+    background-color: var(--danger-red);
+    color: var(--text-white);
+}
+
+.status-warning {
+    background-color: transparent;
+}
+
+.status-success {
+    background-color: var(--good-green);
+    color: var(--text-white);
+}
+
+.status-container {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+.status-message {
+    word-wrap: break-word;
+}
+
+.divider {
+    border-top: 1px solid black;
+}

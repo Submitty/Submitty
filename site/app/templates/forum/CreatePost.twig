@@ -12,7 +12,7 @@
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
-                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Make Announcement"></i></a>
+                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top for seven days?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Make Announcement"></i></a>
 
             {% endif %}
 
@@ -32,7 +32,7 @@
 
     {% endif %}
 
-    <pre class='pre_forum'><span class="post_content pre-wrap" >{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></pre>
+    <div class='pre_forum'><span class="post_content">{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></div>
 
     <hr style="margin-bottom: 3px;">
 
@@ -67,13 +67,16 @@
         <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
     {% endif %}
 
+    {% if post.author_user_id == current_user and first and not thread_announced and date() < date(post_date)|date_modify("+1hour") and userGroup <= 2 %}
+        <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{activeThread.id }});"> Pin &amp; email this thread </a>
+    {% endif %}
     <span class="post-action-container">
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}
             <a class="post-email-toggle key_to_click" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
             <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
         {% endif %}
-
+        
         {% if userGroup <= 2 %}
             <a class="post-user-info key_to_click" tabindex = "0" onClick='changeName(this.parentNode, {{ post_user_info.info_name }}, {{ post_user_info.visible_user_json}}, {{ post_user_info.jscriptAnonFix}})' title="Show full user information" aria-label="Show full user information"><i class="fas fa-eye"></i></a>
         {% endif %}

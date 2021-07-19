@@ -1,12 +1,12 @@
 <div class="content">
     <h1> Polls </h1>
-    <br/> <br/>
+    <hr/>
 
     <div class="dropdown-wrapper">
         <div class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow down"></i>
+                <i class="fa fa-chevron-down"></i>
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
@@ -24,7 +24,12 @@
                 {% for poll in todays_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td align="left">
+                            {% set response_label = poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
+                            {% include "misc/Markdown.twig" with {
+                                content: response_label
+                            } only %}
+                        </td>
                         <td>
                             <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -54,7 +59,7 @@
         <div class="dropdown-bar">
             <h2> Older Polls </h2>
              <div class="dropdown-btn">
-                <i class="dropdown-arrow down"></i>
+                 <i class="fa fa-chevron-down"></i>
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
@@ -72,7 +77,12 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        <td align="left"> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        {% set response_label = poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
+                        <td align="left">
+                            {% include "misc/Markdown.twig" with {
+                                content: response_label
+                            } only %}
+                        </td>
                         <td>
                             <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

@@ -1,4 +1,4 @@
-/* TODO finally put this code to server and sidebar css*/
+/* TODO finally put this code to server and sidebar css */
 body {
     min-width: auto;
 }
@@ -49,6 +49,14 @@ aside {
     padding: 6px 0;
 }
 
+#bar_banner {
+    position: relative;
+    display: block;
+    width:100%;
+    margin: auto;
+    margin-bottom: 5px;
+}
+
 .navigation-box {
     margin: 0 auto;
     display: flex;
@@ -86,6 +94,7 @@ aside {
 .navigation-box.smaller-navbar .grading_toolbar {
     flex-wrap: wrap;
 }
+
 /* Content Panels CSS */
 
 .content-items-container {
@@ -105,18 +114,19 @@ aside {
 .active {
     border: unset;
 }
-/* Toolbar CSS*/
+
+/* Toolbar CSS */
 .grading_toolbar {
     display: flex;
-    padding-top:3px;
-    padding-bottom:3px;
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
 .grading_toolbar .ta-navlink-cont:hover {
-    transform: translate(0 , -2px);
+    transform: translate(0, -2px);
     cursor: pointer;
     transition: transform 0.2s;
-    box-shadow: 0px 0px 5px 5px var(--subheading-underscore-grey);
+    box-shadow: 0 0 5px 5px var(--subheading-underscore-grey);
     background-color: var(--subheading-underscore-grey);
 }
 
@@ -180,7 +190,7 @@ button > i.fas:hover {
     position: absolute;
     top: 49%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
 }
 
 progress {
@@ -202,6 +212,7 @@ progress::-webkit-progress-value {
 
 .panel-header-box {
     display: flex;
+    margin: auto;
 }
 
 .grade-panel {
@@ -226,6 +237,7 @@ progress::-webkit-progress-value {
     left: 4px;
     font-size: 14px;
 }
+
 .grade-panel button i:hover {
     color: unset;
 }
@@ -251,14 +263,16 @@ progress::-webkit-progress-value {
     display: none;
 }
 
-.grade-panel.active button, .grade-panel:hover button {
+.grade-panel.active button,
+.grade-panel:hover button {
     color: white;
 }
 
-/* Default Btn CSS (background + hover + active)*/
+/* Default Btn CSS (background + hover + active) */
 .grade-panel {
     border: 2px solid #1c83b7;
 }
+
 .grade-panel:hover,
 .grade-panel.active,
 .grade-panel .panel-position-cont option:hover,
@@ -280,6 +294,7 @@ progress::-webkit-progress-value {
 #grading_rubric_btn {
     border: 2px solid #249c63;
 }
+
 #grading_rubric_btn:hover,
 #grading_rubric_btn.active,
 #grading_rubric_select option:hover,
@@ -290,6 +305,7 @@ progress::-webkit-progress-value {
 #submission_browser_btn {
     border: 2px solid #1c83b7;
 }
+
 #submission_browser_btn:hover,
 #submission_browser_btn.active,
 #submission_browser_select option:hover,
@@ -365,7 +381,8 @@ progress::-webkit-progress-value {
     border-bottom: 1px solid var(--text-black);
 }
 
-.panel-position-cont option:hover, .panel-position-cont option:focus {
+.panel-position-cont option:hover,
+.panel-position-cont option:focus {
     color: white;
 }
 
@@ -374,6 +391,7 @@ progress::-webkit-progress-value {
 .panels-container {
     margin: 0;
     background: var(--standard-medium-gray);
+    position:relative;
 }
 
 .two-panel-cont {
@@ -389,15 +407,23 @@ progress::-webkit-progress-value {
 .two-panel-item {
     min-width: 200px;
     width: 50%;
+    position: relative;
 }
 
-.panel-item-section.left-top, .panel-item-section.right-top {
+.panel-item-section {
+    position: relative;
+}
+
+.panel-item-section.left-top,
+.panel-item-section.right-top {
     flex: 1 1 0%;
     height: 50%;
     min-height: 100px;
     background: var(--standard-medium-gray);
 }
-.panel-item-section.left-bottom.active, .panel-item-section.right-bottom.active {
+
+.panel-item-section.left-bottom.active,
+.panel-item-section.right-bottom.active {
     display: block;
     height: 50%;
     min-height: 100px;
@@ -412,12 +438,14 @@ progress::-webkit-progress-value {
     display: none;
 }
 
-.two-panel-left.active, .two-panel-right {
+.two-panel-left.active,
+.two-panel-right {
     display: flex;
     flex-direction: column;
 }
 
-.two-panel-drag-bar.active, .panel-item-section-drag-bar.active {
+.two-panel-drag-bar.active,
+.panel-item-section-drag-bar.active {
     display: block;
 }
 
@@ -440,7 +468,7 @@ progress::-webkit-progress-value {
     background: transparent;
 }
 
-.panel-item-section-drag-bar:after {
+.panel-item-section-drag-bar::after {
     content: "";
     position: absolute;
     height: 7px;
@@ -454,11 +482,12 @@ progress::-webkit-progress-value {
     background-color: var(--submitty-logo-blue);
 }
 
-.panel-item-section-drag-bar:hover:after, .panel-item-section-drag-bar:active:after {
-  height: 9px;
+.panel-item-section-drag-bar:hover::after,
+.panel-item-section-drag-bar:active::after {
+    height: 9px;
 }
 
-.two-panel-drag-bar:after {
+.two-panel-drag-bar::after {
     content: "";
     position: absolute;
     width: 7px;
@@ -472,8 +501,42 @@ progress::-webkit-progress-value {
     transition: all 0.1s;
 }
 
-.two-panel-drag-bar:hover:after, .two-panel-drag-bar:active:after  {
-  width: 9px;
+.two-panel-drag-bar:hover::after,
+.two-panel-drag-bar:active::after {
+    width: 9px;
+}
+
+.panel-instructions {
+    color: dimgray;
+    position: absolute;
+    top: 50%;
+    width:100%;
+    text-align: center;
+}
+
+#grading-panel-student-name {
+    position: absolute;
+    overflow-y: scroll;
+    border-right: 1px solid var(--standard-light-medium-gray);
+    left: 5px;
+    top: 5px;
+}
+
+#grading-scroll-message {
+    color: var(--standard-medium-gray);
+    margin-left: 5px;
+    font-size:  14px;
+}
+
+#grading-panel-student-name::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+  
+#grading-panel-student-name::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
 #regrade_inner_info .inner-container {
@@ -481,31 +544,31 @@ progress::-webkit-progress-value {
 }
 
 .rubric_panel {
-    border:5px solid var(--standard-gray-blue);
+    border: 5px solid var(--standard-gray-blue);
 }
 
 #autograding_results.rubric_panel {
-    border:5px solid var(--standard-vibrant-pink-red);
+    border: 5px solid var(--standard-vibrant-pink-red);
 }
 
 #grading_rubric.rubric_panel {
-    border:5px solid var(--standard-dark-mint-green);
+    border: 5px solid var(--standard-dark-mint-green);
 }
 
 #submission_browser.rubric_panel {
-    border:5px solid var(--standard-gray-blue);
+    border: 5px solid var(--standard-gray-blue);
 }
 
 #regrade_info.rubric_panel {
-    border:5px solid var(--standard-vibrant-orange);
+    border: 5px solid var(--standard-vibrant-orange);
 }
 
 #student_info.rubric_panel {
-    border:5px solid var(--text-black);
+    border: 5px solid var(--text-black);
 }
 
 #peer_info.rubric_panel {
-    border:5px solid var(--standard-plum-purple);
+    border: 5px solid var(--standard-plum-purple);
 }
 
 .rubric_panel {
@@ -516,6 +579,7 @@ progress::-webkit-progress-value {
     height: 100%;
     opacity: 0.95;
 }
+
 .sol-textbox-cont {
     height: calc(100% - 120px);
     width: 100%;
@@ -541,36 +605,36 @@ progress::-webkit-progress-value {
 
 .banner {
     border: solid 6px var(--important-post);
-    position:relative;
+    position: relative;
     display: block;
-    width: 400px;
-    height: 25px;
+    width: fit-content;
+    padding: 0.5vh 0.5vw 0.5vh 0.5vw;
+    height: fit-content;
     top: 2px;
-    left: 120px;
-    padding-top:3px;
-    padding-bottom:3px;
+    margin: auto;
+    padding-top: 3px;
+    padding-bottom: 3px;
     text-align: center;
-    vertical-align: middle;
     line-height: 25px;
-    font-weight:    bold;
+    font-weight: bold;
     background-color: var(--badge-backgroud-red);
 }
 
 .info_banner {
     border: solid 6px var(--important-post);
-    position:relative;
+    position: relative;
     display: block;
     float: left;
     width: 400px;
     height: 25px;
     top: 2px;
     left: 120px;
-    padding-top:3px;
-    padding-bottom:3px;
+    padding-top: 3px;
+    padding-bottom: 3px;
     text-align: center;
     vertical-align: middle;
     line-height: 25px;
-    font-weight:    bold;
+    font-weight: bold;
 }
 
 .icon-auto-grading-results {
@@ -580,8 +644,9 @@ progress::-webkit-progress-value {
     width: 22px;
     margin: 5px;
 }
+
 .icon-selected.fa-list {
-    box-shadow: 0px 0px 3px 3px var(--standard-vibrant-pink);
+    box-shadow: 0 0 3px 3px var(--standard-vibrant-pink);
     background-color: var(--standard-vibrant-pink);
 }
 
@@ -592,13 +657,14 @@ progress::-webkit-progress-value {
     width: 22px;
     margin: 5px;
 }
+
 .icon-selected.fa-edit {
-    box-shadow: 0px 0px 3px 3px var(--standard-mint-green);
+    box-shadow: 0 0 3px 3px var(--standard-mint-green);
     background-color: var(--standard-mint-green);
 }
 
 .icon-selected.fa-comment-alt {
-    box-shadow: 0px 0px 3px 3px var(--standard-light-seafoam);
+    box-shadow: 0 0 3px 3px var(--standard-light-seafoam);
     background-color: var(--standard-light-seafoam);
 }
 
@@ -609,8 +675,9 @@ progress::-webkit-progress-value {
     width: 22px;
     margin: 5px;
 }
+
 .icon-selected.fa-folder-open {
-    box-shadow: 0px 0px 3px 3px var(--standard-aqua);
+    box-shadow: 0 0 3px 3px var(--standard-aqua);
     background-color: var(--standard-aqua);
 }
 
@@ -621,29 +688,33 @@ progress::-webkit-progress-value {
     width: 22px;
     margin: 5px;
 }
+
 .icon-selected.fa-user {
-    box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
+
 .icon-selected.fa-users {
-    box-shadow: 0px 0px 3px 3px var(--standard-plum-purple);
+    box-shadow: 0 0 3px 3px var(--standard-plum-purple);
     background-color: var(--standard-plum-purple);
 }
-.icon-selected.grade_inquiry_icon{
-    box-shadow: 0px 0px 3px 3px var(--standard-vibrant-orange);
+
+.icon-selected.grade_inquiry_icon {
+    box-shadow: 0 0 3px 3px var(--standard-vibrant-orange);
     background-color: var(--standard-vibrant-orange);
 }
+
 .icon-header {
     text-align: center;
     width: 1em;
 }
 
 .icon-selected.fa-wrench {
-    box-shadow: 0px 0px 3px 3px var(--standard-light-medium-gray);
+    box-shadow: 0 0 3px 3px var(--standard-light-medium-gray);
     background-color: var(--standard-light-medium-gray);
 }
 
-.icon-refresh{
+.icon-refresh {
     background: url('../img/refresh-page-option.png') no-repeat;
     background-size: 100%;
     display: inline-block;
@@ -668,11 +739,21 @@ progress::-webkit-progress-value {
     margin: 5px;
 }
 
+.custom-mark-number-input::-webkit-outer-spin-button,
+.custom-mark-number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.custom-mark-arrow-icon:hover {
+    color: var(--standard-light-medium-gray);
+}
+
 .ta-nav-wrapper {
     width: 100%;
 }
 
-.file-viewer{
+.file-viewer {
     margin-right: 10px;
     cursor: pointer;
 }
@@ -689,7 +770,7 @@ progress::-webkit-progress-value {
     text-decoration: none;
 }
 
-.div-viewer{
+.div-viewer {
     float: left;
     margin-right: 10px;
     cursor: pointer;
@@ -733,7 +814,7 @@ progress::-webkit-progress-value {
 
 .icon-plus {
     background-image: url('../img/glyphicons-halflings.png');
-    background-position: 0px -96px;
+    background-position: 0 -96px;
     background-repeat: no-repeat;
     color: rgb(51, 51, 51);
     display: inline-block;
@@ -787,7 +868,7 @@ progress::-webkit-progress-value {
 }
 
 tr.is_publish {
-    background-color: #81D4FA;
+    background-color: #81d4fa;
 }
 
 .btn-large {
@@ -800,8 +881,8 @@ tr.is_publish {
     padding: 16px;
 }
 
-#regrade_request_box.rubric_panel{
-    border:5px solid #f47a42 ;
+#regrade_request_box.rubric_panel {
+    border: 5px solid #f47a42;
 }
 
 #settings-content {
@@ -816,13 +897,17 @@ tr.is_publish {
 }
 
 .ta-grading-setting-list tr {
-    border: 1px solid #ddd;
+    border: 1px solid var(--standard-light-gray);
     border-left: none;
     border-right: none;
 }
 
+.ta-grading-setting-list tr:nth-child(odd) {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .ta-grading-setting-list tr:nth-child(even) {
-    background-color: var(--alternating-row-color-light);
+    background-color: var(--default-white);
 }
 
 .ta-grading-setting-list td {
@@ -845,16 +930,16 @@ tr.is_publish {
 }
 
 .overall-comment-status {
-    text-align: right
+    text-align: right;
 }
 
 .gradeable .general-comment {
-    background-color:var(--overall-comment);
+    background-color: var(--overall-comment);
 }
 
 .gradeable .general-comment-entry {
     width: 100%;
-    min-height:100px;
+    min-height: 100px;
     resize: vertical;
 }
 
@@ -889,9 +974,9 @@ tr.is_publish {
 }
 
 .gradeable .version-warning {
-    color:var(--error-alert-dark-red);
+    color: var(--error-alert-dark-red);
     font-weight: bold;
-    font-size:medium;
+    font-size: medium;
 }
 
 .gradeable .graded-by {
@@ -1000,8 +1085,9 @@ tr.is_publish {
     cursor: pointer;
 }
 
-.gradeable .component .row.divider, .solution-box .row.divider {
-    background: #DDD;
+.gradeable .component .row.divider,
+.solution-box .row.divider {
+    background: #dddddd;
     height: 2px;
     width: 100%;
     padding-left: 10px;
@@ -1015,7 +1101,7 @@ tr.is_publish {
 
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
-    padding: 8px 0px;
+    padding: 8px 0;
     margin: 0 -5px;
 }
 
@@ -1046,7 +1132,7 @@ tr.is_publish {
 
 .gradeable .mark-container {
     min-height: 28px;
-    border-bottom: 1px solid #999;
+    border-bottom: 1px solid #999999;
     padding: 3px;
 }
 
@@ -1098,7 +1184,8 @@ tr.is_publish {
     justify-content: flex-start;
 }
 
-.gradeable .mark-container input, .gradeable .mark-container textarea {
+.gradeable .mark-container input,
+.gradeable .mark-container textarea {
     box-sizing: border-box;
 }
 
@@ -1120,7 +1207,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container.mark-publish {
-    background-color: #bde;
+    background-color: #bbddee;
 }
 
 .gradeable .mark-disabled span {
@@ -1129,12 +1216,12 @@ tr.is_publish {
 }
 
 .gradeable .mark-deleted {
-    background: #FFAAAA
+    background: #ffaaaa;
 }
 
 .gradeable .custom-mark-error {
-    border-color: #F00;
-    background-color: #FEE;
+    border-color: #ff0000;
+    background-color: #ffeeee;
 }
 
 .gradeable .mark-deleted span.delete-mark-container {
@@ -1160,7 +1247,7 @@ tr.is_publish {
     min-width: 20px;
     width: 20px;
     text-align: right;
-    opacity: 1.0;
+    opacity: 1;
 }
 
 .gradeable .mark-uneditable {
@@ -1239,13 +1326,13 @@ tr.is_publish {
 }
 
 #discussion_browser.rubric_panel {
-    border:5px solid var(--standard-light-seafoam);
+    border: 5px solid var(--standard-light-seafoam);
 }
 
 #directory_view {
-    position:relative;
-    float:left;
-    width:100%;
+    position: relative;
+    float: left;
+    width: 100%;
     padding-left: 10px;
 }
 
@@ -1263,12 +1350,12 @@ tr.is_publish {
 }
 
 #file-content {
-    height:90%;
+    height: 90%;
     width: 100%;
 }
 
 #changeCodeStyle {
-    display:inline-block;
+    display: inline-block;
 }
 
 /* Panels Selector */
@@ -1288,7 +1375,7 @@ tr.is_publish {
     font-weight: initial;
 }
 
-.layouts-cont .layout-option {
+.layout-option {
     margin-bottom: 20px;
 }
 
@@ -1299,7 +1386,7 @@ tr.is_publish {
 .layout-option-cont {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
-    width: 83vw;
+    max-width: 83vw;
     grid-column-gap: 5px;
     grid-row-gap: 5px;
 }
@@ -1320,7 +1407,7 @@ tr.is_publish {
     width: 100%;
 }
 
-/* Solution/TA Notes Panel*/
+/* Solution/TA Notes Panel */
 
 #solution_ta_notes {
     padding: 10px;
@@ -1366,7 +1453,7 @@ tr.is_publish {
 }
 
 .solution-box button.hide {
-    display: none!important;
+    display: none !important;
 }
 
 [id^=textbox-solution-] {
@@ -1381,6 +1468,17 @@ tr.is_publish {
     padding: 10px;
 }
 
+input[type="radio"][disabled=""]:checked::before {
+    content: "";
+    display: block;
+    position: relative;
+    top: 3px;
+    left: 3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 100%;
+    background: var(--standard-medium-dark-gray);
+}
 
 /* Media queries */
 @media (max-width: 540px) {
@@ -1397,6 +1495,7 @@ tr.is_publish {
         top: 30%;
         left: 20%;
     }
+
     to {
         transform: scale(1, 1);
         position: fixed;

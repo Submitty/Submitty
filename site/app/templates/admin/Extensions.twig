@@ -13,7 +13,7 @@
                 {% for index, value in gradeables %}
                     <option
                             value="{{value['g_id']}}"
-                            {% if current_gradeable['g_id'] == value['g_id'] %} selected {% endif %}
+                            {% if current_gradeable is not null and current_gradeable['g_id'] == value['g_id'] %} selected {% endif %}
                     >
                         {{ value['g_title'] }}
                     </option>
@@ -27,7 +27,7 @@
                 </p>
             {% endif %}
         </div>
-         <input type="hidden" name="due_date" value="{{ due_date }}" />
+        <input type="hidden" name="due_date" value="" />
         <fieldset class="single-student">
             <legend class="option-title">Single Student Entry</legend>
             <br>
@@ -83,7 +83,7 @@
                         <td>{{ user.late_day_exceptions }}</td>
                         <td>
                             <a
-                                aria-label="Delete {{ user.getId() }}'s extension for {{ current_gradeable['g_id'] }}"
+                                aria-label="Delete {{ user.user_id }}'s extension for {{ current_gradeable['g_id'] }}"
                                 href="javascript:deleteHomeworkExtension('{{ user.user_id }}');"
                             >
                                 <i class="fas fa-trash"></i>

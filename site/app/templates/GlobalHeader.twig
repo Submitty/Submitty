@@ -94,11 +94,11 @@
 </head>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
-    {% if wrapper_urls['top_bar.html'] != null %}
+    {% if wrapper_urls['top_bar.html'] is defined %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
-        {% if wrapper_urls['left_sidebar.html'] != null %}
+        {% if wrapper_urls['left_sidebar.html'] is defined %}
             {# uploaded sidebar can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
@@ -138,7 +138,9 @@
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}
-                                <span>&gt;</span> {# span required to give conditional rendering #}
+                                <span class="centered-icon">
+                                    <i class="fas fa-angle-right"></i>
+                                </span>
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}

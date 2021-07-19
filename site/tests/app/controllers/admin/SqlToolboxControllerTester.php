@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
+use app\entities\db\Table;
 use app\exceptions\DatabaseException;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\response\JsonResponse;
 use app\views\admin\SqlToolboxView;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use ReflectionClass;
 use tests\BaseUnitTest;
 
 class SqlToolboxControllerTester extends BaseUnitTest {
@@ -41,11 +46,42 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     }
 
     public function testShowToolbox(): void {
+        $reflection = new ReflectionClass(Table::class);
+        $tables = [
+            $reflection->newInstanceWithoutConstructor(),
+            $reflection->newInstanceWithoutConstructor(),
+        ];
+        $prop = $reflection->getProperty('name');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[0], 'bar');
+        $prop->setAccessible(false);
+
+        $prop = $reflection->getProperty('name');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[1], 'foo');
+        $prop->setAccessible(false);
+
+        /** @var EntityManager&\PHPUnit\Framework\MockObject\MockObject $entity_manager */
+        $entity_manager = $this->createMock(EntityManager::class);
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['schema' => 'public'], ['name' => 'ASC'])
+            ->willReturn($tables);
+        $entity_manager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(Table::class)
+            ->willReturn($repository);
+
+        $this->core->setCourseEntityManager($entity_manager);
+
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertEmpty($response->parameters);
+        $this->assertSame($response->parameters, [$tables]);
     }
 
     public function testRunQuery(): void {

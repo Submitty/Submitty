@@ -1,5 +1,3 @@
-{% import _self as self %}
-
 <div class="content">
     <h1>
         {{ gradeable.getTitle() }}
@@ -34,16 +32,32 @@
     </div>
 
     <div class="column-wrapper" style="margin: 1em 0;">
-        <p>
             {% if action == 'lab' %}
-                No Color - No Credit<br />
-                Dark Blue - Full Credit<br />
-                Light Blue - Half Credit<br />
-                Red - [SAVE ERROR] Refresh Page
+                <ul id="details-legend" class="table-bordered">
+                    <li>
+                        No Color - No Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-full-credit simple-icon"></i>
+                        Full Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-half-credit simple-icon"></i>
+                        Half Credit
+                    </li>
+                    <li>
+                        <i class="fas fa-square simple-save-error simple-icon"></i>
+                        [SAVE ERROR] Refresh Page
+                    </li>
+                </ul>
             {% else %}
-                Red - [SAVE ERROR] Refresh Page
+                <ul id="details-legend" class="table-bordered">
+                    <li>
+                        <i class="fas fa-square simple-save-error simple-icon"></i>
+                        [SAVE ERROR] Refresh Page
+                    </li>
+                </ul>
             {% endif %}
-        </p>
 
         <div class="row-wrapper">
             {#
@@ -171,7 +185,7 @@
                 {# /Section header #}
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
                     {% for grade in section.rows %}
-                        {{ self.render_row(self, action, gradeable, section, grade, loop.index0 + row_index_start, components_numeric) }}
+                        {{ _self.render_row(action, gradeable, section, grade, loop.index0 + row_index_start, components_numeric) }}
                     {% endfor %}
                 </tbody>
                 {% set row_index_start = row_index_start + section.rows|length %}
@@ -186,9 +200,9 @@
 </div>
 
 {# Render one student's row in the table #}
-{% macro render_row(self, action, gradeable, section, grade, index, components_numeric) %}
+{% macro render_row(action, gradeable, section, grade, index, components_numeric) %}
     <tr id="row-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
-        {% if student.accessGrading() %}
+        {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
     >
@@ -203,15 +217,15 @@
         <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedLastName() }}</td>
 
         {% if action == 'lab' %}
-            {{ self.render_lab_cols(self, gradeable, section, grade, index) }}
+            {{ _self.render_lab_cols(gradeable, section, grade, index) }}
         {% else %}
-            {{ self.render_numeric_cols(self, gradeable, section, grade, index, components_numeric) }}
+            {{ _self.render_numeric_cols(gradeable, section, grade, index, components_numeric) }}
         {% endif %}
     </tr>
 {% endmacro %}
 
 {# Render the grading columns for a lab #}
-{% macro render_lab_cols(self, gradeable, section, grade, index) %}
+{% macro render_lab_cols(gradeable, section, grade, index) %}
     {% for component in grade.getGradeable().getComponents() %}
         {% if component.isText() %}
             <td>
@@ -219,26 +233,26 @@
             </td>
         {% else %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
-            {% set component_grade = ta_grade.getGradedComponent(component) %}
+            {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component_grade.getScore() | default('0') }}"
-                data-grader="{{ component_grade.getGrader().getId() }}"
-                {% if component_grade.getGradeTime() != null %}
+                data-grader="{{ component_grade.getGrader().getId() | default('') }}"
+                {% if component_grade is not null and component_grade.getGradeTime() != null %}
                     data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                 {% endif %}
-                {% if component_grade.getScore() == 1.0 %}
+                {% if component_grade is not null and component_grade.getScore() == 1.0 %}
                     style="background-color: #149bdf;"
-                {% elseif component_grade.getScore() == 0.5 %}
+                {% elseif component_grade is not null and component_grade.getScore() == 0.5 %}
                     style="background-color: #88d0f4;"
                 {% endif %}
             >
                 {% if core.getUser().accessFullGrading() %}
-                    <p class="simple-grade-grader">{{ component_grade.getGrader().getId() }}</p>
-                    <p class="simple-grade-date">{{ component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+                    <p class="simple-grade-grader">{{ component_grade is not null ? component_grade.getGrader().getId() }}</p>
+                    <p class="simple-grade-date">{{ component_grade is not null and component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
                 {% endif %}
 
             </td>
@@ -247,29 +261,30 @@
 {% endmacro %}
 
 {# Render the grading columns for a test #}
-{% macro render_numeric_cols(self, gradeable, section, grade, index, components_numeric) %}
+{% macro render_numeric_cols(gradeable, section, grade, index, components_numeric) %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
         {% for component in grade.getGradeable().getComponents()|filter((component) => not component.isText()) %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
-            {% set component_grade = ta_grade.getGradedComponent(component) %}
-            {% set total = total + component_grade.getScore() %}
+            {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
+            {% set component_score = component_grade.getScore() | default(0) %}
+            {% set total = total + component_score %}
             <td class="option-small-input">
                 <input
                     class="option-small-box cell-grade" tabindex="0"
-                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
-                        {{ component_grade.getScore() == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
+                    style="text-align: center; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                        {{ component_score == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
-                    data-origval="{{ component_grade.getScore() | default('0') }}"
-                    value="{{ component_grade.getScore() | default('0') }}"
+                    data-origval="{{ component_score }}"
+                    value="{{ component_score }}"
                     onclick="this.select()"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
-                    {% if component_grade.getGrader() != null %}
+                    {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
-                    {% if component_grade.getGradeTime() != null %}
+                    {% if component_grade is not null and component_grade.getGradeTime() != null %}
                         data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                     {% endif %}
                     data-num="true"
@@ -283,20 +298,32 @@
         </td>
     {% endif %}
 
+    <script>
+        function adjustHeight(el){
+            el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+        }
+        function minimizeHeight(el) {
+            el.style.height = '30px';
+        }
+    </script>
+
     {% set text_start = components_numeric|length %}
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
-        {% set component_grade = ta_grade.getGradedComponent(component) %}
+        {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <input
-                class="option-small-box cell-grade" tabindex="0"
-                type="text"
-                id="cell-{{ index }}-{{ text_start + loop.index0 }}"
-                value="{{ component_grade.getComment() }}"
-                onclick="this.select()"
-                data-id="{{ component.getId() }}"
-                aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}" 
-            />
+            <textarea class="option-small-box cell-grade"
+                  tabindex="0" id="cell-{{ index }}-{{ text_start + loop.index0 }}"
+                  contenteditable
+                  onclick="this.select()"
+                  onfocus="adjustHeight(this);"
+                  onblur="minimizeHeight(this);"
+                  onkeyup="adjustHeight(this);"
+                  data-id="{{ component.getId() }}"
+                  aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
+                  rows="1"
+                  style="resize: vertical;"
+            >{{ component_grade.getComment() | default('') }}</textarea>
         </td>
     {% endfor %}
 {% endmacro %}
