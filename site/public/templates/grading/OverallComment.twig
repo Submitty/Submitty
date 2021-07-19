@@ -47,13 +47,20 @@ Required Parameters:
             <div
               id="overall-comment-{{user | escape }}"
               style="display:none;"
-              class="general-comment-entry markdown-preview noscroll key_to_click" tabindex="0"
+              class="general-comment-entry markdown-preview overall-comment-other noscroll key_to_click" tabindex="0"
             >
               {{comment|escape }}
             </div>
         {% endfor %}
     </div>
     <script>
+        $(document).ready(function(){
+            $('.overall-comment-other').each(function() {
+                const content = $(this).html().trim();
+                const url = buildCourseUrl(['markdown', 'preview']);
+                renderMarkdown($(this), url, content);
+            });
+        });
         var grader = "{{overall_comment["logged_in_user"]["user_id"] | escape('js') }}";
         $(document).on('input','#overall-comment-' + grader,function () {
             var currentOverallComment  = $('textarea#overall-comment-' + grader).val();

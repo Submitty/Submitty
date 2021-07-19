@@ -999,10 +999,11 @@ class ElectronicGraderController extends AbstractController {
         $row_num = 1;
         $error_message = "";
         $new_teams_members = [];
+        $team_names = [];
         foreach ($contents as $content) {
             $vals = str_getcsv($content);
             $vals = array_map('trim', $vals);
-            if (count($vals) != 6) {
+            if (count($vals) != 7) {
                 $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
                 continue;
             }
@@ -1010,8 +1011,13 @@ class ElectronicGraderController extends AbstractController {
                 $row_num += 1;
                 continue;
             }
+            $team_name = $vals[4];
             $team_id = $vals[3];
             $user_id = $vals[2];
+
+            if ($team_name == '') {
+                $team_name = null;
+            }
 
             if ($this->core->getQueries()->getUserById($user_id) === null) {
                 $error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
@@ -1021,6 +1027,7 @@ class ElectronicGraderController extends AbstractController {
                 $new_teams_members[$team_id] = [];
             }
             array_push($new_teams_members[$team_id], $user_id);
+            $team_names[$team_id] = $team_name;
         }
 
         if ($error_message != "") {
@@ -1040,7 +1047,7 @@ class ElectronicGraderController extends AbstractController {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             $members = $this->core->getQueries()->getUsersById(array_slice($members, 1));
             try {
-                $gradeable->createTeam($leader, $members);
+                $gradeable->createTeam($leader, $members, '', -1, $team_names[$team_id]);
             }
             catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized ($leader_id): {$e->getMessage()}");
@@ -1069,7 +1076,7 @@ class ElectronicGraderController extends AbstractController {
 
         $all_teams = $gradeable->getTeams();
         $nl = "\n";
-        $csvdata = "First Name,Last Name,User ID,Team ID,Team Registration Section,Team Rotating Section" . $nl;
+        $csvdata = "First Name,Last Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
         foreach ($all_teams as $team) {
             if ($team->getSize() != 0) {
                 foreach ($team->getMemberUsers() as $user) {
@@ -1078,6 +1085,7 @@ class ElectronicGraderController extends AbstractController {
                         $user->getDisplayedLastName(),
                         $user->getId(),
                         $team->getId(),
+                        $team->getTeamName(),
                         $team->getRegistrationSection(),
                         $team->getRotatingSection()
                     ]);
@@ -1179,10 +1187,12 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        $team_name = $_POST['team_name'] ?? null;
+
         if ($new_team) {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             try {
-                $gradeable->createTeam($leader, $users, $reg_section, $rot_section);
+                $gradeable->createTeam($leader, $users, $reg_section, $rot_section, $team_name);
                 $this->core->addSuccessMessage("Created New Team {$team_id}");
             }
             catch (\Exception $e) {
@@ -1216,6 +1226,7 @@ class ElectronicGraderController extends AbstractController {
 
             $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section === 'NULL' ? null : $reg_section);
             $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section === 0 ? null : $rot_section);
+            $this->core->getQueries()->updateTeamName($team_id, $team_name);
             foreach ($add_user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);

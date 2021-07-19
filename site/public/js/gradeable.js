@@ -289,7 +289,7 @@ function renderInstructorEditGradeable(gradeable, itempool_available, itempool_o
 function renderEditComponent(component, precision, showMarkList) {
 
     return new Promise(function (resolve, reject) {
-        // TODO: i don't think this is async
+        // TODO: I don't think this is async
         resolve(Twig.twig({ref: "EditComponent"}).render({
             'component': component,
             'precision': precision,

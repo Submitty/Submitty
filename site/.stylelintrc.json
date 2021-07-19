@@ -16,6 +16,7 @@
     "public/css/pdf/toolbar_fullscreen.css",
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
+    "public/css/highlightjs/*",
     "public/css/user-profile.css",
     "public/css/table.css",
     "public/css/submitbox.css",

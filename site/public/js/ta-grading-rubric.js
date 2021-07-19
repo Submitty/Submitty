@@ -2499,7 +2499,6 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
 
 function open_overall_comment_tab(user) {
     const textarea = $(`#overall-comment-${user}`);
-    const content = textarea.html();
 
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
@@ -2513,12 +2512,6 @@ function open_overall_comment_tab(user) {
         }
     } else {
         textarea.show();
-    }
-
-    //if it is someone not the current user's comment and it hasn't been rendered yet
-    if(textarea.hasClass('markdown-preview') && !textarea.find('.markdown').length){
-        const url = buildCourseUrl(['markdown', 'preview']);
-        renderMarkdown($(`#overall-comment-${user}`), url, content);
     }
 }
 
