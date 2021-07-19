@@ -1584,13 +1584,6 @@ function toggleMarkdown(post_box_id) {
   $(this).toggleClass('markdown-active markdown-inactive'); 
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-  // const show_markdown_buttons = localStorage.getItem('render_markdown_buttons');
-  // if (show_markdown_buttons === null) {
-  //   localStorage.setItem('render_markdown_buttons', true);
-  // } 
-  // else {
-  //   localStorage.setItem('render_markdown_buttons', !JSON.parse(show_markdown_buttons));
-  // }
 }
 
 function previewForumMarkdown(){
