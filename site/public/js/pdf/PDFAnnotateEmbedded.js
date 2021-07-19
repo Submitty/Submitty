@@ -33,7 +33,7 @@ const ANNOTATION_DEFAULTS = {
     rotation: 0,
     x: 50,
     y: 50,
-    content: "DEFAULT VALUE",
+    content: 'DEFAULT VALUE',
     width: 5,
 };
 
@@ -335,7 +335,7 @@ function toggleOtherAnnotations(hide_others) {
             if (from_other_user) {
                 if (hide_others) {
                     if (!window.GENERAL_INFORMATION.hidden_annotations) {
-                        window.GENERAL_INFORMATION.hidden_annotations = {}
+                        window.GENERAL_INFORMATION.hidden_annotations = {};
                     }
                     window.GENERAL_INFORMATION.hidden_annotations[annotator] = localStorage.getItem(localStorage.key(i));
                     localStorage.setItem(localStorage.key(i), '[]');
@@ -352,27 +352,26 @@ function toggleOtherAnnotations(hide_others) {
 function repairPDF() {
     let remove_faulty = false;
     let found_faulty = false;
-    let found_faulty_other = false;
     $('#grading-pdf-repair').hide();
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i).includes('annotations')) {
             const annotator = localStorage.key(i).split('/')[1];
             const from_other_user = annotator !== window.GENERAL_INFORMATION.grader_id;
-            let annotations = JSON.parse(localStorage.getItem(localStorage.key(i)));
+            const annotations = JSON.parse(localStorage.getItem(localStorage.key(i)));
             if (!Array.isArray(annotations) && !from_other_user) {
                 found_faulty = true;
                 window.GENERAL_INFORMATION.broken = true;
                 const irreparable = confirm('The annotations for this pdf are in an irreparable state.\nWould you like to reset them and refresh the page?');
                 if (irreparable) {
                     //clearAllAnnotations();
-                    localStorage.setItem(localStorage.key(i), "[]");
+                    localStorage.setItem(localStorage.key(i), '[]');
                     saveFile();
                     window.location.reload();
                     return;
                 }
                 else {
                     $('#viewer').remove();
-                    if(!$('#grading-pdf-repair-btn').length) {
+                    if (!$('#grading-pdf-repair-btn').length) {
                         $('#file-view').find('.file-view-header').append('<button id="grading-pdf-repair-btn" class="btn btn-primary" onclick="repairPDF()">Repair <i class="fas fa-tools"></i></button>');
                     }
                     $('#grading-pdf-repair').show();
@@ -381,9 +380,8 @@ function repairPDF() {
             }
             for (let i = annotations.length-1; i >= 0; i--) {
                 const faulty_properties = Object.keys(annotations[i]).filter(prop => annotations[i][prop] === null);
-                if(annotations[i] && faulty_properties.length > 0) {
+                if (annotations[i] && faulty_properties.length > 0) {
                     if (from_other_user) {
-                        found_faulty_other = true;
                         alert(`Faulty annotations from user ${annotator} have been detected. \nThey will be temporarily repaired for you, but please contact them so they can come to this page and repair them fully.`);
                     }
                     if (!remove_faulty && !from_other_user) {
@@ -394,9 +392,8 @@ function repairPDF() {
                         }
                     }
                     if (remove_faulty || from_other_user) {
-                        console.log('repairing...')
-                        for(const faulty_property of faulty_properties) {
-                            if (ANNOTATION_DEFAULTS.hasOwnProperty(faulty_property)) {
+                        for (const faulty_property of faulty_properties) {
+                            if (Object.prototype.hasOwnProperty.call(ANNOTATION_DEFAULTS, faulty_property)) {
                                 annotations[i][faulty_property] = ANNOTATION_DEFAULTS[faulty_property];
                             } 
                             //if there is no default value for this property, just dedlete the annotation
@@ -428,6 +425,5 @@ function repairPDF() {
 }
 
 function saveFile () {
-    const save_button_bbox = $('.toolbar-action[value=save]')[0].getBoundingClientRect()
-    document.elementFromPoint(save_button_bbox.left, save_button_bbox.top).click();
+    $('#save-pdf-btn').click();
 }
