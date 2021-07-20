@@ -274,13 +274,22 @@
     {% if is_timed and allowed_minutes > 25 %}
         //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
         //let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
-        let interval = 5;
+        {#if (interval === 10 && {{ allowed_minutes }} % 10 !== 0) {#}
+        {#    for (let i = 15; i > 4; i--) {#}
+        {#        if ({{ allowed_minutes }} % i === 0) {#}
+        {#            interval = i;#}
+        {#            break;#}
+        {#        }#}
+        {#    }#}
+        {#}#}
+        let interval = 2;
 
         //for displaying popup submit button
-        function initializeTimer1(){
+        function initializePopupTimer(){
             sessionStorage.setItem("show_popup_submit", "yes");
             syncWithServer(true);
-            count();
+            //so popup doesn't appear immediately
+            setTimeout(count, 70000);
         };
 
         function count(){
@@ -292,6 +301,7 @@
                 if (sessionStorage.getItem("show_popup_submit") === 'yes') {
                     $(".notebook-submit-popup").show();
                 }
+                //so popup doesn't reappear immediately
                 setTimeout(count, 70000);
             }
             else {

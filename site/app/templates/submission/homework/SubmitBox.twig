@@ -464,6 +464,7 @@
     $(function() {
         $(".submit-gradeable").click(function(e){ // Submit button
             $(".submit-gradeable").prop('disabled',true);
+            window.onbeforeunload = null;
             var user_id = "";
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
@@ -539,7 +540,7 @@
         });
     });
     initializeTimer('{{ gradeable_id }}');
-    initializeTimer1();
+    initializePopupTimer();
 </script>
 
 
