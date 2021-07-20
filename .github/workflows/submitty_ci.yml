@@ -412,7 +412,9 @@ jobs:
 
           - name: Run git tests
             continue-on-error: true
-            run: bash tests/git_test.sh
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              bash tests/git_test.sh
 
           # - uses: nanasess/setup-chromedriver@master
           # - name: Setup chromedriver
