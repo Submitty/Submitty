@@ -7473,20 +7473,11 @@ SQL;
 
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
-            'SELECT group_name FROM courses WHERE semester = ? AND course = ?',
+            'SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
+                   WHERE c1.semester = ? AND c1.course = ?',
             [$semester, $course]
         );
-
-        if (count($this->submitty_db->rows()) > 0) {
-            $this->submitty_db->query(
-                'SELECT course, semester FROM courses WHERE group_name = ?',
-                [$this->submitty_db->rows()[0]['group_name']]
-            );
-            return $this->submitty_db->rows();
-        }
-        else {
-            return [];
-        }
+        return $this->submitty_db->rows();
     }
 
     private function getInnerQueueSelect(): string {
