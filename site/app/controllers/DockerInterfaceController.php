@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
+use app\views\ErrorView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -82,6 +83,7 @@ class DockerInterfaceController extends AbstractController {
     }
     /**
      * @Route("/admin/add_image", methods={"POST"})
+     * @Route("/api/admin/add_image", methods={"GET"})
      * @return JsonResponse
      */
     public function addImage(): JsonResponse {
@@ -104,10 +106,17 @@ class DockerInterfaceController extends AbstractController {
 
         // check for proper format
         $match = preg_match('/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/', $_POST['image']);
-        if ($match == 0) {
+        
+        if ($match === false) {
+            $this->core->addErrorMessage("An error has occurred when verifying image name");
+            return JsonResponse::getErrorResponse("An error has occurred when verifying image name");
+        }
+        
+        if ($match === 0) {
             $this->core->addErrorMessage("Improper docker image name");
             return JsonReponse::getErrorResponse("Improper docker image name");
         }
+        
         $image_arr = explode(":", $_POST['image']);
         // ping the dockerhub API to check if docker exists
         $url = "https://registry.hub.docker.com/v1/repositories/".$image_arr[0]."/tags";
@@ -128,6 +137,7 @@ class DockerInterfaceController extends AbstractController {
         foreach ($return_json as $image) {
             if ($image->name == $tag) {
                 $found = TRUE;
+                break;
             }
         }
         
@@ -158,7 +168,6 @@ class DockerInterfaceController extends AbstractController {
             if (!$this->updateDocker()) {
                 return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
             }
-            //file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT));
             $this->core->addSuccessMessage("Image found on dockerhub!\n" . $_POST['image'] . " queued to be added.");
             return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub');
         }
@@ -177,6 +186,7 @@ class DockerInterfaceController extends AbstractController {
         if (!$this->updateDocker()) {
             return JsonResponse::getFailResponse("Failed to write to file {$docker_job_file}");
         }
+        $this->core->addSuccessMessage("Successfully queued the system to update docker, please refresh the page in a bit.");
         return JsonResponse::getSuccessResponse("Successfully updated docker images and machines");
     }
 
@@ -185,7 +195,7 @@ class DockerInterfaceController extends AbstractController {
      */
     private function updateDocker() {
         $now = $this->core->getDateTimeNow()->format('Ymd');
-        $docker_job_file = "/var/local/submitty/daemon_job_queue/docker" . $now . ".json";
+        $docker_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(),"daemon_job_queue/docker". $now . ".json");
         $docker_data = [
             "job" => "UpdateDockerImages"
         ];

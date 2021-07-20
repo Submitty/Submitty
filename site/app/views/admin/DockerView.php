@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\libraries\Utils;
+use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class DockerView extends AbstractView {
@@ -130,8 +131,7 @@ class DockerView extends AbstractView {
         $capability_to_color = [];
         $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
         for ($i = 0; $i < count($capabilities); $i++) {
-            $i = min($i, 19);
-            $capability_to_color[$capabilities[$i]] = $colors[$i];
+            $capability_to_color[$capabilities[$i]] = $colors[$i] ?? $colors[19];
         }        
 
         foreach ($worker_machines as $worker) {
@@ -140,32 +140,61 @@ class DockerView extends AbstractView {
             }
         }
 
-        $array_list = scandir("/var/local/submitty/logs/docker/");
+        $array_list = scandir(
+            FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "logs/docker/"
+            )
+        );
         $last_ran = "";
         $machine_to_update = [];
         $fail_images = [];
         $error_logs = [];
         
         if (count($array_list) > 2) {
-            $last_ran = "sometime";
+            $last_ran = "never";
             $most_recent = max($array_list);
-            $fd = fopen("/var/local/submitty/logs/docker/" . $most_recent, "r");
-            while (($buffer = fgets($fd)) !== false) {
-                $match = [];
-                if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $match)) {
-                    $last_ran = $match[1];
+            $content = file_get_contents(
+                FileUtils::joinPaths(
+                    $this->core->getConfig()->getSubmittyPath(),
+                    "logs/docker",
+                    $most_recent
+                )
+            );
+
+            $reset = false;
+            $buffer = strtok($content, "\n");
+            while ($buffer !== false) {
+                if ($reset) {
+                    $error_logs = [];
                 }
-                else if (preg_match("/FAILURE TO UPDATE MACHINE (.+)/", $buffer, $match)) {
-                    $machine_to_update[$match[1]] = false;
+
+                $matches = [];
+
+                $isMatch = preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $matches);
+                if ($isMatch === 1) {
+                    $last_ran = $matches[1];
+                    $reset = true;
+                }
+                $isMatch = preg_match("/FAILURE TO UPDATE MACHINE (.+)/", $buffer, $matches);
+                if ($isMatch) {
+                    $machine_to_update[$matches[1]] = false;
                     $error_logs[] = $buffer;
                 }
-                else if (preg_match("/ERROR: Could not pull (.+)/", $buffer, $match)) {
-                    $fail_images = $match[1];
+                
+                $isMatch = preg_match("/ERROR: Could not pull (.+)/", $buffer, $matches);
+                if ($isMatch) {
+                    $fail_images = $matches[1];
                     $error_logs[] = $buffer;
                 }
+                if (preg_last_error() != PREG_NO_ERROR) {
+                    $error_logs[] = "Error while parsing the logs";
+                    break;
+                }
+                $buffer = strtok("\n");
             }
-            fclose($fd);
         }
+
         $no_image_capabilities = array_unique($no_image_capabilities);
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
@@ -177,7 +206,7 @@ class DockerView extends AbstractView {
                 "no_image_capabilities" => $no_image_capabilities,
                 "image_to_capability" => $image_to_capability,
                 "capability_to_color" => $capability_to_color,
-                "url" => $this->core->buildUrl(["admin"]),
+                "admin_url" => $this->core->buildUrl(["admin"]),
                 "last_updated" => $last_ran,
                 "machine_to_update" => $machine_to_update,
                 "fail_images" => $fail_images,

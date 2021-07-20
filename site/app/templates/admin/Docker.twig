@@ -7,13 +7,13 @@
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
         <p>Updated on: {{last_updated}}</p>
         {% if error_logs | length > 0 %}
-            <textarea disabled="disabled" style="resize: none; width: 100%">
+            <textarea disabled="disabled" style="resize: none; width: 100%; height:25vh;">
                 {% for error_log in error_logs %}
                     {{error_log ~ "\n"}}
                 {% endfor %}
             </textarea>
         {% endif %}
-        <button class="btn btn-primary" id="update-machines" onclick="updateImage({{"\"" ~ url ~ "/update_docker" ~ "\""}})" style="margin-top: 1em"> Update dockers and machines</button>
+        <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
     {% endif %}
 </div>
 
@@ -143,5 +143,5 @@
         </div> 
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
-    <button class="send-button btn btn-primary" id="send-button" onclick="addImage({{"\"" ~ url ~ "/add_image" ~ "\""}})" disabled="disabled">Send</button>
+    <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Send</button>
 </div>

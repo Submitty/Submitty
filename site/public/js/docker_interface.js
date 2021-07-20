@@ -57,11 +57,17 @@ function addFieldOnChange() {
     const regex = new RegExp('^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
     if (!regex.test(command)) {
         $('#send-button').attr('disabled',true);
-        $('#docker-warning').css('display', '');
+        if (command !== "") {
+            $('#docker-warning').css('display', '');
+        }
+        else {
+            localStorage.removeItem('capability');
+        }
     }
     else {
         $('#send-button').attr('disabled',false);
         $('#docker-warning').css('display', 'none');
+        localStorage.setItem('capability', command);
     }
 }
 
@@ -77,7 +83,13 @@ function addImage(url) {
             csrf_token: csrfToken
         },
         success: function(data) {
-            console.log(data);
+            let json = JSON.parse(data);
+            if (json.status == 'success') {
+                localStorage.removeItem('capability');
+            }
+            else {
+                window.alert('Something went wrong. Please try again.');
+            }
             location.reload();
         },
         error: function(err) {
@@ -95,7 +107,10 @@ function updateImage(url) {
             csrf_token: csrfToken
         },
         success: function(data) {
-            console.log(data);
+            let json = Json.parse(data);
+            if (json.status != 'success') {
+                window.alert('Something went wrong. Please try again.');
+            }
             location.reload();
         },
         error: function(err) {
@@ -108,4 +123,6 @@ function updateImage(url) {
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
     $('#add-field').on('input', addFieldOnChange);
+    $('#add-field').val(localStorage.getItem('capability'));
+    $('#add-field').trigger('input');
 });
