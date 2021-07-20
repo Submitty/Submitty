@@ -52,14 +52,17 @@ class TestStats(BaseTestCase):
             self.assertTrue("Teams who have submitted: 7 / 8 (87.5%)" in numerical_data_text)
             self.assertTrue("Section 4: 3 / 4 (75.0%)" in numerical_data_text)
         self.log_out()
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_team_grading_stats(self):
         self.team_grading_stats_test_helper("instructor", True)
         self.team_grading_stats_test_helper("ta", True)
         self.team_grading_stats_test_helper("grader", False)
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_individual_grading_stats(self):
         self.individual_grading_stats_test_helper("instructor", True)
         self.individual_grading_stats_test_helper("ta", True)
         self.individual_grading_stats_test_helper("grader", False)
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_individual_released_stats(self):
         self.individual_released_stats_test_helper("instructor", True)
         self.individual_released_stats_test_helper("ta", True)
