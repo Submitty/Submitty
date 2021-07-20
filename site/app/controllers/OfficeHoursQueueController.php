@@ -142,7 +142,7 @@ class OfficeHoursQueueController extends AbstractController {
                         $invalid = true;
                     }
                     if ($invalid) {
-                        $this->core->addErrorMessage("Invalid contact info");
+                        $this->core->addErrorMessage("Invalid contact information format.  Please re-read the course-specific instructions about the necessary information you should provide when you join this office hours queue.");
                         return MultiResponse::RedirectOnlyResponse(
                             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
                         );

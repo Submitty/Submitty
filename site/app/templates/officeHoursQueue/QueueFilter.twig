@@ -3,20 +3,6 @@
 {% block title %}Queue Settings{% endblock %}
 
 {% block body %}
-    <a onclick="toggleRegexHelp()" style="text-decoration-line: underline; position:relative; float:right; margin-right: 1rem;">Help With Regex Patterns <i style="font-style:normal;" class="fa-question-circle"></i></a>
-    <div class="regex-help" style="display: none;">
-        <br>Regex Patterns are to make sure your students enter the correct information
-        into the "contact information" field. Copy the patterns associated with the type of information you wish
-        your students to provide (copy the pound symbols too).<br>
-        <b>NOTE: REGEX PATTERNS ARE NOT REQUIRED</b><br>
-        <a href="https://www.php.net/manual/en/reference.pcre.pattern.syntax.php" target="_blank">Write Your Own Pattern</a><br>
-        <b>Webex link:</b> #webex.com#<br>
-        <b>Skype link:</b> #join.skype#<br>
-        <b>Zoom link:</b> #zoom.us#<br>
-        <b>Email Address:</b> Just Enter "email" <br>
-        <b>Gmail address:</b> #@gmail.com#<br>
-        <a onclick="toggleRegexHelp()">close</a>
-    </div>
     <br>
   <span class="option-title">Open new queue</span>
   <form method="post" id="open_new_queue" action="{{base_url}}" style="height:auto;">
@@ -27,7 +13,20 @@
       <i class="fas fa-sync"></i>
     </a>
       <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex">
-    <button id="open_new_queue_btn" type="submit" class="btn btn-primary" style="margin-top: 1rem;">Open New Queue</button>
+
+    <div class="regex-help">
+        <br>You may optionally specify a regular expression to ensure your students enter the requested
+        format for the contact information.  For example: <br>
+        <b>Gmail:&nbsp;&nbsp;</b> <tt>*@gmail.com</tt><br>
+        <b>Email:&nbsp;&nbsp;</b> <tt>*@*</tt><br>
+        <b>Webex Personal Room:&nbsp;&nbsp;</b> <tt>https://*.webex.com/meet/*</tt><br>
+        <b>Webex Meeting:&nbsp;&nbsp;</b> <tt>https://*.webex.com/*</tt><br>
+        <b>Skype link:&nbsp;&nbsp;</b> <tt>*join.skype*</tt><br>
+        <b>Zoom link:&nbsp;&nbsp;</b> <tt>*zoom.us*</tt><br>
+    </div>
+
+
+<button id="open_new_queue_btn" type="submit" class="btn btn-primary" style="margin-top: 1rem;">Open New Queue</button>
   </form>
   <br>
   <span class="option-title">Modify old queue</span>
