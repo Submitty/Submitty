@@ -385,6 +385,7 @@ class HomeworkView extends AbstractView {
                 $who_id = $this->core->getUser()->getId();
                 $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
                 $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+                $display_version = $version_instance != null ? $version_instance->getVersion() : 0;
                 $version_path = FileUtils::joinPaths($user_path, $highest_version);
                 $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
 
