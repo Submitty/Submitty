@@ -213,7 +213,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
-        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
+        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
         ");
         return $this->course_db->rows();
     }
@@ -1161,7 +1161,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
-                FROM courses_users INNER JOIN courses 
+                FROM courses_users INNER JOIN courses
                 ON courses_users.semester = courses.semester AND courses_users.course = courses.course
                 " . $extra_join . "
                 WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
@@ -7464,7 +7464,7 @@ SQL;
 
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
-            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
                    c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
             [$user_id]
         );
