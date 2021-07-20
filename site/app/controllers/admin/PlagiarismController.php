@@ -1011,7 +1011,6 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        // TODO: only return the versions that have a "ranking.txt" file!!!
         $user_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1);
         $files = scandir($user_path);
         $all_versions_user_1 = [];

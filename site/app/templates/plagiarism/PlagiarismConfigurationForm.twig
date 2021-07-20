@@ -248,11 +248,14 @@
                 semester_course: semester_course_dropdown.val()
             },
             success: function(data) {
-                // TODO: check for fail vs. success message returned from JSON response
-                // clear the loading message and attach all the options returned by the request
+                data = JSON.parse(data);
+                if (data.status !== 'success') {
+                    alert(data.message);
+                    return;
+                }
+
                 gradeable_dropdown.empty();
-                let parsed_result = JSON.parse(data);
-                $.each(parsed_result.data, function(index, gradeable) {
+                $.each(data.data, function(index, gradeable) {
                     gradeable_dropdown.append("<option value='" + gradeable + "'>" + gradeable + "</option>");
                 });
             },
