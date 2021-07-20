@@ -7462,6 +7462,33 @@ SQL;
         return $this->course_db->rows();
     }
 
+    public function getUserGroups(string $user_id): array {
+        $this->submitty_db->query(
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
+            [$user_id]
+        );
+        return $this->submitty_db->rows();
+    }
+
+    public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
+        $this->submitty_db->query(
+            'SELECT group_name FROM courses WHERE semester = ? AND course = ?',
+            [$semester, $course]
+        );
+
+        if (count($this->submitty_db->rows()) > 0) {
+            $this->submitty_db->query(
+                'SELECT course, semester FROM courses WHERE group_name = ?',
+                [$this->submitty_db->rows()[0]['group_name']]
+            );
+            return $this->submitty_db->rows();
+        }
+        else {
+            return [];
+        }
+    }
+
     private function getInnerQueueSelect(): string {
         return <<<SQL
 
