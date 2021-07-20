@@ -873,7 +873,6 @@ class Course(object):
                 only_submit_plagiarized_users = gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) > 0
                 for user in self.users:
                     if only_submit_plagiarized_users and user.id not in gradeable.plagiarized_user:
-                        print("////////////////////")
                         continue
 
                     submitted = False
