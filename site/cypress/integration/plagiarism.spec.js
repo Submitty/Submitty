@@ -114,7 +114,7 @@ describe('Plagiarism tests', () => {
 
 
         // click the rerun button
-        cy.get('[aria-label="Rerun Autograder Hidden and Extra Credit (C++ Hidden Tests)"]').click()
+        cy.get('[aria-label="Rerun Autograder Hidden and Extra Credit (C++ Hidden Tests)"]').click();
 
         // wait for Lichen to finish running
         cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
