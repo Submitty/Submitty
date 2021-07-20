@@ -89,7 +89,7 @@
             "preview_div_id" : "preview_box_" ~ post_box_id,
             "preview_div_name" : "preview_box_" ~ post_box_id,
             "onclick" : "previewForumMarkdown.call(this)",
-            "render_buttons" : render_markdown is defined ? render_markdown : false,
+            "render_buttons" : render_markdown is defined and render_markdown ? render_markdown : false,
             "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
             "min_height" : min_height,
             "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
