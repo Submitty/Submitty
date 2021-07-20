@@ -1219,8 +1219,12 @@ class Course(object):
         polls_data[2]["release_date"] = f"{datetime.today().date()}"
 
         # add attached image
-        os.makedirs(poll_1_image_path)
-        os.system(f"chown -R submitty_php:sample_tas_www {polls_data[0]["image_path"]}")
+        image_dir = os.path.dirname(polls_data[0]["image_path"])
+        if os.path.isdir(image_dir):
+            shutil.rmtree(image_dir)
+
+        os.makedirs(image_dir)
+        os.system(f"chown -R submitty_php:sample_tas_www {image_dir}")
         copyfile(os.path.join(SETUP_DATA_PATH, "polls", "sea_animals.png"), polls_data[0]["image_path"])
 
         # add polls to DB
@@ -1239,7 +1243,7 @@ class Course(object):
                               question_type=poll["question_type"])
             i = 0
             for poll_response in poll["responses"]:
-                self.conn.execute(polls_table.insert(),
+                self.conn.execute(poll_options_table.insert(),
                                   option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
@@ -1248,13 +1252,13 @@ class Course(object):
                 i += 1
 
         # generate responses to the polls
-        poll_respones_data = []
+        poll_responses_data = []
         # poll1: for each self.users make a random number (0-5) of responses
         poll1_response_ids = [0, 1, 2, 3, 4]
         for user in self.users:
             random_responses = random.sample(poll1_response_ids, random.randint(0, 5))
             for response_id in random_responses:
-                poll_respones_data.append({
+                poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],
                     "student_id": user.id,
                     "option_id": response_id
@@ -1262,17 +1266,17 @@ class Course(object):
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
             if random.random() < 0.8:
-                poll_respones_data.append({
+                poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
                     "option_id": random.randint(0, 3)
                 })
 
         # add responses to DB
-        for response in poll_respones_data:
+        for response in poll_responses_data:
             self.conn.execute(poll_responses_table.insert(),
-                              poll_id=response["poll_id"]
-                              student_id=response["student_id"]
+                              poll_id=response["poll_id"],
+                              student_id=response["student_id"],
                               option_id=response["option_id"])
 
     def make_course_json(self):

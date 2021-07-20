@@ -15,7 +15,7 @@
             0,
             2
         ],
-        "release_date": "2021-07-20",
+        "release_date": "2021-07-19",
         "status": "ended",
         "image_path": "/uploads/polls/poll_image_1_sea_animals.png"
     },
@@ -33,7 +33,7 @@
         "correct_responses": [
             1
         ],
-        "release_date": "2021-07-20",
+        "release_date": "2021-07-19",
         "status": "ended",
         "image_path": null
     },
@@ -58,7 +58,7 @@
             2,
             4
         ],
-        "release_date": "2021-07-20",
+        "release_date": "",
         "status": "open",
         "image_path": null
     },
