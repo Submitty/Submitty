@@ -11,6 +11,11 @@ class DockerView extends AbstractView {
         $this->output->addBreadcrumb("Docker Interface");
         $this->output->setPageName('Docker Interface');
 
+        $this->core->getOutput()->addInternalCss('docker_interface.css');
+        $this->core->getOutput()->addInternalJs('docker_interface.js');
+        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->enableMobileViewport();
+
         $found_images = [];
         $not_found = [];
         $autograding_containers = $docker_data['autograding_containers']['default'];
@@ -28,7 +33,8 @@ class DockerView extends AbstractView {
             $image["virtual_size"] = Utils::formatBytes('mb', $image["virtual_size"], true);
             $image["additional_names"] = array_slice($image['tags'], 1);
 
-            $copy[] = $image;
+            $copy[$full_name] = $image;
+            
         }
 
         $docker_data['docker_images'] = $copy;
@@ -75,12 +81,107 @@ class DockerView extends AbstractView {
             "not_found" => sort($not_found)
         ];
 
+        $capabilities = [];
+        $worker_machines = [];
+        $no_image_capabilities = [];
+        $image_to_capability = [];
+        foreach ($docker_data['autograding_workers'] as $name => $worker) {
+            $worker_temp = [];
+            $worker_temp['name'] = $name;
+            $worker_temp['capabilities'] = [];
+            $worker_temp['images'] = [];
+            $image_names = [];
+            foreach ($worker['capabilities'] as $capability) {
+                $capabilities[] = $capability;
+                $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
+                $worker_temp['enabled'] = $worker['enabled'];
+                $worker_temp['capabilities'] = $worker['capabilities'];
+                // list of capabilities without containers
+                $worker_temp['images_not_found'] = [];
+                if (array_key_exists($capability, $docker_data['autograding_containers'])) {
+                    foreach ($docker_data['autograding_containers'][$capability] as $image) {
+                        $image_names[] = $image;
+                        $image_to_capability[$image][] = $capability;
+                    }
+                }
+                else {
+                    $no_image_capabilities[] = $capability;
+                }
+            }
+            // Get ride of duplicate images
+            $image_names = array_unique($image_names);
+            foreach ($image_names as $image) {
+                // Extra precaution since data is quite messy
+                if (array_key_exists($image, $autograding_containers['all_images'])) {
+                    $worker_temp['images'][] = $autograding_containers['all_images'][$image];
+                }
+                else {
+                    $worker_temp['images_not_found'][] = $image;
+                }
+            }
+            $worker_machines[] = $worker_temp;
+        }
 
+        $capabilities = array_unique($capabilities);
+        foreach ($image_to_capability as $map) {
+            $map = array_unique($map);
+        }
+        asort($capabilities);
+        $capability_to_color = [];
+        $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
+        for ($i = 0; $i < count($capabilities); $i++) {
+            $i = min($i, 19);
+            $capability_to_color[$capabilities[$i]] = $colors[$i];
+        }        
+
+        foreach ($worker_machines as $worker) {
+            foreach ($capabilities as $capability) {
+                $worker_temp['capabilities'][] = in_array($capability, $worker['capabilities']);
+            }
+        }
+
+        $array_list = scandir("/var/local/submitty/logs/docker/");
+        $last_ran = "";
+        $machine_to_update = [];
+        $fail_images = [];
+        $error_logs = [];
+        
+        if (count($array_list) > 2) {
+            $last_ran = "sometime";
+            $most_recent = max($array_list);
+            $fd = fopen("/var/local/submitty/logs/docker/" . $most_recent, "r");
+            while (($buffer = fgets($fd)) !== false) {
+                $match = [];
+                if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $match)) {
+                    $last_ran = $match[1];
+                }
+                else if (preg_match("/FAILURE TO UPDATE MACHINE (.+)/", $buffer, $match)) {
+                    $machine_to_update[$match[1]] = false;
+                    $error_logs[] = $buffer;
+                }
+                else if (preg_match("/ERROR: Could not pull (.+)/", $buffer, $match)) {
+                    $fail_images = $match[1];
+                    $error_logs[] = $buffer;
+                }
+            }
+            fclose($fd);
+        }
+        $no_image_capabilities = array_unique($no_image_capabilities);
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
                 "autograding_containers" => $autograding_containers,
                 "docker_info" => $docker_data['docker_info'],
+                "capabilities" => $capabilities,
+                "worker_machines" => $worker_machines,
+                "no_image_capabilities" => $no_image_capabilities,
+                "image_to_capability" => $image_to_capability,
+                "capability_to_color" => $capability_to_color,
+                "url" => $this->core->buildUrl(["admin"]),
+                "last_updated" => $last_ran,
+                "machine_to_update" => $machine_to_update,
+                "fail_images" => $fail_images,
+                "error_logs" => $error_logs
             ]
         );
     }
