@@ -86,7 +86,7 @@ class DockerInterfaceController extends AbstractController {
      * @Route("/api/admin/add_image", methods={"GET"})
      * @return JsonResponse | MultiResponse
      */
-    public function addImage(){
+    public function addImage() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
