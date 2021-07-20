@@ -4,8 +4,8 @@
     <form id="late-day-form" class="exception-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <p>
-            Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
-            Students may use these additional late days for any future homeworks (after the specificed date).
+            Use this form to set the number of late days for a student.<br>
+            Students may use these late days for any future homeworks (after the specified date).
         </p>
         <fieldset class="single-student">
             <legend class="option-title">Single Student Entry</legend>
@@ -18,8 +18,8 @@
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
-                Additional Late Days:
-                <input class="option-input" type="text" name="late_days" id="late_days">
+                Total Late Days:
+                <input class="option-input" type="number" name="late_days" id="late_days">
             </label>
             <div>
                 <input class="btn btn-primary" type="submit" value="Submit">
@@ -68,7 +68,7 @@
                         <td>{{ user.getSinceTimestamp() }}</td>
                         <td>
                             <a
-                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
+                                aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >
                                 <i class="fas fa-trash"></i>
@@ -81,8 +81,24 @@
     {% endif %}
 </div>
 <script>
+    const students_and_late_days = JSON.parse(`{
+    {% for user in users %}
+        "{{ user.getId() }}":"{{ user.getAllowedLateDays() }}",
+    {% endfor %}
+    "":""
+    }`);
+
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
+    });
+
+    $("#user_id").change(() => {
+        if ($("#user_id").val() in students_and_late_days) { // check to see if this is a valid user id
+            $("#late_days").val(students_and_late_days[$("#user_id").val()]);
+        }
+        else {
+            $("#late_days").val("");
+        }
     });
 
     flatpickr("#datestamp", {
