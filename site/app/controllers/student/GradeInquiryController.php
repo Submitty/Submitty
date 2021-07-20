@@ -207,7 +207,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
-     * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
@@ -227,9 +227,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Submitter has not made a grade inquiry')
-            );
+            return JsonResponse::getFailResponse('Submitter has not made a grade inquiry');
         }
 
         $submitter = $this->core->getQueries()->getUserById($submitter_id);
@@ -239,16 +237,12 @@ class GradeInquiryController extends AbstractController {
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && ($submitter_id === $user->getId() || $submitter->accessGrading() );
         if (!$graded_gradeable->getSubmitter()->hasUser($user) || !$can_inquiry) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Insufficient permissions to change grade inquiry status')
-            );
+            return JsonResponse::getFailResponse('Insufficient permissions to change grade inquiry status');
         }
 
         $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
         if (is_null($grade_inquiry)) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Cannot find grade inquiry')
-            );
+            JsonResponse::getFailResponse('Cannot find grade inquiry');
         }
         // toggle status
         $status = $grade_inquiry->getStatus();
@@ -270,19 +264,16 @@ class GradeInquiryController extends AbstractController {
             $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'toggle_status', 'new_discussion' => $new_discussion])
-            );
+            return JsonResponse::getSuccessResponse([
+                'type' => 'toggle_status',
+                'new_discussion' => $new_discussion
+            ]);
         }
         catch (\InvalidArgumentException $e) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse($e->getMessage())
-            );
+            return JsonResponse::getFailResponse($e->getMessage());
         }
         catch (\Exception $e) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getErrorResponse($e->getMessage())
-            );
+            return JsonResponse::getErrorResponse($e->getMessage());
         }
     }
 
