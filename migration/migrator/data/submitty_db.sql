@@ -283,7 +283,7 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
     $$;
 
 
-SET default_with_oids = false;
+SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
