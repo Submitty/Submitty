@@ -822,7 +822,7 @@ function gatherInputAnswersByType(type){
     {
         var inputs = $("[id^="+type+"_]");
     }
-
+    //console.log(inputs);
     if(type != "codebox"){
         inputs = inputs.serializeArray();
     }
