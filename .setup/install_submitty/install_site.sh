@@ -40,6 +40,12 @@ set_permissions () {
 
 echo -e "Copy the submission website"
 
+if [[ "$#" -ge 1 && $1 == "skip_rsync" ]]; then
+    SKIP_RSYNC=1
+else
+    SKIP_RSYNC=0
+fi
+
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/../bin/versions.sh
 
@@ -61,7 +67,7 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' --exclude '/site/.eslintrc.json' --exclude '/site/.eslintignore' --exclude '/site/cypress/' --exclude '/site/cypress.json' --exclude '/site/jest.config.js' --exclude '/site/.babelrc.json' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' --exclude '/site/.eslintrc.json' --exclude '/site/.eslintignore' --exclude '/site/cypress/' --exclude '/site/cypress.json' --exclude '/site/jest.config.js' --exclude '/site/.babelrc.json' --exclude '/site/.stylelintrc.json' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
 
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
@@ -91,6 +97,10 @@ chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
+
+if [ ${SKIP_RSYNC} == 1 ]; then
+    chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/site/app" "${SUBMITTY_INSTALL_DIR}/site/room_templates" "${SUBMITTY_INSTALL_DIR}/site/socket" "${SUBMITTY_INSTALL_DIR}/site/tests"
+fi
 
 # Update permissions & ownership for cache directory
 chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
@@ -125,7 +135,7 @@ for entry in "${result_array[@]}"; do
     fi
 done
 
-if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
+if echo "${result}" | grep -E -q "composer\.(json|lock)" || [ ${SKIP_RSYNC} == 1 ]; then
     # install composer dependencies and generate classmap
     su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader --no-suggest"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
@@ -137,7 +147,7 @@ find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
-if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
+if echo "{$result}" | grep -E -q "package(-lock)?.json" || [ ${SKIP_RSYNC} == 1 ]; then
     # Install JS dependencies and then copy them into place
     # We need to create the node_modules folder initially if it
     # doesn't exist, or else submitty_php won't be able to make it

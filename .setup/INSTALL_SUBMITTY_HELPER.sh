@@ -55,7 +55,8 @@ fi
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
-       && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
+       && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker"
+       && "$1" != "skip_rsync" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
@@ -69,6 +70,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh disable_shipper_worker"
+    echo -e "   ./INSTALL_SUBMITTY.sh skip_rsync"
     exit 1
 fi
 
@@ -478,7 +480,11 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    if [[ "$#" -ge 1 && $1 == "skip_rsync" ]]; then
+        source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh skip_rsync
+    else
+        source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    fi
 fi
 
 ################################################################################################################
