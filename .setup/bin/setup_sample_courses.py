@@ -218,6 +218,8 @@ def main():
             students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
             course.users.append(students[key])
             key += 1
+        
+        course.users.sort(key=lambda x: x.id)
 
     for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]
