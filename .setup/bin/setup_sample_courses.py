@@ -220,7 +220,7 @@ def main():
             students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
             course.users.append(students[key])
             key += 1
-        
+
         course.users.sort(key=lambda x: x.id)
 
     for course in sorted(courses.keys()):
@@ -870,8 +870,10 @@ class Course(object):
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             # This for loop adds submissions for users and teams(if applicable)
             if not NO_SUBMISSIONS:
+                only_submit_plagiarized_users = gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) > 0
                 for user in self.users:
-                    if gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) == 0 and len(gradeable.plagiarism_submissions) == 0:
+                    if only_submit_plagiarized_users and user.id not in gradeable.plagiarized_user:
+                        print("////////////////////")
                         continue
 
                     submitted = False
