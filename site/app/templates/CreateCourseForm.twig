@@ -9,7 +9,7 @@
                     <span class="option-title block">Term</span>
                     <span class="option-alt">
                       <span class="block">What is the term for the new course?</span>
-                      <span class="block">Note: Contact the system administrator to if the desired term is not available from the drop down menu.</span>
+                      <span class="block">Contact the system administrator if the desired term is not available from the drop down menu.</span>
                       <span class="required_type">(Required)</span>
                     </span>
                 </label>
@@ -36,6 +36,8 @@
                     <span class="option-alt">
                       <span class="block">What is the course code for the new course?
                       {{ course_code_requirements }} </span>
+                      <span class="block">Please follow course code conventions established by your school and department.
+                      Contact the system administrator if you are unsure what course code you should use.</span>
                       <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</span>
                       <span class="required_type">(Required)</span>
                     </span>
@@ -74,10 +76,10 @@
         <div class="option row">
             <div class="option-desc col-md-6">
                 <label for="group_name">
-                    <span class="option-title block">Prior Course Group</span>
-                    <span class="option-alt">Select a group for this course from the dropdown menu.</span>
-                    <span class="option-alt block">Note: Instructors and graders in the group on GNU/Linux will be able to see the content of the new course as well.</span>
-                    <span class="option-alt block">Contact the system administrator if this course should receive a new/different GNU/Linux group.</span>
+                    <span class="option-title block">GNU/Linux Filesystem Group</span>
+                    <span class="option-alt">Select the appropriate GNU/Linux filesystem group for this course from the dropdown menu.</span>
+                    <span class="option-alt block">Instructors and graders in this group with ssh access to the server will be able to access files for this new course.</span>
+                    <span class="option-alt block">Contact the system administrator if you do not see an appropriate GNU/Linux group in this list.  Or if you need to modify the members of the GNU/Linux filesystem group.</span>
                     <span class="required_type">(Required)</span>
                 </label>
             </div>
