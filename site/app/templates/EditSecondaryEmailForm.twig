@@ -21,7 +21,8 @@
                    name="user_secondary_email_change"
                    value="{{ user.getSecondaryEmail() }}"
                    id="user-secondary-email-change"
-                   data-current-second-email="{{ user.getSecondaryEmail() }}"/>
+                   data-current-second-email="{{ user.getSecondaryEmail() }}"
+                   oninput="changeSecondaryEmail()"/>
         </div>
 
         <p class="std-margin">
@@ -37,6 +38,9 @@
                    name="user_secondary_email_notify_change"
                    {% if user.getEmailBoth() %}
                        checked
+                   {% endif %}
+                   {% if user.getSecondaryEmail() is null or user.getSecondaryEmail() is empty %}
+                       disabled
                    {% endif %}
                    id="user-secondary-email-notify-change"
                    {% if user.getEmailBoth() %}

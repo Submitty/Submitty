@@ -91,7 +91,7 @@ class GradedComponentContainer extends AbstractModel {
         $grades_exist = $this->anyGradedComponents();
         if ($grader === null) {
             // If the grader is null and its a peer component, we can't do anything useful
-            if ($this->component->isPeer()) {
+            if ($this->component->isPeerComponent()) {
                 throw new \InvalidArgumentException('Cannot get peer graded component with null grader');
             }
 
@@ -113,7 +113,7 @@ class GradedComponentContainer extends AbstractModel {
         // Grader not null
         //
 
-        if ($this->component->isPeer()) {
+        if ($this->component->isPeerComponent()) {
             // Try to find existing graded component for this component and user...
             foreach ($this->graded_components as $graded_component) {
                 if ($graded_component->getGrader()->getId() === $grader->getId()) {
@@ -207,7 +207,7 @@ class GradedComponentContainer extends AbstractModel {
      *  to the precision of the gradeable
      * @return float
      */
-    public function getTotalScore(User $grader = null) {
+    public function getTotalScore(User $grader = null): float {
         $points_earned = 0.0;
         $number_of_graders = 0;
         // TODO: how should peer grades be calculated: now its an average
@@ -228,13 +228,64 @@ class GradedComponentContainer extends AbstractModel {
     }
 
     /**
+     * Gets the score the submitter received for this peer component, rounded
+     *  to the precision of the gradeable
+     * @return float
+     */
+    public function getTotalPeerScore(User $grader = null): float {
+        $points_earned = 0.0;
+        /** @var GradedComponent $graded_component */
+        foreach ($this->graded_components as $graded_component) {
+            // If there is a grader, we are only computing their total score rather than the total score for all graders
+            if ($grader !== null && $graded_component->getGrader()->getId() !== $grader->getId()) {
+                continue;
+            }
+            if ($graded_component->getGrader()->getGroup() < User::GROUP_STUDENT) {
+                if ($graded_component->isPeer()) {
+                    $points_earned += $graded_component->getTotalScore();
+                }
+            }
+        }
+
+        return $points_earned;
+    }
+
+    /**
+     * Gets the ta score the submitter received for this component, rounded
+     *  to the precision of the gradeable
+     * @return float
+     */
+    public function getTotalTaScore(User $grader = null): float {
+        $points_earned = 0.0;
+        $number_of_graders = 0;
+        // TODO: how should peer grades be calculated: now its an average
+        /** @var GradedComponent $graded_component */
+        foreach ($this->graded_components as $graded_component) {
+            // If there is a grader, we are only computing their total score rather than the total score for all peers.
+            if ($graded_component->getGrader()->getGroup() < User::GROUP_STUDENT) {
+                if ($graded_component->isPeer()) {
+                }
+                else {
+                    $points_earned += $graded_component->getTotalScore();
+                }
+            }
+            else {
+                $points_earned = 0;
+                $number_of_graders = 0;
+            }
+        }
+
+        return $points_earned;
+    }
+
+    /**
      * Gets whether this component is considered fully graded
      * In the peer case, components are considered fully graded if they
      *  meet the peer grade set or one of the graders is non-peer
      * @return bool
      */
     public function isComplete() {
-        if ($this->component->isPeer()) {
+        if ($this->component->isPeerComponent()) {
             if (count($this->graded_components) > 0) {
                 return true;
             }
@@ -363,7 +414,7 @@ class GradedComponentContainer extends AbstractModel {
      * @return float
      */
     public function getScore() {
-        return $this->component->isPeer() ? 0.0 : $this->getGradedComponent()->getScore();
+        return $this->component->isPeerComponent() ? 0.0 : $this->getGradedComponent()->getScore();
     }
 
     /**
@@ -372,6 +423,6 @@ class GradedComponentContainer extends AbstractModel {
      * @return string
      */
     public function getComment() {
-        return $this->component->isPeer() ? '' : $this->getGradedComponent()->getComment();
+        return $this->component->isPeerComponent() ? '' : $this->getGradedComponent()->getComment();
     }
 }

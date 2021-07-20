@@ -24,6 +24,7 @@ function loadTemplates() {
         {id: 'Mark', href: "/templates/grading/Mark.twig"},
         {id: 'OverallComment', href: "/templates/grading/OverallComment.twig"},
         {id: 'TotalScoreBox', href: "/templates/grading/TotalScoreBox.twig"},
+        {id: 'TotalPeerScoreBox', href: "/templates/grading/TotalPeerScoreBox.twig"},
         {id: 'ConflictMarks', href: "/templates/grading/ConflictMarks.twig"},
         {id: 'RubricTotalBox', href: "/templates/grading/RubricTotalBox.twig"},
     ];
@@ -139,7 +140,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'decimal_precision': DECIMAL_PRECISION,
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
-        'display_version': displayVersion
+        'display_version': displayVersion,
     });
 }
 
@@ -160,7 +161,8 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         graded_gradeable.graded_components = {};
     }
 
-    var peer_details = {};
+    let peer_details = {};
+
     // Group together some useful data for rendering:
     gradeable.components.forEach(function(component) {
         // The peer details for a specific component (who has graded it and what marks have they chosen.)
@@ -173,7 +175,6 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
             peer_details[component.id]["marks_assigned"][graded_component.grader_id] = graded_component.mark_ids;
         });
     });
-
     // TODO: i don't think this is async
     return Twig.twig({ref: "PeerGradeable"}).render({
         'gradeable': gradeable,
@@ -203,11 +204,12 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @returns {Promise<string>} the html for the graded component
  */
 
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer) {
+
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer, allowCustomMarks) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
-        if (is_student){
+        if (is_student) {
             component.ta_comment = "";
         } else {
             component.student_comment = "";
@@ -223,8 +225,8 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'decimal_precision': DECIMAL_PRECISION,
             'can_verify_graders': canVerifyGraders,
             'grader_id': grader_id,
-            'component_version_conflict': componentVersionConflict,
             'peer_component' : component.peer,
+            'allow_custom_marks' : allowCustomMarks,
             'itempool_id': itempool_items.hasOwnProperty(component.id) ? itempool_items[component.id] : '',
             'ta_grading_peer': taGradingPeer
         }));
@@ -287,7 +289,7 @@ function renderInstructorEditGradeable(gradeable, itempool_available, itempool_o
 function renderEditComponent(component, precision, showMarkList) {
 
     return new Promise(function (resolve, reject) {
-        // TODO: i don't think this is async
+        // TODO: I don't think this is async
         resolve(Twig.twig({ref: "EditComponent"}).render({
             'component': component,
             'precision': precision,
@@ -296,7 +298,7 @@ function renderEditComponent(component, precision, showMarkList) {
             'itempool_available': isItempoolAvailable(),
             'itempool_options': getItempoolOptions(),
             'decimal_precision': DECIMAL_PRECISION,
-            'peer_component' : component.peer,
+            'peer_component' : component.peer_component,
         }));
     });
 }

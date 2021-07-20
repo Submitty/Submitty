@@ -80,6 +80,8 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home/courses/new', 'New Course'],
             [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
+            [self.test_url + '/superuser/email', 'Email All'],
+            [self.test_url + '/superuser/email_status', 'Email Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]
@@ -148,6 +150,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/graders', 'Manage Graders'],
             [base_url + '/sections', 'Manage Sections'],
             [base_url + '/student_photos', 'Student Photos'],
+            [base_url + '/activity', 'Student Activity Dashboard'],
             [base_url + '/late_days', 'Late Days Allowed'],
             [base_url + '/extensions', 'Excused Absence Extensions'],
             [base_url + '/grade_override', 'Grade Override'],

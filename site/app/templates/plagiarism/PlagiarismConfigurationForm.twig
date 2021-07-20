@@ -4,7 +4,7 @@
     <div id="save-configuration-form">
         <form method="post" action="{{ form_action_link }}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-            <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" />
+            {# <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" /> #}
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Select Gradeable:</div>
@@ -254,6 +254,13 @@
     $("#code-provided-id").change(function() {
         $("#current-code-file").show();
         $("#provided-code-file").show();
+    });
+
+    $(document).ready(function() {
+        if ({{ provided_code ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
+            $("#current-code-file").show();
+            $("#provided-code-file").show();
+        }
     });
 
     // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
