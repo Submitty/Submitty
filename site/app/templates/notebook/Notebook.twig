@@ -276,10 +276,9 @@
         //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
         let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
         let loadTime = Date.now();
-       
+
         function initializePopupTimer(){
             sessionStorage.setItem("show_popup_submit", "yes");
-            syncWithServer(true);
             count();
         }
 
