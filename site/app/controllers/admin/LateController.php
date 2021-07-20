@@ -99,7 +99,6 @@ class LateController extends AbstractController {
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
             $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
-
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
