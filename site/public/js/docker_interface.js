@@ -1,4 +1,4 @@
-/* exported collapseSection, addImage */
+/* exported collapseSection, addImage, updateImage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -28,17 +28,17 @@ function filterOnClick() {
         $(this).addClass('fully-transparent');
     }
 
-    $(".filter-buttons").each(function (){
-        this_filter.set($(this).data("capability"), !$(this).hasClass("fully-transparent"));
+    $('.filter-buttons').each(function (){
+        this_filter.set($(this).data('capability'), !$(this).hasClass('fully-transparent'));
     });
 
-    $(".image-row").each(function() {
+    $('.image-row').each(function() {
         const this_row = $(this);
         let hide = true;
-        if ($(this).find(".badge").length == 0) {
+        if ($(this).find('.badge').length == 0) {
             hide = false;
         }
-        $(this).find(".badge").each(function (){
+        $(this).find('.badge').each(function (){
             if (this_filter.get($(this).text())) {
                 hide = false;
             }
@@ -57,7 +57,7 @@ function addFieldOnChange() {
     const regex = new RegExp('^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
     if (!regex.test(command)) {
         $('#send-button').attr('disabled',true);
-        if (command !== "") {
+        if (command !== '') {
             $('#docker-warning').css('display', '');
         }
         else {
@@ -80,10 +80,11 @@ function addImage(url) {
         data: {
             'capability': capability,
             'image': image,
-            csrf_token: csrfToken
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
         },
         success: function(data) {
-            let json = JSON.parse(data);
+            const json = JSON.parse(data);
             if (json.status == 'success') {
                 localStorage.removeItem('capability');
             }
@@ -104,10 +105,11 @@ function updateImage(url) {
         url: url,
         type: 'GET',
         data: {
-            csrf_token: csrfToken
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
         },
         success: function(data) {
-            let json = Json.parse(data);
+            const json = JSON.parse(data);
             if (json.status != 'success') {
                 window.alert('Something went wrong. Please try again.');
             }

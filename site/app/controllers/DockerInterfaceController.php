@@ -63,7 +63,7 @@ class DockerInterfaceController extends AbstractController {
                 "autograding_containers.json"
             )
         );
-        
+
         $json['autograding_workers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
@@ -84,42 +84,42 @@ class DockerInterfaceController extends AbstractController {
     /**
      * @Route("/admin/add_image", methods={"POST"})
      * @Route("/api/admin/add_image", methods={"GET"})
-     * @return JsonResponse
+     * @return JsonResponse | MultiResponse
      */
-    public function addImage(): JsonResponse {
+    public function addImage(){
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
             );
         }
-        
+
         if (!isset($_POST['image'])) {
             $this->core->addErrorMessage("Image not set");
-            return JsonReponse::getErrorResponse("Image not set");
+            return JsonResponse::getErrorResponse("Image not set");
         }
         if (!isset($_POST['capability'])) {
             $this->core->addErrorMessage("Capability not set");
-            return JsonReponse::getErrorResponse("Capability not set");
+            return JsonResponse::getErrorResponse("Capability not set");
         }
 
         // check for proper format
         $match = preg_match('/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/', $_POST['image']);
-        
+
         if ($match === false) {
             $this->core->addErrorMessage("An error has occurred when verifying image name");
             return JsonResponse::getErrorResponse("An error has occurred when verifying image name");
         }
-        
+
         if ($match === 0) {
             $this->core->addErrorMessage("Improper docker image name");
-            return JsonReponse::getErrorResponse("Improper docker image name");
+            return JsonResponse::getErrorResponse("Improper docker image name");
         }
-        
+
         $image_arr = explode(":", $_POST['image']);
         // ping the dockerhub API to check if docker exists
-        $url = "https://registry.hub.docker.com/v1/repositories/".$image_arr[0]."/tags";
+        $url = "https://registry.hub.docker.com/v1/repositories/" . $image_arr[0] . "/tags";
         $tag = $image_arr[1];
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -132,15 +132,15 @@ class DockerInterfaceController extends AbstractController {
             return JsonResponse::getErrorResponse($image_arr[0] . ' not found on DockerHub');
         }
         $return_json = json_decode($return_str);
-        $found = FALSE;
+        $found = false;
 
         foreach ($return_json as $image) {
             if ($image->name == $tag) {
-                $found = TRUE;
+                $found = true;
                 break;
             }
         }
-        
+
         if ($found) {
             $json = FileUtils::readJsonFile(
                 FileUtils::joinPaths(
@@ -153,8 +153,8 @@ class DockerInterfaceController extends AbstractController {
                 $json[$_POST['capability']][] = $_POST['image'];
             }
             else {
-                $this->core->addErrorMessage("Error: Image already exists in capability ". $_POST['capability']);
-                return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability '. $_POST['capability']);
+                $this->core->addErrorMessage("Error: Image already exists in capability " . $_POST['capability']);
+                return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability ' . $_POST['capability']);
             }
             FileUtils::writeJsonFile(
                 FileUtils::joinPaths(
@@ -164,7 +164,7 @@ class DockerInterfaceController extends AbstractController {
                 ),
                 $json
             );
-            
+
             if (!$this->updateDocker()) {
                 return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
             }
@@ -175,7 +175,6 @@ class DockerInterfaceController extends AbstractController {
             $this->core->addErrorMessage("Error: Image not found on dockerhub.");
             return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
         }
-        
     }
 
     /**
@@ -184,7 +183,7 @@ class DockerInterfaceController extends AbstractController {
      */
     public function updateDockerCall() {
         if (!$this->updateDocker()) {
-            return JsonResponse::getFailResponse("Failed to write to file {$docker_job_file}");
+            return JsonResponse::getFailResponse("Failed to write to file");
         }
         $this->core->addSuccessMessage("Successfully queued the system to update docker, please refresh the page in a bit.");
         return JsonResponse::getSuccessResponse("Successfully updated docker images and machines");
@@ -195,7 +194,7 @@ class DockerInterfaceController extends AbstractController {
      */
     private function updateDocker() {
         $now = $this->core->getDateTimeNow()->format('Ymd');
-        $docker_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(),"daemon_job_queue/docker". $now . ".json");
+        $docker_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue/docker" . $now . ".json");
         $docker_data = [
             "job" => "UpdateDockerImages"
         ];

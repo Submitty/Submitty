@@ -35,7 +35,6 @@ class DockerView extends AbstractView {
             $image["additional_names"] = array_slice($image['tags'], 1);
 
             $copy[$full_name] = $image;
-            
         }
 
         $docker_data['docker_images'] = $copy;
@@ -132,7 +131,7 @@ class DockerView extends AbstractView {
         $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
         for ($i = 0; $i < count($capabilities); $i++) {
             $capability_to_color[$capabilities[$i]] = $colors[$i] ?? $colors[19];
-        }        
+        }
 
         foreach ($worker_machines as $worker) {
             foreach ($capabilities as $capability) {
@@ -150,7 +149,7 @@ class DockerView extends AbstractView {
         $machine_to_update = [];
         $fail_images = [];
         $error_logs = [];
-        
+
         if (count($array_list) > 2) {
             $last_ran = "never";
             $most_recent = max($array_list);
@@ -181,7 +180,7 @@ class DockerView extends AbstractView {
                     $machine_to_update[$matches[1]] = false;
                     $error_logs[] = $buffer;
                 }
-                
+
                 $isMatch = preg_match("/ERROR: Could not pull (.+)/", $buffer, $matches);
                 if ($isMatch) {
                     $fail_images = $matches[1];

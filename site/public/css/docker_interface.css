@@ -1,4 +1,5 @@
-#tag-list, #capabilities-list {
+#tag-list,
+#capabilities-list {
     margin-left: 20px;
 }
 
@@ -17,8 +18,9 @@ table {
     border-collapse: collapse;
     width: 100%;
 }
-  
-td, th {
+
+td,
+th {
     border: 1px solid #dddddd;
     padding: 8px;
 }
@@ -90,7 +92,7 @@ td {
 
 .filter {
     margin-bottom: 1em;
-  }
+}
 
 .docker-warning {
     margin-bottom: 1em;
