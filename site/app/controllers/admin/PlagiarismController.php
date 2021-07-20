@@ -104,28 +104,14 @@ class PlagiarismController extends AbstractController {
      * @throws Exception
      */
     private function getPriorSemesterCourses(): array {
-        // holds the group for this course's directory so we can check it against all the other directories
-        $this_course_group = filegroup($this->core->getConfig()->getCoursePath());
-        if (!$this_course_group) {
-            throw new Exception("Unable to obtain group for current course");
+        $this_semester = $this->core->getConfig()->getSemester();
+        $this_course = $this->core->getConfig()->getCourse();
+        $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
+        $ret = [];
+        foreach ($valid_courses as $item) {
+            $ret[] = "{$item['semester']} {$item['course']}";
         }
-
-        $valid_courses = [];
-
-        // loop over all of the semesters
-        foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses")) as $term) {
-            if ($term !== '.' && $term !== '..') {
-                // loop over each of the courses in the term
-                foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term)) as $course) {
-                    $course_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course);
-                    if ($term !== '.' && $term !== '..' && filegroup($course_path) === $this_course_group) {
-                        $valid_courses[] =  "{$term} {$course}";
-                    }
-                }
-            }
-        }
-
-        return $valid_courses;
+        return $ret;
     }
 
     /**
@@ -146,14 +132,14 @@ class PlagiarismController extends AbstractController {
         if (!$this_course_group) {
             throw new Exception("Unable to obtain group for current course");
         }
-        if ($this_course_group !== filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course))) {
+        if ($this_course_group !== @filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course))) {
             throw new Exception("Group for requested course {$term}/{$course} does not match group for current course");
         }
 
         // actually do the collection of gradeables here
         $gradeables = [];
-        foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course)) as $gradeable) {
-            if ($term !== '.' && $term !== '..') {
+        foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course, "submissions")) as $gradeable) {
+            if ($gradeable !== '.' && $gradeable !== '..') {
                 $gradeables[] = $gradeable;
             }
         }
@@ -832,7 +818,7 @@ class PlagiarismController extends AbstractController {
         $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
         foreach ($prior_term_gradeables_array as &$gradeable) {
             try {
-                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($prior_term_gradeables_array["prior_semester"], $prior_term_gradeables_array["prior_course"]);
+                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"]);
             }
             catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());

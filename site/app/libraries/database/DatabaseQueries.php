@@ -7471,6 +7471,24 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
+        $this->submitty_db->query(
+            'SELECT group_name FROM courses WHERE semester = ? AND course = ?',
+            [$semester, $course]
+        );
+
+        if (count($this->submitty_db->rows()) > 0) {
+            $this->submitty_db->query(
+                'SELECT course, semester FROM courses WHERE group_name = ?',
+                [$this->submitty_db->rows()[0]['group_name']]
+            );
+            return $this->submitty_db->rows();
+        }
+        else {
+            return [];
+        }
+    }
+
     private function getInnerQueueSelect(): string {
         return <<<SQL
 
