@@ -99,7 +99,7 @@ for entry in "${result_array[@]}"; do
 done
 
 if [ ${SKIP_RSYNC} == 1 ]; then
-    chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/site"
+    chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/site/app" "${SUBMITTY_INSTALL_DIR}/site/room_templates" "${SUBMITTY_INSTALL_DIR}/site/socket" "${SUBMITTY_INSTALL_DIR}/site/tests"
 fi
 
 # Update permissions & ownership for cache directory
