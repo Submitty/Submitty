@@ -61,7 +61,7 @@ Macros
 				<th class="section-break" scope="col" colspan="{{ 2 + (reg_sections | length) }}">Limited Access Graders</td>
 			</tr>
 			{{ self.display_graders(graders[3], reg_sections) }}
-		{% elseif num_rotating_sections == 0 %}
+		{% elseif num_rotating_sections is not defined or num_rotating_sections == 0 %}
 			<p><b>
 				Rotating Sections have not been set up yet. <br/>
 				You can set up Rotating Sections using the "Manage Sections" option on the sidebar.
