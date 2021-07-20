@@ -43,20 +43,20 @@
         "question": "What is your favorite food?",
         "question_type": "multiple-response-survey",
         "responses": {
-            "0": "Pizza",
-            "3": "Hamburger",
-            "1": "Ice cream",
-            "5": "Steak",
-            "2": "Candy",
-            "4": "Other"
+            "Pizza",
+            "Hamburger",
+            "Ice cream",
+            "Steak",
+            "Candy",
+            "Other"
         },
         "correct_responses": [
             0,
-            3,
             1,
-            5,
             2,
-            4
+            3,
+            4,
+            5
         ],
         "release_date": "",
         "status": "open",
