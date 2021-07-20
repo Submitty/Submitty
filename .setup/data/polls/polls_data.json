@@ -42,14 +42,14 @@
         "name": "Poll 3",
         "question": "What is your favorite food?",
         "question_type": "multiple-response-survey",
-        "responses": {
+        "responses": [
             "Pizza",
             "Hamburger",
             "Ice cream",
             "Steak",
             "Candy",
             "Other"
-        },
+        ],
         "correct_responses": [
             0,
             1,
