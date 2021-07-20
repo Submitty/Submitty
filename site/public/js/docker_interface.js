@@ -19,27 +19,21 @@ function collapseSection(id,btn_id) {
 }
 
 function filterOnClick() {
-    const this_filter = new Map();
+    const this_filter = $(this).data('capability');
+
+    $('.filter-buttons').each(function (){
+        $(this).addClass('fully-transparent');
+    });
 
     if ($(this).hasClass('fully-transparent')) {
         $(this).removeClass('fully-transparent');
     }
-    else {
-        $(this).addClass('fully-transparent');
-    }
-
-    $('.filter-buttons').each(function (){
-        this_filter.set($(this).data('capability'), !$(this).hasClass('fully-transparent'));
-    });
 
     $('.image-row').each(function() {
         const this_row = $(this);
         let hide = true;
-        if ($(this).find('.badge').length == 0) {
-            hide = false;
-        }
         $(this).find('.badge').each(function (){
-            if (this_filter.get($(this).text())) {
+            if ($(this).text() == this_filter) {
                 hide = false;
             }
         });
@@ -50,6 +44,11 @@ function filterOnClick() {
             this_row.show();
         }
     });
+}
+
+function showAll() {
+    $('.image-row').show();
+    $('.filter-buttons').removeClass('fully-transparent');
 }
 
 function addFieldOnChange() {
@@ -124,6 +123,7 @@ function updateImage(url) {
 
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
+    $('#show-all').on('click', showAll);
     $('#add-field').on('input', addFieldOnChange);
     $('#add-field').val(localStorage.getItem('capability'));
     $('#add-field').trigger('input');
