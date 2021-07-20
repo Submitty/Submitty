@@ -319,6 +319,7 @@ function setButtonStatus() {
     else if (use_previous) {
         $("#getprev").prop("disabled", false);
     }
+
 }
 
 // LABELS FOR SELECTED FILES
@@ -386,6 +387,7 @@ function addLabel(filename, filesize, part, previous){
 
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
+    showPopup = true;
     if (!inactive_version) {
         setButtonStatus();
     }

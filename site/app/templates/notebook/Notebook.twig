@@ -276,6 +276,7 @@
         //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
         let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
         let loadTime = Date.now();
+        let showPopup = false;
 
         function initializePopupTimer(){
             sessionStorage.setItem("show_popup_submit", "yes");
@@ -286,12 +287,11 @@
             const time_taken = Math.floor((curTime - loadTime)/1000);
             const minutes_taken = Math.floor(time_taken / 60);
             if (minutes_taken >= interval ) {
-                if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline) {
+                if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline && showPopup) {
                     $(".notebook-submit-popup").show();
                 }
             }
             setTimeout(count,100);
-
         }
 
         function closePopup() {
