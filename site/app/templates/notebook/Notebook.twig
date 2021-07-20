@@ -273,44 +273,33 @@
 <script>
     {% if is_timed and allowed_minutes > 25 %}
         //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
-        //let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
-        {#if (interval === 10 && {{ allowed_minutes }} % 10 !== 0) {#}
-        {#    for (let i = 15; i > 4; i--) {#}
-        {#        if ({{ allowed_minutes }} % i === 0) {#}
-        {#            interval = i;#}
-        {#            break;#}
-        {#        }#}
-        {#    }#}
-        {#}#}
-        let interval = 2;
-
+        let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
+        let loadTime = Date.now();
+        console.log(interval);
         //for displaying popup submit button
         function initializePopupTimer(){
             sessionStorage.setItem("show_popup_submit", "yes");
             syncWithServer(true);
-            //so popup doesn't appear immediately
-            setTimeout(count, 70000);
-        };
+            count();
+        }
 
         function count(){
-            const time_taken = Math.floor((curTime - startTime)/1000);
+            const time_taken = Math.floor((curTime - loadTime)/1000);
             const minutes_taken = Math.floor(time_taken / 60);
-            console.log(minutes_taken);
-            if (minutes_taken % interval === 0 && minutes_taken > 0 ) {
-                console.log(minutes_taken);
-                if (sessionStorage.getItem("show_popup_submit") === 'yes') {
+            //console.log(minutes_taken);
+            if (minutes_taken >= interval ) {
+                //console.log(minutes_taken);
+                if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline) {
                     $(".notebook-submit-popup").show();
                 }
-                //so popup doesn't reappear immediately
-                setTimeout(count, 70000);
             }
-            else {
-                setTimeout(count,100);
-            }
+            setTimeout(count,100);
+
         }
 
         function closePopup() {
             $(".notebook-submit-popup").hide();
+            loadTime = Date.now();
 
         }
 
@@ -318,6 +307,7 @@
             closePopup();
             sessionStorage.setItem("show_popup_submit", "no");
         }
+
     {% endif %}
 
     function populatePreviousFiles(part){
