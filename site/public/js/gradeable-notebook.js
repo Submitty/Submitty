@@ -5,11 +5,9 @@
  *
  * @param mc_field_id The id of the multiple choice fieldset
  */
-function setMultipleChoices(mc_field_id) {
+function setMultipleChoices(mc_field_id, viewing_inactive_version) {
     let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
-
     prev_checked = prev_checked.split('\n');
-
     // For each input inside the fieldset see if its value is inside the prev checked array
     $(`#${mc_field_id} :input`).each((index,element) => {
 
@@ -19,6 +17,9 @@ function setMultipleChoices(mc_field_id) {
             $(element).prop('checked', true);
         }
         else {
+            if (viewing_inactive_version) {
+                $(element).prop('disabled', true);
+            }
             $(element).prop('checked', false);
         }
     });
@@ -47,8 +48,7 @@ function clearMultipleChoices(mc_field_id) {
 function setCodeBox(codebox_id, state) {
     // Get initial and previous submission values
     const initial_value = $(`#${codebox_id}`).attr('data-initial_value');
-    const recent_submission = $(`#${codebox_id}`).attr('data-recent_submission');
-
+    const version_submission =  $(`#${codebox_id}`).attr('data-version_submission');
     // Get the codebox
     const codebox = $(`#${codebox_id} .CodeMirror`).get(0).CodeMirror;
 
@@ -56,7 +56,7 @@ function setCodeBox(codebox_id, state) {
         codebox.setValue(initial_value);
     }
     else {
-        codebox.setValue(recent_submission);
+        codebox.setValue(version_submission);
     }
 }
 
@@ -142,10 +142,6 @@ $(document).ready(() => {
 
         // Set global javascript variable to allow submission for notebook
         window.is_notebook = true;
-
-        // Enable submit button
-        $('#submit').attr('disabled', false);
-
     });
 
     $('#submit').click(() => {
@@ -194,15 +190,14 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', true);
         }
         else {
-            $(clear_button_id).attr('disabled', false);
+            $(clear_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
         }
 
         if (code === recent_submission) {
             $(recent_button_id).attr('disabled', true);
         }
         else {
-            $(recent_button_id).attr('disabled', false);
-            $('#submit').attr('disabled', false);
+            $(recent_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
             window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));
@@ -225,7 +220,7 @@ $(document).ready(() => {
         }
         else if (action == 'recent') {
             setMultipleChoices(field_set_id);
-            $(`#mc_${index}_clear_button`).attr('disabled', false);
+            $(`#mc_${index}_clear_button`).attr('disabled', true);
             $(`#mc_${index}_recent_button`).attr('disabled', true);
         }
 
@@ -240,11 +235,11 @@ $(document).ready(() => {
 
         // Enable recent button
         $(`#mc_${index}_clear_button`).attr('disabled', false);
+        $(`#mc_${index}_recent_button`).attr('disabled', false);
         const prev_checked_items = this.getAttribute('data-prev_checked');
         const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');
         if (curr_checked_items !== prev_checked_items) {
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $('#submit').attr('disabled', false);
             $(`#mc_${index}_recent_button`).attr('disabled', false);
         }
         else {
@@ -310,7 +305,6 @@ $(document).ready(() => {
         else {
             $(recent_button_id).attr('disabled', false);
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $('#submit').attr('disabled', false);
         }
     });
 

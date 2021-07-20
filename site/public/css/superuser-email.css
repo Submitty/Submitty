@@ -1,0 +1,60 @@
+.email-content {
+    margin-top: 2vh;
+    min-height: 50vh;
+    resize: none;
+    padding: 1%;
+}
+
+.email-subject {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    min-height: 6vh;
+    font-size: large;
+    resize: none;
+    padding: 1%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    background-color: var(--hover-dark-border-actionable-blue);
+    width: 5px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--actionable-blue);
+    border-radius: 5px;
+    height: 10%;
+}
+
+.btn {
+    margin-top: 2vh;
+    float: right;
+}
+
+.checkbox-options {
+    margin: 2vh 0 2vh 0;
+}
+
+.course-title {
+    font-size: x-large;
+}
+
+.course-email {
+    padding: 1em;
+}
+
+.option {
+    display: block;
+}
+
+.options-label {
+    vertical-align: top;
+    display: inline-block;
+    padding-right: 1em;
+    width: 10vw;
+}
+
+.email-warning {
+    margin-top: 1em;
+    padding: 10px;
+}

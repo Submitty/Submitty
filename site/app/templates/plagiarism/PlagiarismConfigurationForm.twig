@@ -256,6 +256,13 @@
         $("#provided-code-file").show();
     });
 
+    $(document).ready(function() {
+        if ({{ provided_code ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
+            $("#current-code-file").show();
+            $("#provided-code-file").show();
+        }
+    });
+
     // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
     $('#add-more-prev-gradeable', form).on('click', function(){
         addMorePriorTermGradeable(prior_term_gradeables);

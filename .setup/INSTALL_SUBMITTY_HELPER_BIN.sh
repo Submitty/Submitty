@@ -71,7 +71,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
 # DAEMON_USER only things in sbin
-array=( auto_rainbow_grades.py auto_rainbow_scheduler.py build_config_upload.py run_lichen_plagiarism.py send_email.py generate_grade_summaries.py submitty_daemon_jobs)
+array=( auto_rainbow_grades.py auto_rainbow_scheduler.py build_config_upload.py send_email.py generate_grade_summaries.py submitty_daemon_jobs)
 for i in "${array[@]}"; do
     chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}

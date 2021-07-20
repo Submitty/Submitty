@@ -1579,7 +1579,7 @@ function bookmarkThread(thread_id, type){
 }
 
 function toggleMarkdown(post_box_id) {
-  if(!post_box_id) post_box_id = '';
+  if(post_box_id === undefined) post_box_id = '';
   $(`#markdown_buttons_${post_box_id}`).toggle();
   $(this).toggleClass('markdown-active'); 
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
@@ -1587,7 +1587,10 @@ function toggleMarkdown(post_box_id) {
 }
 
 function previewForumMarkdown(){
-  const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
+  let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
+  if (post_box_num === undefined) {
+    post_box_num = '';
+  }
   const reply_box = $(`textarea#reply_box_${post_box_num}`);
   const preview_box = $(`#preview_box_${post_box_num}`);
   const preview_button = $(this);

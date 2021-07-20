@@ -2,7 +2,7 @@
 /* global captureTabInModal */
 
 function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members,
-    pending_members, multiple_invite_members, max_members, lock_date) {
+    pending_members, multiple_invite_members, max_members, lock_date, team_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#admin-team-form');
     form.css('display', 'block');
@@ -63,6 +63,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="edit_team_team_id"]', form).val(who_id);
 
         title_div.append(`Edit Team: ${who_id}`);
+
+        $('#admin-team-name-form').val(team_name);
 
         //append current members in the team to members_div
         for (let i = 0; i < members.length; i++) {
@@ -143,6 +145,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 else if (user_assignment_setting_json.team_history[j].action == 'cancel_invitation') {
                     team_history_tbody.append(getRowBound(curr_json_entry.canceled_by_user, `Uninvited ${curr_json_entry.canceled_user}`));
                 }
+                else if (user_assignment_setting_json.team_history[j].action == 'change_name') {
+                    team_history_tbody.append(getRowBound(curr_json_entry.user, 'Changed Team Name'));
+                }
             }
             if (past_lock_date) {
                 $('#admin_team_history_table > tfoot').css('display', 'table-footer-group');
@@ -151,6 +156,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     }
 
     $(':text',form).change(function() {
+        if ($(this)[0].id === 'admin-team-name-form') {
+            return;
+        }
         let found = false;
         for (let i = 0; i < student_full.length; i++) {
             if (student_full[i]['value'] === $(this).val()) {
@@ -212,6 +220,7 @@ function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclic
                 id="${id_prefix + user_num}"
                 class="btn ${button_class} admin-team-form-button" 
                 onclick="${onclick.name}(${onclickArgs.join(', ')})" 
+                type="button"
             >
                 ${text}
             </button>`;
@@ -223,6 +232,7 @@ function getTeamFormAddMoreUsersButtonString(user_num){
                 onclick="addTeamMemberInput(this, ${user_num});" 
                 aria-label="Add More Users"
                 class="btn btn-primary"
+                type="button"
             >
                 <i class="fas fa-plus-square"></i>
                 Add More Users

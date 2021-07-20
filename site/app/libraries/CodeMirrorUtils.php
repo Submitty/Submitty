@@ -7,12 +7,14 @@ class CodeMirrorUtils {
     const DEFAULT_CSS_FILES = [
         'codemirror/codemirror.css',
         'codemirror/theme/eclipse.css',
-        'codemirror/theme/monokai.css'
+        'codemirror/theme/monokai.css',
+        'codemirror-spell-checker/spell-checker.min.css'
     ];
 
     const DEFAULT_JS_FILES = [
         'codemirror/codemirror.js',
         'codemirror/addon/display/placeholder.js',
+        'codemirror/addon/mode/overlay.js',
         'codemirror/mode/clike/clike.js',
         'codemirror/mode/haskell/haskell.js',
         'codemirror/mode/haskell-literate/haskell-literate.js',
@@ -23,6 +25,7 @@ class CodeMirrorUtils {
         'codemirror/mode/scheme/scheme.js',
         'codemirror/mode/shell/shell.js',
         'codemirror/mode/sql/sql.js',
+        'codemirror-spell-checker/spell-checker.min.js',
     ];
 
     const DEFAULT_MIME_TYPE = 'text/plain';
@@ -93,6 +96,7 @@ class CodeMirrorUtils {
      */
     public static function loadDefaultDependencies(Core $core): void {
         $core->getOutput()->addInternalJs('code-mirror-utils.js');
+        $core->getOutput()->addInternalCss('code-mirror-utils.css');
 
         foreach (self::DEFAULT_JS_FILES as $file) {
             $core->getOutput()->addVendorJs($file);

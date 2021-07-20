@@ -5,6 +5,7 @@ namespace app\controllers\student;
 use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
@@ -38,7 +39,7 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
-        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection(), null);
         $this->core->addSuccessMessage("Created a new team");
 
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
@@ -459,6 +460,66 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
         $this->core->redirect($return_url);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/setname")
+     */
+    public function setTeamName($gradeable_id): RedirectResponse {
+        $user_id = $this->core->getUser()->getId();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage("Invalid gradeable");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable === false) {
+            $this->core->addErrorMessage("You are not on a team");
+            return new RedirectResponse($return_url);
+        }
+        $team = $graded_gradeable->getSubmitter()->getTeam();
+
+        if (!isset($_POST['team_name'])) {
+            $this->core->addErrorMessage("You must pick a name");
+            return new RedirectResponse($return_url);
+        }
+
+        if ($_POST['team_name'] == '') {
+            $_POST['team_name'] = null;
+        }
+
+        if ($_POST['team_name'] === $team->getTeamName()) {
+            $this->core->addErrorMessage("No changes detected in team name");
+            return new RedirectResponse($return_url);
+        }
+
+        $this->core->getQueries()->updateTeamName($team->getId(), $_POST['team_name']);
+
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $this->core->addErrorMessage("Failed to open settings file");
+            return new RedirectResponse($return_url);
+        }
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
+        $json["team_history"][] = ["action" => "change_name", "time" => $current_time, "user" => $user_id];
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMessage("Failed to write to team history to settings file");
+            return new RedirectResponse($return_url);
+        }
+
+        $this->core->addSuccessMessage("Team name successfully set");
+        return new RedirectResponse($return_url);
     }
 
     /**

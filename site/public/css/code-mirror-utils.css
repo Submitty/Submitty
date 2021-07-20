@@ -1,0 +1,5 @@
+.cm-spell-error {
+    background: transparent !important;
+    text-decoration: red dotted underline;
+    text-underline-position: under;
+}

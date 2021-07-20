@@ -65,7 +65,9 @@
                 <h2>Messages</h2>
                 <div id="cust_messages_collapse" class="collapsible_area">
                     <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
+                    {% if 0 in messages|keys %}
                     <textarea id="cust_messages_textarea">{{ messages[0] }}</textarea>
+                    {% endif %}
                 </div>
             </div>
             <div id="section_labels" class="customization_item">
@@ -96,7 +98,7 @@
                                 </li>
                             {% endfor %}
                         </ol>
-                        Total: <span id="used_percentage">{{ bucket_percentages['used_percentage'] }}%</span>
+                        Total: <span id="used_percentage">{% if 'used_percentage' in bucket_percentages|keys %}{{ bucket_percentages['used_percentage'] }}{% else %}0{% endif %}%</span>
                     </div>
                     <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
                         <h3>Available Buckets</h3>

@@ -9,9 +9,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\views\email\EmailStatusView;
 use app\libraries\routers\AccessControl;
 
-/**
- * @AccessControl(role="INSTRUCTOR")
- */
 class EmailStatusController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -19,6 +16,7 @@ class EmailStatusController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/email_status")
+     * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
     public function getEmailStatusPage() {
@@ -31,6 +29,20 @@ class EmailStatusController extends AbstractController {
                 'showEmailStatus',
                 $result
             )
+        );
+    }
+
+    /**
+     * @Route("/superuser/email_status")
+     * @AccessControl(level="SUPERUSER")
+     * @return WebResponse
+     */
+    public function getSuperuserEmailStatusPage(): WebResponse {
+        $email_statuses = $this->core->getQueries()->getAllEmailStatuses();
+        return new WebResponse(
+            EmailStatusView::class,
+            'showSuperuserEmailStatus',
+            $email_statuses
         );
     }
 }

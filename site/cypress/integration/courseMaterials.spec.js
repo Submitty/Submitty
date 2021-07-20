@@ -1,4 +1,5 @@
 import {buildUrl, getCurrentSemester} from '../support/utils.js';
+import {skipOn} from '@cypress/skip-test';
 
 const coursePath = `${getCurrentSemester()}/sample/uploads/course_materials`;
 const defaultFilePath = `/var/local/submitty/courses/${coursePath}`;
@@ -7,6 +8,7 @@ describe('Test cases revolving around course material uploading and access contr
     before(() => {
         cy.visit('/');
         cy.login();
+        cy.wait(500);
         cy.visit(['sample', 'course_materials']);
     });
 
@@ -312,49 +314,51 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.btn-danger').click();
     });
 
-    it('Should sort course materials', () => {
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
-        cy.get('#upload1').attachFile('file1.txt' , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_sort').clear().type('50000');
-        cy.get('#submit-materials').click();
-        cy.reload();
+    skipOn(Cypress.env('run_area') === 'CI', () => {
+        it('Should sort course materials', () => {
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#input-provide-full-path').type('a');
+            cy.get('#upload1').attachFile('file1.txt' , { subjectType: 'drag-n-drop' });
+            cy.get('#upload_sort').clear().type('50000');
+            cy.get('#submit-materials').click();
+            cy.reload();
 
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
-        cy.get('#upload1').attachFile('file2.txt' , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_sort').clear().type('10');
-        cy.get('#submit-materials').click();
-        cy.reload();
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#input-provide-full-path').type('a');
+            cy.get('#upload1').attachFile('file2.txt' , { subjectType: 'drag-n-drop' });
+            cy.get('#upload_sort').clear().type('10');
+            cy.get('#submit-materials').click();
+            cy.reload();
 
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
-        cy.get('#upload1').attachFile('file3.txt' , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_sort').clear().type('5.5');
-        cy.get('#submit-materials').click();
-        cy.reload();
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#input-provide-full-path').type('a');
+            cy.get('#upload1').attachFile('file3.txt' , { subjectType: 'drag-n-drop' });
+            cy.get('#upload_sort').clear().type('5.5');
+            cy.get('#submit-materials').click();
+            cy.reload();
 
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
-        cy.get('#upload1').attachFile('file4.txt' , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_sort').clear().type('5.4');
-        cy.get('#submit-materials').click();
-        cy.reload();
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#input-provide-full-path').type('a');
+            cy.get('#upload1').attachFile('file4.txt' , { subjectType: 'drag-n-drop' });
+            cy.get('#upload_sort').clear().type('5.4');
+            cy.get('#submit-materials').click();
+            cy.reload();
 
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#input-provide-full-path').type('a');
-        cy.get('#upload1').attachFile('file5.txt' , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_sort').clear().type('0');
-        cy.get('#submit-materials').click();
-        cy.reload();
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#input-provide-full-path').type('a');
+            cy.get('#upload1').attachFile('file5.txt' , { subjectType: 'drag-n-drop' });
+            cy.get('#upload_sort').clear().type('0');
+            cy.get('#submit-materials').click();
+            cy.reload(true);
+            cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
 
 
-        for (let i = 5; i > 0; i--){
-            cy.get(`:nth-child(${6-i}) > .file-viewer`).contains(`file${i}.txt` );
-        }
+            for (let i = 5; i > 0; i--){
+                cy.get(`:nth-child(${6-i}) > .file-viewer`).contains(`file${i}.txt` );
+            }
 
-        cy.get('.fa-trash').first().click();
-        cy.get('.btn-danger').click();
+            cy.get('.fa-trash').first().click();
+            cy.get('.btn-danger').click();
+        });
     });
 });
