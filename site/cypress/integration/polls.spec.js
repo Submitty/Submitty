@@ -42,7 +42,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#today-table > tbody > tr > :nth-child(3) > a > .btn').should('have.class', 'btn-success');
         cy.get('#today-table > tbody > tr > :nth-child(3) > a > .btn').contains('Answer');
 
-
         cy.get('#older-table').contains('Poll 1');
         cy.get('#older-table > tbody > :nth-child(1) > :nth-child(3) > a > .btn').should('have.class', 'btn-primary');
         cy.get('#older-table > tbody > :nth-child(1) > :nth-child(3) > a > .btn').contains('View Poll');
@@ -50,6 +49,19 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#older-table').contains('Poll 2');
         cy.get('#older-table > tbody > :nth-child(2) > :nth-child(3) > a > .btn').should('have.class', 'btn-primary');
         cy.get('#older-table > tbody > :nth-child(2) > :nth-child(3) > a > .btn').contains('View Poll');
+    });
 
+    it('Should verify all polls result pages', () => {
+        // log in from instructor account
+        cy.visit('/');
+        cy.login();
+        cy.visit(['sample', 'polls']);
+
+        // verify that all the poll result pages work and are in the expected state
+        cy.get('#today-table > tbody > tr > :nth-child(7) > .btn').click();
+        cy.get('.content > h1').contains("Viewing poll results for Poll 3");
+        cy.get('.content > h2').contains("Question:");
+        cy.get('.markdown').contains("What is your favorite food?");
+        //cy.get('.content > .user-select-none').should('exist');
     });
 });
