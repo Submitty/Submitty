@@ -170,7 +170,6 @@ function newPostRender(gc_id, post_id, new_post) {
             last_post = component_grade_inquiry.children('.grade-inquiry-header-div').last();
         }
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
-        component_grade_inquiry.find(`[data-post_id=${post_id}]`).children('div').first().remove();
     }
     else {
         const last_post = $('.grade-inquiry').children('.post_box').last();
