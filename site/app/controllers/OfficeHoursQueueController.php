@@ -131,17 +131,7 @@ class OfficeHoursQueueController extends AbstractController {
                 $regex_pattern = $this->core->getQueries()->getQueueRegex($queue_code)[0]['regex_pattern'];
                 if ($regex_pattern !== '') {
                     $contact_info = $_POST['contact_info'];
-                    $invalid = false;
-                    //if checking for any email address
-                    if ($regex_pattern === 'email' || $regex_pattern === 'Email') {
-                        if (!filter_var($contact_info, FILTER_VALIDATE_EMAIL)) {
-                            $invalid = true;
-                        }
-                    }
-                    elseif (preg_match($regex_pattern, $contact_info) == 0) {
-                        $invalid = true;
-                    }
-                    if ($invalid) {
+                    if (preg_match($regex_pattern, $contact_info) == 0) {
                         $this->core->addErrorMessage("Invalid contact information format.  Please re-read the course-specific instructions about the necessary information you should provide when you join this office hours queue.");
                         return MultiResponse::RedirectOnlyResponse(
                             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
