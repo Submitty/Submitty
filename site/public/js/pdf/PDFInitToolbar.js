@@ -112,7 +112,6 @@ function renderPDFToolbar() {
         if (confirm('Are you sure you want to clear all of your annotations?\n\nWARNING: This action CANNOT be undone.')) {
             localStorage.setItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`, '[]');
             saveFile();
-            console.log($(`svg [data-pdf-annotate-userId=${GENERAL_INFORMATION.grader_id}]`));
             $(`svg [data-pdf-annotate-userId=${GENERAL_INFORMATION.grader_id}]`).remove();
         }
     }
