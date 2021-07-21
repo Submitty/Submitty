@@ -392,7 +392,7 @@ class AutoGradingView extends AbstractView {
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file["encoded_name"] = md5($file['path']);
                 $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
@@ -480,7 +480,7 @@ class AutoGradingView extends AbstractView {
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
-            'can_download' => !$gradeable->isVcs(),
+            'can_download' => true,
             'display_version' => $display_version,
             'display_original_pdf' => $this->core->buildCourseUrl(['display_file']),
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),

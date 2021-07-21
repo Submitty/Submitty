@@ -34,7 +34,7 @@ class PDFController extends AbstractController {
         }
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
-        $md5_path = md5($anon_path);
+        $md5_path = md5($path);
         if (is_dir($annotation_path)) {
             $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
@@ -71,7 +71,7 @@ class PDFController extends AbstractController {
         $annotation_jsons = [];
 
         $latest_timestamp = filemtime($path);
-        $md5_path = md5($anon_path);
+        $md5_path = md5($path);
         if (is_dir($annotation_path)) {
             $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
