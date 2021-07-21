@@ -832,6 +832,7 @@ function gatherInputAnswersByType(type){
         var key = "";
         var value = "";
         if(type == "codebox"){
+            //console.log(this_input_answer);
             key = this_input_answer.id;
             var editor = this_input_answer.querySelector(".CodeMirror").CodeMirror;
             value = editor.getValue();
@@ -846,7 +847,7 @@ function gatherInputAnswersByType(type){
         }
         input_answers[key].push(value);
     }
-
+    //console.log(input_answers);
     return input_answers;
 }
 

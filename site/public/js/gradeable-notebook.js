@@ -89,8 +89,9 @@ function saveNotebookToLocal() {
 }
 
 
-function tempRestore() {
-    let inputs=[];
+function tempcollect() {
+    let mc_inputs=[];
+    let short_answer_inputs = []
     $('.multiple_choice').each(function(){
         let file_name='';
         $(this).children('fieldset').each(function(){
@@ -103,15 +104,52 @@ function tempRestore() {
                         checked = true;
                         answers.push($(this)[0].defaultValue);
                     }
-                })
-            })
+                });
+            });
             if (checked) {
-                inputs.push([file_name, answers]);
+                mc_inputs.push([file_name, answers]);
+            }
+        });
+    });
+
+    $('.short_answer').each(function(){
+        $(this).children('div').each(function(){
+            let file_name = $(this).attr('class');
+            let value = '';
+            if (file_name !== 'markdown ') {
+                let editor = ($(this)[0]).querySelector(".CodeMirror").CodeMirror;
+                value = editor.getValue();
+                short_answer_inputs.push([file_name, value])
             }
         })
-    })
+    });
+    localStorage.setItem('gang', JSON.stringify({
+        timestamp: Date.now(),
+        multiple_choice: mc_inputs,
+        short_answer: short_answer_inputs
+    }));
+     console.log(mc_inputs);
+     console.log(short_answer_inputs);
+     tempRestore();
+}
 
+function tempRestore(){
+    const inputs = JSON.parse(localStorage.getItem('gang'));
     console.log(inputs);
+    //restore multiple choice
+    for (const id in inputs.multiple_choice) {
+        let filename = inputs.multiple_choice[id][0];
+        let answers = inputs.multiple_choice[id][1];
+        console.log(answers);
+    }
+    //restore short answers
+    for (const id in inputs.short_answer) {
+        let filename = inputs.short_answer[id][0];
+        let answers = inputs.short_answer[id][1];
+        console.log(answers);
+    }
+
+
 }
 
 /**
@@ -158,7 +196,7 @@ function restoreNotebookFromLocal() {
             cm.setValue(answer);
         }
     }
-    tempRestore();
+    tempcollect();
 }
 
 $(document).ready(() => {
