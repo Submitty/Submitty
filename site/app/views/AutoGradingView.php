@@ -392,6 +392,7 @@ class AutoGradingView extends AbstractView {
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                var_dump($file["path"]);
                 $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
                 $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
