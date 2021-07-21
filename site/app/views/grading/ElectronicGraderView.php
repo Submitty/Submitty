@@ -1655,7 +1655,9 @@ HTML;
             "highest_version" => $highest_version,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             "old_files" => $old_files,
-            "is_grader_view" => true
+            "is_grader_view" => true,
+            "max_file_uploads" => ini_get('max_file_uploads'),
+            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css')
             ]
         );
     }
