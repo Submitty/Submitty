@@ -1128,6 +1128,89 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Gets an unique array of active users in courses_users, active users are users enrolled in a course in the current semester
+     * Allows the filtering the group of users returned by this function
+     *
+     * @param bool $instructor To include instructors or not
+     * @param bool $fullAccess To include full access graders or not
+     * @param bool $limitedAccess To include limited access graders or not
+     * @param bool $student To include students or not
+     * @param bool $faculty to include faculty level users or not
+     * @return array - array of userids active in the specified semester
+     */
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+        $args = ['-1'];
+        $extra_join = '';
+        $extra_where = '';
+        if ($instructor) {
+            $args[] = '1';
+        }
+        if ($fullAccess) {
+            $args[] = '2';
+        }
+        if ($limitedAccess) {
+            $args[] = '3';
+        }
+        if ($student) {
+            $args[] = '4';
+        }
+
+        if ($faculty) {
+            $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
+            $extra_where = ' OR users.user_access_level <= 2';
+        }
+        $result_rows = [];
+        $this->submitty_db->query(
+            "SELECT DISTINCT courses_users.user_id as user_id
+                FROM courses_users INNER JOIN courses 
+                ON courses_users.semester = courses.semester AND courses_users.course = courses.course
+                " . $extra_join . "
+                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
+        );
+        return array_map(
+            function ($row) {
+                return $row['user_id'];
+            },
+            $this->submitty_db->rows()
+        );
+    }
+
+    /**
+     * Count number of each group of faculty, instructors in active course, full access graders in active course, limited access graders in active course, students in active course
+     * @return array
+     */
+    public function countActiveUsersByGroup(): array {
+        $this->submitty_db->query(
+            "WITH A as (SELECT DISTINCT ON(user_id) user_id, user_group FROM courses_users JOIN courses
+            on courses.course = courses_users.course
+            and courses.semester = courses_users.semester
+            WHERE courses.status = 1
+            ORDER BY user_id, courses_users.user_group ASC)
+            SELECT A.user_group, COUNT(A.user_group) FROM A GROUP BY A.user_group"
+        );
+        $result = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            if ($row['user_group'] == 1) {
+                $result['instructor'] = $row['count'];
+            }
+            elseif ($row['user_group'] == 2) {
+                $result['full_access'] = $row['count'];
+            }
+            elseif ($row['user_group'] == 3) {
+                $result['limited_access'] = $row['count'];
+            }
+            else {
+                $result['student'] = $row['count'];
+            }
+        }
+        $this->submitty_db->query(
+            "SELECT COUNT(user_access_level) FROM users WHERE user_access_level <= 2"
+        );
+        $result['faculty'] = $this->submitty_db->row()['count'];
+        return $result;
+    }
+
+    /**
      * Gets whether a gradeable exists already
      *
      * @param string $g_id the gradeable id to check for
@@ -4360,13 +4443,29 @@ AND gc_id IN (
      * a student has dropped a course.  SQL query checks for user_group=4 so
      * that only students are considered.  Returns false when course is dropped.
      * Returns true when course is still active, or user is not a student.
+     * If course or semester is null, this method instead checks for if the student
+     * is 'active' in any course
      *
      * @param  string $user_id
      * @param  string $course
      * @param  string $semester
-     * @return boolean
+     * @return bool
      */
-    public function checkStudentActiveInCourse($user_id, $course, $semester) {
+    public function checkStudentActiveInCourse($user_id, $course, $semester): bool {
+        if ($course == null || $semester == null) {
+            $this->submitty_db->query(
+                "
+                SELECT
+                    CASE WHEN registration_section IS NULL AND user_group=4 THEN FALSE
+                    ELSE TRUE
+                    END
+                AS active
+                FROM courses_users WHERE user_id=?",
+                [$user_id]
+            );
+            $row = $this->submitty_db->row();
+            return count($row) > 0 && $row['active'];
+        }
         $this->submitty_db->query(
             "
             SELECT
@@ -4377,7 +4476,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return $this->submitty_db->row()['active'];
+        $row = $this->submitty_db->row();
+        return count($row) > 0 && $row['active'];
     }
 
     public function checkIsInstructorInCourse($user_id, $course, $semester) {
@@ -5902,10 +6002,17 @@ AND gc_id IN (
      *
      * @param string $course
      * @param string $semester
+     * @return EmailStatusModel
      */
-    public function getEmailStatusWithCourse($semester, $course) {
+    public function getEmailStatusWithCourse($semester, $course): EmailStatusModel {
         $parameters = [$course, $semester];
         $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
+        $details = $this->submitty_db->rows();
+        return new EmailStatusModel($this->core, $details);
+    }
+
+    public function getAllEmailStatuses(): EmailStatusModel {
+        $this->submitty_db->query('SELECT * FROM emails ORDER BY created DESC');
         $details = $this->submitty_db->rows();
         return new EmailStatusModel($this->core, $details);
     }
@@ -7354,6 +7461,15 @@ SQL;
             [$g_id, $team_id]
         );
         return $this->course_db->rows();
+    }
+
+    public function getUserGroups(string $user_id): array {
+        $this->submitty_db->query(
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
+            [$user_id]
+        );
+        return $this->submitty_db->rows();
     }
 
     private function getInnerQueueSelect(): string {
