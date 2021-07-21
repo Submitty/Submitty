@@ -13,7 +13,7 @@
             Submit often and save your progress !<br>
             <hr>
             <button class="submit-gradeable btn btn-success popup-submit">Submit</button>
-            <button class="btn btn-primary" onclick="closePopup()">Close</button>
+            <button class="btn btn-primary" onclick="closePopupSubmit()">Close</button>
             <button class="btn btn-danger" onclick="DontShowPopupSubmit()">Don't Ask Me Again</button>
         </div>
     {% endif %}
@@ -275,7 +275,7 @@
     {% if is_timed and allowed_minutes > 25 %}
         //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
         let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
-        let loadTime = Date.now();
+        let loadTime = curTime !== 0 ? curTime : Date.now();
         let showPopup = false;
 
         function initializePopupTimer(){
@@ -286,23 +286,23 @@
         function count(){
             const time_taken = Math.floor((curTime - loadTime)/1000);
             const minutes_taken = Math.floor(time_taken / 60);
+            console.log(minutes_taken);
             if (minutes_taken >= interval ) {
                 if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline && showPopup) {
                     $(".notebook-submit-popup").show();
                 }
             }
-            setTimeout(count,100);
+            setTimeout(count,2000);
         }
 
-        function closePopup() {
+        function closePopupSubmit() {
             $(".notebook-submit-popup").hide();
             //restart timer
-            loadTime = Date.now();
-
+            loadTime = curTime;
         }
 
         function DontShowPopupSubmit() {
-            closePopup();
+            closePopupSubmit();
             sessionStorage.setItem("show_popup_submit", "no");
         }
 
