@@ -85,7 +85,7 @@
                                 <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Post Additional Information
                                 </button>
-                                <button type="button" id="grading-close gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button type="button" id="grading-close" formaction="{{ change_request_status_url }}" class="gi-ignore-disabled gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Close Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == -1 %}
@@ -102,7 +102,7 @@
                                 <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Add Comment
                                 </button>
-                                <button type="button" id="gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button type="button" formaction="{{ change_request_status_url }}" class="gi-ignore-disabled gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Reopen Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == 0 %}

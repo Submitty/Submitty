@@ -40,7 +40,7 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
-    const buttons = $('.gi-submit:not(#gi_ignore_disabled)');
+    const buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     if (reply_text_area.val() === '') {
         buttons.prop('disabled',true);
     }
