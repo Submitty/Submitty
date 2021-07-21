@@ -47,7 +47,7 @@
                 {# show form if it is before grade inquiry deadline or this is an already opened inquiry #}
                 {% if is_inquiry_open or grade_inquiries[component.id] is defined %}
                 {# show form if grade inquiry per component and (it is not the all tab or there is an unresolved inquiry that is not a component) #}
-                {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
+                {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or (grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == -1))) or not grade_inquiry_per_component_allowed %}
                     <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
                         <input type="hidden" id="thread_id" name="thread_id" value="{{ grade_inquiries[component.id].id is defined ? grade_inquiries[component.id].id : 0  }}">

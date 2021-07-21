@@ -1,8 +1,8 @@
 <div class="component-tabs">
     {% for component in gradeable_components %}
-        <a class="component-tab key_to_click component-{{ component.id }} {{ grade_inquiries[component.id].status == -1 ? 'component-unresolved' : '' }}" tabindex="0" data-component_id="{{ component.id }}" href="javascript:void(0)" onclick="onComponentTabClicked(this)">
+        <a class="component-tab key_to_click component-{{ component.id }} {{ grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == -1 ? 'component-unresolved' : '' }}" tabindex="0" data-component_id="{{ component.id }}" href="javascript:void(0)" onclick="onComponentTabClicked(this)">
             {{ component.title }}
-            {% if grade_inquiries[component.id].status == -1%}
+            {% if grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == -1%}
                 <i class="fas component-tab-icon fa-exclamation notification-badge"></i>
             {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == 0 and component.id != 0 %}
                 <i class="fas component-tab-icon fa-check notification-badge"></i>
