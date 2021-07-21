@@ -88,28 +88,32 @@ function saveNotebookToLocal() {
     }
 }
 
-inputs=[];
+
 function tempRestore() {
-    let input_elems= $("[id^="+'multiple_choice'+"_]");
+    let inputs=[];
     $('.multiple_choice').each(function(){
+        let file_name='';
         $(this).children('fieldset').each(function(){
+            file_name = $(this).attr('name');
+            let answers = []
+            let checked = false;
             $(this).children('label').each(function(){
                 $(this).children('input').each(function(){
-                    inputs.push($(this));
+                    if($(this)[0].checked) {
+                        checked = true;
+                        answers.push($(this)[0].defaultValue);
+                    }
                 })
             })
+            if (checked) {
+                inputs.push([file_name, answers]);
+            }
         })
     })
-    inputs.forEach(test);
-    console.log(inputs[2][0].id)
-    // input_elems = input_elems.serializeArray()
-    // console.log(input_elems);
+
+    console.log(inputs);
 }
-function test(value) {
-    if (document.getElementById(value[0].id).checked === false) {
-        console.log('yay');
-    }
-}
+
 /**
  * Restores the state of the notebook gradeable from localstorage. If no
  * autosave data exists yet, then this function does nothing.
