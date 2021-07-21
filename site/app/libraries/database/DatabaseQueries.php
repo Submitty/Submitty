@@ -7471,6 +7471,14 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    public function courseExists(string $semester, string $course): bool {
+        $this->submitty_db->query(
+            'SELECT * FROM courses WHERE semester=? AND course=?',
+            [$semester, $course]
+        );
+        return $this->submitty_db->getRowCount() === 1;
+    }
+
     private function getInnerQueueSelect(): string {
         return <<<SQL
 

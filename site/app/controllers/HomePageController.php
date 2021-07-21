@@ -133,13 +133,14 @@ class HomePageController extends AbstractController {
             || !isset($_POST['course_title'])
             || !isset($_POST['head_instructor'])
             || !isset($_POST['group_name'])
+            || $_POST['group_name'] === ""
         ) {
             $error = "Semester, course title, head instructor, or group name not set.";
             $this->core->addErrorMessage($error);
             return new MultiResponse(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
 
@@ -153,7 +154,7 @@ class HomePageController extends AbstractController {
             return new MultiResponse(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
 
@@ -163,7 +164,17 @@ class HomePageController extends AbstractController {
             return new MultiResponse(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        if ($this->core->getQueries()->courseExists($_POST['course_semester'], $_POST['course_title'])) {
+            $error = "Course with that semester/title already exists.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
 
@@ -185,7 +196,7 @@ class HomePageController extends AbstractController {
                 return new MultiResponse(
                     JsonResponse::getFailResponse($error),
                     null,
-                    new RedirectResponse($this->core->buildUrl(['home']))
+                    new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
                 );
             }
 
@@ -195,7 +206,17 @@ class HomePageController extends AbstractController {
                 return new MultiResponse(
                     JsonResponse::getFailResponse($error),
                     null,
-                    new RedirectResponse($this->core->buildUrl(['home']))
+                    new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+                );
+            }
+
+            if (json_decode($group_check, true)['status'] === 'error') {
+                $error = "The Linux group does not have the correct members for submitty use";
+                $this->core->addErrorMessage($error);
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($error),
+                    null,
+                    new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
                 );
             }
         }
@@ -253,8 +274,42 @@ class HomePageController extends AbstractController {
                 $this->core->getUser()->getId(),
                 $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
-                $this->core->getCsrfToken()
+                $this->core->getCsrfToken(),
+                $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId())
             )
+        );
+    }
+
+    /**
+     * @Route("/home/group/users")
+     *
+     * @return MultiResponse
+     */
+    public function getGroupUsers($group_name = null): MultiResponse {
+        if (!$this->core->getUser()->accessFaculty()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+
+        $group_file = fopen("/etc/group", "r");
+        $group_content = fread($group_file, filesize("/etc/group"));
+        fclose($group_file);
+
+        $groups = explode("\n", $group_content);
+        foreach ($groups as $group) {
+            if (str_starts_with($group, $group_name)) {
+                $categories = explode(":", $group);
+                $members = array_pop($categories);
+                return new MultiResponse(
+                    JsonResponse::getSuccessResponse($members)
+                );
+            }
+        }
+
+        return new MultiResponse(
+            JsonResponse::getErrorResponse("Group not found")
         );
     }
 

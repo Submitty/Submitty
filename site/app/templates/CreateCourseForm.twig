@@ -36,7 +36,8 @@
                     <span class="option-alt">
                       <span class="block">What is the course code for the new course?
                       {{ course_code_requirements }} </span>
-                      <span class="block">Please follow course code conventions established by your school and department.
+                      <span class="block">Please follow course code conventions established by your school and department.<br>
+                      My Prior Course Codes: {% for course in courses %}{{ course.getTitle }}{% if not loop.last%},{% endif %} {% endfor %}.<br>
                       Contact the system administrator if you are unsure what course code you should use.</span>
                       <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</span>
                       <span class="required_type">(Required)</span>
@@ -85,7 +86,10 @@
             </div>
 
             <div class="option-input col-md-6">
-                <select name="group_name" id="group_name" class="auto_save"></select>
+                <select name="group_name" id="group_name" class="auto_save" onchange="onGroupChange()">
+                    <option value="">Please select an option</option>
+                </select>
+                <p id="group_users" style="display: none;">Users in this group: </p>
             </div>
         </div>
 
@@ -117,9 +121,35 @@
                 let json = JSON.parse(data);
                 let groups = json['data'];
                 $('#group_name').find('option').remove();
+                $('#group_name').append('<option value="">Please select an option</option>');
                 $.each(groups, (i, val) => {
                     $('#group_name').append(`<option value="${val['group_name']}">${val['group_name']}`)
                 })
+                onGroupChange();
+            }
+        });
+    }
+
+    function onGroupChange() {
+        let group = $('#group_name').val();
+        $('#group_users').text("Users in this group: ");
+        if (group === "") {
+            $('#group_users').hide();
+            return;
+        }
+        $.ajax({
+            type: "GET",
+            url: buildUrl(['home', 'group', 'users']) + `?group_name=${group}`,
+            success: function(data) {
+                let json = JSON.parse(data);
+                if (json.status === "success") {
+                    let users = json.data;
+                    $('#group_users').text(`Users in this group: ${users}`);
+                    $('#group_users').show();
+                }
+                else {
+                    alert("Error displaying group members:\n\n" + json.message)
+                }
             }
         });
     }

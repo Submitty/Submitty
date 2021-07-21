@@ -57,7 +57,7 @@ class HomePageView extends AbstractView {
         ]);
     }
 
-    public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token) {
+    public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
         $this->output->addBreadcrumb("New Course");
         return $this->output->renderTwigTemplate('CreateCourseForm.twig', [
             "csrf_token" => $csrf_token,
@@ -67,7 +67,8 @@ class HomePageView extends AbstractView {
             "semesters" => $semesters,
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
-            "add_term_url" => $this->output->buildUrl(['term', 'new'])
+            "add_term_url" => $this->output->buildUrl(['term', 'new']),
+            "courses" => $courses
         ]);
     }
 
