@@ -133,6 +133,8 @@ function renderPDFToolbar() {
                 if(response.status === 'success'){
                     $('#save_status').text('Saved');
                     $('#save_status').css('color', 'inherit');
+                    $('#save-pdf-btn').removeClass('btn-primary');
+                    $('#save-pdf-btn').addClass('btn-default');
                 }
                 else {
                     alert(data.message);

@@ -283,6 +283,8 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             if (selected.length != 0 && $(selected[0]).attr('value') != 'cursor') {
                                 $('#save_status').text('Changes not saved');
                                 $('#save_status').css('color', 'red');
+                                $('#save-pdf-btn').removeClass('btn-default');
+                                $('#save-pdf-btn').addClass('btn-primary');
                             }
                         });
                         document.getElementById(`pageContainer${page_id}`).addEventListener('mouseenter', () => {
