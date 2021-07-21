@@ -109,10 +109,11 @@ function renderPDFToolbar() {
     }
 
     function clearCanvas(){
-        if (confirm('Are you sure you want to clear all of your annotations and refresh the page?\n\nWARNING: This action CANNOT be undone.')) {
+        if (confirm('Are you sure you want to clear all of your annotations?\n\nWARNING: This action CANNOT be undone.')) {
             localStorage.setItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`, '[]');
             saveFile();
-            window.location.reload();
+            console.log($(`svg [data-pdf-annotate-userId=${GENERAL_INFORMATION.grader_id}]`));
+            $(`svg [data-pdf-annotate-userId=${GENERAL_INFORMATION.grader_id}]`).remove();
         }
     }
     
