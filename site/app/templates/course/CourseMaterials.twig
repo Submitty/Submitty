@@ -44,24 +44,24 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "") }}
+        {{ _self.display_files(submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "", seen) }}
 
     </div>
 </div>
 
-{% macro display_files(files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_files(files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) %}
     {# Files on top #}
     {% for dir, path in files %}
         {% if path is not iterable %}
-            {{ _self.display_file(dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ _self.display_file(dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir, seen) }}
         {% else %}
-            {{ _self.display_dir(dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ _self.display_dir(dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir, seen) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_file(dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) %}
     {% set this_file_section = file_sections[path] is defined ? file_sections[path] : null %}
     {% set this_hide_from_students = hide_from_students[path] %}
     {% set this_external_link = external_link[path] is defined ? external_link[path] : null %}
@@ -75,7 +75,6 @@
     {% if greater_than_student or visible_to_student %}
     <div class="file-container">
         <div class="file-viewer">
-
             {% if this_external_link %}
                 <i class="fas fa-link" style='vertical-align:text-bottom;'></i>
                 <a href="{{this_external_link[0]}}">{{this_external_link[1]}}</a>&nbsp;
@@ -144,15 +143,18 @@
                     document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
                 </script>
             {% endif %}
+            {% if not seen[path] %}
+                <span class="badge" style="background-color: #00b3fa; min-width: 10px; color: var(--text-black); float: none;">NEW</span>
+            {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
+{% macro display_dir(dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) %}
     {% if indent == 0 %}
-        {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+        {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) }}
     {% else %}
     <div class="folder-container">
 
@@ -180,7 +182,7 @@
 
             {# Recurse #}
 
-            {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+            {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) }}
 
         </div>
     </div>

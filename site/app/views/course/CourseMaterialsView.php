@@ -31,6 +31,7 @@ class CourseMaterialsView extends AbstractView {
         $hide_from_students = [];
         $external_link = [];
         $priorities = [];
+        $seen = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
@@ -39,6 +40,7 @@ class CourseMaterialsView extends AbstractView {
         $course_materials = [];
         foreach ($course_materials_db as $course_material) {
             $course_materials[$course_material->getPath()] = $course_material;
+            $seen[$course_material->getPath()] = $course_material->userHasViewed($user->getId());
         }
 
         foreach ($course_materials as $path => $material) {
@@ -170,7 +172,8 @@ class CourseMaterialsView extends AbstractView {
             "file_sections" => $file_sections,
             "hide_from_students" => $hide_from_students,
             "external_link" => $external_link,
-            "materials_exist" => count($course_materials) != 0
+            "materials_exist" => count($course_materials) != 0,
+            "seen" => $seen
         ]);
     }
 }

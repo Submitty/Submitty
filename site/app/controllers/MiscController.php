@@ -126,6 +126,10 @@ class MiscController extends AbstractController {
                     return false;
                 }
             }
+
+            if ($dir === "course_materials") {
+                CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
+            }
         }
 
         $file_name = basename($path);
@@ -205,6 +209,10 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->showError($access_failure);
                 return false;
             }
+        }
+
+        if ($dir === "course_materials") {
+            CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
         if ($dir == 'submissions') {
