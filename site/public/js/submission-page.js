@@ -54,7 +54,7 @@ function syncWithServer(criticalSync) {
                 curTime = data.current_time;
                 deadline = data.deadline;
                 updateTime();
-                if (!popUpTimerStarted && isNotebook) {
+                if (!popUpTimerStarted && isNotebook && typeof initializePopupTimer === "function") {
                     initializePopupTimer();
                     popUpTimerStarted = true;
                 }
