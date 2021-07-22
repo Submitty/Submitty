@@ -82,26 +82,11 @@
     {% endif %}
 </div>
 <script>
-    const students_and_late_days = JSON.parse(`{
-    {% for user in users %}
-        "{{ user.getId() }}":"{{ user.getAllowedLateDays() }}",
-    {% endfor %}
-    "":""
-    }`);
 
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
-
-    $("#user_id").change(() => {
-        if ($("#user_id").val() in students_and_late_days) { // check to see if this is a valid user id
-            $("#late_days").val(students_and_late_days[$("#user_id").val()]);
-        }
-        else {
-            $("#late_days").val("");
-        }
-    });
-
+    
     flatpickr("#datestamp", {
         plugins: [ShortcutButtonsPlugin(
             {
