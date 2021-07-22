@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: submitty/action-dependabot-title-fixer@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
