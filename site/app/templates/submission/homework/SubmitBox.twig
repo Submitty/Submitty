@@ -540,9 +540,6 @@
         });
     });
     initializeTimer('{{ gradeable_id }}');
-    {% if is_timed and allowed_minutes > 25 %}
-        initializePopupTimer();
-    {% endif %}
 </script>
 
 
