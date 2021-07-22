@@ -1234,7 +1234,6 @@ class Course(object):
 
         for poll in polls_data:
             self.conn.execute(polls_table.insert(),
-                              poll_id=poll["id"],
                               name=poll["name"],
                               question=poll["question"],
                               status=poll["status"],
