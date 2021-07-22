@@ -11,6 +11,6 @@ jobs:
   title-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: submitty/action-dependabot-title-fixer@master
+      - uses: submitty/action-dependabot-title-fixer@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
