@@ -82,11 +82,10 @@
     {% endif %}
 </div>
 <script>
-
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
-    
+
     flatpickr("#datestamp", {
         plugins: [ShortcutButtonsPlugin(
             {
