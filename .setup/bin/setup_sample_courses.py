@@ -37,7 +37,7 @@ from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
 from ruamel.yaml import YAML
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join, func
 
 yaml = YAML(typ='safe')
 
@@ -1083,23 +1083,12 @@ class Course(object):
         json_team_history = {}
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
         teams_table = Table("teams", self.metadata, autoload=True)
-        ucounter = 0
+        ucounter = self.conn.execute(select([func.count()]).select_from(gradeable_teams_table)).scalar()
         for user in self.users:
             #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
             #example: 00001_aphacker
+
             unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-            team_in_other_gradeable = select([gradeable_teams_table]).where(
-            gradeable_teams_table.c['team_id'] == unique_team_id)
-            res = self.conn.execute(team_in_other_gradeable)
-            num = res.rowcount
-            while num is not 0:
-                ucounter+=1
-                unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-                team_in_other_gradeable = select([gradeable_teams_table]).where(
-                gradeable_teams_table.c['team_id'] == unique_team_id)
-                res = self.conn.execute(team_in_other_gradeable)
-                num = res.rowcount
-            res.close()
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is None:
                 continue
