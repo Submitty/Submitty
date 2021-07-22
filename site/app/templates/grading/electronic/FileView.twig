@@ -15,6 +15,12 @@
         {% if show_pdf_bar|default(true) %}
         {% include "grading/electronic/PDFAnnotationBar.twig" %}
         {% endif %}
+        <div class="image-rotate-bar" id="{{ image_rotate_bar_id|default('image-rotate-icons-bar') }}">
+            <a class="image-rotate-icon-ccw">
+            <i class="fas fa-undo" title="Rotate image counterclockwise"></i></a>
+            <a class="image-rotate-icon-cw">
+            <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
+        </div>
     </div>
     <div id="{{ file_content_id|default('file-content') }}"></div>
 </div>
