@@ -96,11 +96,9 @@ class DockerInterfaceController extends AbstractController {
         }
 
         if (!isset($_POST['image'])) {
-            $this->core->addErrorMessage("Image not set");
             return JsonResponse::getErrorResponse("Image not set");
         }
         if (!isset($_POST['capability'])) {
-            $this->core->addErrorMessage("Capability not set");
             return JsonResponse::getErrorResponse("Capability not set");
         }
 
@@ -108,12 +106,10 @@ class DockerInterfaceController extends AbstractController {
         $match = preg_match('/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/', $_POST['image']);
 
         if ($match === false) {
-            $this->core->addErrorMessage("An error has occurred when verifying image name");
             return JsonResponse::getErrorResponse("An error has occurred when verifying image name");
         }
 
         if ($match === 0) {
-            $this->core->addErrorMessage("Improper docker image name");
             return JsonResponse::getErrorResponse("Improper docker image name");
         }
 
@@ -128,7 +124,6 @@ class DockerInterfaceController extends AbstractController {
         $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $code_success = !$http_code == 200;
         if (curl_errno($ch) || $http_code !== 200) {
-            $this->core->addErrorMessage("Error: Repository not found on dockerhub.");
             return JsonResponse::getErrorResponse($image_arr[0] . ' not found on DockerHub');
         }
         $return_json = json_decode($return_str);
@@ -153,7 +148,6 @@ class DockerInterfaceController extends AbstractController {
                 $json[$_POST['capability']][] = $_POST['image'];
             }
             else {
-                $this->core->addErrorMessage("Error: Image already exists in capability " . $_POST['capability']);
                 return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability ' . $_POST['capability']);
             }
             FileUtils::writeJsonFile(
@@ -168,11 +162,9 @@ class DockerInterfaceController extends AbstractController {
             if (!$this->updateDocker()) {
                 return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
             }
-            $this->core->addSuccessMessage("Image found on dockerhub!\n" . $_POST['image'] . " queued to be added.");
-            return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub');
+            return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub and queued to be added!');
         }
         else {
-            $this->core->addErrorMessage("Error: Image not found on dockerhub.");
             return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
         }
     }
@@ -183,10 +175,9 @@ class DockerInterfaceController extends AbstractController {
      */
     public function updateDockerCall() {
         if (!$this->updateDocker()) {
-            return JsonResponse::getFailResponse("Failed to write to file");
+            return JsonResponse::getErrorResponse("Failed to write to file");
         }
-        $this->core->addSuccessMessage("Successfully queued the system to update docker, please refresh the page in a bit.");
-        return JsonResponse::getSuccessResponse("Successfully updated docker images and machines");
+        return JsonResponse::getSuccessResponse("Successfully queued the system to update docker, please refresh the page in a bit.");
     }
 
     /**

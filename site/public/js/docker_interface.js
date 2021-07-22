@@ -86,11 +86,13 @@ function addImage(url) {
             const json = JSON.parse(data);
             if (json.status == 'success') {
                 localStorage.removeItem('capability');
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(json.data);
             }
             else {
-                window.alert('Something went wrong. Please try again.');
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json.message);
             }
-            location.reload();
         },
         error: function(err) {
             console.error(err);
@@ -109,10 +111,14 @@ function updateImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
-            if (json.status != 'success') {
-                window.alert('Something went wrong. Please try again.');
+            if (json.status == 'success') {
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(json.data);
             }
-            location.reload();
+            else {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json.message);
+            }
         },
         error: function(err) {
             console.error(err);
