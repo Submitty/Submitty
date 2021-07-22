@@ -1578,12 +1578,18 @@ function bookmarkThread(thread_id, type){
     });
 }
 
-function toggleMarkdown(post_box_id) {
+function toggleMarkdown(post_box_id, triggered) {
   if(post_box_id === undefined) post_box_id = '';
   $(`#markdown_buttons_${post_box_id}`).toggle();
-  $(this).toggleClass('markdown-active'); 
+  $(this).toggleClass('markdown-active markdown-inactive');
+  if (!triggered) {
+    $('.markdown-toggle').not(this).each(function() {
+      toggleMarkdown.call(this, this.id.split('_')[2], true);
+    });
+  }
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+  document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
 }
 
 function previewForumMarkdown(){
@@ -1888,7 +1894,7 @@ function updateThread(e) {
     lock_thread_date: $('input#lock_thread_date').text(),
     expirationDate: $('input#expirationDate').val(),
     cat,
-    markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
+    markdown_status: parseInt($("input#markdown_input_").val()),
   };
 
   $.ajax({
