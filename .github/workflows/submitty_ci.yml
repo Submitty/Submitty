@@ -411,10 +411,21 @@ jobs:
               sudo service nginx restart
 
           - name: Run git tests
+            timeout-minutes: 5
             continue-on-error: true
             run: |
               cd $SUBMITTY_REPOSITORY
               bash tests/git_test.sh
+
+          - name: Debug
+            continue-on-error: true
+            run: |
+              printf "logs\n"
+              ls -lah /var/local/submitty/logs
+              printf "vcs"
+              ls -lah /var/local/submitty/vcs/git/
+              printf "vcs gen"
+              ls -lah /var/local/submitty/logs/vcs_generation/
 
           # - uses: nanasess/setup-chromedriver@master
           # - name: Setup chromedriver
