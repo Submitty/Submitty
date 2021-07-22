@@ -5,7 +5,7 @@ namespace app\entities\db;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="app\repositories\email\EmailRepository")
  * @ORM\Table(name="emails")
  * @method string getUserId()
  * @method string getSubject()
@@ -26,11 +26,17 @@ class EmailEntity
      * @var int
      */
     private $id;
-    /** @ORM\Column(type="string") */
+    /** 
+     * @ORM\Column(type="string")
+     */
     private $user_id;
-    /** @ORM\Column(type="text") */
+    /**
+     * @ORM\Column(type="text")
+     */
     private $subject;
-    /** @ORM\Column(type="text") */
+    /** 
+     * @ORM\Column(type="text")
+     */
     private $body;
     /** @ORM\Column(type="datetime") */
     private $created;

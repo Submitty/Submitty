@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
+use app\models\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use app\views\email\EmailStatusView;
 use app\libraries\routers\AccessControl;
@@ -19,11 +20,12 @@ class EmailStatusController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
-    public function getEmailStatusPage() {
+    public function getEmailStatusPage($page = 1) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $count = $this->core->getQueries()->getDistinctEmailSubject($semester, $course);
-        $result = $this->core->getQueries()->getEmailStatusWithCourse($semester, $course);
+        //$count = $this->core->getQueries()->getDistinctEmailSubject($semester, $course);
+        //$result = $this->core->getQueries()->getEmailStatusWithCourse($semester, $course);
+        $result = $this->core->getSubmittyEntityManager()->getRepository(Email::class)->getEmailsByPage($page);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 EmailStatusView::class,
