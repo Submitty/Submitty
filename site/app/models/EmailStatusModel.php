@@ -34,9 +34,9 @@ class EmailStatusModel extends AbstractModel {
     public function __construct(Core $core, $data) {
         parent::__construct($core);
         foreach ($data as $row) {
-            $key = $this->EmailToKey($row[0]);
+            $key = $this->EmailToKey($row);
             if (!in_array($key, $this->subjects)) {
-                $this->subjects[] = [$key];
+                $this->subjects[] = $key;
                 $this->successes[$key] = [];
                 $this->errors[$key] = [];
                 $this->pending[$key] = [];
@@ -57,6 +57,6 @@ class EmailStatusModel extends AbstractModel {
     }
     
     private function EmailToKey ($row) {
-        return $row->getSubject() . ', ' . $row->getCreated();
+        return $row->getSubject() . ', ' . $row->getCreated()->format('Y-m-d H:i:s');
     }
 }

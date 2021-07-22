@@ -1,7 +1,8 @@
 <?php
 
-namespace app\entities\db;
+namespace app\entities\email;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -91,11 +92,11 @@ class EmailEntity
         return $this->created;
     }
 
-    public function getSent(): \DateTime {
+    public function getSent(): ?\DateTime {
         return $this->sent;
     }
 
-    public function getError(): string {
+    public function getError(): ?string {
         return $this->error;
     }
 
@@ -103,11 +104,11 @@ class EmailEntity
         return $this->email_address;
     }
 
-    public function getSemester(): string {
+    public function getSemester(): ?string {
         return $this->semester;
     }
 
-    public function getCourse(): string {
+    public function getCourse(): ?string {
         return $this->course;
     }
 }

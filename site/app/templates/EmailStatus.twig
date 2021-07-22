@@ -1,10 +1,10 @@
 {% if not subjects|length == 0 %}
-    {% for subject in subjects|keys %}
+    {% for subject in subjects %}
         <div class="status-container">
             <div class = "button-container">
                 <div>
-                    <div> Email Subject: {{subject}} </div>
-                    <div> Time Created: {{subjects[subject]|slice(0,19)}}</div>
+                    <div> Email Subject: {{subject[0:-21]}} </div>
+                    <div> Time Created: {{subject[-19:]}}</div>
                     {% if courses is defined and courses[subject] is defined and courses[subject] is not null %}
                         <div> Course: {{courses[subject]}}</div>
                     {% else %}
@@ -29,9 +29,9 @@
                 <ul>
                     {% for row in errors[subject] %}
                         <li class="status status-error">
-                            <div class="status-message">Recipient: {{row["user_id"]}}</div>
+                            <div class="status-message">Recipient: {{row.getUserId()}}</div>
                             <div class="status-message">Time Sent: Not Sent</div>
-                            <div class="status-message">Email Address: {{row["email_address"]}} </div>
+                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
                             <div class="status-message">
                                 Error: {{row["error"]}}
                             </div>
@@ -39,16 +39,16 @@
                     {% endfor %}
                     {% for row in pending[subject] %}
                         <li class="status status-warning">
-                            <div class="status-message">Recipient: {{row["user_id"]}}</div>
+                            <div class="status-message">Recipient: {{row.getUserId()}}</div>
                             <div class="status-message">Time Sent: Not Sent</div>
-                            <div class="status-message">Email Address: {{row["email_address"]}} </div>
+                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
                         </li>
                     {% endfor %}
                     {% for row in successes[subject] %}
                         <li class="status status-success"> 
-                            <div class="status-message">Recipient: {{row["user_id"]}}</div> 
-                            <div class="status-message">Time Sent: {{row["sent"]|slice(0,19)}}</div>
-                            <div class="status-message">Email Address: {{row["email_address"]}} </div>
+                            <div class="status-message">Recipient: {{row.getUserId()}}</div> 
+                            <div class="status-message">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
+                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
                         </li>
                     {% endfor %}
                 </ul>

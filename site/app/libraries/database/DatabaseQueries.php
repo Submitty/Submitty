@@ -6032,10 +6032,10 @@ AND gc_id IN (
         $this->core->loadMasterDatabase();
         $em = $this->core->getSubmittyEntityManager();
         if ($semester != null || $course != null) {
-            $dql = "SELECT DISTINCT e.subject, e.created FROM app\\entities\db\EmailEntity e WHERE e.semester = '$semester' AND e.course = '$course' ORDER BY e.created DESC";
+            $dql = "SELECT DISTINCT e.subject, e.created FROM app\\entities\\email\EmailEntity e WHERE e.semester = '$semester' AND e.course = '$course' ORDER BY e.created DESC";
         }
         else {
-            $dql = "SELECT DISTINCT e.subject, e.created FROM app\\entities\db\EmailEntity e ORDER BY e.created DESC";
+            $dql = "SELECT DISTINCT e.subject, e.created FROM app\\entities\\email\EmailEntity e ORDER BY e.created DESC";
         }
         $q = $em->createQuery($dql);
         $query_res = $q->getResult();
