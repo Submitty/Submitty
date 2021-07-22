@@ -129,9 +129,9 @@
         Not a proper docker image name
     </p>
     <div style="margin-bottom: 1em">
-        <div style="display: inline-block; margin-right: 1em; width: 5%;">
+        <label for="capability-form" style="display: inline-block; margin-right: 1em; width: 5%;">
             Capability:
-        </div> 
+        </label> 
         <select class="form-control form-control-lg" style="width:93%; display: inline-block;" id="capability-form">
             {% for capability in capabilities %}
                 <option>{{capability}}</option>
@@ -139,10 +139,10 @@
         </select>
     </div>
     <div>
-        <div style="display: inline-block; margin-right: 1em; width: 5%">
+        <label for="add-field" style="display: inline-block; margin-right: 1em; width: 5%">
             Image:
-        </div> 
+        </label> 
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
-    <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Send</button>
+    <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
 </div>
