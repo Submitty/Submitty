@@ -34,24 +34,29 @@ class EmailStatusModel extends AbstractModel {
     public function __construct(Core $core, $data) {
         parent::__construct($core);
         foreach ($data as $row) {
-            if (!array_key_exists($row["subject"], $this->subjects)) {
-                $this->subjects[$row["subject"]] = $row["created"];
-                $this->successes[$row["subject"]] = [];
-                $this->errors[$row["subject"]] = [];
-                $this->pending[$row["subject"]] = [];
+            $key = $this->EmailToKey($row[0]);
+            if (!in_array($key, $this->subjects)) {
+                $this->subjects[] = [$key];
+                $this->successes[$key] = [];
+                $this->errors[$key] = [];
+                $this->pending[$key] = [];
             }
-            if ($row["semester"] != null || $row["course"] != null) {
-                $this->courses[$row["subject"]] = $row["semester"] . ' ' . $row["course"];
+            if ($row->getSemester() != null || $row->getCourse() != null) {
+                $this->courses[$key] = $row->getSemester() . ' ' . $row->getCourse();
             }
-            if ($row["sent"] != null) {
-                $this->successes[$row["subject"]][] = $row;
+            if ($row->getSent() != null) {
+                $this->successes[$key][] = $row;
             }
-            elseif ($row["error"] != null) {
-                $this->errors[$row["subject"]][] = $row;
+            elseif ($row->getError() != null) {
+                $this->errors[$key][] = $row;
             }
             else {
-                $this->pending[$row["subject"]][] = $row;
+                $this->pending[$key][] = $row;
             }
         }
+    }
+    
+    private function EmailToKey ($row) {
+        return $row->getSubject() . ', ' . $row->getCreated();
     }
 }
