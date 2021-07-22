@@ -18,12 +18,12 @@
         <div class="regex-help">
             <br>You may optionally specify a regular expression to ensure your students enter the requested
             format for the contact information.  For example: <br>
-            <b>Gmail:&nbsp;&nbsp;</b> <tt>*@gmail.com</tt><br>
-            <b>Email:&nbsp;&nbsp;</b> <tt>*@*</tt><br>
-            <b>Webex Personal Room:&nbsp;&nbsp;</b> <tt>https://*.webex.com/meet/*</tt><br>
-            <b>Webex Meeting:&nbsp;&nbsp;</b> <tt>https://*.webex.com/*</tt><br>
-            <b>Skype link:&nbsp;&nbsp;</b> <tt>*join.skype*</tt><br>
-            <b>Zoom link:&nbsp;&nbsp;</b> <tt>*zoom.us*</tt><br><br>
+            <b>Gmail:&nbsp;&nbsp;</b> <tt>.+@gmail.com</tt><br>
+            <b>Email:&nbsp;&nbsp;</b> <tt>.+@.+\..+</tt><br>
+            <b>Webex Personal Room:&nbsp;&nbsp;</b> <tt>^https:\/\/.+.webex.com\/meet\/[^/]+$*</tt><br>
+            <b>Webex Meeting:&nbsp;&nbsp;</b> <tt>^https:\/\/.+\.webex\.com\/.*</tt><br>
+            <b>Skype link:&nbsp;&nbsp;</b> <tt>.+\.join\.skype.+</tt><br>
+            <b>Zoom link:&nbsp;&nbsp;</b> <tt>.+\.zoom\.us.+</tt><br><br>
         </div>
     {% endif %}
 <button id="open_new_queue_btn" type="submit" class="btn btn-primary" >Open New Queue</button>
@@ -128,4 +128,3 @@
         });
     </script>
 {% endblock %}
-
