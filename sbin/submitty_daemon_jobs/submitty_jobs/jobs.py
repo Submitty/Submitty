@@ -361,10 +361,6 @@ class UpdateDockerImages(AbstractJob):
     def run_job(self):
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "docker")
-        try:
-            os.mkdir(log_path, mode=0o600)
-        except FileExistsError:
-            pass
         log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
         flag = os.O_EXCL | os.O_WRONLY
         if not os.path.exists(log_file_path):
