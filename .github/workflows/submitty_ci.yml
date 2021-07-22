@@ -421,11 +421,11 @@ jobs:
             continue-on-error: true
             run: |
               printf "logs\n"
-              ls -lah /var/local/submitty/logs
+              sudo ls -lah /var/local/submitty/logs
               printf "vcs"
-              ls -lah /var/local/submitty/vcs/git/
+              sudo ls -lah /var/local/submitty/vcs/git/
               printf "vcs gen"
-              ls -lah /var/local/submitty/logs/vcs_generation/
+              sudo ls -lah /var/local/submitty/logs/vcs_generation/
 
           # - uses: nanasess/setup-chromedriver@master
           # - name: Setup chromedriver
