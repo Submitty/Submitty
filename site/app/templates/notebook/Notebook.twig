@@ -272,42 +272,41 @@
 
 <script>
     //for displaying popup submit button
-    {% if is_timed and allowed_minutes > 25 %}
-        //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
-        let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
-        let loadTime = 0;
-        let showPopup = false;
 
-        function initializePopupTimer(){
-            sessionStorage.setItem("show_popup_submit", "yes");
-            loadTime = curTime;
-            count();
-        }
+    //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
+    let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
+    let loadTime = 0;
+    let showPopup = false;
 
-        function count(){
-            const time_taken = Math.floor((curTime - loadTime)/1000);
-            const minutes_taken = Math.floor(time_taken / 60);
-            if (minutes_taken >= interval ) {
-                if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline && showPopup) {
-                    $(".notebook-submit-popup").show();
-                }
+    function initializePopupTimer(){
+        sessionStorage.setItem("show_popup_submit", "yes");
+        loadTime = curTime;
+        count();
+    }
+
+    function count(){
+        const time_taken = Math.floor((curTime - loadTime)/1000);
+        const minutes_taken = Math.floor(time_taken / 60);
+        if (minutes_taken >= interval ) {
+            if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline && showPopup) {
+                $(".notebook-submit-popup").show();
             }
-            setTimeout(count,2000);
         }
+        setTimeout(count,2000);
+    }
 
-        function closePopupSubmit() {
-            $(".notebook-submit-popup").hide();
-            //restart timer
-            loadTime = curTime;
-        }
+    function closePopupSubmit() {
+        $(".notebook-submit-popup").hide();
+        //restart timer
+        loadTime = curTime;
+    }
 
-        function DontShowPopupSubmit() {
-            closePopupSubmit();
-            sessionStorage.setItem("show_popup_submit", "no");
-        }
+    function DontShowPopupSubmit() {
+        closePopupSubmit();
+        sessionStorage.setItem("show_popup_submit", "no");
+    }
 
-    {% endif %}
-
+    
     function populatePreviousFiles(part){
         let prev_files = {
             {% for file in old_files %}
