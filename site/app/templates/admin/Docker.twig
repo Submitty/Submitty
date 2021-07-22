@@ -65,7 +65,6 @@
                 <th>Image Name</th>
                 <th>Tag</th>
                 <th>ID</th>
-                <th>Size</th>
                 <th>Created Date</th>
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
@@ -77,8 +76,6 @@
                 <td>{{ value["name"] }}</th>
                 <td>{{ value["tag"] }} </td>
                 <td>{{ value["short_id"] | trim("sha256:") }} </td>
-                <td>{{ value["size"] }} (Virtual Size: {{ value["virtual_size"] }})
-                </td>
                 <td> Created on: {{ value["created"] }} </td>
                 <td>
                 {% if value["additional_names"] | length > 0 %}
