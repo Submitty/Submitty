@@ -79,19 +79,19 @@ function notebookAutosaveKey() {
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
-    let mc_inputs=[];
-    let short_answer_inputs = []
+    const mc_inputs=[];
+    const short_answer_inputs = [];
 
     //save multiple choice answers
     $('.multiple_choice').each(function(){
         let file_name='';
         $(this).children('fieldset').each(function(){
             file_name = $(this).attr('name');
-            let answers = []
+            const answers = [];
             $(this).children('label').each(function(){
                 //grab selected answers
                 $(this).children('input').each(function(){
-                    if($(this)[0].checked) {
+                    if ($(this)[0].checked) {
                         answers.push($(this)[0].defaultValue);
                     }
                 });
@@ -109,9 +109,9 @@ function saveNotebookToLocal() {
             file_name = file_name.trim();
             //grab input
             if (file_name !== 'markdown') {
-                let editor = ($(this)[0]).querySelector(".CodeMirror").CodeMirror;
+                const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
                 value = editor.getValue();
-                short_answer_inputs.push([file_name, value])
+                short_answer_inputs.push([file_name, value]);
             }
         })
     });
