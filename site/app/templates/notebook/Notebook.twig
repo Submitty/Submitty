@@ -272,7 +272,6 @@
 
 <script>
     //for displaying popup submit button
-
     //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
     let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
     let loadTime = 0;
@@ -306,7 +305,7 @@
         sessionStorage.setItem("show_popup_submit", "no");
     }
 
-    
+
     function populatePreviousFiles(part){
         let prev_files = {
             {% for file in old_files %}
