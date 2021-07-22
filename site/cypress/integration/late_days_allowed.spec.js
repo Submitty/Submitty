@@ -1,5 +1,3 @@
-import {buildUrl} from '../support/utils.js';
-
 describe('Test cases involving the late days allowed page', () => {
     describe('Test accessing page as a student', () => {
         it('should not allow access', () => {
