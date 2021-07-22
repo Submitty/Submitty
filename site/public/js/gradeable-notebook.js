@@ -1,4 +1,4 @@
-/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, gatherInputAnswersByType, saveAndWarnUnsubmitted */
+/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, saveAndWarnUnsubmitted */
 
 /**
  * Checks all radio buttons or checkboxes that were previously checked in the recent submission
@@ -113,13 +113,13 @@ function saveNotebookToLocal() {
                 value = editor.getValue();
                 short_answer_inputs.push([file_name, value]);
             }
-        })
+        });
     });
 
     localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
         timestamp: Date.now(),
         multiple_choice: mc_inputs,
-        short_answer: short_answer_inputs
+        short_answer: short_answer_inputs,
     }));
 }
 
@@ -136,8 +136,8 @@ function restoreNotebookFromLocal() {
         }
         //restore multiple choice
         for (const id in inputs.multiple_choice) {
-            let filename = inputs.multiple_choice[id][0];
-            let answers = inputs.multiple_choice[id][1];
+            const filename = inputs.multiple_choice[id][0];
+            const answers = inputs.multiple_choice[id][1];
             $('.multiple_choice').each(function () {
                 $(this).children('fieldset').each(function () {
                     //match file names
@@ -158,17 +158,17 @@ function restoreNotebookFromLocal() {
         }
         //restore short answers
         for (const id in inputs.short_answer) {
-            let filename = inputs.short_answer[id][0];
-            let answers = inputs.short_answer[id][1];
+            const filename = inputs.short_answer[id][0];
+            const answers = inputs.short_answer[id][1];
             $('.short_answer').each(function(){
                 $(this).children('div').each(function(){
                     //match file names
                     if ($(this).attr('class') === filename) {
                         //set input
-                        let editor = ($(this)[0]).querySelector(".CodeMirror").CodeMirror;
+                        const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
                         editor.setValue(answers);
                     }
-                })
+                });
             });
         }
     }
