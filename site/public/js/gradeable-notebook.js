@@ -79,77 +79,48 @@ function notebookAutosaveKey() {
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
-    if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
-        localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
-            timestamp: Date.now(),
-            multiple_choice: gatherInputAnswersByType('multiple_choice'),
-            codebox: gatherInputAnswersByType('codebox'),
-        }));
-    }
-}
-
-
-function tempcollect() {
     let mc_inputs=[];
     let short_answer_inputs = []
+
+    //save multiple choice answers
     $('.multiple_choice').each(function(){
         let file_name='';
         $(this).children('fieldset').each(function(){
             file_name = $(this).attr('name');
             let answers = []
-            let checked = false;
             $(this).children('label').each(function(){
+                //grab selected answers
                 $(this).children('input').each(function(){
                     if($(this)[0].checked) {
-                        checked = true;
                         answers.push($(this)[0].defaultValue);
                     }
                 });
             });
-            if (checked) {
-                mc_inputs.push([file_name, answers]);
-            }
+            mc_inputs.push([file_name, answers]);
+
         });
     });
 
+    //save short answers
     $('.short_answer').each(function(){
         $(this).children('div').each(function(){
             let file_name = $(this).attr('class');
             let value = '';
-            if (file_name !== 'markdown ') {
+            file_name = file_name.trim();
+            //grab input
+            if (file_name !== 'markdown') {
                 let editor = ($(this)[0]).querySelector(".CodeMirror").CodeMirror;
                 value = editor.getValue();
                 short_answer_inputs.push([file_name, value])
             }
         })
     });
-    localStorage.setItem('gang', JSON.stringify({
+
+    localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
         timestamp: Date.now(),
         multiple_choice: mc_inputs,
         short_answer: short_answer_inputs
     }));
-     console.log(mc_inputs);
-     console.log(short_answer_inputs);
-     tempRestore();
-}
-
-function tempRestore(){
-    const inputs = JSON.parse(localStorage.getItem('gang'));
-    console.log(inputs);
-    //restore multiple choice
-    for (const id in inputs.multiple_choice) {
-        let filename = inputs.multiple_choice[id][0];
-        let answers = inputs.multiple_choice[id][1];
-        console.log(answers);
-    }
-    //restore short answers
-    for (const id in inputs.short_answer) {
-        let filename = inputs.short_answer[id][0];
-        let answers = inputs.short_answer[id][1];
-        console.log(answers);
-    }
-
-
 }
 
 /**
@@ -158,45 +129,49 @@ function tempRestore(){
  */
 function restoreNotebookFromLocal() {
     if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
-        const state = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
+        const inputs = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
 
-        if (state === null) {
+        if (inputs === null) {
             return;
         }
-        // First, we restore multiple choice answers
-        for (const id in state.multiple_choice) {
-            const values = state.multiple_choice[id];
-            // Extract the index from the ID generated from gatherInputAnswersByType()
-            // Index is stored after multiple_choice_, so substring it out
-            const index = id.substring('multiple_choice_'.length);
-            $(`#mc_field_${index} :input`).each((_index, element) => {
-                $(element).prop('checked', values.includes(element.value)).change();
+        //restore multiple choice
+        for (const id in inputs.multiple_choice) {
+            let filename = inputs.multiple_choice[id][0];
+            let answers = inputs.multiple_choice[id][1];
+            $('.multiple_choice').each(function () {
+                $(this).children('fieldset').each(function () {
+                    //match file names
+                    if ($(this).attr('name') === filename) {
+                        $(this).children('label').each(function () {
+                            $(this).children('input').each(function () {
+                                //check proper inputs
+                                for (let i = 0; i < answers.length; i++) {
+                                    if ($(this)[0].defaultValue === answers[i]) {
+                                        $(this).prop('checked', true);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
             });
         }
-        // Next, we restore short-answer boxes
-        for (const id in state.short_answer) {
-            const answer = state.short_answer[id][0];
-            // Restore the answer and trigger change events (for setting button states)
-            // (see https://stackoverflow.com/questions/4672505/why-does-the-jquery-change-event-not-trigger-when-i-set-the-value-of-a-select-us)
-            $(`#${id}`).val(answer).trigger('input');
-        }
-        // Finally, we restore codeboxes
-        for (const id in state.codebox) {
-            const answer = state.codebox[id][0];
-            const codebox = $(`#${id} .CodeMirror`).get(0);
-            // If this box no longer exists, then don't attempt to update the
-            // answer. The autosave data is probably for an older version of
-            // the gradeable at this point, see issue #5351.
-            if (!codebox) {
-                continue;
-            }
-            const cm = codebox.CodeMirror;
-            // This automatically triggers the event handler for the clear and
-            // recent buttons.
-            cm.setValue(answer);
+        //restore short answers
+        for (const id in inputs.short_answer) {
+            let filename = inputs.short_answer[id][0];
+            let answers = inputs.short_answer[id][1];
+            $('.short_answer').each(function(){
+                $(this).children('div').each(function(){
+                    //match file names
+                    if ($(this).attr('class') === filename) {
+                        //set input
+                        let editor = ($(this)[0]).querySelector(".CodeMirror").CodeMirror;
+                        editor.setValue(answers);
+                    }
+                })
+            });
         }
     }
-    tempcollect();
 }
 
 $(document).ready(() => {
