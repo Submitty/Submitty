@@ -1,6 +1,6 @@
 name: 'Dependabot PR Title Fixer'
 on:
-  pull_request:
+  pull_request_target:
     # check when PR
     # * is created,
     # * title is edited, and
