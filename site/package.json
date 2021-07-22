@@ -37,7 +37,7 @@
     "cypress-file-upload": "^5.0.8",
     "eslint": "^7.29.0",
     "eslint-plugin-cypress": "^2.11.3",
-    "eslint-plugin-jest": "^24.3.6",
+    "eslint-plugin-jest": "^24.4.0",
     "jest": "^27.0.6",
     "regenerator-runtime": "^0.13.7",
     "stylelint": "^13.13.1",
