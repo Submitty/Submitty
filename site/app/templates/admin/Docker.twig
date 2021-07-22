@@ -65,8 +65,8 @@
                 <th>Image Name</th>
                 <th>Tag</th>
                 <th>ID</th>
-                <th>Created Date</th>
                 <th>Alias</th>
+                <th>Created Date</th>
                 <th>Capabilities Containing This Image</th>
             </tr>
         </thead>
@@ -76,7 +76,6 @@
                 <td>{{ value["name"] }}</th>
                 <td>{{ value["tag"] }} </td>
                 <td>{{ value["short_id"] | trim("sha256:") }} </td>
-                <td> Created on: {{ value["created"] }} </td>
                 <td>
                 {% if value["additional_names"] | length > 0 %}
                 <ul id="tag-list">
@@ -86,6 +85,7 @@
                 </ul>
                 {% endif %}
                 </td>
+                <td> Created on: {{ value["created"] }} </td>
                 <td>
                     {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
                         {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
