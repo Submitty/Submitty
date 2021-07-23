@@ -5997,56 +5997,6 @@ AND gc_id IN (
     }
 
     /**
-     * Get a status of emails sent of a course with course name and semester
-     *
-     * @param string $course
-     * @param string $semester
-     * @return EmailStatusModel
-     */
-    public function getEmailStatusWithCourse($semester, $course): EmailStatusModel {
-        $parameters = [$course, $semester];
-        $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
-        $details = $this->submitty_db->rows();
-        return new EmailStatusModel($this->core, $details);
-    }
-
-    public function getAllEmailStatuses($page = 1): EmailStatusModel {
-        $emailSubjects = array_slice($this->getDistinctEmailSubject(), ($page - 1) * 10, 10);
-        $this->core->loadMasterDatabase();
-        $em = $this->core->getSubmittyEntityManager();
-        $details = [];
-        foreach ($emailSubjects as $email) {
-            $param = array('subject' => $email[0]);
-            $details[] = $em->getRepository('app\\entities\db\EmailEntity')->findBy($param);
-        }
-        return new EmailStatusModel($this->core, $details);
-    }
-
-    /**
-     * Count number of email associated with semester and course
-     * @param string $course
-     * @param string $semester
-     * @return array
-     */
-    public function getDistinctEmailSubject($semester = null, $course = null): array {
-        $this->core->loadMasterDatabase();
-        $em = $this->core->getSubmittyEntityManager();
-        if ($semester != null || $course != null) {
-            $dql = "SELECT DISTINCT e.subject, e.created FROM app\\entities\\email\EmailEntity e WHERE e.semester = '$semester' AND e.course = '$course' ORDER BY e.created DESC";
-        }
-        else {
-            $dql = "SELECT DISTINCT e.subject, e.created FROM app\\entities\\email\EmailEntity e ORDER BY e.created DESC";
-        }
-        $q = $em->createQuery($dql);
-        $query_res = $q->getResult();
-        $res = [];
-        foreach ($query_res as $row) {
-            $res[] = [$row["subject"], $row["created"]];
-        }
-        return $res;
-    }
-
-    /**
      * Gives true if thread is locked
      *
      * @param  int $thread_id
