@@ -1349,6 +1349,11 @@ tr.is_publish {
     z-index: 30;
 }
 
+#image-rotate-icons-bar, #notebook-image-rotate-icons-bar {
+    display: none;
+    padding: 0px 10px;
+}
+
 #file-content {
     height: 90%;
     width: 100%;
