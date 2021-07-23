@@ -72,8 +72,6 @@ def main():
     db, metadata = setup_db()
     with open(CONFIG_FILE_PATH) as config_file:
         json_string = config_file.read()
-    # Removes #'s
-    json_string = re.sub("(^|\n)#[^\n]*(?=\n)", "", json_string)
     CONFIG_FILE = json.loads(json_string)
     timelimit_case = None
     for testcase in CONFIG_FILE['testcases']:
@@ -88,8 +86,10 @@ def main():
         override = None
         if 'override' in timelimit_case['validation'][0]:
             override = timelimit_case['validation'][0]['override']
-        send_data(db, allowed_minutes, override)
-
+        try:
+            send_data(db, allowed_minutes, override)
+        except:
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
