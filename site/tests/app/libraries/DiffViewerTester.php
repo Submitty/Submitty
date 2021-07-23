@@ -80,9 +80,9 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
         );
         $diff->buildViewer();
         $diff_result_actual = $diff->getDisplayActual();
-        $this->assertStringStartsWith("<p style='color: black;'>This file has been truncated. Please download it to see the full file.</p>", $diff_result_actual);
+        $this->assertStringStartsWith("<p style='color: red;'>This file has been truncated. Please download it to see the full file.</p>", $diff_result_actual);
 
         $diff_result_expected = $diff->getDisplayExpected();
-        $this->assertStringStartsWith("<p style='color: black;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>", $diff_result_expected);
+        $this->assertStringStartsWith("<p style='color: red;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>", $diff_result_expected);
     }
 }
