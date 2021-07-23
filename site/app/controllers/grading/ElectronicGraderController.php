@@ -1363,16 +1363,18 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             if (is_null($who_id) || $who_id == '') {
-                $message = "There are no students";
+                $message = "You've reached the ";
                 if ($to === 'prev') {
-                    $message .= " before";
+                    $message .= " start";
                 }
                 else {
-                    $message .= " after";
+                    $message .= " end";
                 }
-                $message .= " the last selected student using the student index ordering";
+                $message .= " of";
                 if ($navigate_assigned_students_only !== "false") {
-                    $message .= " assigned to you";
+                    $message .= " your assigned sections";
+                } else {
+                    $message .= " the list";
                 }
                 if ($filter !== 'default') {
                     $message .= " (using filter '" . $filter . "')";
