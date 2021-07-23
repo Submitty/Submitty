@@ -17,6 +17,7 @@ from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
 from . import VERIFIED_ADMIN_USER
 
+
 class AbstractJob(ABC):
     """
     Abstract class that all jobs should extend from, creating a common
@@ -138,16 +139,16 @@ class RunGenerateRepos(CourseGradeableJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        gen_script = os.path.join(INSTALL_DIR,'bin','generate_repos.py')
+        gen_script = os.path.join(INSTALL_DIR, 'bin', 'generate_repos.py')
 
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "vcs_generation")
-        datestring = "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,today.day)
+        datestring = "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day)
         log_file_path = os.path.join(log_path, datestring)
         current_time = today.strftime("%m/%d/%Y, %H:%M:%S")
         try:
             with open(log_file_path, "a") as output_file:
-                print ("At time: "+current_time, file=output_file)
+                print("At time: "+current_time, file=output_file)
                 output_file.flush()
                 subprocess.run([
                     "sudo",
@@ -166,28 +167,21 @@ class RunLichen(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
+        config_id = self.job_details['config_id']
 
-        lichen_script = Path(INSTALL_DIR, 'sbin', 'run_lichen_plagiarism.py')
-
-        # delete existing data
-        lichen_dir = Path(DATA_DIR, 'courses', semester, course, 'lichen')
-        if not lichen_dir.exists():
+        # error checking
+        # prevent against backwards crawling
+        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
+            print('invalid path component ".." in string')
             return
-        for folder in ['ranking', 'tokenized', 'concatenated', 'hashes', 'matches']:
-            shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
 
-        # create directory for logging
-        logging_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable)
-        if(not os.path.isdir(logging_dir)):
-            os.makedirs(logging_dir)
+        # paths
+        lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
+        config_path = os.path.join(lichen_dir, gradeable, config_id)
+        data_path = os.path.join(DATA_DIR, 'courses')
 
-        lichen_output = Path(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable, 'lichen_job_output.txt')
-
-        try:
-            with lichen_output.open("w") as output_file:
-                subprocess.call([str(lichen_script), semester, course, gradeable], stdout=output_file, stderr=output_file)
-        except PermissionError:
-            print("error, could not open "+output_file+" for writing")
+        # run Lichen
+        subprocess.call(['/usr/local/submitty/Lichen/bin/process_all.sh', config_path, data_path])
 
 
 class DeleteLichenResult(CourseGradeableJob):
@@ -195,40 +189,41 @@ class DeleteLichenResult(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
+        config_id = self.job_details['config_id']
 
-        lichen_dir = Path(DATA_DIR, 'courses', semester, course, 'lichen')
-        if not lichen_dir.exists():
+        lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
+
+        # error checking
+        # prevent against backwards crawling
+        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
+            print('invalid path component ".." in string')
             return
 
-        log_file = Path(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable, 'lichen_job_output.txt')
+        if not os.path.isdir(lichen_dir):
+            return
 
-        with log_file.open('w') as open_file:
-            lichen_json = 'lichen_{}_{}_{}.json'.format(semester, course, gradeable)
+        # delete the config directory
+        shutil.rmtree(os.path.join(lichen_dir, gradeable, config_id), ignore_errors=True)
 
-            config = Path(lichen_dir, 'config', lichen_json)
-            if config.exists():
-                config.unlink()
-
-            for folder in ['ranking', 'provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
-                shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
-            msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
-            open_file.write(msg)
+        # if there are no other configs in this gradeable directory, remove it
+        if len(os.listdir(os.path.join(lichen_dir, gradeable))) == 0:
+            shutil.rmtree(os.path.join(lichen_dir, gradeable))
 
 
 class BulkUpload(CourseJob):
     required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
 
-    def add_permissions(self,item,perms):
+    def add_permissions(self, item, perms):
         if os.getuid() == os.stat(item).st_uid:
-            os.chmod(item,os.stat(item).st_mode | perms)
+            os.chmod(item, os.stat(item).st_mode | perms)
 
-    def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
+    def add_permissions_recursive(self, top_dir, root_perms, dir_perms, file_perms):
         for root, dirs, files in os.walk(top_dir):
-            self.add_permissions(root,root_perms)
+            self.add_permissions(root, root_perms)
             for d in dirs:
-                self.add_permissions(os.path.join(root, d),dir_perms)
+                self.add_permissions(os.path.join(root, d), dir_perms)
             for f in files:
-                self.add_permissions(os.path.join(root, f),file_perms)
+                self.add_permissions(os.path.join(root, f), file_perms)
 
     def run_job(self):
         semester = self.job_details['semester']
@@ -253,13 +248,11 @@ class BulkUpload(CourseJob):
                 msg = "Did not pass in the number to divide " + filename + " by"
                 print(msg)
                 return
-            num  = self.job_details['num']
+            num = self.job_details['num']
 
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
-        log_file_path = os.path.join(log_path,
-                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
-                                today.day))
+        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
 
         pid = os.getpid()
         log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
@@ -269,22 +262,21 @@ class BulkUpload(CourseJob):
             log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
 
         logger.write_to_log(log_file_path, log_msg)
-        #create paths
+        # create paths
         try:
             current_path = os.path.dirname(os.path.realpath(__file__))
-            uploads_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads")
-            bulk_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
-            split_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+            bulk_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/bulk_pdf", gradeable_id, timestamp)
+            split_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/split_pdf", gradeable_id, timestamp)
         except Exception:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
             traceback.print_exc()
             logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
 
-        #copy file over to correct folders
+        # copy file over to correct folders
         try:
             if not os.path.exists(split_path):
-                #if the directory has been made by another job continue as normal
+                # if the directory has been made by another job continue as normal
                 try:
                     os.makedirs(split_path)
                 except Exception:
@@ -298,9 +290,9 @@ class BulkUpload(CourseJob):
             # access so submitty_php can view & delete pdfs when they are
             # assigned to a student and/or deleted
             self.add_permissions_recursive(split_path,
-                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
-                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
-                                       stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,  # noqa: E222
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,  # noqa: E222
+                                           stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP)  # noqa: E222
 
             # move to copy folder
             os.chdir(split_path)
@@ -324,7 +316,7 @@ class BulkUpload(CourseJob):
             return
 
         os.chdir(split_path)
-        #if the original file has been deleted, continue as normal
+        # if the original file has been deleted, continue as normal
         try:
             os.remove(filename)
         except Exception:
@@ -336,7 +328,7 @@ class BulkUpload(CourseJob):
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
-        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
+        for key in ['semester', 'course', 'head_instructor', 'group_name']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
@@ -349,10 +341,7 @@ class CreateCourse(AbstractJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         head_instructor = self.job_details['head_instructor']
-        base_course_semester = self.job_details['base_course_semester']
-        base_course_title = self.job_details['base_course_title']
-
-        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
+        base_group = self.job_details['group_name']
 
         log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
             semester, course, head_instructor, base_group

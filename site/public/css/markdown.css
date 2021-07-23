@@ -23,6 +23,15 @@
     margin: 0;
 }
 
+.markdown h1 *,
+.markdown h2 *,
+.markdown h3 *,
+.markdown h4 *,
+.markdown h5 *,
+.markdown h6 * {
+    font-size: inherit !important;
+}
+
 .markdown p {
     margin-top: 12px;
     margin-bottom: 12px;
@@ -60,11 +69,16 @@
     position:absolute;
     top: 1em;
     padding-right: 1px;
+    font-size: 13px;
     text-align: right;
     border-right: 0.5px solid var(--standard-medium-gray);
 }
 
 .markdown code {
+    font-size: 13px;
+}
+
+.markdown code:not(.inline-code) {
     display: block;
     white-space: pre;
     padding: 1em 1em 1em 2em;
