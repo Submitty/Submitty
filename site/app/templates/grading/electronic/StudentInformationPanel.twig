@@ -25,6 +25,7 @@
                 <div style="padding-left:10px;">
                     <b>
                         {% if team_assignment %}
+                            Team Name: {% if submitter.getTeam().getTeamName() is not null %}{{ submitter.getTeam().getTeamName() }}{% else %}Not Set{% endif %}<br/>
                             Team:<br/>
 
                             {% for team_member in submitter.getTeam().getMemberUsers() %}

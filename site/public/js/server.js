@@ -270,6 +270,19 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function newEditCourseMaterialsFolderForm(path, dir) {
+    let form = $('#edit-course-materials-folder-form');
+
+    $('#hide-materials-checkbox-edit', form).prop('checked', false);
+    $('#material-folder-edit-form', form).attr('data-directory', path);
+    $("#show-some-section-selection-edit", form).hide();
+    $("#all-sections-showing-yes", form).prop('checked',false);
+    $("#all-sections-showing-no", form).prop('checked',true);
+    $('#edit-folder-sort', form).attr('value', dir);
+    form.css("display", "block");
+    captureTabInModal("edit-course-materials-folder-form");
+}
+
 function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time) {
 
     let form = $("#edit-course-materials-form");
@@ -278,7 +291,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students == "on"){
+    if(this_hide_from_students === "1"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
 
@@ -841,12 +854,12 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         var height = max_height;
     }
     if (force_height != -1) {
-        document.getElementById(id).height = force_height + "px";
+        $("iframe#" + id).height(force_height);
     } else if (height >= max_height) {
-        document.getElementById(id).height= max_height + "px";
+        $("iframe#" + id).height(max_height);
     }
     else {
-        document.getElementById(id).height = (height+18) + "px";
+        $("iframe#" + id).height(height + 18);
     }
     //Workarounds for FireFox changing height/width of img sometime after this code runs
     if(img.length !== 0) {
