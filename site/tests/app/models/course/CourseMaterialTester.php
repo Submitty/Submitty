@@ -20,7 +20,9 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['path'],
             $details['release_date'],
             $details['hidden_from_students'],
-            $details['priority']
+            $details['priority'],
+            null,
+            null
         );
         $sections = ['1', '2'];
         foreach ($sections as $section) {
@@ -52,7 +54,9 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['path'],
             $details['release_date'],
             $details['hidden_from_students'],
-            $details['priority']
+            $details['priority'],
+            null,
+            null
         );
         $this->assertEquals($details['type'], $course_material->getType());
         $this->assertEquals($details['path'], $course_material->getPath());
