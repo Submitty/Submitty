@@ -14,6 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    database.execute("ALTER TABLE gradeable_allowed_minutes_override DROP CONSTRAINT IF EXISTS fk_user_id;")
     database.execute("ALTER TABLE gradeable_allowed_minutes_override ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (user_id);")
 
 

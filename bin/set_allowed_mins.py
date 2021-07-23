@@ -5,12 +5,11 @@ Handles updating the database with allowed minutes
 and override allowed minutes for the gradeable timer
 """
 
-from sqlalchemy import create_engine, MetaData, text
+from sqlalchemy import create_engine, MetaData, text, exc
 import datetime
 import os
 import sys
 import json
-import re
 
 try:
     CONFIG_PATH = os.path.join(
@@ -88,8 +87,9 @@ def main():
             override = timelimit_case['validation'][0]['override']
         try:
             send_data(db, allowed_minutes, override)
-        except:
+        except exc.IntegrityError:
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
