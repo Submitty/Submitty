@@ -149,7 +149,7 @@ class MiscController extends AbstractController {
             if (!is_null($ta_grading) && $ta_grading === "true") {
                 $newlines = substr_count($contents, "\n");
                 $carriage_returns = substr_count($contents, "\r");
-                if (max($newlines, $carriage_returns) > 5000) {
+                if ($newlines + $carriage_returns > 2000) {
                     return new WebResponse(MiscView::class, 'tooLarge');
                 }
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);

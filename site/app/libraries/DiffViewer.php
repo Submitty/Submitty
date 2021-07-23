@@ -541,14 +541,6 @@ class DiffViewer {
                 $html .= "\t</div>\n";
             }
         }
-        if (count($lines) + $num_blanks > 1000) {
-            if ($type === self::EXPECTED) {
-                $html = "<p style='color: black;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>" . $html;
-            }
-            elseif ($type === self::ACTUAL) {
-                $html = "<p style='color: black;'>This file has been truncated. Please download it to see the full file.</p>" . $html;
-            }
-        }
         /*
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
@@ -649,6 +641,15 @@ class DiffViewer {
             if ($start !== null && !isset($this->diff[$type][($i + 1)])) {
                 $start = null;
                 $html .= "\t</div>\n";
+            }
+        }
+        if (count($lines) + $num_blanks > 1000) {
+            $html .= "<p>...</p>";
+            if ($type === self::EXPECTED) {
+                $html .= "<p style='color: red;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>";
+            }
+            elseif ($type === self::ACTUAL) {
+                $html .= "<p style='color: red;'>This file has been truncated. Please download it to see the full file.</p>";
             }
         }
         return $html . "</div></div>\n";
