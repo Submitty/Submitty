@@ -22,11 +22,10 @@ class CourseMaterialsController extends AbstractController {
     public function viewCourseMaterialsPage(): WebResponse {
         $course_materials = $this->core->getCourseEntityManager()
             ->getRepository(CourseMaterial::class)
-            ->findAll();
+            ->getCourseMaterials();
         return new WebResponse(
             CourseMaterialsView::class,
             'listCourseMaterials',
-            $this->core->getUser(),
             $course_materials
         );
     }
@@ -108,7 +107,7 @@ class CourseMaterialsController extends AbstractController {
                 if ($course_material !== null) {
                     if (!$this->core->getUser()->accessGrading()) {
                         // only add the file if the section of student is allowed and course material is released!
-                        if ($course_material->isSectionAllowed($this->core->getUser()) && $course_material->getReleaseDate() < $this->core->getDateTimeNow()) {
+                        if ($course_material->isSectionAllowed($this->core->getUser()->getRegistrationSection()) && $course_material->getReleaseDate() < $this->core->getDateTimeNow()) {
                             $relativePath = substr($file_path, strlen($root_path) + 1);
                             $isFolderEmptyForMe = false;
                             $zip->addFile($file_path, $relativePath);
@@ -355,229 +354,236 @@ class CourseMaterialsController extends AbstractController {
             $url_url = $_POST['url_url'];
         }
 
-        $external_link_file_name = "";
         if (isset($url_title) && isset($url_url)) {
-            $external_link_file_name = "external-link-" . $this->core->getDateTimeNow()->format('Y-m-d-H-i-s') . ".json";
-
-            $external_link_json = json_encode(
-                [
-                    "name" => $url_title,
-                    "url" => $url_url,
-                ]
-            );
-
-            $temp_external_link_file = tmpfile();
-            fwrite($temp_external_link_file, $external_link_json);
-
-            $_FILES["files1"]["name"][] = $external_link_file_name;
-            $_FILES["files1"]["type"][] = "text/json";
-            $_FILES["files1"]["tmp_name"][] = stream_get_meta_data($temp_external_link_file)['uri'];
-            $_FILES["files1"]["error"][] = 0;
-            $_FILES["files1"]["size"][] = 10;//Size does not really matter because it is just a basic json file that holds a url
-        }
-
-        $uploaded_files = [];
-        if (isset($_FILES["files1"])) {
-            $uploaded_files[1] = $_FILES["files1"];
-        }
-
-        if (empty($uploaded_files)) {
-            return JsonResponse::getErrorResponse("No files were submitted.");
-        }
-
-        $status = FileUtils::validateUploadedFiles($_FILES["files1"]);
-        if (array_key_exists("failed", $status)) {
-            return JsonResponse::getErrorResponse("Failed to validate uploads " . $status['failed']);
-        }
-
-        $file_size = 0;
-        foreach ($status as $stat) {
-            $file_size += $stat['size'];
-            if ($stat['success'] === false) {
-                return JsonResponse::getErrorResponse($stat['error']);
+            $details['type'][0] = CourseMaterial::LINK;
+            $final_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+            if (!empty($requested_path)) {
+                $final_path = FileUtils::joinPaths($final_path, $requested_path);
+                if (!FileUtils::createDir($final_path)) {
+                    return JsonResponse::getErrorResponse("Failed to make path.");
+                }
             }
+            $details['path'][0] = FileUtils::joinPaths($final_path, urlencode("link-" . $url_title));
+            FileUtils::writeFile($details['path'][0], "");
         }
+        else {
+            $uploaded_files = [];
+            if (isset($_FILES["files1"])) {
+                $uploaded_files[1] = $_FILES["files1"];
+            }
 
-        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        if ($file_size > $max_size) {
-            return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.");
-        }
+            if (empty($uploaded_files) && !(isset($url_url) && isset($url_title))) {
+                return JsonResponse::getErrorResponse("No files were submitted.");
+            }
 
-        // creating uploads/course_materials directory
-        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        if (!FileUtils::createDir($upload_path)) {
-            return JsonResponse::getErrorResponse("Failed to make image path.");
-        }
-        $dirs_to_make = null;
-        // create nested path
-        if (!empty($requested_path)) {
-            $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
-            if (!FileUtils::createDir($upload_nested_path, true)) {
+            $status = FileUtils::validateUploadedFiles($_FILES["files1"]);
+            if (array_key_exists("failed", $status)) {
+                return JsonResponse::getErrorResponse("Failed to validate uploads " . $status['failed']);
+            }
+
+            $file_size = 0;
+            foreach ($status as $stat) {
+                $file_size += $stat['size'];
+                if ($stat['success'] === false) {
+                    return JsonResponse::getErrorResponse($stat['error']);
+                }
+            }
+
+            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+            if ($file_size > $max_size) {
+                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.");
+            }
+
+            // creating uploads/course_materials directory
+            $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+            if (!FileUtils::createDir($upload_path)) {
                 return JsonResponse::getErrorResponse("Failed to make image path.");
             }
-            $dirs_to_make = [];
-            $dirs = explode('/', $requested_path);
-            $j = count($dirs);
-            foreach ($dirs as $dir) {
-                for ($i = 0; $i < $j; $i++) {
-                    if (!isset($dirs_to_make[$i])) {
-                        $dirs_to_make[$i] = $upload_path . '/' . $dir;
-                    }
-                    else {
-                        $dirs_to_make[$i] .= '/' . $dir;
-                    }
+            $dirs_to_make = null;
+            // create nested path
+            if (!empty($requested_path)) {
+                $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
+                if (!FileUtils::createDir($upload_nested_path, true)) {
+                    return JsonResponse::getErrorResponse("Failed to make image path.");
                 }
-                $j--;
+                $dirs_to_make = [];
+                $dirs = explode('/', $requested_path);
+                $j = count($dirs);
+                foreach ($dirs as $dir) {
+                    for ($i = 0; $i < $j; $i++) {
+                        if (!isset($dirs_to_make[$i])) {
+                            $dirs_to_make[$i] = $upload_path . '/' . $dir;
+                        }
+                        else {
+                            $dirs_to_make[$i] .= '/' . $dir;
+                        }
+                    }
+                    $j--;
+                }
+                $upload_path = $upload_nested_path;
             }
-            $upload_path = $upload_nested_path;
-        }
 
-        $count_item = count($status);
-        if (isset($uploaded_files[1])) {
-            $index = 0;
-            for ($j = 0; $j < $count_item; $j++) {
-                $is_external_link_file = $uploaded_files[1]["name"][$j] == $external_link_file_name;
-                if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j]) || $is_external_link_file) {
-                    $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
+            $count_item = count($status);
+            if (isset($uploaded_files[1])) {
+                $index = 0;
+                for ($j = 0; $j < $count_item; $j++) {
+                    if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                        $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
-                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                        ->findOneBy(['path' => $dst]);
-                    if ($cm != null) {
-                        return JsonResponse::getErrorResponse("A file already exists with path " .
-                            $dst . ". Please delete the current file if you would like to use this path.");
-                    }
-
-                    if (strlen($dst) > 255) {
-                        return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
-                    }
-
-                    $is_zip_file = false;
-
-                    if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
-                        if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                            return JsonResponse::getErrorResponse("You may not use quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
-                        }
-                        $is_zip_file = true;
-                    }
-                    //cannot check if there are duplicates inside zip file, will overwrite
-                    //it is convenient for bulk uploads
-                    if ($expand_zip == 'on' && $is_zip_file === true) {
-                        //get the file names inside the zip to write to the JSON file
-
-                        $zip = new \ZipArchive();
-                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
-
-                        if (!$res) {
-                            return JsonResponse::getErrorResponse("Failed to open zip archive");
+                        $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                            ->findOneBy(['path' => $dst]);
+                        if ($cm != null) {
+                            return JsonResponse::getErrorResponse("A file already exists with path " .
+                                $dst . ". Please delete the current file if you would like to use this path.");
                         }
 
-                        $entries = [];
-                        $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
-                        $disallowed_files = ['.ds_store'];
-                        for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $entries[] = $zip->getNameIndex($i);
+                        if (strlen($dst) > 255) {
+                            return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
                         }
-                        $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
-                            $name = strtolower($entry);
-                            foreach ($disallowed_folders as $folder) {
-                                if (Utils::startsWith($folder, $name)) {
-                                    return false;
-                                }
+
+                        $is_zip_file = false;
+
+                        if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                            if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                                return JsonResponse::getErrorResponse("You may not use quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
                             }
-                            if (substr($name, -1) !== '/') {
-                                foreach ($disallowed_files as $file) {
-                                    if (basename($name) === $file) {
+                            $is_zip_file = true;
+                        }
+                        //cannot check if there are duplicates inside zip file, will overwrite
+                        //it is convenient for bulk uploads
+                        if ($expand_zip == 'on' && $is_zip_file === true) {
+                            //get the file names inside the zip to write to the JSON file
+
+                            $zip = new \ZipArchive();
+                            $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+
+                            if (!$res) {
+                                return JsonResponse::getErrorResponse("Failed to open zip archive");
+                            }
+
+                            $entries = [];
+                            $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
+                            $disallowed_files = ['.ds_store'];
+                            for ($i = 0; $i < $zip->numFiles; $i++) {
+                                $entries[] = $zip->getNameIndex($i);
+                            }
+                            $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
+                                $name = strtolower($entry);
+                                foreach ($disallowed_folders as $folder) {
+                                    if (Utils::startsWith($folder, $name)) {
                                         return false;
                                     }
                                 }
-                            }
-                            return true;
-                        });
-                        $zfiles = array_filter($entries, function ($entry) {
-                            return substr($entry, -1) !== '/';
-                        });
-
-                        foreach ($zfiles as $zfile) {
-                            $path = FileUtils::joinPaths($upload_path, $zfile);
-                            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                                ->findOneBy(['path' => $path]);
-                            if ($cm != null) {
-                                return JsonResponse::getErrorResponse("A file already exists with path " .
-                                $path . ". Please delete the current file if you would like to use this path.");
-                            }
-                        }
-
-                        $zip->extractTo($upload_path, $entries);
-
-                        foreach ($zfiles as $zfile) {
-                            $path = FileUtils::joinPaths($upload_path, $zfile);
-                            $details['type'][$index] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
-                            $details['path'][$index] = $path;
-                            if ($dirs_to_make == null) {
-                                $dirs_to_make = [];
-                            }
-                            $dirs = explode('/', $zfile);
-                            array_pop($dirs);
-                            $j = count($dirs);
-                            $count = count($dirs_to_make);
-                            foreach ($dirs as $dir) {
-                                for ($i = $count; $i < $j + $count; $i++) {
-                                    if (!isset($dirs_to_make[$i])) {
-                                        $dirs_to_make[$i] = $upload_path . '/' . $dir;
-                                    }
-                                    else {
-                                        $dirs_to_make[$i] .= '/' . $dir;
+                                if (substr($name, -1) !== '/') {
+                                    foreach ($disallowed_files as $file) {
+                                        if (basename($name) === $file) {
+                                            return false;
+                                        }
                                     }
                                 }
-                                $j--;
+                                return true;
+                            });
+                            $zfiles = array_filter($entries, function ($entry) {
+                                return substr($entry, -1) !== '/';
+                            });
+
+                            foreach ($zfiles as $zfile) {
+                                $path = FileUtils::joinPaths($upload_path, $zfile);
+                                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                                    ->findOneBy(['path' => $path]);
+                                if ($cm != null) {
+                                    return JsonResponse::getErrorResponse("A file already exists with path " .
+                                        $path . ". Please delete the current file if you would like to use this path.");
+                                }
                             }
-                            $index++;
+
+                            $zip->extractTo($upload_path, $entries);
+
+                            foreach ($zfiles as $zfile) {
+                                $path = FileUtils::joinPaths($upload_path, $zfile);
+                                $details['type'][$index] = CourseMaterial::FILE;
+                                $details['path'][$index] = $path;
+                                if ($dirs_to_make == null) {
+                                    $dirs_to_make = [];
+                                }
+                                $dirs = explode('/', $zfile);
+                                array_pop($dirs);
+                                $j = count($dirs);
+                                $count = count($dirs_to_make);
+                                foreach ($dirs as $dir) {
+                                    for ($i = $count; $i < $j + $count; $i++) {
+                                        if (!isset($dirs_to_make[$i])) {
+                                            $dirs_to_make[$i] = $upload_path . '/' . $dir;
+                                        }
+                                        else {
+                                            $dirs_to_make[$i] .= '/' . $dir;
+                                        }
+                                    }
+                                    $j--;
+                                }
+                                $index++;
+                            }
+                        }
+                        else {
+                            if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
+                                return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
+                            }
+                            else {
+                                $details['type'][$index] = CourseMaterial::FILE;
+                                $details['path'][$index] = $dst;
+                                $index++;
+                            }
                         }
                     }
                     else {
-                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
-                        }
-                        else {
-                            $details['type'][$index] = $is_external_link_file ? CourseMaterial::LINK : CourseMaterial::FILE;
-                            $details['path'][$index] = $dst;
-                            $index++;
-                        }
+                        return JsonResponse::getErrorResponse("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.");
+                    }
+                    // Is this really an error we should fail on?
+                    if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
+                        return JsonResponse::getErrorResponse("Failed to delete the uploaded file {$uploaded_files[1]['name'][$j]} from temporary storage.");
                     }
                 }
-                else {
-                    return JsonResponse::getErrorResponse("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.");
-                }
-                // Is this really an error we should fail on?
-                if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
-                    return JsonResponse::getErrorResponse("Failed to delete the uploaded file {$uploaded_files[1]['name'][$j]} from temporary storage.");
-                }
             }
-        }
-        if ($dirs_to_make != null) {
-            $i = -1;
-            $new_paths = [];
-            foreach ($dirs_to_make as $dir) {
-                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
-                    ['path' => $dir]
-                );
-                if ($cm == null && !in_array($dir, $new_paths)) {
-                    $details['type'][$i] = CourseMaterial::DIR;
-                    $details['path'][$i] = $dir;
-                    $i--;
-                    $new_paths[] = $dir;
+            if ($dirs_to_make != null) {
+                $i = -1;
+                $new_paths = [];
+                foreach ($dirs_to_make as $dir) {
+                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
+                        ['path' => $dir]
+                    );
+                    if ($cm == null && !in_array($dir, $new_paths)) {
+                        $details['type'][$i] = CourseMaterial::DIR;
+                        $details['path'][$i] = $dir;
+                        $i--;
+                        $new_paths[] = $dir;
+                    }
                 }
             }
         }
 
         foreach ($details['type'] as $key => $value) {
-            $course_material = new CourseMaterial(
-                $value,
-                $details['path'][$key],
-                DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
-                $details['hidden_from_students'],
-                $details['priority']
-            );
+            if ($value === CourseMaterial::LINK) {
+                $course_material = new CourseMaterial(
+                    $value,
+                    $details['path'][$key],
+                    DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
+                    $details['hidden_from_students'],
+                    $details['priority'],
+                    $url_url,
+                    $url_title
+                );
+            }
+            else {
+                $course_material = new CourseMaterial(
+                    $value,
+                    $details['path'][$key],
+                    DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
+                    $details['hidden_from_students'],
+                    $details['priority'],
+                    null,
+                    null
+                );
+            }
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
                 foreach ($details['sections'] as $section) {

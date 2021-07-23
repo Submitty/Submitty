@@ -61,7 +61,6 @@ def up(config, database, semester, course):
                 for itemkey, itemvalue in data.items():
                     material_type = 0
                     path = itemkey
-                    paths.add(path) # in case json already contains the path
                     if itemvalue['external_link'] is True:
                         material_type = 1
                     sections = []
@@ -70,6 +69,8 @@ def up(config, database, semester, course):
                     if 'sections' in itemvalue and itemvalue['sections'] is not None:
                         for section in itemvalue['sections']:
                             sections.append(section)
+                    if itemvalue['release_datetime'][:4] == "0000" or itemvalue['release_datetime'][:4] == "0001":
+                        itemvalue['release_datetime'] = "1001" + itemvalue['release_datetime'][4:]
                     has_sections = len(sections) != 0
                     query =  """
                         INSERT INTO course_materials (
@@ -91,7 +92,7 @@ def up(config, database, semester, course):
                         'path': path,
                         'type': material_type,
                         'release_date': itemvalue['release_datetime'],
-                        'hidden_from_students': itemvalue['hide_from_students'],
+                        'hidden_from_students': "false" if itemvalue['hide_from_students'] == "off" else "true",
                         'priority': itemvalue['sort_priority']
                     }
                     result = database.session.execute(query, params)
@@ -130,16 +131,20 @@ def up(config, database, semester, course):
                     VALUES (
                         :type, :path, :release_date, :hidden_from_students, :priority
                     ) ON CONFLICT(path) DO UPDATE SET
+                    type = EXCLUDED.type,
                     release_date = EXCLUDED.release_date,
                     hidden_from_students = EXCLUDED.hidden_from_students,
                     priority = EXCLUDED.priority
                 """
+                priority = 0
+                if isinstance(data, dict) and dir in data:
+                    priority = data[dir]['sort_priority']
                 params = {
                     'path': dir,
                     'type': 2,
                     'release_date': None,
                     'hidden_from_students': None,
-                    'priority': 0
+                    'priority': priority
                 }
                 database.session.execute(query, params)
 
@@ -158,4 +163,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    database.execute("DROP TABLE IF EXISTS course_materials CASCADE;")
+    database.execute("DROP TABLE IF EXISTS course_materials_sections CASCADE;")
     pass

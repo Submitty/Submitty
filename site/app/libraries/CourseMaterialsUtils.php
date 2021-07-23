@@ -37,7 +37,7 @@ class CourseMaterialsUtils {
         if ($course_material == null) {
             return false;
         }
-        return ($current_user->getGroup() < 4 || $course_material->isSectionAllowed($current_user));
+        return ($current_user->getGroup() < 4 || $course_material->isSectionAllowed($current_user->getRegistrationSection()));
     }
 
     /**

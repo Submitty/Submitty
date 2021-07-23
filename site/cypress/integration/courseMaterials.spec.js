@@ -96,15 +96,15 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
         cy.get('#submit-materials').click();
 
-        cy.get('#date_to_release_sd1f1').should('have.value', date);
-        cy.get('#date_to_release_sd1f1').should('have.value', date);
+        cy.get('#date_to_release_sf1').should('have.value', date);
+        cy.get('#date_to_release_sf1').should('have.value', date);
 
         cy.reload(); //dom elements become detatched after uploading?
 
         cy.get('.fa-pencil-alt').first().click();
         cy.get('#edit-picker').clear().type('9998-01-01 00:00:00');
         cy.get('#submit-edit').click({force: true}); //div covering button
-        cy.get('#date_to_release_sd1f1').should('have.value', '9998-01-01 00:00:00');
+        cy.get('#date_to_release_sf1').should('have.value', '9998-01-01 00:00:00');
 
         cy.reload();
 
@@ -191,13 +191,17 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
         cy.get('.file-viewer').should('have.length', 23);
 
-        cy.get('#file-container .btn').eq(3).click();
+        cy.get('#file-container .btn').eq(6).click();
         cy.get('#date_to_release').clear().type('2021-06-29 21:37:53');
         cy.get('#submit_time').click();
 
         cy.reload();
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 3; i++) {
+            cy.get('[name="release_date"]').eq(i).should('have.value', '9998-01-01 00:00:00');
+        }
+
+        for (let i = 3; i < 6; i++) {
             cy.get('[name="release_date"]').eq(i).should('have.value', '2021-06-29 21:37:53');
         }
 
@@ -209,9 +213,9 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login('aphacker');
         cy.visit(['sample','course_materials']);
 
-        cy.get('.file-viewer').should('have.length', 6);
+        cy.get('.file-viewer').should('have.length', 3);
 
-        const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/2/3/8/4/3/1/1_1.txt`;
+        const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/2/3/7/9/10/10_1.txt`;
         cy.visit(fileTgt);
         cy.get('body').should('have.text','');
 
@@ -287,7 +291,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.reload();
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
-        cy.get('.fa-pencil-alt').eq(9).click();
+        cy.get('.fa-pencil-alt').eq(24).click();
         cy.get('#all-sections-showing-yes').click();
         cy.get('#section-edit-2').check();
         cy.get('#submit-edit').click();

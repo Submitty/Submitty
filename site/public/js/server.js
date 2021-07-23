@@ -301,7 +301,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
-    if(this_file_section != null){
+    if(this_file_section.length !== 0){
         for(let index = 0; index < this_file_section.length; ++index){
             $("#section-edit-" + this_file_section[index], form).prop('checked',true);
         }

@@ -6,24 +6,25 @@
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
-    {% if userGroup == 1 %}
+    {% if user_group == 1 %}
         <div style="float: right; margin-bottom: 20px;">
             {# button to open all of the subfolders and cookie it#}
             <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
             {# button to set the release dates of all files in the page/course materials #}
             <a
-                onclick='setFolderRelease("{{ folderPath }}","","",
-                    [{% for file in inDir %}
-                        "{{ file }}",
-                    {% endfor %}]
-                    )'
-                class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
-                tabindex="0">Set All Release Dates</a>
+                    onclick='setFolderRelease("{{ base_course_material_path }}","","",
+                            [{% for file in material_list %} {% if not file.isDir %}
+                                "{{ file.getPath }}",
+                        {% endif %}
+                            {% endfor %}]
+                            )'
+                    class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
+                    tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
-    {% if userGroup==1 %}
+    {% if user_group==1 %}
         <ul style="justify-self: center" id="details-legend" class="table-bordered">
             <li>
                 <i class="fas fa-circle grader-NULL"></i>
@@ -44,149 +45,128 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, "") }}
+        {{ _self.display_files(course_materials, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, material_list, date_format) }}
 
     </div>
 </div>
 
-{% macro display_files(files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
-    {# Files on top #}
-    {% for dir, path in files %}
-        {% if path is not iterable %}
-            {{ _self.display_file(dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+{% macro display_files(course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format) %}
+    {% for name, course_material in course_materials %}
+        {% if course_material is iterable %}
+            {{ _self.display_folder(name, course_material, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format) }}
         {% else %}
-            {{ _self.display_dir(dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir ~ "/" ~ dir) }}
+            {{ _self.display_file(name, course_material, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, date_format) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
+{% macro display_file(name, course_material, user_group, user_section, id, indent, display_file_url, date_format) %}
+    {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
+        <div class="file-container">
+            <div class="file-viewer">
+                {% if course_material.isLink %}
+                    <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
+                    <a href="{{ course_material.getUrl }}">{{ course_material.getUrlTitle }}</a>
+                {% else %}
+                    <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
+                    {{ name }}
+                {% endif %}
+                {% set extension = name|split('.')|last|lower %}
+                {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
+                    <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ course_material.getPath | url_encode }}" aria-label="Pop up {{ name }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                {% endif %}
+                {% if not course_material.isLink %}
+                    <a class="key_to_click" onclick='downloadFile("{{ course_material.getPath | url_encode }}", "course_materials")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+                {% endif %}
+                {% if user_group == 1 %}
 
-{% macro display_file(dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
-    {% set this_file_section = file_sections[path] is defined ? file_sections[path] : null %}
-    {% set this_hide_from_students = hide_from_students[path] %}
-    {% set this_external_link = external_link[path] is defined ? external_link[path] : null %}
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getPath }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
-    {% set greater_than_student = userGroup < 4 %}
-    {% set visible_to_student =
-        not this_hide_from_students and
-        (this_file_section is null or user_section in this_file_section)
-    %}
-
-    {% if greater_than_student or visible_to_student %}
-    <div class="file-container">
-        <div class="file-viewer">
-
-            {% if this_external_link %}
-                <i class="fas fa-link" style='vertical-align:text-bottom;'></i>
-                <a href="{{this_external_link[0]}}">{{this_external_link[1]}}</a>&nbsp;
-            {% else %}
-                <i class="fas fa-file" style='vertical-align:text-bottom;'></i>
-                {{ dir }}&nbsp;
-            {% endif %}
-            {% set dirExtension = dir|split('.')|last|lower %}
-            {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}" aria-label="Pop up {{ dir }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
-            {% endif %}
-            {% if not this_external_link %}
-              <a class="key_to_click" onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
-            {% endif %}
-            {% if userGroup == 1 %}
-
-               <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ path }}", "{{ priorities[path] }}", {{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-
-               <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
-                <label for="date_to_release_{{ id }}">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
-                {% if not(this_file_section is null) %}
-                    {% if this_hide_from_students == "on" %}
-                        <span>Sections (Hidden):
-                        {{this_file_section|join(',')}}
+                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getPath | url_encode }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
+                    <label for="date_to_release_{{ id }}">Share to student on</label>
+                    <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>
+                {% if not course_material.getSections|length == 0 %}
+                {% if course_material.isHiddenFromStudents %}
+                    <span>Sections (Hidden):
+                        {{course_material.getSections|map(s => s.getSectionId)|join(',')}}
                         </span>
-                    {% else %}
-                        <span>Sections:
-                        {{this_file_section|join(',')}}
+                {% else %}
+                    <span>Sections:
+                        {{course_material.getSections|map(s => s.getSectionId)|join(',')}}
                         </span>
-                    {% endif %}
+                {% endif %}
 
                 {% endif %}
 
-                <script>
-                    function determineRelease(inputID){
-                        var now = new Date();
+                    <script>
+                        function determineRelease(inputID){
+                            var now = new Date();
 
-                        function pad(str){
-                            return ('0'+str).slice(-2);
+                            function pad(str){
+                                return ('0'+str).slice(-2);
+                            }
+
+                            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+                            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+                            var currentDT = date+' '+time;
+                            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+
+                            //get the value in each file so the color can be assigned
+                            //based on the time chosen
+                            var inputDT = document.getElementById(inputID);
+                            var fileDT = inputDT.value;
+
+                            fileDT = fileDT.replace(/\s/, 'T');
+                            currentDT = currentDT.replace(/\s/, 'T');
+                            neverDT = neverDT.replace(/\s/, 'T');
+
+                            //also custom colors for this page for readability
+                            if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
+                                return green;
+                            } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
+                                return red;
+                            } else {
+                                return yellow;
+                            }
                         }
-
-                        var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-                        var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-                        var currentDT = date+' '+time;
-                        var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
-
-                        //get the value in each file so the color can be assigned
-                        //based on the time chosen
-                        var inputDT = document.getElementById(inputID);
-                        var fileDT = inputDT.value;
-
-                        fileDT = fileDT.replace(/\s/, 'T');
-                        currentDT = currentDT.replace(/\s/, 'T');
-                        neverDT = neverDT.replace(/\s/, 'T');
-
-                        //also custom colors for this page for readability
-                        if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
-                            return green;
-                        } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
-                            return red;
-                        } else {
-                            return yellow;
-                        }
-                    }
-                    document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
-                </script>
-            {% endif %}
+                        document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
+                    </script>
+                {% endif %}
+            </div>
+            <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ name }}" data-file_url="{{ course_material.getPath }}"></div>
         </div>
-        <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
-    </div>
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) %}
-    {% if indent == 0 %}
-        {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
+{% macro display_folder(name, course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format) %}
+    {% if indent == -1 %}
+        {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format) }}
     {% else %}
-    <div class="folder-container">
-
-        <div class="div-viewer">
-            {# button to open each folder #}
-            <a class='openAllDiv key_to_click openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ folderPath }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")' tabindex="0">
-                <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
-                {{ dir }}
-            </a>
-            <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
-            {% if userGroup == 1 %}
-                <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folderPath }}", "{{ priorities[folderPath] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                {# button to choose release date for all files in folder and subfolders #}
-                <a onclick='setFolderRelease("{{ folderPath }}","","{{ id }}",
-                [{% for file in inDir %}
-                        {% if folderPath in file %}
-                            "{{ file }}",
+        <div class="folder-container">
+            <div class="div-viewer">
+                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setCookie('{{ folder_path }}',openDivForCourseMaterials('{{ id }}')+'{{ id }}')" tabindex="0">
+                    <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
+                    {{ name }}
+                </a>
+                <a onclick="downloadCourseMaterialZip('{{ name }}', '{{ folder_path | url_encode }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
+                {% if user_group == 1 %}
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_path }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_path | url_encode  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}",
+                            [{% for file in material_list %}
+                        {% if folder_path in file.getPath and not file.isDir %}
+                                "{{ file.getPath }}",
                         {% endif %}
                 {% endfor %}]
-                        )' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
-            {% endif %}
+                            )' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
+                {% endif %}
+            </div>
+            <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
+                {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format) }}
+            </div>
         </div>
-        <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
-
-            {# Recurse #}
-
-            {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir) }}
-
-        </div>
-    </div>
     {% endif %}
 {% endmacro %}
-
 
 <script>
     //set cookie for open adapted from w3schools
@@ -220,40 +200,40 @@
             //open all the folders
             openAllDivForCourseMaterials();
             //
-            {% for file in inDir %}
-                //if one of the subdirs, check if it is closed post opening all
-                var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
-                if(subFolderCookie.indexOf("closed")==0){
-                    //if closed. close it after it has been opened by the override above
-                    closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
-                }
+            {% for file in material_list %}
+            //if one of the subdirs, check if it is closed post opening all
+            var subFolderCookie = getCookie("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
+            if(subFolderCookie.indexOf("closed")==0){
+                //if closed. close it after it has been opened by the override above
+                closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+            }
             {% endfor %}
         }
         else{
             //makes sure that opened folders don't get opened multiple times
             let trackOpens = new Map();
             //goes through all possible directories
-            {% for file in inDir %}
-                    //get the cookie for each dir
-                    var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
-                    //if the folder is open
-                    if(subFolderCookie.indexOf("open")==0){
-                        //check if the folder has been opened already (do it it again will close it)
-                        if(trackOpens.get(subFolderCookie.substr(4,subFolderCookie.length)) === undefined){
-                            //undefined means it has not been opened
-                            //set the value as open so it will not be reopened
-                            trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
-                            //open the folder
-                            openDivForCourseMaterials(subFolderCookie.substr(4,subFolderCookie.length));
-                        }
-                    }
-                    else{
-                        if(subFolderCookie.indexOf("closed")==0){
-                            //if the folder should be closed, close it
-                            closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
-                            //there's no way to open it in that function
-                        }
-                    }
+            {% for file in material_list %}
+            //get the cookie for each dir
+            var subFolderCookie = getCookie("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
+            //if the folder is open
+            if(subFolderCookie.indexOf("open")==0){
+                //check if the folder has been opened already (do it it again will close it)
+                if(trackOpens.get(subFolderCookie.substr(4,subFolderCookie.length)) === undefined){
+                    //undefined means it has not been opened
+                    //set the value as open so it will not be reopened
+                    trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
+                    //open the folder
+                    openDivForCourseMaterials(subFolderCookie.substr(4,subFolderCookie.length));
+                }
+            }
+            else{
+                if(subFolderCookie.indexOf("closed")==0){
+                    //if the folder should be closed, close it
+                    closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+                    //there's no way to open it in that function
+                }
+            }
             {% endfor %}
         }
         // loop thru each div_viewer_xxx
@@ -261,18 +241,18 @@
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
 
             $('[id^=div_viewer_]').each(function() {
-            var number = this.id.replace('div_viewer_', '').trim();
-            var keyValuePairs = document.cookie.split(';');
+                var number = this.id.replace('div_viewer_', '').trim();
+                var keyValuePairs = document.cookie.split(';');
 
-            for(var i = 0; i < keyValuePairs.length; i++) {
-                var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
-                var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
-                if (name === 'cm_'+number && value === '1') {
-                    openDivForCourseMaterials(number);
-                    document.cookie = 'cm_' + number + '='; // clean up cookie since we don't need this anymore
+                for(var i = 0; i < keyValuePairs.length; i++) {
+                    var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
+                    var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
+                    if (name === 'cm_'+number && value === '1') {
+                        openDivForCourseMaterials(number);
+                        document.cookie = 'cm_' + number + '='; // clean up cookie since we don't need this anymore
+                    }
                 }
-            }
-        });
+            });
             // jump to last location if scroll is enabled.
             window.scrollTo(0, jumpToScrollPosition);
             document.cookie = 'jumpToScrollPosition=-1';
@@ -281,16 +261,16 @@
         else {
             // clean up all cookies which are stated with "cm_";
             $('[id^=div_viewer_]').each(function() {
-            var number = this.id.replace('div_viewer_', '').trim();
-            var keyValuePairs = document.cookie.split(';');
+                var number = this.id.replace('div_viewer_', '').trim();
+                var keyValuePairs = document.cookie.split(';');
 
-            for(var i = 0; i < keyValuePairs.length; i++) {
-                var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
-                if (name === 'cm_'+number) {
-                    document.cookie = 'cm_' + number + '=';
+                for(var i = 0; i < keyValuePairs.length; i++) {
+                    var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
+                    if (name === 'cm_'+number) {
+                        document.cookie = 'cm_' + number + '=';
+                    }
                 }
-            }
-        });
+            });
         }
     };
 
