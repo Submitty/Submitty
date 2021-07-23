@@ -1062,7 +1062,7 @@ HTML;
                             'name' => str_replace('\'', '\\\'', $file['name']),
                             'size' => number_format($file['size'] / 1024, 2),
                             'part' => $i,
-                            'path' => $file['path']
+                            'path' => $this->setAnonPath($file['path'])
                         ];
                     }
                 }

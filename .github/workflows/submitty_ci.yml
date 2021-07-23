@@ -236,11 +236,12 @@ jobs:
     e2e:
         needs:
           - js-lint
+          - js-unit          
           - php-lint
           - php-unit
           - python-lint
           - python-unit
-          - js-unit
+          - css-lint
         runs-on: ubuntu-18.04
         services:
           postgres:
