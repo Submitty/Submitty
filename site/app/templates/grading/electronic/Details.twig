@@ -37,7 +37,7 @@
             <div class="action-btn-cont">
                 {% if show_all_sections_button %}
                 <a class="btn btn-default"
-                   href="{{ view_all_toggle_url }}">
+                   href="" onclick="changeSections()">
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </a>
                 {% endif %}
@@ -715,6 +715,18 @@
 
 {# /Column functions #}
 <script>
+    function changeSections() {
+        const status = {{ view_all ? 1 : 0 }};
+        if (status) {
+            document.cookie = 'view=assigned;';
+            localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
+        } else {
+            document.cookie = 'view=all;';
+            localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
+        }
+        location.reload();
+    }
+
     function changeAnon() {
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {

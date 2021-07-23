@@ -827,8 +827,6 @@ HTML;
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "peer" => $peer,
             "details_base_url" => $details_base_url,
-            "view_all_toggle_url" => $details_base_url . '?' .
-                http_build_query(['view' => $view_all ? null : 'all', 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction, 'anon_mode' => $anon_mode]),
             "order_toggle_url" => $details_base_url . '?' .
                 http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "sort" => $sort,

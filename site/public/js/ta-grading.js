@@ -45,7 +45,14 @@ const taLayoutDet = {
 };
 
 let settingsCallbacks = {
-  "general-setting-arrow-function": changeStudentArrowTooltips
+  "general-setting-arrow-function": changeStudentArrowTooltips,
+  "general-setting-navigate-assigned-students-only": function(value) {
+    if (value == 'true') {
+      document.cookie = "view=assigned;";
+    } else {
+      document.cookie = "view=all;";
+    }
+  }
 }
 
 // Grading Panel header width
@@ -91,7 +98,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
-  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  for (let i = 0; i < settingsData.length; i++) {
+    for (let x = 0; x < settingsData[i].values.length; x++) {
+      let storageCode = settingsData[i].values[x].storageCode;
+      let item = localStorage.getItem(storageCode);
+      if (item && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](item);
+      }
+    }
+  }
 
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');

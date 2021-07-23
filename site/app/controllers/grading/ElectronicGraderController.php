@@ -833,11 +833,11 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
+    public function showDetails($gradeable_id, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
-        $view_all = $view === 'all';
+        $view_all = isset($_COOKIE['view']) && $_COOKIE['view'] === 'all';
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -1383,7 +1383,8 @@ class ElectronicGraderController extends AbstractController {
                 $message .= " of";
                 if ($navigate_assigned_students_only !== "false") {
                     $message .= " your assigned sections";
-                } else {
+                }
+                else {
                     $message .= " the list";
                 }
                 if ($filter !== 'default') {
