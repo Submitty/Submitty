@@ -73,7 +73,6 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-
         if (!Utils::startsWith($file_path, $check_path)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
