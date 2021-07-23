@@ -1065,6 +1065,7 @@ class Course(object):
         #This segment adds the sample forum posts for the sample course only
         if self.code == "sample":
             self.add_sample_forum_data()
+            self.add_sample_queue_data()
             print('Added forum data to sample course.')
 
         self.conn.close()
@@ -1216,6 +1217,81 @@ class Course(object):
                               resolved = True if postData[8] == "t" else False,
                               type=postData[9],
                               has_attachment=True if postData[10] != "f" else False)
+
+    def add_sample_queue_data(self):
+        # load the sample polls from input file
+        queue_data_path = os.path.join(SETUP_DATA_PATH, "queue", "queue_data.json")
+        with open(queue_data_path, 'r') as queue_file:
+            queue_data = json.load(queue_file)
+
+        # set sample course to have office hours queue enabled by default
+        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
+        with open(course_json_file, 'r+') as open_file:
+            course_json = json.load(open_file)
+            course_json['course_details']['queue_enabled'] = True
+            course_json['course_details']['queue_contact_info'] = True
+            course_json['course_details']['queue_message'] = queue_data["queue_message"]
+            course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
+            open_file.seek(0)
+            open_file.truncate()
+            json.dump(course_json, open_file, indent=2)
+
+        # generate values that depend on current date and time
+        # helped for the first time, done --- LAB queue
+        queue_data["queue_entries"][0]["time_in"] = datetime.now() - timedelta(minutes=25)
+        queue_data["queue_entries"][0]["time_out"] = datetime.now() - timedelta(minutes=19)
+        queue_data["queue_entries"][0]["time_help_start"] = datetime.now() - timedelta(minutes=24)
+        # helped, done --- LAB queue
+        queue_data["queue_entries"][1]["time_in"] = datetime.now() - timedelta(minutes=24)
+        queue_data["queue_entries"][1]["time_out"] = datetime.now() - timedelta(minutes=15)
+        queue_data["queue_entries"][1]["time_help_start"] = datetime.now() - timedelta(minutes=23)
+        # removed by self --- LAB queue
+        queue_data["queue_entries"][2]["time_in"] = datetime.now() - timedelta(minutes=22)
+        queue_data["queue_entries"][2]["time_out"] = datetime.now() - timedelta(minutes=21)
+        # being helped --- HW queue
+        queue_data["queue_entries"][3]["time_in"] = datetime.now() - timedelta(minutes=23)
+        queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(minutes=14)
+        # waiting for help for second time --- LAB queue
+        queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(minutes=21)
+        queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data["queue_entries"][0]["time_in"]
+        # paused --- HW queue
+        queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(minutes=20)
+        queue_data["queue_entries"][5]["time_paused_start"] = datetime.now() - timedelta(minutes=18)
+        # wait for the first time --- HW queue
+        queue_data["queue_entries"][6]["time_in"] = datetime.today()
+
+        queues_table = Table("queue_settings", self.metadata, autoload=True)
+        queue_entries_table = Table("queue", self.metadata, autoload=True)
+
+        # make two sample queues
+        self.conn.execute(queues_table.insert(),
+                          open=True,
+                          code="Lab Help",
+                          token="lab")
+        self.conn.execute(queues_table.insert(),
+                          open=True,
+                          code="Homework Debugging",
+                          token="hw_debug")
+
+        # add, help, remove, pause, etc. students in the queue
+        for queue_enrty in queue_data["queue_entries"]:
+            self.conn.execute(queue_entries_table.insert(),
+                              current_state=queue_entry["current_state"],
+                              removal_type=queue_entry["removal_type"],
+                              queue_code=queue_entry["queue_code"],
+                              user_id=queue_entry["user_id"],
+                              name=queue_entry["name"],
+                              time_in=queue_entry["time_in"],
+                              time_out=queue_entry["time_out"],
+                              added_by=queue_entry["added_by"],
+                              help_started_by=queue_entry["help_started_by"],
+                              removed_by=queue_entry["removed_by"],
+                              contact_info=queue_entry["contact_info"],
+                              last_time_in_queue=queue_entry["last_time_in_queue"],
+                              time_help_start=queue_entry["time_help_start"],
+                              paused=queue_entry["paused"],
+                              time_paused=queue_entry["time_paused"],
+                              time_paused_start=queue_entry["time_paused_start"])
 
     def make_course_json(self):
         """
