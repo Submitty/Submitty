@@ -11,6 +11,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\entities\course\CourseMaterial;
+use app\repositories\course\CourseMaterialRepository;
 use app\views\course\CourseMaterialsView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
@@ -20,9 +21,9 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage(): WebResponse {
-        $course_materials = $this->core->getCourseEntityManager()
-            ->getRepository(CourseMaterial::class)
-            ->getCourseMaterials();
+        $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
+        /** @var CourseMaterialRepository $repo */
+        $course_materials = $repo->getCourseMaterials();
         return new WebResponse(
             CourseMaterialsView::class,
             'listCourseMaterials',

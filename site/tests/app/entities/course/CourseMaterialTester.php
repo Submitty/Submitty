@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\app\models\course;
+namespace tests\app\entities\course;
 
 use app\entities\course\CourseMaterial;
 use app\entities\course\CourseMaterialSection;
