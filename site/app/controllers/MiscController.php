@@ -72,7 +72,7 @@ class MiscController extends AbstractController {
         else {
             $section = $submitter->getRotatingSection();
         }
-        
+
 
         if (!Utils::startsWith($file_path, $check_path)) {
             return MultiResponse::JsonOnlyResponse(
