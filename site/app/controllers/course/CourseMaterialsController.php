@@ -84,22 +84,25 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $temp_dir = "/tmp";
-        // makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-        // replacing any whitespace with underscore char.
+         //replacing any whitespace with underscore char.
         $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
-        // Always delete the zip file after script execution
-        register_shutdown_function('unlink', $zip_name);
 
-        $zip = new \ZipArchive();
-        $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $isFolderEmptyForMe = true;
         // iterate over the files inside the requested directory
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($root_path),
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
+
+        $options = new \ZipStream\Option\Archive();
+        $options->setSendHttpHeaders(true);
+        $options->setEnableZip64(false);
+
+        // create a new zipstream object
+        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
+
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $file_path = $file->getRealPath();
@@ -111,14 +114,14 @@ class CourseMaterialsController extends AbstractController {
                         if ($course_material->isSectionAllowed($this->core->getUser()) && $course_material->getReleaseDate() < $this->core->getDateTimeNow()) {
                             $relativePath = substr($file_path, strlen($root_path) + 1);
                             $isFolderEmptyForMe = false;
-                            $zip->addFile($file_path, $relativePath);
+                            $zip_stream->addFileFromPath($relativePath,$file_path);
                         }
                     }
                     else {
                         // For graders and instructors, download the course-material unconditionally!
                         $relativePath = substr($file_path, strlen($root_path) + 1);
                         $isFolderEmptyForMe = false;
-                        $zip->addFile($file_path, $relativePath);
+                        $zip_stream->addFileFromPath($relativePath,$file_path);
                     }
                 }
             }
@@ -129,7 +132,7 @@ class CourseMaterialsController extends AbstractController {
             $this->core->getOutput()->showError("You do not have access to this folder");
             return false;
         }
-        $zip->close();
+        $zip_stream->finish();
         header("Content-type: application/zip");
         header("Content-Disposition: attachment; filename=$zip_file_name");
         header("Content-length: " . filesize($zip_name));
