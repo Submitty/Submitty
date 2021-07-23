@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -7146,7 +7147,10 @@ AND gc_id IN (
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => []
+        'team_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection',
+        ]
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -7160,7 +7164,10 @@ AND gc_id IN (
         'team_id' => [
             'team.team_id'
         ],
-        'user_id' => []
+        'user_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection'
+        ]
     ];
 
     /**
