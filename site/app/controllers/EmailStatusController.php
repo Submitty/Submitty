@@ -17,39 +17,77 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/email_status")
+     * @Route("/courses/{_semester}/{_course}/email_status", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return WebResponse
      */
     public function getEmailStatusPage() {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $page = isset($_POST['page']) ? $_POST['page'] : 1;
-        //$count = $this->core->getQueries()->getDistinctEmailSubject($semester, $course);
-        //$result = $this->core->getQueries()->getEmailStatusWithCourse($semester, $course);
-        $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum($semester, $course);
-        $result = new EmailStatusModel($this->core, $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page, $semester, $course));
         
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
+        $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum($semester, $course);
+                
+        return new WebResponse(
+            EmailStatusView::class,
+            'showEmailStatusPage',
+            $num_page,
+            $this->core->buildCourseUrl(["email_status_page"])
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/email_status_page", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/email_status_page", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return array
+     */
+    public function getEmailStatusesByPage(): array {
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $page = isset($_POST['page']) ? $_POST['page'] : 1;
+        $result = new EmailStatusModel($this->core, $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page, $semester, $course));
+
+        return $this->core->getOutput()->renderJsonSuccess(
+            $this->core->getOutput()->renderTemplate(
                 EmailStatusView::class,
-                'showEmailStatus',
+                'renderStatusPage',
                 $result
             )
         );
     }
 
     /**
-     * @Route("/superuser/email_status")
+     * @Route("/superuser/email_status", methods={"GET"})
      * @AccessControl(level="SUPERUSER")
      * @return WebResponse
      */
     public function getSuperuserEmailStatusPage(): WebResponse {
-        $email_statuses = $this->core->getQueries()->getAllEmailStatuses();
+        $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum();
+                
         return new WebResponse(
             EmailStatusView::class,
-            'showSuperuserEmailStatus',
-            $email_statuses
+            'showEmailStatusPage',
+            $num_page,
+            $this->core->buildUrl(["admin", "email_status_page"])
+        );
+    }
+
+    /**
+     * @Route("/admin/email_status_page", methods={"GET"})
+     * @Route("/api/admin/email_status_page", methods={"GET"})
+     * @AccessControl(level="SUPERUSER")
+     * @return array
+     */
+    public function getSuperuserEmailStatusesByPage(): array {
+        $page = $_GET['page'] ?? 1;
+        $result = new EmailStatusModel($this->core, $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page));
+
+        return $this->core->getOutput()->renderJsonSuccess(
+            $this->core->getOutput()->renderTemplate(
+                EmailStatusView::class,
+                'renderStatusPage',
+                $result
+            )
         );
     }
 }

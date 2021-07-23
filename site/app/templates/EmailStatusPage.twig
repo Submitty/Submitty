@@ -1,28 +1,20 @@
 <div id="email" class="content">
     <h1>Email Status</h1>
-    {% include "EmailStatus.twig" with {
-        "subjects": subjects,
-        "errors": errors,
-        "pending": pending,
-        "successes": successes,
-        "courses": courses
-    } %}
+    <div id="email-statuses">
+    </div>
     <nav aria-label="Page navigation">
         <ul class="pagination">
             <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="sr-only">Previous</span>
-                </a>
+                <button class="btn first-btn" aria-hidden="true" onclick="loadPage(1, {{ "\"" ~ load_page_url ~ "\""}});">&laquo;</button>
             </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
             <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="sr-only">Next</span>
-                </a>
+                
+            </li>
+            {% for i in 1 .. num_page %}
+                <li class="page-item"><button class="btn page-btn" id="{{i}}" onclick="loadPage({{i}}, {{ "\"" ~ load_page_url ~ "\""}});">{{i}}</button></li>
+            {% endfor %}
+            <li class="page-item">
+                <button class="btn last-btn" aria-hidden="true" onclick="loadPage({{num_page}}, {{ "\"" ~ load_page_url ~ "\""}});">&raquo;</button>
             </li>
         </ul>
     </nav>

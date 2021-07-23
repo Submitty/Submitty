@@ -10,6 +10,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class EmailRepository extends EntityRepository {
     const PAGE_SIZE = 1000;
+    const MAX_SUBJECTS_PER_PAGE = 10;
 
     public function getEmailsByPage(int $page, $semester = null, $course = null): Paginator {
         $entity = EmailEntity::class;
@@ -38,14 +39,17 @@ class EmailRepository extends EntityRepository {
         $query_res = $q->getResult();
         $page = 1;
         $count = 0;
+        $subject = 0;
         foreach ($query_res as $email) {
             $count += $email[1];
-            if ($count > self::PAGE_SIZE) {
+            $subject += 1;
+            if ($count > self::PAGE_SIZE || $subject >= self::MAX_SUBJECTS_PER_PAGE) {
                 $page += 1;
                 $count = 0;
+                $subject = 0;
             }
         }
-        return $count;
+        return $page;
     }
 
     private function getPageWindow($page, $semester = null, $course = null): array {
@@ -61,6 +65,7 @@ class EmailRepository extends EntityRepository {
         $curr_page = 1;
         $current_entry = 0;
         $count = 0;
+        $subject = 0;
         foreach ($query_res as $email) {
             if ($curr_page > $page) {
                 break;
@@ -72,9 +77,11 @@ class EmailRepository extends EntityRepository {
             }
             $count += $email[1];
             $current_entry += $email[1];
-            if ($count + $email[1] > self::PAGE_SIZE) {
-                $page += 1;
+            $subject += 1;
+            if ($count > self::PAGE_SIZE || $subject >= self::MAX_SUBJECTS_PER_PAGE) {
+                $curr_page += 1;
                 $count = 0;
+                $subject = 0;
             }
             $end = $current_entry;
         }
