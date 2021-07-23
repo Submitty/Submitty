@@ -147,6 +147,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                         if (annotation.type == 'drawing') {
                             ctx.lineWidth = annotation.width;
                             ctx.strokeStyle = annotation.color;
+                            ctx.beginPath();
                             for (let line = 1; line < annotation.lines.length; line++) {
                                 ctx.moveTo(annotation.lines[line - 1][0], annotation.lines[line - 1][1]);
                                 ctx.lineTo(annotation.lines[line][0], annotation.lines[line][1]);
