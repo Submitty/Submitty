@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
+#   install_system.sh [--vagrant] [--utm]  [--worker] [<extra> <extra> ...]
 
 err_message() {
     >&2 echo -e "
@@ -59,6 +59,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 #################
 
 export VAGRANT=0
+export UTM=0
 export NO_SUBMISSIONS=0
 export WORKER=0
 
@@ -69,6 +70,9 @@ while :; do
     case $1 in
         --vagrant)
             export VAGRANT=1
+            ;;
+	--utm)
+            export UTM=1
             ;;
         --worker)
             export WORKER=1
@@ -92,7 +96,9 @@ if [ ${VAGRANT} == 1 ]; then
 
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
-    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    if [ ${UTM} == 0 ]; then
+	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    fi
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
