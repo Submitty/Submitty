@@ -33,7 +33,7 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
 fi
 
 UTM_ARM=0
-if [[ "$(uname -m)" = "arm64" ]] ; then
+if [[ "$(uname -m)" = "aarch64" ]] ; then
     UTM_ARM=1
 fi
 
@@ -492,11 +492,11 @@ fi
 
 echo -e "Compile and install analysis tools"
 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
 # WIP - HASKELL BINARY IS NOT AVAILABLE ARM 64
 if [ ${UTM_ARM} == 0 ]; then
 # END HACK
-
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
@@ -510,7 +510,7 @@ popd > /dev/null
 
 # WIP - HASKELL BINARY IS NOT AVAILABLE ARM 64
 else
-    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64
+    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64"
 fi
 # END HACK
 
