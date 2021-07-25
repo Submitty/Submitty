@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_system.sh [--vagrant] [--utm]  [--worker] [<extra> <extra> ...]
+#   install_system.sh [--vagrant] [--utm_arm]  [--worker] [<extra> <extra> ...]
 
 err_message() {
     >&2 echo -e "
@@ -59,7 +59,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 #################
 
 export VAGRANT=0
-export UTM=0
+export UTM_ARM=0
 export NO_SUBMISSIONS=0
 export WORKER=0
 
@@ -71,8 +71,8 @@ while :; do
         --vagrant)
             export VAGRANT=1
             ;;
-	--utm)
-            export UTM=1
+	--utm_arm)
+            export UTM_ARM=1
             ;;
         --worker)
             export WORKER=1
@@ -96,7 +96,7 @@ if [ ${VAGRANT} == 1 ]; then
 
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
-    if [ ${UTM} == 0 ]; then
+    if [ ${UTM_ARM} == 0 ]; then
 	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
     fi
 
@@ -206,10 +206,11 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
+    # NOTE: currently only 64-bit (x86_64) Linux binary is available
 fi
 
 #################################################################
@@ -249,6 +250,17 @@ if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
 else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
+
+
+# WIP - CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON UTM_ARM MAC M1
+if getent passwd vagrant > /dev/null; then
+    # Already exists
+    echo 're-running install submitty'
+elif [ ${UTM_ARM} == 1 ]; then
+    useradd -m vagrant
+fi
+# END HACK
+
 
 if [ ${VAGRANT} == 1 ]; then
 	usermod -aG sudo vagrant
@@ -415,8 +427,8 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         # remove default sites which would cause server to mess up
-        rm /etc/apache2/sites*/000-default.conf
-        rm /etc/apache2/sites*/default-ssl.conf
+        rm -f /etc/apache2/sites*/000-default.conf
+        rm -f /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
@@ -669,7 +681,7 @@ if [ ${WORKER} == 0 ]; then
         echo "Creating submitty master database"
         su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
         su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
-        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
+        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config -e master -e system migrate --initial
     else
         echo "Submitty master database already exists"
     fi

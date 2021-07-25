@@ -21,7 +21,7 @@
 cryptography==3.3.2
 
 # For QR bulk upload
-opencv-python==3.4.9.33
+opencv-python==3.4.10.37
 
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2021.1 # Submitty-util specific.
@@ -57,4 +57,4 @@ numpy==1.19.5
 
 # python libraries for OCR for digit recognition
 # newer versions are not supported on 18.04
-onnxruntime==1.3.0
+onnxruntime==1.8.1

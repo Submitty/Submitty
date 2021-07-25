@@ -32,6 +32,11 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
     VAGRANT=1
 fi
 
+UTM_ARM=0
+if [[ "$(uname -m)" = "arm64" ]] ; then
+    UTM_ARM=1
+fi
+
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
@@ -487,6 +492,10 @@ fi
 
 echo -e "Compile and install analysis tools"
 
+# WIP - HASKELL BINARY IS NOT AVAILABLE ARM 64
+if [ ${UTM_ARM} == 0 ]; then
+# END HACK
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -498,6 +507,12 @@ if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     echo ${AnalysisTools_Version} > VERSION
 fi
 popd > /dev/null
+
+# WIP - HASKELL BINARY IS NOT AVAILABLE ARM 64
+else
+    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64
+fi
+# END HACK
 
 # change permissions
 chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
