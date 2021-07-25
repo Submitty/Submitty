@@ -48,7 +48,7 @@ Vagrant.configure(2) do |config|
   config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 8433, host: 8433   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
   end
 
