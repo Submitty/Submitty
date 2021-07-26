@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_system.sh [--vagrant] [--utm_arm]  [--worker] [<extra> <extra> ...]
+#   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
 
 err_message() {
     >&2 echo -e "
@@ -59,7 +59,6 @@ source ${CURRENT_DIR}/bin/versions.sh
 #################
 
 export VAGRANT=0
-export UTM_ARM=0
 export NO_SUBMISSIONS=0
 export WORKER=0
 
@@ -70,9 +69,6 @@ while :; do
     case $1 in
         --vagrant)
             export VAGRANT=1
-            ;;
-	--utm_arm)
-            export UTM_ARM=1
             ;;
         --worker)
             export WORKER=1
@@ -87,6 +83,12 @@ while :; do
 
     shift
 done
+
+
+export UTM_ARM=0
+if [[ "$(uname -m)" = "aarch64" ]] ; then
+    export UTM_ARM=1
+fi
 
 
 if [ ${VAGRANT} == 1 ]; then

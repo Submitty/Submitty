@@ -2,13 +2,16 @@
 
 On an M1 Mac laptop, we cannot use virtual box, so follow these instructions instead:
 
+
 1. Install UTM
    https://mac.getutm.app/
+
 
 2. Download and save the Ubuntu 20.04 ARM Server ISO
    https://mac.getutm.app/gallery/ubuntu-20-04
 
-3. Through the UTM GUI, create a new VM
+
+3. Through the UTM GUI, create a new VM:
 
    under the "System" tab, specify:
    architecture -> ARM64 (aarch64)
@@ -31,56 +34,93 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    -> "enable clipboard sharing"
    -> "enable directory sharing"
 
-   
 
-4. from the main screen, with this new VM selected:
+4. On the host computer, create a new directory named GIT_CHECKOUT to
+   hold all of the Submitty git repositories.  Manually checkout these
+   repositories:
 
-   -> set the CD/DVD drrive to point to the iso you downloaded earlier
+   From https://github.com/Submitty
+
+   Submitty
+   AnalysisTools
+   CrashCourseCPPSyntax
+   Lichen
+   RainbowGrades
+   SysadminTools
+   Tutorial
+
+   And also create directory:
+   vendor/nlohmann/json/
+
+   from:
+   git clone https://github.com/nlohmann/json.git
+
+   Optionally (currently a private repo), from https://github.com/Submitty
+   LichenTestData
+
+   *** FIXME: Currently we checkout all of the repositories manually,
+       since the VM cannot write to the shared directory?  Unlike how
+       we currently setup with vagrant, we may not be able to share
+       multiple directories ***
+
+
+5. From the main screen, with this new VM selected:
+
+   -> set the CD/DVD drive to point to the ISO you downloaded to your
+      host machine earlier
 
    -> set the shared directory to point to the GIT_CHECKOUT directory
       that holds your Submitty git repositories on your host machine
 
-      *** FIXME, might want to do something different with the sharing? ***
 
-5. boot & install the machine
-
-   do the interactive setup...
+6. Now boot & install the guest machine.  Do the interactive Ubuntu
+   Server installation...
    
-   you'll set a <USERNAME> & <PASSWORD>
+   You'll set a <USERNAME> & <PASSWORD>
  
-      *** could be more explicit about other things in the interactive setup? ***
 
-6. turn off the virtual machine, and from the main screen,
+   *** TODO: could be more explicit about other things in the
+       interactive setup? ***
 
-   -> disconnect the removable usb drive & reboot
 
-7. To ssh from your host to the vm:
+7. Turn off the virtual machine, and from the main UTM screen,
+   disconnect the removable CD/DVD drive.  Then reboot.
+
+
+8. To ssh from your host machine to the guest vm:
 
    ssh -p 1234 <USERNAME>@localhost
 
-8. Share directories back to your host machine
+
+9. To share directories between host & guest machines:
+
+   On the guest machine:
 
    sudo apt install spice-vdagent spice-webdavd
    sudo apt install davfs2
 
-   sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT
-
-      *** FIXME, might want to do something different with the
-          sharing, the installation scripts cannot write new repos to
-          this directory(??), or maybe some setting is off preventing
-          writing? ***
+   sudo mkdir -p /usr/local/submitty
 
 
-   setup to do this automatically on boot -- doesn't work
+   NOTE: The command below must be re-run each time the guest machine
+   is rebooted.  It will require interactively entering the username &
+   password for the host machine.  You could put those credentials on
+   the command line, and in a guest machine startup script, but that
+   may be a security concern.
 
-   sudo emacs /etc/rc.local
-
-   put this in that file:
-   #!/bin/bash
    sudo mount -t davfs -o noexec http://127.0.0.1:9843 /usr/local/submitty/GIT_CHECKOUT
 
-      ** FIXME, whoops, this is an interactive script requiring your host
-         username & password **
 
-   sudo chmod +x /etc/rc.local
+10. Do Submitty system setup and installation:
+
+    On the guest machine:
+
+    sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/install_system.sh --vagrant
+
+
+11. When finished, access the Submitty website from a browser on your host machine:
+
+    http://localhost:1511/
+
+
 
