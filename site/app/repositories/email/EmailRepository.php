@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\repositories\email;
 
 use app\entities\email\EmailEntity;
@@ -22,9 +21,7 @@ class EmailRepository extends EntityRepository {
             ->setMaxResults($window[1]);
             //->getResult(); maybe
 
-        $paginator = new Paginator($query);
-        
-        return $paginator;
+        return new Paginator($query);
     }
 
     public function getPageNum($semester = null, $course = null): int {
@@ -70,7 +67,7 @@ class EmailRepository extends EntityRepository {
             if ($curr_page > $page) {
                 break;
             }
-            else if ($curr_page == $page) {
+            elseif ($curr_page == $page) {
                 if (!isset($start)) {
                     $start = $current_entry;
                 }
@@ -85,6 +82,6 @@ class EmailRepository extends EntityRepository {
             }
             $end = $current_entry;
         }
-        return [$start, $end-$start];
+        return [$start, $end - $start];
     }
 }

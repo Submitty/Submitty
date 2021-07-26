@@ -55,8 +55,8 @@ class EmailStatusModel extends AbstractModel {
             }
         }
     }
-    
-    private function EmailToKey ($row) {
+
+    private function EmailToKey($row) {
         return $row->getSubject() . ', ' . $row->getCreated()->format('Y-m-d H:i:s');
     }
 }

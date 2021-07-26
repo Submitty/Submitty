@@ -18,8 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @method string getSemester()
  * @method string getCourse()
  */
-class EmailEntity
-{
+class EmailEntity {
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -27,7 +26,7 @@ class EmailEntity
      * @var int
      */
     private $id;
-    /** 
+    /**
      * @ORM\Column(type="string")
      * @prop-read string
      */
@@ -37,7 +36,7 @@ class EmailEntity
      * @prop-read string
      */
     private $subject;
-    /** 
+    /**
      * @ORM\Column(type="text")
      * @prop-read string
      */
@@ -52,7 +51,7 @@ class EmailEntity
      * @prop-read DateTime
      */
     private $sent;
-    /** 
+    /**
      * @ORM\Column(type="string")
      * @prop-read string
      */
@@ -62,7 +61,7 @@ class EmailEntity
      * @prop-read string
      */
     private $email_address;
-    /** 
+    /**
      * @ORM\Column(type="string")
      * @prop-read string
      */

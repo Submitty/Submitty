@@ -24,9 +24,9 @@ class EmailStatusController extends AbstractController {
     public function getEmailStatusPage() {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
+
         $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum($semester, $course);
-                
+
         return new WebResponse(
             EmailStatusView::class,
             'showEmailStatusPage',
@@ -63,7 +63,7 @@ class EmailStatusController extends AbstractController {
      */
     public function getSuperuserEmailStatusPage(): WebResponse {
         $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum();
-                
+
         return new WebResponse(
             EmailStatusView::class,
             'showEmailStatusPage',

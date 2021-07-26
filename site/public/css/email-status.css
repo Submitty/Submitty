@@ -71,12 +71,13 @@
     border: 1px solid var(--text-black);
 }
 
-.selected{
+.selected {
     color: var(--text-white);
     background-color: var(--text-black);
 }
 
-.first-btn, .last-btn {
+.first-btn,
+.last-btn {
     background-color: transparent;
     font-size: 1em;
     color: var(--text-black);
