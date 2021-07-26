@@ -82,7 +82,7 @@ class CourseMaterialsController extends AbstractController {
             $this->core->getOutput()->showError("You do not have access to this folder");
             return false;
         }
-        
+
         $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
 
         $isFolderEmptyForMe = true;
