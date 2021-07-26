@@ -135,11 +135,16 @@ function restoreNotebookFromLocal() {
         if (inputs === null) {
             return;
         }
+        //to prevent data loss when these changes get installed on production
+        let not_found = [];
+
         //restore multiple choice
         for (const id in inputs.multiple_choice) {
             const filename = inputs.multiple_choice[id][0];
             const answers = inputs.multiple_choice[id][1];
+            let found = false;
             $(`fieldset.mc[data-filename="${filename}"] input`).each(function() {
+                found = true;
                 //check off proper inputs
                 for (let i = 0; i < answers.length; i++) {
                     if ($(this)[0].defaultValue === answers[i]) {
@@ -147,16 +152,32 @@ function restoreNotebookFromLocal() {
                     }
                 }
             });
+            if (!found) {
+                not_found.push(answers);
+            }
         }
+
         //restore short answers
         for (const id in inputs.short_answer) {
             const filename = inputs.short_answer[id][0];
             const answers = inputs.short_answer[id][1];
+            let found = false;
             $(`.short_answer > div[data-filename="${filename}"]`).each(function(){
                 //set input
+                found = true;
                 const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
                 editor.setValue(answers);
             });
+            if (!found) {
+                not_found.push(answers);
+            }
+        }
+
+        if (not_found.length > 0) {
+            for (const id in not_found) {
+                console.log(not_found[id]);
+            }
+            alert('Answer(s) could not be restored you will have to copy and paste them in the proper place, the answers are in your console right now, press f12 to open it. Answers: ' + not_found);
         }
     }
 }
