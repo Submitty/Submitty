@@ -136,7 +136,7 @@ function restoreNotebookFromLocal() {
             return;
         }
         //to prevent data loss when these changes get installed on production
-        let not_found = [];
+        const not_found = [];
 
         //restore multiple choice
         for (const id in inputs.multiple_choice) {
@@ -177,7 +177,7 @@ function restoreNotebookFromLocal() {
             for (const id in not_found) {
                 console.log(not_found[id]);
             }
-            alert('Answer(s) could not be restored you will have to copy and paste them in the proper place, the answers are in your console right now, press f12 to open it. Answers: ' + not_found);
+            alert(`Answer(s) could not be restored you will have to copy and paste them in the proper place, the answers are in your console right now, press f12 to open it. Answers: ${not_found}`);
         }
     }
 }
