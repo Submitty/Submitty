@@ -12,6 +12,7 @@ def up(config):
     """
     workers_json = str(Path(config.submitty['submitty_install_dir'], 'config', 'autograding_workers.json'))
     os.chmod(workers_json, 0o660)
+    os.system("chown submitty_php {}".format(workers_json))
 
 
 def down(config):

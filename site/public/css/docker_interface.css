@@ -13,23 +13,28 @@
     margin-top: 10px;
 }
 
-.docker-table {
+.docker-table,
+.machine-table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
     width: 100%;
 }
 
 .docker-table td,
-.docker-table th {
+.docker-table th,
+.machine-table td,
+.machine-table th {
     border: 1px solid #dddddd;
     padding: 8px;
 }
 
-.docker-table th {
+.docker-table th,
+.machine-table th {
     text-align: left;
 }
 
-.docker-table td {
+.docker-table td,
+.machine-table td {
     text-align: center;
     vertical-align: middle;
 }
