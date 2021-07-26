@@ -1,7 +1,24 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_worker.sh
+#   install_worker.sh [--no-rpi]
+
+# Read through the flags passed to the script reading them in and setting
+# appropriate bash variables, breaking out of this once we hit something we
+# don't recognize as a flag
+
+export NO_RPI=0
+while :; do
+    case $1 in
+        --no-rpi)
+            export NO_RPI=1
+            ;;
+        *) # No more options, so break out of the loop.
+            break
+    esac
+
+    shift
+done
 
 # This script is used to set up the worker machine in a vagrant worker pair
 # made by running WORKER_PAIR=1 vagrant up
@@ -22,7 +39,9 @@ bash ${GIT_PATH}/.setup/install_system.sh --worker 2>&1 | tee ${GIT_PATH}/.vagra
 echo "--- FINISHED INSTALLING SYSTEM ---"
 echo "installing worker..."
 
-sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/distro_setup/ubuntu/rpi.sh
+if [ ${NO_RPI} == 0 ]; then
+    sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/distro_setup/ubuntu/rpi.sh
+fi
 
 sudo usermod -a -G submitty_daemon ${SUPERVISOR_USER}
 sudo usermod -a -G submitty_daemonphp ${SUPERVISOR_USER}
