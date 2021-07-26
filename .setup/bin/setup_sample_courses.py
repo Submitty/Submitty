@@ -1259,20 +1259,18 @@ class Course(object):
                               release_date=poll["release_date"],
                               image_path=poll["image_path"],
                               question_type=poll["question_type"])
-            i = 0
-            for poll_response in poll["responses"]:
+            for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
                                   option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
-                                  response=poll_response,
+                                  response=poll["responses"][i],
                                   correct=(i in poll["correct_responses"]))
-                i += 1
 
         # generate responses to the polls
         poll_responses_data = []
         # poll1: for each self.users make a random number (0-5) of responses
-        poll1_response_ids = [0, 1, 2, 3, 4]
+        poll1_response_ids = list(range(len(polls_data[0]['responses'])))
         for user in self.users:
             random_responses = random.sample(poll1_response_ids, random.randint(0, 5))
             for response_id in random_responses:
@@ -1287,7 +1285,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
-                    "option_id": random.randint(0, 3)
+                    "option_id": random.randint(0, len(polls_data[1]['responses']) - 1)
                 })
 
         # add responses to DB
