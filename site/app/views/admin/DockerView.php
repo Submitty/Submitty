@@ -123,8 +123,8 @@ class DockerView extends AbstractView {
         }
 
         $capabilities = array_unique($capabilities);
-        foreach ($image_to_capability as $map) {
-            $map = array_unique($map);
+        foreach ($image_to_capability as $image => $map) {
+            $image_to_capability[$image] = array_unique($map);
         }
         asort($capabilities);
         $capability_to_color = [];
