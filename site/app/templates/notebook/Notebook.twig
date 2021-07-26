@@ -45,10 +45,10 @@
             {% elseif cell.type == "short_answer" %}
 
 
-                {% if cell.label %}
+                {% if cell.label is defined %}
                     {% set content_label = cell.label %}
                 {% else %}
-                    {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                    {% set write_your = cell.programming_language is not defined or cell.programming_language == '' ? 'answer' : cell.programming_language %}
                     {% set content_label = "Write your " ~ write_your ~ " below:" %}
                 {% endif %}
 
@@ -162,7 +162,7 @@
                         {% endfor %}
                     {% else %}
                         <legend class="markdown">
-                            {% if cell.label %}
+                            {% if cell.label is defined %}
                                 {% include "misc/Markdown.twig" with {
                                     "content" : cell.label
                                 } only %}
