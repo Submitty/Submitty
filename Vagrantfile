@@ -7,6 +7,8 @@
 #   NO_SUBMISSIONS=1 vagrant up
 #       or
 #   EXTRA=rpi vagrant up
+#       or
+#   WORKER_PAIR=1 vagrant up
 #
 #
 # If you want to install extra packages (such as rpi or matlab), you need to have the environment
@@ -31,9 +33,9 @@ end
 if ENV.has_key?('EXTRA')
     extra_command << ENV['EXTRA']
 end
-if ENV.has_key?('WORKER')
+if ENV.has_key?('WORKER_PAIR')
     autostart_worker = true
-    extra_command << '--worker-helper '
+    extra_command << '--worker-pair '
 end
   
 
@@ -48,7 +50,7 @@ $worker_script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/install_worker.sh --worker 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
+bash ${GIT_PATH}/.setup/install_worker.sh 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
 Vagrant.configure(2) do |config|
@@ -68,8 +70,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-20.04'
+    # If this IP address changes, it must be changed in install_system.sh and 
+    # CONFIGURE_SUBMITTY.pyto allow the ssh connection
     ubuntu.vm.network "private_network", ip: "192.168.1.8"
-    #ubuntu.ssh.username = 'root'
     ubuntu.vm.provision 'shell', inline: $worker_script
   end
 

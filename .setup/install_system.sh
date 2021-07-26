@@ -61,7 +61,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
-export WORKER_HELPER=0
+export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -78,9 +78,9 @@ while :; do
             export NO_SUBMISSIONS=1
             echo 'no_submissions'
             ;;
-        --worker-helper)
-            export WORKER_HELPER=1
-            echo "worker_helper"
+        --worker-pair)
+            export WORKER_PAIR=1
+            echo "worker_pair"
             ;;
         *) # No more options, so break out of the loop.
             break
@@ -291,7 +291,7 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
-    if [ ${WORKER_HELPER} == 1 ]; then
+    if [ ${WORKER_PAIR} == 1 ]; then
         echo -e "attempting to create ssh key for submitty_daemon..."
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
@@ -648,7 +648,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --worker-helper 1
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --worker-pair 1
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
