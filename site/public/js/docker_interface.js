@@ -58,6 +58,7 @@ function addFieldOnChange() {
         $('#send-button').attr('disabled',true);
         if (command !== '') {
             $('#docker-warning').css('display', '');
+            localStorage.setItem('capability', command);
         }
         else {
             localStorage.removeItem('capability');
@@ -85,6 +86,7 @@ function addImage(url) {
         success: function(data) {
             const json = JSON.parse(data);
             if (json.status == 'success') {
+                $('#add-field').val("");
                 localStorage.removeItem('capability');
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
@@ -130,7 +132,7 @@ function updateImage(url) {
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
     $('#show-all').on('click', showAll);
-    $('#add-field').on('input', addFieldOnChange);
     $('#add-field').val(localStorage.getItem('capability'));
+    $('#add-field').on('input', addFieldOnChange);
     $('#add-field').trigger('input');
 });

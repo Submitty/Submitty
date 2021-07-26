@@ -85,7 +85,7 @@
                 </ul>
                 {% endif %}
                 </td>
-                <td> Created on: {{ value["created"] }} </td>
+                <td> {{ value["created"] }} </td>
                 <td>
                     {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
                         {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}

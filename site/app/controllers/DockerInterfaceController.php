@@ -144,6 +144,11 @@ class DockerInterfaceController extends AbstractController {
                     "autograding_containers.json"
                 )
             );
+
+            if (!array_key_exists($_POST['capability'], $json)) {
+                $json[$_POST['capability']] = [];
+            }
+
             if (!in_array($_POST['image'], $json[$_POST['capability']])) {
                 $json[$_POST['capability']][] = $_POST['image'];
             }
