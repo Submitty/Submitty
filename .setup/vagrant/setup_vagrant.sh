@@ -15,7 +15,6 @@ if [ -x "$(command -v pip3)" ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
 fi
 
-echo "args: $@"
 sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}
 if [ $? -ne 0 ]; then
     DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')

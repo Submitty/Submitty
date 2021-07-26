@@ -628,7 +628,6 @@ else
         if [ -z "${SUBMISSION_URL}" ]; then
             SUBMISSION_URL='http://192.168.56.101'
         fi
-        #TODO: make this string into variable so i can only pass worker helper arg when needed
         echo -e "/var/run/postgresql
 ${DB_USER}
 ${DATABASE_PASSWORD}
@@ -648,7 +647,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --worker-pair 1
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --worker-pair ${WORKER_PAIR}
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -657,12 +656,6 @@ fi
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
     SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    # if id "${SUPERVISOR_USER}" &>/dev/null; then
-    #     echo "Supervisor user found"
-    # else
-    #     echo "Supervisor user not found... creating user: ${SUPERVISOR_USER}"
-    #     useradd ${SUPERVISOR_USER} -d /home/${SUPERVISOR_USER} -p $(openssl passwd -crypt submitty) ${SUPERVISOR_USER}
-    # fi
     if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers

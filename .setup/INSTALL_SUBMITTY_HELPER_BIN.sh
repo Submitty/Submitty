@@ -52,8 +52,6 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin
 chown root:root ${SUBMITTY_INSTALL_DIR}/sbin
 chmod 755 ${SUBMITTY_INSTALL_DIR}/sbin
 
-echo "1..."
-
 mkdir -p ${SUBMITTY_INSTALL_DIR}/autograder
 mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 
@@ -69,8 +67,6 @@ find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 
-echo "2..."
-
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
@@ -81,14 +77,9 @@ for i in "${array[@]}"; do
     chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
-echo "3..."
-
 # DAEMON_USER only things in autograder
 chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/autograder
 chmod -R 750 ${SUBMITTY_INSTALL_DIR}/autograder
-
-echo "4..."
-echo "${SUPERVISOR_USER}"
 
 if [ "${WORKER}" == 1 ]; then
     chown -R ${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
@@ -98,20 +89,14 @@ fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*
 
-echo "5..."
-
 # set the permissions here in the case we JUST run this script or else things will break
 if [ -f ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute ]; then
     chgrp ${DAEMON_GROUP}  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
     chmod 4550             ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 fi
 
-echo "6..."
-
 if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
     chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 fi
-
-echo "7..."
 
