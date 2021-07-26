@@ -151,8 +151,10 @@ describe('Test cases relating to the grading of an assignment', () => {
         // });
 
         it('save a mark and see that it is visible everywhere it should be visible', () => {
+            // switch to the rubric panel
             cy.get('#grading_rubric_btn').click()
 
+            // make a mark
             cy.get('.component-container').first().within(() => {
                 // open the component
                 cy.get('#grading_total').click()
@@ -172,6 +174,33 @@ describe('Test cases relating to the grading of an assignment', () => {
                 cy.get('.graded-by').contains('Graded by instructor')
                 cy.get('#grading_total').contains('1 / 2')
             });
+
+            cy.reload()
+
+            cy.get('#grading_total', { timeout: 4000 }).first().should('be.visible');
+
+            // check that the mark is still there
+            cy.get('.component-container').first().within(() => {
+                // open the component
+                cy.get('#grading_total').click()
+
+                // wait for the component to load properly
+                cy.get('.mark-selector', { timeout: 4000 }).should('be.visible');
+
+                cy.get('.mark-selector').eq(1).click();
+                cy.get('#grading_total').contains('− / 2')
+
+                // click the save button
+                cy.get('.save-tools-save', { timeout: 4000 }).should('be.visible');
+                cy.get('.save-tools-save').click()
+
+                // wait for the component to close
+                cy.get('.mark-selector', { timeout: 4000 }).should('not.be.visible');
+
+                cy.get('.graded-by').contains('Ungraded!')
+                cy.get('#grading_total').contains('− / 2')
+            });
+
         });
     });
 });
