@@ -1065,8 +1065,9 @@ class Course(object):
         #This segment adds the sample forum posts for the sample course only
         if self.code == "sample":
             self.add_sample_forum_data()
-            self.add_sample_queue_data()
             print('Added forum data to sample course.')
+            self.add_sample_queue_data()
+            print('Added office hours queue data to sample course.')
 
         self.conn.close()
         submitty_conn.close()
@@ -1237,7 +1238,7 @@ class Course(object):
             json.dump(course_json, open_file, indent=2)
 
         # generate values that depend on current date and time
-        # helped for the first time, done --- LAB queue
+        # helped for the first time today, done --- LAB queue
         queue_data["queue_entries"][0]["time_in"] = datetime.now() - timedelta(minutes=25)
         queue_data["queue_entries"][0]["time_out"] = datetime.now() - timedelta(minutes=19)
         queue_data["queue_entries"][0]["time_help_start"] = datetime.now() - timedelta(minutes=24)
@@ -1251,14 +1252,17 @@ class Course(object):
         # being helped --- HW queue
         queue_data["queue_entries"][3]["time_in"] = datetime.now() - timedelta(minutes=23)
         queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(minutes=14)
-        # waiting for help for second time --- LAB queue
+        # waiting for help for second time today --- LAB queue
         queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(minutes=21)
         queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data["queue_entries"][0]["time_in"]
         # paused --- HW queue
         queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(minutes=20)
         queue_data["queue_entries"][5]["time_paused_start"] = datetime.now() - timedelta(minutes=18)
         # wait for the first time --- HW queue
-        queue_data["queue_entries"][6]["time_in"] = datetime.today()
+        queue_data["queue_entries"][6]["time_in"] = datetime.now() - timedelta(minutes=15)
+        # waiting for help for second time this week --- LAB queue
+        queue_data["queue_entries"][7]["time_in"] = datetime.now() - timedelta(minutes=10)
+        queue_data["queue_entries"][7]["last_time_in_queue"] = datetime.now() - timedelta(days=1, minutes=30)
 
         queues_table = Table("queue_settings", self.metadata, autoload=True)
         queue_entries_table = Table("queue", self.metadata, autoload=True)
@@ -1274,7 +1278,7 @@ class Course(object):
                           token="hw_debug")
 
         # add, help, remove, pause, etc. students in the queue
-        for queue_enrty in queue_data["queue_entries"]:
+        for queue_entry in queue_data["queue_entries"]:
             self.conn.execute(queue_entries_table.insert(),
                               current_state=queue_entry["current_state"],
                               removal_type=queue_entry["removal_type"],

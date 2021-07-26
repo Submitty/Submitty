@@ -127,6 +127,24 @@
             "paused": false,
             "time_paused": 0,
             "time_paused_start": null
+        },
+        {
+            "current_state": "waiting",
+            "removal_type": null,
+            "queue_code": "Lab Help",
+            "user_id": "chrisw",
+            "name": "Willy Christiansen",
+            "time_in": "",
+            "time_out": null,
+            "added_by": "chrisw",
+            "help_started_by": null,
+            "removed_by": null,
+            "contact_info": "chrisw@sample.edu",
+            "last_time_in_queue": "",
+            "time_help_start": null,
+            "paused": false,
+            "time_paused": 0,
+            "time_paused_start": null
         }
     ]
 }
