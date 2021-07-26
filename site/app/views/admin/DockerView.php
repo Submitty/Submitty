@@ -133,12 +133,6 @@ class DockerView extends AbstractView {
             $capability_to_color[$capabilities[$i]] = $colors[$i] ?? $colors[19];
         }
 
-        foreach ($worker_machines as $worker) {
-            foreach ($capabilities as $capability) {
-                $worker_temp['capabilities'][] = in_array($capability, $worker['capabilities']);
-            }
-        }
-
         $array_list = scandir(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
@@ -195,6 +189,7 @@ class DockerView extends AbstractView {
         }
 
         $no_image_capabilities = array_unique($no_image_capabilities);
+        
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [

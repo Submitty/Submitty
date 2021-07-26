@@ -145,6 +145,7 @@ class DockerInterfaceController extends AbstractController {
                 )
             );
 
+
             if (!array_key_exists($_POST['capability'], $json)) {
                 $json[$_POST['capability']] = [];
             }
