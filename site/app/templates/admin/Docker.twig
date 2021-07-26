@@ -5,79 +5,141 @@
     {% if docker_info is not null %}
         {# TODO: include worker information here in the future #}
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
+        <p>Updated on: {{last_updated}}</p>
+        {% if error_logs | length > 0 %}
+            <textarea disabled="disabled" style="resize: none; width: 100%; height:25vh;">
+                {% for error_log in error_logs %}
+                    {{error_log ~ "\n"}}
+                {% endfor %}
+            </textarea>
+        {% endif %}
+        <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
     {% endif %}
 </div>
 
 <div class="content">
-    <h2 class="docker-header">Autograding Docker Images</h2>
-    <button class="btn btn-default" 
-            onclick="collapseSection('autograding-images','autograding-images-collapse')"
-            id="autograding-images-collapse">
-            Collapse
-    </button>
-
-    <div id="autograding-images" style="display:block;">
-        <p class="black-message">These are the docker images that are installed and listed under autograding_containers.json</p>
-
-        <div class="docker-images-container">
-            {{ _self.renderDockerImage(autograding_containers['found']) }}
-        </div>
-    </div>
-</div>
-
-<div class="content">
-    <h2 class="docker-header">System Wide Docker Images </h2>
-    <button class="btn btn-default"
-            onclick="collapseSection('system-images','system-images-collapse')"
-            id="system-images-collapse">
-            Collapse
-    </button>
-
-    <div id="system-images" style="display:block;">
-        <p class="black-message">These are the docker images that are installed on the primary submitty machine</p> 
-        <div class="docker-images-container">
-            {{ _self.renderDockerImage(autograding_containers['all_images']) }}
-        </div>
-    </div>
-</div>
-
-{% if autograding_containers['not_found'] | length > 0 %}
-<div class="content">
-    <h2 class="docker-header">Other</h2>
-
-    <p class="red-message">The following Docker images were listed in the autograding_config.json file but were not found installed system wide</p>
-    <p>This could mean that the image(s) are not installed yet or have been installed incorrectly </p>
-
-    <br>
-        {% for image in autograding_containers['not_found'] %}
-            <p class="black-message"> {{ image }} </p>
+    <h2 class="docker-header">Worker Machines</h2>
+    <table>
+        <tr>
+            <th>Machine</th>
+            {% for capability in capabilities %}
+            <th>{{capability}}</th>
+            {% endfor %}
+            <th>Num Autograding Workers</th>
+        </tr>
+        {% for worker in worker_machines %}
+        <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
+            <th>{{worker['name']}}</th>
+            {% for capability in worker['capabilities'] %}
+                {% if capability %}
+                    <td><i class="fas fa-check"></i></td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+            <td>{{worker['num_autograding_workers']}}</td>
+        </tr>
         {% endfor %}
+    </table>
+</div>
 
-</div>  
+<div class="content">
+    <h2 class ="docker-header">Autograding Docker Images</h2>
+    {% if capabilities is not null %}
+        <div class="filter">
+            <div style="display:inline-block;">Capability Filter: </div>
+            <div style="display:inline-block;">
+                <button class="btn btn-primary" id="show-all">Show All</button>
+                {% for capability in capabilities %}
+                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
+                        {{capability}}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
+    <table class="table docker-table mobile-table">
+        <thead>
+            <tr>
+                <th>Image Name</th>
+                <th>Tag</th>
+                <th>ID</th>
+                <th>Alias</th>
+                <th>Created Date</th>
+                <th>Capabilities Containing This Image</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key, value in autograding_containers['all_images'] %}
+            <tr class="image-row" data-error={{value["name"] in fail_images ? "true" : "false"}}>
+                <td>{{ value["name"] }}</th>
+                <td>{{ value["tag"] }} </td>
+                <td>{{ value["short_id"] | trim("sha256:") }} </td>
+                <td>
+                {% if value["additional_names"] | length > 0 %}
+                <ul id="tag-list">
+                    {% for name in value["additional_names"] %}
+                    <li>{{ name }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                </td>
+                <td> Created on: {{ value["created"] }} </td>
+                <td>
+                    {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
+                        {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
+                            <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                        {% endfor %}
+                    {% else %}
+                        {% for name in value["additional_names"] %}
+                            {% if name in image_to_capability|keys %}
+                                {% for capability in image_to_capability[name] %}
+                                    <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 
+{% if no_image_capabilities | length > 0 %}
+<div class="content">
+    <h2 class="docker-header">Capabilities With No Image Associated</h2>
+    <p>The follow capabilities were found to not have any images associated with them under autograding_containers.json:</p>
+    <ul id="capabilities-list">
+        {% for capability in no_image_capabilities %}
+            <li>{{capability}}</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endif %}
 
-
-{% macro renderDockerImage(data) %}
-    {% for key, value in data %}
-        <div class="shadow">
-            <h3>{{ value["name"] }}</h3>
-            <p> ID:  {{ value["short_id"] | trim("sha256:") }} </p>
-            <p> Size:  {{ value["size"] }} 
-                <em> (Virtual Size: {{ value["virtual_size"] }} ) </em> 
-            </p>
-            <p> Tag: {{ value["tag"] }} </p>
-            <br>
-            <p> Created on: {{ value["created"] }} </p>
-            <br>
-            {% if value["additional_names"] | length > 0 %}
-            <p>This container has also been tagged as :</p>
-            <ul id="tag-list">
-                {% for name in value["additional_names"] %}
-                <li>{{ name }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        </div>
-    {% endfor %}
-{% endmacro %}
+<div class="content">
+    <div> </div>
+    <h2 class="docker-header">Add Image to Capability</h2>
+    <p id="docker-warning" class="danger docker-warning" style="display: none;">
+        Not a proper docker image name
+    </p>
+    <div style="margin-bottom: 1em">
+        <label for="capability-form" style="display: inline-block; margin-right: 1em; width: 5%;">
+            Capability:
+        </label> 
+        <select class="form-control form-control-lg" style="width:93%; display: inline-block;" id="capability-form">
+            {% for capability in capabilities %}
+                <option>{{capability}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="add-field" style="display: inline-block; margin-right: 1em; width: 5%">
+            Image:
+        </label> 
+        <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
+    </div>
+    <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
+</div>
