@@ -22,11 +22,17 @@ def up(config, database):
     for semester in semester_dir.iterdir():
         for course in semester.iterdir():
             query = "UPDATE courses SET group_name=:g, owner_name=:o WHERE semester = :s AND course = :c;"
+            try:
+                course_group = course.group()
+                course_owner = course.owner()
+            except:
+                print (f"WARNING: Could not obtain course group and/or owner for {semester} {course}")
+                continue
             params = {
                 's': semester.name,
                 'c': course.name,
-                'g': course.group(),
-                'o': course.owner()
+                'g': course_group,
+                'o': course_owner
             }
             database.session.execute(text(query), params)
     # we should be able to force the not null constraint now

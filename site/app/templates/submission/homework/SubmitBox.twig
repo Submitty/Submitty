@@ -500,7 +500,7 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_user_id, git_repo_id);
             }
             // user id entered, need to validate first
             else {
