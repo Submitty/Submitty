@@ -61,7 +61,7 @@
                 <div
                     id="codebox_{{ num_codeboxes }}"
                     name="codebox_{{ num_codeboxes }}"
-                    class="{{ cell.filename }}"
+                    data-filename="{{ cell.filename }}"
                     autocapitalization="off"
                     spellcheck="false"
                     data-initial_value="{{ cell.initial_value }}"
@@ -131,7 +131,7 @@
 
                 <fieldset id="mc_field_{{ num_multiple_choice }}"
                           class="mc"
-                          name="{{ cell.filename }}"
+                          data-filename="{{ cell.filename }}"
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
                         <legend>

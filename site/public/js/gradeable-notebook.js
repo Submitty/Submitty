@@ -82,33 +82,34 @@ function saveNotebookToLocal() {
     const mc_inputs=[];
     const short_answer_inputs = [];
 
-    //save multiple choice answers
+    //loop through multiple choice questions and save answers
     $('.multiple_choice').each(function(){
         let file_name='';
         $(this).children('fieldset').each(function(){
-            file_name = $(this).attr('name');
-            const answers = [];
-            $(this).children('label').each(function(){
-                //grab selected answers
-                $(this).children('input').each(function(){
-                    if ($(this)[0].checked) {
-                        answers.push($(this)[0].defaultValue);
-                    }
+            file_name = $(this).data('filename');
+            if (file_name) {
+                const answers = [];
+                $(this).children('label').each(function(){
+                    //grab selected answers
+                    $(this).children('input').each(function(){
+                        if ($(this)[0].checked) {
+                            answers.push($(this)[0].defaultValue);
+                        }
+                    });
                 });
-            });
-            mc_inputs.push([file_name, answers]);
-
+                mc_inputs.push([file_name, answers]);
+            }
         });
     });
 
     //save short answers
     $('.short_answer').each(function(){
         $(this).children('div').each(function(){
-            let file_name = $(this).attr('class');
-            let value = '';
-            file_name = file_name.trim();
-            //grab input
-            if (file_name !== 'markdown') {
+            let file_name = $(this).data('filename');
+            if (file_name) {
+                let value = '';
+                file_name = file_name.trim();
+                //grab input
                 const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
                 value = editor.getValue();
                 short_answer_inputs.push([file_name, value]);
@@ -138,37 +139,23 @@ function restoreNotebookFromLocal() {
         for (const id in inputs.multiple_choice) {
             const filename = inputs.multiple_choice[id][0];
             const answers = inputs.multiple_choice[id][1];
-            $('.multiple_choice').each(function () {
-                $(this).children('fieldset').each(function () {
-                    //match file names
-                    if ($(this).attr('name') === filename) {
-                        $(this).children('label').each(function () {
-                            $(this).children('input').each(function () {
-                                //check proper inputs
-                                for (let i = 0; i < answers.length; i++) {
-                                    if ($(this)[0].defaultValue === answers[i]) {
-                                        $(this).prop('checked', true);
-                                    }
-                                }
-                            });
-                        });
+            $(`fieldset.mc[data-filename="${filename}"] input`).each(function() {
+                //check off proper inputs
+                for (let i = 0; i < answers.length; i++) {
+                    if ($(this)[0].defaultValue === answers[i]) {
+                        $(this).prop('checked', true);
                     }
-                });
+                }
             });
         }
         //restore short answers
         for (const id in inputs.short_answer) {
             const filename = inputs.short_answer[id][0];
             const answers = inputs.short_answer[id][1];
-            $('.short_answer').each(function(){
-                $(this).children('div').each(function(){
-                    //match file names
-                    if ($(this).attr('class') === filename) {
-                        //set input
-                        const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
-                        editor.setValue(answers);
-                    }
-                });
+            $(`.short_answer > div[data-filename="${filename}"]`).each(function(){
+                //set input
+                const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
+                editor.setValue(answers);
             });
         }
     }
