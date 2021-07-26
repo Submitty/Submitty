@@ -44,7 +44,7 @@
     </div>
 {% endblock %}
 {% block buttons %}
-    <button type="button" class="btn btn-primary" onclick="window.location.reload()">Close</button>
+    <button type="button" class="btn btn-primary" onclick="$('#new-queue').hide()">Close</button>
     <script>
         $(document).keyup(function(e) {
             if (e.key == "Escape" && $("#{{ block('popup_id') }}").is(":visible")) {
