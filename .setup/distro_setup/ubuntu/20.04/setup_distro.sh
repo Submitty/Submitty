@@ -80,11 +80,6 @@ apt-get install -qqy cmake
 # for Lichen (Plagiarism Detection)
 apt-get install -qqy python-clang-6.0
 
-# Install OpenJDK8 Non-Interactively
-echo "installing java8"
-apt-get install -qqy openjdk-8-jdk
-update-java-alternatives --set java-1.8.0-openjdk-amd64
-
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
