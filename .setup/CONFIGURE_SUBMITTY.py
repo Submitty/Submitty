@@ -481,7 +481,6 @@ if not args.worker:
             "default": [
                           "submitty/clang:6.0",
                           "submitty/autograding-default:latest",
-                          "submitty/java:8",
                           "submitty/java:11",
                           "submitty/python:3.6",
                           "submittyrpi/csci1200:default"
