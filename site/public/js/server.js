@@ -659,7 +659,6 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    console.log(['download'] + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`);
     window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 

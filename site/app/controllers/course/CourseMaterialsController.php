@@ -82,14 +82,9 @@ class CourseMaterialsController extends AbstractController {
             $this->core->getOutput()->showError("You do not have access to this folder");
             return false;
         }
-
-        //makes a random zip file name on the server
-        $temp_dir = "/tmp";
-        $temp_name = uniqid($this->core->getUser()->getId(), true);
-        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-         //replacing any whitespace with underscore char.
+        
         $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
-        register_shutdown_function('unlink', $zip_name);
+
         $isFolderEmptyForMe = true;
         // iterate over the files inside the requested directory
         $files = new \RecursiveIteratorIterator(
@@ -134,13 +129,6 @@ class CourseMaterialsController extends AbstractController {
             return false;
         }
         $zip_stream->finish();
-        header("Content-type: application/zip");
-        header("Content-Disposition: attachment; filename=$zip_file_name");
-        header("Content-length: " . filesize($zip_name));
-        header("Pragma: no-cache");
-        header("Expires: 0");
-        readfile("$zip_name");
-        unlink($zip_name);
     }
 
     /**
