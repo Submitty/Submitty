@@ -189,7 +189,7 @@ class DockerView extends AbstractView {
         }
 
         $no_image_capabilities = array_unique($no_image_capabilities);
-        
+
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [

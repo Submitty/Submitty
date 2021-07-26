@@ -86,7 +86,7 @@ function addImage(url) {
         success: function(data) {
             const json = JSON.parse(data);
             if (json.status == 'success') {
-                $('#add-field').val("");
+                $('#add-field').val('');
                 localStorage.removeItem('capability');
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
