@@ -485,6 +485,9 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
+    if [ ${VAGRANT} == 1 ]; then
+        sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
+    fi
 
     #################################################################
     # PHP SETUP
@@ -650,7 +653,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
