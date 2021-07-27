@@ -80,6 +80,8 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/home/courses/new', 'New Course'],
             [self.test_url + '/superuser/gradeables', 'Pending Gradeables'],
             [self.test_url + '/update', 'System Update'],
+            [self.test_url + '/superuser/email', 'Email All'],
+            [self.test_url + '/superuser/email_status', 'Email Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]
@@ -139,6 +141,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/gradeable', 'New Gradeable'],
             [base_url + '/config', 'Course Settings'],
             [base_url + '/sql_toolbox', 'SQL Toolbox'],
+            [base_url + '/polls', 'Submini Polls'],
             # the office hours queue is not initially enabled in the sample course
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/course_materials', 'Course Materials'],
@@ -203,6 +206,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
+            [base_url + '/polls', 'Submini Polls'],
             # the office hours queue is not initially enabled in the sample course
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             # sample course has no course materials to start, so this link will not appear
@@ -255,6 +259,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
+            [base_url + '/polls', 'Submini Polls'],
             # the office hours queue is not initially enabled in the sample course
             # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             # sample course has no course materials in start, so this link will not appear

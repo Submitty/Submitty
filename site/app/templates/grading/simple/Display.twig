@@ -86,6 +86,28 @@
         </div>
     </div>
 
+    <p>Sort By:</p>
+    <div style="margin: 1em 0;"> {# This is a drop down menu containing sorting options #}
+        <select
+            id="subsection_sort"
+            name="subsection_sorting"
+            onChange="window.location.href='{{ grading_url }}?view={{ view_all ? 'all' }}&sort=' + this.value"
+            style="font-size:15px;"
+        >
+            <option value="section_subsection" aria-label="sort by Section then Subsection" {{ sort == "section_subsection" ? 'selected' }}>
+                Section then Subsection then User ID
+            </option>
+            <option value="id" aria-label="sort by ID" {{ sort == "id" ? 'selected' }}>
+                Section then User ID
+            </option>
+            <option value="first" aria-label="sort by First Name" {{ sort == "first" ? 'selected' }}>
+                Section then First Name then User ID
+            </option>
+            <option value="last" aria-label="sort by Last Name" {{ sort == "last" ? 'selected' }}>
+                Section then Last Name then User ID
+            </option>
+        </select>
+    </div>
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
         <div class="column-wrapper">
             <label for="csvUpload">Upload CSV

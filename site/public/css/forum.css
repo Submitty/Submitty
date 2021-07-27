@@ -39,7 +39,7 @@
 
 .post_content {
     margin-right: 5px;
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
 .post_viewed_btn {
