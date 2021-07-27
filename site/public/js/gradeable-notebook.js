@@ -153,7 +153,6 @@ function restoreNotebookFromLocal() {
                 }
             });
             if (!found) {
-                console.log('not found ' + answers);
                 not_found.push(answers);
             }
         }
@@ -175,10 +174,25 @@ function restoreNotebookFromLocal() {
 
         //if there are answers that could not be placed anywhere
         if (not_found.length > 0) {
-            for (const id in not_found) {
-                console.log(not_found[id]);
+            const old_answers_div = document.createElement('div');
+            old_answers_div.id = 'old-answers';
+            old_answers_div.classList.add ('box', 'red-background');
+
+            //create header text to warn user
+            const old_answers_header = document.createElement('h4');
+            old_answers_header.innerHTML = "Answer(s) could not be restored you will have to copy and paste them in the proper place";
+            old_answers_header.classList.add('red-message');
+            //add header to container
+            old_answers_div.appendChild(old_answers_header);
+
+            // for ... of loop loops through all elements in array, while for ... in loop loops through
+            // all indexes/keys in arrays/objects
+            for (const answer of not_found) {
+                const answer_text = document.createElement('p');
+                answer_text.innerHTML = answer;
+                old_answers_div.appendChild(answer_text);
             }
-            alert(`Answer(s) could not be restored you will have to copy and paste them in the proper place, the answers are in your console right now, press f12 to open it. Answers: ${not_found}`);
+            $(old_answers_div).insertAfter('#gradeable-info');
         }
     }
 }
