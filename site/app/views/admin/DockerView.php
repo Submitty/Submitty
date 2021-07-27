@@ -156,10 +156,13 @@ class DockerView extends AbstractView {
             );
 
             $reset = false;
+            $content = rtrim($content);
             $buffer = strtok($content, "\n");
             while ($buffer !== false) {
                 if ($reset) {
                     $error_logs = [];
+                    $machine_to_update = [];
+                    $fail_images = [];
                 }
 
                 $matches = [];

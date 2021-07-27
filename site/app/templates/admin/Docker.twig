@@ -7,11 +7,12 @@
         <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
         <p>Updated on: {{last_updated}}</p>
         {% if error_logs | length > 0 %}
-            <textarea disabled="disabled" style="resize: none; width: 100%; height:25vh;">
+            <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
+            <pre class="error-log">
                 {% for error_log in error_logs %}
                     {{error_log ~ "\n"}}
                 {% endfor %}
-            </textarea>
+            </pre>
         {% endif %}
         <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
     {% endif %}
@@ -21,11 +22,14 @@
     <h2 class="docker-header">Worker Machines</h2>
     <table class="machine-table">
         <tr>
-            <th>Machine</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
+            <th colspan={{capabilities|length}}>Capabilities</th>
+            <td rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</td>
+        </tr>
+        <tr>
             {% for capability in capabilities %}
-            <th>{{capability}}</th>
+            <td>{{capability}}</td>
             {% endfor %}
-            <th>Num Autograding Workers</th>
         </tr>
         {% for worker in worker_machines %}
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
@@ -61,7 +65,7 @@
     
     <table class="table striped-table docker-table mobile-table">
         <thead>
-            <tr>
+            <tr style="background: #000000">
                 <th>Image Name</th>
                 <th>Tag</th>
                 <th>ID</th>
@@ -78,7 +82,7 @@
                 <td>{{ value["short_id"] | trim("sha256:") }} </td>
                 <td>
                 {% if value["additional_names"] | length > 0 %}
-                <ul id="tag-list">
+                <ul class="tag-list">
                     {% for name in value["additional_names"] %}
                     <li>{{ name }}</li>
                     {% endfor %}

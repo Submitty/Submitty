@@ -1,4 +1,4 @@
-#tag-list,
+.tag-list,
 #capabilities-list {
     margin-left: 20px;
 }
@@ -68,12 +68,16 @@
 .docker-table td:nth-of-type(6)::before { content: "Alias"; }
 .docker-table td:nth-of-type(7)::before { content: "Capabilities Containing This Image"; }
 
-.docker-table tr:nth-child(even) td {
-    background: var(--standard-hover-light-gray);
+.docker-table tr:nth-child(even) td{
+    background: #2b2b2b;
 }
 
 .docker-table tr:nth-child(odd) td {
-    background: var(--standard-light-gray);
+    background: #757575;
+}
+
+.docker-table tr {
+    color: #ffffff;
 }
 
 .send-button {
@@ -103,4 +107,12 @@
 .docker-warning {
     margin-bottom: 1em;
     padding: 10px;
+}
+
+.error-log {
+    width: 100%;
+    height:fit-content;
+    white-space: normal;
+    padding: 1em;
+    background: var(--standard-light-gray);
 }
