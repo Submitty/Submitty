@@ -8,15 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="app\repositories\email\EmailRepository")
  * @ORM\Table(name="emails")
- * @method string getUserId()
- * @method string getSubject()
- * @method string getBody()
- * @method \DateTime getCreated()
- * @method \DateTime getSent()
- * @method string getError()
- * @method string getEmailAddress()
- * @method string getSemester()
- * @method string getCourse()
  */
 class EmailEntity {
     /**

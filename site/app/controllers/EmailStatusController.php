@@ -68,26 +68,24 @@ class EmailStatusController extends AbstractController {
             EmailStatusView::class,
             'showEmailStatusPage',
             $num_page,
-            $this->core->buildUrl(["admin", "email_status_page"])
+            $this->core->buildUrl(["superuser", "email_status_page"])
         );
     }
 
     /**
-     * @Route("/admin/email_status_page", methods={"GET"})
-     * @Route("/api/admin/email_status_page", methods={"GET"})
+     * @Route("/superuser/email_status_page", methods={"GET"})
      * @AccessControl(level="SUPERUSER")
-     * @return array
+     * @return WebResponse
      */
-    public function getSuperuserEmailStatusesByPage(): array {
+    public function getSuperuserEmailStatusesByPage(): WebResponse {
         $page = $_GET['page'] ?? 1;
         $result = new EmailStatusModel($this->core, $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page));
-
-        return $this->core->getOutput()->renderJsonSuccess(
-            $this->core->getOutput()->renderTemplate(
-                EmailStatusView::class,
-                'renderStatusPage',
-                $result
-            )
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return new WebResponse(
+            EmailStatusView::class,
+            'renderStatusPage',
+            $result
         );
     }
 }

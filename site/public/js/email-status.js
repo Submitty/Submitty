@@ -24,15 +24,7 @@ function loadPage(page, load_page_url) {
             'page': page
         },
         success: function(data) {
-            console.log(data);
-            const response = JSON.parse(data);
-            if (response.status !== 'success') {
-                // eslint-disable-next-line no-undef
-                displayErrorMessage(response.message);
-            }
-            else {
-                $('#email-statuses').html(response.data);
-            }
+            $('#email-statuses').html(data);
             $('.page-btn').each(function() {
                 $id = parseInt($(this).attr('id'));
                 if (parseInt(page) - page_window <= $id && $id <= parseInt(page) + page_window && $id != parseInt(page)) {
