@@ -140,7 +140,6 @@ function restoreNotebookFromLocal() {
             const {file_name, answers} = inputs.multiple_choice[id];
             let found = false;
             $(`fieldset.mc[data-filename="${file_name}"] input`).each(function(){
-                //check off proper inputs if question exists
                 found = true;
                 //check off proper inputs
                 for (let i = 0; i < answers.length; i++) {
@@ -170,7 +169,6 @@ function restoreNotebookFromLocal() {
 
         //if there are answers that could not be placed anywhere
         if (not_found.length > 0) {
-            console.log(not_found)
             const old_answers_div = document.createElement('div');
             old_answers_div.id = 'old-answers';
             old_answers_div.classList.add ('box', 'red-background');
