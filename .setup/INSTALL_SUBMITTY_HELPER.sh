@@ -324,6 +324,32 @@ chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 #  / trailing slash, copies contents into target
 #  no slash, copies the directory & contents to target
 
+########################################################################################################################
+########################################################################################################################
+# CHECKOUT & INSTALL THE NLOHMANN C++ JSON LIBRARY
+
+nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json
+
+# If we don't already have a copy of this repository, check it out
+if [ ! -d "${nlohmann_dir}" ]; then
+    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
+fi
+
+# TODO: We aren't checking / enforcing a specific/minimum version of this library...
+
+# Add read & traverse permissions for RainbowGrades and vendor repos
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
+
+# "install" the nlohmann json library
+mkdir -p ${SUBMITTY_INSTALL_DIR}/vendor
+sudo chown -R root:submitty_course_builders ${SUBMITTY_INSTALL_DIR}/vendor
+sudo chown -R root:submitty_course_builders ${SUBMITTY_INSTALL_DIR}/vendor
+rsync -rtz ${SUBMITTY_REPOSITORY}/../vendor/nlohmann/json/include ${SUBMITTY_INSTALL_DIR}/vendor/
+chown -R  root:root ${SUBMITTY_INSTALL_DIR}/vendor
+find ${SUBMITTY_INSTALL_DIR}/vendor -type d -exec chmod 555 {} \;
+find ${SUBMITTY_INSTALL_DIR}/vendor -type f -exec chmod 444 {} \;
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -560,22 +586,10 @@ chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 
 #####################################
-# Checkout the NLohmann C++ json library
-
-nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json
-
-if [ ! -d "${nlohmann_dir}" ]; then
-    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
-fi
-
-#####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
 
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type d -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type f -exec chmod o+r {} \;
-
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
 # Obtain API auth token for submitty-admin user
