@@ -1,9 +1,9 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}filter-settings{% endblock %}
-{% block title %}Queue Settings{% endblock %}
+{% block title %}Edit Existing Queue{% endblock %}
 
 {% block body %}
-  <span class="option-title">Modify old queue</span>
+  <span class="option-title">Modify access code</span>
   <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token" style="height:auto;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
@@ -18,8 +18,10 @@
     </a>
     <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Access Code</button>
   </form>
-  <br>
+    <br>
     {% if viewer.isContactInfoEnabled() %}
+        <hr>
+        <span class="option-title">Modify regex pattern</span>
         <form method="post" id="change_queue_regex" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <select id="old_queue_code_2" class="form-control" name="code" aria-label="Access Code" required="required">
