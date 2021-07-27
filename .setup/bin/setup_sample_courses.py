@@ -1066,6 +1066,8 @@ class Course(object):
         if self.code == "sample":
             self.add_sample_forum_data()
             print('Added forum data to sample course.')
+            self.add_sample_polls_data()
+            print('Added polls data to sample course.')
             self.add_sample_queue_data()
             print('Added office hours queue data to sample course.')
 
@@ -1294,7 +1296,7 @@ class Course(object):
             self.conn.execute(poll_responses_table.insert(),
                               poll_id=response["poll_id"],
                               student_id=response["student_id"],
-                              option_id=response["option_id"])                          
+                              option_id=response["option_id"])
 
     def add_sample_queue_data(self):
         # load the sample polls from input file
