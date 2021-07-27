@@ -89,7 +89,7 @@ function saveNotebookToLocal() {
             file_name = $(this).data('filename');
             if (file_name) {
                 const answers = [];
-                    //grab selected answers
+                //grab selected answers
                 $(this).find('input').each(function(){
                     if ($(this)[0].checked) {
                         answers.push($(this)[0].defaultValue);
@@ -163,7 +163,7 @@ function restoreNotebookFromLocal() {
                 editor.setValue(value);
             }
             else {
-                not_found.push(inputs.codebox[id][0])
+                not_found.push(inputs.codebox[id][0]);
             }
         }
 
@@ -175,7 +175,7 @@ function restoreNotebookFromLocal() {
 
             //create header text to warn user
             const old_answers_header = document.createElement('h4');
-            old_answers_header.innerHTML = "Answer(s) could not be restored you will have to copy and paste them in the proper place";
+            old_answers_header.innerHTML = 'Answer(s) could not be restored you will have to copy and paste them in the proper place';
             //add header to container
             old_answers_div.appendChild(old_answers_header);
 
