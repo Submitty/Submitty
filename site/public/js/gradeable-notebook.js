@@ -171,21 +171,26 @@ function restoreNotebookFromLocal() {
         if (not_found.length > 0) {
             const old_answers_div = document.createElement('div');
             old_answers_div.id = 'old-answers';
-            old_answers_div.classList.add ('box', 'red-background');
+            old_answers_div.classList.add('box');
+            old_answers_div.style.backgroundColor = 'var(--alert-background-danger-red)';
 
             //create header text to warn user
             const old_answers_header = document.createElement('h4');
+            old_answers_header.style.color = 'var(--focus-danger-red)';
             old_answers_header.innerHTML = 'Answer(s) could not be restored you will have to copy and paste them in the proper place';
             //add header to container
             old_answers_div.appendChild(old_answers_header);
 
             // for ... of loop loops through all elements in array, while for ... in loop loops through
             // all indexes/keys in arrays/objects
+            const old_answers_list = document.createElement('ol');
+            old_answers_list.style.marginLeft = '3em';
             for (const i in not_found) {
-                const answer_text = document.createElement('p');
+                const answer_text = document.createElement('li');
                 answer_text.innerHTML = not_found[i];
-                old_answers_div.appendChild(answer_text);
+                old_answers_list.appendChild(answer_text);
             }
+            old_answers_div.appendChild(old_answers_list);
             $(old_answers_div).insertAfter('#gradeable-info');
         }
     }
