@@ -89,34 +89,33 @@ function saveNotebookToLocal() {
             file_name = $(this).data('filename');
             if (file_name) {
                 const answers = [];
-                $(this).children('label').each(function(){
                     //grab selected answers
-                    $(this).children('input').each(function(){
-                        if ($(this)[0].checked) {
-                            answers.push($(this)[0].defaultValue);
-                        }
-                    });
+                $(this).find('input').each(function(){
+                    if ($(this)[0].checked) {
+                        answers.push($(this)[0].defaultValue);
+                    }
                 });
-                mc_inputs.push([file_name, answers]);
+                mc_inputs.push({file_name, answers});
             }
         });
     });
 
     //save short answers
     $('.short_answer').each(function(){
-        $(this).children('div').each(function(){
-            let file_name = $(this).data('filename');
+        $(this).find('div[name^="codebox_"]').each(function(){
+            const file_name = ($(this).data('filename') || '').trim();
             if (file_name) {
-                let value = '';
-                file_name = file_name.trim();
                 //grab input
                 const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
-                value = editor.getValue();
-                short_answer_inputs.push([file_name, value]);
+                if (editor) {
+                    const value = editor.getValue();
+                    short_answer_inputs.push({file_name, value});
+                }
             }
         });
     });
-
+    console.log(mc_inputs);
+    console.log(short_answer_inputs);
     localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
         timestamp: Date.now(),
         multiple_choice: mc_inputs,
@@ -140,10 +139,11 @@ function restoreNotebookFromLocal() {
 
         //restore multiple choice
         for (const id in inputs.multiple_choice) {
-            const filename = inputs.multiple_choice[id][0];
-            const answers = inputs.multiple_choice[id][1];
+            const {file_name, answers} = inputs.multiple_choice[id];
+            console.log(inputs.multiple_choice[id]);
             let found = false;
-            $(`fieldset.mc[data-filename="${filename}"] input`).each(function() {
+            $(`fieldset.mc[data-filename="${file_name}"] input`).each(function(){
+                //check off proper inputs if question exists
                 found = true;
                 //check off proper inputs
                 for (let i = 0; i < answers.length; i++) {
@@ -153,26 +153,27 @@ function restoreNotebookFromLocal() {
                 }
             });
             if (!found) {
+                console.log('not found ' + answers);
                 not_found.push(answers);
             }
         }
 
         //restore short answers
         for (const id in inputs.short_answer) {
-            const filename = inputs.short_answer[id][0];
-            const answers = inputs.short_answer[id][1];
-            let found = false;
-            $(`.short_answer > div[data-filename="${filename}"]`).each(function(){
-                //set input
-                found = true;
-                const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
-                editor.setValue(answers);
-            });
-            if (!found) {
-                not_found.push(answers);
+            const {file_name, value} = inputs.short_answer[id];
+            console.log(inputs.short_answer[id]);
+            const question = $(`.short_answer > div[data-filename="${file_name}"]`);
+            //fill in proper values if question is found
+            if (question) {
+                const editor = question[0].querySelector('.CodeMirror').CodeMirror;
+                editor.setValue(value);
+            }
+            else {
+                not_found.push(value);
             }
         }
 
+        //if there are answers that could not be placed anywhere
         if (not_found.length > 0) {
             for (const id in not_found) {
                 console.log(not_found[id]);
