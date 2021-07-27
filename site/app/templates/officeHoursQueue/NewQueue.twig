@@ -9,7 +9,7 @@
         <div class="access-code-input" style="margin-top: 1rem;">
             <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
             <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
-                <i class="fas fa-sync"></i>
+                <i class="fas fa-dice"></i>
             </a>
         </div>
     {% if viewer.isContactInfoEnabled() %}
