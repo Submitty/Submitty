@@ -486,7 +486,8 @@ if not args.worker:
                           "submitty/autograding-default:latest",
                           "submitty/java:11",
                           "submitty/python:3.6",
-                          "submittyrpi/csci1200:default"
+                          "submittyrpi/csci1200:default",
+                          "submitty/tutorial:tutorial_18"
                        ]
         }
 
