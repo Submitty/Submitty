@@ -118,8 +118,15 @@ class TestOfficeHoursQueue(BaseTestCase):
     def openFilterSettings(self):
         self.goToQueuePage()
         self.assertEqual(True,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
-        self.driver.find_element(By.ID, 'toggle_new_queue').click()
+        self.driver.find_element(By.ID, 'toggle_filter_settings').click()
         self.assertEqual(False,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
+
+
+    def openNewQueueSettings(self):
+        self.goToQueuePage()
+        self.assertEqual(True,self.driver.execute_script("return $('#new-queue').is(':hidden')"))
+        self.driver.find_element(By.ID, 'toggle_new_queue').click()
+        self.assertEqual(False,self.driver.execute_script("return $('#new-queue').is(':hidden')"))
 
     def closeFilterSettings(self):
         self.assertEqual(False,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
@@ -154,7 +161,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.closeFilterSettings()
 
     def openQueue(self, name, code=None):
-        self.openFilterSettings()
+        self.openNewQueueSettings()
         self.driver.find_element(By.ID, 'new_queue_code').send_keys(name)
         if(code):
             self.driver.find_element(By.ID, 'new_queue_token').send_keys(code)
