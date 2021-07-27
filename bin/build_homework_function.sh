@@ -182,7 +182,6 @@ function build_homework {
         ${GRADINGCODE}/execute_limits.cpp ${GRADINGCODE}/seccomp_functions.cpp \
         ${GRADINGCODE}/empty_custom_function.cpp -pthread -g -std=c++11 -lseccomp -o configure.out
 
-
     ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json $assignment
     configure_res=$?
 

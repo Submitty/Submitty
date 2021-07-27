@@ -123,37 +123,58 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     whole_config["gradeable_message"] = whole_config.value("assignment_message","");
     whole_config.erase("assignment_message");
   }
-  whole_config["gradeable_message"] = whole_config.value("gradeable_message", "");
 
-  whole_config["load_gradeable_message"] = whole_config.value("load_gradeable_message", nlohmann::json::object());
-  whole_config["load_gradeable_message"]["message"] = whole_config["load_gradeable_message"].value("message", "");
-  whole_config["load_gradeable_message"]["first_time_only"] = whole_config["load_gradeable_message"].value("first_time_only", false);
+  std::string tmp_string = whole_config.value("gradeable_message", std::string(""));
+  whole_config["gradeable_message"] = tmp_string;
 
-  whole_config["early_submission_incentive"] = whole_config.value("early_submission_incentive", nlohmann::json::object());
-  whole_config["early_submission_incentive"]["message"] = whole_config["early_submission_incentive"].value("message", "");
-  whole_config["early_submission_incentive"]["minimum_days_early"] = whole_config["early_submission_incentive"].value("minimum_days_early", 0);
-  whole_config["early_submission_incentive"]["minimum_points"] = whole_config["early_submission_incentive"].value("minimum_points", 0);
-  whole_config["early_submission_incentive"]["test_cases"] = whole_config["early_submission_incentive"].value("test_cases", std::vector<int>());
+  if (whole_config.find("load_gradeable_message") == whole_config.end()) {
+    nlohmann::json o;
+    o["message"] = "";
+    o["first_time_only"] = false;
+    whole_config["load_gradeable_message"] = o;
+  } else {
+    whole_config["load_gradeable_message"]["message"] = whole_config["load_gradeable_message"].value("message", std::string(""));
+    whole_config["load_gradeable_message"]["first_time_only"] = whole_config["load_gradeable_message"].value("first_time_only", false);
+  }
 
-  whole_config["max_submission_size"] = whole_config.value("max_submission_size",MAX_SUBMISSION_SIZE);
+  if (whole_config.find("early_submission_incentive") == whole_config.end()) {
+    nlohmann::json o;
+    o["message"] = "";
+    o["minimum_days_early"] = 0;
+    o["minimum_points"] = 0;
+    o["test_cases"] = std::vector<int>();
+    whole_config["early_submission_incentive"] = o;
+  } else {
+    whole_config["early_submission_incentive"]["message"] = whole_config["early_submission_incentive"].value("message", "");
+    whole_config["early_submission_incentive"]["minimum_days_early"] = whole_config["early_submission_incentive"].value("minimum_days_early", 0);
+    whole_config["early_submission_incentive"]["minimum_points"] = whole_config["early_submission_incentive"].value("minimum_points", 0);
+    whole_config["early_submission_incentive"]["test_cases"] = whole_config["early_submission_incentive"].value("test_cases", std::vector<int>());
+  }
 
-  whole_config["required_capabilities"] = whole_config.value("required_capabilities","default");
+  int tmp_int = whole_config.value("max_submission_size", MAX_SUBMISSION_SIZE);
+  whole_config["max_submission_size"] = tmp_int;
+
+  tmp_string = whole_config.value("required_capabilities","default");
+  whole_config["required_capabilities"] = tmp_string;
 
   // Configure defaults for hide_submitted_files
-  whole_config["hide_submitted_files"] = whole_config.value("hide_submitted_files", false);
-
+  if (whole_config.find("hide_submitted_files") == whole_config.end()) {
+    whole_config["hide_submitted_files"] = false;
+  }
   // Configure defaults for hide_version_and_test_details
-  whole_config["hide_version_and_test_details"] = whole_config.value("hide_version_and_test_details", false);
+  if (whole_config.find("hide_version_and_test_details") == whole_config.end()) {
+    whole_config["hide_version_and_test_details"] = false;
+  }
 
   // By default, we have one drop zone without a part label / sub
   // directory.
   nlohmann::json::iterator parts = whole_config.find("part_names");
   if (parts != whole_config.end()) {
-    nlohmann::json tmp =  nlohmann::json::array();
+    nlohmann::json tmp_array =  nlohmann::json::array();
     for (int i = 0; i < parts->size(); i++) {
-      tmp.push_back((*parts)[i]);
+      tmp_array.push_back((*parts)[i]);
     }
-    whole_config["part_names"] = tmp;
+    whole_config["part_names"] = tmp_array;
   }
 
   // But, if there are input fields, but there are no explicit parts
@@ -966,15 +987,26 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
     Execution_Helper(single_testcase);
   }
 
-  single_testcase["testcase_label"] = single_testcase.value("testcase_label", "");
-  single_testcase["details"] = single_testcase.value("details","");
-  single_testcase["extra_credit"] = single_testcase.value("extra_credit",false);
-  single_testcase["release_hidden_details"] = single_testcase.value("release_hidden_details", false);
-  single_testcase["hidden"] = single_testcase.value("hidden", false);
+  std::string tmp_string = single_testcase.value("testcase_label", "");
+  single_testcase["testcase_label"] = tmp_string;
+  tmp_string = single_testcase.value("details","");
+  single_testcase["details"] = tmp_string;
+  if (single_testcase.find("extra_credit") == single_testcase.end()) {
+    single_testcase["extra_credit"] = false;
+  }
+  if (single_testcase.find("release_hidden_details") == single_testcase.end()) {
+    single_testcase["release_hidden_details"] = false;
+  }
+  if (single_testcase.find("hidden") == single_testcase.end()) {
+    single_testcase["hidden"] = false;
+  }
   assert(!(single_testcase["release_hidden_details"] && !single_testcase["hidden"]));
-  single_testcase["view_testcase_message"] = single_testcase.value("view_testcase_message",true);
-  single_testcase["publish_actions"] = single_testcase.value("publish_actions", false);
-
+  if (single_testcase.find("view_testcase_message") == single_testcase.end()) {
+    single_testcase["view_testcase_message"] = true;
+  }
+  if (single_testcase.find("publish_action") == single_testcase.end()) {
+    single_testcase["publish_actions"] = false;
+  }
 
   nlohmann::json::iterator itr = single_testcase.find("validation");
   if (itr != single_testcase.end()) {
