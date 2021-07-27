@@ -130,7 +130,7 @@ function saveNotebookToLocal() {
 function restoreNotebookFromLocal() {
     if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
         const inputs = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
-
+        console.log(inputs);
         if (inputs === null) {
             return;
         }
@@ -140,7 +140,6 @@ function restoreNotebookFromLocal() {
         //restore multiple choice
         for (const id in inputs.multiple_choice) {
             const {file_name, answers} = inputs.multiple_choice[id];
-            console.log(inputs.multiple_choice[id]);
             let found = false;
             $(`fieldset.mc[data-filename="${file_name}"] input`).each(function(){
                 //check off proper inputs if question exists
@@ -153,14 +152,13 @@ function restoreNotebookFromLocal() {
                 }
             });
             if (!found) {
-                not_found.push(answers);
+                not_found.push(inputs.multiple_choice[id]);
             }
         }
 
         //restore short answers
         for (const id in inputs.short_answer) {
             const {file_name, value} = inputs.short_answer[id];
-            console.log(inputs.short_answer[id]);
             const question = $(`.short_answer > div[data-filename="${file_name}"]`);
             //fill in proper values if question is found
             if (question) {
@@ -168,12 +166,13 @@ function restoreNotebookFromLocal() {
                 editor.setValue(value);
             }
             else {
-                not_found.push(value);
+                not_found.push(inputs.short_answer[id][0]);
             }
         }
 
         //if there are answers that could not be placed anywhere
         if (not_found.length > 0) {
+            console.log(not_found)
             const old_answers_div = document.createElement('div');
             old_answers_div.id = 'old-answers';
             old_answers_div.classList.add ('box', 'red-background');
@@ -181,15 +180,14 @@ function restoreNotebookFromLocal() {
             //create header text to warn user
             const old_answers_header = document.createElement('h4');
             old_answers_header.innerHTML = "Answer(s) could not be restored you will have to copy and paste them in the proper place";
-            old_answers_header.classList.add('red-message');
             //add header to container
             old_answers_div.appendChild(old_answers_header);
 
             // for ... of loop loops through all elements in array, while for ... in loop loops through
             // all indexes/keys in arrays/objects
-            for (const answer of not_found) {
+            for (const i in not_found) {
                 const answer_text = document.createElement('p');
-                answer_text.innerHTML = answer;
+                answer_text.innerHTML = not_found[i];
                 old_answers_div.appendChild(answer_text);
             }
             $(old_answers_div).insertAfter('#gradeable-info');
