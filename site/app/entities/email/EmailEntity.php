@@ -19,47 +19,47 @@ class EmailEntity {
     private $id;
     /**
      * @ORM\Column(type="string")
-     * @prop-read string
+     * @var string
      */
     private $user_id;
     /**
      * @ORM\Column(type="text")
-     * @prop-read string
+     * @var string
      */
     private $subject;
     /**
      * @ORM\Column(type="text")
-     * @prop-read string
+     * @var string
      */
     private $body;
     /**
      * @ORM\Column(type="datetime")
-     * @prop-read DateTime
+     * @var DateTime
      */
     private $created;
     /**
      * @ORM\Column(type="datetime")
-     * @prop-read DateTime
+     * @var DateTime
      */
     private $sent;
     /**
      * @ORM\Column(type="string")
-     * @prop-read string
+     * @var string
      */
     private $error;
     /**
      * @ORM\Column(type="string", length=255)
-     * @prop-read string
+     * @var string
      */
     private $email_address;
     /**
      * @ORM\Column(type="string")
-     * @prop-read string
+     * @var string
      */
     private $semester;
     /**
      * @ORM\Column(type="string")
-     * @prop-read string
+     * @var string
      */
     private $course;
 
