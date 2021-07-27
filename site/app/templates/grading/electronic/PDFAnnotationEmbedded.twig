@@ -5,6 +5,9 @@
     <script src="{{ script }}"></script>
 {% endfor %}
 <div id="content-wrapper">
+    <div id="grading-pdf-repair" hidden>
+        <p><em>There is a problem with this pdf. Please repair to try and automatically fix any issues.</em></p>
+    </div>
     <div id="viewer" class="pdfViewer"></div>
 </div>
 
@@ -27,9 +30,9 @@
         console.error(err);
         alert("Can't fetch annotations");
     }
-    {% if student_download is defined %}
+    {% if student_download is defined and student_download %}
     download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}" , "{{ rerender_annotated_pdf }}");
-    {% elseif student_popup is defined %}
+    {% elseif student_popup is defined and student_popup %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}");
     {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
