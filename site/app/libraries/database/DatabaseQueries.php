@@ -7478,7 +7478,20 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    public function getGroupForCourse(string $semester, string $course): string {
+        $this->submitty_db->query(
+            'SELECT group_name FROM courses WHERE semester = ? AND course = ?',
+            [$semester, $course]
+        );
+        return count($this->submitty_db->rows()) === 1 ? $this->submitty_db->rows()[0]['group_name'] : '';
+    }
+
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
+        // some courses are archived and assigned the group "root" on production.  We want to exclude these.
+        if ($this->getGroupForCourse($semester, $course) === 'root') {
+            return [];
+        }
+
         $this->submitty_db->query(
             'SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
                    WHERE c1.semester = ? AND c1.course = ?',
