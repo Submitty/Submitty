@@ -1,13 +1,4 @@
-var csrfToken = undefined;
-
-window.addEventListener("load", function() {
-  for (const elem in document.body.dataset) {
-    window[elem] = document.body.dataset[elem];
-  }
-});
-
 window.addEventListener("resize", checkSidebarCollapse);
-
 
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point

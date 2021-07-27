@@ -11,7 +11,6 @@ import shutil
 import string
 import tzlocal
 import tempfile
-import readline
 
 
 def get_uid(user):
@@ -53,6 +52,7 @@ parser.add_argument('--setup-for-sample-courses', action='store_true', default=F
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
+parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
 
 args = parser.parse_args()
 
@@ -74,6 +74,8 @@ if not os.path.isdir(SUBMITTY_DATA_DIR) or not os.access(SUBMITTY_DATA_DIR, os.R
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
+
+WEBSOCKET_PORT = args.websocket_port
 
 ##############################################################################
 
@@ -366,6 +368,7 @@ else:
     config['vcs_url'] = VCS_URL
     config['submission_url'] = SUBMISSION_URL
     config['cgi_url'] = CGI_URL
+    config['websocket_port'] = WEBSOCKET_PORT
 
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT
@@ -531,6 +534,7 @@ if not args.worker:
     config['submission_url'] = SUBMISSION_URL
     config['vcs_url'] = VCS_URL
     config['cgi_url'] = CGI_URL
+    config['websocket_port'] = WEBSOCKET_PORT
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE

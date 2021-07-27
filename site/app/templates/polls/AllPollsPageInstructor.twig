@@ -46,7 +46,7 @@
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td align="left">
+                        <td style="text-align: left;">
                             {{ poll.getName() }}
                         </td>
                         <td>
@@ -57,10 +57,7 @@
                         </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                <button type="submit" class="btn btn-primary">View Results</button>
-                            </a>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">View Results</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -110,8 +107,8 @@
                         </td>
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
-                        </td>	
-                        <td align="left"> 
+                        </td>
+                        <td style="text-align: left;">
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
@@ -123,10 +120,7 @@
                         </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                <button type="submit" class="btn btn-primary">View Results</button>
-                            </a>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">View Results</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -172,17 +166,12 @@
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td align="left">
+                        <td style="text-align: left;">
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td> {{ poll.getUserResponses()|length }} </td>
-                        <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                <button type="submit" class="btn btn-primary">View Results</button>
-                            </a>
-                        </td>
+                        <td><a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">View Results</a></td>
                     </tr>
                 {% endfor %}
             </tbody>

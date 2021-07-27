@@ -1062,7 +1062,7 @@ class Course(object):
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                             self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
-        #This segment adds the sample forum posts for the sample course only
+        #This segment adds the sample forum posts and sample polls for the sample course only
         if self.code == "sample":
             self.add_sample_forum_data()
             print('Added forum data to sample course.')
@@ -1218,6 +1218,83 @@ class Course(object):
                               resolved = True if postData[8] == "t" else False,
                               type=postData[9],
                               has_attachment=True if postData[10] != "f" else False)
+
+    def add_sample_polls_data(self):
+        # set sample course to have polls enabled by default
+        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
+        with open(course_json_file, 'r+') as open_file:
+            course_json = json.load(open_file)
+            course_json['course_details']['polls_enabled'] = True
+            open_file.seek(0)
+            open_file.truncate()
+            json.dump(course_json, open_file, indent=2)
+
+        # load the sample polls from input file
+        polls_data_path = os.path.join(SETUP_DATA_PATH, "polls", "polls_data.json")
+        with open(polls_data_path, 'r') as polls_file:
+            polls_data = json.load(polls_file)
+
+        # set some values that depend on current time
+        polls_data[0]["image_path"] = self.course_path + polls_data[0]["image_path"]
+        polls_data[2]["release_date"] = f"{datetime.today().date()}"
+
+        # add attached image
+        image_dir = os.path.dirname(polls_data[0]["image_path"])
+        if os.path.isdir(image_dir):
+            shutil.rmtree(image_dir)
+
+        os.makedirs(image_dir)
+        os.system(f"chown -R submitty_php:sample_tas_www {image_dir}")
+        copyfile(os.path.join(SETUP_DATA_PATH, "polls", "sea_animals.png"), polls_data[0]["image_path"])
+
+        # add polls to DB
+        polls_table = Table("polls", self.metadata, autoload=True)
+        poll_options_table = Table("poll_options", self.metadata, autoload=True)
+        poll_responses_table = Table("poll_responses", self.metadata, autoload=True)
+
+        for poll in polls_data:
+            self.conn.execute(polls_table.insert(),
+                              name=poll["name"],
+                              question=poll["question"],
+                              status=poll["status"],
+                              release_date=poll["release_date"],
+                              image_path=poll["image_path"],
+                              question_type=poll["question_type"])
+            for i in range(len(poll["responses"])):
+                self.conn.execute(poll_options_table.insert(),
+                                  option_id=i,
+                                  order_id=i,
+                                  poll_id=poll["id"],
+                                  response=poll["responses"][i],
+                                  correct=(i in poll["correct_responses"]))
+
+        # generate responses to the polls
+        poll_responses_data = []
+        # poll1: for each self.users make a random number (0-5) of responses
+        poll1_response_ids = list(range(len(polls_data[0]['responses'])))
+        for user in self.users:
+            random_responses = random.sample(poll1_response_ids, random.randint(0, 5))
+            for response_id in random_responses:
+                poll_responses_data.append({
+                    "poll_id": polls_data[0]["id"],
+                    "student_id": user.id,
+                    "option_id": response_id
+                })
+        # poll2: take a large portion of self.users and make each submit one random response
+        for user in self.users:
+            if random.random() < 0.8:
+                poll_responses_data.append({
+                    "poll_id": polls_data[1]["id"],
+                    "student_id": user.id,
+                    "option_id": random.randint(0, len(polls_data[1]['responses']) - 1)
+                })
+
+        # add responses to DB
+        for response in poll_responses_data:
+            self.conn.execute(poll_responses_table.insert(),
+                              poll_id=response["poll_id"],
+                              student_id=response["student_id"],
+                              option_id=response["option_id"])                          
 
     def add_sample_queue_data(self):
         # load the sample polls from input file
