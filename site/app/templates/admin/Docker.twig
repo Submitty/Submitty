@@ -23,8 +23,8 @@
     <table class="machine-table">
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
-            <th colspan={{capabilities|length}}>Capabilities</th>
             <td rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</td>
+            <th colspan={{capabilities|length}}>Capabilities</th>
         </tr>
         <tr>
             {% for capability in capabilities %}
@@ -34,6 +34,7 @@
         {% for worker in worker_machines %}
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th>{{worker['name']}}</th>
+            <td>{{worker['num_autograding_workers']}}</td>
             {% for capability in worker['capabilities'] %}
                 {% if capability %}
                     <td><i class="fas fa-check"></i></td>
@@ -41,7 +42,6 @@
                     <td></td>
                 {% endif %}
             {% endfor %}
-            <td>{{worker['num_autograding_workers']}}</td>
         </tr>
         {% endfor %}
     </table>
