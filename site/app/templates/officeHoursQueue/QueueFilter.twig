@@ -49,7 +49,7 @@
           <td style="text-align: left;">
               <b>Name: </b>{{queue['code']}}<br>
               <b>Access Code: </b>{{queue['token']}}<br>
-              {% if queue['regex_pattern'] != '' %}
+              {% if queue['regex_pattern'] is defined and queue['regex_pattern'] != '' %}
                 <b>Regex Pattern: </b>{{queue['regex_pattern']}}</td>
               {% endif %}
           <td>
