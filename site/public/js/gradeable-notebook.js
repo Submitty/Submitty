@@ -80,7 +80,7 @@ function notebookAutosaveKey() {
  */
 function saveNotebookToLocal() {
     const mc_inputs=[];
-    const short_answer_inputs = [];
+    const codebox_inputs = [];
 
     //loop through multiple choice questions and save answers
     $('.multiple_choice').each(function(){
@@ -109,17 +109,16 @@ function saveNotebookToLocal() {
                 const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
                 if (editor) {
                     const value = editor.getValue();
-                    short_answer_inputs.push({file_name, value});
+                    codebox_inputs.push({file_name, value});
                 }
             }
         });
     });
-    console.log(mc_inputs);
-    console.log(short_answer_inputs);
+
     localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
         timestamp: Date.now(),
         multiple_choice: mc_inputs,
-        short_answer: short_answer_inputs,
+        codebox: codebox_inputs,
     }));
 }
 
@@ -130,7 +129,6 @@ function saveNotebookToLocal() {
 function restoreNotebookFromLocal() {
     if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
         const inputs = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
-        console.log(inputs);
         if (inputs === null) {
             return;
         }
@@ -157,16 +155,16 @@ function restoreNotebookFromLocal() {
         }
 
         //restore short answers
-        for (const id in inputs.short_answer) {
-            const {file_name, value} = inputs.short_answer[id];
+        for (const id in inputs.codebox) {
+            const {file_name, value} = inputs.codebox[id];
             const question = $(`.short_answer > div[data-filename="${file_name}"]`);
             //fill in proper values if question is found
-            if (question) {
+            if (question.length > 0) {
                 const editor = question[0].querySelector('.CodeMirror').CodeMirror;
                 editor.setValue(value);
             }
             else {
-                not_found.push(inputs.short_answer[id][0]);
+                not_found.push(inputs.codebox[id][0])
             }
         }
 
