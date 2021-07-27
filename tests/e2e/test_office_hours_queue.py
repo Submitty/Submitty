@@ -118,7 +118,7 @@ class TestOfficeHoursQueue(BaseTestCase):
     def openFilterSettings(self):
         self.goToQueuePage()
         self.assertEqual(True,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
-        self.driver.find_element(By.ID, 'toggle_filter_settings').click()
+        self.driver.find_element(By.ID, 'toggle_new_queue').click()
         self.assertEqual(False,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
 
     def closeFilterSettings(self):
