@@ -11,13 +11,11 @@ import pwd
 import random
 from datetime import datetime
 import glob
+import json
 
 from submitty_utils import dateutils
 
-from ruamel.yaml import YAML
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
-
-yaml = YAML(typ='safe')
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
@@ -30,6 +28,7 @@ TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "exam
 
 DB_HOST = "localhost"
 
+# To stress test the email database, change this variable to a greater number
 EMAIL_NUM = 20000
 
 with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as database_config:
@@ -40,17 +39,15 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as databa
 NOW = dateutils.get_current_time()
 
 def main():
-    users = {}  # dict[str, User]
-    courses = {}  # dict[str, Course]
-
-    random.seed(8431571)
+    random.seed(8430571)
 
     submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
-    user_table = Table('users', submitty_metadata, autoload=True)
+    email_table = Table('emails', submitty_metadata, autoload=True)
 
     courses = submitty_conn.execute("SELECT semester, course FROM courses")
+
     courses_subject = []
     courses_body = []
     superuser_subject = []
@@ -58,14 +55,38 @@ def main():
 
     # These are not realistic emails as the email content does not check who owns the course and the body is often times nonsensical
     for i in range(EMAIL_NUM):
-        course_selected = random.randint(0, len(courses))
+        course_selected = random.randint(0, courses.rowcount)
         # superuser email
-        if course_selected is len(courses):
-
+        if course_selected is courses.rowcount:
+            user_table = Table('users', submitty_metadata, autoload=True)
+            users = submitty_conn.execute(select(user_table))
+            emails = generateRandomSuperuserEmail(users)
+            for email in emails:
+                submitty_conn.execute(email_table.insert(),
+                                    user_id=email["user_id"],
+                                    subject=email["subject"],
+                                    body=email["body"],
+                                    created=email["created"],
+                                    email_address=email["email_address"],
+                                    semester=email["semester"],
+                                    course=email["course"])
         # course email
         else:
-            course = courses[course_selected]
-            
+            course = courses.fetchall()[course_selected]
+            user_table = Table('courses_users', submitty_metadata, autoload=True)
+            users = submitty_conn.execute(select(user_table.c)
+                                        .where(user_table.c.semester == course.semester)
+                                        .where(user_table.c.course == course.course))
+            emails = generateRandomCourseEmail(users, course)
+            for email in emails:
+                submitty_conn.execute(email_table.insert(),
+                                    user_id=email["user_id"],
+                                    subject=email["subject"],
+                                    body=email["body"],
+                                    created=email["created"],
+                                    email_address=email["email_address"],
+                                    semester=email["semester"],
+                                    course=email["course"])
 
 def generateRandomSuperuserEmail(recipients):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'SuperuserEmailBody.txt')) as body_file, \
@@ -107,4 +128,8 @@ def generateRandomCourseEmail(recipients, course):
                 "course": course.course
             }
         )
+
     return emails
+
+if __name__ == "__main__":
+    main()
