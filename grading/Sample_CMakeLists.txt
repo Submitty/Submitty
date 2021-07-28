@@ -9,7 +9,9 @@ set (SUBMITTY_DATA_DIR __INSTALL__FILLIN__SUBMITTY_DATA_DIR__)
 
 # assuming the core files for config, compilation, running, & grading are here:
 set (GRADINGCODE  ${SUBMITTY_INSTALL_DIR}/src)
+set (JSONCODE     ${SUBMITTY_INSTALL_DIR}/vendor/include)
 set (GRADINGLIB   ${SUBMITTY_INSTALL_DIR}/src/grading/lib/libsubmitty_grading.a)
+
 
 ###################################################################################
 
@@ -135,6 +137,7 @@ set_property(TARGET validate.out             APPEND_STRING PROPERTY COMPILE_FLAG
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})
 include_directories(${GRADINGCODE}/grading)
+include_directories(${JSONCODE})
 
 SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
 
