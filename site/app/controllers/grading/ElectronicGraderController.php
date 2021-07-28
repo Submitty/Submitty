@@ -1374,23 +1374,10 @@ class ElectronicGraderController extends AbstractController {
             }
             if (is_null($who_id) || $who_id == '') {
                 $message = "You've reached the ";
-                if ($to === 'prev') {
-                    $message .= " start";
-                }
-                else {
-                    $message .= " end";
-                }
+                $message .= $to === 'prev' ? " start" : " end";
                 $message .= " of";
-                if ($navigate_assigned_students_only !== "false") {
-                    $message .= " your assigned sections";
-                }
-                else {
-                    $message .= " the list";
-                }
-                if ($filter !== 'default') {
-                    $message .= " (using filter '" . $filter . "')";
-                }
-                $message .= ".";
+                $message .= $navigate_assigned_students_only !== "false" ? " your assigned sections" : " the list";
+                $message .= $filter !== 'default' ? " (using filter '" . $filter . "')." : ".";
                 $this->core->addSuccessMessage($message);
                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             }
