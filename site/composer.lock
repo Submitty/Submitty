@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "143ae2c795fa7e9982195ef79dbc1567",
+    "content-hash": "01dee83d8e99f6f5f2de42ca3a13407d",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2757,22 +2757,23 @@
         },
         {
             "name": "symfony/config",
-            "version": "v4.4.26",
+            "version": "v4.4.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "1cb26cdb8a9834d8494cadd284602fa0647b73e5"
+                "reference": "8132e8d645d703e9b7c9c4f25067b93638683a35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/1cb26cdb8a9834d8494cadd284602fa0647b73e5",
-                "reference": "1cb26cdb8a9834d8494cadd284602fa0647b73e5",
+                "url": "https://api.github.com/repos/symfony/config/zipball/8132e8d645d703e9b7c9c4f25067b93638683a35",
+                "reference": "8132e8d645d703e9b7c9c4f25067b93638683a35",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.3",
                 "symfony/filesystem": "^3.4|^4.0|^5.0",
                 "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-php80": "^1.16",
                 "symfony/polyfill-php81": "^1.22"
             },
             "conflict": {
@@ -2814,7 +2815,7 @@
             "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/config/tree/v4.4.26"
+                "source": "https://github.com/symfony/config/tree/v4.4.27"
             },
             "funding": [
                 {
@@ -2830,7 +2831,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-06-21T14:51:25+00:00"
+            "time": "2021-07-21T12:19:41+00:00"
         },
         {
             "name": "symfony/console",
@@ -2923,21 +2924,22 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v4.4.26",
+            "version": "v4.4.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "a501126eb6ec9288a3434af01b3d4499ec1268a0"
+                "reference": "517fb795794faf29086a77d99eb8f35e457837a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/a501126eb6ec9288a3434af01b3d4499ec1268a0",
-                "reference": "a501126eb6ec9288a3434af01b3d4499ec1268a0",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/517fb795794faf29086a77d99eb8f35e457837a7",
+                "reference": "517fb795794faf29086a77d99eb8f35e457837a7",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.3",
-                "symfony/polyfill-ctype": "~1.8"
+                "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-php80": "^1.16"
             },
             "type": "library",
             "autoload": {
@@ -2965,7 +2967,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v4.4.26"
+                "source": "https://github.com/symfony/filesystem/tree/v4.4.27"
             },
             "funding": [
                 {
@@ -2981,27 +2983,27 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-06-30T07:12:23+00:00"
+            "time": "2021-07-21T12:19:41+00:00"
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.4.26",
+            "version": "v4.4.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "8759ed5c27c2a8a47cb60f367f4be6727f08d58b"
+                "reference": "31d4a645cdec3d6cbcba485428181e31b3801503"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/8759ed5c27c2a8a47cb60f367f4be6727f08d58b",
-                "reference": "8759ed5c27c2a8a47cb60f367f4be6727f08d58b",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/31d4a645cdec3d6cbcba485428181e31b3801503",
+                "reference": "31d4a645cdec3d6cbcba485428181e31b3801503",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.3",
                 "symfony/mime": "^4.3|^5.0",
                 "symfony/polyfill-mbstring": "~1.1",
-                "symfony/polyfill-php80": "^1.15"
+                "symfony/polyfill-php80": "^1.16"
             },
             "require-dev": {
                 "predis/predis": "~1.0",
@@ -3033,7 +3035,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v4.4.26"
+                "source": "https://github.com/symfony/http-foundation/tree/v4.4.27"
             },
             "funding": [
                 {
@@ -3049,26 +3051,27 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-06-26T21:56:04+00:00"
+            "time": "2021-07-23T15:41:52+00:00"
         },
         {
             "name": "symfony/mime",
-            "version": "v4.4.26",
+            "version": "v4.4.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
-                "reference": "1a2bdd55e13e295f63a57a5838029bf41b1969bf"
+                "reference": "6ab91e811439360339ebde803630c8d74223fa77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mime/zipball/1a2bdd55e13e295f63a57a5838029bf41b1969bf",
-                "reference": "1a2bdd55e13e295f63a57a5838029bf41b1969bf",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/6ab91e811439360339ebde803630c8d74223fa77",
+                "reference": "6ab91e811439360339ebde803630c8d74223fa77",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.3",
                 "symfony/polyfill-intl-idn": "^1.10",
-                "symfony/polyfill-mbstring": "^1.0"
+                "symfony/polyfill-mbstring": "^1.0",
+                "symfony/polyfill-php80": "^1.16"
             },
             "conflict": {
                 "egulias/email-validator": "~3.0.0",
@@ -3108,7 +3111,7 @@
                 "mime-type"
             ],
             "support": {
-                "source": "https://github.com/symfony/mime/tree/v4.4.26"
+                "source": "https://github.com/symfony/mime/tree/v4.4.27"
             },
             "funding": [
                 {
@@ -3124,7 +3127,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-06-08T11:22:53+00:00"
+            "time": "2021-07-21T12:19:41+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -3775,20 +3778,21 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.4.25",
+            "version": "v4.4.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "3a3c2f197ad0846ac6413225fc78868ba1c61434"
+                "reference": "244609821beece97167fa7ba4eef49d2a31862db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/3a3c2f197ad0846ac6413225fc78868ba1c61434",
-                "reference": "3a3c2f197ad0846ac6413225fc78868ba1c61434",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/244609821beece97167fa7ba4eef49d2a31862db",
+                "reference": "244609821beece97167fa7ba4eef49d2a31862db",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.3"
+                "php": ">=7.1.3",
+                "symfony/polyfill-php80": "^1.16"
             },
             "conflict": {
                 "symfony/config": "<4.2",
@@ -3797,7 +3801,7 @@
             },
             "require-dev": {
                 "doctrine/annotations": "^1.10.4",
-                "psr/log": "~1.0",
+                "psr/log": "^1|^2|^3",
                 "symfony/config": "^4.2|^5.0",
                 "symfony/dependency-injection": "^3.4|^4.0|^5.0",
                 "symfony/expression-language": "^3.4|^4.0|^5.0",
@@ -3843,7 +3847,7 @@
                 "url"
             ],
             "support": {
-                "source": "https://github.com/symfony/routing/tree/v4.4.25"
+                "source": "https://github.com/symfony/routing/tree/v4.4.27"
             },
             "funding": [
                 {
@@ -3859,7 +3863,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-26T17:39:37+00:00"
+            "time": "2021-07-23T15:41:52+00:00"
         },
         {
             "name": "symfony/service-contracts",
