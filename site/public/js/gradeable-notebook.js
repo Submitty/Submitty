@@ -145,9 +145,9 @@ function restoreNotebookFromLocal() {
                 for (let i = 0; i < answers.length; i++) {
                     if ($(this)[0].defaultValue === answers[i]) {
                         $(this).prop('checked', true);
+                        $(this).trigger('change');
                     }
                 }
-                setResetButton(($(this).parent().closest('fieldset'))[0]);
             });
             if (!found) {
                 not_found.push(inputs.multiple_choice[id]);
@@ -194,23 +194,6 @@ function restoreNotebookFromLocal() {
             old_answers_div.appendChild(old_answers_list);
             $(old_answers_div).insertAfter('#gradeable-info');
         }
-    }
-}
-
-function setResetButton(fieldset){
-    const items = fieldset.id.split('_');
-    const index = items[2];
-    // Enable recent button
-    $(`#mc_${index}_clear_button`).attr('disabled', false);
-    $(`#mc_${index}_recent_button`).attr('disabled', false);
-    const prev_checked_items = fieldset.getAttribute('data-prev_checked');
-    const curr_checked_items = $(fieldset).serializeArray().map(v => v.value).join('\n');
-    if (curr_checked_items !== prev_checked_items) {
-        window.onbeforeunload = saveAndWarnUnsubmitted;
-        $(`#mc_${index}_recent_button`).attr('disabled', false);
-    }
-    else {
-        $(`#mc_${index}_recent_button`).attr('disabled', true);
     }
 }
 
