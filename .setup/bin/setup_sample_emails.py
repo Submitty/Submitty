@@ -117,9 +117,11 @@ def generateRandomCourseEmail(recipients, course):
 
     emails = []
     for recipient in recipients:
+        print(recipient.keys())
+        print(recipient)
         emails.append(
             {
-                "user_id": recipient.id,
+                "user_id": recipient.user_id,
                 "subject": subject,
                 "body": body,
                 "created": NOW,
