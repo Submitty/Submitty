@@ -192,6 +192,7 @@ class PDFController extends AbstractController {
         $page_num = $_POST['page_num'] ?? null;
         $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
+        $file_path = urldecode($_POST['file_path']);
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id);
@@ -231,11 +232,11 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
-        $file_path = md5($_POST['file_path']);
+        $file_path_md5 = md5($file_path);
         if (is_dir($annotation_dir)) {
             $dir_iter = new \FilesystemIterator($annotation_dir);
             foreach ($dir_iter as $annotation_file) {
-                if (explode('_', $annotation_file->getFilename())[0] === $file_path) {
+                if (explode('_', $annotation_file->getFilename())[0] === $file_path_md5) {
                     $file_contents = file_get_contents($annotation_file->getPathname());
                     $annotation_decoded = json_decode($file_contents, true);
                     if ($annotation_decoded !== null) {
@@ -246,7 +247,7 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $_POST['file_path'], $annotation_jsons, false, $page_num);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $annotation_jsons, false, $page_num);
     }
 
     /**
