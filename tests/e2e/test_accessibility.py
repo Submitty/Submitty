@@ -58,6 +58,7 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/polls',
         '/courses/{}/{}/polls/newPoll',
         '/courses/{}/{}/sql_toolbox',
+        '/admin/docker',
     ]
 
     urls_formatted = []
