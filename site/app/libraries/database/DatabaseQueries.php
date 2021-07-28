@@ -7465,7 +7465,7 @@ SQL;
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
             'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
-                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
             [$user_id]
         );
         return $this->submitty_db->rows();
