@@ -21,14 +21,11 @@ function onReady(){
         $(this).find('.gi-submit .gi-submit-empty').prop('disabled', true);
     });
 
-    
-
     const reply_text_area_has_text = $('.reply-text-form').find('[name="replyTextArea"]').val() !== '';
     $('.gi-show-not-empty').toggle(reply_text_area_has_text);
     $('.gi-show-empty').toggle(!reply_text_area_has_text);
     $('.gi-submit').prop('disabled', !reply_text_area_has_text);
     $('.gi-submit-empty').prop('disabled', reply_text_area_has_text);
-    
 }
 
 function onComponentTabClicked(tab) {
@@ -65,7 +62,7 @@ function onReplyTextAreaKeyUp(textarea) {
     }
     else {
         $('.gi-show-not-empty').show();
-        $('.gi-show-empty').hide()
+        $('.gi-show-empty').hide();
     }
 }
 
