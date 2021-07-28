@@ -3,7 +3,7 @@
     background-color: var(--standard-medium-dark-lime-green);
 }
 
-.toolbar-action,
+.toolbar-action:not(button),
 .toolbar-item {
     text-align: center;
     margin-left: 6px;
@@ -15,6 +15,10 @@
     display: block;
     width: fit-content;
 }
+
+#pdf_annotation_icons .btn {
+    margin: 0 5px 0 5px;
+} 
 
 #pdf_annotation_bar {
     display: none;
@@ -34,16 +38,9 @@
     margin-top: -5px;
 }
 
-.toolbar-action[value^='save'] {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: 16px;
-}
-
 .selection-menu {
     display: none;
     position: absolute;
-    width: 150px;
-    height: 80px;
     border: 1px solid var(--standard-medium-dark-lime-green);
     background: var(--standard-light-seafoam);
     top: auto;
@@ -55,6 +52,15 @@
     border: initial;
     height: initial;
     background-size: initial;
+}
+
+#color-selector-container {
+    display: inline;
+}
+
+#color-selector-grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
 }
 
 #color_selector_menu {
@@ -72,4 +78,74 @@
     border: 1px solid var(--text-black);
     vertical-align: middle;
     margin: 2px;
+}
+
+#custom-color {
+    width: revert;
+    padding: 0px;
+}
+
+.color:hover,
+#custom-color:hover {
+    cursor: pointer;
+}
+
+#content-wrapper {
+    position: relative;
+}
+
+#zoom-custom {
+    width: 55px;
+}
+
+.input-suffix {
+    display: inline-block;
+    position: relative;
+}
+
+.input-suffix:after {
+    position: absolute;
+    top: 11px;
+    right: 0.5em;
+    transition: all 0.05s ease-in-out;
+}
+
+.input-suffix:hover::after,
+.input-suffix:focus-within::after {
+  right: 1.5em;
+}
+
+.suffix-percent::after {
+    content: '%';
+} 
+
+@supports (-moz-appearance:none) {
+    .input-suffix::after {
+      right: 1.5em;
+    }
+}
+
+
+#grading-pdf-repair {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    margin: 2% 0 2% 0;
+    color: var(--danger-red);
+    font-size: 16px;
+}
+
+#grading-pdf-repair-btn {
+    margin-left: 8px;
+}
+
+#pdf-buttons {
+    display: inline-block;
+}
+
+/* Notebook panel */
+#notebook-main-view {
+    padding: 10px;
 }

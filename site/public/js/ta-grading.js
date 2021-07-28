@@ -730,7 +730,6 @@ function resetSinglePanelLayout() {
   $("#two-panel-exchange-btn").removeClass("active");
 
   $('.panels-container').append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
-  $('.panels-container :not(.panel-instructions').css('z-index', '2');
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
@@ -976,7 +975,6 @@ function togglePanelLayoutModes(forceVal = false) {
 
 // Handles the DOM manipulation to update the two panel layout
 function updatePanelLayoutModes () {
-  $('.panels-container *').css('z-index', '');
   // fetch the panels by their ids
   const leftTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftTop);
   const leftBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftBottom);
