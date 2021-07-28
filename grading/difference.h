@@ -7,7 +7,7 @@
 
 #include "testResults.h"
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 #define tab "    "
 #define OtherType 0

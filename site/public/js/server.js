@@ -1,13 +1,4 @@
-var csrfToken = undefined;
-
-window.addEventListener("load", function() {
-  for (const elem in document.body.dataset) {
-    window[elem] = document.body.dataset[elem];
-  }
-});
-
 window.addEventListener("resize", checkSidebarCollapse);
-
 
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
@@ -679,7 +670,7 @@ function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.code ? pos + 1 : 0;
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
             setInterval(function() { $("*").addClass("rainbow"); }, 100);
             $(document.body).off('keyup', colorEvent);
@@ -850,12 +841,12 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         var height = max_height;
     }
     if (force_height != -1) {
-        document.getElementById(id).height = force_height + "px";
+        $("iframe#" + id).height(force_height);
     } else if (height >= max_height) {
-        document.getElementById(id).height= max_height + "px";
+        $("iframe#" + id).height(max_height);
     }
     else {
-        document.getElementById(id).height = (height+18) + "px";
+        $("iframe#" + id).height(height + 18);
     }
     //Workarounds for FireFox changing height/width of img sometime after this code runs
     if(img.length !== 0) {

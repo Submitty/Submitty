@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 #include "grading/TestCase.h"
-#include "grading/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include <unistd.h>
 
