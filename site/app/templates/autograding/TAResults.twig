@@ -53,8 +53,6 @@ $( document ).ready(function() {
 
         {% if uploaded_pdfs|length >= 1 %}
             <div class = "no-border-box">
-                {{ dump(uploaded_pdfs) }}
-                {{ dump(annotated_file_names) }}
                 {% if annotated_file_names|length > 0 %}
                     <div class="row">
                         <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
@@ -77,10 +75,9 @@ $( document ).ready(function() {
                                 {% if file.encoded_name in annotated_file_names %}
                                     <p style="text-align:center; vertical-align: middle;">
                                         <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        {% if can_download %}
-                                            <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
-                                            <i class="fas fa-download" title="Download the file"></i></button>
-                                        {% endif %}
+                                        <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> 
+                                            Download <i class="fas fa-download" title="Download the file"></i>
+                                        </button>
                                     </p>
                                     {% if loop.index != files|length %}
                                         <br />
