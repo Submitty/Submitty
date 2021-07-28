@@ -179,6 +179,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     rm -rf ${SUBMITTY_INSTALL_DIR}/site
     rm -rf ${SUBMITTY_INSTALL_DIR}/src
+    rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin
     rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
