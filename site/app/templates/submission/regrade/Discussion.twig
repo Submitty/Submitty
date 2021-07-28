@@ -124,7 +124,7 @@
         $(onReady());
         //prevent spam submission
         $('#grade-inquiry-actions').on('click', function() {
-            $(this).find('button').prop('disabled', true);
+            $(this).find('.gi-submit:not(.gi-ignore-disabled)').prop('disabled', true);
         });
     </script>
 {% endif %}

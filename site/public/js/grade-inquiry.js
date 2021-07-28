@@ -100,7 +100,6 @@ function onGradeInquirySubmitClicked(button) {
                             'submitter_id': submitter_id,
                             'gc_id': gc_id,
                         });
-                        $('#grading-close').prop('disabled', false);
                     }
                     else if (data.type === 'open_grade_inquiry'){
                         window.socketClient.send({'type' : 'toggle_status', 'submitter_id' : submitter_id});
