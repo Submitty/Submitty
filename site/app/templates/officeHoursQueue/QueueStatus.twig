@@ -26,7 +26,7 @@
   </form>
     <script>
         $('#queue_code').change(function(){
-        document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';
+        document.getElementById('add_to_queue').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/add';
         });
     </script>
 
@@ -73,7 +73,7 @@
       {{plurality_picker(num_ahead_today, 'person', 'people')}} {{ end_text }}.
     </p>
 
-    <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+    <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() | url_encode }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
@@ -106,7 +106,7 @@
     <form
       method="post"
       id="finish_help"
-      action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/finishHelp"
+      action="{{base_url}}/{{ viewer.getCurrentQueueCode() | url_encode }}/finishHelp"
       onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
