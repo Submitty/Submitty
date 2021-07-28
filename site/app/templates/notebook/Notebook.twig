@@ -282,8 +282,8 @@
     }
 
     function initializePopupTimer(){
-        if (!localStorage.getItem(notebookAutosaveKey())) {
-            localStorage.setItem(notebookAutosaveKey(), 'yes');
+        if (!localStorage.getItem(notebookPopupSubmitKey())) {
+            localStorage.setItem(notebookPopupSubmitKey(), 'yes');
         }
         loadTime = curTime;
         count();
@@ -293,7 +293,7 @@
         const time_taken = Math.floor((curTime - loadTime)/1000);
         const minutes_taken = Math.floor(time_taken / 60);
         if (minutes_taken >= interval ) {
-            if (localStorage.getItem(notebookAutosaveKey()) === 'yes' && curTime < user_deadline && showPopup) {
+            if (localStorage.getItem(notebookPopupSubmitKey()) === 'yes' && curTime < user_deadline && showPopup) {
                 $(".notebook-submit-popup").show();
             }
         }
@@ -308,7 +308,7 @@
 
     function DontShowPopupSubmit() {
         closePopupSubmit();
-        localStorage.setItem(notebookAutosaveKey(), 'no');
+        localStorage.setItem(notebookPopupSubmitKey(), 'no');
     }
 
 
