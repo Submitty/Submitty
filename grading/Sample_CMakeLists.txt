@@ -12,7 +12,6 @@ set (GRADINGCODE  ${SUBMITTY_INSTALL_DIR}/src)
 set (JSONCODE     ${SUBMITTY_INSTALL_DIR}/vendor/include)
 set (GRADINGLIB   ${SUBMITTY_INSTALL_DIR}/src/grading/lib/libsubmitty_grading.a)
 
-
 ###################################################################################
 
 # DEFAULT:  NORMAL ASSIGNMENT INSTALLATION
