@@ -15,13 +15,24 @@ class EmailRepository extends EntityRepository {
 
     public function getEmailsByPage(int $page, $semester = null, $course = null): array {
         $entity = EmailEntity::class;
-        $course_specific = ($semester && $course) ? "WHERE e.semester = '{$semester}' AND e.course = '{$course}' " : "";
-        $dql = "SELECT e FROM {$entity} e {$course_specific} ORDER BY e.created DESC";
+        $course_specific = ($semester && $course) ? "WHERE e.semester = :semester AND e.course = :course " : "";
+        $dql = 'SELECT e FROM app\entities\email\EmailEntity e ' . $course_specific . ' ORDER BY e.created DESC';
         $window = $this->getPageWindow($page, $semester, $course);
-        $qb = $this->_em->createQuery($dql)
-            ->setFirstResult($window[0])
-            ->setMaxResults($window[1]);
-        return $qb->getResult();
+        
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('e')
+           ->from('app\entities\email\EmailEntity', 'e');
+        if ($semester && $course) {
+            $qb->where('e.semester = :semester')
+               ->andWhere('e.course = :course')
+               ->setParameter('semester', $semester)
+               ->setParameter('course', $course);
+        }
+        $qb->orderBy('e.created', 'DESC')
+           ->setFirstResult($window[0])
+           ->setMaxResults($window[1]);
+
+        return $qb->getQuery()->getResult();
     }
 
     public function getPageNum($semester = null, $course = null): int {
