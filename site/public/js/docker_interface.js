@@ -25,9 +25,7 @@ function filterOnClick() {
         $(this).addClass('fully-transparent');
     });
 
-    if ($(this).hasClass('fully-transparent')) {
-        $(this).removeClass('fully-transparent');
-    }
+    $(this).removeClass('fully-transparent');
 
     $('.image-row').each(function() {
         const this_row = $(this);
