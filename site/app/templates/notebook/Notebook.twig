@@ -277,8 +277,14 @@
     let loadTime = 0;
     let showPopup = false;
 
+    function notebookPopupSubmitKey(){
+        return `${gradeable_id}-${USER_ID}`;
+    }
+
     function initializePopupTimer(){
-        sessionStorage.setItem("show_popup_submit", "yes");
+        if (!localStorage.getItem(notebookAutosaveKey())) {
+            localStorage.setItem(notebookAutosaveKey(), 'yes');
+        }
         loadTime = curTime;
         count();
     }
@@ -287,7 +293,7 @@
         const time_taken = Math.floor((curTime - loadTime)/1000);
         const minutes_taken = Math.floor(time_taken / 60);
         if (minutes_taken >= interval ) {
-            if (sessionStorage.getItem("show_popup_submit") === 'yes' && curTime < user_deadline && showPopup) {
+            if (localStorage.getItem(notebookAutosaveKey()) === 'yes' && curTime < user_deadline && showPopup) {
                 $(".notebook-submit-popup").show();
             }
         }
@@ -302,7 +308,7 @@
 
     function DontShowPopupSubmit() {
         closePopupSubmit();
-        sessionStorage.setItem("show_popup_submit", "no");
+        localStorage.setItem(notebookAutosaveKey(), 'no');
     }
 
 
