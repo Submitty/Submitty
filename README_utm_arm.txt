@@ -54,7 +54,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    under the "Drives" tab, make 2 drives:
    the first one is a "removable drive" "USB" for the CD/DVD (ISO) image, USB interface
-   the second one is a "disk image" with "virtIO" that is at least 30 GB.
+   the second one is a "disk image" with "virtIO" that is at least 40 GB.
 
    under the "Network" tab, add port forwarding:
    guest port 22 -> host 1234 (or anything for ssh below)
@@ -90,7 +90,11 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    * "Done" on configure proxy
    * "Done" on alternate mirror
    * "Done" on default for storage configuration / storage layout
-   * "Done" on default for storage configuration / file system
+   * "on default for storage configuration / file system
+
+      - set the "device" "mounted at /" to be at least 35 GB
+        it probably defaulted to 20BG
+
    * "Continue" on confirm destructive action
    * Fill in the profile setup (set a <USERNAME> & <PASSWORD>)
    * Select "Install OpenSSH server" and then "Done"
@@ -117,14 +121,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    On the guest machine:
 
-   sudo apt install spice-vdagent spice-webdavd
-
-   sudo apt install davfs2
-
-      * Answer the question (probably grant access?) about unpriviledged users and SUID *
-
+   sudo apt install -y spice-vdagent spice-webdavd
+   sudo apt install -y davfs2
+       * Answer the question "YES" and grant access to unpriviledged users *
    sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT
-
 
    NOTE: The command below must be re-run each time the guest machine
    is rebooted.  It will require interactively entering the username &
@@ -136,6 +136,11 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    Terminal (not from an ssh terminal).  
 
    sudo mount -t davfs -o noexec http://127.0.0.1:9843 /usr/local/submitty/GIT_CHECKOUT
+
+   If you get an error, you can try running, and then repeat the mount
+   command...  and if that doesn't work you can try rebooting the VM.
+
+   sudo umount /usr/local/submitty/GIT_CHECKOUT
 
 
 10. Do Submitty system setup and installation:

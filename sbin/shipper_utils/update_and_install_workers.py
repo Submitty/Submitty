@@ -10,6 +10,7 @@ import docker
 import traceback
 import argparse
 from submitty_utils import ssh_proxy_jump
+import platform
 
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
@@ -59,7 +60,15 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             except Exception as e:
               print(f"ERROR: Could not pull {image}")
               traceback.print_exc()
-              success = False
+
+              # check for machine
+              if platform.machine() == "aarch64":
+                  # TEMPORARY: docker pull often fails on ARM installation
+                  print("WARNING: SKIPPING DOCKER PULL ERROR")
+              else:
+                  # normal case
+                  success = False
+
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
