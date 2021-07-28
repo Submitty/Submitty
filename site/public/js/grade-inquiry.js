@@ -64,7 +64,7 @@ function onGradeInquirySubmitClicked(button) {
     // and ignore their response
     const text_area = $(`#reply-text-area-${component_id}`);
     const submit_button_id = button_clicked.attr('id');
-    if (submit_button_id != null && submit_button_id.includes('grading-close')){
+    if (submit_button_id && submit_button_id === 'grading-close'){
         if (text_area.val().trim()) {
             if (!confirm('The text you entered will not be posted. Are you sure you want to close the grade inquiry?')) {
                 return;
@@ -100,6 +100,7 @@ function onGradeInquirySubmitClicked(button) {
                             'submitter_id': submitter_id,
                             'gc_id': gc_id,
                         });
+                        $('#grading-close').prop('disabled', false);
                     }
                     else if (data.type === 'open_grade_inquiry'){
                         window.socketClient.send({'type' : 'toggle_status', 'submitter_id' : submitter_id});
