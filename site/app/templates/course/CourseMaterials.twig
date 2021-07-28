@@ -100,21 +100,21 @@
 
                     <script>
                         function determineRelease(inputID){
-                            var now = new Date();
+                            const now = new Date();
 
                             function pad(str){
                                 return ('0'+str).slice(-2);
                             }
 
-                            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-                            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-                            var currentDT = date+' '+time;
-                            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+                            const date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+                            const time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+                            let currentDT = date+' '+time;
+                            let neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
 
                             //get the value in each file so the color can be assigned
                             //based on the time chosen
-                            var inputDT = document.getElementById(inputID);
-                            var fileDT = inputDT.value;
+                            const inputDT = document.getElementById(inputID);
+                            let fileDT = inputDT.value;
 
                             fileDT = fileDT.replace(/\s/, 'T');
                             currentDT = currentDT.replace(/\s/, 'T');

@@ -5,13 +5,13 @@
     <div id="material-upload-form" class="flex-col flex-col-space">
         <p>
             <strong>Path to directory containing course materials file(s):</strong><br />
-            {{ folderPath~"/" }}
+            {{ base_course_material_path~"/" }}
         </p>
         <label id="cm_path">
             <span>
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
-                {{ folderPath }}/optional/subdirectory
+                {{ base_course_material_path }}/optional/subdirectory
             </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>

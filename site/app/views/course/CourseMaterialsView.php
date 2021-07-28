@@ -26,16 +26,39 @@ class CourseMaterialsView extends AbstractView {
         foreach ($course_materials_db as $course_material) {
             if ($course_material->isDir()) {
                 $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
-                $directories[$rel_path] = substr_count($rel_path, "/");
+                $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
             }
         }
-        array_multisort(array_values($directories), SORT_ASC, array_keys($directories), SORT_ASC, $directories);
+        $sort_priority = function (CourseMaterial $a, CourseMaterial $b) use ($base_course_material_path) {
+            $rel_path_a = substr($a->getPath(), strlen($base_course_material_path) + 1);
+            $rel_path_b = substr($b->getPath(), strlen($base_course_material_path) + 1);
+            $dir_count_a = substr_count($rel_path_a, "/");
+            $dir_count_b = substr_count($rel_path_b, "/");
+            if ($dir_count_a > $dir_count_b) {
+                return true;
+            }
+            elseif ($dir_count_a < $dir_count_b) {
+                return false;
+            }
+            else {
+                if ($a->getPriority() > $b->getPriority()) {
+                    return true;
+                }
+                elseif ($a->getPriority() < $b->getPriority()) {
+                    return false;
+                }
+                else {
+                    return $a->getPath() > $b->getPath();
+                }
+            }
+        };
+        uasort($directories, $sort_priority);
 
         $final_structure = [];
 
-        foreach ($directories as $directory => $num) {
-            $dirs = explode("/", $directory);
+        foreach ($directories as $rel_path => $directory) {
+            $dirs = explode("/", $rel_path);
             $cur_dir = &$final_structure;
             $folder_to_make = array_pop($dirs);
             foreach ($dirs as $dir) {
@@ -60,17 +83,47 @@ class CourseMaterialsView extends AbstractView {
                 $file_name = $course_material->getUrlTitle();
             }
             $path_to_place = &$final_structure;
+            $path = "";
             foreach ($dirs as $dir) {
                 $path_to_place = &$path_to_place[$dir];
+                $path = FileUtils::joinPaths($path, $dir);
             }
-            $path_to_place[$file_name] = $course_material;
+            $index = 0;
+            foreach ($path_to_place as $key => $value) {
+                if (is_array($value)) {
+                    $priority = $directories[FileUtils::joinPaths($path, $key)]->getPriority();
+                }
+                else {
+                    $priority = $value->getPriority();
+                }
+                if ($course_material->getPriority() > $priority) {
+                    $index++;
+                }
+                elseif ($course_material->getPriority() === $priority) {
+                    if (is_array($value)) {
+                        $index++;
+                    }
+                    else {
+                        if ($course_material->getPath() > $value->getPath()) {
+                            $index++;
+                        }
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            $path_to_place = array_merge(
+                array_slice($path_to_place, 0, $index),
+                [$file_name => $course_material],
+                array_slice($path_to_place, $index)
+            );
         }
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
             "reg_sections" => $this->core->getQueries()->getRegistrationSections(),
-            "folderPath" => $base_course_material_path,
             "csrf_token" => $this->core->getCsrfToken(),
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "base_course_material_path" => $base_course_material_path,
