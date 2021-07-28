@@ -48,19 +48,16 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    under the "System" tab, specify:
    architecture -> ARM64 (aarch64)
    system -> QEMU 6.0 ARM Virtual Machine
-   memory -> 2048 mb
+   memory -> 2048 mb (or more)
    click on "show advanced settings"
-   CPU Cores -> 2
+   CPU Cores -> 2 (or more)
 
    under the "Drives" tab, make 2 drives:
    the first one is a "removable drive" "USB" for the CD/DVD (ISO) image, USB interface
    the second one is a "disk image" with "virtIO" that is at least 40 GB.
 
-   under the "Network" tab, add port forwarding:
-   guest port 22 -> host 1234 (or anything for ssh below)
-   guest port 1511 -> host 1511
-   guest port 8443 -> host 8443
-   guest port 5432 -> host 16442
+   under the "Network" tab... we'll setup port forwarding in a later
+   step (it gives errors if you set it too early?)
 
    under the "Sharing" tab,
    -> could uncheck "enable clipboard sharing" (doesn't seem to work anyways, buggy?)
@@ -107,9 +104,27 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    select "Reboot now"
 
 
-7. Turn off the virtual machine, and from the main UTM screen,
-   "Clear"/disconnect the removable CD/DVD drive.  Then press the play
-   button to boot the machine again.
+7. After waiting a little while...
+   NOTE: reboot only seems to stop.  It doesn't actually halt & restart.
+
+   From the main UTM screen:
+
+   * Turn off the virtual machine by pressing the square symbol.
+
+   * "Clear"/disconnect the removable CD/DVD drive.
+
+   * Click on the sliders icon in the upper right to edit the VM
+     settings again.
+
+     under the "Network" tab, add port forwarding:
+       guest port 22 -> host 1234 (or anything for ssh below)
+       guest port 1511 -> host 1511
+       guest port 8443 -> host 8443
+       guest port 5432 -> host 16442
+
+     press "save".
+
+   * Then press the play icon to boot the machine again.
 
 
 8. To ssh from your host machine to the guest vm:
@@ -137,8 +152,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    sudo mount -t davfs -o noexec http://127.0.0.1:9843 /usr/local/submitty/GIT_CHECKOUT
 
-   If you get an error, you can try running, and then repeat the mount
-   command...  and if that doesn't work you can try rebooting the VM.
+   If you get an error mounting the shared directory, you can try
+   running the umount command below, and then repeat the mount command
+   above.  If that doesn't work you can try halt, stop, and play
+   (rebooting) the VM and then try again.
 
    sudo umount /usr/local/submitty/GIT_CHECKOUT
 
@@ -151,7 +168,8 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
     Hopefully it completes without error or network problems... if you
     have errors, you can try to re-run the above command.  However, if
-    it crashes in the middle of creating the data, you may need to do:
+    it crashes in the middle of creating the sample course data, you
+    may need to do:
 
     sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh
 
