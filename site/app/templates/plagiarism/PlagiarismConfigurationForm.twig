@@ -181,7 +181,7 @@
             {##################################################################}
             <div>
                 <a href="{{ plagiarism_link }}" class="btn btn-danger">Cancel</a>
-                <input class="btn btn-primary" type="submit" value="Save Configuration" />
+                <input id="submit-form" class="btn btn-primary" type="submit" value="Save Configuration"/>
             </div>
         </form>
     </div>
@@ -190,6 +190,13 @@
 <script>
     const form = $("#save-configuration-form");
     const prior_semester_course_list = JSON.parse(`{{ config["prior_semester_courses"] | json_encode() | raw }}`);
+
+    // SUBMIT FORM /////////////////////////////////////////////////////////////
+    $(document).ready(function() {
+        form.submit(function () {
+            $('#submit-form').attr('disabled', true);
+        });
+    });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
     $("#no-code-provided-id").change(function() {
@@ -213,6 +220,12 @@
     });
 
     // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
+    $(document).ready(function() {
+        if ({{ config["prior_terms"] ? "true" : "false" }} && $("#past-terms-id").is(":checked")) {
+            $("#prev-gradeable-div").show();
+        }
+    });
+
     $('#add-more-prev-gradeable', form).on('click', function(){
         addMorePriorTermGradeable();
     });
