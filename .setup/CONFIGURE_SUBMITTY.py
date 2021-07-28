@@ -492,9 +492,9 @@ if not args.worker:
             json.dump(container_dict, container_file, indent=4)
 
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
-      shutil.chown(file, PHP_USER, DAEMON_GID)
       os.chmod(file, 0o660)
 
+    shutil.chown(WORKERS_JSON, PHP_USER, DAEMON_GID)
     shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
 ##############################################################################
