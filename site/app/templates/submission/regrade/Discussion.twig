@@ -20,7 +20,7 @@
             <div class="grade-inquiry" data-component_id={{ component.id }}>
                 <div class="grade-inquiry-header-div">
                     {% if grade_inquiries[component.id] is defined %}
-                        {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
+                        {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
                             <h3 class="grade-inquiry-header">Grade Inquiry:</h3>
                             <span class="grade-inquiry-status">
                             {% if grade_inquiries[component.id].status == -1 and is_grading %}
@@ -47,7 +47,7 @@
                 {# show form if it is before grade inquiry deadline or this is an already opened inquiry #}
                 {% if is_inquiry_open or grade_inquiries[component.id] is defined %}
                 {# show form if grade inquiry per component and (it is not the all tab or there is an unresolved inquiry that is not a component) #}
-                {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
+                {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
                     <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
                         <input type="hidden" id="thread_id" name="thread_id" value="{{ grade_inquiries[component.id].id is defined ? grade_inquiries[component.id].id : 0  }}">
@@ -93,7 +93,7 @@
                                 <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Post Additional Information
                                 </button>
-                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Close Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == 0 and is_grading %}
