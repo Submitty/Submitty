@@ -65,7 +65,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    under the "Sharing" tab,
    -> could uncheck "enable clipboard sharing" (doesn't seem to work anyways, buggy?)
    -> "enable directory sharing"
-   
+
 
 
 5. From the main screen, with this new VM selected:
@@ -83,7 +83,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    * "Install Ubuntu Server"
 
    ... you'll wait a while here ...
-   
+
    * "English"
    * "Done" on keyboard layout
    * "Done" on network connections
@@ -98,7 +98,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    * "Continue" on confirm destructive action
    * Fill in the profile setup (set a <USERNAME> & <PASSWORD>)
    * Select "Install OpenSSH server" and then "Done"
-   * "Done" on featured server snaps 
+   * "Done" on featured server snaps
 
    ... now wait why the server installs ...
 
@@ -133,7 +133,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    may be a security concern.
 
    ALSO: It appears the command below MUST be typed in the UTM VM GUI
-   Terminal (not from an ssh terminal).  
+   Terminal (not from an ssh terminal).
 
    sudo mount -t davfs -o noexec http://127.0.0.1:9843 /usr/local/submitty/GIT_CHECKOUT
 
@@ -149,8 +149,12 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
     sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/install_system.sh --vagrant
 
-    Hopefully it completes without error or network problems.
-    
+    Hopefully it completes without error or network problems... if you
+    have errors, you can try to re-run the above command.  However, if
+    it crashes in the middle of creating the data, you may need to do:
+
+    sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh
+
 
 11. When finished, access the Submitty website from a browser on your host machine:
 

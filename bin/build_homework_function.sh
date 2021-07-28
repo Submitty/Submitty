@@ -185,6 +185,7 @@ function build_homework {
         -I${JSONCODE} \
         -pthread -g -std=c++11 -lseccomp -o configure.out
 
+ 
     ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json $assignment
     configure_res=$?
 
