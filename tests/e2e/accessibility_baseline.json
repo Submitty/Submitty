@@ -33,8 +33,7 @@
     "/courses/{}/{}/theme": [],
     "/courses/{}/{}/office_hours_queue": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "Bad value 'http://localhost/courses/{}/sample/office_hours_queue/{}/{}' for attribute 'action' on element 'form': Illegal character in path segment: space is not allowed.",
-        "Attribute 'help_time' not allowed on element 'td' at this point."
+        "Attribute “help_time” not allowed on element “td” at this point."
     ],
     "/courses/s20/sample/polls": [],
     "/courses/s20/sample/polls/newPoll": [],
