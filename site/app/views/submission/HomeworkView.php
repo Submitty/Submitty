@@ -256,7 +256,8 @@ class HomeworkView extends AbstractView {
                     $new_late_days_remaining = $late_days_remaining - $new_late_charged;
                     $messages[] = ['type' => 'would_allowed', 'info' => [
                         'charged' => $new_late_charged,
-                        'remaining' => $new_late_days_remaining
+                        'remaining' => $new_late_days_remaining,
+                        'active_version' => $active_version
                     ]];
                 }
             }
