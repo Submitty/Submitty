@@ -178,7 +178,7 @@ function restoreNotebookFromLocal() {
             //create header text to warn user
             const old_answers_header = document.createElement('h4');
             old_answers_header.style.color = 'var(--focus-danger-red)';
-            old_answers_header.innerHTML = 'Answer(s) could not be restored you will have to copy and paste them in the proper place';
+            old_answers_header.innerHTML = 'Answer(s) could not be restored. You will have to copy and paste them in the proper place.';
             //add header to container
             old_answers_div.appendChild(old_answers_header);
 
