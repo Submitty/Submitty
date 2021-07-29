@@ -114,6 +114,7 @@ function build_homework {
 
     course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
     GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
+    JSONCODE=${SUBMITTY_INSTALL_DIR}/vendor/include
 
     # check that the user executing this script is in the course group
     course_group=`stat -c "%G" $course_dir`
@@ -190,7 +191,9 @@ function build_homework {
         ${GRADINGCODE}/dispatch.cpp ${GRADINGCODE}/change.cpp ${GRADINGCODE}/difference.cpp \
         ${GRADINGCODE}/tokenSearch.cpp ${GRADINGCODE}/tokens.cpp ${GRADINGCODE}/clean.cpp \
         ${GRADINGCODE}/execute_limits.cpp ${GRADINGCODE}/seccomp_functions.cpp \
-        ${GRADINGCODE}/empty_custom_function.cpp -pthread -g -std=c++11 -lseccomp -o configure.out
+        ${GRADINGCODE}/empty_custom_function.cpp \
+        -I${JSONCODE} \
+        -pthread -g -std=c++11 -lseccomp -o configure.out
 
 
     ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json $assignment

@@ -9,21 +9,12 @@ window.onbeforeunload = function() {
 };
 //Toolbar stuff
 function renderPDFToolbar() {
-    let active_toolbar = true;
-    const debounce = (fn, time, ...args) => {
-        if (active_toolbar) {
-            fn(args);
-            active_toolbar = false;
-            setTimeout(function() {
-                active_toolbar = true;
-            }, time);
-        }
-    }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    $('#zoom-custom').val(Number(localStorage.getItem('scale'))*100 || '100');
     sessionStorage.setItem('toolbar_loaded', true);
     function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
-        let clicked_button = $("a[value="+option+"]");
+        let clicked_button = $(`a[value=${option}]`);
         if(option != selected.attr('value')){
             //There are two classes for the icons; toolbar-action and toolbar-item.
             //toolbar-action are single use buttons such as download and clear
@@ -66,20 +57,30 @@ function renderPDFToolbar() {
                     clearCanvas();
                     break;
                 case 'save':
-                    debounce(saveFile, 500);
+                    saveFile();
+                    break;
+                case 'toggle-annotations':
+                    const hide_other = $('#toggle-annotations-btn').hasClass('hide-other-annotations');
+                    $('#toggle-annotations-btn').toggleClass('hide-other-annotations');
+                    if(hide_other) {
+                        $('#toggle-annotations-btn').html('Show All Annotations <i class="fas fa-eye"></i>');
+                    }
+                    else {
+                        $('#toggle-annotations-btn').html('Hide Other Annotations <i class="fas fa-eye-slash"></i>');
+                    }
+                    toggleOtherAnnotations(hide_other);
                     break;
                 case 'zoomin':
-                    debounce(zoom, 500, 'in');
+                    zoom(Math.round((Number(window.RENDER_OPTIONS.scale) + 0.1) * 100));
                     break;
                 case 'zoomout':
-                    debounce(zoom, 500, 'out');
+                    zoom(Math.round((Number(window.RENDER_OPTIONS.scale) - 0.1) * 100));
                     break;
-                case 'zoomcustom':
-                    debounce(zoom, 500, 'custom');
+                case 'rotate-right':
+                    rotate(90);
                     break;
-                case 'rotate':
-                    debounce(rotate, 500);
-                    break;
+                case 'rotate-left':
+                    rotate(-90);
                 case 'text':
                     currentTool = 'text';
                     PDFAnnotate.UI.enableText();
@@ -90,62 +91,28 @@ function renderPDFToolbar() {
             //For color and size select
             switch(option){
                 case 'pen':
-                    $("#pen_selection").toggle();
+                    $('#pen_selection').toggle();
                     break;
                 case 'text':
-                    $("#text_selection").toggle();
+                    $('#text_selection').toggle();
                     break;
             }
         }
     }
 
-    function rotate(){
-        window.RENDER_OPTIONS.rotate += 90;
+    function rotate(amount) {
+        window.RENDER_OPTIONS.rotate += amount;
         if (!window.RENDER_OPTIONS.studentPopup) {
           localStorage.setItem('rotate', window.RENDER_OPTIONS.rotate);
         }
         render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
     }
 
-    function zoom(option, custom_val){
-        let zoom_flag = true;
-        let zoom_level = window.RENDER_OPTIONS.scale;
-        if(option == 'in'){
-            zoom_level += 0.1;
-        }
-        else if(option == 'out'){
-            zoom_level -= 0.1;
-        }
-        else {
-            if(custom_val != null){
-                zoom_level = custom_val/100;
-            }
-            else {
-                zoom_flag = false;
-            }
-            $('#zoom_selection').toggle();
-        }
-        if(zoom_level > 10 || zoom_level < 0.25){
-            alert("Cannot zoom more");
-            return;
-        }
-        if(zoom_flag){
-            $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
-            window.RENDER_OPTIONS.scale = zoom_level;
-            if (!window.RENDER_OPTIONS.studentPopup) {
-              localStorage.setItem('scale', window.RENDER_OPTIONS.scale);
-            }
-            render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-        }
-    }
-
     function clearCanvas(){
-        if (confirm('Are you sure you want to clear annotations?')) {
-            for (let i=0; i<NUM_PAGES; i++) {
-                document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
-            }
-
-            localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        if (confirm('Are you sure you want to clear all of your annotations?\n\nWARNING: This action CANNOT be undone.')) {
+            localStorage.setItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`, '[]');
+            saveFile();
+            $(`svg [data-pdf-annotate-userId=${GENERAL_INFORMATION.grader_id}]`).remove();
         }
     }
     
@@ -163,16 +130,18 @@ function renderPDFToolbar() {
             },
             success: function(data){
                 let response = JSON.parse(data);
-                if(response.status === "success"){
-                    $('#save_status').text("Saved");
+                if(response.status === 'success'){
+                    $('#save_status').text('Saved');
                     $('#save_status').css('color', 'inherit');
+                    $('#save-pdf-btn').removeClass('btn-primary');
+                    $('#save-pdf-btn').addClass('btn-default');
                 }
                 else {
                     alert(data.message);
                 }
             },
             error: function(){
-                alert("Something went wrong, please contact a administrator.");
+                alert('Something went wrong, please contact a administrator.');
             }
         });
     }
@@ -182,29 +151,40 @@ function renderPDFToolbar() {
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
 
+    $(document).on('click', function() {
+        $('.selection-menu').hide();
+    });
+
+    $('.selection-menu').on('click', function(e) {
+        e.stopPropagation();
+    })
+
 // Color/size selection
     function initColors(){
-        document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
-        document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+        document.getElementById('color_selector').addEventListener('click', colorMenuToggle);
+        document.getElementById('size_selector').addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
-        let init_color = localStorage.getItem('main_color') || "#000000";
+        let init_color = localStorage.getItem('main_color') || '#000000';
         setColor(init_color);
     }
 
     function colorMenuToggle(e){
         let shouldShow = !$('#color_selector_menu').is(':visible');
         $('.selection-menu').hide();
-        shouldShow && $('#color_selector_menu').toggle();
+        shouldShow && $('#color_selector_menu').show();
+        e.stopPropagation();
     }
 
-    function sizeMenuToggle(){
+    function sizeMenuToggle(e){
         let shouldShow = !$('#size_selector_menu').is(':visible');
         $('.selection-menu').hide();
-        shouldShow && $('#size_selector_menu').toggle();
+        shouldShow && $('#size_selector_menu').show();
+        e.stopPropagation();
     }
 
     function changeColor(e){
-        setColor(e.srcElement.getAttribute('value'))
+        setColor(e.srcElement.getAttribute('value') || e.target.value);
+        $('#color_selector_menu').hide();
     }
 
     function setColor(color){
@@ -217,7 +197,7 @@ function renderPDFToolbar() {
     let scrollLock= false;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 5.0;
-        let init_color = localStorage.getItem('main_color') || "#000000";
+        let init_color = localStorage.getItem('main_color') || '#000000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         if($('#scroll_lock_mode').is(':checked')) {
@@ -227,14 +207,16 @@ function renderPDFToolbar() {
         setPen(init_size, init_color);
         
         document.getElementById('pen_size_selector').addEventListener('change', function(e){
-            setPen(e.target.value || e.srcElement.value, penColor);
+            setPen(e.target.value, penColor);
         });
         document.addEventListener('colorchange', function(e){
-            setPen(penSize, e.srcElement.getAttribute('value'));
+            setPen(penSize, e.srcElement.getAttribute('value') || e.target.value);
         });
     }
 
     function setPen(pen_size, pen_color) {
+        pen_size = pen_size || 5;
+        pen_color = pen_color || '#000000';
         penSize = pen_size;
         penColor = pen_color;
         
@@ -251,18 +233,20 @@ function renderPDFToolbar() {
     let textColor = '#FF0000';
     function initText() {
         let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('main_color') || "#000000";
+        let init_color = localStorage.getItem('main_color') || '#000000';
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
         document.addEventListener('colorchange', function(e){
-            setText(textSize, e.srcElement.getAttribute('value'));
+            setText(textSize, e.target.value);
         });
         document.getElementById('text_size_selector').addEventListener('change', function(e) {
-            setText(e.target.value || e.srcElement.value, textColor);
+            setText(e.target.value, textColor);
         });
     }
 
     function setText(text_size, text_color) {
+        text_size = text_size || 12;
+        text_color = text_color || '#000000';
         textSize = text_size;
         textColor = text_color;
         localStorage.setItem('text/size', text_size);
@@ -272,4 +256,21 @@ function renderPDFToolbar() {
     initColors();
     initPen();
     initText();
+}
+
+function zoom(zoom_level){
+    if(isNaN(zoom_level)) {
+        zoom_level = 100;
+    }
+
+    $('#zoom-custom').val(zoom_level);
+
+    zoom_level = Math.min(Math.max(10, zoom_level), 500);
+    zoom_level /= 100;
+
+    window.RENDER_OPTIONS.scale = zoom_level;
+    if (!window.RENDER_OPTIONS.studentPopup) {
+        localStorage.setItem('scale', window.RENDER_OPTIONS.scale);
+    }
+    render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
 }
