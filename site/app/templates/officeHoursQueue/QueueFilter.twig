@@ -49,14 +49,14 @@
               <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
           </td>
           <td>
-            <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+            <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
               <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn">Empty</button>
             </form>
           </td>
           <td>
-            <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
+            <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
               <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn">Delete</button>

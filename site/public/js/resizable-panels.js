@@ -39,7 +39,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
 
         document.documentElement.style.setProperty(
             'cursor',
-            dragBarSel === '.two-panel-drag-bar' ? 'col-resize' : 'ns-resize',
+            dragBarSel === '.two-panel-drag-bar' || dragBarSel === '.plag-drag-bar' ? 'col-resize' : 'ns-resize',
             'important',
         );
 

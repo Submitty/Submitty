@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iomanip>
 #include <sys/resource.h>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "testResults.h"
 

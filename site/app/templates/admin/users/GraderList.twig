@@ -54,7 +54,7 @@
 </div>
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/GraderListForm.twig') %}
-{% include('admin/users/RegistrationSectionsForm.twig') %}
+{% include('admin/users/RegistrationSectionsForm.twig') with { 'num_rotating_sections': rot_sections|length } %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'grader' } %}
 {% include('admin/users/DeleteUserForm.twig') %}
 
