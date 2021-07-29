@@ -7485,7 +7485,7 @@ SQL;
         );
         return $this->submitty_db->getRowCount() === 1;
     }
-  
+
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
             'SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
