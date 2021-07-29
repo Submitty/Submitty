@@ -49,16 +49,25 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $annotation_jsons, true, 1, true);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, null, null, $annotation_jsons, true, 1, true);
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")
      */
-    public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path): void {
+    public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path, string $student_id=""): void {
         $filename = html_entity_decode($filename);
         $anon_path = urldecode($anon_path);
         $id = $this->core->getUser()->getId();
+
+        if($student_id) {
+            if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT && $student_id !== $id) {
+                $this->core->getOutput()->renderJsonFail('You do not have permission to access this file');
+                return;
+            }
+            $id = $student_id;
+        }
+
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
@@ -247,7 +256,7 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $annotation_jsons, false, $page_num);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num);
     }
 
     /**
