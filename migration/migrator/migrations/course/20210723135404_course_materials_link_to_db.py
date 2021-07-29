@@ -16,8 +16,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE course_materials ADD COLUMN url TEXT;")
-    database.execute("ALTER TABLE course_materials ADD COLUMN url_title varchar(255);")
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS url TEXT;")
+    database.execute("ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS url_title varchar(255);")
 
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     json_file = Path(course_dir, 'uploads', 'course_materials_file_data.json')
@@ -30,11 +30,13 @@ def up(config, database, semester, course):
                 for itemkey, itemvalue in data.items():
                     url = None
                     url_title = None
-                    if itemvalue['external_link'] is True:
+                    if 'external_link' in itemvalue and itemvalue['external_link'] is True:
                         f = open(itemkey)
                         data = json.load(f)
                         url = data['url']
                         url_title = data['name']
+                        if url is not None and url_title is None:
+                            url_title = url
                     query = """
                         UPDATE course_materials SET
                         url = :url, url_title = :url_title

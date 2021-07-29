@@ -358,6 +358,9 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
             $details['path'][0] = FileUtils::joinPaths($final_path, urlencode("link-" . $url_title));
+            if (file_exists($details['path'][0])) {
+                return JsonResponse::getErrorResponse("Link with title already exists in this location. Please pick a different title.");
+            }
             FileUtils::writeFile($details['path'][0], "");
         }
         else {

@@ -113,11 +113,8 @@ class CourseMaterialsView extends AbstractView {
                     break;
                 }
             }
-            $path_to_place = array_merge(
-                array_slice($path_to_place, 0, $index),
-                [$file_name => $course_material],
-                array_slice($path_to_place, $index)
-            );
+            $path_to_place = array_slice($path_to_place, 0, $index, true) +
+                [$file_name => $course_material] + array_slice($path_to_place, $index, null, true);
         }
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [

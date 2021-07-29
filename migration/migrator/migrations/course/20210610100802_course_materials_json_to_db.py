@@ -59,9 +59,11 @@ def up(config, database, semester, course):
             data = json.load(file)
             if isinstance(data, dict):
                 for itemkey, itemvalue in data.items():
+                    if itemkey == 'release_time':
+                        continue
                     material_type = 0
                     path = itemkey
-                    if itemvalue['external_link'] is True:
+                    if 'external_link' in itemvalue and itemvalue['external_link'] is True:
                         material_type = 1
                     sections = []
                     if 'sort_priority' not in itemvalue:
@@ -92,7 +94,7 @@ def up(config, database, semester, course):
                         'path': path,
                         'type': material_type,
                         'release_date': itemvalue['release_datetime'],
-                        'hidden_from_students': "false" if itemvalue['hide_from_students'] == "off" else "true",
+                        'hidden_from_students': "false" if 'hide_from_students' in itemvalue and itemvalue['hide_from_students'] == "off" else "true",
                         'priority': itemvalue['sort_priority']
                     }
                     result = database.session.execute(query, params)
@@ -163,6 +165,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE IF EXISTS course_materials CASCADE;")
-    database.execute("DROP TABLE IF EXISTS course_materials_sections CASCADE;")
     pass
