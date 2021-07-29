@@ -3,6 +3,7 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\entities\course\CourseMaterialAccess;
 use app\entities\course\CourseMaterialSection;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -112,6 +113,8 @@ class CourseMaterialsController extends AbstractController {
                             $relativePath = substr($file_path, strlen($root_path) + 1);
                             $isFolderEmptyForMe = false;
                             $zip->addFile($file_path, $relativePath);
+                            $course_material_access = new CourseMaterialAccess($course_material, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
+                            $course_material->addAccess($course_material_access);
                         }
                     }
                     else {
@@ -119,6 +122,8 @@ class CourseMaterialsController extends AbstractController {
                         $relativePath = substr($file_path, strlen($root_path) + 1);
                         $isFolderEmptyForMe = false;
                         $zip->addFile($file_path, $relativePath);
+                        $course_material_access = new CourseMaterialAccess($course_material, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
+                        $course_material->addAccess($course_material_access);
                     }
                 }
             }
@@ -130,6 +135,7 @@ class CourseMaterialsController extends AbstractController {
             return false;
         }
         $zip->close();
+        $this->core->getCourseEntityManager()->flush();
         header("Content-type: application/zip");
         header("Content-Disposition: attachment; filename=$zip_file_name");
         header("Content-length: " . filesize($zip_name));
