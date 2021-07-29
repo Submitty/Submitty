@@ -14,8 +14,9 @@ describe('Test cases revolving around polls functionality', () => {
 
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
-        cy.wait(500);
+        cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();
+        cy.get('#future-table').should('be.visible');
 
         // verify that existing polls exist and are in the expected state
         cy.get('#older-table').contains('Poll 1');
@@ -31,8 +32,7 @@ describe('Test cases revolving around polls functionality', () => {
         // poll 3 release date is initially set to today but we
         // can't rely on the test being run on the same day as
         // when the vagrant environment was created
-        cy.get('#poll_3_visible').should('be.checked');
-        cy.get('#poll_3_view_results').should('be.checked');
+        cy.contains('Poll 3');
         cy.get('#poll_3_responses').invoke('text').then(parseInt).should('be.eq', 0);
 
         cy.get('#future-table').contains('Poll 4');
@@ -53,8 +53,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#older-table').contains('Poll 2');
         cy.contains('Poll 2').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
         cy.contains('Poll 2').siblings(':nth-child(3)').contains('View Poll');
-
-        cy.contains('Poll 3').siblings(':nth-child(2)').contains('No Response');
     });
 
     it('Should verify all polls result pages', () => {
@@ -65,8 +63,9 @@ describe('Test cases revolving around polls functionality', () => {
 
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
-        cy.wait(500);
+        cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();
+        cy.get('#future-table').should('be.visible');
 
         // go to poll 1 result page
         cy.contains('Poll 1').siblings().last().click();
