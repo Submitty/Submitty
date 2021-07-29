@@ -545,11 +545,13 @@ class DiffViewer {
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
          */
+        $num_chars = 0;
         $max_digits = strlen((string) count($lines));
         for ($i = 0; $i < count($lines); $i++) {
-            if ($i === 1000 - $num_blanks) {
+            if ($i === 1000 - $num_blanks || $num_chars >= 50000) {
                 break;
             }
+            $num_chars += strlen($lines[$i]);
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
@@ -643,7 +645,7 @@ class DiffViewer {
                 $html .= "\t</div>\n";
             }
         }
-        if (count($lines) + $num_blanks > 1000) {
+        if (count($lines) + $num_blanks > 1000 || $num_chars >= 50000) {
             $html .= "<p>...</p>";
             if ($type === self::EXPECTED) {
                 $truncate_error = "<p style='color: red;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>";
