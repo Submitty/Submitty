@@ -35,8 +35,9 @@ class EmailStatusView extends AbstractView {
         $errors = [];
         // A map of email subjects to the semester and course as one string
         $courses = [];
-
+        $count = 0;
         foreach ($data as $row) {
+            $count++;
             $key = $this->EmailToKey($row);
             if (!in_array($key, $subjects)) {
                 $subjects[] = $key;

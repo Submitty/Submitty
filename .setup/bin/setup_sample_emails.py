@@ -52,14 +52,16 @@ def main():
     courses_body = []
     superuser_subject = []
     superuser_body = []
+    course_result = courses.fetchall()
 
     # These are not realistic emails as the email content does not check who owns the course and the body is often times nonsensical
     for i in range(EMAIL_NUM):
         course_selected = random.randint(0, courses.rowcount)
+        print ("Adding email entry #", i)
         # superuser email
-        if course_selected is courses.rowcount:
+        if course_selected == courses.rowcount:
             user_table = Table('users', submitty_metadata, autoload=True)
-            users = submitty_conn.execute(select(user_table))
+            users = submitty_conn.execute(select(user_table.c))
             emails = generateRandomSuperuserEmail(users)
             for email in emails:
                 submitty_conn.execute(email_table.insert(),
@@ -72,11 +74,13 @@ def main():
                                     course=email["course"])
         # course email
         else:
-            course = courses.fetchall()[course_selected]
-            user_table = Table('courses_users', submitty_metadata, autoload=True)
-            users = submitty_conn.execute(select(user_table.c)
-                                        .where(user_table.c.semester == course.semester)
-                                        .where(user_table.c.course == course.course))
+            course = course_result[course_selected]
+            courses_user_table = Table('courses_users', submitty_metadata, autoload=True)
+            user_table = Table('users', submitty_metadata, autoload=True)
+            users = submitty_conn.execute("SELECT * FROM users INNER JOIN courses_users\
+                                           ON courses_users.user_id = users.user_id\
+                                           WHERE courses_users.semester = '{}'\
+                                           AND courses_users.course = '{}'".format(course.semester, course.course))
             emails = generateRandomCourseEmail(users, course)
             for email in emails:
                 submitty_conn.execute(email_table.insert(),
@@ -98,11 +102,11 @@ def generateRandomSuperuserEmail(recipients):
     for recipient in recipients:
         emails.append(
             {
-                "user_id": recipient.id,
+                "user_id": recipient.user_id,
                 "subject": "[Submitty Admin Announcement]: " + subject,
                 "body": body,
                 "created": NOW,
-                "email_address": recipient.email,
+                "email_address": recipient.user_email,
                 "semester": None,
                 "course": None
             }
@@ -117,15 +121,13 @@ def generateRandomCourseEmail(recipients, course):
 
     emails = []
     for recipient in recipients:
-        print(recipient.keys())
-        print(recipient)
         emails.append(
             {
                 "user_id": recipient.user_id,
                 "subject": subject,
                 "body": body,
                 "created": NOW,
-                "email_address": recipient.email,
+                "email_address": recipient.user_email,
                 "semester": course.semester,
                 "course": course.course
             }
