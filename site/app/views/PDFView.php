@@ -45,11 +45,6 @@ class PDFView extends AbstractView {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
         }
 
-        // var_dump($file_name);
-        // var_dump($file_path);
-        // var_dump($anon_path);
-        // var_dump($download_path);
-
         $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
             'user_id' => $user_id,

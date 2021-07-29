@@ -55,12 +55,12 @@ class PDFController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")
      */
-    public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path, string $student_id=""): void {
+    public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path, string $student_id = ""): void {
         $filename = html_entity_decode($filename);
         $anon_path = urldecode($anon_path);
         $id = $this->core->getUser()->getId();
 
-        if($student_id) {
+        if ($student_id) {
             if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT && $student_id !== $id) {
                 $this->core->getOutput()->renderJsonFail('You do not have permission to access this file');
                 return;
