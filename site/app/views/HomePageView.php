@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\libraries\DateUtils;
+use app\models\Course;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -59,6 +60,12 @@ class HomePageView extends AbstractView {
 
     public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
         $this->output->addBreadcrumb("New Course");
+        $course_names = [];
+        foreach ($courses as $course) {
+            $course_names[] = $course->getTitle();
+        }
+        $course_names = array_unique($course_names);
+        sort($course_names);
         return $this->output->renderTwigTemplate('CreateCourseForm.twig', [
             "csrf_token" => $csrf_token,
             "head_instructor" => $head_instructor,
@@ -68,7 +75,7 @@ class HomePageView extends AbstractView {
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
             "add_term_url" => $this->output->buildUrl(['term', 'new']),
-            "courses" => $courses
+            "courses" => $course_names
         ]);
     }
 

@@ -37,7 +37,7 @@
                       <span class="block">What is the course code for the new course?
                       {{ course_code_requirements }} </span>
                       <span class="block">Please follow course code conventions established by your school and department.<br>
-                      My Prior Course Codes: {% for course in courses %}{{ course.getTitle }}{% if not loop.last%},{% endif %} {% endfor %}.<br>
+                      My Prior Course Codes: {% for course in courses %}{{ course }}{% if not loop.last %}, {% endif %}{% endfor %}.<br>
                       Contact the system administrator if you are unsure what course code you should use.</span>
                       <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</span>
                       <span class="required_type">(Required)</span>

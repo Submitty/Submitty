@@ -20,7 +20,7 @@ status = 'fail'
 group_name = arguments.getvalue('group_name', None)
 head_instructor = arguments.getvalue('head_instructor', None)
 
-group_mandatory_users = ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_admin'];
+group_mandatory_users = ['submitty_php', 'submitty_daemon', 'submitty_cgi'];
 
 for member in grp.getgrnam(group_name).gr_mem:
     if member in group_mandatory_users:
