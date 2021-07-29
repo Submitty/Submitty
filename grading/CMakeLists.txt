@@ -9,6 +9,7 @@ set (SUBMITTY_DATA_DIR __INSTALL__FILLIN__SUBMITTY_DATA_DIR__)
 
 # assuming the core files for config, compilation, running, & grading are here:
 set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
+set (JSONCODE ${SUBMITTY_INSTALL_DIR}/vendor/include)
 
 ###################################################################################
 # source files
@@ -36,7 +37,7 @@ target_link_libraries(submitty_grading seccomp)
 
 set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 
-
 include_directories(${GRADINGCODE})
+include_directories(${JSONCODE})
 
 ###################################################################################

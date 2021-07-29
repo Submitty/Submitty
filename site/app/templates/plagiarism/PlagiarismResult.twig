@@ -1,36 +1,38 @@
 <script>
     $(document).ready(function() {
-        setUpPlagView("{{ gradeable_id }}", "{{ config_id }}");
+        setUpPlagView("{{ gradeable_id }}", "{{ term_course_gradeable }}", "{{ config_id }}", {{ rankings|json_encode()|raw }});
     });
 </script>
 <div class="content plagiarism-result-cont">
     <div id="result-title-bar">
         <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span> </h2>
         <span class="plag-results-header-right">
-            <a class="btn btn-primary" onclick="toggle();">Swap Students</a> {# TODO: Disable "Swap Students" button when no user selected #}
+            <a class="btn btn-primary" onclick="showPlagiarismHighKey()">View Key</a>
             <a class="btn btn-primary" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
-            <a class="btn btn-primary" title="View Key" onclick="showPlagiarismHighKey()">View Key</a>
         </span>
     </div>
     <hr />
     <form id="users_with_plagiarism" class="plag-flex">
         <div class="plag-flex-row">
             <span class="plag-flex-item">
-                <select name="user_id_1" class="user1-select">
+                <select id="user-1-dropdown-list" name="user_id_1" class="user1-select">
                     {% for ranking in rankings %}
-                        <option value="{{ ranking[1] }}">(Max Match: {{ ranking[0] }}) {{ ranking[3] }} {{ ranking[4] }} &lt;{{ ranking[1] }}&gt;</option>
+                        <option value="{{ ranking["user_id"] }}">(Max Match: {{ ranking["percent"] }}) {{ ranking["display_name"] }} &lt;{{ ranking["user_id"] }}&gt;</option>
                     {% endfor %}
                 </select>
             </span>
+            <a id="swap-students-button" class="btn btn-secondary pl-1 pr-1" title="Switch Focused Student"><i class="fa fa-long-arrow-alt-left fa-lg"></i></a>
             <span class="plag-flex-item">
-                <select name="user_id_2" class="user2-select"></select>
+                <select id="user-2-dropdown-list" name="user_id_2" class="user2-select">
+                    <option>Loading...</option>
+                </select>
             </span>
         </div>
 
         <div class="plag-flex-row">
             <span class="plag-flex-item">Version:
-                <select name="version_user_1">
-                    <option value="">None</option>
+                <select id="user-1-version-dropdown-list" name="version_user_1">
+                    <option>Loading...</option>
                 </select>
             </span>
         </div>
