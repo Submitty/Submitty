@@ -36,26 +36,26 @@ class EmailStatusView extends AbstractView {
         // A map of email subjects to the semester and course as one string
         $courses = [];
         $count = 0;
-        foreach ($data as $row) {
-            $count++;
-            $key = $this->EmailToKey($row);
-            if (!in_array($key, $subjects)) {
-                $subjects[] = $key;
-                $successes[$key] = [];
-                $errors[$key] = [];
-                $pending[$key] = [];
-            }
-            if ($row->getSemester() != null || $row->getCourse() != null) {
-                $courses[$key] = $row->getSemester() . ' ' . $row->getCourse();
-            }
-            if ($row->getSent() != null) {
-                $successes[$key][] = $row;
-            }
-            elseif ($row->getError() != null) {
-                $errors[$key][] = $row;
-            }
-            else {
-                $pending[$key][] = $row;
+        foreach ($data as $iterator) {
+            foreach($iterator as $row) {
+                $count++;
+                $key = $this->EmailToKey($row);
+                if (!in_array($key, $subjects)) {
+                    $subjects[] = $key;
+                    $successes[$key] = [];
+                    $errors[$key] = [];
+                    $pending[$key] = [];
+                }
+                if ($row->getSemester() != null || $row->getCourse() != null) {
+                    $courses[$key] = $row->getSemester() . ' ' . $row->getCourse();
+                }
+                if ($row->getSent() != null) {
+                    $successes[$key][] = $row;
+                } elseif ($row->getError() != null) {
+                    $errors[$key][] = $row;
+                } else {
+                    $pending[$key][] = $row;
+                }
             }
         }
 

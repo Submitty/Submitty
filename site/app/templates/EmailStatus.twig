@@ -13,17 +13,14 @@
                 </div>
                 {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
                     <button class="btn btn-success text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
-                        Show Details
-                    </button>
                 {% elseif errors[subject]|length != 0 %}
                     <button class="btn btn-danger  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
-                        Show Details
-                    </button>
                 {% else %}
                     <button class="btn btn-primary  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
-                        Show Details
-                    </button>
                 {% endif %}
+                        <div class="btn-text">Show Details</div>
+                        ({{errors[subject]|length + pending[subject]|length + successes[subject]|length}})
+                    </button>
             </div>
             <div class="expand" id={{"collapse"~loop.index}}>
                 <ul>
@@ -67,11 +64,11 @@
         const expandTarget = $(button).data('target');
         if ($(button).parent().parent().find(expandTarget).is(':visible')) {
             $(button).parent().parent().find(expandTarget).hide();
-            $(button).text("Show Details");
+            $(button).find('.btn-text').text("Show Details");
         }
         else {
             $(button).parent().parent().find(expandTarget).show();
-            $(button).text("Hide Details");
+            $(button).find('.btn-text').text("Hide Details");
         }
     }
 </script>
