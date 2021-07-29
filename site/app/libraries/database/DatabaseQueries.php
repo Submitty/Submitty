@@ -7493,7 +7493,6 @@ SQL;
             [$semester, $course]
         );
         return $this->submitty_db->rows();
-
     }
 
     private function getInnerQueueSelect(): string {
