@@ -1,0 +1,85 @@
+[
+    {
+        "id": 1,
+        "name": "Poll 1",
+        "question": "What animals swim in the sea?",
+        "question_type": "multiple-response-flexible",
+        "responses": [
+            "Dolphin",
+            "Dove",
+            "Shark",
+            "Frog",
+            "Snail"
+        ],
+        "correct_responses": [
+            0,
+            2
+        ],
+        "release_date": "2021-07-19",
+        "status": "ended",
+        "image_path": "/uploads/polls/poll_image_1_sea_animals.png"
+    },
+    {
+        "id": 2,
+        "name": "Poll 2",
+        "question": "What color is the sky?",
+        "question_type": "single-response-single-correct",
+        "responses": [
+            "Green",
+            "Blue",
+            "White",
+            "Red"
+        ],
+        "correct_responses": [
+            1
+        ],
+        "release_date": "2021-07-19",
+        "status": "ended",
+        "image_path": null
+    },
+    {
+        "id": 3,
+        "name": "Poll 3",
+        "question": "What is your favorite food?",
+        "question_type": "multiple-response-survey",
+        "responses": [
+            "Pizza",
+            "Hamburger",
+            "Ice cream",
+            "Steak",
+            "Candy",
+            "Other"
+        ],
+        "correct_responses": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ],
+        "release_date": "",
+        "status": "open",
+        "image_path": null
+    },
+    {
+        "id": 4,
+        "name": "Poll 4",
+        "question": "Which of the following statements are true? Select all that apply.",
+        "question_type": "multiple-response-exact",
+        "responses": [
+            "2 + 2 = 4",
+            "3 + 2 = 7 ",
+            "2 * 3 = 6",
+            "8 / 2 = 3",
+            "1 * 3 = 4"
+        ],
+        "correct_responses": [
+            0,
+            2
+        ],
+        "release_date": "9999-12-31",
+        "status": "closed",
+        "image_path": null
+    }
+]

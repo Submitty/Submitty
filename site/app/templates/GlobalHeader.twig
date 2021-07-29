@@ -5,6 +5,13 @@
     <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
 
+    <script>
+        window.baseUrl = "{{ base_url }}";
+        window.courseUrl = "{{ course_url }}";
+        window.csrfToken = "{{ csrf_token }}";
+        window.websocketPort = {{ websocket_port }};
+    </script>
+
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
