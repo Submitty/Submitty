@@ -32,8 +32,9 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
         $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_negative_unselected");
         $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_selected");
     }
-    peerFeedbackUpload(grader_id, user_id, g_id, feedback);
-
+    if (send) {
+        peerFeedbackUpload(grader_id, user_id, g_id, feedback);
+    }
 }
 function switch_feedback_modes() {
     if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){

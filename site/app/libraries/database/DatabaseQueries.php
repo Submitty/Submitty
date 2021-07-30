@@ -3752,16 +3752,16 @@ SQL;
     }
 
     /**
-     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     * Adds an assignment for someone to get the peer feedback for a given user for a given gradeable
      *
      * @param string $gradeable_id
      */
-    public function getAllPeerFeedback($gradeable_id, $anon = false) {
+    public function getPeerFeedbackForUser($gradeable_id, $user_id, $anon = false) {
         if ($anon) {
-            $this->course_db->query("SELECT u.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN users u ON u.user_id=p.grader_id WHERE p.g_id = ? ORDER BY p.grader_id", [$gradeable_id]);
+            $this->course_db->query("SELECT u.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN users u ON u.user_id=p.grader_id WHERE p.g_id = ? AND p.user_id = ? ORDER BY p.grader_id", [$gradeable_id, $user_id]);
         }
         else {
-            $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+            $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $user_id]);
         }
         $return = [];
         foreach ($this->course_db->rows() as $id) {
