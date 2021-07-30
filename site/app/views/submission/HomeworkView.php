@@ -678,9 +678,11 @@ class HomeworkView extends AbstractView {
         $team_assignment = $graded_gradeable === null ? true : $graded_gradeable->getGradeable()->isTeamAssignment();
         $member_list = $graded_gradeable !== null && $team_assignment
                     ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : '';
+        $team_name = $graded_gradeable !== null && $team_assignment ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '';
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/NoSubmissionBox.twig', [
             'team_assignment' => $team_assignment,
-            'member_list' => $member_list
+            'member_list' => $member_list,
+            'team_name' => $team_name
         ]);
     }
 
