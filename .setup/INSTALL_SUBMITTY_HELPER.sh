@@ -58,7 +58,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
        && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
-    echo -e "   ./INSTALL_SUBMITTY.sh clean"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean quick"
     echo -e "   ./INSTALL_SUBMITTY.sh clean test"
     echo -e "   ./INSTALL_SUBMITTY.sh clean skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
@@ -177,13 +177,26 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
-    rm -rf ${SUBMITTY_INSTALL_DIR}/site
-    rm -rf ${SUBMITTY_INSTALL_DIR}/src
-    rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
+    if [[ "$#" -ge 1 && $1 == "quick" ]] ; then
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/app
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cache
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/config
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cypress
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/public
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/room_templates
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/socket
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/tests
+        find ${SUBMITTY_INSTALL_DIR}/site -maxdepth 1 -type f -exec rm {} \;
+    else
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site
+        rm -rf ${SUBMITTY_INSTALL_DIR}/src
+        rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
+        rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+    fi
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin
     rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
-    rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
 # set the permissions of the top level directory
