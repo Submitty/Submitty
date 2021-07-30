@@ -7489,8 +7489,8 @@ SQL;
 
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
-            'SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
-                   WHERE c1.semester = ? AND c1.course = ?',
+            "SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
+                   WHERE c1.semester = ? AND c1.course = ? AND c1.group_name != 'root'",
             [$semester, $course]
         );
         return $this->submitty_db->rows();
