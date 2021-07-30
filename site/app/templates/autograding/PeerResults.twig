@@ -13,7 +13,7 @@ function open_peer_feedback_tab(user, ordered_graders) {
     }
     $('#peer_feedback_nav_'+user).addClass('active-btn');
 }
-function set_peer_feedback(grader_id, user_id, g_id, feedback) {
+function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
     let peer_feedback_positive = ['no_response', 'thanks', 'helpful', 'detailed'];
     let peer_feedback_negative = ['inappropriate'];
     peer_feedback_positive.forEach(function(feedback, index) {
@@ -291,7 +291,7 @@ function switch_feedback_modes() {
                 var feedbackArray = {{peer_feedback|json_encode|raw}};
                 if('{{grader}}' in feedbackArray){
                     var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback'];
-                    set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback)
+                    set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback, false)
                 }
             </script>
         </div>

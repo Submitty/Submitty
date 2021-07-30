@@ -1366,7 +1366,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
     formData.append('grader_id', grader_id);
     formData.append('user_id', user_id);
     formData.append('feedback', feedback);
-    $.ajax({
+    $.getJSON({
         url: url,
         type: "POST",
         data: formData,
@@ -1375,7 +1375,11 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         contentType: false,
         success: function(data) {
             try {
-                $('#save_status').html('All Changes Saved');
+                if (data.status === 'success') {
+                    $('#save_status').html('All Changes Saved');
+                } else {
+                    $('#save_status').html('Error Saving Changes');
+                }
             } catch(err){
                 return;
             }

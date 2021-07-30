@@ -732,7 +732,7 @@ class AutoGradingView extends AbstractView {
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
             "annotated_file_names" =>  $annotated_file_names,
-            "peer_feedback" => $this->core->getQueries()->getAllPeerFeedback($gradeable_id),
+            "peer_feedback" => $this->core->getQueries()->getAllPeerFeedback($gradeable_id, true),
             'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
         ]);
     }

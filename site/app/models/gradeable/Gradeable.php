@@ -604,10 +604,12 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
+            return false;
         }
         else {
             $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
+        return true;
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
@@ -1623,7 +1625,7 @@ class Gradeable extends AbstractModel {
      * Gets if students can make submissions at this time
      * @return bool
      */
-    public function canStudentSubmit(): bool {
+    public function canStudentSubmit() {
         return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
             (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
     }
