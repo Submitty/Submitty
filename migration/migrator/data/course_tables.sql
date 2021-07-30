@@ -169,6 +169,50 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 
 
 --
+-- Name: course_materials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.course_materials (
+    id integer NOT NULL,
+    path character varying(255),
+    type smallint NOT NULL,
+    release_date timestamp with time zone,
+    hidden_from_students boolean,
+    priority double precision NOT NULL
+);
+
+
+--
+-- Name: course_materials_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_id_seq OWNED BY public.course_materials.id;
+
+
+--
+-- Name: course_materials_sections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.course_materials_sections (
+    course_material_id integer NOT NULL,
+    section_id character varying(255) NOT NULL
+);
+
+
+--
 -- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -517,7 +561,8 @@ CREATE TABLE public.gradeable_teams (
     g_id character varying(255) NOT NULL,
     anon_id character varying(255),
     registration_section character varying(255),
-    rotating_section integer
+    rotating_section integer,
+    team_name character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -813,7 +858,8 @@ CREATE TABLE public.queue_settings (
     id integer NOT NULL,
     open boolean NOT NULL,
     code text NOT NULL,
-    token text NOT NULL
+    token text NOT NULL,
+    regex_pattern character varying
 );
 
 
@@ -1019,6 +1065,7 @@ CREATE TABLE public.threads (
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
     pinned_expiration timestamp with time zone DEFAULT '1900-01-01 00:00:00-05'::timestamp with time zone NOT NULL,
+    announced timestamp(6) with time zone DEFAULT NULL::timestamp with time zone,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 
@@ -1088,6 +1135,13 @@ CREATE TABLE public.viewed_responses (
 --
 
 ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nextval('public.categories_list_category_id_seq'::regclass);
+
+
+--
+-- Name: course_materials id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials ALTER COLUMN id SET DEFAULT nextval('public.course_materials_id_seq'::regclass);
 
 
 --
@@ -1202,6 +1256,22 @@ ALTER TABLE ONLY public.categories_list
 
 ALTER TABLE ONLY public.categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
+
+
+--
+-- Name: course_materials course_materials_path_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_path_key UNIQUE (path);
+
+
+--
+-- Name: course_materials course_materials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_pkey PRIMARY KEY (id);
 
 
 --
@@ -1426,6 +1496,14 @@ ALTER TABLE ONLY public.peer_assign
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id);
 
 
 --
@@ -1660,6 +1738,30 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable_version
     ADD CONSTRAINT electronic_gradeable_version_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
+
+
+--
+-- Name: course_materials_sections fk_section_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
 
 
 --
@@ -2241,3 +2343,4 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+

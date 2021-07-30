@@ -382,9 +382,11 @@ function addLabel(filename, filesize, part, previous){
     label_array[part-1].push(filename);
 }
 
-function handle_input_keypress() {
+function handle_input_keypress(inactive_version) {
     empty_inputs = false;
-    setButtonStatus();
+    if (!inactive_version) {
+        setButtonStatus();
+    }
 }
 
 // BULK UPLOAD
@@ -922,11 +924,10 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
     var return_url = buildCourseUrl(['gradeable', gradeable_id]);
-
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
@@ -956,7 +957,8 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('user_id', user_id);
     formData.append('git_user_id', git_user_id);
     formData.append('git_repo_id', git_repo_id);
-    formData.append('student_page', student_page);
+    formData.append('student_page', student_page)
+    formData.append('viewing_inactive_version', viewing_inactive_version);
 
     let filesize = 0;
 
@@ -1137,7 +1139,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock) {
     var submit_url = buildCourseUrl(['course_materials', 'upload']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1154,6 +1156,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
+    formData.append('sections_lock', sections_lock);
 
     if(sections !== null){
         formData.append('sections', sections);
@@ -1254,7 +1257,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime, sortPriority) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1270,6 +1273,10 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
+    formData.append('sections_lock', sections_lock);
+    if (folderUpdate != null) {
+        formData.append('folder_update', folderUpdate);
+    }
 
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);

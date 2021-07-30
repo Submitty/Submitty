@@ -63,7 +63,6 @@
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
-
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submission-form" method="post">
@@ -288,7 +287,8 @@
             "gradeable_id" : gradeable_id,
             "highest_version" : highest_version,
             "max_file_uploads" : max_file_uploads,
-            "old_files" : old_files
+            "old_files" : old_files,
+            'viewing_inactive_version' : viewing_inactive_version
         } %}
     {% endif %}
 
@@ -311,7 +311,10 @@
                             Drag your file(s) here or click to open file browser
                         {% endif %}
                     </h2>
-                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
+                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload"
+                            {% if viewing_inactive_version %}
+                                disabled="disabled"
+                            {% endif %}/>
                     <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
                       <tr style="background:transparent; display:none;">
                         <th>File Name:</th>
@@ -335,15 +338,16 @@
             </form>
         {% endif %}
         {# /Page selector #}
-
-        <div class="upload-message">
-            {% include "misc/Markdown.twig" with {
-                "content" : upload_message
-            } only %}
-        </div>
-
-        <button type="button" id="submit" class="btn btn-success">Submit</button>
-
+        {% if can_student_submit %}
+            <div class="upload-message">
+                {% include "misc/Markdown.twig" with {
+                    "content" : upload_message
+                } only %}
+            </div>
+                <button type="button" id="submit" class="btn btn-success">
+                    {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
+                </button>
+        {% endif %}
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
@@ -415,6 +419,7 @@
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
+
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
@@ -432,7 +437,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
         else {
@@ -451,7 +457,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
     }
@@ -493,7 +500,7 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_user_id, git_repo_id);
             }
             // user id entered, need to validate first
             else {

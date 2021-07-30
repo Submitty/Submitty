@@ -56,7 +56,7 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = $this->decodeAnonPath($_POST['file_path']);
+        $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']));
         $directory = 'invalid';
         if (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
@@ -128,7 +128,7 @@ class MiscController extends AbstractController {
             }
         }
 
-        $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
+        $file_name = basename($path);
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
@@ -293,10 +293,6 @@ class MiscController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $temp_dir = "/tmp";
-        //makes a random zip file name on the server
-        $temp_name = uniqid($this->core->getUser()->getId(), true);
-        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         $gradeable_path = $this->core->getConfig()->getCoursePath();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
@@ -347,15 +343,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
-
         $zip_stream->finish();
-        header("Content-type: application/zip");
-        header("Content-Disposition: attachment; filename=$zip_file_name");
-        header("Content-length: " . filesize($zip_name));
-        header("Pragma: no-cache");
-        header("Expires: 0");
-        readfile("$zip_name");
-        unlink($zip_name); //deletes the random zip file
     }
 
     /**
@@ -420,7 +408,7 @@ class MiscController extends AbstractController {
                         );
                         foreach ($files as $name => $file) {
                             // Skip directories (they would be added automatically)
-                            if (!$file->isDir()) {
+                            if (!$file->isDir() && !$file->isLink()) {
                                 // Get real and relative path for current file
                                 $filePath = $file->getRealPath();
                                 $relativePath = substr($filePath, strlen($gradeable_path) + 1);

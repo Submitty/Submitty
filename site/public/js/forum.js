@@ -1578,16 +1578,25 @@ function bookmarkThread(thread_id, type){
     });
 }
 
-function toggleMarkdown(post_box_id) {
-  if(!post_box_id) post_box_id = '';
+function toggleMarkdown(post_box_id, triggered) {
+  if(post_box_id === undefined) post_box_id = '';
   $(`#markdown_buttons_${post_box_id}`).toggle();
-  $(this).toggleClass('markdown-active'); 
+  $(this).toggleClass('markdown-active markdown-inactive');
+  if (!triggered) {
+    $('.markdown-toggle').not(this).each(function() {
+      toggleMarkdown.call(this, this.id.split('_')[2], true);
+    });
+  }
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
+  document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
 }
 
 function previewForumMarkdown(){
-  const post_box_num = $(this).closest($('.thread-post-form')).data('post_box_id') || '';
+  let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
+  if (post_box_num === undefined) {
+    post_box_num = '';
+  }
   const reply_box = $(`textarea#reply_box_${post_box_num}`);
   const preview_box = $(`#preview_box_${post_box_num}`);
   const preview_button = $(this);
@@ -1885,7 +1894,7 @@ function updateThread(e) {
     lock_thread_date: $('input#lock_thread_date').text(),
     expirationDate: $('input#expirationDate').val(),
     cat,
-    markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
+    markdown_status: parseInt($("input#markdown_input_").val()),
   };
 
   $.ajax({
@@ -2119,4 +2128,54 @@ $(() => {
 //helps to make sure the current thread is always visible on the page
 function scrollThreadListTo(element){
   $(element).get(0).scrollIntoView({behavior: "smooth", block: "center"});
+}
+
+//Only used by the posters and only on recent posts (60 minutes since posted)
+function sendAnnouncement(id){
+  $(".pin-and-email-message").attr('disabled','disabled');
+  $.ajax({
+    type: 'POST',
+    url: buildCourseUrl(['forum', 'make_announcement']),
+    data: {"id": id, 'csrf_token': window.csrfToken},
+    success: function(data){
+        try {
+            if (JSON.parse(data).status === "success"){ 
+                pinAnnouncement(id, 1, window.csrfToken);
+                window.location.reload();
+            }
+            else{
+                window.alert("Something went wrong while trying to queue the announcement. Please try again.");
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    },
+    error: function(){
+      window.alert("Something went wrong while trying to queue the announcement. Please try again.");
+    }
+  });
+}
+
+function pinAnnouncement(thread_id, type, csrf_token){
+    if(confirm){
+        var url = buildCourseUrl(['forum', 'announcements']) + `?type=${type}`;
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_id: thread_id,
+                csrf_token: csrf_token
+
+            },
+            success: function(data){
+                if (type)
+                    window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to remove announcement. Please try again.");
+            }
+        })
+    }
 }

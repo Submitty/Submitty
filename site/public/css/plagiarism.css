@@ -1,4 +1,4 @@
-/* Main Page */
+/* ==== Main Page =========================================================== */
 .nav-buttons .btn-primary {
     white-space: normal;
 }
@@ -8,12 +8,25 @@
     width: 100%;
 }
 
+.plag-table-cont th {
+    white-space: nowrap;
+}
+
 td .plag-action-btn-cont {
     display: flex;
 }
 
 td .plag-action-btn-cont a:not(:last-child) {
     margin-right: 40px;
+}
+
+.config-id-title {
+    color: var(--standard-medium-gray);
+    font-weight: normal;
+}
+
+#result-title-bar {
+    margin-bottom: 10px;
 }
 
 .run-log-data {
@@ -30,7 +43,7 @@ td .plag-action-btn-cont a:not(:last-child) {
     max-width: 100%;
 }
 
-/* Configuration form page */
+/* ==== Configuration form page ============================================= */
 .plag-data-group {
     display: flex;
     flex-direction: column;
@@ -138,7 +151,35 @@ input[type=text]:invalid {
     margin-right: 10px;
 }
 
-/* Results Page */
+/* ==== Results Page ======================================================== */
+.match-style {
+    background-color: yellow;
+    border: 1px solid black;
+}
+
+.specific-match-style {
+    background-color: orange;
+    border: 1px solid black;
+}
+
+.common-code-style {
+    background-color: lightgray;
+}
+
+.provided-code-style {
+    background-color: #b5e3b5;
+}
+
+.selected-style-red {
+    background-color: red;
+    border: 1px solid black;
+}
+
+.selected-style-blue {
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
 .plagiarism-result-cont {
     display: flex;
     flex-direction: column;
@@ -205,14 +246,14 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 .plag-drag-bar {
     height: 100%;
-    width: 20px;
+    width: 14px;
     position: relative;
     cursor: col-resize;
 }
 
 .plag-drag-bar::after {
     content: "";
-    width: 10px;
+    width: 7px;
     height: 25%;
     max-height: 120px;
     border-radius: 10px;
@@ -224,7 +265,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
 }
 
 .plag-drag-bar:hover::after {
-    filter: blur(5px);
+    width: 9px;
 }
 
 .plag-results-header-right {
@@ -283,12 +324,12 @@ main#main.full-screen-mode .plagiarism-result-cont {
     }
 
     .plag-flex-row .user1-select {
-        width: calc(100% - 10px);
+        width: calc(100% - 7px);
     }
 
     .plag-flex-row .user2-select {
-        width: calc(100% - 10px);
-        margin-left: 10px;
+        width: calc(100% - 7px);
+        margin-left: 7px;
     }
 
     .plag-flex-item {

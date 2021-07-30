@@ -1010,6 +1010,11 @@ class SubmissionController extends AbstractController {
         $merge_previous = isset($merge) && $merge === 'true';
         $clobber = isset($clobber) && $clobber === 'true';
 
+        //don't allow submission if not on most recent version
+        if (isset($_POST['viewing_inactive_version']) && $_POST['viewing_inactive_version'] === "1") {
+            return $this->uploadResult("Must be on most recent version to make a new submission", false);
+        }
+
         $vcs_checkout = isset($_POST['vcs_checkout']) ? $_POST['vcs_checkout'] === "true" : false;
         if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
@@ -1889,15 +1894,15 @@ class SubmissionController extends AbstractController {
         if ($gradeable !== null) {
             if ($gradeable->hasAllowedTime()) {
                 $allowed_time = $gradeable->getUserAllowedTime($this->core->getUser());
-                $thing = $this->core->getQueries()->getGradeableAccessUser($gradeable->getId(), $this->core->getUser()->getId())[0]['timestamp'];
-                $now = new \DateTime($thing);
-                $now->add(new \DateInterval('PT' . $allowed_time . 'M'));
+                $first_access = $this->core->getQueries()->getGradeableAccessUser($gradeable->getId(), $this->core->getUser()->getId())[0]['timestamp'];
+                $due_time = new \DateTime($first_access);
+                $due_time->add(new \DateInterval('PT' . $allowed_time . 'M'));
                 $duedate = $gradeable->getSubmissionDueDate();
                 return JsonResponse::getSuccessResponse([
                     'deadline' => $duedate->getTimestamp() * 1000,
-                    'user_allowed_time_deadline' => $now->getTimestamp() * 1000,
+                    'user_allowed_time_deadline' => $due_time->getTimestamp() * 1000,
                     'user_allowed_time' => $allowed_time,
-                    'user_start_time' => (new \DateTime($thing))->getTimestamp() * 1000,
+                    'user_start_time' => (new \DateTime($first_access))->getTimestamp() * 1000,
                     'current_time' => (new \DateTime())->getTimestamp() * 1000
                 ]);
             }
