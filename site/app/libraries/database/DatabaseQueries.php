@@ -3759,7 +3759,8 @@ SQL;
     public function getAllPeerFeedback($gradeable_id, $anon = false) {
         if ($anon) {
             $this->course_db->query("SELECT u.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN users u ON u.user_id=p.grader_id WHERE p.g_id = ? ORDER BY p.grader_id", [$gradeable_id]);
-        } else {
+        }
+        else {
             $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
         }
         $return = [];
