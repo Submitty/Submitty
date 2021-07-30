@@ -1,9 +1,15 @@
 <div class="content">
-    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1>
     <div class="nav-buttons">
-        <a class="btn btn-primary"
-           href="{{ new_plagiarism_config_link }}"
-        ><i class="fas fa-plus"></i><span style="margin-left:0.5em;"></span>Configure New Gradeable for Plagiarism Detection</a>
+        <a class="btn btn-primary" href="{{ new_plagiarism_config_link }}">
+            <i class="fas fa-plus"></i>
+            <span style="margin-left:0.5em;"></span>
+            Configure New Gradeable for Plagiarism Detection
+        </a>
+        <a target=_blank class="right option-alt" style="margin-top: 1em;" href="https://submitty.org/instructor/course_management/plagiarism#plagiarism-main-page">
+            How to use Lichen Plagiarism Detection
+            <i style="font-style: normal;" class="fa-question-circle"></i>
+        </a>
     </div>
     {% if plagiarism_results_info|length > 0 %}
         <div class="plag-table-cont">
@@ -139,20 +145,42 @@
         originalTableWidth = $(".plag-table-cont").width();
     });
 
+    function updateRunLog(gradeable_id, config_id) {
+        const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}&config_id=${config_id}`;
+        $.get(url, function (data) {
+            if ($(`#${gradeable_id}_${config_id}_table_row`).next().hasClass("run-log-results")) {
+                data = JSON.parse(data);
+
+                const log = $(`#${gradeable_id}_${config_id}_table_row`).next().find('pre');
+                const stickToBottom = log[0].scrollHeight - log.scrollTop() - log.outerHeight() < 1;
+                log.html(data.data);
+
+                if (stickToBottom) {
+                    log.scrollTop(log[0].scrollHeight);
+                }
+
+                // the log is still open, so refresh it again
+                setTimeout(() => {
+                    updateRunLog(gradeable_id, config_id)
+                }, 50);
+            }
+        });
+    }
+
     function viewRunLog(gradeable_id, config_id) {
         if ($(`#${gradeable_id}_${config_id}_table_row`).next().hasClass("run-log-results")) {
             $(`#${gradeable_id}_${config_id}_table_row`).next().remove();
         }
         else {
-            const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}&config_id=${config_id}`;
-            $.get(url, function (data) {
-                data = JSON.parse(data);
-                $(`<tr class="run-log-results">
-                <td colspan="8" class="run-log-data">
-                    <pre style="width:${originalTableWidth}px">${data.data}</pre>
-                </td>
-            </tr>`).insertAfter(`#${gradeable_id}_${config_id}_table_row`);
-            });
+            $(`
+                <tr class="run-log-results">
+                    <td colspan="8" class="run-log-data">
+                        <pre style="width:${originalTableWidth}px"></pre>
+                    </td>
+                </tr>
+            `).insertAfter(`#${gradeable_id}_${config_id}_table_row`);
+
+            updateRunLog(gradeable_id, config_id);
         }
     }
 </script>

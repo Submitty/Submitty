@@ -1,0 +1,56 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}new-queue{% endblock %}
+{% block title %}Open New Queue{% endblock %}
+
+{% block body %}
+    <form method="post" id="open_new_queue" action="{{base_url}}" style="height:auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048" style="margin-top: 1rem;"><br>
+        <div class="access-code-input" style="margin-top: 1rem;">
+            <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
+            <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
+                <i class="fas fa-dice"></i>
+            </a>
+        </div>
+    {% if viewer.isContactInfoEnabled() %}
+        <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex" style="min-width: 45%; margin-top: 1rem;">
+
+        <div class="regex-help">
+            <br>You may optionally specify a regular expression to ensure your students enter the requested
+            format for the contact information.  For example: <br>
+            <b>Gmail:&nbsp;&nbsp;</b> <tt>.+@gmail.com</tt><br>
+            <b>Email:&nbsp;&nbsp;</b> <tt>.+@.+\..+</tt><br>
+            <b>Webex Personal Room:&nbsp;&nbsp;</b> <tt>^https:\/\/.+\.webex\.com\/meet\/.*</tt><br>
+            <b>Webex Meeting:&nbsp;&nbsp;</b> <tt>^https:\/\/.+\.webex\.com\/.*</tt><br>
+            <b>Skype link:&nbsp;&nbsp;</b> <tt>.*join\.skype\.com.*</tt><br>
+            <b>Zoom link:&nbsp;&nbsp;</b> <tt>.*zoom\.us.*</tt><br><br>
+        </div>
+    {% endif %}
+    <button id="open_new_queue_btn" type="submit" class="btn btn-primary" >Open New Queue</button>
+    </form>
+    <script>
+        let queueDraggable = $(".popup-window").draggable();
+        //allow users to copy regex patterns from office hours queue settings
+        $('.regex-help', queueDraggable).mousedown(function(ev) {
+            queueDraggable.draggable('disable');
+        }).mouseup(function(ev) {
+            queueDraggable.draggable('enable');
+        });
+    </script>
+{% endblock %}
+{% block form %}
+    <div style="height: 100%">
+        {{ parent() }}
+    </div>
+{% endblock %}
+{% block buttons %}
+    <button type="button" class="btn btn-primary" onclick="$('#new-queue').hide()">Close</button>
+    <script>
+        $(document).keyup(function(e) {
+            if (e.key == "Escape" && $("#{{ block('popup_id') }}").is(":visible")) {
+
+                window.location.reload();
+            }
+        });
+    </script>
+{% endblock %}
