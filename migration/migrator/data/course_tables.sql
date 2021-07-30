@@ -1740,6 +1740,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
