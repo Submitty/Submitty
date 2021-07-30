@@ -858,7 +858,8 @@ CREATE TABLE public.queue_settings (
     id integer NOT NULL,
     open boolean NOT NULL,
     code text NOT NULL,
-    token text NOT NULL
+    token text NOT NULL,
+    regex_pattern character varying
 );
 
 
@@ -2342,3 +2343,4 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
