@@ -281,6 +281,10 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
+            
+          - name: Set Timezone
+            run: |
+              sudo timedatectl set-timezone America/New_York
 
           - name: Cache pip
             uses: actions/cache@v2
