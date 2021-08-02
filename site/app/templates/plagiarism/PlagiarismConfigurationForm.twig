@@ -10,7 +10,7 @@
                 <div class="plag-data">
 
                     {% if new_or_edit == "new" %}
-                        <select name="gradeable_id">
+                        <select name="gradeable_id" id="gradeable_id">
                             {% for gradeable_id_title in config["gradeable_ids_titles"] %}
                                 <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} (Due {{ gradeable_id_title['g_grade_due_date'] }})</option>
                             {% endfor %}
@@ -67,7 +67,7 @@
                 <div class="plag-data">
                     <div id="files-to-be-compared">
                         <span class="option-alt">
-                            <a target=_blank href="https://submitty.org/instructor/course_management/plagiarism">How do I specify a regex expression?
+                            <a target=_blank href="https://submitty.org/instructor/course_management/plagiarism#files-to-be-compared">How do I specify a regex expression?
                                 <i style="font-style: normal;" class="fa-question-circle"></i>
                             </a>
                         </span>
@@ -120,7 +120,8 @@
             </div>
             {##################################################################}
             <div class="plag-data-group">
-                <div class="plag-data-label">Prior Terms Gradeables:</div>
+                <div class="plag-data-label">Other Gradeables:</div>
+                <label>Add gradeables from current or prior courses to compare against</label>
                 <div class="plag-data">
                     <span class="radio-label-pair">
                         <input type="radio" id="no-past-terms-id" value="no_past_terms" name="past_terms_option" {{ config["prior_terms"] ? "" : "checked" }}>
@@ -131,29 +132,31 @@
                         <label for="past-terms-id">Yes</label>
                     </span>
                     <div class="past-terms-wrapper" id="prev-gradeable-div">
+                        <div id="past-terms-content">
+                            {% if new_or_edit == "edit" %}
+                                {% for row in config["prior_term_gradeables"] %}
+                                    <div id="prior-g-option-{{ loop.index0 }}" class="prior-gradeable-wrapper">
+                                        <select name='prior_semester_course[]' onchange='getGradeables(this)'>
+                                            {% for semester_course in config["prior_semester_courses"] %}
+                                                {% set tokens = semester_course|split(' ') %}
+                                                <option value="{{ tokens[0] }} {{ tokens[1] }}" {{ tokens[0] == row["prior_semester"] and tokens[1] == row["prior_course"] ? "selected" : "" }}>{{ tokens[0] }}/{{ tokens[1] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name='prior_gradeable[]'>
+                                            {% for other_gradeable in row["other_gradeables"] %}
+                                                <option value="{{ other_gradeable }}" {{ other_gradeable == row["prior_gradeable"] ? "selected" : "" }}>{{ other_gradeable }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span class="remove-prev-gradeable" onclick="deletePrevGradeable(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                         <div id="add-more-prev-gradeable" class="add-more" aria-label="Add more">
                             <i class="fas fa-plus-square"></i>Add more
                         </div>
-                        {% if new_or_edit == "edit" %}
-                            {% for row in config["prior_term_gradeables"] %}
-                                <div id="prior-g-option-{{ loop.index0 }}" class="prior-gradeable-wrapper">
-                                    <select name='prior_semester_course[]' onchange='getGradeables(this)'>
-                                        {% for semester_course in config["prior_semester_courses"] %}
-                                            {% set tokens = semester_course|split(' ') %}
-                                            <option value="{{ tokens[0] }} {{ tokens[1] }}" {{ tokens[0] == row["prior_semester"] and tokens[1] == row["prior_course"] ? "selected" : "" }}>{{ tokens[0] }}/{{ tokens[1] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <select name='prior_gradeable[]'>
-                                        {% for other_gradeable in row["other_gradeables"] %}
-                                            <option value="{{ other_gradeable }}" {{ other_gradeable == row["prior_gradeable"] ? "selected" : "" }}>{{ other_gradeable }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <span class="remove-prev-gradeable" onclick="deletePrevGradeable(this)">
-                                        <i class="fas fa-trash"></i>
-                                    </span>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -181,7 +184,7 @@
             {##################################################################}
             <div>
                 <a href="{{ plagiarism_link }}" class="btn btn-danger">Cancel</a>
-                <input class="btn btn-primary" type="submit" value="Save Configuration" />
+                <input id="submit-form" class="btn btn-primary" type="submit" value="Save Configuration"/>
             </div>
         </form>
     </div>
@@ -190,6 +193,13 @@
 <script>
     const form = $("#save-configuration-form");
     const prior_semester_course_list = JSON.parse(`{{ config["prior_semester_courses"] | json_encode() | raw }}`);
+
+    // SUBMIT FORM /////////////////////////////////////////////////////////////
+    $(document).ready(function() {
+        form.submit(function () {
+            $('#submit-form').attr('disabled', true);
+        });
+    });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
     $("#no-code-provided-id").change(function() {
@@ -207,22 +217,27 @@
             $("#current-code-file").show();
             $("#provided-code-file").show();
         }
+    });
+
+    // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
+    $(document).ready(function() {
         if ({{ config["prior_terms"] ? "true" : "false" }} && $("#past-terms-id").is(":checked")) {
             $("#prev-gradeable-div").show();
         }
     });
 
-    // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
     $('#add-more-prev-gradeable', form).on('click', function(){
         addMorePriorTermGradeable();
     });
 
     $("#no-past-terms-id").change(function() {
         $(".past-terms-wrapper").hide();
+        $('#past-terms-content', form).html('');
     });
 
     $("#past-terms-id").change(function() {
         $(".past-terms-wrapper").show();
+        addMorePriorTermGradeable();
     });
 
     function deletePrevGradeable(clickedElement) {
@@ -241,11 +256,12 @@
         gradeable_dropdown.empty();
         gradeable_dropdown.append("<option value=''>Loading...</option>");
         $.ajax({
-            url: "{{ base_url }}" + "/getPriorGradeables",
+            url: `{{ base_url }}/getPriorGradeables`,
             type: "POST",
             data: {
                 csrf_token: csrfToken,
-                semester_course: semester_course_dropdown.val()
+                semester_course: semester_course_dropdown.val(),
+                this_gradeable: {{ new_or_edit == "edit" ? "'" + config["gradeable_id"] + "'" : "$('#gradeable_id').val()" }}
             },
             success: function(data) {
                 data = JSON.parse(data);
@@ -256,7 +272,7 @@
 
                 gradeable_dropdown.empty();
                 $.each(data.data, function(index, gradeable) {
-                    gradeable_dropdown.append("<option value='" + gradeable + "'>" + gradeable + "</option>");
+                    gradeable_dropdown.append(`<option value='${gradeable}'>${gradeable}</option>`);
                 });
             },
             error: function(e) {
@@ -270,8 +286,8 @@
         const form = $("#save-configuration-form");
         // add a new row with the next index, with empty dropdowns
         let first_free_index = $(".prior-gradeable-wrapper").length;
-        $('#prev-gradeable-div', form).append(`
-            <div id='prior-g-option-`+first_free_index+`' class='prior-gradeable-wrapper'>
+        $('#past-terms-content', form).append(`
+            <div id='prior-g-option-${first_free_index}' class='prior-gradeable-wrapper'>
                 <select name='prior_semester_course[]' onchange='getGradeables(this)'>
                 </select>
                 <select name='prior_gradeable[]'>
@@ -282,10 +298,10 @@
             </div>
         `);
         // fill in the left dropdown
-        let semester_course_dropdown = $("#prior-g-option-"+first_free_index).children().first();
+        let semester_course_dropdown = $(`#prior-g-option-${first_free_index}`).children().first();
         $.each(prior_semester_course_list, function(index, semester_course) {
             let tokens_array = semester_course.split(" ");
-            semester_course_dropdown.append("<option value='" + tokens_array[0] + " " + tokens_array[1] + "'>" + tokens_array[0] + "/" + tokens_array[1] + "</option>");
+            semester_course_dropdown.append(`<option value='${semester_course}'>${tokens_array[0]}/${tokens_array[1]}</option>`);
         });
         // fill in the right dropdown
         getGradeables(semester_course_dropdown[0]);

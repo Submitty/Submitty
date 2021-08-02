@@ -118,10 +118,11 @@ class PlagiarismController extends AbstractController {
      * Get a list of gradeables for the given term+course
      * @param string $term
      * @param string $course
+     * @param string $this_gradeable
      * @return array
      * @throws Exception
      */
-    private function getOtherPriorGradeables(string $term, string $course): array {
+    private function getOtherPriorGradeables(string $term, string $course, string $this_gradeable): array {
         // check for backwards crawling
         if (str_contains($term, '..') || str_contains($course, '..')) {
             throw new Exception('Error: path contains invalid component ".."');
@@ -139,7 +140,7 @@ class PlagiarismController extends AbstractController {
         // actually do the collection of gradeables here
         $gradeables = [];
         foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course, "submissions")) as $gradeable) {
-            if ($gradeable !== '.' && $gradeable !== '..') {
+            if ($gradeable !== '.' && $gradeable !== '..' && $gradeable !== $this_gradeable) {
                 $gradeables[] = $gradeable;
             }
         }
@@ -525,11 +526,20 @@ class PlagiarismController extends AbstractController {
                         $this->core->addErrorMessage("Error: submssions to prior term gradeable provided not found");
                         return new RedirectResponse($return_url);
                     }
-                    $prev_term_gradeables[] = [
+                    $to_append = [
                         "prior_semester" => $prior_semester,
                         "prior_course" => $prior_course,
                         "prior_gradeable" => $prior_gradeable
                     ];
+                    if ($prior_semester === $semester && $prior_course === $course && $prior_gradeable === $gradeable_id) {
+                        $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
+                        return new RedirectResponse($return_url);
+                    }
+                    if (in_array($to_append, $prev_term_gradeables)) {
+                        $this->core->addErrorMessage("Error: duplicate other gradeable found: {$prior_semester} {$prior_course} {$prior_gradeable}");
+                        return new RedirectResponse($return_url);
+                    }
+                    $prev_term_gradeables[] = $to_append;
                 }
             }
         }
@@ -818,7 +828,7 @@ class PlagiarismController extends AbstractController {
         $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
         foreach ($prior_term_gradeables_array as &$gradeable) {
             try {
-                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"]);
+                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"], $gradeable_id);
             }
             catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
@@ -922,12 +932,16 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
      */
     public function getPriorGradeables(): JsonResponse {
-        $tokens = explode(' ', $_POST["semester_course"]);
+        if (!isset($_POST['semester_course']) || !isset($_POST['this_gradeable'])) {
+            return JsonResponse::getErrorResponse("Error: Unable to get prior gradeables");
+        }
+
+        $tokens = explode(' ', $_POST['semester_course']);
         $semester = $tokens[0];
         $course = $tokens[1];
 
         try {
-            $return = $this->getOtherPriorGradeables($semester, $course);
+            $return = $this->getOtherPriorGradeables($semester, $course, $_POST['this_gradeable']);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
