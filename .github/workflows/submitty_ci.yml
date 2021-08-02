@@ -249,7 +249,6 @@ jobs:
             env:
               POSTGRES_PASSWORD: submitty_dbuser
               POSTGRES_USER: postgres
-              TZ: America/New_York
             options: >-
               --health-cmd pg_isready
               --health-interval 10s
@@ -281,10 +280,6 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
-            
-          - name: Set Timezone
-            run: |
-              sudo timedatectl set-timezone America/New_York
 
           - name: Cache pip
             uses: actions/cache@v2
