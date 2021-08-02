@@ -20,6 +20,7 @@ use app\libraries\FileUtils;
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
+ * @method integer getWebsocketPort()
  * @method string getSubmittyPath()
  * @method string getCgiTmpPath()
  * @method string getCoursePath()
@@ -117,6 +118,8 @@ class Config extends AbstractModel {
     protected $vcs_url;
     /** @prop @var string */
     protected $cgi_url;
+    /** @prop @var int */
+    protected $websocket_port = 8443;
     /** @prop @var string */
     protected $authentication;
     /** @prop @var DateTimeZone */
@@ -352,6 +355,10 @@ class Config extends AbstractModel {
 
         if (isset($submitty_json['system_message'])) {
             $this->system_message = strval($submitty_json['system_message']);
+        }
+
+        if (isset($submitty_json['websocket_port'])) {
+            $this->websocket_port = $submitty_json['websocket_port'];
         }
 
         $this->base_url = rtrim($this->base_url, "/") . "/";

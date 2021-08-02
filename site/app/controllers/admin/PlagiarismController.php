@@ -60,6 +60,18 @@ class PlagiarismController extends AbstractController {
         return FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "users", $user_id, $version);
     }
 
+    /**
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @param string $source_gradeable
+     * @param string $user_id
+     * @param string $version
+     * @return string
+     */
+    private function getOtherGradeablePath(string $gradeable_id, string $config_id, string $source_gradeable, string $user_id, string $version): string {
+        return FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id, $config_id, "other_gradeables", $source_gradeable, $user_id, $version);
+    }
+
 
     /**
      * @param string $gradeable_id
@@ -86,10 +98,54 @@ class PlagiarismController extends AbstractController {
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
+    /**
+     * Gets a list of courses which have the same group as the current course and are thus eligible prior terms
+     * @return array
+     * @throws Exception
+     */
+    private function getPriorSemesterCourses(): array {
+        $this_semester = $this->core->getConfig()->getSemester();
+        $this_course = $this->core->getConfig()->getCourse();
+        $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
+        $ret = [];
+        foreach ($valid_courses as $item) {
+            $ret[] = "{$item['semester']} {$item['course']}";
+        }
+        return $ret;
+    }
 
-    private function getGradeablesFromPriorTerm() {
-        // TODO: Implement.
-        return [];
+    /**
+     * Get a list of gradeables for the given term+course
+     * @param string $term
+     * @param string $course
+     * @param string $this_gradeable
+     * @return array
+     * @throws Exception
+     */
+    private function getOtherPriorGradeables(string $term, string $course, string $this_gradeable): array {
+        // check for backwards crawling
+        if (str_contains($term, '..') || str_contains($course, '..')) {
+            throw new Exception('Error: path contains invalid component ".."');
+        }
+
+        // check to make sure the group is the same as the group for the current course
+        $this_course_group = filegroup($this->core->getConfig()->getCoursePath());
+        if (!$this_course_group) {
+            throw new Exception("Unable to obtain group for current course");
+        }
+        if ($this_course_group !== @filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course))) {
+            throw new Exception("Group for requested course {$term}/{$course} does not match group for current course");
+        }
+
+        // actually do the collection of gradeables here
+        $gradeables = [];
+        foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course, "submissions")) as $gradeable) {
+            if ($gradeable !== '.' && $gradeable !== '..' && $gradeable !== $this_gradeable) {
+                $gradeables[] = $gradeable;
+            }
+        }
+
+        return $gradeables;
     }
 
     /**
@@ -159,25 +215,6 @@ class PlagiarismController extends AbstractController {
      * @throws Exception
      */
     private function getRankingsForUser(string $gradeable_id, string $config_id, string $user_id_1, string $user_1_version): array {
-        // TODO: temporary fix, should make a proper PR overhauling all of plagiarism.js to fix this.
-        if ($user_1_version === "max_matching") {
-            $max_percent = 0;
-            foreach (scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)) as $version) {
-                $file_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1, $version, "ranking.txt");
-                if ($version !== "." && $version !== ".." && file_exists($file_path)) {
-                    $content = file_get_contents($file_path);
-                    $content = trim(str_replace(["\r", "\n"], ' ', $content));
-                    $rankings = preg_split('/ +/', $content);
-                    $rankings = array_chunk($rankings, 3);
-
-                    if ($rankings[0][0] > $max_percent) {
-                        $user_1_version = $version;
-                        $max_percent = $rankings[0][0];
-                    }
-                }
-            }
-        }
-
         $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $user_1_version), "ranking.txt");
         if (!file_exists($file_path)) {
             throw new Exception("Unable to read ranking file for {$user_id_1} version {$user_1_version} in gradeable {$gradeable_id} config {$config_id}");
@@ -186,7 +223,7 @@ class PlagiarismController extends AbstractController {
         $content = file_get_contents($file_path);
         $content = trim(str_replace(["\r", "\n"], ' ', $content));
         $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings, 3);
+        $rankings = array_chunk($rankings, 4);
         return $rankings;
     }
 
@@ -323,7 +360,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
-     * @return WebResponse|RedirectResponse
+     * @return ResponseInterface
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult(string $gradeable_id, string $config_id): ResponseInterface {
@@ -341,27 +378,33 @@ class PlagiarismController extends AbstractController {
         }
 
         try {
-            $rankings = $this->getOverallRankings($gradeable_id, $config_id);
+            $rankings_data = $this->getOverallRankings($gradeable_id, $config_id);
         }
         catch (Exception $e) {
             $this->core->addErrorMessage("Plagiarism Detection job is already running for this gradeable.");
             return new RedirectResponse($error_return_url);
         }
 
-        if (count($rankings) === 0) {
+        if (count($rankings_data) === 0) {
             $this->core->addSuccessMessage("There are no matches (plagiarism) for the gradeable with current configuration");
         }
 
-        foreach ($rankings as $i => $ranking) {
-            if (!$gradeable_config->isTeamAssignment()) {
-                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
-                array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
+        $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
+        $rankings = [];
+        foreach ($rankings_data as $item) {
+            $display_name = "";
+            if (!$is_team_assignment) {
+                $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
             }
-            else {
-                array_push($rankings[$i], "");
-                array_push($rankings[$i], "");
-            }
+            $temp = [
+                "percent" => $item[0],
+                "user_id" => $item[1],
+                "display_name" => $display_name,
+                "version" => $item[2],
+            ];
+            array_push($rankings, $temp);
         }
+
 
         return new WebResponse(
             ['admin', 'Plagiarism'],
@@ -454,17 +497,52 @@ class PlagiarismController extends AbstractController {
 
         // Prior terms /////////////////////////////////////////////////////////
         $prev_term_gradeables = [];
-        /*
-        TODO: fix? prior_term_gradeables_number is commented out on the frontend so $_POST['prior_term_gradeables_number'] is always unset / 0
-        See #6650 for where this variable was commented out
-
-        $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
-        for ($i = 0; $i < $prev_gradeable_number; $i++) {
-            if ($_POST['prev_sem_' . $i] != "" && $_POST['prev_course_' . $i] != "" && $_POST['prev_gradeable_' . $i] != "") {
-                array_push($prev_term_gradeables, FileUtils::joinPaths($course_path, $_POST['prev_sem_' . $i], $_POST['prev_course_' . $i], "submissions", $_POST['prev_gradeable_' . $i]));
+        if ($_POST["past_terms_option"] === "past_terms") {
+            if (isset($_POST["prior_semester_course"]) !== isset($_POST["prior_gradeable"])) {
+                $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                $this->core->redirect($return_url);
+            }
+            foreach ($_POST["prior_semester_course"] as $index => $sem_course) {
+                if (!isset($_POST["prior_gradeable"][$index])) {
+                    $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                    $this->core->redirect($return_url);
+                }
+                else {
+                    $tokens = explode(" ", $sem_course);
+                    if (count($tokens) !== 2) {
+                        $this->core->addErrorMessage("Invalid input provided for prior semester and course");
+                        $this->core->redirect($return_url);
+                    }
+                    $prior_semester = $tokens[0];
+                    $prior_course = $tokens[1];
+                    $prior_gradeable = $_POST["prior_gradeable"][$index];
+                    // Error checking
+                    if (str_contains($prior_semester, '..') || str_contains($prior_course, '..') || str_contains($prior_gradeable, '..')) {
+                        $this->core->addErrorMessage("Error: prior term gradeables string contains invalid component '..'");
+                        return new RedirectResponse($return_url);
+                    }
+                    $prior_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $prior_semester, $prior_course, "submissions", $prior_gradeable);
+                    if (!is_dir($prior_g_submissions_path) || count(scandir($prior_g_submissions_path)) === 2) {
+                        $this->core->addErrorMessage("Error: submssions to prior term gradeable provided not found");
+                        return new RedirectResponse($return_url);
+                    }
+                    $to_append = [
+                        "prior_semester" => $prior_semester,
+                        "prior_course" => $prior_course,
+                        "prior_gradeable" => $prior_gradeable
+                    ];
+                    if ($prior_semester === $semester && $prior_course === $course && $prior_gradeable === $gradeable_id) {
+                        $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
+                        return new RedirectResponse($return_url);
+                    }
+                    if (in_array($to_append, $prev_term_gradeables)) {
+                        $this->core->addErrorMessage("Error: duplicate other gradeable found: {$prior_semester} {$prior_course} {$prior_gradeable}");
+                        return new RedirectResponse($return_url);
+                    }
+                    $prev_term_gradeables[] = $to_append;
+                }
             }
         }
-        */
 
 
         // Submissions to ignore ///////////////////////////////////////////////
@@ -554,7 +632,7 @@ class PlagiarismController extends AbstractController {
             "language" => $language,
             "threshold" => $threshold,
             "sequence_length" => $sequence_length,
-            "prev_term_gradeables" => $prev_term_gradeables,
+            "prior_term_gradeables" => $prev_term_gradeables,
             "ignore_submissions" => $ignore_submission_option
         ];
 
@@ -562,7 +640,6 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
             return new RedirectResponse($return_url);
         }
-
 
         // Create the Lichen job ///////////////////////////////////////////////
         try {
@@ -672,23 +749,37 @@ class PlagiarismController extends AbstractController {
             $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
             $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
         }
-
         usort($gradeable_ids_titles, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
         });
 
-        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
+        $config = [];
+
+        // Default values for the form
+        $config["gradeable_id"] = "";
+        $config["config_id"] = "";
+        $config["title"] = null;
+        $config["gradeable_ids_titles"] = $gradeable_ids_titles;
+        $config["provided_code"] = false;
+        $config["provided_code_filenames"] = [];
+        $config["version"] = "all_versions";
+        $config["regex"] = "";
+        $config["regex_dirs"] = ["submissions"];
+        $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
+        $config["language"]["plaintext"] = "selected";
+        $config["threshold"] = 5;
+        $config["sequence_length"] = 4;
+        $config["prior_terms"] = false;
+        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
+        $config["prior_term_gradeables"] = [];
+        $config["ignore_submissions"] = [];
+        $config["ignore_submissions_list"] = "";
 
         return new WebResponse(
             ['admin', 'Plagiarism'],
             'configurePlagiarismForm',
             'new',
-            $gradeable_ids_titles,
-            $prior_term_gradeables,
-            null,
-            null,
-            null,
-            null
+            $config
         );
     }
 
@@ -697,7 +788,7 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
      * @param string $gradeable_id
      * @param string $config_id
-     * @return WebResponse|RedirectResponse
+     * @return ResponseInterface
      */
     public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): ResponseInterface {
         $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
@@ -716,25 +807,60 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
+        // get the config from the config file
         $saved_config = json_decode(file_get_contents($config_path), true);
         $title = "";
         if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
         }
 
-        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-        $ignore_submissions = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
+        // check to see if there are any provided code files
+        $has_provided_code = false;
+        $provided_code_filenames = [];
+        if (is_dir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files"))) {
+            $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files")), [".", ".."]);
+            $has_provided_code = count($provided_code_filename_array) > 0;
+            foreach ($provided_code_filename_array as $filename) {
+                $provided_code_filenames[] = $filename;
+            }
+        }
+        $ignore = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
+        $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
+        foreach ($prior_term_gradeables_array as &$gradeable) {
+            try {
+                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"], $gradeable_id);
+            }
+            catch (Exception $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($return_url);
+            }
+        }
+        $config = [];
+
+        $config["gradeable_id"] = $saved_config['gradeable'];
+        $config["config_id"] = $saved_config['config_id'];
+        $config["title"] = $title;
+        $config["gradeable_ids_titles"] = [];
+        $config["provided_code"] = $has_provided_code;
+        $config["provided_code_filenames"] = $provided_code_filenames;
+        $config["version"] = $saved_config['version'];
+        $config["regex"] = $saved_config['regex'];
+        $config["regex_dirs"] = $saved_config['regex_dirs'];
+        $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
+        $config["language"][$saved_config['language']] = "selected";
+        $config["threshold"] = (int) $saved_config['threshold'];
+        $config["sequence_length"] = (int) $saved_config['sequence_length'];
+        $config["prior_terms"] = count($saved_config['prior_term_gradeables']) > 0;
+        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
+        $config["prior_term_gradeables"] = $prior_term_gradeables_array;
+        $config["ignore_submissions"] = $ignore[0];
+        $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
 
         return new WebResponse(
             ['admin', 'Plagiarism'],
             'configurePlagiarismForm',
             'edit',
-            null,
-            $prior_term_gradeables,
-            $ignore_submissions[0],
-            $ignore_submissions[1],
-            $saved_config,
-            $title
+            $config
         );
     }
 
@@ -803,6 +929,29 @@ class PlagiarismController extends AbstractController {
 
 
     /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
+     */
+    public function getPriorGradeables(): JsonResponse {
+        if (!isset($_POST['semester_course']) || !isset($_POST['this_gradeable'])) {
+            return JsonResponse::getErrorResponse("Error: Unable to get prior gradeables");
+        }
+
+        $tokens = explode(' ', $_POST['semester_course']);
+        $semester = $tokens[0];
+        $course = $tokens[1];
+
+        try {
+            $return = $this->getOtherPriorGradeables($semester, $course, $_POST['this_gradeable']);
+        }
+        catch (Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+
+        return JsonResponse::getSuccessResponse($return);
+    }
+
+
+    /**
      * @param string $gradeable_id
      * @param string $config_id
      * @return JsonResponse
@@ -827,18 +976,17 @@ class PlagiarismController extends AbstractController {
         return JsonResponse::getSuccessResponse($log_data);
     }
 
-
     /**
+     * returns info for the user versions, to be displayed in the left pane of
+     * PlagiarismResult. Grabs the list of versions, the max matching version,
+     * and the active version of that user.
      * @param string $gradeable_id
      * @param string $config_id
      * @param string $user_id_1
-     * @param string $version_user_1
-     * @param string|null $user_id_2
-     * @param string|null $version_user_2
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist")
      */
-    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null): JsonResponse {
+    public function ajaxGetVersionList(string $gradeable_id, string $config_id, string $user_id_1): JsonResponse {
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
@@ -847,7 +995,7 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
         // check for backwards crawling
-        if (str_contains($user_id_1, '..') || str_contains($version_user_1, '..') || ($user_id_2 !== null && str_contains($user_id_2, '..')) || ($version_user_2 !== null && str_contains($version_user_2, '..'))) {
+        if (str_contains($user_id_1, '..')) {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
@@ -860,7 +1008,7 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse('Error: unable to get user "' . $user_id_1 . '" submission for gradeable "' . $gradeable_id . '"');
         }
 
-        $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $active_version_user_1 = (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         try {
             $rankings = $this->getOverallRankings($gradeable_id, $config_id);
@@ -869,67 +1017,27 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse("Rankings file not found or no matches found for selected user");
         }
 
-        $max_matching_version = 1;
+        $max_matching_version = 0;
         foreach ($rankings as $ranking) {
             if ($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
-            }
-        }
-        if ($version_user_1 == "max_matching" || $version_user_1 == "") {
-            $version_user_1 = $max_matching_version;
-        }
-        $all_versions_user_1 = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1)), [".", ".."]);
-
-        $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "submission.concatenated");
-        if (file_exists($file_name)) {
-            if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-                try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '1');
-                }
-                catch (Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
-            }
-            else {
-                try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, $user_id_1, $version_user_1, '', '', '1');
-                }
-                catch (Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
-            }
-            $data = [
-                'display_code1' => file_get_contents($file_name),
-                'code_version_user_1' => $version_user_1,
-                'max_matching_version' => $max_matching_version,
-                'active_version_user_1' => $active_version_user_1,
-                'all_versions_user_1' => $all_versions_user_1,
-                'ci' => $color_info
-            ];
-        }
-        else {
-            return JsonResponse::getErrorResponse("User 1 submission.concatenated for specified version not found.");
-        }
-
-        if (isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-            $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "submission.concatenated");
-
-            if (($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-                try {
-                    $color_info = $this->getColorInfo($gradeable_id, $config_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
-                }
-                catch (Exception $e) {
-                    return JsonResponse::getErrorResponse($e->getMessage());
-                }
-                $data['display_code2'] = file_get_contents($file_name);
-            }
-            else {
-                return JsonResponse::getErrorResponse("User 2 submission.concatenated for specified version not found.");
+                break;
             }
         }
 
-        $data['ci'] = $color_info[0];
-        $data['si'] = $color_info[1];
+        $user_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "users", $user_id_1);
+        $files = scandir($user_path);
+        $all_versions_user_1 = [];
+        foreach ($files as $version) {
+            if ($version !== "." && $version !== ".." && file_exists(FileUtils::joinPaths($user_path, $version, "ranking.txt"))) {
+                $all_versions_user_1[] = $version;
+            }
+        }
+
+        $data = [];
+        $data["versions"] = array_values($all_versions_user_1);
+        $data["max_matching"] = strval($max_matching_version);
+        $data["active_version"] = strval($active_version_user_1);
         return JsonResponse::getSuccessResponse($data);
     }
 
@@ -937,139 +1045,156 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $gradeable_id
      * @param string $config_id
+     * @param string $user_id
+     * @param string $version
+     * @param string|null $source_gradeable
+     * @return JsonResponse
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/concat")
+     */
+    public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id, string $version, string $source_gradeable = null): JsonResponse {
+        // error checking
+        try {
+            $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
+        }
+        catch (Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
+        }
+        // check for backwards crawling
+        if (str_contains($user_id, '..') || str_contains($version, '..') || ($source_gradeable !== null && str_contains($source_gradeable, '..'))) {
+            return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
+        }
+
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        if (isset($source_gradeable) && $source_gradeable !== "{$semester}__{$course}__{$gradeable_id}") {
+            $file_name = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable, $user_id, $version), "submission.concatenated");
+        }
+        else {
+            $file_name = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id, $version), "submission.concatenated");
+        }
+
+        if (!file_exists($file_name)) {
+            return JsonResponse::getErrorResponse("Unable to open submission.concatenated for user {$user_id}, version {$version}");
+        }
+
+        return JsonResponse::getSuccessResponse(file_get_contents($file_name));
+    }
+
+
+    /**
+     * @param string $gradeable_id
+     * @param string $config_id
      * @param string $user_id_1
      * @param string $version_user_1
-     * @param string $user_id_2
-     * @param string $version_user_2
-     * @param string $codebox
-     * @return array
-     * @throws Exception
+     * @param string|null $user_id_2
+     * @param string|null $version_user_2
+     * @param string|null $source_gradeable_user_2
+     * @return JsonResponse
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/colorinfo")
      */
-    private function getColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2, string $version_user_2, string $codebox): array {
+    public function ajaxGetColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): JsonResponse {
         // error checking
-        $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
-
-        $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "matches.json");
-        if (!file_exists($file_path)) {
-            throw new Exception("Error: Unable to find matches.json");
+        try {
+            $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
-
-        // check for backwards crawling
-        if (str_contains($user_id_1, '..') || str_contains($version_user_1, '..') || str_contains($user_id_2, '..') || str_contains($version_user_2, '..')) {
-            throw new Exception('Error: path contains invalid component ".."');
+        catch (Exception $e) {
+            return JsonResponse::getErrorResponse($e->getMessage());
         }
 
 
-        $color_info = [];
-        //Represents left and right display users
-        $color_info[1] = [];
-        $segment_info = [];
+        // get the contents of matches.json as an array of Intervals
+        $matches_file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "matches.json");
+        if (!file_exists($matches_file_path)) {
+            return JsonResponse::getErrorResponse("Error: Unable to find matches.json for user {$user_id_1}, version {$version_user_1}");
+        }
+        $intervals = PlagiarismUtils::constructIntervalsForUserPair($matches_file_path, $user_id_2, intval($version_user_2), $source_gradeable_user_2);
+
+        // get the list of tokens for user 1
+        $user_1_tokens_file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "tokens.json");
+        if (!file_exists($user_1_tokens_file_path)) {
+            return JsonResponse::getErrorResponse("Error: Unable to find tokens.json for user {$user_id_1}, version {$version_user_1}");
+        }
+        $tokens_user_1 = json_decode(file_get_contents($user_1_tokens_file_path), true);
+
+
+        // get the list of tokens for user 2
+        $tokens_user_2 = [];
+        if (isset($user_id_2)) {
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            if (isset($source_gradeable_user_2) && $source_gradeable_user_2 !== "{$semester}__{$course}__{$gradeable_id}") {
+                $user_2_tokens_file_path = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable_user_2, $user_id_2, $version_user_2), "tokens.json");
+            }
+            else {
+                $user_2_tokens_file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "tokens.json");
+            }
+
+            if (!file_exists($user_2_tokens_file_path)) {
+                return JsonResponse::getErrorResponse("Error: Unable to find tokens.json for user {$user_id_2}, version {$version_user_2}");
+            }
+            $tokens_user_2 = json_decode(file_get_contents($user_2_tokens_file_path), true);
+        }
 
 
         // Used to prevent an out of bounds error on the tokens arrays
-        $dummyToken = [];
-        $dummyToken["char"] = 99999999999; // set it to a big number of negligible significance
-
-        $matches = PlagiarismUtils::constructIntervalsForUserPair($file_path, $user_id_2, intval($version_user_2));
-
-        $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_1, $version_user_1), "tokens.json");
-        if (!file_exists($file_path)) {
-            throw new Exception("Error: Unable to find tokens.json for user 1");
-        }
-        $tokens_user_1 = json_decode(file_get_contents($file_path), true);
-
-        $tokens_user_2 = [];
-        if ($user_id_2 != "") {
-            $file_path = FileUtils::joinPaths($this->getSubmissionPath($gradeable_id, $config_id, $user_id_2, $version_user_2), "tokens.json");
-            if (!file_exists($file_path)) {
-                throw new Exception("Error: Unable to find tokens.json for user 2");
-            }
-            $tokens_user_2 = json_decode(file_get_contents($file_path), true);
+        $dummyToken = [
+            "char" => 99999999999,
+            "line" => 99999999999,
+            "value" => ""
+        ];
+        array_push($tokens_user_1, $dummyToken);
+        if (!empty($tokens_user_2)) {
             array_push($tokens_user_2, $dummyToken);
         }
 
-        array_push($tokens_user_1, $dummyToken);
 
-        $i = 0;
-        foreach ($matches as $match) {
-            // count the number of tokens iterated through
-            $i++;
-
-            $s_pos = $match->getStart();
-            $e_pos = $match->getEnd();
-
-            $next_start = 99999999999;
-            if ($i < count($matches)) {
-                next($matches);
-                $next_start = current($matches)->getStart();
+        $return = [];
+        foreach ($intervals as $interval) {
+            $others = [];
+            foreach (array_keys($interval->getOthers()) as $id_string) {
+                $temp = [];
+                $tokens = explode("__", $id_string, 3);
+                $temp["user_id"] = $tokens[0];
+                $temp["version"] = $tokens[1];
+                $temp["source_gradeable"] = $tokens[2];
+                $others[] = $temp;
             }
 
-            $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
-            $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
-
-            if ($e_pos > $next_start) {
-                $e_pos = $next_start - 1;
-            }
-            $end_pos = $tokens_user_1[$e_pos]["char"] - 1;
-            $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
-
-            $userMatchesStarts = [];
-            $userMatchesEnds = [];
-
-            $color = ""; // placeholder
-
-            if ($match->getType() === "match") {
-                //Color is yellow -- matches other students but not general match between students...
-                $color = '#ffff00';
-
-                $others = array_keys($match->getOthers());
-                $segment_info["{$start_line}_{$start_pos}"] = $others;
-            }
-            elseif ($match->getType() === "specific-match") {
-                //Color is orange -- general match from selected match
-                $color = '#ffa500';
-
-                if ($codebox == "2" && $user_id_2 != "") {
-                    foreach ($match->getMatchingPositions($user_id_2, $version_user_2) as $pos) {
-                        $matchPosStart = $pos['start'];
-                        $matchPosEnd =  $pos['end'];
-                        $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
-                        $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
-                        $end_pos_2 = $tokens_user_2[$matchPosEnd]["char"] - 1;
-                        $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
-
-                        $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, $color, $matchPosStart, $matchPosEnd];
-                        $userMatchesStarts[] = $matchPosStart;
-                        $userMatchesEnds[] = $matchPosEnd;
-                    }
+            $matching_positions = [];
+            if (!empty($tokens_user_2)) {
+                foreach ($interval->getMatchingPositions($user_id_2, $version_user_2, $source_gradeable_user_2) as $mp) {
+                    $matching_positions[] = [
+                        "start_char" => $tokens_user_2[$mp["start"] - 1]["char"],
+                        "start_line" => $tokens_user_2[$mp["start"] - 1]["line"],
+                        "end_char" => $tokens_user_2[$mp["end"]]["char"],
+                        "end_line" => $tokens_user_2[$mp["end"]]["line"],
+                    ];
                 }
-
-                $others = array_keys($match->getOthers());
-                $segment_info["{$start_line}_{$start_pos}"] = $others;
-            }
-            elseif ($match->getType() === "common") { // common code does not show up on user 2
-                //Color is grey -- common matches among all students
-                $color = '#cccccc';
-            }
-            elseif ($match->getType() === "provided") { // provided code does not show up on user 2
-                //Color is green -- instructor provided code #b5e3b5
-                $color = '#b5e3b5';
             }
 
-            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $userMatchesStarts, $userMatchesEnds]);
+            $return[] = [
+                "start_char" => $tokens_user_1[$interval->getStart() - 1]["char"],
+                "start_line" => $tokens_user_1[$interval->getStart() - 1]["line"],
+                "end_char" => $tokens_user_1[$interval->getEnd()]["char"],
+                "end_line" => $tokens_user_1[$interval->getEnd()]["line"],
+                "type" => $interval->getType(),
+                "matching_positions" => $matching_positions,
+                "others" => $others
+            ];
         }
-        return [$color_info, $segment_info];
+
+        return JsonResponse::getSuccessResponse($return);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/match")
      * @param string $gradeable_id
      * @param string $config_id
      * @param string $user_id_1
      * @param string $version_user_1
      * @return JsonResponse
      */
-    public function ajaxGetMatchingUsers(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
+    public function ajaxGetUser2DropdownList(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
         // error checking
         try {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
@@ -1089,19 +1214,19 @@ class PlagiarismController extends AbstractController {
         }
 
         $return = [];
+        $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
         foreach ($ranking as $item) {
-            $temp = [];
-            array_push($temp, $item[1]);
-            array_push($temp, $item[2]);
-            if (!$this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
-                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName());
-                array_push($temp, $this->core->getQueries()->getUserById($item[1])->getDisplayedLastName());
+            $display_name = "";
+            if (!$is_team_assignment) {
+                $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
             }
-            else {
-                array_push($temp, "");
-                array_push($temp, "");
-            }
-            array_push($temp, $item[0]);
+            $temp = [
+                "percent" => $item[0],
+                "user_id" => $item[1],
+                "display_name" => $display_name,
+                "version" => $item[2],
+                "source_gradeable" => $item[3]
+            ];
             array_push($return, $temp);
         }
 
