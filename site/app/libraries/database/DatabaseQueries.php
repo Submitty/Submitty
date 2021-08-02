@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -213,7 +214,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
-        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
+        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
         ");
         return $this->course_db->rows();
     }
@@ -1161,7 +1162,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
-                FROM courses_users INNER JOIN courses 
+                FROM courses_users INNER JOIN courses
                 ON courses_users.semester = courses.semester AND courses_users.course = courses.course
                 " . $extra_join . "
                 WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
@@ -6133,7 +6134,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token) {
+    public function openQueue($queue_code, $token, $regex_pattern) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6141,8 +6142,13 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token) VALUES (TRUE, TRIM(?), TRIM(?))", [$queue_code,$token]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern) VALUES (TRUE, TRIM(?), TRIM(?), ?)", [$queue_code,$token,$regex_pattern]);
         return true;
+    }
+
+    public function getQueueRegex($queue_code) {
+        $this->course_db->query("SELECT regex_pattern FROM queue_settings WHERE code = ?", [$queue_code]);
+        return $this->course_db->rows();
     }
 
     public function toggleQueue($queue_code, $state) {
@@ -6367,6 +6373,10 @@ AND gc_id IN (
 
     public function changeQueueToken($token, $queue_code) {
         $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", [$token, $queue_code]);
+    }
+
+    public function changeQueueRegex($regex_pattern, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
 
@@ -7146,7 +7156,10 @@ AND gc_id IN (
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => []
+        'team_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection',
+        ]
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -7160,7 +7173,10 @@ AND gc_id IN (
         'team_id' => [
             'team.team_id'
         ],
-        'user_id' => []
+        'user_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection'
+        ]
     ];
 
     /**
@@ -7460,6 +7476,24 @@ SQL;
             [$g_id, $team_id]
         );
         return $this->course_db->rows();
+    }
+
+    public function getUserGroups(string $user_id): array {
+        $this->submitty_db->query(
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
+            [$user_id]
+        );
+        return $this->submitty_db->rows();
+    }
+
+    public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
+        $this->submitty_db->query(
+            "SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
+                   WHERE c1.semester = ? AND c1.course = ? AND c1.group_name != 'root'",
+            [$semester, $course]
+        );
+        return $this->submitty_db->rows();
     }
 
     private function getInnerQueueSelect(): string {

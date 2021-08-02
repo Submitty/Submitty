@@ -4,7 +4,7 @@
 #include <sys/resource.h>
 #include <string>
 #include <vector>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <queue>
 #include <mutex>
 #include <thread>
