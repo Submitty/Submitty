@@ -1,9 +1,15 @@
 <div class="content">
-    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1>
     <div class="nav-buttons">
-        <a class="btn btn-primary"
-           href="{{ new_plagiarism_config_link }}"
-        ><i class="fas fa-plus"></i><span style="margin-left:0.5em;"></span>Configure New Gradeable for Plagiarism Detection</a>
+        <a class="btn btn-primary" href="{{ new_plagiarism_config_link }}">
+            <i class="fas fa-plus"></i>
+            <span style="margin-left:0.5em;"></span>
+            Configure New Gradeable for Plagiarism Detection
+        </a>
+        <a target=_blank class="right option-alt" style="margin-top: 1em;" href="https://submitty.org/instructor/course_management/plagiarism#plagiarism-main-page">
+            How to use Lichen Plagiarism Detection
+            <i style="font-style: normal;" class="fa-question-circle"></i>
+        </a>
     </div>
     {% if plagiarism_results_info|length > 0 %}
         <div class="plag-table-cont">
