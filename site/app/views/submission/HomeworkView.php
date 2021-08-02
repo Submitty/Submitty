@@ -498,8 +498,8 @@ class HomeworkView extends AbstractView {
             'max_file_uploads' => ini_get('max_file_uploads'),
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
-            'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser())
-            'can_student_submit' => $canStudentSubmit,
+            'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
+            'can_student_submit' => $canStudentSubmit
         ]);
     }
 
