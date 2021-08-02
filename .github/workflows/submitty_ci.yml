@@ -374,6 +374,9 @@ jobs:
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/bin/update_repos.sh
 
+          - name: Install Lichen
+            run: sudo bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh
+
           - name: Set up sample course
             run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
 
