@@ -84,3 +84,32 @@
     color: var(--text-black);
     height: fit-content;
 }
+
+#page-num {
+    -moz-appearance: textfield;
+    margin: 0;
+    width: 5vw;
+}
+
+#page-num::-webkit-outer-spin-button,
+#page-num::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.loading-animation {
+    border: 16px solid var(--text-black); /* Light grey */
+    border-top: 16px solid var(--actionable-blue); /* Blue */
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+    width: 130px;
+    height: 130px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2em;
+    margin-top: 2em;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

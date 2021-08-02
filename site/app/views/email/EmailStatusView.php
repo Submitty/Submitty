@@ -8,14 +8,15 @@ use app\libraries\FileUtils;
 use app\models\EmailStatusModel;
 
 class EmailStatusView extends AbstractView {
-    public function showEmailStatusPage($num_page, $load_page_url) {
+    public function showEmailStatusPage($num_page, $load_page_url, $base_url) {
         $this->core->getOutput()->addBreadcrumb("Email Statuses", $this->core->buildCourseUrl(["email"]));
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalCss('email-status.css');
         $this->core->getOutput()->addInternalJs('email-status.js');
         return $this->core->getOutput()->renderTwigTemplate("EmailStatusPage.twig", [
             "num_page" => $num_page,
-            "load_page_url" => $load_page_url
+            "load_page_url" => $load_page_url,
+            "base_url" => $base_url
         ]);
     }
 

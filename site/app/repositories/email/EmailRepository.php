@@ -2,12 +2,8 @@
 
 namespace app\repositories\email;
 
-use app\entities\email\EmailEntity;
 use app\models\EmailStatusModel;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Query\Parameter;
 
 class EmailRepository extends EntityRepository {
     const PAGE_SIZE = 5000;
@@ -15,8 +11,6 @@ class EmailRepository extends EntityRepository {
     
     public function getEmailsByPage(int $page, $semester = null, $course = null): array {
         $this->_em->getConnection()->getConfiguration()->setSQLLogger(null);
-        $course_specific = ($semester && $course) ? "WHERE e.semester = :semester AND e.course = :course " : "";
-        $dql = 'SELECT e FROM app\entities\email\EmailEntity e ' . $course_specific . ' ORDER BY e.created DESC';
         $subjects = $this->getPageSubjects($page, $semester, $course);
         $result = [];
 

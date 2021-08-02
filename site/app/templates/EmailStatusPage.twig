@@ -2,21 +2,26 @@
     <h1>Email Status</h1>
     <div id="email-statuses">
     </div>
-    <nav aria-label="Page navigation">
+    <nav aria-label="Page navigation" id="pagination-nav" style="display: none;">
         <ul class="pagination">
             <li class="page-item">
-                <button class="btn first-btn" aria-hidden="true" onclick="loadPage(1, {{ "\"" ~ load_page_url ~ "\""}});">&laquo;</button>
+                <button class="btn first-btn" aria-hidden="true" onclick="loadPage(1, {{ "\"" ~ load_page_url ~ "\", \"" ~ base_url ~ "\"" }});">&laquo;</button>
             </li>
             <li class="page-item">
                 
             </li>
             {% for i in 1 .. num_page %}
-                <li class="page-item"><button class="btn page-btn" id="{{i}}" onclick="loadPage({{i}}, {{ "\"" ~ load_page_url ~ "\""}});">{{i}}</button></li>
+                <li class="page-item"><button class="btn page-btn" id="{{i}}" onclick="loadPage({{i}}, {{ "\"" ~ load_page_url ~ "\", \"" ~ base_url ~ "\"" }});">{{i}}</button></li>
             {% endfor %}
             <li class="page-item">
-                <button class="btn last-btn" aria-hidden="true" onclick="loadPage({{num_page}}, {{ "\"" ~ load_page_url ~ "\""}});">&raquo;</button>
+                <button class="btn last-btn" aria-hidden="true" onclick="loadPage({{num_page}}, {{ "\"" ~ load_page_url ~ "\", \"" ~ base_url ~ "\"" }});">&raquo;</button>
             </li>
         </ul>
+        <div style="margin-left: auto; margin-right: auto; width: fit-content; margin-top: 10px;">
+            <input type="number" name="page-num" id="page-num" max="{{num_page}}" min="1" value="1">
+            </input>
+            / {{num_page}}
+        </div>
     </nav>
 </div>
 

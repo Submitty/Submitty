@@ -30,7 +30,8 @@ class EmailStatusController extends AbstractController {
             EmailStatusView::class,
             'showEmailStatusPage',
             $num_page,
-            $this->core->buildCourseUrl(["email_status_page"])
+            $this->core->buildCourseUrl(["email_status_page"]),
+            $this->core->buildUrl()
         );
     }
 
@@ -67,7 +68,8 @@ class EmailStatusController extends AbstractController {
             EmailStatusView::class,
             'showEmailStatusPage',
             $num_page,
-            $this->core->buildUrl(["superuser", "email_status_page"])
+            $this->core->buildUrl(["superuser", "email_status_page"]),
+            $this->core->buildUrl()
         );
     }
 
