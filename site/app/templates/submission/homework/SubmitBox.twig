@@ -347,9 +347,9 @@
                     "content" : upload_message
                 } only %}
             </div>
-                <button type="button" id="submit" class="btn btn-success">
-                    {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
-                </button>
+            <button type="button" id="submit" class="submit-gradeable btn btn-success">
+                {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
+            </button>
         {% endif %}
         
         {% if part_names is not empty %}
