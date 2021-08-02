@@ -52,13 +52,14 @@ class EmailRepository extends EntityRepository {
         $page = 1;
         $count = 0;
         $subject = 0;
+        $new_page_flag = false;
         foreach ($q->toIterable() as $email) {
             $count += $email[1];
             $subject += 1;
-            if ($count >= self::PAGE_SIZE || $subject == self::MAX_SUBJECTS_PER_PAGE) {
+            if ($count >= self::PAGE_SIZE || $subject > self::MAX_SUBJECTS_PER_PAGE) {
                 $page += 1;
                 $count = 0;
-                $subject = 0;
+                $subject = 1;
             }
         }
         return $page;
@@ -78,20 +79,24 @@ class EmailRepository extends EntityRepository {
         $subject_count = 0;
         $subjects = [];
         foreach ($q->toIterable() as $email) {
+            $count += $email[1];
+            $current_entry += $email[1];
+            $subject_count += 1;
             if ($curr_page > $page) {
                 break;
             }
             elseif ($curr_page == $page) {
                 $subjects[] = array("subject" => $email['subject'], "created" => $email['created']->format("Y-m-d H:i:s.u"));
             }
-            $count += $email[1];
-            $current_entry += $email[1];
-            $subject_count += 1;
-            if ($count >= self::PAGE_SIZE || $subject_count == self::MAX_SUBJECTS_PER_PAGE) {
+            if ($count >= self::PAGE_SIZE || $subject_count > self::MAX_SUBJECTS_PER_PAGE) {
                 $curr_page += 1;
                 $count = 0;
-                $subject_count = 0;
+                $subject_count = 1;
+                if ($curr_page == $page) {
+                    $subjects[] = array("subject" => $email['subject'], "created" => $email['created']->format("Y-m-d H:i:s.u"));
+                }
             }
+            
         }
         return $subjects;
     }

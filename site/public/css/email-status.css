@@ -69,6 +69,7 @@
     background-color: var(--text-black);
     color: var(--focus-actionable-blue);
     border: 1px solid var(--text-black);
+    font-size: 16px;
 }
 
 .selected {
@@ -79,7 +80,7 @@
 .first-btn,
 .last-btn {
     background-color: transparent;
-    font-size: 1em;
+    font-size: 16px;
     color: var(--text-black);
     height: fit-content;
 }

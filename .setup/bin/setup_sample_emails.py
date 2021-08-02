@@ -36,8 +36,6 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as databa
     DB_USER = database_config_json["database_user"]
     DB_PASS = database_config_json["database_password"]
 
-NOW = dateutils.get_current_time()
-
 def main():
     random.seed(8430571)
 
@@ -52,11 +50,13 @@ def main():
     user_table = Table('users', submitty_metadata, autoload=True)
 
     for course in courses:
-        users[course.course + ' ' + course.semester] = list(submitty_conn.execute("SELECT * FROM users INNER JOIN courses_users\
+        users[course.course + ' ' + course.semester] = list(submitty_conn.execute("SELECT DISTINCT users.user_id, users.user_email FROM users INNER JOIN courses_users\
                                                 ON courses_users.user_id = users.user_id\
                                                 WHERE courses_users.semester = '{}'\
                                                 AND courses_users.course = '{}'".format(course.semester, course.course)))
-    users["superuser"] = list(submitty_conn.execute(select(user_table.c)))
+    users["superuser"] = list(submitty_conn.execute("SELECT DISTINCT user_id, user_email FROM users"))
+
+    print(users)
 
     courses_subject = []
     courses_body = []
@@ -69,7 +69,6 @@ def main():
         print ("Adding email entry #", i)
         # superuser email
         if course_selected == len(courses):
-            user_table = Table('users', submitty_metadata, autoload=True)
             emails = generateRandomSuperuserEmail(users["superuser"])
             for email in emails:
                 submitty_conn.execute(email_table.insert(),
@@ -99,7 +98,8 @@ def generateRandomSuperuserEmail(recipients):
         open(os.path.join(SETUP_DATA_PATH, 'random', 'SuperuserSubject.txt')) as subject_file:
         body = random.choice(body_file.read().strip().split('\n'))
         subject = random.choice(subject_file.read().strip().split('\n'))
-
+    #print("Inserting {} emails".format(len(recipients)))
+    now = dateutils.get_current_time()
     emails = []
     for recipient in recipients:
         emails.append(
@@ -107,7 +107,7 @@ def generateRandomSuperuserEmail(recipients):
                 "user_id": recipient.user_id,
                 "subject": "[Submitty Admin Announcement]: " + subject,
                 "body": body,
-                "created": NOW,
+                "created": now,
                 "email_address": recipient.user_email,
                 "semester": None,
                 "course": None
@@ -120,7 +120,8 @@ def generateRandomCourseEmail(recipients, course):
         open(os.path.join(SETUP_DATA_PATH, 'random', 'CourseSubject.txt')) as subject_file:
         body = random.choice(body_file.read().strip().split('\n'))
         subject = random.choice(subject_file.read().strip().split('\n'))
-
+    #print("Inserting {} emails".format(len(recipients)))
+    now = dateutils.get_current_time()
     emails = []
     for recipient in recipients:
         emails.append(
@@ -128,7 +129,7 @@ def generateRandomCourseEmail(recipients, course):
                 "user_id": recipient.user_id,
                 "subject": subject,
                 "body": body,
-                "created": NOW,
+                "created": now,
                 "email_address": recipient.user_email,
                 "semester": course.semester,
                 "course": course.course
