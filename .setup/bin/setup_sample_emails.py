@@ -46,23 +46,31 @@ def main():
     submitty_metadata = MetaData(bind=submitty_engine)
     email_table = Table('emails', submitty_metadata, autoload=True)
 
-    courses = submitty_conn.execute("SELECT semester, course FROM courses")
+    courses = list(submitty_conn.execute("SELECT semester, course FROM courses"))
+    users = {}
+    courses_user_table = Table('courses_users', submitty_metadata, autoload=True)
+    user_table = Table('users', submitty_metadata, autoload=True)
+
+    for course in courses:
+        users[course.course + ' ' + course.semester] = list(submitty_conn.execute("SELECT * FROM users INNER JOIN courses_users\
+                                                ON courses_users.user_id = users.user_id\
+                                                WHERE courses_users.semester = '{}'\
+                                                AND courses_users.course = '{}'".format(course.semester, course.course)))
+    users["superuser"] = list(submitty_conn.execute(select(user_table.c)))
 
     courses_subject = []
     courses_body = []
     superuser_subject = []
     superuser_body = []
-    course_result = courses.fetchall()
 
     # These are not realistic emails as the email content does not check who owns the course and the body is often times nonsensical
     for i in range(EMAIL_NUM):
-        course_selected = random.randint(0, courses.rowcount)
+        course_selected = random.randint(0, len(courses))
         print ("Adding email entry #", i)
         # superuser email
-        if course_selected == courses.rowcount:
+        if course_selected == len(courses):
             user_table = Table('users', submitty_metadata, autoload=True)
-            users = submitty_conn.execute(select(user_table.c))
-            emails = generateRandomSuperuserEmail(users)
+            emails = generateRandomSuperuserEmail(users["superuser"])
             for email in emails:
                 submitty_conn.execute(email_table.insert(),
                                     user_id=email["user_id"],
@@ -74,14 +82,8 @@ def main():
                                     course=email["course"])
         # course email
         else:
-            course = course_result[course_selected]
-            courses_user_table = Table('courses_users', submitty_metadata, autoload=True)
-            user_table = Table('users', submitty_metadata, autoload=True)
-            users = submitty_conn.execute("SELECT * FROM users INNER JOIN courses_users\
-                                           ON courses_users.user_id = users.user_id\
-                                           WHERE courses_users.semester = '{}'\
-                                           AND courses_users.course = '{}'".format(course.semester, course.course))
-            emails = generateRandomCourseEmail(users, course)
+            course = courses[course_selected]
+            emails = generateRandomCourseEmail(users[course.course + ' ' + course.semester], course)
             for email in emails:
                 submitty_conn.execute(email_table.insert(),
                                     user_id=email["user_id"],
@@ -95,8 +97,8 @@ def main():
 def generateRandomSuperuserEmail(recipients):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'SuperuserEmailBody.txt')) as body_file, \
         open(os.path.join(SETUP_DATA_PATH, 'random', 'SuperuserSubject.txt')) as subject_file:
-        body = random.choice(body_file.read().strip().split())
-        subject = random.choice(subject_file.read().strip().split())
+        body = random.choice(body_file.read().strip().split('\n'))
+        subject = random.choice(subject_file.read().strip().split('\n'))
 
     emails = []
     for recipient in recipients:
@@ -116,8 +118,8 @@ def generateRandomSuperuserEmail(recipients):
 def generateRandomCourseEmail(recipients, course):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'CourseEmailBody.txt')) as body_file, \
         open(os.path.join(SETUP_DATA_PATH, 'random', 'CourseSubject.txt')) as subject_file:
-        body = random.choice(body_file.read().strip().split())
-        subject = random.choice(subject_file.read().strip().split())
+        body = random.choice(body_file.read().strip().split('\n'))
+        subject = random.choice(subject_file.read().strip().split('\n'))
 
     emails = []
     for recipient in recipients:
