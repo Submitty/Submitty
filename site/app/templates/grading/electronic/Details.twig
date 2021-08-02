@@ -615,23 +615,10 @@
 
 {# Total Point Summary (peer) #}
 {% macro render_column_total_peer(context, section, graded_gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently) #}
-    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
-    {% set graded = gradeable.getGradedNonHiddenPoints() %}
-    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
-    {% for component in components %}
-        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
-        {% set graded = graded + component.getScore() %}
-    {% endfor %}
-    {#
-        instead of autograding_score it should be total autograding possible
-        I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
-    #}
-    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
+    {% set graded = graded_gradeable.getPeerGradedScore(core.getUser()) %}
+    {% set total_possible = graded_gradeable.getGradeable().getPeerPoints() %}
     <td>
-        {% if gradeable.validateVersions() %}
-            <div>{{ graded }} / {{ total_possible }}</div>
-        {% endif %}
+        <div>{{ graded }} / {{ total_possible }}</div>
     </td>
 {% endmacro %}
 

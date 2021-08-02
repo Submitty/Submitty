@@ -135,6 +135,16 @@ class GradedGradeable extends AbstractModel {
         return true;
     }
 
+    public function getPeerGradedScore(User $user): float {
+        $total_score = 0.0;
+        foreach ($this->getTaGradedGradeable()->getGradedComponentContainers() as $container) {
+            $component = $container->getOrCreateGradedComponent($user);
+            if ($component !== null) {
+                $total_score += $component->getScore();
+            }
+        }
+        return $total_score;
+    }
 
     /**
      * Sets the grade inquiry for this graded gradeable
