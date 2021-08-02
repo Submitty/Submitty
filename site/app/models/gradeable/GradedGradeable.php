@@ -140,7 +140,7 @@ class GradedGradeable extends AbstractModel {
         foreach ($this->getTaGradedGradeable()->getGradedComponentContainers() as $container) {
             $component = $container->getOrCreateGradedComponent($user);
             if ($component !== null) {
-                $total_score += $component->getScore();
+                $total_score += $component->getTotalScore();
             }
         }
         return $total_score;
