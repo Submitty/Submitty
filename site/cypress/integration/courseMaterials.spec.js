@@ -228,90 +228,94 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer').should('not.exist');
     });
 
-    it('Should restrict course materials by section', () => {
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#all_Sections_Showing_yes').click();
-        cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
-        cy.get('#section-1').check();
-        cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
-        cy.get('#submit-materials').click();
+    skipOn(Cypress.env('run_area') === 'CI', () => {
+        it('Should restrict course materials by section', () => {
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#all_Sections_Showing_yes').click();
+            cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
+            cy.get('#section-1').check();
+            cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
+            cy.get('#submit-materials').click();
 
-        cy.reload();
-        cy.get('.fa-pencil-alt').last().click();
-        cy.get('#section-edit-2').check();
-        cy.get('#submit-edit').click();
+            cy.reload();
+            cy.get('.fa-pencil-alt').last().click();
+            cy.get('#section-edit-2').check();
+            cy.get('#submit-edit').click();
 
-        cy.reload();
-        cy.logout();
-        cy.login('aphacker');
-        cy.visit(['sample', 'course_materials']);
+            cy.reload();
+            cy.logout();
+            cy.login('aphacker');
+            cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer').should('have.length', 2);
+            cy.get('.file-viewer').should('have.length', 2);
 
-        cy.logout();
-        cy.login('browna');
-        cy.visit(['sample', 'course_materials']);
+            cy.logout();
+            cy.login('browna');
+            cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer').should('have.length', 1);
+            cy.get('.file-viewer').should('have.length', 1);
 
-        const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
+            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
 
-        cy.visit(fileTgt2);
-        cy.wait(1000);
-        cy.get('.content').contains('Reason: Your section may not access this file');
+            cy.visit(fileTgt2);
+            cy.wait(1000);
+            cy.get('.content').contains('Reason: Your section may not access this file');
 
-        cy.visit('/');
-        cy.wait(1000);
-        cy.logout();
-        cy.reload(true);
-        cy.login();
+            cy.visit('/');
+            cy.wait(1000);
+            cy.logout();
+            cy.reload(true);
+            cy.login();
 
-        cy.visit(['sample', 'course_materials']);
-        cy.get('.fa-trash').first().click();
-        cy.get('.btn-danger').click();
+            cy.visit(['sample', 'course_materials']);
+            cy.get('.fa-trash').first().click();
+            cy.get('.btn-danger').click();
 
-        cy.get('.fa-trash').click();
-        cy.get('.btn-danger').click();
-        cy.get('.file-viewer').should('not.exist');
+            cy.get('.fa-trash').click();
+            cy.get('.btn-danger').click();
+            cy.get('.file-viewer').should('not.exist');
 
+        });
     });
+    
+    skipOn(Cypress.env('run_area') === 'CI', () => {
+        it('Should restrict course materials within folders', () => {
+            cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+            cy.get('#all_Sections_Showing_yes').click();
+            cy.get('#upload1').attachFile('zip.zip' , { subjectType: 'drag-n-drop' });
+            cy.get('#section-1').check();
+            cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
+            cy.get('#expand-zip-checkbox').check();
+            cy.get('#submit-materials').click();
 
-    it('Should restrict course materials within folders', () => {
-        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#all_Sections_Showing_yes').click();
-        cy.get('#upload1').attachFile('zip.zip' , { subjectType: 'drag-n-drop' });
-        cy.get('#section-1').check();
-        cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
-        cy.get('#expand-zip-checkbox').check();
-        cy.get('#submit-materials').click();
+            cy.reload();
+            cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+            cy.get('.fa-pencil-alt').eq(9).click();
+            cy.get('#all-sections-showing-yes').click();
+            cy.get('#section-edit-2').check();
+            cy.get('#submit-edit').click();
 
-        cy.reload();
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
-        cy.get('.fa-pencil-alt').eq(9).click();
-        cy.get('#all-sections-showing-yes').click();
-        cy.get('#section-edit-2').check();
-        cy.get('#submit-edit').click();
+            cy.reload(true);
+            cy.logout();
+            cy.login('browna');
+            cy.visit(['sample', 'course_materials']);
 
-        cy.reload(true);
-        cy.logout();
-        cy.login('browna');
-        cy.visit(['sample', 'course_materials']);
+            cy.get('.file-viewer').should('have.length', 1);
+            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/1_1.txt`;
+            cy.visit(fileTgt2);
 
-        cy.get('.file-viewer').should('have.length', 1);
-        const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/1_1.txt`;
-        cy.visit(fileTgt2);
+            cy.wait(1000);
+            cy.get('.content').contains('Reason: Your section may not access this file');
+            cy.visit('/');
+            cy.wait(1000);
+            cy.logout();
+            cy.reload(true);
 
-        cy.wait(1000);
-        cy.get('.content').contains('Reason: Your section may not access this file');
-        cy.visit('/');
-        cy.wait(1000);
-        cy.logout();
-        cy.reload(true);
-
-        cy.login();
-        cy.visit(['sample', 'course_materials']);
-        cy.get('.fa-trash').first().click();
-        cy.get('.btn-danger').click();
+            cy.login();
+            cy.visit(['sample', 'course_materials']);
+            cy.get('.fa-trash').first().click();
+            cy.get('.btn-danger').click();
+        });
     });
 
     skipOn(Cypress.env('run_area') === 'CI', () => {
