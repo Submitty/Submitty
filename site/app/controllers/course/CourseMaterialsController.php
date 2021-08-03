@@ -342,13 +342,14 @@ class CourseMaterialsController extends AbstractController {
 
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
+        $dirs_to_make = [];
+
         $url_url = null;
         if (isset($_POST['url_url'])) {
             if (!filter_var($_POST['url_url'], FILTER_VALIDATE_URL)) {
                 return JsonResponse::getErrorResponse("Invalid url");
             }
             $url_url = $_POST['url_url'];
-            $dirs_to_make = [];
             if (isset($requested_path)) {
                 $this->addDirs($requested_path, $upload_path, $dirs_to_make);
             }
