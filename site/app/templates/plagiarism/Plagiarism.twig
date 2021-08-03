@@ -94,7 +94,7 @@
         <td>
             {{ row['config_id'] }}
         </td>
-        {% if row['in_queue'] is defined %}
+        {% if row['in_queue'] == true %}
             <td colspan=4>
                 {% if row['processing'] %}
                     <i>Running</i>

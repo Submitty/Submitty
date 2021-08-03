@@ -357,7 +357,7 @@ class PlagiarismController extends AbstractController {
             $plagiarism_row['config_id'] = $gradeable['g_config_version'];
             $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format('F d Y H:i:s'); // TODO: think about the format of this date.  Using the format of the last run date for now.
             $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']) . "?config_id={$plagiarism_row["config_id"]}";
-            $overall_ranking_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "overall_rankings.txt") ;
+            $overall_ranking_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "overall_ranking.txt") ;
             if (file_exists($overall_ranking_file)) {
                 $timestamp = date("F d Y H:i:s", filemtime($overall_ranking_file));
                 $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
@@ -379,16 +379,18 @@ class PlagiarismController extends AbstractController {
             $plagiarism_row['night_rerun_status'] = "";//$nightly_rerun_info[$plagiarism_row['id']] ? "" : "checked";
 
             // lichen job in queue for this gradeable but processing not started
-            if (file_exists($this->getQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
-                $plagiarism_row['in_queue'] = true;
-                $plagiarism_row['processing'] = false;
-            }
-            elseif (file_exists($this->getProcessingQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
+            if (file_exists($this->getProcessingQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
                 // lichen job in processing stage for this gradeable but not completed
                 $plagiarism_row['in_queue'] = true;
                 $plagiarism_row['processing'] = true;
             }
+            elseif (file_exists($this->getQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
+                $plagiarism_row['in_queue'] = true;
+                $plagiarism_row['processing'] = false;
+            }
             else {
+                $plagiarism_row['in_queue'] = false;
+                $plagiarism_row['processing'] = false;
                 // no lichen job
                 if (!file_exists($overall_ranking_file) || file_get_contents($overall_ranking_file) == "") {
                     $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
