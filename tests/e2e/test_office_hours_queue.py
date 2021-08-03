@@ -4,6 +4,8 @@ from selenium.webdriver.support.ui import Select
 from random import choice
 from string import ascii_lowercase
 import urllib.parse
+import os
+import unittest
 
 
 class TestOfficeHoursQueue(BaseTestCase):
