@@ -14,9 +14,64 @@ describe('Test cases relating to the grading of an assignment', () => {
             cy.url().should('include', buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'details'], true))
         });
 
-        it('test prev/next buttons', () => {
+        describe('', () => {
+            beforeEach(() => {
+                // the browser's local storage should keep the student info pane selected so we only have to click it once
+                cy.get('#student_info_btn').click()
+            });
 
-        });
+            it('test basic prev/next', () => {
+                cy.get('#grading-setting-btn').click()
+                cy.get('#general-setting-list .ta-grading-setting-option').select('Prev/Next Student')
+                cy.get('#settings-popup .form-buttons .btn').click()
+                cy.get('.rubric-title').should('contain', 'Alyssa P Hacker (aphacker)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Felicity Hammes (hammef)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Mauricio Hettinger (hettim)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Ena Huel (huele)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Mauricio Hettinger (hettim)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Felicity Hammes (hammef)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Alyssa P Hacker (aphacker)')
+                // check to make sure we go back to the home page if we go past the start of the list and vice-versa
+                cy.get('#prev-student').click()
+                cy.url().should('include', buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'details'], true))
+                cy.get('#details-table').contains('whitel').siblings(':nth-child(8)').click()
+                cy.get('#next-student').click()
+                cy.url().should('include', buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'details'], true))
+            });
+
+            it('test prev/next ungraded student', () => {
+                cy.get('#main-page').click()
+                cy.get('#details-table').contains('chrisw').siblings(':nth-child(8)').click()
+
+                cy.get('#grading-setting-btn').click()
+                cy.get('#general-setting-list .ta-grading-setting-option').select('Prev/Next Ungraded Student')
+                cy.get('#settings-popup .form-buttons .btn').click()
+
+                cy.get('.rubric-title').should('contain', 'Willy Christiansen (chrisw)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Rollin Jakubowski (jakubr)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Bridget Kunde (kundeb)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Madelynn Larkin (larkim)')
+                cy.get('#next-student').click()
+                cy.get('.rubric-title').should('contain', 'Kaley Hayes (hayesk)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Madelynn Larkin (larkim)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Bridget Kunde (kundeb)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Rollin Jakubowski (jakubr)')
+                cy.get('#prev-student').click()
+                cy.get('.rubric-title').should('contain', 'Willy Christiansen (chrisw)')
+            });
+        })
     });
 
     describe('Test cases relating to the "files" pane', () => {
@@ -224,7 +279,7 @@ describe('Test cases relating to the grading of an assignment', () => {
             cy.get('#student_info_btn').click()
         });
 
-        it('save a mark and then remove it', () => {
+        it('check cancelling and reinstating assignment', () => {
             cy.get('.rubric-title').should('contain', 'Alyssa P Hacker (aphacker)')
             cy.get('.rubric-title').should('contain', 'Submission Number: 1 / 1')
             cy.get('.rubric-title').should('contain', 'Submitted: 12/31/1971 23:59:59 EST')
