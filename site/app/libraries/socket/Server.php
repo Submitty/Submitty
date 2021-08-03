@@ -230,15 +230,6 @@ class Server implements MessageComponentInterface {
         }
         elseif (isset($msg['user_id'])) {
             // user_id is only sent with socket clients open from a php user_agent
-            $user_open_clients = $this->getSocketClients($msg['user_id']);
-            if (is_array($user_open_clients)) {
-                foreach ($user_open_clients as $original_client) {
-                    if ($this->getSocketClientPage($original_client) === $msg['page']) {
-                        $original_client->close();
-                        break;
-                    }
-                }
-            }
             unset($msg['user_id']);
             $new_msg_string = json_encode($msg);
             $this->broadcast($from, $new_msg_string, $msg['page']);
