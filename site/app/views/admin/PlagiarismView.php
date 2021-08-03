@@ -8,7 +8,12 @@ use app\libraries\plagiarism\PlagiarismUtils;
 
 class PlagiarismView extends AbstractView {
 
-    public function plagiarismMainPage($plagiarism_result_info, $refresh_page) {
+    /**
+     * @param array $plagiarism_result_info
+     * @param string $refresh_page
+     * @return string
+     */
+    public function plagiarismMainPage(array $plagiarism_result_info, string $refresh_page): string {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
         $this->core->getOutput()->addInternalCss("plagiarism.css");
         $this->core->getOutput()->enableMobileViewport();
@@ -24,7 +29,14 @@ class PlagiarismView extends AbstractView {
         ]);
     }
 
-    public function showPlagiarismResult($gradeable_id, $config_id, $gradeable_title, $rankings) {
+    /**
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @param string $gradeable_title
+     * @param array $rankings
+     * @return string
+     */
+    public function showPlagiarismResult(string $gradeable_id, string $config_id, string $gradeable_title, array $rankings): string {
         $this->core->getOutput()->addBreadcrumb('Plagiarism  Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb($gradeable_title);
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
@@ -44,7 +56,12 @@ class PlagiarismView extends AbstractView {
         ]);
     }
 
-    public function configurePlagiarismForm($new_or_edit, $config) {
+    /**
+     * @param string $new_or_edit
+     * @param array $config
+     * @return string
+     */
+    public function configurePlagiarismForm(string $new_or_edit, array $config): string {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         if ($new_or_edit === "edit") {
             $this->core->getOutput()->addBreadcrumb('Edit Gradeable Configuration');
