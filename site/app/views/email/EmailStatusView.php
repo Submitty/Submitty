@@ -71,6 +71,6 @@ class EmailStatusView extends AbstractView {
     }
 
     private function EmailToKey($row) {
-        return $row->getSubject() . ', ' . $row->getCreated()->format('Y-m-d H:i:s');
+        return $row->getSubject() . ', ' . $row->getCreated()->format('Y-m-d H:i:s.u');
     }
 }

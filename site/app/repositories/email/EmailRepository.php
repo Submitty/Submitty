@@ -68,13 +68,11 @@ class EmailRepository extends EntityRepository {
         }
         $q = $this->_em->createQuery($dql);
         $curr_page = 1;
-        $current_entry = 0;
         $count = 0;
         $subject_count = 0;
         $subjects = [];
         foreach ($q->toIterable() as $email) {
             $count += $email[1];
-            $current_entry += $email[1];
             $subject_count += 1;
             if ($curr_page > $page) {
                 break;
@@ -82,13 +80,10 @@ class EmailRepository extends EntityRepository {
             elseif ($curr_page == $page) {
                 $subjects[] = ["subject" => $email['subject'], "created" => $email['created']->format("Y-m-d H:i:s.u")];
             }
-            if ($count >= self::PAGE_SIZE || $subject_count > self::MAX_SUBJECTS_PER_PAGE) {
+            if ($count >= self::PAGE_SIZE || $subject_count == self::MAX_SUBJECTS_PER_PAGE) {
                 $curr_page += 1;
                 $count = 0;
-                $subject_count = 1;
-                if ($curr_page == $page) {
-                    $subjects[] = ["subject" => $email['subject'], "created" => $email['created']->format("Y-m-d H:i:s.u")];
-                }
+                $subject_count = 0;
             }
         }
         return $subjects;

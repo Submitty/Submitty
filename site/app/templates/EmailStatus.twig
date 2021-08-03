@@ -3,8 +3,8 @@
         <div class="status-container">
             <div class = "button-container">
                 <div>
-                    <div> Email Subject: {{subject[0:-21]}} </div>
-                    <div> Time Created: {{subject[-19:]}}</div>
+                    <div> Email Subject: {{subject[0:-28]}} </div>
+                    <div> Time Created: {{subject[-26:-7]}}</div>
                     {% if courses is defined and courses[subject] is defined and courses[subject] is not null %}
                         <div> Course: {{courses[subject]}}</div>
                     {% else %}
