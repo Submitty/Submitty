@@ -1,6 +1,6 @@
 <div class="content">
     {% if team_assignment %}
-        <h3>Team{% if team_name is defined %} ({{ team_name }}){% endif %}: {{ team_members is defined ? team_members : '' }}</h3><br />
+        <h3>Team{% if team_name is not null %} ({{ team_name }}){% endif %}: {{ member_list }}</h3><br />
     {% endif %}
     <span style="font-style: italic">No submissions for this assignment.</span>
 </div>
