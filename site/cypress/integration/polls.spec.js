@@ -15,6 +15,7 @@ describe('Test cases revolving around polls functionality', () => {
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
+        cy.wait(500);
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
 
@@ -67,6 +68,7 @@ describe('Test cases revolving around polls functionality', () => {
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
+        cy.wait(500);
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
 
@@ -150,9 +152,10 @@ describe('Test cases revolving around polls functionality', () => {
 
         // make a poll
         cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll 5');
-        cy.get('#poll-question').type('Question goes here...?');
+        cy.get('#poll-name').type('Poll Cypress Test');
+        cy.get('#poll-question').type('# Question goes here...?');
         cy.get('#poll-date').type('1970-01-01');
+        cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('+ Add Response').click();
         cy.contains('+ Add Response').click();
         cy.contains('+ Add Response').click();
@@ -166,31 +169,33 @@ describe('Test cases revolving around polls functionality', () => {
         // submit and verify on main polls page, poll should be closed
         cy.get('#poll-form-submit').click();
         cy.url().should('include', 'sample/polls');
-        cy.contains('Poll 5').siblings(':nth-child(5)').should('not.be.checked');
-        cy.contains('Poll 5').siblings(':nth-child(6)').should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(5)').should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').should('not.be.checked');
 
         // log into student and assert we can't see the poll yet
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(3)').contains('Closed');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Closed');
 
         // log into instructor and change poll to visible
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.get('#old-table-dropdown').click();
-        cy.contains('Poll 5').siblings(':nth-child(5)').children().click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(5)').children().click();
         cy.wait(1000);
 
         // log in from student and verify we can now view but not answer the poll
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.get('h1').contains('Poll 5');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('h1').contains('Poll Cypress Test');
+        cy.get('img').should('be.visible');
         cy.get('h2').contains('Possible responses:');
-        cy.get('.markdown > p').contains('Question goes here...?');
+        cy.get('.markdown').should('contain', 'Question goes here...?');
+        cy.get('.markdown').should('not.contain', '#');
         cy.get('.radio').eq(0).contains('No response');
         cy.get('.radio > input').eq(0).should('be.disabled');
         cy.get('.radio > input').eq(0).should('be.checked');
@@ -205,14 +210,14 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(6)').children().click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
         cy.wait(1000);
 
         // log into student and verify we can answer the poll
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(3)').contains('Answer').click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
         cy.url().should('include', 'sample/polls/viewPoll');
         cy.get('.radio').eq(0).contains('No response');
         cy.get('.radio > input').eq(0).should('not.be.disabled');
@@ -227,25 +232,25 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('button[type=submit]').click();
         cy.wait(1000);
         cy.url().should('include', 'sample/polls');
-        cy.contains('Poll 5').siblings(':nth-child(2)').contains('Answer 2');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 2');
 
         // try switching the answer and verify it got saved
-        cy.contains('Poll 5').siblings(':nth-child(3)').contains('Answer').click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
         cy.get('.radio > input').eq(2).should('be.checked');
         cy.get('.radio > input').eq(3).should('not.be.checked');
         cy.get('.radio > input').eq(3).check();
         cy.get('button[type=submit]').click();
         cy.wait(1000);
-        cy.contains('Poll 5').siblings(':nth-child(2)').contains('Answer 3');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 3');
 
-        // log into instructor, edit the poll to switch the order of the answers
+        // log into instructor, edit the poll
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(1)').children().click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
-        cy.get('#poll-name').invoke('val').should('eq', 'Poll 5');
+        cy.get('#poll-name').invoke('val').should('eq', 'Poll Cypress Test');
         cy.get('#poll-question').contains('Question goes here...?');
         cy.get('#poll-type-single-response-single-correct').should('not.be.checked');
         cy.get('#poll-type-single-response-multiple-correct').should('be.checked');
@@ -272,7 +277,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(3)').contains('Answer').click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
         cy.get('.radio').eq(0).contains('No response');
         cy.get('.radio > input').eq(0).should('not.be.checked');
         cy.get('.radio').eq(1).contains('Answer 0');
@@ -286,14 +291,14 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll 5').siblings(':nth-child(2)').click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
         cy.wait(1000);
 
         // log into student and verify the poll is no longer there
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.get('.content').should('not.contain', 'Poll 5');
+        cy.get('.content').should('not.contain', 'Poll Cypress Test');
 
         // yay! done.
     });
