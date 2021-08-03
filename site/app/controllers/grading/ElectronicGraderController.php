@@ -1188,14 +1188,12 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $team_name = $_POST['team_name'] ?? null;
-        $new_team_name = false;
 
         if ($new_team) {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             try {
                 $gradeable->createTeam($leader, $users, $reg_section, $rot_section, $team_name);
                 $this->core->addSuccessMessage("Created New Team {$team_id}");
-                $new_team_name = true;
             }
             catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized: {$e->getMessage()}");
@@ -1208,6 +1206,7 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->addErrorMessage("ERROR: {$team_id} is not a valid Team ID");
                 $this->core->redirect($return_url);
             }
+            $new_team_name = false;
             if ($team_name !== $team->getTeamName()) {
                 $new_team_name = true;
             }
