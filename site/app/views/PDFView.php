@@ -13,6 +13,8 @@ class PDFView extends AbstractView {
         string $user_id,
         ?string $file_name,
         ?string $file_path,
+        ?string $anon_path,
+        ?string $download_path,
         array $annotation_jsons,
         bool $is_student,
         ?int $page_num,
@@ -51,11 +53,15 @@ class PDFView extends AbstractView {
             'file_path' => $file_path,
             'annotation_jsons' => json_encode($annotation_jsons),
             'student_popup' => $is_student,
+            'can_download' => !$is_student,
             'page_num' => $page_num,
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
             'localjs' => $localjs,
-            'csrfToken' => $this->core->getCsrfToken()
+            'csrfToken' => $this->core->getCsrfToken(),
+            'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'download_pdf']),
+            'anon_path' => $anon_path,
+            'download_path' => $download_path
         ]);
     }
 
