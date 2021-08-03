@@ -29,7 +29,7 @@ TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "exam
 DB_HOST = "localhost"
 
 # To stress test the email database, change this variable to a greater number
-EMAIL_NUM = 20000
+EMAIL_NUM = 1000
 
 with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as database_config:
     database_config_json = json.load(database_config)
@@ -64,6 +64,8 @@ def main():
     # These are not realistic emails as the email content does not check who owns the course and the body is often times nonsensical
     print("Inserting sample emails into database")
     for i in range(EMAIL_NUM):
+        if i / EMAIL_NUM * 100 % 10 == 0 and i != 0:
+            print("{}% of emails inserted.".format(int(i / EMAIL_NUM * 100)))
         course_selected = random.randint(0, len(courses))
         # superuser email
         if course_selected == len(courses):
