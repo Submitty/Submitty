@@ -552,28 +552,15 @@ class CourseMaterialsController extends AbstractController {
         }
 
         foreach ($details['type'] as $key => $value) {
-            if ($value === CourseMaterial::LINK) {
-                $course_material = new CourseMaterial(
-                    $value,
-                    $details['path'][$key],
-                    DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
-                    $details['hidden_from_students'],
-                    $details['priority'],
-                    $url_url,
-                    $url_title
-                );
-            }
-            else {
-                $course_material = new CourseMaterial(
-                    $value,
-                    $details['path'][$key],
-                    DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
-                    $details['hidden_from_students'],
-                    $details['priority'],
-                    null,
-                    null
-                );
-            }
+            $course_material = new CourseMaterial(
+                $value,
+                $details['path'][$key],
+                DateUtils::parseDateTime($details['release_date'], $this->core->getDateTimeNow()->getTimezone()),
+                $details['hidden_from_students'],
+                $details['priority'],
+                $value === CourseMaterial::LINK ? $url_url : null,
+                $value === CourseMaterial::LINK ? $url_title : null
+            );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
                 foreach ($details['sections'] as $section) {
