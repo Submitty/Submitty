@@ -14,7 +14,7 @@
             <hr>
             <button class="submit-gradeable btn btn-success popup-submit">Submit</button>
             <button class="btn btn-primary" onclick="closePopupSubmit()">Close</button>
-            <button class="btn btn-danger" onclick="DontShowPopupSubmit()">Don't Ask Me Again</button>
+            <button class="btn btn-danger" onclick="dontShowPopupSubmit()">Don't Ask Me Again</button>
         </div>
     {% endif %}
     {% for cell in notebook %}
@@ -290,8 +290,14 @@
     }
 
     function count(){
+        //clear local storage if gradeable is past due
+        if (user_deadline < curTime ) {
+            localStorage.removeItem(notebookPopupSubmitKey());
+        }
+        
         const time_taken = Math.floor((curTime - loadTime)/1000);
         const minutes_taken = Math.floor(time_taken / 60);
+        console.log(minutes_taken);
         if (minutes_taken >= interval ) {
             if (localStorage.getItem(notebookPopupSubmitKey()) === 'yes' && curTime < user_deadline && showPopup) {
                 $(".notebook-submit-popup").show();
@@ -306,7 +312,7 @@
         loadTime = curTime;
     }
 
-    function DontShowPopupSubmit() {
+    function dontShowPopupSubmit() {
         closePopupSubmit();
         localStorage.setItem(notebookPopupSubmitKey(), 'no');
     }

@@ -20,11 +20,11 @@ let allowedTime = 0;
 let gradeable_id = '';
 let ticks_till_update = 600000;
 let popUpTimerStarted = false;
-let isNotebook = false;
+let isTimed = false;
 
-function initializeTimer(gradeableID, is_notebook) {
+function initializeTimer(gradeableID, is_timed) {
     gradeable_id = gradeableID;
-    isNotebook = is_notebook;
+    isTimed = is_timed;
     syncWithServer(true);
 }
 
@@ -54,7 +54,7 @@ function syncWithServer(criticalSync) {
                 curTime = data.current_time;
                 deadline = data.deadline;
                 updateTime();
-                if (!popUpTimerStarted && isNotebook) {
+                if (!popUpTimerStarted && isTimed && allowedTime > 25) {
                     // eslint-disable-next-line no-undef
                     initializePopupTimer();
                     popUpTimerStarted = true;
