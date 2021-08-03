@@ -340,12 +340,18 @@ class CourseMaterialsController extends AbstractController {
             $url_title = $_POST['url_title'];
         }
 
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+
         $url_url = null;
         if (isset($_POST['url_url'])) {
             if (!filter_var($_POST['url_url'], FILTER_VALIDATE_URL)) {
                 return JsonResponse::getErrorResponse("Invalid url");
             }
             $url_url = $_POST['url_url'];
+            $dirs_to_make = [];
+            if (isset($requested_path)) {
+                $this->addDirs($requested_path, $upload_path, $dirs_to_make);
+            }
         }
 
         if (isset($url_title) && isset($url_url)) {
@@ -391,12 +397,9 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.");
             }
 
-            // creating uploads/course_materials directory
-            $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             if (!FileUtils::createDir($upload_path)) {
                 return JsonResponse::getErrorResponse("Failed to make image path.");
             }
-            $dirs_to_make = null;
             // create nested path
             if (!empty($requested_path)) {
                 $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
@@ -404,19 +407,7 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Failed to make image path.");
                 }
                 $dirs_to_make = [];
-                $dirs = explode('/', $requested_path);
-                $j = count($dirs);
-                foreach ($dirs as $dir) {
-                    for ($i = 0; $i < $j; $i++) {
-                        if (!isset($dirs_to_make[$i])) {
-                            $dirs_to_make[$i] = $upload_path . '/' . $dir;
-                        }
-                        else {
-                            $dirs_to_make[$i] .= '/' . $dir;
-                        }
-                    }
-                    $j--;
-                }
+                $this->addDirs($requested_path, $upload_path, $dirs_to_make);
                 $upload_path = $upload_nested_path;
             }
 
@@ -541,19 +532,20 @@ class CourseMaterialsController extends AbstractController {
                     }
                 }
             }
-            if ($dirs_to_make != null) {
-                $i = -1;
-                $new_paths = [];
-                foreach ($dirs_to_make as $dir) {
-                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
-                        ['path' => $dir]
-                    );
-                    if ($cm == null && !in_array($dir, $new_paths)) {
-                        $details['type'][$i] = CourseMaterial::DIR;
-                        $details['path'][$i] = $dir;
-                        $i--;
-                        $new_paths[] = $dir;
-                    }
+        }
+
+        if ($dirs_to_make != null) {
+            $i = -1;
+            $new_paths = [];
+            foreach ($dirs_to_make as $dir) {
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
+                    ['path' => $dir]
+                );
+                if ($cm == null && !in_array($dir, $new_paths)) {
+                    $details['type'][$i] = CourseMaterial::DIR;
+                    $details['path'][$i] = $dir;
+                    $i--;
+                    $new_paths[] = $dir;
                 }
             }
         }
@@ -591,5 +583,21 @@ class CourseMaterialsController extends AbstractController {
         }
         $this->core->getCourseEntityManager()->flush();
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
+    }
+
+    private function addDirs(string $requested_path, string $upload_path, array &$dirs_to_make): void {
+        $dirs = explode('/', $requested_path);
+        $j = count($dirs);
+        foreach ($dirs as $dir) {
+            for ($i = 0; $i < $j; $i++) {
+                if (!isset($dirs_to_make[$i])) {
+                    $dirs_to_make[$i] = $upload_path . '/' . $dir;
+                }
+                else {
+                    $dirs_to_make[$i] .= '/' . $dir;
+                }
+            }
+            $j--;
+        }
     }
 }
