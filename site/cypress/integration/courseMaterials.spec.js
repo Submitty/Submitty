@@ -277,7 +277,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         });
     });
-    
+
     skipOn(Cypress.env('run_area') === 'CI', () => {
         it('Should restrict course materials within folders', () => {
             cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
