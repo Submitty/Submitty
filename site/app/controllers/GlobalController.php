@@ -192,6 +192,15 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-envelope"
             ]);
         }
+
+        if ($this->core->getUser()->accessFullGrading()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['grading_done']),
+                "title" => "Grading Machines",
+                "icon" => "fa-server"
+            ]);
+        }
+
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [
