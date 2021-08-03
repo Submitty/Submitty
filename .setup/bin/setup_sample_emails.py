@@ -56,17 +56,15 @@ def main():
                                                 AND courses_users.course = '{}'".format(course.semester, course.course)))
     users["superuser"] = list(submitty_conn.execute("SELECT DISTINCT user_id, user_email FROM users"))
 
-    print(users)
-
     courses_subject = []
     courses_body = []
     superuser_subject = []
     superuser_body = []
 
     # These are not realistic emails as the email content does not check who owns the course and the body is often times nonsensical
+    print("Inserting sample emails into database")
     for i in range(EMAIL_NUM):
         course_selected = random.randint(0, len(courses))
-        print ("Adding email entry #", i)
         # superuser email
         if course_selected == len(courses):
             emails = generateRandomSuperuserEmail(users["superuser"])
