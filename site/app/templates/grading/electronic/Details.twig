@@ -247,8 +247,6 @@
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
                 {{ _self.render_column_total(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "total_peer" %}
-                {{ _self.render_column_total_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_first" %}
                 {{ _self.render_column_user_first(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
@@ -610,15 +608,6 @@
         {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
                 <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
         {% endif %}
-    </td>
-{% endmacro %}
-
-{# Total Point Summary (peer) #}
-{% macro render_column_total_peer(context, section, graded_gradeable, index, info, column) %}
-    {% set graded = graded_gradeable.getPeerGradedScore(core.getUser()) %}
-    {% set total_possible = graded_gradeable.getGradeable().getPeerPoints() %}
-    <td>
-        <div>{{ graded }} / {{ total_possible }}</div>
     </td>
 {% endmacro %}
 
