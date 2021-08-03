@@ -357,7 +357,7 @@ class PlagiarismController extends AbstractController {
             $plagiarism_row['config_id'] = $gradeable['g_config_version'];
             $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format('F d Y H:i:s'); // TODO: think about the format of this date.  Using the format of the last run date for now.
             $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']) . "?config_id={$plagiarism_row["config_id"]}";
-            $overall_ranking_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "overall_ranking.txt") ;
+            $overall_ranking_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "overall_ranking.txt");
             if (file_exists($overall_ranking_file)) {
                 $timestamp = date("F d Y H:i:s", filemtime($overall_ranking_file));
                 $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
