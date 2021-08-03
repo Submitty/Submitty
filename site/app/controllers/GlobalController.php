@@ -195,7 +195,7 @@ class GlobalController extends AbstractController {
 
         if ($this->core->getUser()->accessFullGrading()) {
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['grading_done']),
+                "href" => $this->core->buildCourseUrl(['grading_done']),
                 "title" => "Grading Machines",
                 "icon" => "fa-server"
             ]);

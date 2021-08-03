@@ -11,19 +11,22 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @AccessControl(role="FULL_ACCESS_GRADER")
+ * @AccessControl(role="INSTRUCTOR")
  */
 class GradingMachineController extends AbstractController {
     /**
-     * @Route("/grading_done")
+     * @Route("/courses/{_semester}/{_course}/grading_done")
      */
     public function getGradingDonePage() {
         return new WebResponse(
             GradingMachineView::class,
-            'displayPage'
+            'displayPage',
+            $this->getProgress()
         );
     }
 
     public function getProgress() {
-        
+        $result = exec('sudo python3 /usr/local/submitty/bin/grading_done.py');
+
     }
 }
