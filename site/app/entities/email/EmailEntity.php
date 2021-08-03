@@ -34,12 +34,12 @@ class EmailEntity {
     private $body;
     /**
      * @ORM\Column(type="datetime")
-     * @var DateTime
+     * @var \DateTime
      */
     private $created;
     /**
      * @ORM\Column(type="datetime")
-     * @var DateTime
+     * @var \DateTime
      */
     private $sent;
     /**

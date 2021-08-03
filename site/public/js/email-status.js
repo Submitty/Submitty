@@ -4,12 +4,12 @@ function loadPage(page, load_page_url) {
     $(`#${page}`).addClass('selected');
     $(`#${page}`).attr('disabled', 'disabled');
     $('.page-btn').each(function() {
-        $id = parseInt($(this).attr('id'));
+        const id = parseInt($(this).attr('id'));
         // To avoid race condition of what gets displayed first when buttons are spammed
         $(this).attr('disabled', 'disabled');
         $('#page-num').attr('disabled', 'disabled');
         // To avoid cluttering of buttons
-        if ($id < parseInt(page) - page_window || parseInt(page) + page_window < $id) {
+        if (id < parseInt(page) - page_window || parseInt(page) + page_window < id) {
             $(this).hide();
         }
         else {
@@ -23,13 +23,13 @@ function loadPage(page, load_page_url) {
         data: {
             // eslint-disable-next-line no-undef
             'csrf_token': csrfToken,
-            'page': page
+            'page': page,
         },
         success: function(data) {
             $('#email-statuses').html(data);
             $('.page-btn').each(function() {
-                $id = parseInt($(this).attr('id'));
-                if (parseInt(page) - page_window <= $id && $id <= parseInt(page) + page_window && $id != parseInt(page)) {
+                const id = parseInt($(this).attr('id'));
+                if (parseInt(page) - page_window <= id && id <= parseInt(page) + page_window && id != parseInt(page)) {
                     $(this).removeAttr('disabled');
                     $('#page-num').removeAttr('disabled');
                     $('#page-num').val(page);
@@ -37,10 +37,6 @@ function loadPage(page, load_page_url) {
             });
             $('#pagination-nav').show();
         },
-        error: function (err) {
-            displayAjaxError(err);
-            reject(err);
-        }
     });
 }
 
@@ -55,7 +51,7 @@ function textPageChange(){
     $(`#${page}`).trigger('click');
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
     $('#1').trigger('click');
     $('#page-num').on('change', textPageChange);
 });

@@ -24,6 +24,7 @@ class EmailStatusController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
+        /** @phpstan-ignore-next-line */
         $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum($semester, $course);
 
         return new WebResponse(
@@ -44,6 +45,7 @@ class EmailStatusController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $page = isset($_POST['page']) ? $_POST['page'] : 1;
+        /** @phpstan-ignore-next-line */
         $result = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page, $semester, $course);
 
         return $this->core->getOutput()->renderJsonSuccess(
@@ -61,6 +63,7 @@ class EmailStatusController extends AbstractController {
      * @return WebResponse
      */
     public function getSuperuserEmailStatusPage(): WebResponse {
+        /** @phpstan-ignore-next-line */
         $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum();
 
         return new WebResponse(
@@ -79,6 +82,7 @@ class EmailStatusController extends AbstractController {
      */
     public function getSuperuserEmailStatusesByPage(): WebResponse {
         $page = $_GET['page'] ?? 1;
+        /** @phpstan-ignore-next-line */
         $result = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);

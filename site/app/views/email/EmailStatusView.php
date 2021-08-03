@@ -37,7 +37,7 @@ class EmailStatusView extends AbstractView {
         $courses = [];
         $count = 0;
         foreach ($data as $iterator) {
-            foreach($iterator as $row) {
+            foreach ($iterator as $row) {
                 $count++;
                 $key = $this->EmailToKey($row);
                 if (!in_array($key, $subjects)) {
@@ -51,9 +51,11 @@ class EmailStatusView extends AbstractView {
                 }
                 if ($row->getSent() != null) {
                     $successes[$key][] = $row;
-                } elseif ($row->getError() != null) {
+                }
+                elseif ($row->getError() != null) {
                     $errors[$key][] = $row;
-                } else {
+                }
+                else {
                     $pending[$key][] = $row;
                 }
             }
