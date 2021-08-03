@@ -10,6 +10,7 @@ if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://localhost:1511'
     export SUBMISSION_PORT=1511
     export DATABASE_PORT=16442
+    export WEBSOCKET_PORT=8443
 fi
 
 #################################################################
@@ -79,11 +80,6 @@ apt-get install -qqy cmake
 
 # for Lichen (Plagiarism Detection)
 apt-get install -qqy python-clang-6.0
-
-# Install OpenJDK8 Non-Interactively
-echo "installing java8"
-apt-get install -qqy openjdk-8-jdk
-update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
