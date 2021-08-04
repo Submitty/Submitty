@@ -35,8 +35,7 @@
                 <label for="course_title">
                     <span class="option-title block">Course Code</span>
                       <span class="block">What is the course code for the new course?<br>
-                            <span class="information_type">My Prior Course Codes:
-                                  {% for course in courses %}{{ course }}{% if not loop.last %}, {% endif %}{% endfor %}.</span></span>
+                            </span>
                       <span class="option-alt">
                          <span class="block">Please follow course code conventions established by your school and department.<br>
                                {{ course_code_requirements }}
@@ -47,7 +46,9 @@
                 </label>
             </div>
             <div class="option-input col-md-6">
-                <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea>
+                <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea><br>
+                <span class="information_type" style="overflow-wrap: anywhere">My Prior Course Codes:
+                                  {% for course in courses %}{{ course }}{% if not loop.last %}, {% endif %}{% endfor %}.</span>
             </div>
         </div>
 
@@ -93,8 +94,8 @@
             <div class="option-input col-md-6">
                 <select name="group_name" id="group_name" class="auto_save" onchange="onGroupChange()">
                     <option value="">Please select an option</option>
-                </select>
-                <span class="information_type"><p id="group_users" style="display: none;">Users in this group:</p></span>
+                </select><br>
+                <span class="information_type" id="group_users" style="display: none; overflow-wrap: anywhere">Users in this group:</span>
             </div>
         </div>
 
