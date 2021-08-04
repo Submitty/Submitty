@@ -21,7 +21,7 @@
 cryptography==3.3.2
 
 # For QR bulk upload
-opencv-python==3.4.9.33
+opencv-python==4.5.3.56
 
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2021.1 # Submitty-util specific.
