@@ -31,24 +31,24 @@ let settingsData = [
                 default: "Prev/Next Student"
             },
             {
-                name: "Prev/Next buttons navigate through students in assigned registration/rotation sections only",
+                name: "Prev/Next buttons navigate through",
                 storageCode: "general-setting-navigate-assigned-students-only",
                 options: function() {
                     if ($('#ta-grading-settings-list').attr("data-full_access") !== "true") {
                         return {};
                     }
                     return {
-                        "No": "false",
-                        "Yes": "true"
+                        "All students": "false",
+                        "Only students in assigned registration/rotation sections": "true"
                     };
                 }, 
-                default: "Yes"
+                default: "Only students in assigned registration/rotation sections"
             }
         ]
     },
     {
         id: "notebook-setting-list",
-        name: "Notebook",
+        name: "Notebook",   
         values: [
             {
                 name: "Expand files in notebook file submission on page load",
