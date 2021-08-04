@@ -232,7 +232,7 @@ describe('Test cases relating to the grading of an assignment', () => {
                 cy.get('#grading_total').click();
 
                 // wait for the component to load properly
-                cy.get('.mark-selector', { timeout: 4000 }).should('be.visible');
+                cy.get('.mark-selector', { timeout: 10000 }).should('be.visible');
 
                 cy.get('.mark-selector').eq(1).click();
                 cy.get('#grading_total').contains('1 / 2');
@@ -241,7 +241,7 @@ describe('Test cases relating to the grading of an assignment', () => {
                 cy.get('.save-tools-save').click();
 
                 // wait for the component to close
-                cy.get('.mark-selector', { timeout: 4000 }).should('not.be.visible');
+                cy.get('.mark-selector', { timeout: 10000 }).should('not.be.visible');
 
                 cy.get('.graded-by').contains('Graded by instructor');
                 cy.get('#grading_total').contains('1 / 2');
@@ -249,7 +249,7 @@ describe('Test cases relating to the grading of an assignment', () => {
 
             cy.reload();
 
-            cy.get('#grading_total', { timeout: 4000 }).first().should('be.visible');
+            cy.get('#grading_total', { timeout: 10000 }).first().should('be.visible');
 
             // check that the mark is still there
             cy.get('.component-container').first().within(() => {
@@ -257,7 +257,7 @@ describe('Test cases relating to the grading of an assignment', () => {
                 cy.get('#grading_total').click();
 
                 // wait for the component to load properly
-                cy.get('.mark-selector', { timeout: 4000 }).should('be.visible');
+                cy.get('.mark-selector', { timeout: 10000 }).should('be.visible');
 
                 cy.get('.mark-selector').eq(1).click();
                 cy.get('#grading_total').contains('− / 2');
@@ -266,7 +266,7 @@ describe('Test cases relating to the grading of an assignment', () => {
                 cy.get('.save-tools-save').click({force: true});
 
                 // wait for the component to close
-                cy.get('.mark-selector', { timeout: 4000 }).should('not.be.visible');
+                cy.get('.mark-selector', { timeout: 10000 }).should('not.be.visible');
 
                 cy.get('.graded-by').contains('Ungraded!');
                 cy.get('#grading_total').contains('− / 2');
