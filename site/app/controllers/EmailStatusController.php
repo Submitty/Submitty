@@ -50,7 +50,7 @@ class EmailStatusController extends AbstractController {
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
         $result = $repository->getEmailsByPage($page, $semester, $course);
-        
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return new WebResponse(
