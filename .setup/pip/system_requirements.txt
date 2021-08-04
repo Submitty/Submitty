@@ -18,7 +18,7 @@
 # It should be noted that we do not directly rely on cryptography, but pin it
 # as a transitive dependency of our actual dependencies. This line can be removed
 # once we move to a newer pip.
-cryptography==3.3.2
+cryptography==3.4.7
 
 # For QR bulk upload
 opencv-python==3.4.9.33
