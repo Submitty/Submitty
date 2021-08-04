@@ -746,6 +746,10 @@ class Access {
         //To array of [type, value]
         $subparts = array_combine($subpart_types, $subpart_values);
 
+        if (is_link($path)) {
+            return false;
+        }
+
         //So we can extract parameters from the path
         foreach ($subpart_types as $type) {
             $value = $subparts[$type];
