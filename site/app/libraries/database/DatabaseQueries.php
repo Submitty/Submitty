@@ -7401,9 +7401,23 @@ AND gc_id IN (
 
     public function getResults($poll_id) {
         $results = [];
-        foreach ($this->getResponses($poll_id) as $option_id => $answer) {
-            $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);
-            $results[$option_id] = count($this->course_db->rows());
+        $query = <<<SQL
+SELECT
+    po.option_id,
+    COALESCE(pr.count, 0) AS count
+FROM
+    poll_options AS po
+    LEFT JOIN (
+        SELECT option_id, COUNT(*) AS count FROM poll_responses WHERE poll_id = ? GROUP BY option_id
+    ) AS pr ON pr.option_id = po.option_id
+WHERE
+    po.poll_id = ?
+ORDER BY
+    po.order_id ASC
+SQL;
+        $this->course_db->query($query, [$poll_id, $poll_id]);
+        foreach ($this->course_db->rows() as $row) {
+            $results[$row["option_id"]] = $row['count'];
         }
         return $results;
     }
