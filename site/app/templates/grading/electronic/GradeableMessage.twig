@@ -1,0 +1,64 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}gradeable-message-popup{% endblock %}
+{% block title %}Your Responsibility as a Grader{% endblock %}
+{% block body %}
+
+<div hidden data-semester="{{ semester }}" data-course="{{ course }}" data-gradeable="{{ gradeable_id }}" data-userlevel="{{ core.getUser().getGroup() }}" id="gradeable-message-data"></div>
+
+<!-- If grader is limited access or full access grader -->
+{% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}
+    <div class="content gradeable_message">
+        <p>
+            You will be reviewing materials submitted by students and these materials are considered confidential.<br>
+            The author of this material is entitled to copyright protection. As such,
+        <ul>
+            <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+            <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material.<br>
+                You must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+            {% if blind_status == 3 %}
+                <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be <em>blinded</em>.<br>
+                    You should not attempt to discover the identities of the students.<br>
+                    However, their identities may be unintentionally or unavoidably revealed.<br>
+                    Please respect the students' privacy.</li>
+            {% endif %}
+        </ul>
+        </p><p>
+            Please communicate with the instructor if you realize you have a conflict of interest with a student that you have been assigned to grade.
+        </p>
+    </div>
+    <!-- Else if grader is a student peer grader -->
+{% elseif core.getUser().getGroup() == 4 %}
+    <div class="content gradeable_message">
+        <p>
+            You will be reviewing materials submitted by your classmates and these materials are considered confidential.<br>
+            Your classmate, the author of this material, is entitled to copyright protection. As such,
+        <ul>
+            <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+            <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+            {% if blind_status == 3 %}
+                <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be double-blind.<br>
+                    You should not attempt to discover the identities of your classmates.<br>
+                    However, the identities of the classmates may be unintentionally or unavoidably revealed.<br>
+                    Please respect your classmates' privacy.</li>
+            {% elseif blind_status == 2 %}
+                <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be single-blind.</li>
+            {% else %}
+                <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be unblinded.</li>
+            {% endif %}
+        </ul>
+        </p><p>
+            Please communicate with your instructor if you realize you have a conflict of interest with a peer that you have been assigned to grade.
+        </p>
+    </div>
+{% endif %}
+
+{% endblock %}
+{% block form %}
+    <form onsubmit="return gradeableMessageAgree()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    <button class="btn btn-default close-button" onclick="gradeableMessageCancel()" type="button">Cancel</button>
+    <input class="btn btn-primary" type="submit" value="Agree">
+{% endblock %}

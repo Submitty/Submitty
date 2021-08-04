@@ -605,7 +605,7 @@ class NavigationView extends AbstractView {
             $view = null;
         }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']) . '?view=all';
         }
         elseif ($gradeable->getType() === GradeableType::CHECKPOINTS || $gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']) . '?view=' . $view;

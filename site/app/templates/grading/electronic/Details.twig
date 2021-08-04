@@ -54,6 +54,7 @@
             </div>
         </div>
     </div>
+    <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
     {% if can_regrade and not is_vcs %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
@@ -782,3 +783,9 @@
     }
 </script>
 
+{% include 'grading/electronic/GradeableMessage.twig' with {
+    "course": course,
+    "semester": semester,
+    "gradeable_id": gradeable.getId,
+    "blind_status": blind_status
+}%}
