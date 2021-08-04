@@ -270,6 +270,7 @@ function newEditCourseMaterialsFolderForm(path, dir) {
     $("#all-sections-showing-yes", form).prop('checked',false);
     $("#all-sections-showing-no", form).prop('checked',true);
     $('#edit-folder-sort', form).attr('value', dir);
+    disableFullUpdate();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-folder-form");
 }

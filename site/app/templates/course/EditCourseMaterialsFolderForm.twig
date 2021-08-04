@@ -52,13 +52,13 @@
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()"/>
+            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()" />
         </label>
         <label>
-            <input id="hide-folder-materials-checkbox-edit" type="checkbox"/>
+            <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="enableFullUpdate()"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" onchange="enableFullUpdate()"/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script>
         function submitFolderEdit(fullUpdate){ // Submit button
@@ -88,6 +88,11 @@
         function enableFullUpdate() {
             let submit = $('#submit-folder-edit-full');
             submit.attr('disabled', false);
+        }
+
+        function disableFullUpdate() {
+            let submit = $('#submit-folder-edit-full');
+            submit.attr('disabled', true);
         }
 
         flatpickr('.edit-folder-picker', {
