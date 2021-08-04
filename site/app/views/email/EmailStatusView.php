@@ -5,10 +5,9 @@ namespace app\views\email;
 use app\views\AbstractView;
 use app\models\User;
 use app\libraries\FileUtils;
-use app\models\EmailStatusModel;
 
 class EmailStatusView extends AbstractView {
-    public function showEmailStatusPage($num_page, $load_page_url) {
+    public function showEmailStatusPage(int $num_page, string $load_page_url) {
         $this->core->getOutput()->addBreadcrumb("Email Statuses", $this->core->buildCourseUrl(["email"]));
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalCss('email-status.css');
@@ -19,12 +18,7 @@ class EmailStatusView extends AbstractView {
         ]);
     }
 
-    public function showSuperuserEmailStatus($email_status) {
-        $this->core->getOutput()->addBreadcrumb("Superuser Email Statuses", $this->core->buildUrl(["superuser","email"]));
-        return $this->renderStatusPage($email_status);
-    }
-
-    public function renderStatusPage($data) {
+    public function renderStatusPage(iterable $data) {
         // A map of all unique subjects of emails to the time created
         $subjects = [];
         // A map of email subjects to the rows that are still pending to send in the database

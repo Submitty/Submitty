@@ -3,12 +3,12 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\entities\email\EmailEntity;
 use Symfony\Component\Routing\Annotation\Route;
 use app\views\email\EmailStatusView;
 use app\libraries\routers\AccessControl;
+use app\repositories\EmailRepository;
 
 class EmailStatusController extends AbstractController {
     public function __construct(Core $core) {
@@ -24,8 +24,9 @@ class EmailStatusController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
-        /** @phpstan-ignore-next-line */
-        $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum($semester, $course);
+        /** @var EmailRepository $repository */
+        $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
+        $num_page = $repository->getPageNum($semester, $course);
 
         return new WebResponse(
             EmailStatusView::class,
@@ -41,19 +42,21 @@ class EmailStatusController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return array
      */
-    public function getEmailStatusesByPage(): array {
+    public function getEmailStatusesByPage(): WebResponse {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $page = isset($_POST['page']) ? $_POST['page'] : 1;
-        /** @phpstan-ignore-next-line */
-        $result = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page, $semester, $course);
 
-        return $this->core->getOutput()->renderJsonSuccess(
-            $this->core->getOutput()->renderTemplate(
-                EmailStatusView::class,
-                'renderStatusPage',
-                $result
-            )
+        /** @var EmailRepository $repository */
+        $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
+        $result = $repository->getEmailsByPage($page, $semester, $course);
+        
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return new WebResponse(
+            EmailStatusView::class,
+            'renderStatusPage',
+            $result
         );
     }
 
@@ -63,8 +66,9 @@ class EmailStatusController extends AbstractController {
      * @return WebResponse
      */
     public function getSuperuserEmailStatusPage(): WebResponse {
-        /** @phpstan-ignore-next-line */
-        $num_page = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getPageNum();
+        /** @var EmailRepository $repository */
+        $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
+        $num_page = $repository->getPageNum();
 
         return new WebResponse(
             EmailStatusView::class,
@@ -82,8 +86,9 @@ class EmailStatusController extends AbstractController {
      */
     public function getSuperuserEmailStatusesByPage(): WebResponse {
         $page = $_GET['page'] ?? 1;
-        /** @phpstan-ignore-next-line */
-        $result = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class)->getEmailsByPage($page);
+        /** @var EmailRepository $repository */
+        $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
+        $result = $repository->getEmailsByPage($page);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return new WebResponse(
