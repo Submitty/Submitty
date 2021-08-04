@@ -200,6 +200,16 @@ class ElectronicGraderController extends AbstractController {
         return $final_grading_info;
     }
     /**
+     * Route for Getting Gradeable
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getUserGroup", methods={"GET"})
+     * @param string $gradeable_id
+     * @return JsonResponse
+     */
+    public function getUserGroup($gradeable_id) {
+        $user_group = $this->core->getUser()->getGroup();
+        return JsonResponse::getSuccessResponse($user_group);
+    }
+    /**
      * Route for randomizing peer assignments with 'One Grades Many'
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
@@ -1196,6 +1206,10 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->addErrorMessage("ERROR: {$team_id} is not a valid Team ID");
                 $this->core->redirect($return_url);
             }
+            $new_team_name = false;
+            if ($team_name !== $team->getTeamName()) {
+                $new_team_name = true;
+            }
             $team_members = $team->getMembers();
             $add_user_ids = [];
             foreach ($user_ids as $id) {
@@ -1240,6 +1254,9 @@ class ElectronicGraderController extends AbstractController {
             foreach ($remove_user_ids as $id) {
                 $json["team_history"][] = ["action" => "admin_remove_user", "time" => $current_time,
                     "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id];
+            }
+            if ($new_team_name) {
+                $json["team_history"][] = ["action" => "change_name", "time" => $current_time, "user" => $this->core->getUser()->getId()];
             }
             if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
                 $this->core->addErrorMessage("Failed to write to team history to settings file");
@@ -1693,10 +1710,16 @@ class ElectronicGraderController extends AbstractController {
         // Passing null returns grading for all graders.
         $grading_done_by = ($all_peers ? null : $grader);
         $response_data = $ta_graded_gradeable->toArray($grading_done_by);
-
+        $response_data_with_peer = $ta_graded_gradeable->toArray();
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
+        $combined_score = 0;
+        foreach ($response_data_with_peer['peer_scores'] as $score) {
+            $combined_score += $score;
+        }
+        //remove non peer component scores from combined score to get the combined peer score
+        $combined_peer_score = $combined_score - $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
         if (count($gradeable->getAutogradingConfig()->getPersonalizedTestcases($submitter)) > 1) {
@@ -1716,16 +1739,21 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
             }
         }
-
-        // If it is graded at all, then send ta score information
-        $response_data['ta_grading_total'] = $gradeable->getManualGradingPoints();
-        if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
-            if ($gradeable->hasPeerComponent()) {
-                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
-            }
-            else {
-                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
-            }
+        //send ta score information
+        $response_data['ta_grading_total'] = $gradeable->getTaPoints();
+        if ($gradeable->hasPeerComponent()) {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalTaScore($this->core->getUser());
+            $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalPeerScore($grading_done_by);
+            $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($this->core->getUser());
+            $response_data['peer_total'] = $gradeable->getPeerPoints();
+            $response_data['user_group'] = $this->core->getUser()->getGroup();
+            $response_data['peer_gradeable'] = true;
+            $response_data['combined_peer_score'] = $combined_peer_score;
+        }
+        else {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
+            $response_data['user_group'] = $this->core->getUser()->getGroup();
+            $response_data['peer_gradeable'] = false;
         }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();

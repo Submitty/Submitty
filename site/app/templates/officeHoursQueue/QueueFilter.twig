@@ -1,19 +1,9 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}filter-settings{% endblock %}
-{% block title %}Queue Settings{% endblock %}
+{% block title %}Edit Existing Queue{% endblock %}
+
 {% block body %}
-  <span class="option-title">Open new queue</span>
-  <form method="post" id="open_new_queue" action="{{base_url}}" style="height:auto;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-    <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048">
-    <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
-    <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
-      <i class="fas fa-sync"></i>
-    </a>
-    <button id="open_new_queue_btn" type="submit" class="btn btn-primary">Open New Queue</button>
-  </form>
-  <br>
-  <span class="option-title">Modify old queue</span>
+  <span class="option-title">Modify access code</span>
   <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token" style="height:auto;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
@@ -24,16 +14,32 @@
     </select>
     <input type="text" id="old_queue_token" name="token" placeholder="New Access Code" aria-label="New Access Code" required="required">
     <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
-      <i class="fas fa-sync"></i>
+      <i class="fas fa-dice"></i>
     </a>
     <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Access Code</button>
   </form>
-  <br>
-  <span class="option-title">Modify queue status</span>
+    <br>
+    {% if viewer.isContactInfoEnabled() %}
+        <hr>
+        <span class="option-title">Modify regex pattern</span>
+        <form method="post" id="change_queue_regex" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <select id="old_queue_code_2" class="form-control" name="code" aria-label="Access Code" required="required">
+                <option value="">Queue Name</option>
+                {% for queue in viewer.getAllQueues() %}
+                    <option value="{{queue['code']}}">{{queue['code']}}</option>
+                {% endfor %}
+            </select>
+            <input type="text" id="old_queue_regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="New Access Code" required="required" style="min-width: 40%;">
+            <button id="change_regex_btn" type="submit" class="btn btn-primary">Change Queue Regex Pattern </button>
+        </form>
+        <br>
+    {% endif %}
+  <span class="option-title"> Modify queue status </span>
   <table class="table table-striped" style="width:100%;">
     <thead>
       <tr>
-        <th style="text-align: left;" scope="col">Queue Name/Access Code</th>
+        <th scope="col" style="text-align: left;"> Queue Name/Access Code </th>
         <th scope="col">Open?</th>
         <th scope="col">Empty</th>
         <th scope="col">Delete</th>
@@ -43,20 +49,23 @@
       {% for queue in viewer.getAllQueues() %}
           <tr>
           <td style="text-align: left;">
-              <b>Name:</b>{{queue['code']}}<br>
-              <b>Access Code:</b>{{queue['token']}}</td>
+              <b>Name: </b>{{queue['code']}}<br>
+              <b>Access Code: </b>{{queue['token']}}<br>
+              {% if queue['regex_pattern'] is defined and queue['regex_pattern'] != '' %}
+                <b>Regex Pattern: </b>{{queue['regex_pattern']}}</td>
+              {% endif %}
           <td>
               <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
           </td>
           <td>
-            <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+            <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
               <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn">Empty</button>
             </form>
           </td>
           <td>
-            <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
+            <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
               <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn">Delete</button>
@@ -83,4 +92,3 @@
         });
     </script>
 {% endblock %}
-

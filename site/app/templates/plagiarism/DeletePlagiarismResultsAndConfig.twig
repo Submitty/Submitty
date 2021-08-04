@@ -1,5 +1,5 @@
 <div class="popup-form"  style="display: none;" id="delete-plagiarism-result-and-config-form">
-    <form name="delete" method="post">
+    <form id="delete-config-form" name="delete" method="post">
         <div class="popup-box">
             <div class="popup-window ui-draggable ui-draggable-handle" style="position: relative;">
                 <div class="form-title">
@@ -12,7 +12,7 @@
                     <div class="form-buttons">
                         <div class="form-button-container">
                             <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
-                            <input class="btn btn-danger" type="submit" value="Delete" />
+                            <input id="submit-form" class="btn btn-danger" type="submit" value="Delete" />
                         </div>
                     </div>
                 </div>
@@ -22,4 +22,10 @@
 </div>
 <script>
     $(".popup-window").draggable();
+
+    $(document).ready(function() {
+        $('#delete-config-form').submit(function () {
+            $('#submit-form').attr('disabled', true);
+        });
+    });
 </script>

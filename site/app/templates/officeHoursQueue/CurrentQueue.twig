@@ -20,7 +20,7 @@
 
           {% if entry['current_state'] == 'waiting' %}
             <td>
-              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp" {% if entry['paused'] %}onsubmit="return confirm('Are you sure you want to start helping this student? This student is currently paused.');"{% endif %}>
+              <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/startHelp" {% if entry['paused'] %}onsubmit="return confirm('Are you sure you want to start helping this student? This student is currently paused.');"{% endif %}>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['paused'] %}
@@ -43,9 +43,9 @@
           {% elseif entry['current_state'] == 'being_helped' %}
             <td>
               {% if entry['help_started_by'] == viewer.getUserId() %}
-                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
+                <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp">
               {% else %}
-                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp" onsubmit="return confirm('{{entry['help_started_by']}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
+                <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{entry['help_started_by']}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
               {% endif %}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
@@ -72,7 +72,7 @@
 
           <td>{{ entry['queue_code'] }}</td>
           <td>
-            <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
+            <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
               <button type="submit" class="btn btn-default remove_from_queue_btn">Remove</button>

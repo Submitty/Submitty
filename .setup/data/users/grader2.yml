@@ -7,3 +7,5 @@ user_numeric_id: 548466737
 courses:
   sample:
     user_group: 3
+  plagiarism:
+    user_group: 3  

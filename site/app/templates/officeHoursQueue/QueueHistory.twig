@@ -70,7 +70,7 @@
             {% endif %}
             {% if viewer.isGrader() %}
               <td>
-                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
+                <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
                   <button type="submit" class="btn btn-danger queue_restore_btn">Restore</button>

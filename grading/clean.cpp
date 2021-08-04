@@ -10,6 +10,7 @@
  * required for creating custom grading modules.
  */
 
+#include <iostream>
 #include "clean.h"
 
 /* METHOD: clean

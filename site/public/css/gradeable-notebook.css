@@ -81,11 +81,6 @@ textarea.sa-box {
     margin: 5px;
 }
 
-.mc pre {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
 /* Add some margin for informational content that is inside <p> tags */
 .notebook p {
     margin-top: 12px;

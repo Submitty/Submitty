@@ -9,13 +9,13 @@ use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
 use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 use League\CommonMark\HtmlElement;
 
-class CustomCodeRenderer implements BlockRendererInterface {
+class CustomCodeBlockRenderer implements BlockRendererInterface {
 
     /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
     protected $baseRenderer;
 
     public function __construct($baseRenderer) {
-        $this->baseRenderer = new $baseRenderer();
+        $this->baseRenderer = new $baseRenderer(['default']);
     }
 
     public function render(AbstractBlock $block, ElementRendererInterface $htmlRenderer, bool $inTightList = false) {
@@ -26,6 +26,9 @@ class CustomCodeRenderer implements BlockRendererInterface {
     }
 
     private function addLineNumbers(HtmlElement $element, int $num_lines) {
+        if ($num_lines < 5) {
+            return $element->getContents();
+        }
         $line_numbers_content = "";
         for ($num = 1; $num <= $num_lines; $num++) {
             $line_numbers_content .= strval($num) . "\n";
