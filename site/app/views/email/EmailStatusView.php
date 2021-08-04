@@ -18,7 +18,7 @@ class EmailStatusView extends AbstractView {
         ]);
     }
 
-    public function renderStatusPage(iterable $data) {
+    public function renderStatusPage(array $data) {
         // A map of all unique subjects of emails to the time created
         $subjects = [];
         // A map of email subjects to the rows that are still pending to send in the database
