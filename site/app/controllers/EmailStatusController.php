@@ -8,7 +8,7 @@ use app\entities\email\EmailEntity;
 use Symfony\Component\Routing\Annotation\Route;
 use app\views\email\EmailStatusView;
 use app\libraries\routers\AccessControl;
-use app\repositories\EmailRepository;
+use app\repositories\email\EmailRepository;
 
 class EmailStatusController extends AbstractController {
     public function __construct(Core $core) {
@@ -40,7 +40,7 @@ class EmailStatusController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/email_status_page", methods={"GET"})
      * @Route("/api/courses/{_semester}/{_course}/email_status_page", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return array
+     * @return WebResponse
      */
     public function getEmailStatusesByPage(): WebResponse {
         $semester = $this->core->getConfig()->getSemester();
