@@ -59,6 +59,7 @@
     </form>
 {% endblock %}
 {% block buttons %}
-    <button class="btn btn-default close-button" onclick="gradeableMessageCancel()" type="button">Cancel</button>
-    <input class="btn btn-primary" type="submit" value="Agree">
+    <button class="btn btn-default close-button" onclick="gradeableMessageCancel()" type="button" id="cancel-button">Cancel</button>
+    <button class="btn btn-default close-button" type="button" style="display: none" id="close-hidden-button" onclick="hideGradeableMessage()">Close</button>
+    <input class="btn btn-primary" type="submit" value="Agree" id="agree-button">
 {% endblock %}

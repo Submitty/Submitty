@@ -49,3 +49,16 @@ function gradeableMessageAgree() {
 function gradeableMessageCancel() {
     window.location = courseUrl;
 }
+
+function showGradeableMessage() {
+    const message = $('#gradeable-message-popup');
+    message.css('display', 'block');
+    $('#agree-button').css('display', 'none');
+    $('#cancel-button').css('display', 'none');
+    $('#close-hidden-button').css('display', 'block');
+}
+
+function hideGradeableMessage() {
+    const message = $('#gradeable-message-popup');
+    message.css('display', 'none');
+}

@@ -55,6 +55,7 @@
         </div>
     </div>
     <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    <button class="btn btn-primary" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
     {% if can_regrade and not is_vcs %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
