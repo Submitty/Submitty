@@ -56,6 +56,11 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as data
     DB_USER = database_config_json["database_user"]
     DB_PASS = database_config_json["database_password"]
 
+# used for constructing the url to clone repos for cvs gradeables
+with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
+    submitty_config_json = json.load(submitty_config)
+    SUBMISSION_URL = submitty_config_json["submission_url"]
+
 DB_ONLY = False
 NO_SUBMISSIONS = False
 NO_GRADING = False
@@ -540,6 +545,10 @@ def create_gradeable_submission(src, dst):
         os.remove(zip_dst)
 
 
+def commit_submission_to_repo(user_id, src_file, repo_url):
+    # a function to commit and push a file to a user's submitty-hosted repository
+    # TODO
+
 class User(object):
     """
     A basic object to contain the objects loaded from the users.json file. We use this to link
@@ -862,6 +871,7 @@ class Course(object):
 
             # creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
+            checkout_path = os.path.join(self.course_path, "checkout", gradeable.id)
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
@@ -896,6 +906,12 @@ class Course(object):
                     else:
                         submission_path = os.path.join(gradeable_path, user.id)
 
+                    # need to create the directories for the user/version in "checkout" too for git sunmissions
+                    if gradeable.is_repository:
+                        user_checkout_path = os.path.join(checkout_path, user.id)
+                    else:
+                        user_checkout_path = None
+
                     if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                         if user.id in gradeable.plagiarized_user:
                             # If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to
@@ -918,6 +934,11 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
+                            if gradeable.is_repository:
+                                if not os.path.exists(checkout_path):
+                                    os.makedirs(checkout_path)
+                                if not os.path.exists(user_checkout_path):
+                                    os.makedirs(user_checkout_path)
 
                             # Reduce the probability to get a cancelled submission (active_version = 0)
                             # This is done my making other possibilities three times more likely
@@ -979,8 +1000,14 @@ class Course(object):
                                             os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                             submission = random.choice(gradeable.submissions[key])
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            dst = os.path.join(submission_path, str(version), key)
-                                            create_gradeable_submission(src, dst)
+                                            # files submitted to cvs gradeables are not moved into the "submissions folder",
+                                            # the user's repo gets checked out automatically by the job into "checkout"
+                                            if gradeable.is_repository:
+                                                repo_url = f"{SUBMISSION_URL}/git/{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_url)
+                                            else:
+                                                dst = os.path.join(submission_path, str(version), key)
+                                                create_gradeable_submission(src, dst)
                                     else:
                                         submission = random.choice(gradeable.submissions)
                                         if isinstance(submission, list):
@@ -989,12 +1016,23 @@ class Course(object):
                                             submissions = [submission]
                                         for submission in submissions:
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            dst = os.path.join(submission_path, str(version))
-                                            create_gradeable_submission(src, dst)
+                                            # files submitted to cvs gradeables are not moved into the "submissions folder",
+                                            # the user's repo gets checked out automatically by the job into "checkout"
+                                            if gradeable.is_repository:
+                                                repo_url = f"{SUBMISSION_URL}/git/{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_url)
+                                            else:
+                                                dst = os.path.join(submission_path, str(version))
+                                                create_gradeable_submission(src, dst)
                                 random_days -= 0.5
 
                             with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
+                            # submissions to cvs greadeable also have a ".submit.VCS_CHECKOUT"
+                            if gradeable.is_repository:
+                                with open(os.path.join(submission_path, ".submit.VCS_CHECKOUT"), "w") as open_file:
+                                    # the file contains info only if the git repos are non-submitty hosted
+
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
