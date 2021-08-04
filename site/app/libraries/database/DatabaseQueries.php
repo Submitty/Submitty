@@ -7404,7 +7404,7 @@ AND gc_id IN (
         $query = <<<SQL
 SELECT
     po.option_id,
-    pr.count
+    COALESCE(pr.count, 0) AS count
 FROM
     poll_options AS po
     LEFT JOIN (
