@@ -1,6 +1,5 @@
 /* global attachCollapsiblePanel, courseUrl */
-/* exported gradeableMessageAgree */
-/* exported gradeableMessageCancel */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage */
 $(document).ready(() => {
     // Attach the collapsible panel on details-table
     attachCollapsiblePanel('#details-table .details-info-header', 951, 'panel-head-active');
