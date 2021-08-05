@@ -14,6 +14,7 @@ use app\libraries\routers\FeatureFlag;
 use Exception;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
+use app\views\admin\PlagiarismView;
 
 /**
  * Class PlagiarismController
@@ -350,16 +351,17 @@ class PlagiarismController extends AbstractController {
 
         // gather and format all the data for every config to display in the main page table
         $plagiarism_result_info = [];
+        $gradeable_date_format = $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
         foreach ($all_configurations as $gradeable) {
             $plagiarism_row = [];
             $plagiarism_row['title'] = $gradeable['g_title'];
             $plagiarism_row['id'] = $gradeable['g_id'];
             $plagiarism_row['config_id'] = $gradeable['g_config_version'];
-            $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format('F d Y H:i:s'); // TODO: think about the format of this date.  Using the format of the last run date for now.
+            $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format($gradeable_date_format);
             $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']) . "?config_id={$plagiarism_row["config_id"]}";
             $overall_ranking_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "overall_ranking.txt");
             if (file_exists($overall_ranking_file)) {
-                $timestamp = date("F d Y H:i:s", filemtime($overall_ranking_file));
+                $timestamp = date($gradeable_date_format, filemtime($overall_ranking_file));
                 $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
@@ -410,7 +412,7 @@ class PlagiarismController extends AbstractController {
         }
 
         return new WebResponse(
-            ['admin', 'Plagiarism'],
+            PlagiarismView::class,
             'plagiarismMainPage',
             $plagiarism_result_info,
             $refresh_page
@@ -807,7 +809,7 @@ class PlagiarismController extends AbstractController {
                 continue;
             }
             $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
-            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
+            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format($this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'));
         }
         usort($gradeable_ids_titles, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
