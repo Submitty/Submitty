@@ -554,7 +554,6 @@ function handleClickedMarks(state) {
                         mark.attributes.selected = true;
                         mark.className = 'selected-style-red';
                         if (first_mark) {
-                            console.log(mark.attributes.end_line)
                             state.editor1.scrollIntoView({line: mark.attributes.end_line, ch: 0}, 400);
                             first_mark = false;
                         }
