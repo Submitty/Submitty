@@ -7,6 +7,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\views\GradingMachineView;
+use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -25,8 +26,19 @@ class GradingMachineController extends AbstractController {
         );
     }
 
-    public function getProgress() {
-        $result = exec('sudo python3 /usr/local/submitty/bin/grading_done.py');
-
+    public function getProgress(): WebResponse {
+        try {
+            $response = $this->core->curlRequest(
+                $this->core->getConfig()->getCgiUrl() . "grading_done.cgi"
+            );
+        }
+        catch (CurlException $exc) {
+            $msg = "Failed to get response from CGI process, please try again";
+            return new MultiResponse(
+                JsonResponse::getFailResponse($msg),
+                new WebResponse("Error", "errorPage", $msg)
+            );
+        }
+        $json = json_decode($response, true);
     }
 }
