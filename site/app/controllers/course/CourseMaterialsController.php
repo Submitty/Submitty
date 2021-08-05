@@ -203,6 +203,7 @@ class CourseMaterialsController extends AbstractController {
         if ($requested_path === '') {
             return JsonResponse::getErrorResponse("Requested path cannot be empty");
         }
+        /** @var CourseMaterial $course_material */
         $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['path' => $requested_path]);
         if ($course_material == null) {
@@ -271,6 +272,10 @@ class CourseMaterialsController extends AbstractController {
         }
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
+        }
+        if (isset($_POST['link_url']) && isset($_POST['link_title'])) {
+            $course_material->setUrl($_POST['link_url']);
+            $course_material->setUrlTitle($_POST['link_title']);
         }
 
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
