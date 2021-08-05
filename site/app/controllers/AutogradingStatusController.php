@@ -6,7 +6,7 @@ use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
-use app\views\GradingMachineView;
+use app\views\AutogradingStatusView;
 use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -14,19 +14,27 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="FULL_ACCESS_GRADER")
  * @AccessControl(role="INSTRUCTOR")
  */
-class GradingMachineController extends AbstractController {
+class AutogradingStatusController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/grading_done")
+     * @Route("/courses/{_semester}/{_course}/autograding_status")
      */
     public function getGradingDonePage() {
         return new WebResponse(
-            GradingMachineView::class,
-            'displayPage',
-            $this->getProgress()
+            AutogradingStatusView::class,
+            'displayPage'
         );
     }
 
     public function getProgress(): WebResponse {
+        // Read autograding_workers.json
+        $workers = json_encode(FileUtils::readJsonFile(
+            FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyInstallPath(),
+                "config",
+                "autograding_workers.json"
+            )
+        ));
+
         try {
             $response = $this->core->curlRequest(
                 $this->core->getConfig()->getCgiUrl() . "grading_done.cgi"
@@ -40,5 +48,10 @@ class GradingMachineController extends AbstractController {
             );
         }
         $json = json_decode($response, true);
+        return new WebResponse(
+            AutogradingStatusView::class,
+            'renderTable',
+            $response
+        );
     }
 }

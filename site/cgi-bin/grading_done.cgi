@@ -17,8 +17,7 @@ GRADING_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 IN_PROGRESS_DIR = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
 
 with open(os.path.join(CONFIG_PATH, 'autograding_workers.json')) as open_file:
-    OPEN_AUTOGRADING_WORKERS_JSON = json.load(open_file)
-    
+    OPEN_AUTOGRADING_WORKERS_JSON = json.load(open_file) 
 GLOBAL_LAST_PRINT = 100
 
 class QueueItem:
@@ -192,4 +191,6 @@ def getGradingMachineJson():
 
 
 if __name__ == "__main__":
+    print("Content-type: application/json")
+    print()
     print(getGradingMachineJson())
