@@ -261,7 +261,7 @@
             data: {
                 csrf_token: csrfToken,
                 semester_course: semester_course_dropdown.val(),
-                this_gradeable: {{ new_or_edit == "edit" ? "'" + config["gradeable_id"] + "'" : "$('#gradeable_id').val()" }}
+                this_gradeable: {{ new_or_edit == "edit" ? ("'" ~ config["gradeable_id"] ~ "'")|raw : "$('#gradeable_id').val()" }}
             },
             success: function(data) {
                 data = JSON.parse(data);
