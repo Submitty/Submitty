@@ -31,12 +31,15 @@ def up(config, database, semester, course):
                     url = None
                     url_title = None
                     if 'external_link' in itemvalue and itemvalue['external_link'] is True:
-                        f = open(itemkey)
-                        data = json.load(f)
-                        url = data['url']
-                        url_title = data['name']
-                        if url is not None and url_title is None:
-                            url_title = url
+                        try:
+                            f = open(itemkey)
+                            data = json.load(f)
+                            url = data['url']
+                            url_title = data['name']
+                            if url is not None and url_title is None:
+                                url_title = url
+                        except:
+                            print ("course materials migration - directory exception on {itemkey}")
                     query = """
                         UPDATE course_materials SET
                         url = :url, url_title = :url_title
