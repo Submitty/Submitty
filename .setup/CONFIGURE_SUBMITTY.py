@@ -470,7 +470,7 @@ if not args.worker:
         if args.worker_pair:
             worker_dict["submitty-worker"] = {
                 "capabilities": ['default'],
-                "address": "192.168.1.8",
+                "address": "172.18.2.8",
                 "username": "submitty",
                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
                 "enabled": True
