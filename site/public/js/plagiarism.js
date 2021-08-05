@@ -361,6 +361,8 @@ function refreshColorInfo(state) {
                                 'original_color': color,
                                 'start_line': mp.start_line - 1,
                                 'end_line': mp.start_line - 1,
+                                'start_char': mp.start_char - 1,
+                                'end_char': mp.end_char - 1,
                             },
                             className: color,
                         },
@@ -497,6 +499,64 @@ function handleClickedMarks(state) {
         state.editor1.refresh();
         state.editor2.refresh();
     };
+
+    state.editor2.getWrapperElement().onmouseup = function(e) {
+        const lineCh = state.editor2.coordsChar({ left: e.clientX, top: e.clientY });
+        const markers = state.editor2.findMarksAt(lineCh);
+
+
+        // hide the "others" popup in case it was visible
+        $('#popup_to_show_matches_id').css('display', 'none');
+
+
+        // Only grab the first one if there is overlap...
+        const clickedMark = markers[0];
+
+        // reset all previous marks
+        const marks_editor1 = state.editor1.getAllMarks();
+        state.editor1.operation(() => {
+            marks_editor1.forEach(mark => {
+                if (markers.length === 0 || mark !== clickedMark) {
+                    mark.className = mark.attributes.original_color;
+                    mark.attributes.selected = false;
+                }
+            });
+        });
+        const marks_editor2 = state.editor2.getAllMarks();
+        state.editor2.operation(() => {
+            marks_editor2.forEach(mark => {
+                mark.className = mark.attributes.original_color;
+            });
+        });
+
+
+        // Did not select a marker
+        if (markers.length === 0) {
+            state.editor1.refresh();
+            state.editor2.refresh();
+            return;
+        }
+
+        clickedMark.className = 'selected-style-red';
+        state.editor1.operation(() => {
+            marks_editor1.forEach(mark => {
+                $.each(mark.attributes.matching_positions, (i, mp) => {
+                    if (mp.attributes.start_line === clickedMark.attributes.start_line &&
+                        mp.attributes.end_line === clickedMark.attributes.end_line &&
+                        mp.attributes.start_char === clickedMark.attributes.start_char &&
+                        mp.attributes.end_char === clickedMark.attributes.end_char
+                    ) {
+                        mark.attributes.selected = true;
+                        mark.className = 'selected-style-red';
+                    }
+                });
+            });
+        });
+
+        // Refresh editors
+        state.editor1.refresh();
+        state.editor2.refresh();
+    }
 }
 
 
