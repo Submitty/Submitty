@@ -6134,7 +6134,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token) {
+    public function openQueue($queue_code, $token, $regex_pattern) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6142,8 +6142,13 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token) VALUES (TRUE, TRIM(?), TRIM(?))", [$queue_code,$token]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern) VALUES (TRUE, TRIM(?), TRIM(?), ?)", [$queue_code,$token,$regex_pattern]);
         return true;
+    }
+
+    public function getQueueRegex($queue_code) {
+        $this->course_db->query("SELECT regex_pattern FROM queue_settings WHERE code = ?", [$queue_code]);
+        return $this->course_db->rows();
     }
 
     public function toggleQueue($queue_code, $state) {
@@ -6368,6 +6373,10 @@ AND gc_id IN (
 
     public function changeQueueToken($token, $queue_code) {
         $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", [$token, $queue_code]);
+    }
+
+    public function changeQueueRegex($regex_pattern, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
 
@@ -7392,9 +7401,23 @@ AND gc_id IN (
 
     public function getResults($poll_id) {
         $results = [];
-        foreach ($this->getResponses($poll_id) as $option_id => $answer) {
-            $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);
-            $results[$option_id] = count($this->course_db->rows());
+        $query = <<<SQL
+SELECT
+    po.option_id,
+    COALESCE(pr.count, 0) AS count
+FROM
+    poll_options AS po
+    LEFT JOIN (
+        SELECT option_id, COUNT(*) AS count FROM poll_responses WHERE poll_id = ? GROUP BY option_id
+    ) AS pr ON pr.option_id = po.option_id
+WHERE
+    po.poll_id = ?
+ORDER BY
+    po.order_id ASC
+SQL;
+        $this->course_db->query($query, [$poll_id, $poll_id]);
+        foreach ($this->course_db->rows() as $row) {
+            $results[$row["option_id"]] = $row['count'];
         }
         return $results;
     }
@@ -7471,17 +7494,25 @@ SQL;
 
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
-            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
-                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
             [$user_id]
         );
         return $this->submitty_db->rows();
     }
 
+    public function courseExists(string $semester, string $course): bool {
+        $this->submitty_db->query(
+            'SELECT * FROM courses WHERE semester=? AND course=?',
+            [$semester, $course]
+        );
+        return $this->submitty_db->getRowCount() === 1;
+    }
+
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
-            'SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
-                   WHERE c1.semester = ? AND c1.course = ?',
+            "SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
+                   WHERE c1.semester = ? AND c1.course = ? AND c1.group_name != 'root'",
             [$semester, $course]
         );
         return $this->submitty_db->rows();

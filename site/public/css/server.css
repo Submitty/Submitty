@@ -1516,6 +1516,11 @@ end of styles used in the admin gradeable page
     display: inline;
 }
 
+.information_type {
+    color: var(--standard-deep-blue);
+    display: inline;
+}
+
 .modal {
     display: none;
     position: fixed;
