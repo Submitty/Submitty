@@ -595,7 +595,7 @@ function handleClickedMarks(state) {
         }
 
         handleClickedMark_editor2(state, clickedMark);
-    }
+    };
 }
 
 
