@@ -22,7 +22,7 @@
                         <th>Last Run</th>
                         <th>Submissions</th>
                         <th>Students Matched</th>
-                        <th>Nightly<br/>Re-run</th>
+                        {# <th>Nightly<br/>Re-run</th> #}
                         <th>Run Log</th>
                     </tr>
                 </thead>
@@ -126,11 +126,13 @@
                 {{ row['matches_and_topmatch'] }}
             </td>
         {% endif %}
+        {#
         <td>
             <input type="checkbox"
                    onclick='window.location.href = {{ row['nightly_rerun_link'] ?? '' }};'
                    {{ row['nightly_rerun_status'] ?? '' }}>
         </td>
+        #}
         <td>
             <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
         </td>
