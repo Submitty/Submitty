@@ -839,7 +839,8 @@ HTML;
             "stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']),
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
-            "blind_status" => $gradeable->getPeerBlind()
+            "blind_status" => $gradeable->getPeerBlind(),
+            "is_instructor" => $this->core->getUser()->getGroup() === 1
         ]);
     }
 
