@@ -275,9 +275,9 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
     chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/docker
 
-    # php needs to be able to read containers config
+    # php & daemon needs to be able to read workers & containers config
+    chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json
     chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json
-    chown ${PHP_USER}:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json
 fi
 
 # Set permissions of all files in the logs directories

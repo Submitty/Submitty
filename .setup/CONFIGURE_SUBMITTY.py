@@ -447,8 +447,8 @@ for full_file_name, tmp_file_name in rescued:
     #copy autograding workers back
     shutil.move(tmp_file_name, full_file_name)
     #make sure the permissions are correct.
-    os.chmod(full_file_name, 0o460)
     shutil.chown(full_file_name, 'root', DAEMON_GID)
+    os.chmod(full_file_name, 0o660)
 
 #remove the tmp folder
 os.removedirs(tmp_folder)
