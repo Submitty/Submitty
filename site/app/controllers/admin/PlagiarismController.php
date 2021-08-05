@@ -295,12 +295,12 @@ class PlagiarismController extends AbstractController {
             if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id']))) {
                 foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id_title['g_id'])) as $config_id) {
                     if ($config_id !== '.' && $config_id !== '..' && file_exists(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id_title['g_id'], $config_id), "config.json"))) {
-                        $configuration = [];
-                        $configuration["g_id"] = $gradeable_id_title["g_id"];
-                        $configuration["g_title"] = $gradeable_id_title["g_title"];
-                        $configuration["g_grade_due_date"] = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title["g_id"]);
-                        $configuration["g_config_version"] = $config_id;
-
+                        $configuration = [
+                            "g_id" => $gradeable_id_title["g_id"],
+                            "g_title" => $gradeable_id_title["g_title"],
+                            "g_grade_due_date" => $this->core->getQueries()->getDateForGradeableById($gradeable_id_title["g_id"]),
+                            "g_config_version" => $config_id
+                        ];
                         $all_configurations[] = $configuration;
                     }
                 }
@@ -353,14 +353,25 @@ class PlagiarismController extends AbstractController {
         $plagiarism_result_info = [];
         $gradeable_date_format = $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
         foreach ($all_configurations as $gradeable) {
-            $plagiarism_row = [];
-            $plagiarism_row['title'] = $gradeable['g_title'];
-            $plagiarism_row['id'] = $gradeable['g_id'];
-            $plagiarism_row['config_id'] = $gradeable['g_config_version'];
-            $plagiarism_row['duedate'] = $gradeable['g_grade_due_date']->format($gradeable_date_format);
-            $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id'], 'delete']) . "?config_id={$plagiarism_row["config_id"]}";
             $overall_ranking_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "overall_ranking.txt");
-            if (file_exists($overall_ranking_file)) {
+            // if we have an overall ranking file, it means that the Lichen job finished successfully and there are matches
+            $has_results = file_exists($overall_ranking_file) && file_get_contents($overall_ranking_file) !== "";
+
+            $timestamp = "N/A";
+            $students = "N/A";
+            $submissions = "N/A";
+            $in_queue = false;
+            $processing = false;
+            $ranking_available = false;
+            $matches_and_topmatch = "0 students matched, N/A top match";
+            $gradeable_link = "";
+            $rerun_plagiarism_link = "";
+            $edit_plagiarism_link = "";
+            $delete_form_action = "";
+            $nightly_rerun_link = "";
+            $night_rerun_status = ""; // TODO: future feature
+
+            if ($has_results) {
                 $timestamp = date($gradeable_date_format, filemtime($overall_ranking_file));
                 $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
                 $submissions = 0;
@@ -369,46 +380,52 @@ class PlagiarismController extends AbstractController {
                 }
                 $students = count($students);
             }
-            else {
-                $timestamp = "N/A";
-                $students = "N/A";
-                $submissions = "N/A";
-            }
-            $plagiarism_row['timestamp'] = $timestamp;
-            $plagiarism_row['students'] = $students;
-            $plagiarism_row['submissions'] = $submissions;
 
-            $plagiarism_row['night_rerun_status'] = "";//$nightly_rerun_info[$plagiarism_row['id']] ? "" : "checked";
-
-            // lichen job in queue for this gradeable but processing not started
             if (file_exists($this->getProcessingQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
                 // lichen job in processing stage for this gradeable but not completed
-                $plagiarism_row['in_queue'] = true;
-                $plagiarism_row['processing'] = true;
+                $in_queue = true;
+                $processing = true;
             }
             elseif (file_exists($this->getQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
-                $plagiarism_row['in_queue'] = true;
-                $plagiarism_row['processing'] = false;
+                // lichen job in queue for this gradeable but processing not started
+                $in_queue = true;
+                $processing = false;
             }
             else {
-                $plagiarism_row['in_queue'] = false;
-                $plagiarism_row['processing'] = false;
                 // no lichen job
-                if (!file_exists($overall_ranking_file) || file_get_contents($overall_ranking_file) == "") {
-                    $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
+                $in_queue = false;
+                $processing = false;
+                if ($has_results) {
+                    $ranking_content = trim(str_replace(["\r", "\n"], '', file_get_contents($overall_ranking_file)));
+                    $rankings = array_chunk(preg_split('/ +/', $ranking_content), 3);
+                    $ranking_available = true;
+                    $matches_and_topmatch = count($rankings) . " students matched, {$rankings[0][0]} top match";
+                    $gradeable_link = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $gradeable['g_id']]) . "?config_id={$gradeable['g_config_version']}";
                 }
-                else {
-                    $content = trim(str_replace(["\r", "\n"], '', file_get_contents($overall_ranking_file)));
-                    $rankings = array_chunk(preg_split('/ +/', $content), 3);
-                    $plagiarism_row['ranking_available'] = true;
-                    $plagiarism_row['matches_and_topmatch'] = count($rankings) . " students matched, {$rankings[0][0]} top match";
-                    $plagiarism_row['gradeable_link'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id']]) . "?config_id={$plagiarism_row["config_id"]}";
-                }
-                $plagiarism_row['rerun_plagiarism_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", $plagiarism_row["id"], "rerun"]) . "?config_id={$plagiarism_row["config_id"]}";
-                $plagiarism_row['edit_plagiarism_link'] = $this->core->buildCourseUrl(["plagiarism", "configuration", "edit"]) . "?gradeable_id={$plagiarism_row["id"]}&config_id={$plagiarism_row["config_id"]}";
-                $plagiarism_row['nightly_rerun_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", $plagiarism_row["id"], "nightly_rerun"]) . "?config_id={$plagiarism_row["config_id"]}";
+                $rerun_plagiarism_link = $this->core->buildCourseUrl(["plagiarism", "gradeable", $gradeable['g_id'], "rerun"]) . "?config_id={$gradeable['g_config_version']}";
+                $edit_plagiarism_link = $this->core->buildCourseUrl(["plagiarism", "configuration", "edit"]) . "?gradeable_id={$gradeable['g_id']}&config_id={$gradeable['g_config_version']}";
+                $delete_form_action = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $gradeable['g_id'], 'delete']) . "?config_id={$gradeable['g_config_version']}";
+                $nightly_rerun_link = $this->core->buildCourseUrl(["plagiarism", "gradeable", $gradeable['g_id'], "nightly_rerun"]) . "?config_id={$gradeable['g_config_version']}";
             }
-            $plagiarism_result_info[] = $plagiarism_row;
+            $plagiarism_result_info[] = [
+                'title' => $gradeable['g_title'],
+                'id' => $gradeable['g_id'],
+                'config_id' => $gradeable['g_config_version'],
+                'duedate' => $gradeable['g_grade_due_date']->format($gradeable_date_format),
+                'timestamp' => $timestamp,
+                'students' => $students,
+                'submissions' => $submissions,
+                'in_queue' => $in_queue,
+                'processing' => $processing,
+                'ranking_available' => $ranking_available,
+                'matches_and_topmatch' => $matches_and_topmatch,
+                'gradeable_link' => $gradeable_link,
+                'rerun_plagiarism_link' => $rerun_plagiarism_link,
+                'edit_plagiarism_link' => $edit_plagiarism_link,
+                'delete_form_action' => $delete_form_action,
+                'nightly_rerun_link' => $nightly_rerun_link,
+                'night_rerun_status' => $night_rerun_status
+            ];
         }
 
         return new WebResponse(
