@@ -111,6 +111,7 @@ class PlagiarismController extends AbstractController {
         foreach ($valid_courses as $item) {
             $ret[] = "{$item['semester']} {$item['course']}";
         }
+        sort($ret);
         return $ret;
     }
 
@@ -144,7 +145,7 @@ class PlagiarismController extends AbstractController {
                 $gradeables[] = $gradeable;
             }
         }
-
+        sort($gradeables);
         return $gradeables;
     }
 
@@ -749,6 +750,8 @@ class PlagiarismController extends AbstractController {
             $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
             $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
         }
+
+        // TODO: fix the sorting here, it's broken
         usort($gradeable_ids_titles, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date'];
         });
