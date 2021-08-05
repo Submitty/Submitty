@@ -72,7 +72,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.box = 'bento/ubuntu-20.04'
     # If this IP address changes, it must be changed in install_system.sh and 
     # CONFIGURE_SUBMITTY.pyto allow the ssh connection
-    ubuntu.vm.network "private_network", ip: "192.168.1.8"
+    ubuntu.vm.network "private_network", ip: "172.18.2.8"
     ubuntu.vm.provision 'shell', inline: $worker_script
   end
 
