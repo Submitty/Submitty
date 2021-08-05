@@ -385,6 +385,10 @@ function refreshColorInfo(state) {
                             'type': interval.type,
                             'matching_positions': mp_text_marks,
                             'others': interval.others,
+                            'start_line': interval.start_line - 1,
+                            'end_line': interval.start_line - 1,
+                            'start_char': interval.start_char - 1,
+                            'end_char': interval.end_char - 1,
                         },
                         className: color,
                     },
@@ -539,6 +543,7 @@ function handleClickedMarks(state) {
 
         clickedMark.className = 'selected-style-red';
         state.editor1.operation(() => {
+            let first_mark = true;
             marks_editor1.forEach(mark => {
                 $.each(mark.attributes.matching_positions, (i, mp) => {
                     if (mp.attributes.start_line === clickedMark.attributes.start_line &&
@@ -548,6 +553,11 @@ function handleClickedMarks(state) {
                     ) {
                         mark.attributes.selected = true;
                         mark.className = 'selected-style-red';
+                        if (first_mark) {
+                            console.log(mark.attributes.end_line)
+                            state.editor1.scrollIntoView({line: mark.attributes.end_line, ch: 0}, 400);
+                            first_mark = false;
+                        }
                     }
                 });
             });
