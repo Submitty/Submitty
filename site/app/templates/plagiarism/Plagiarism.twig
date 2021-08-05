@@ -83,7 +83,7 @@
 {% macro renderPlagiarismRow(row) %}
     <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
         <td>
-            {% if row['ranking_available'] == true %}
+            {% if row['ranking_available'] %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
             {% else %}
                 {{ row['title'] }}
@@ -94,7 +94,7 @@
         <td>
             {{ row['config_id'] }}
         </td>
-        {% if row['in_queue'] == true %}
+        {% if row['in_queue'] %}
             <td colspan=4>
                 {% if row['processing'] %}
                     <i>Running</i>
