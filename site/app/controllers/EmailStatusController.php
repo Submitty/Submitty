@@ -20,7 +20,7 @@ class EmailStatusController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
-    public function getEmailStatusPage() {
+    public function getEmailStatusPage(): WebResponse {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
