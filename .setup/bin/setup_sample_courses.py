@@ -1065,8 +1065,9 @@ class Course(object):
         #This segment adds the sample forum posts and sample polls for the sample course only
         if self.code == "sample":
             self.add_sample_forum_data()
+            print('Added forum data to sample course.')
             self.add_sample_polls_data()
-            print('Added forum and polls data to sample course.')
+            print('Added polls data to sample course.')
 
         self.conn.close()
         submitty_conn.close()
@@ -1272,7 +1273,7 @@ class Course(object):
         # poll1: for each self.users make a random number (0-5) of responses
         poll1_response_ids = list(range(len(polls_data[0]['responses'])))
         for user in self.users:
-            random_responses = random.sample(poll1_response_ids, random.randint(0, 5))
+            random_responses = random.sample(poll1_response_ids, random.randint(0, len(polls_data[0]['responses'])))
             for response_id in random_responses:
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],

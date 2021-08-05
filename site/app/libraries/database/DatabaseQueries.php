@@ -7401,9 +7401,23 @@ AND gc_id IN (
 
     public function getResults($poll_id) {
         $results = [];
-        foreach ($this->getResponses($poll_id) as $option_id => $answer) {
-            $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);
-            $results[$option_id] = count($this->course_db->rows());
+        $query = <<<SQL
+SELECT
+    po.option_id,
+    COALESCE(pr.count, 0) AS count
+FROM
+    poll_options AS po
+    LEFT JOIN (
+        SELECT option_id, COUNT(*) AS count FROM poll_responses WHERE poll_id = ? GROUP BY option_id
+    ) AS pr ON pr.option_id = po.option_id
+WHERE
+    po.poll_id = ?
+ORDER BY
+    po.order_id ASC
+SQL;
+        $this->course_db->query($query, [$poll_id, $poll_id]);
+        foreach ($this->course_db->rows() as $row) {
+            $results[$row["option_id"]] = $row['count'];
         }
         return $results;
     }
@@ -7480,11 +7494,19 @@ SQL;
 
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
-            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
-                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1',
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
             [$user_id]
         );
         return $this->submitty_db->rows();
+    }
+
+    public function courseExists(string $semester, string $course): bool {
+        $this->submitty_db->query(
+            'SELECT * FROM courses WHERE semester=? AND course=?',
+            [$semester, $course]
+        );
+        return $this->submitty_db->getRowCount() === 1;
     }
 
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
