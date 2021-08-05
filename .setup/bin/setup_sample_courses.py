@@ -1062,7 +1062,7 @@ class Course(object):
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                             self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
-        #This segment adds the sample forum posts and sample polls for the sample course only
+        # This segment adds the sample data for features in the sample course only
         if self.code == "sample":
             self.add_sample_forum_data()
             print('Added forum data to sample course.')
@@ -1275,7 +1275,7 @@ class Course(object):
         # poll1: for each self.users make a random number (0-5) of responses
         poll1_response_ids = list(range(len(polls_data[0]['responses'])))
         for user in self.users:
-            random_responses = random.sample(poll1_response_ids, random.randint(0, 5))
+            random_responses = random.sample(poll1_response_ids, random.randint(0, len(polls_data[0]['responses'])))
             for response_id in random_responses:
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],

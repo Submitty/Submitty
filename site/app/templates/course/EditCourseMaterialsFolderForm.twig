@@ -17,11 +17,11 @@
                 Do you want to restrict this course material to some sections?
             </legend>
             <label class = "radio">
-                <input id = "all-sections-showing-no-folder" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsFolderEdit()" checked>
+                <input id = "all-sections-showing-no-folder" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsFolderEdit(); enableFullUpdate()" checked>
                 No
             </label>
             <label class = "radio">
-                <input id = "all-sections-showing-yes-folder" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsFolderEdit()">
+                <input id = "all-sections-showing-yes-folder" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsFolderEdit(); enableFullUpdate()">
                 Yes
             </label>
             <br>
@@ -33,7 +33,7 @@
                           <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
                         </td>
                         <td>
-                            <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                            <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
                         </td>
                         <td>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -52,10 +52,10 @@
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26"/>
+            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()" />
         </label>
         <label>
-            <input id="hide-folder-materials-checkbox-edit" type="checkbox"/>
+            <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="enableFullUpdate()"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -85,10 +85,23 @@
             handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort, sections_lock, fullUpdate);
         };
 
+        function enableFullUpdate() {
+            let submit = $('#submit-folder-edit-full');
+            submit.attr('disabled', false);
+        }
+
+        function disableFullUpdate() {
+            let submit = $('#submit-folder-edit-full');
+            submit.attr('disabled', true);
+        }
+
         flatpickr('.edit-folder-picker', {
             plugins: [ShortcutButtonsPlugin(
                     {
                         button: [
+                            {
+                                label: "Beginning of time"
+                            },
                             {
                                 label: "Now"
                             },
@@ -104,13 +117,16 @@
                             let date;
                             switch (index) {
                                 case 0:
-                                    date = new Date();
+                                    date = new Date("1001-01-01 00:00:00");
                                     break;
                                 case 1:
                                     date = new Date();
-                                    date.setDate(date.getDate() + 1);
                                     break;
                                 case 2:
+                                    date = new Date();
+                                    date.setDate(date.getDate() + 1);
+                                    break;
+                                case 3:
                                     date = new Date("9998-01-01 00:00:00");
                                     break;
                             }
@@ -133,5 +149,5 @@
 {% block buttons %}
     {{ block('close_button') }}
     <input class="btn btn-primary" id="submit-folder-edit" type="submit" value="Submit Sort Change" onclick = "submitFolderEdit(false);"/>
-    <input class="btn btn-primary" id="submit-folder-edit-full" type="submit" value="Submit Full Update" onclick="submitFolderEdit(true);">
+    <input class="btn btn-primary" id="submit-folder-edit-full" type="submit" value="Submit Full Update" disabled onclick="submitFolderEdit(true);">
 {% endblock %}

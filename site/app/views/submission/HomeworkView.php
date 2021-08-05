@@ -1256,7 +1256,7 @@ class HomeworkView extends AbstractView {
             ],
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'component' => [
-                'id' => 0
+                'id' => $gc_id
             ]
         ]);
     }
