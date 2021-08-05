@@ -39,7 +39,7 @@ pause==0.3
 paramiko==2.7.2
 tzlocal==2.1
 PyPDF2==1.26.0
-distro==1.5.0
+distro==1.6.0
 jsonschema==3.2.0
 jsonref==0.2
 docker==5.0.0
