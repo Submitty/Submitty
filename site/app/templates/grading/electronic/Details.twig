@@ -134,7 +134,7 @@
         {% if sections|length == 0 %}
             <tbody class="empty-info-header">
                 <tr class="info">
-                    <td colspan="{{ 42 + gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
+                    <td colspan="{{ gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
                 </tr>
             </tbody>
         {% else %}
