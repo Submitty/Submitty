@@ -355,7 +355,7 @@ function refreshColorInfo(state) {
                 const wasPreviousSelection = interval.start_line - 1 === state.previous_selection.start_line && interval.end_line - 1 === state.previous_selection.end_line && interval.start_char - 1 === state.previous_selection.start_char && interval.end_char - 1 === state.previous_selection.end_char;
 
                 $.each(interval.matching_positions, (i, mp) => {
-                    const color = 'specific-match-style';
+                    const color2 = 'specific-match-style';
                     mp_text_marks[i] = state.editor2.markText(
                         { // start position
                             line: mp.start_line - 1,
@@ -367,13 +367,13 @@ function refreshColorInfo(state) {
                         },
                         {
                             attributes: {
-                                'original_color': color,
+                                'original_color': color2,
                                 'start_line': mp.start_line - 1,
-                                'end_line': mp.start_line - 1,
+                                'end_line': mp.end_line - 1,
                                 'start_char': mp.start_char - 1,
                                 'end_char': mp.end_char - 1,
                             },
-                            className: color,
+                            className: color2,
                         },
                     );
                 });
@@ -395,7 +395,7 @@ function refreshColorInfo(state) {
                             'matching_positions': mp_text_marks,
                             'others': interval.others,
                             'start_line': interval.start_line - 1,
-                            'end_line': interval.start_line - 1,
+                            'end_line': interval.end_line - 1,
                             'start_char': interval.start_char - 1,
                             'end_char': interval.end_char - 1,
                         },
@@ -429,6 +429,20 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 mp.className = 'selected-style-red';
             });
             state.editor2.scrollIntoView({line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0}, 400);
+        });
+
+        // highlight the other matching regions on the left side
+        state.editor1.getAllMarks().forEach(mark => {
+            $.each(mark.attributes.matching_positions, (i, mp) => {
+                if (mp.attributes.start_line === clickedMark.attributes.matching_positions[0].attributes.start_line &&
+                    mp.attributes.end_line === clickedMark.attributes.matching_positions[0].attributes.end_line &&
+                    mp.attributes.start_char === clickedMark.attributes.matching_positions[0].attributes.start_char &&
+                    mp.attributes.end_char === clickedMark.attributes.matching_positions[0].attributes.end_char
+                ) {
+                    mark.attributes.selected = true;
+                    mark.className = 'selected-style-red';
+                }
+            });
         });
     }
     else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
@@ -492,20 +506,27 @@ function handleClickedMark_editor2(state, clickedMark) {
     state.editor1.operation(() => {
         let first_mark = true;
         state.editor1.getAllMarks().forEach(mark => {
+            let mark_does_contain_mp = false;
             $.each(mark.attributes.matching_positions, (i, mp) => {
                 if (mp.attributes.start_line === clickedMark.attributes.start_line &&
                     mp.attributes.end_line === clickedMark.attributes.end_line &&
                     mp.attributes.start_char === clickedMark.attributes.start_char &&
                     mp.attributes.end_char === clickedMark.attributes.end_char
                 ) {
-                    mark.attributes.selected = true;
-                    mark.className = 'selected-style-red';
+                    mark_does_contain_mp = true;
+                }
+            });
+            if (mark_does_contain_mp) {
+                mark.attributes.selected = true;
+                mark.className = 'selected-style-red';
+                $.each(mark.attributes.matching_positions, (i, mp) => {
+                    mp.className = 'selected-style-red';
                     if (first_mark) {
                         state.editor1.scrollIntoView({line: mark.attributes.end_line, ch: 0}, 400);
                         first_mark = false;
                     }
-                }
-            });
+                });
+            }
         });
     });
 
