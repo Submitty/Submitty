@@ -165,11 +165,11 @@
                         {% for info in section.rows %}
                             {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
                         {% endfor %}
-                        {% if section.teamless_users is defined %}
-                            {% for info in section.teamless_users %}
-                                {{ _self.render_teamless_user(_context, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
-                            {% endfor %}
-                        {% endif %}
+                    {% endif %}
+                    {% if section.teamless_users is defined %}
+                        {% for info in section.teamless_users %}
+                            {{ _self.render_teamless_user(_context, section, info.user, info.new_team_onclick, loop.index + (section.rows is defined ? section.rows|length : 0), columns) }}
+                        {% endfor %}
                     {% endif %}
                 </tbody>
                 {# /Student list #}
