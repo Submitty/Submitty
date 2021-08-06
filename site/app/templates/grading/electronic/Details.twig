@@ -110,7 +110,7 @@
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
                         <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">
-                            <a href="{{ details_base_url }}?view={{ (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null }}&sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
+                            <a href="{{ details_base_url }}?sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
                             {% endif %}
