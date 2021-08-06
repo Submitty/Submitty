@@ -312,7 +312,6 @@ class ElectronicGraderView extends AbstractView {
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
-            "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
@@ -829,7 +828,7 @@ HTML;
             "peer" => $peer,
             "details_base_url" => $details_base_url,
             "order_toggle_url" => $details_base_url . '?' .
-                http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
+                http_build_query(['sort' => $sort === 'random' ? null : 'random', 'anon_mode' => $anon_mode]),
             "sort" => $sort,
             "direction" => $direction,
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
@@ -1111,7 +1110,7 @@ HTML;
         if ($gradeable->getLimitedAccessBlind() == 2) {
             $isBlind = true;
         }
-        $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
+        $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction]);
 
         $studentBaseUrl = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']);
 

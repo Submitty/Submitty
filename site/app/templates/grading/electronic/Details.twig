@@ -134,7 +134,7 @@
         {% if sections|length == 0 %}
             <tbody class="empty-info-header">
                 <tr class="info">
-                    <td colspan="{{ gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
+                    <td colspan="{{ columns|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
                 </tr>
             </tbody>
         {% else %}
@@ -716,10 +716,10 @@
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
-            document.cookie = 'view=assigned;';
+            document.cookie = 'view=assigned; path=/;';
             localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
         } else {
-            document.cookie = 'view=all;';
+            document.cookie = 'view=all; path=/;';
             localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
         }
         location.reload();

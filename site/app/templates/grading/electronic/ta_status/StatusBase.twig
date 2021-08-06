@@ -190,11 +190,7 @@
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             <a class="btn btn-primary" style="float: left"
-                {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
-                    href="{{ details_view_all_url }}">
-                {% else %}
-                    href="{{ details_url }}">
-                {% endif %}
+                href="{{ details_url }}">
 
                 Grading Index
             </a>

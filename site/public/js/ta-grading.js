@@ -48,9 +48,9 @@ let settingsCallbacks = {
   "general-setting-arrow-function": changeStudentArrowTooltips,
   "general-setting-navigate-assigned-students-only": function(value) {
     if (value == 'true') {
-      document.cookie = "view=assigned;";
+      document.cookie = "view=assigned; path=/;";
     } else {
-      document.cookie = "view=all;";
+      document.cookie = "view=all; path=/;";
     }
   }
 }

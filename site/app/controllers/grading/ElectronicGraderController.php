@@ -1105,7 +1105,7 @@ class ElectronicGraderController extends AbstractController {
      */
     public function randomizeTeamRotatingSections($gradeable_id) {
         $section_count = $this->core->getQueries()->getMaxRotatingSection();
-        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']) . '?' . http_build_query(['view' => 'all']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
         $teams = $this->core->getQueries()->getTeamsWithMembersFromGradeableID($gradeable_id);
 
         //Does nothing if there are no sections or no teams
@@ -1386,7 +1386,7 @@ class ElectronicGraderController extends AbstractController {
                 $message .= $navigate_assigned_students_only !== "false" ? " your assigned sections" : " the list";
                 $message .= $filter !== 'default' ? " (using filter '" . $filter . "')." : ".";
                 $this->core->addSuccessMessage($message);
-                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction]));
             }
         }
         // Get the graded gradeable for the submitter we are requesting
@@ -1399,7 +1399,7 @@ class ElectronicGraderController extends AbstractController {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
         if ($graded_gradeable === false) {
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction]));
             $peer = false;
         }
 
