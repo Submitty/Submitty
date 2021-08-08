@@ -178,7 +178,9 @@ CREATE TABLE public.course_materials (
     type smallint NOT NULL,
     release_date timestamp with time zone,
     hidden_from_students boolean,
-    priority double precision NOT NULL
+    priority double precision NOT NULL,
+    url text,
+    url_title character varying(255)
 );
 
 
