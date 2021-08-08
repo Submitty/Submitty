@@ -5998,26 +5998,6 @@ AND gc_id IN (
     }
 
     /**
-     * Get a status of emails sent of a course with course name and semester
-     *
-     * @param string $course
-     * @param string $semester
-     * @return EmailStatusModel
-     */
-    public function getEmailStatusWithCourse($semester, $course): EmailStatusModel {
-        $parameters = [$course, $semester];
-        $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
-        $details = $this->submitty_db->rows();
-        return new EmailStatusModel($this->core, $details);
-    }
-
-    public function getAllEmailStatuses(): EmailStatusModel {
-        $this->submitty_db->query('SELECT * FROM emails ORDER BY created DESC');
-        $details = $this->submitty_db->rows();
-        return new EmailStatusModel($this->core, $details);
-    }
-
-    /**
      * Gives true if thread is locked
      *
      * @param  int $thread_id
