@@ -1,13 +1,4 @@
-var csrfToken = undefined;
-
-window.addEventListener("load", function() {
-  for (const elem in document.body.dataset) {
-    window[elem] = document.body.dataset[elem];
-  }
-});
-
 window.addEventListener("resize", checkSidebarCollapse);
-
 
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
@@ -279,6 +270,7 @@ function newEditCourseMaterialsFolderForm(path, dir) {
     $("#all-sections-showing-yes", form).prop('checked',false);
     $("#all-sections-showing-no", form).prop('checked',true);
     $('#edit-folder-sort', form).attr('value', dir);
+    disableFullUpdate();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-folder-form");
 }
@@ -301,7 +293,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
-    if(this_file_section != null){
+    if(this_file_section.length !== 0){
         for(let index = 0; index < this_file_section.length; ++index){
             $("#section-edit-" + this_file_section[index], form).prop('checked',true);
         }
@@ -683,7 +675,7 @@ function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.code ? pos + 1 : 0;
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
             setInterval(function() { $("*").addClass("rainbow"); }, 100);
             $(document.body).off('keyup', colorEvent);

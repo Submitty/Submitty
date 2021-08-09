@@ -319,7 +319,8 @@ class ElectronicGraderView extends AbstractView {
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
             "warnings" => $warnings,
-            "submissions_in_queue" => $submissions_in_queue
+            "submissions_in_queue" => $submissions_in_queue,
+            "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
         ]);
     }
 
@@ -479,7 +480,7 @@ HTML;
             // See also note in ElectronicGradeController.php
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
-                if ($peer === 'false') {
+                if ($peer === false) {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                     $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 }
@@ -498,7 +499,6 @@ HTML;
                 else {
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
                 }
-                $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
         }
@@ -628,7 +628,7 @@ HTML;
                 }
                 $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-                $team_name = $row->getSubmitter()->getTeam()->getTeamName();
+                $team_name = addslashes($row->getSubmitter()->getTeam()->getTeamName());
                 $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}', '{$team_name}');";
                 $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"] ?? null;
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
@@ -1661,7 +1661,9 @@ HTML;
             "highest_version" => $highest_version,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             "old_files" => $old_files,
-            "is_grader_view" => true
+            "is_grader_view" => true,
+            "max_file_uploads" => ini_get('max_file_uploads'),
+            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css')
             ]
         );
     }

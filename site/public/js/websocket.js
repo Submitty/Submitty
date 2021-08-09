@@ -32,7 +32,7 @@ class WebSocketClient {
         this.onmessage = null;
         // We do string replacement here so that http -> ws, https -> wss.
         const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
-        my_url.port = 8443;
+        my_url.port = window.websocketPort;
         my_url.pathname = 'ws';
         this.url = my_url.href;
     }

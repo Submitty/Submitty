@@ -1468,11 +1468,6 @@ tr.is_publish {
     resize: none;
 }
 
-/* Notebook panel */
-#notebook-main-view {
-    padding: 10px;
-}
-
 input[type="radio"][disabled=""]:checked::before {
     content: "";
     display: block;

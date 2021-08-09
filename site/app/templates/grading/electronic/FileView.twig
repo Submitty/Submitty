@@ -1,7 +1,7 @@
 <div id="{{ file_view_id|default('file-view') }}" class="hide">
     <div class="sticky-file-info">
         <div class="flex-row">
-            <span>
+            <span class="file-view-header">
                 <span class="grading_label">{{ panelTitle|default('Submissions and Results Browser')}} ></span>
                 <span class="grading_label" id="{{ grading_file_name_id|default('grading_file_name') }}"></span>
                 <a onclick='collapseFile("{{ panel|default('"submission"') }}")'
