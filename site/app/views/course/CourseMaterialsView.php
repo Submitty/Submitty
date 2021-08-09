@@ -16,16 +16,16 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $this->core->getOutput()->enableMobileViewport();
-        $seen = [];
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
         $base_course_material_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials');
         $directories = [];
         $directory_priorities = [];
+        $seen = [];
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
-            $seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
+            //$seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
             if ($course_material->isDir()) {
                 $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
@@ -119,6 +119,8 @@ class CourseMaterialsView extends AbstractView {
                 [$file_name => $course_material] + array_slice($path_to_place, $index, null, true);
         }
 
+        $this->setSeen($final_structure, $seen, $base_course_material_path);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -133,5 +135,27 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure
         ]);
+    }
+
+    private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {
+        $has_unseen = false;
+        foreach ($course_materials as $path => $course_material) {
+            /** @var CourseMaterial $course_material */
+            if (is_array($course_material)) {
+                if ($this->setSeen($course_material, $seen, FileUtils::joinPaths($cur_path, $path))) {
+                    $seen[FileUtils::joinPaths($cur_path, $path)] = false;
+                }
+                else {
+                    $seen[FileUtils::joinPaths($cur_path, $path)] = true;
+                }
+            }
+            else {
+                $seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
+                if (!$course_material->userHasViewed($this->core->getUser()->getId())) {
+                    $has_unseen = true;
+                }
+            }
+        }
+        return $has_unseen;
     }
 }

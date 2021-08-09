@@ -161,6 +161,9 @@
                 {% endfor %}]
                             )' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
+                {% if not seen[folder_path] %}
+                    <span class="badge" style="background-color: #00b3fa; min-width: 10px; color: var(--text-black); float: none;">NEW</span>
+                {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
                 {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, seen) }}
