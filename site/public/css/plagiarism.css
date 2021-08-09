@@ -256,6 +256,11 @@ main#main.full-screen-mode .plagiarism-result-cont {
     left: calc(75% - 7px - 1.5em);
 }
 
+.left-sub-item-middle,
+.right-sub-item-middle {
+    height: 100%;
+}
+
 .left-sub-item {
     width: calc(50% - 7px);
 }
