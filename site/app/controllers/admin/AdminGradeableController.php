@@ -919,7 +919,6 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
-                'has_due_date' => true,
                 'allow_custom_marks' => true,
 
                 //For discussion component
@@ -934,7 +933,9 @@ class AdminGradeableController extends AbstractController {
                 'limited_access_blind' => 1,
                 'peer_blind' => 3,
                 'depends_on' => null,
-                'depends_on_points' => null
+                'depends_on_points' => null,
+                'has_due_date' => false,
+                'has_release_date' => false
             ]);
         }
         else {
@@ -949,7 +950,6 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'has_due_date' => false,
                 'hidden_files' => ""
             ]);
         }
@@ -1056,6 +1056,7 @@ class AdminGradeableController extends AbstractController {
             'discussion_based',
             'vcs',
             'has_due_date',
+            'has_release_date',
             'allow_custom_marks'
         ];
 
@@ -1228,7 +1229,7 @@ class AdminGradeableController extends AbstractController {
         $jsonProperties = [
             'gradeable_id' => $gradeable->getId(),
             'config_path' => $gradeable->getAutogradingConfigPath(),
-            'date_due' => DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+            'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
         ];
@@ -1381,13 +1382,19 @@ class AdminGradeableController extends AbstractController {
         $success = null;
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
-            if ($dates['grade_released_date'] > $now) {
-                $this->shiftDates($dates, 'grade_released_date', $now);
-                $message .= "Released grades for ";
-                $success = true;
+            if ($gradeable->hasReleaseDate()) {
+                if ($dates['grade_released_date'] > $now) {
+                    $this->shiftDates($dates, 'grade_released_date', $now);
+                    $message .= "Released grades for ";
+                    $success = true;
+                }
+                else {
+                    $message .= "Grades already released for ";
+                    $success = false;
+                }
             }
             else {
-                $message .= "Grades already released for";
+                $message .= "Can't release grades for ";
                 $success = false;
             }
         }
@@ -1425,13 +1432,19 @@ class AdminGradeableController extends AbstractController {
             }
         }
         elseif ($action === "close_submissions") {
-            if ($dates['submission_due_date'] > $now) {
-                $this->shiftDates($dates, 'submission_due_date', $now);
-                $message .= "Closed assignment ";
-                $success = true;
+            if ($gradeable->hasDueDate()) {
+                if ($dates['submission_due_date'] > $now) {
+                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $message .= "Closed assignment ";
+                    $success = true;
+                }
+                else {
+                    $message .= "Grading already closed for ";
+                    $success = false;
+                }
             }
             else {
-                $message .= "Grading already closed for ";
+                $message .= "Can't close submissions for ";
                 $success = false;
             }
         }

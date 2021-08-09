@@ -908,10 +908,9 @@ class Course(object):
                             versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
 
                         if ((gradeable.gradeable_config is not None
-                           and (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                           and (gradeable.has_due_date is True and (gradeable.submission_due_date < NOW or random.random() < 0.5))
                            and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions))
                            or (gradeable.gradeable_config is not None and user.id in gradeable.plagiarized_user)):
-
                             # only create these directories if we're actually going to put something in them
                             if not os.path.exists(gradeable_path):
                                 os.makedirs(gradeable_path)
@@ -996,7 +995,7 @@ class Course(object):
                             with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
-                        if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
+                        if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
                             print("Inserting {} for {}...".format(gradeable.id, user.id))
                             # gd_overall_comment no longer does anything, and will be removed in a future update.
@@ -1045,7 +1044,7 @@ class Course(object):
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
 
-                    if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
+                    if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
                         res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment='')
                         gd_id = res.inserted_primary_key[0]
@@ -1442,7 +1441,7 @@ class Course(object):
                 max_ta = 0
 
                 print_grades = True if g_type != 0 or (gradeable.submission_open_date < NOW) else False
-                release_grades = (gradeable.grade_released_date < NOW)
+                release_grades = (gradeable.has_release_date is True) and (gradeable.grade_released_date < NOW)
 
                 gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
                                                     "config", "complete_config")
@@ -1567,6 +1566,8 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.has_due_date = True
+        self.has_release_date = True
         self.allow_custom_marks = True
         self.plagiarism_submissions = []
         self.plagiarism_versions_per_user = 1
@@ -1687,6 +1688,8 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
+            self.has_due_date = gradeable['eg_has_due_date']
+            self.has_release_date = gradeable['eg_has_release_date']
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
@@ -1697,9 +1700,9 @@ class Gradeable(object):
                 else:
                     self.config_path = None
             assert self.ta_view_date < self.submission_open_date
-            assert self.submission_open_date < self.submission_due_date
-            assert self.submission_due_date < self.grade_start_date
-            assert self.grade_released_date <= self.grade_inquiry_start_date
+            assert self.has_due_date is False or self.submission_open_date < self.submission_due_date
+            assert self.has_due_date is False or self.submission_due_date < self.grade_start_date
+            assert self.has_release_date is False or self.grade_released_date <= self.grade_inquiry_start_date
             assert self.grade_inquiry_start_date < self.grade_inquiry_due_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
@@ -1717,7 +1720,7 @@ class Gradeable(object):
                                                 "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_due_date
-        assert self.grade_due_date <= self.grade_released_date
+        assert self.has_release_date is False or self.grade_due_date <= self.grade_released_date
 
         self.components = []
         for i in range(len(gradeable['components'])):
