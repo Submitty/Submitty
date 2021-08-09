@@ -1,3 +1,32 @@
 <div class="content">
-    {{progress}}
+    <h1>
+        machine_grading_counts
+    </h1>
+    {% for machine, count in progress["machine_grading_counts"] %}
+        <div> {{ machine ~ ": " ~ count }}</div>
+    {% endfor %}
+    <h1>
+        capability_queue_counts
+    </h1>
+    {% for capability, count in progress["capability_queue_counts"] %}
+        <div> {{ capability ~ ": " ~ count }}</div>
+    {% endfor %}
+    <h1>
+        machine_stale_jobs
+    </h1>
+    {% for machine, stale in progress["machine_stale_jobs"] %}
+        <div> {{ machine ~ ": " ~ stale }}</div>
+    {% endfor %}
+    <h1>
+        queue_counts
+    </h1>
+    {% for type, count in progress["queue_counts"] %}
+        <div> {{ type ~ ": " ~ count }}</div>
+    {% endfor %}
+    <h1>
+        job_files
+    </h1>
+    {% for file in progress["job_files"] %}
+        <div> {{ file }}</div>
+    {% endfor %}
 </div>

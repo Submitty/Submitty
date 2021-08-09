@@ -3,31 +3,55 @@
 namespace app\libraries;
 
 /**
- * @method array getGradingQueueObj()
- * @method int getStartTime()
- * @method int getElapsedTime()
- * @method array getQueueObj()
- * @method bool isRegrade()
+ * Class QueueItem
+ * 
+ * @method array    getGradingQueueObj()
+ * @method int      getStartTime()
+ * @method int      getElapsedTime()
+ * @method array    getQueueObj()
+ * @method bool     isRegrade()
  */
 class QueueItem{
-    /** @var array */
-    private $grading_queue_obj = [];
-    /** @var int */
-    private $start_time = 0;
-    /** @var int */
-    private $elapsed_time = 0;
-    /** @var array */
-    private $queue_obj = [];
-    /** @var bool */
-    private $is_regrade = false;
+    /** @prop-read @var array */
+    private array $grading_queue_obj = [];
+    /** @prop-read @var int */
+    private int $start_time = 0;
+    /** @prop-read @var int */
+    private int $elapsed_time = 0;
+    /** @prop-read @var array */
+    private array $queue_obj = [];
+    /** @prop-read @var bool */
+    private bool $regrade = false;
 
-    public function __construct(string $json_file, int $epoch_time, bool $is_grading){
+    public function getGradingQueueObj(): array {
+        return $this->grading_queue_obj;
+    }
+
+    public function getStartTime(): int {
+        return $this->start_time;
+    }
+
+    public function getElapsedTime(): int {
+        return $this->elapsed_time;
+    }
+
+    public function getQueueObj(): array {
+        return $this->queue_obj;
+    }
+
+    public function isRegrade(): bool {
+        return $this->regrade;
+    }
+
+    public function __construct(string $json_file, int $epoch_time, bool $is_grading) {
         if ($is_grading) {
-            $this->grading_queue_obj = FileUtils::readJsonFile($json_file);
+            $base = basename($json_file);
+            $dir = dirname($json_file);
+            $this->grading_queue_obj = FileUtils::readJsonFile($dir . "/GRADING_" . $base);
         }
         $this->start_time = filemtime($json_file);
         $this->elapsed_time = $epoch_time - $this->start_time;
         $this->queue_obj = FileUtils::readJsonFile($json_file);
-        $this->is_regrade = in_array("regrade", $this->queue_obj);
+        $this->regrade = $this->queue_obj["regrade"];
     }
 }

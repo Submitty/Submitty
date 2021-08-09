@@ -40,7 +40,9 @@ class GradingQueue {
     public function __construct($semester, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
         $this->grading_path = FileUtils::joinPaths($submitty_path, 'in_progress_grading');
-        $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
+        if ($semester != null || $course != null) {
+            $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
+        }
     }
 
     /**
@@ -215,11 +217,10 @@ class GradingQueue {
      *  - 
      * @return array
      */
-    public function getAutogradingInfo() {
+    public function getAutogradingInfo($config_path) {
         // Get information on the worker machines
-        $config_path = $this->core->getConfig()->getConfigPath();
         $open_autograding_workers_json = FileUtils::readJsonFile(
-            FileUtils::joinPaths($config_path, "autograding_workers.json");
+            FileUtils::joinPaths($config_path, "autograding_workers.json")
         );
 
         $this->ensureLoadedQueue();
@@ -230,16 +231,15 @@ class GradingQueue {
         $capability_queue_counts = [];
         $machine_stale_jobs = [];
 
-        foreach ($open_autograding_workers_json as $machine) {
+        foreach ($open_autograding_workers_json as $machine => $details) {
             $machine_grading_counts[$machine] = 0;
-            $m = $open_autograding_workers_json[$machine];
-            foreach ($m["capabilities"] as $c) {
+            foreach ($details["capabilities"] as $c) {
                 $capability_queue_counts[$c] = 0;
             }
             $machine_stale_jobs[$machine] = false;
         }
 
-        $capability_queue_counts = ksort($capability_queue_counts);
+        ksort($capability_queue_counts);
 
         $queue_counts = [];
         $queue_counts["interactive"] = 0;
@@ -249,21 +249,54 @@ class GradingQueue {
 
         $job_files = [];
 
-        // Might want to read subqueue?
         foreach ($this->queue_files as $full_path_file) {
-            $job_file = $this->updateDetailedQueueCount($full_path_file, false, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs);
-            $job_files = array_merge($job_files, $job_file)
+            $path = FileUtils::joinPaths($this->queue_path, $full_path_file);
+            $job_file = $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
+                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json);
+            $job_files = array_merge($job_files, $job_file);
         }
 
-        foreach ($this->grading_files as $full_path_file){
-            all_the_files
+        $started = [];
+        $not_yet_started = [];
+        $all_files = $this->subqueue_files;
+
+        foreach ($all_files as $worker => $files) {
+            foreach ($files as $file) {
+                $path = FileUtils::joinPaths($this->grading_path, $worker, self::GRADING_FILE_PREFIX . $file);
+                $found = file_exists($path);
+                if ($found) {
+                    $started[] = FileUtils::joinPaths($worker, $file);
+                } else {
+                    $not_yet_started[] = FileUtils::joinPaths($worker, $file);
+                }
+            }
         }
 
+        foreach ($started as $file) {
+            $path = FileUtils::joinPaths($this->grading_path, $file);
+            $job_file = $this->updateDetailedQueueCount($path, true, $epoch_time, $queue_counts,
+                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json);
+            $job_files = array_merge($job_files, $job_file);
+        }
+
+        foreach ($not_yet_started as $file) {
+            $path = FileUtils::joinPaths($this->grading_path, $file);
+            $job_file = $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
+                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json);
+            $job_files = array_merge($job_files, $job_file);
+        }
+
+        return [
+            "machine_grading_counts" => $machine_grading_counts,
+            "capability_queue_counts" => $capability_queue_counts,
+            "machine_stale_jobs" => $machine_stale_jobs,
+            "queue_counts" => $queue_counts,
+            "job_files" => $job_files
+        ];
     }
 
-    private function updateDetailedQueueCount($queue_or_grading_file, $is_grading, $epoch_time, $detailed_queue_counts,
-            $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json): array {
+    private function updateDetailedQueueCount($queue_or_grading_file, $is_grading, $epoch_time, &$detailed_queue_counts,
+            &$capability_queue_counts, &$machine_grading_counts, &$machine_stale_jobs, $open_autograding_workers_json): array {
         $stale = false;
         $error = "";
         
@@ -272,13 +305,15 @@ class GradingQueue {
         $job_file = basename($queue_or_grading_file);
 
         try {
-            $entry = new QueueItem($queue_or_grading_file, $epoch_time, $is_grading)
+            $entry = new QueueItem($queue_or_grading_file, $epoch_time, $is_grading);
             if ($entry->isRegrade()) {
                 if ($is_grading) {
                     $detailed_queue_counts["regrade_grading"] += 1;
+                }
                 else {
                     $detailed_queue_counts["regrade"] += 1;
                 }
+            }
             else {
                 if ($is_grading) {
                     $detailed_queue_counts["interactive_grading"] += 1;
@@ -287,13 +322,13 @@ class GradingQueue {
                     $detailed_queue_counts["interactive"] += 1;
                 }
             }
-            $capability = "default"
+            $capability = "default";
             if (in_array("required_capabilities",$entry->getQueueObj())) {
                 $capability = $entry->getQueueObj()["required_capabilities"];
             }
 
             if (!$is_grading) {
-                if (!in_array($capability, $capability_queue_counts)) {
+                if (!array_key_exists($capability, $capability_queue_counts)) {
                     $error .= "ERROR: {$job_file} requires {$capability} which is not provided by any worker";
                 }
                 else {
@@ -301,8 +336,8 @@ class GradingQueue {
 
                     $enabled_worker = false;
                     foreach ($open_autograding_workers_json as $machine) {
-                        if ($open_autograding_workers_json[$machine]["enabled"]){
-                            if (in_array($capability, $open_autograding_workers_json[$machine]["capabilities"]){
+                        if ($machine["enabled"]){
+                            if (in_array($capability, $machine["capabilities"])){
                                 $enabled_worker = true;
                             }
                         }
@@ -317,27 +352,28 @@ class GradingQueue {
                 $max_time = $entry->getQueueObj()["max_possible_grading_time"];
                 $full_machine = $entry->getGradingQueueObj()['machine'];
 
-                $grading_machine = "NONE"
-                foreach ($open_autograding_workers_json as $machine) {
-                    $m = $open_autograding_workers_json[$machine]["address"];
-                    if ($open_autograding_workers_json[$machine]["username"] != "") {
-                        $m = "{$open_autograding_workers_json[$machine]['username']}@{$m}";
+                $grading_machine = "NONE";
+                foreach ($open_autograding_workers_json as $machine => $details) {
+                    $m = $details["address"];
+                    if ($details["username"] != "") {
+                        $m = "{$details['username']}@{$m}";
                     }
                     if ($full_machine == $m) {
                         $grading_machine = $machine;
                         break;
                     }
                 }
-                $machine_grading_counts[$grading_machine] += 1
+                $machine_grading_counts[$grading_machine] += 1;
 
-                if ($entry->getElapsedTime > $max_time) {
+                $elapsed_time = $entry->getElapsedTime();
+                if ($elapsed_time > $max_time) {
                     $machine_stale_jobs[$grading_machine] = true;
                     $stale = true;
                 }
             }
         }
         catch (\Exception $e) {
-            $error .= "Could not read for {$queue_or_grading_file}: {$e}"
+            $error .= "Could not read for {$queue_or_grading_file}: {$e}";
         }
         return [
             $job_file => [
