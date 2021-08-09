@@ -236,12 +236,36 @@ main#main.full-screen-mode .plagiarism-result-cont {
     min-width: 100px;
 }
 
+.loading-animation {
+    border: 5px solid var(--standard-dark-gray);
+    border-top: 5px solid rgba(0,0,0,0);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    width: 3em;
+    height: 3em;
+    position: absolute;
+    top: calc(50% - 1.5em);
+    z-index: 1000;
+}
+
+.loading-animation.left-loader {
+    left: calc(25% - 7px - 1.5em);
+}
+
+.loading-animation.right-loader {
+    left: calc(75% - 7px - 1.5em);
+}
+
 .left-sub-item {
-    width: 49%;
+    width: calc(50% - 7px);
 }
 
 .right-sub-item {
-    flex: 1 1 0%;
+    flex: 1 1 0;
+}
+
+.blurry {
+    filter: blur(1px);
 }
 
 .plag-drag-bar {
