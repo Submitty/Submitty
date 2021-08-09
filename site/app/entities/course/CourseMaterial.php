@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Class CourseMaterial
  * @package app\entities
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="\app\repositories\course\CourseMaterialRepository")
  * @ORM\Table(name="course_materials")
  */
 class CourseMaterial {
@@ -71,13 +71,27 @@ class CourseMaterial {
      */
     protected $sections;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority) {
+    /**
+     * @ORM\Column(type="string")
+     * @var string
+     */
+    protected $url;
+
+    /**
+     * @ORM\Column(type="string")
+     * @var string
+     */
+    protected $url_title;
+
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $url_title) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
         $this->setHiddenFromStudents($hidden_from_students);
         $this->setPriority($priority);
         $this->sections = new ArrayCollection();
+        $this->url = $url;
+        $this->url_title = $url_title;
     }
 
     /**
@@ -119,12 +133,12 @@ class CourseMaterial {
         return $this->hidden_from_students;
     }
 
-    public function isSectionAllowed(User $user): bool {
+    public function isSectionAllowed(string $section): bool {
         if ($this->sections->count() === 0) {
             return true;
         }
         foreach ($this->sections->getValues() as $course_material_section) {
-            if ($user->getRegistrationSection() === $course_material_section->getSectionId()) {
+            if ($section === $course_material_section->getSectionId()) {
                 return true;
             }
         }
@@ -169,7 +183,15 @@ class CourseMaterial {
 
     public function userHasViewed(string $user_id): bool {
         return $this->accesses->filter(function (CourseMaterialAccess $courseMaterialAccess) use ($user_id) {
-            return $courseMaterialAccess->getUserId() === $user_id;
+                return $courseMaterialAccess->getUserId() === $user_id;
         })->count() > 0;
+    }
+
+    public function getUrl(): string {
+        return $this->url;
+    }
+
+    public function getUrlTitle(): string {
+        return $this->url_title;
     }
 }
