@@ -33,6 +33,24 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/course_materials/view", methods={"POST"})
+     */
+    public function markViewed(): JsonResponse {
+        $ids = $_POST['ids'];
+        if (!is_array($ids)) {
+            $ids = [$ids];
+        }
+        $cms = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findBy(['id' => $ids]);
+        foreach ($cms as $cm) {
+            $cm_access = new CourseMaterialAccess($cm, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
+            $cm->addAccess($cm_access);
+        }
+        $this->core->getCourseEntityManager()->flush();
+        return JsonResponse::getSuccessResponse();
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      */
     public function deleteCourseMaterial($path) {

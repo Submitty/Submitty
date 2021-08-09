@@ -66,7 +66,7 @@
             <div class="file-viewer">
                 {% if course_material.isLink %}
                     <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
-                    <a href="{{ course_material.getUrl }}">{{ course_material.getUrlTitle }}</a>
+                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</a>
                 {% else %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {{ name }}

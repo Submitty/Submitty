@@ -716,6 +716,19 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
+function markViewed(ids, redirect) {
+    let data = new FormData();
+    data.append("ids", ids);
+    data.append("csrf_token", csrfToken);
+    $.ajax({
+        url: buildCourseUrl(['course_materials', 'view']),
+        type: "POST",
+        data: data,
+        contentType: false,
+        processData: false
+    });
+}
+
 function hideEmptyCourseMaterialFolders() {
   // fetch all the folders and remove those one which have no `file` within.
   $('.folder-container').each(function() {
