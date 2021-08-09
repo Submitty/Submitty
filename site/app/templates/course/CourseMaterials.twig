@@ -127,11 +127,11 @@
                                 return yellow;
                             }
                         }
-                        {% if not seen[path] %}
-                            <span class="badge" style="background-color: #00b3fa; min-width: 10px; color: var(--text-black); float: none;">NEW</span>
-                        {% endif %}
                         document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
                     </script>
+                {% endif %}
+                {% if not seen[course_material.getPath] %}
+                    <span class="badge" style="background-color: #00b3fa; min-width: 10px; color: var(--text-black); float: none;">NEW</span>
                 {% endif %}
             </div>
             <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ name }}" data-file_url="{{ course_material.getPath }}"></div>
@@ -139,15 +139,9 @@
     {% endif %}
 {% endmacro %}
 
-<<<<<<< HEAD
-{% macro display_dir(dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) %}
-    {% if indent == 0 %}
-        {{ _self.display_files(contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link, priorities, recursiveDir, seen) }}
-=======
-{% macro display_folder(name, course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format) %}
+{% macro display_folder(name, course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, seen) %}
     {% if indent == -1 %}
-        {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format) }}
->>>>>>> master
+        {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, seen) }}
     {% else %}
         <div class="folder-container">
             <div class="div-viewer">
