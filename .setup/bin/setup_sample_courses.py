@@ -60,6 +60,7 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as data
 with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
     submitty_config_json = json.load(submitty_config)
     SUBMISSION_URL = submitty_config_json["submission_url"]
+    VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs', 'git')
 
 DB_ONLY = False
 NO_SUBMISSIONS = False
@@ -547,7 +548,19 @@ def create_gradeable_submission(src, dst):
 
 def commit_submission_to_repo(user_id, src_file, repo_url):
     # a function to commit and push a file to a user's submitty-hosted repository
-    # TODO
+    my_cwd = os.getcwd()
+    with TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+        os.system(f'git clone {repo_url}')
+        os.chdir(os.path.join(temp_dir, user_id))
+        os.system('git checkout main')
+        os.system('git pull')
+        # use the above function to copy the files into the git repo for us
+        create_gradeable_submission(src_file, os.getcwd())
+        os.system('git add --all')
+        os.system("git commit -a --allow-empty -m 'adding submission files'")
+        os.system('git push')
+    os.chdir(my_cwd)
 
 class User(object):
     """
