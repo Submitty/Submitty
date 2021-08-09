@@ -131,7 +131,7 @@
                     </script>
                 {% endif %}
                 {% if not seen[course_material.getPath] %}
-                    <span class="badge" style="background-color: #00b3fa; min-width: 10px; color: var(--text-black); float: none;">NEW</span>
+                    <span class="badge course-material-badge" >NEW</span>
                 {% endif %}
             </div>
             <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ name }}" data-file_url="{{ course_material.getPath }}"></div>
@@ -162,7 +162,7 @@
                             )' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
                 {% if not seen[folder_path] %}
-                    <span class="badge" style="background-color: #00b3fa; min-width: 10px; color: var(--text-black); float: none;">NEW</span>
+                    <span class="badge course-material-badge" >NEW</span>
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
