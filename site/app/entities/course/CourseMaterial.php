@@ -179,11 +179,11 @@ class CourseMaterial {
         return $this->url_title;
     }
 
-    public function setUrl(String $url): void {
+    public function setUrl(string $url): void {
         $this->url = $url;
     }
 
-    public function setUrlTitle(String $url_title): void {
+    public function setUrlTitle(string $url_title): void {
         $this->url_title = $url_title;
     }
 }
