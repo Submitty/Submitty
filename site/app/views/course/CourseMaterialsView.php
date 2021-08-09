@@ -151,7 +151,11 @@ class CourseMaterialsView extends AbstractView {
             }
             else {
                 $seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
-                if (!$course_material->userHasViewed($this->core->getUser()->getId())) {
+                $reg_sec = $this->core->getUser()->getRegistrationSection();
+                if ($reg_sec !== null && !$course_material->isSectionAllowed($reg_sec)) {
+                    $seen[$course_material->getPath()] = true;
+                }
+                if (!$seen[$course_material->getPath()]) {
                     $has_unseen = true;
                 }
             }
