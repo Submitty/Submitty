@@ -4594,6 +4594,8 @@ AND gc_id IN (
     }
 
     public function deleteGradeable($g_id) {
+        $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
+                                eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
     }
 
@@ -4688,7 +4690,9 @@ AND gc_id IN (
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
                   eg_precision AS precision,
-                  eg_hidden_files as hidden_files
+                  eg_hidden_files as hidden_files,
+                  eg_depends_on as depends_on,
+                  eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
               LEFT JOIN (
@@ -5358,7 +5362,9 @@ AND gc_id IN (
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
                 $gradeable->isDiscussionBased(),
-                $gradeable->getHiddenFiles()
+                $gradeable->getHiddenFiles(),
+                $gradeable->getDependsOn(),
+                $gradeable->getDependsOnPoints()
             ];
             $this->course_db->query(
                 "
@@ -5390,9 +5396,11 @@ AND gc_id IN (
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion,
-                  eg_hidden_files
+                  eg_hidden_files,
+                  eg_depends_on,
+                  eg_depends_on_points                               
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5510,6 +5518,8 @@ AND gc_id IN (
                     $gradeable->getDiscussionThreadId(),
                     $gradeable->isDiscussionBased(),
                     $gradeable->getHiddenFiles(),
+                    $gradeable->getDependsOn(),
+                    $gradeable->getDependsOnPoints(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -5541,7 +5551,9 @@ AND gc_id IN (
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
                       eg_has_discussion=?,
-                      eg_hidden_files=?
+                      eg_hidden_files=?,
+                      eg_depends_on=?,
+                      eg_depends_on_points=?                              
                     WHERE g_id=?",
                     $params
                 );
