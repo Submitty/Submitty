@@ -86,7 +86,7 @@
         </tr>
         {% if viewer.isContactInfoEnabled() %}
           <tr class="contact_info row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;border-top:0px">
-            <td colspan="7" style="border-top:0px; word-wrap:anywhere;">{{entry['contact_info']}}</td>
+            <td colspan="8" style="border-top:0px; word-wrap:anywhere;">{{entry['contact_info']}}</td>
           </tr>
         {% endif %}
       {% endfor %}
