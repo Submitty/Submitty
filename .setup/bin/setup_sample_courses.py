@@ -546,19 +546,19 @@ def create_gradeable_submission(src, dst):
         os.remove(zip_dst)
 
 
-def commit_submission_to_repo(user_id, src_file, repo_url):
+def commit_submission_to_repo(user_id, src_file, repo_path):
     # a function to commit and push a file to a user's submitty-hosted repository
     my_cwd = os.getcwd()
     with TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
-        os.system(f'git clone {repo_url}')
+        os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
         os.chdir(os.path.join(temp_dir, user_id))
         os.system('git checkout main')
         os.system('git pull')
         # use the above function to copy the files into the git repo for us
         create_gradeable_submission(src_file, os.getcwd())
         os.system('git add --all')
-        os.system("git commit -a --allow-empty -m 'adding submission files'")
+        os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
         os.system('git push')
     os.chdir(my_cwd)
 
@@ -886,6 +886,11 @@ class Course(object):
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
             checkout_path = os.path.join(self.course_path, "checkout", gradeable.id)
 
+            if gradeable.is_repository:
+                # generate the repos for the vcs gradeable
+                print(f"generating repositories for gradeable {gradeable.id}")
+                subprocess.check_call(f"sudo {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py {self.semester} {self.code} {gradeable.id}", stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
+
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
@@ -1016,8 +1021,8 @@ class Course(object):
                                             # files submitted to vcs gradeables are not moved into the "submissions folder",
                                             # the user's repo gets checked out automatically by the job into "checkout"
                                             if gradeable.is_repository:
-                                                repo_url = f"{SUBMISSION_URL}/git/{self.semester}/{self.code}/{gradeable.id}/{user.id}"
-                                                commit_submission_to_repo(user.id, src, repo_url)
+                                                repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_path)
                                             else:
                                                 dst = os.path.join(submission_path, str(version), key)
                                                 create_gradeable_submission(src, dst)
@@ -1032,8 +1037,8 @@ class Course(object):
                                             # files submitted to vcs gradeables are not moved into the "submissions folder",
                                             # the user's repo gets checked out automatically by the job into "checkout"
                                             if gradeable.is_repository:
-                                                repo_url = f"{SUBMISSION_URL}/git/{self.semester}/{self.code}/{gradeable.id}/{user.id}"
-                                                commit_submission_to_repo(user.id, src, repo_url)
+                                                repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_path)
                                             else:
                                                 dst = os.path.join(submission_path, str(version))
                                                 create_gradeable_submission(src, dst)
