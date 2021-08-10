@@ -1,32 +1,172 @@
 <div class="content">
     <h1>
-        machine_grading_counts
+        Machine Statistics
     </h1>
-    {% for machine, count in progress["machine_grading_counts"] %}
-        <div> {{ machine ~ ": " ~ count }}</div>
-    {% endfor %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Machine
+                </th>
+                <th>
+                    Grading Job
+                </th>
+                <th>
+                    Stale Jobs
+                </th>
+            </tr>
+        </thead>
+        {% for machine in progress["machine_grading_counts"]|keys %}
+        <tr>
+            <td>
+                {{machine}}
+            </td>
+            <td>
+                {{progress["machine_grading_counts"][machine]}}
+            </td>
+            <td>
+                {{progress["machine_stale_jobs"][machine]}}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<div class="content">
     <h1>
-        capability_queue_counts
+        Capability Statistics
     </h1>
-    {% for capability, count in progress["capability_queue_counts"] %}
-        <div> {{ capability ~ ": " ~ count }}</div>
-    {% endfor %}
+    <table class="table table-striped">
+        <thead>
+            <th>
+                Capability
+            </th>
+            <th>
+                Jobs Queued
+            </th>
+        </thead>
+        {% for capability, count in progress["capability_queue_counts"] %}
+            <tr>
+                <td>
+                    {{capability}}
+                </td>
+                <td>
+                    {{count}}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<div class="content">
     <h1>
-        machine_stale_jobs
+        Jobs Statistics
     </h1>
-    {% for machine, stale in progress["machine_stale_jobs"] %}
-        <div> {{ machine ~ ": " ~ stale }}</div>
-    {% endfor %}
-    <h1>
-        queue_counts
-    </h1>
-    {% for type, count in progress["queue_counts"] %}
-        <div> {{ type ~ ": " ~ count }}</div>
-    {% endfor %}
+    <table class="table table-striped">
+        <thead>
+            <th>
+                Job Type
+            </th>
+            <th>
+                Count
+            </th>
+        </thead>
+        {% for type, count in progress["queue_counts"] %}
+            <tr>
+                <td> {{ type }}</td>
+                <td>{{ count }} </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<div class="content">
     <h1>
         job_files
     </h1>
     {% for file in progress["job_files"] %}
-        <div> {{ file }}</div>
     {% endfor %}
+</div>
+<div class="content">
+    <table class="table table-striped" id="autograding-status-table">
+        <thead>
+            <tr>
+                <th rowspan="3">
+                    TIME STAMP
+                </th>
+                <th colspan="2" style="text-align: left;">
+                    INTERATIVE
+                </th>
+                <th colspan="2" style="text-align: left;">
+                    REGRADE
+                </th>
+                <th class="col-md-2" colspan="{{ progress["machine_grading_counts"]|keys|length }}" style="text-align: left;">
+                    MACHINES (active work)
+                </th>
+                <th class="col-md-2" colspan="{{ progress["capability_queue_counts"]|keys|length }}" style="text-align: left;">
+                    CAPABILITIES (queue)
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    grading
+                </th>
+                <th>
+                    in queue
+                </th>
+                <th>
+                    grading
+                </th>
+                <th>
+                    in queue
+                </th>
+                {% for machines in progress["machine_grading_counts"]|keys %}
+                <th class="col-md-2" rowspan>
+                    {{ machines|upper }}
+                </th>
+                {% endfor %}
+                {% for capability in progress["capability_queue_counts"]|keys %}
+                <th class="col-md-2" rowspan="2">
+                    {{ capability|upper }}
+                </th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th colspan="4">
+                </th>
+                {# Should display number of shippers instead for each machine #}
+                <th colspan="{{ progress["machine_grading_counts"]|keys|length }}">
+                    Need numbers
+                </th>
+                <th colspan="{{ progress["capability_queue_counts"]|keys|length }}">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    {{ time }}
+                </td>
+                <td>
+                    {{ progress["queue_counts"]["Ongoing grading"] }}
+                </td>
+                <td>
+                    {{ progress["queue_counts"]["Grading"] }}
+                </td>
+                <td>
+                    {{ progress["queue_counts"]["Ongoing regrade"] }}
+                </td>
+                <td>
+                    {{ progress["queue_counts"]["Regrade"] }}
+                </td>
+                {% for count in progress["machine_grading_counts"] %}
+                <td>
+                    {{ count }}
+                </td>
+                {% endfor %}
+                {% for count in progress["capability_queue_counts"]%}
+                <td>
+                    {{ count }}
+                </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
 </div>

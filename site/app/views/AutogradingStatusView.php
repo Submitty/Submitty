@@ -8,12 +8,11 @@ use app\models\AutogradingStatusController;
 
 class AutogradingStatusView extends AbstractView {
     public function displayPage($progress) {
+        $this->core->getOutput()->addInternalJs("autograding-status.js");
+        $this->core->getOutput()->addInternalCss("autograding-status.css");
         return $this->core->getOutput()->renderTwigTemplate("AutogradingStatus.twig", [
-            "progress" => $progress
+            "progress" => $progress,
+            "time" => date("H:i:s", time())
         ]); 
-    }
-
-    public function renderTable($status_json) {
-        
     }
 }

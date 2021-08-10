@@ -236,16 +236,16 @@ class GradingQueue {
             foreach ($details["capabilities"] as $c) {
                 $capability_queue_counts[$c] = 0;
             }
-            $machine_stale_jobs[$machine] = false;
+            $machine_stale_jobs[$machine] = 0;
         }
 
         ksort($capability_queue_counts);
 
         $queue_counts = [];
-        $queue_counts["interactive"] = 0;
-        $queue_counts["interactive_grading"] = 0;
-        $queue_counts["regrade"] = 0;
-        $queue_counts["regrade_grading"] = 0;
+        $queue_counts["Grading"] = 0;
+        $queue_counts["Ongoing grading"] = 0;
+        $queue_counts["Regrade"] = 0;
+        $queue_counts["Ongoing regrade"] = 0;
 
         $job_files = [];
 
@@ -308,18 +308,18 @@ class GradingQueue {
             $entry = new QueueItem($queue_or_grading_file, $epoch_time, $is_grading);
             if ($entry->isRegrade()) {
                 if ($is_grading) {
-                    $detailed_queue_counts["regrade_grading"] += 1;
+                    $detailed_queue_counts["Ongoing regrade"] += 1;
                 }
                 else {
-                    $detailed_queue_counts["regrade"] += 1;
+                    $detailed_queue_counts["Regrade"] += 1;
                 }
             }
             else {
                 if ($is_grading) {
-                    $detailed_queue_counts["interactive_grading"] += 1;
+                    $detailed_queue_counts["Ongoing grading"] += 1;
                 }
                 else {
-                    $detailed_queue_counts["interactive"] += 1;
+                    $detailed_queue_counts["Grading"] += 1;
                 }
             }
             $capability = "default";
@@ -367,7 +367,7 @@ class GradingQueue {
 
                 $elapsed_time = $entry->getElapsedTime();
                 if ($elapsed_time > $max_time) {
-                    $machine_stale_jobs[$grading_machine] = true;
+                    $machine_stale_jobs[$grading_machine] += 1;
                     $stale = true;
                 }
             }
