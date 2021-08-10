@@ -315,9 +315,18 @@ class CourseMaterialsController extends AbstractController {
             $expand_zip = $_POST['expand_zip'];
         }
 
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+
         $requested_path = "";
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'];
+            $tmp_path = FileUtils::joinPaths($upload_path, $requested_path);
+            $dirs = explode("/", $tmp_path);
+            foreach ($dirs as $dir) {
+                if ($dir === "") {
+                    return JsonResponse::getErrorResponse("Invalid requested path");
+                }
+            }
         }
         $details['path'][0] = $requested_path;
 
@@ -357,8 +366,6 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['url_title'])) {
             $url_title = $_POST['url_title'];
         }
-
-        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
         $dirs_to_make = [];
 
