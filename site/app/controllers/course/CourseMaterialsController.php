@@ -374,7 +374,7 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("Invalid url");
             }
             $url_url = $_POST['url_url'];
-            if (isset($requested_path)) {
+            if (isset($requested_path) && $requested_path !== "") {
                 $this->addDirs($requested_path, $upload_path, $dirs_to_make);
             }
         }
