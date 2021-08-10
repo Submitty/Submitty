@@ -419,6 +419,8 @@ function refreshColorInfo(state) {
     if (previousSelectedMark !== null) {
         handleClickedMark_editor1(state, previousSelectedMark);
     }
+    hideLoadingIndicatorLeft();
+    hideLoadingIndicatorRight();
 }
 
 
