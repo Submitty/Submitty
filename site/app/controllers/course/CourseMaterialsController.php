@@ -318,12 +318,12 @@ class CourseMaterialsController extends AbstractController {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
         $requested_path = "";
-        if (isset($_POST['requested_path'])) {
+        if (isset($_POST['requested_path']) && $_POST['requested_path'] !== "") {
             $requested_path = $_POST['requested_path'];
             $tmp_path = FileUtils::joinPaths($upload_path, $requested_path);
             $dirs = explode("/", $tmp_path);
-            foreach ($dirs as $dir) {
-                if ($dir === "") {
+            for ($i = 1; $i < count($dirs); $i++) {
+                if ($dirs[$i] === "") {
                     return JsonResponse::getErrorResponse("Invalid requested path");
                 }
             }
