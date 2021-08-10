@@ -340,6 +340,16 @@
                 gradeInqOpenDate.prop('disabled', $(this).is(':checked'));
                 gradeInqDueDate.prop('disabled', $(this).is(':checked'));
             });
+
+            $('#date_released').prop('disabled', !$('#has_release_date_yes').is(':checked'));
+
+            const has_due_date = $('#has_due_date_yes').is(':checked');
+
+            $('#date_due').prop('disabled', !has_due_date);
+            $('#date_grade').prop('disabled', !has_due_date);
+            $('#date_grade_due').prop('disabled', !has_due_date);
+
+
         }
         $('#hide_dates').hide();
         $('#show_all_dates').show();
@@ -469,6 +479,26 @@
         }
         else {
             lateSubmissionParts.hide();
+        }
+        updateDateDisplay();
+    }
+
+    function onHasReleaseDate() {
+        if ($('#has_release_date_yes').is(':checked')) {
+            disableElementChildren('.release_date_date', false);
+        }
+        else {
+            disableElementChildren('.release_date_date', true);
+        }
+        updateDateDisplay();
+    }
+
+    function onHasDueDate() {
+        if ($('#has_due_date_yes').is(':checked')) {
+            disableElementChildren('.due_date_date', false);
+        }
+        else {
+            disableElementChildren('.due_date_date', true);
         }
         updateDateDisplay();
     }
