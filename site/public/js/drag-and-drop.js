@@ -1212,6 +1212,8 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
           }
       }
     }
+
+    let linkToBeAdded = false;
     
     if($('#url_selection').is(":visible")){
       if($("#url_title").val() !== "" && $("#url_url").val() !== "" ){
@@ -1222,6 +1224,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     }
 
     if (filesToBeAdded == false && linkToBeAdded == false){
+        alert('You must add a file or specify link AND title!')
         return;
     }
     $.ajax({
