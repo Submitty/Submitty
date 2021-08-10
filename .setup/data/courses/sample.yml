@@ -477,7 +477,7 @@ gradeables:
   g_ta_view_start_date: 1970-01-01 23:59:59
   eg_is_repository: true
   g_title: Open VCS Homework
-  gradeable_config: vcs_submissions # TODO
+  gradeable_config: vcs_submissions
   g_bucket: homework
 
 - g_id: grading_team_homework

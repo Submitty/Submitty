@@ -56,11 +56,11 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as data
     DB_USER = database_config_json["database_user"]
     DB_PASS = database_config_json["database_password"]
 
-# used for constructing the url to clone repos for cvs gradeables
+# used for constructing the url to clone repos for vcs gradeables
 with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
     submitty_config_json = json.load(submitty_config)
     SUBMISSION_URL = submitty_config_json["submission_url"]
-    VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs', 'git')
+    VCS_FOLDER = os.path.join(submitty_config_json['submitty_data_dir'], 'vcs', 'git')
 
 DB_ONLY = False
 NO_SUBMISSIONS = False
@@ -1013,7 +1013,7 @@ class Course(object):
                                             os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                             submission = random.choice(gradeable.submissions[key])
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            # files submitted to cvs gradeables are not moved into the "submissions folder",
+                                            # files submitted to vcs gradeables are not moved into the "submissions folder",
                                             # the user's repo gets checked out automatically by the job into "checkout"
                                             if gradeable.is_repository:
                                                 repo_url = f"{SUBMISSION_URL}/git/{self.semester}/{self.code}/{gradeable.id}/{user.id}"
@@ -1029,7 +1029,7 @@ class Course(object):
                                             submissions = [submission]
                                         for submission in submissions:
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            # files submitted to cvs gradeables are not moved into the "submissions folder",
+                                            # files submitted to vcs gradeables are not moved into the "submissions folder",
                                             # the user's repo gets checked out automatically by the job into "checkout"
                                             if gradeable.is_repository:
                                                 repo_url = f"{SUBMISSION_URL}/git/{self.semester}/{self.code}/{gradeable.id}/{user.id}"
@@ -1041,10 +1041,11 @@ class Course(object):
 
                             with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
-                            # submissions to cvs greadeable also have a ".submit.VCS_CHECKOUT"
+                            # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
                             if gradeable.is_repository:
                                 with open(os.path.join(submission_path, ".submit.VCS_CHECKOUT"), "w") as open_file:
                                     # the file contains info only if the git repos are non-submitty hosted
+                                    pass
 
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
