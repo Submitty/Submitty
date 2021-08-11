@@ -163,15 +163,15 @@ class DatabaseQueries {
     }
 
     /**
-     * @param $numeric_id
+     * @param int $numeric_id
      * @return User|null
      */
-    public function getUserByNumericId($numeric_id): ?User {
+    public function getUserByNumericId(int $numeric_id): ?User {
         return $this->getUser($numeric_id, true);
     }
 
     /**
-     * @param $id
+     * @param int|string $id
      * @return User|null
      */
     public function getUserByIdOrNumericId($id): ?User {
@@ -7122,11 +7122,11 @@ AND gc_id IN (
     /**
      * Given an array of user IDs, return an array of corresponding user objects or null if any one of them wasn't found
      *
-     * @param $user_id_list
+     * @param array $user_id_list
      * @param bool $is_numeric
-     * @return User|null
+     * @return array|null
      */
-    private function getUsers($user_id_list, bool $is_numeric = false): ?array {
+    private function getUsers(array $user_id_list, bool $is_numeric = false): ?array {
         $placeholders = $this->createParamaterList(count($user_id_list));
 
         if (!$is_numeric) {
