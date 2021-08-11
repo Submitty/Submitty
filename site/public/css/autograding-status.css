@@ -1,1 +1,12 @@
-/* Should delete if there's no use for this file */
+.right-boarder {
+    border-right: 1px solid var(--text-black);
+}
+
+#autograding-status-table {
+    border: 1px solid var(--text-black);
+    padding-right: 30px;
+}
+
+#stop-btn {
+    margin-bottom: 1em;
+}

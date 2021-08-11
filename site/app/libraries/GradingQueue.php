@@ -217,7 +217,7 @@ class GradingQueue {
      *  - 
      * @return array
      */
-    public function getAutogradingInfo($config_path) {
+    public function getAutogradingInfo(string $config_path): array {
         // Get information on the worker machines
         $open_autograding_workers_json = FileUtils::readJsonFile(
             FileUtils::joinPaths($config_path, "autograding_workers.json")
@@ -230,6 +230,9 @@ class GradingQueue {
         $machine_grading_counts = [];
         $capability_queue_counts = [];
         $machine_stale_jobs = [];
+        $workers = [];
+        $ongoing_job_info = [];
+        $course_info = [];
 
         foreach ($open_autograding_workers_json as $machine => $details) {
             $machine_grading_counts[$machine] = 0;
@@ -237,6 +240,7 @@ class GradingQueue {
                 $capability_queue_counts[$c] = 0;
             }
             $machine_stale_jobs[$machine] = 0;
+            $workers[$machine] = $details["num_autograding_workers"];
         }
 
         ksort($capability_queue_counts);
@@ -251,9 +255,8 @@ class GradingQueue {
 
         foreach ($this->queue_files as $full_path_file) {
             $path = FileUtils::joinPaths($this->queue_path, $full_path_file);
-            $job_file = $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json);
-            $job_files = array_merge($job_files, $job_file);
+            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
+                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json, $course_info);
         }
 
         $started = [];
@@ -275,15 +278,28 @@ class GradingQueue {
         foreach ($started as $file) {
             $path = FileUtils::joinPaths($this->grading_path, $file);
             $job_file = $this->updateDetailedQueueCount($path, true, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json);
+                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json, $course_info);
             $job_files = array_merge($job_files, $job_file);
+            $file_segments = explode("/", $file);
+            $machine = $file_segments[0];
+            $file_segments = explode("__", $file_segments[1]);
+            $ongoing_job_info[] = [
+                "semester" => $file_segments[0],
+                "course" => $file_segments[1],
+                "gradeable_id" => $file_segments[2],
+                "machine" => $machine,
+                "regrade" => $job_file["regrade"],
+                "elapsed_time" => $job_file["elapsed_time"],
+                "error" => $job_file["error"],
+                "stale" => $job_file["stale"]
+            ];
         }
 
+        // These are files in the grading directory but does not have a GRADING_ file, so grading has not started yet
         foreach ($not_yet_started as $file) {
             $path = FileUtils::joinPaths($this->grading_path, $file);
-            $job_file = $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json);
-            $job_files = array_merge($job_files, $job_file);
+            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
+                $capability_queue_counts, $machine_grading_counts, $machine_stale_jobs, $open_autograding_workers_json, $course_info);
         }
 
         return [
@@ -291,14 +307,17 @@ class GradingQueue {
             "capability_queue_counts" => $capability_queue_counts,
             "machine_stale_jobs" => $machine_stale_jobs,
             "queue_counts" => $queue_counts,
-            "job_files" => $job_files
+            "num_autograding_workers" => $workers,
+            "job_info" => $ongoing_job_info,
+            "course_info" => $course_info
         ];
     }
 
     private function updateDetailedQueueCount($queue_or_grading_file, $is_grading, $epoch_time, &$detailed_queue_counts,
-            &$capability_queue_counts, &$machine_grading_counts, &$machine_stale_jobs, $open_autograding_workers_json): array {
+            &$capability_queue_counts, &$machine_grading_counts, &$machine_stale_jobs, $open_autograding_workers_json, &$course_info): array {
         $stale = false;
         $error = "";
+        $regrade = false;
         
         $elapsed_time = -1;
 
@@ -306,7 +325,8 @@ class GradingQueue {
 
         try {
             $entry = new QueueItem($queue_or_grading_file, $epoch_time, $is_grading);
-            if ($entry->isRegrade()) {
+            $regrade = $entry->isRegrade();
+            if ($regrade) {
                 if ($is_grading) {
                     $detailed_queue_counts["Ongoing regrade"] += 1;
                 }
@@ -371,16 +391,30 @@ class GradingQueue {
                     $stale = true;
                 }
             }
+            $file_segments = explode("__", $job_file);
+            if (!array_key_exists($file_segments[0] . "__" . $file_segments[1], $course_info)) {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]] = [];
+            }
+
+            if (!array_key_exists($file_segments[2], $course_info[$file_segments[0] . "__" . $file_segments[1]])) {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]][$file_segments[2]] = ["regrade" => 0, "interactive" => 0];
+            }
+
+            if ($regrade) {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]][$file_segments[2]]["regrade"] += 1;
+            }
+            else {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]][$file_segments[2]]["interactive"] += 1;
+            }
         }
         catch (\Exception $e) {
             $error .= "Could not read for {$queue_or_grading_file}: {$e}";
         }
         return [
-            $job_file => [
-                "elapsed_time" => $elapsed_time,
-                "stale" => $stale,
-                "error" => $error
-            ]
+            "elapsed_time" => $elapsed_time,
+            "stale" => $stale,
+            "error" => $error,
+            "regrade" => $regrade
         ];
     }
 }
