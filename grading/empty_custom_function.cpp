@@ -1,4 +1,3 @@
-#include "json.hpp"
 #include "TestCase.h"
 
 TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {

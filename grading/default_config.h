@@ -1,7 +1,7 @@
 #ifndef __DEFAULT_CONFIG_H__
 #define __DEFAULT_CONFIG_H__
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <limits>
 #include <sys/time.h>
 #include <sys/resource.h>

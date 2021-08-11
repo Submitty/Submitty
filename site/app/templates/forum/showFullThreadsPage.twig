@@ -13,10 +13,10 @@
             "cookie_selected_categories" : filterFormData.cookie_selected_categories,
             "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
             "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
-            "display_option" : filterFormData.display_option,
+            "display_option" : filterFormData.display_option is defined ? filterFormData.display_option : '',
             "thread_exists" : filterFormData.thread_exists,
-            "attachment_all_button" : generate_post_content.attachment_all_button,
-            "total_attachments" : generate_post_content.total_attachments,
+            "attachment_all_button" : generate_post_content is defined ? generate_post_content.attachment_all_button : '',
+            "total_attachments" : generate_post_content is defined ? generate_post_content.total_attachments : '',
             "show_filter": true,
             "is_full_threads_page": true,
         } %}

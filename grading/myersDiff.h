@@ -31,7 +31,7 @@
 #include "difference.h"
 #include "metaData.h"
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 
 // runs shortest edit script. Saves traces in snapshots,

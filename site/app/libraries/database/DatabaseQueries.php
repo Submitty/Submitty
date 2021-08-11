@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -213,7 +214,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
-        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id; 
+        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
         ");
         return $this->course_db->rows();
     }
@@ -1161,7 +1162,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
-                FROM courses_users INNER JOIN courses 
+                FROM courses_users INNER JOIN courses
                 ON courses_users.semester = courses.semester AND courses_users.course = courses.course
                 " . $extra_join . "
                 WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
@@ -4593,6 +4594,8 @@ AND gc_id IN (
     }
 
     public function deleteGradeable($g_id) {
+        $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
+                                eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
     }
 
@@ -4684,10 +4687,13 @@ AND gc_id IN (
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
+                  eg_has_release_date as has_release_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
                   eg_precision AS precision,
-                  eg_hidden_files as hidden_files
+                  eg_hidden_files as hidden_files,
+                  eg_depends_on as depends_on,
+                  eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
               LEFT JOIN (
@@ -5304,7 +5310,8 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
-            DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
+            $gradeable->getGradeReleasedDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket(),
             $gradeable->getAllowCustomMarks()
@@ -5332,7 +5339,8 @@ AND gc_id IN (
             $params = [
                 $gradeable->getId(),
                 DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+                $gradeable->getSubmissionDueDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsHostType(),
@@ -5357,7 +5365,9 @@ AND gc_id IN (
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
                 $gradeable->isDiscussionBased(),
-                $gradeable->getHiddenFiles()
+                $gradeable->getHiddenFiles(),
+                $gradeable->getDependsOn(),
+                $gradeable->getDependsOnPoints()
             ];
             $this->course_db->query(
                 "
@@ -5389,9 +5399,11 @@ AND gc_id IN (
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion,
-                  eg_hidden_files
+                  eg_hidden_files,
+                  eg_depends_on,
+                  eg_depends_on_points                               
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5496,6 +5508,7 @@ AND gc_id IN (
                     $gradeable->isStudentViewAfterGrades(),
                     $gradeable->isStudentSubmit(),
                     $gradeable->hasDueDate(),
+                    $gradeable->hasReleaseDate(),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
@@ -5509,6 +5522,8 @@ AND gc_id IN (
                     $gradeable->getDiscussionThreadId(),
                     $gradeable->isDiscussionBased(),
                     $gradeable->getHiddenFiles(),
+                    $gradeable->getDependsOn(),
+                    $gradeable->getDependsOnPoints(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -5528,6 +5543,7 @@ AND gc_id IN (
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
                       eg_has_due_date=?,
+                      eg_has_release_date=?,            
                       eg_config_path=?,
                       eg_late_days=?,
                       eg_allow_late_submission=?,
@@ -5540,7 +5556,9 @@ AND gc_id IN (
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
                       eg_has_discussion=?,
-                      eg_hidden_files=?
+                      eg_hidden_files=?,
+                      eg_depends_on=?,
+                      eg_depends_on_points=?                              
                     WHERE g_id=?",
                     $params
                 );
@@ -5997,26 +6015,6 @@ AND gc_id IN (
     }
 
     /**
-     * Get a status of emails sent of a course with course name and semester
-     *
-     * @param string $course
-     * @param string $semester
-     * @return EmailStatusModel
-     */
-    public function getEmailStatusWithCourse($semester, $course): EmailStatusModel {
-        $parameters = [$course, $semester];
-        $this->submitty_db->query('SELECT * FROM emails WHERE course = ? AND semester = ? ORDER BY created DESC', $parameters);
-        $details = $this->submitty_db->rows();
-        return new EmailStatusModel($this->core, $details);
-    }
-
-    public function getAllEmailStatuses(): EmailStatusModel {
-        $this->submitty_db->query('SELECT * FROM emails ORDER BY created DESC');
-        $details = $this->submitty_db->rows();
-        return new EmailStatusModel($this->core, $details);
-    }
-
-    /**
      * Gives true if thread is locked
      *
      * @param  int $thread_id
@@ -6133,7 +6131,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token) {
+    public function openQueue($queue_code, $token, $regex_pattern) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6141,8 +6139,13 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token) VALUES (TRUE, TRIM(?), TRIM(?))", [$queue_code,$token]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern) VALUES (TRUE, TRIM(?), TRIM(?), ?)", [$queue_code,$token,$regex_pattern]);
         return true;
+    }
+
+    public function getQueueRegex($queue_code) {
+        $this->course_db->query("SELECT regex_pattern FROM queue_settings WHERE code = ?", [$queue_code]);
+        return $this->course_db->rows();
     }
 
     public function toggleQueue($queue_code, $state) {
@@ -6367,6 +6370,10 @@ AND gc_id IN (
 
     public function changeQueueToken($token, $queue_code) {
         $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", [$token, $queue_code]);
+    }
+
+    public function changeQueueRegex($regex_pattern, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
 
@@ -7146,7 +7153,10 @@ AND gc_id IN (
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => []
+        'team_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection',
+        ]
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -7160,7 +7170,10 @@ AND gc_id IN (
         'team_id' => [
             'team.team_id'
         ],
-        'user_id' => []
+        'user_id' => [],
+        'section_subsection' => [
+            'u.registration_subsection'
+        ]
     ];
 
     /**
@@ -7385,9 +7398,23 @@ AND gc_id IN (
 
     public function getResults($poll_id) {
         $results = [];
-        foreach ($this->getResponses($poll_id) as $option_id => $answer) {
-            $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);
-            $results[$option_id] = count($this->course_db->rows());
+        $query = <<<SQL
+SELECT
+    po.option_id,
+    COALESCE(pr.count, 0) AS count
+FROM
+    poll_options AS po
+    LEFT JOIN (
+        SELECT option_id, COUNT(*) AS count FROM poll_responses WHERE poll_id = ? GROUP BY option_id
+    ) AS pr ON pr.option_id = po.option_id
+WHERE
+    po.poll_id = ?
+ORDER BY
+    po.order_id ASC
+SQL;
+        $this->course_db->query($query, [$poll_id, $poll_id]);
+        foreach ($this->course_db->rows() as $row) {
+            $results[$row["option_id"]] = $row['count'];
         }
         return $results;
     }
@@ -7460,6 +7487,32 @@ SQL;
             [$g_id, $team_id]
         );
         return $this->course_db->rows();
+    }
+
+    public function getUserGroups(string $user_id): array {
+        $this->submitty_db->query(
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
+            [$user_id]
+        );
+        return $this->submitty_db->rows();
+    }
+
+    public function courseExists(string $semester, string $course): bool {
+        $this->submitty_db->query(
+            'SELECT * FROM courses WHERE semester=? AND course=?',
+            [$semester, $course]
+        );
+        return $this->submitty_db->getRowCount() === 1;
+    }
+
+    public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
+        $this->submitty_db->query(
+            "SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
+                   WHERE c1.semester = ? AND c1.course = ? AND c1.group_name != 'root'",
+            [$semester, $course]
+        );
+        return $this->submitty_db->rows();
     }
 
     private function getInnerQueueSelect(): string {

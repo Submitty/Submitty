@@ -75,16 +75,20 @@
                         sectionsEdit.push(element['sections_registration_id']);
                     }
                 });
+                let sections_lock = document.getElementById('all-sections-showing-yes').checked === true;
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort, sections_lock, null);
         };
 
         flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
                     button: [
+                        {
+                            label: "Beginning of time"
+                        },
                         {
                             label: "Now"
                         },
@@ -100,13 +104,16 @@
                         let date;
                         switch (index) {
                             case 0:
-                                date = new Date();
+                                date = new Date("1001-01-01 00:00:00");
                                 break;
                             case 1:
                                 date = new Date();
-                                date.setDate(date.getDate() + 1);
                                 break;
                             case 2:
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
+                                break;
+                            case 3:
                                 date = new Date("9998-01-01 00:00:00");
                                 break;
                         }

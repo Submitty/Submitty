@@ -16,8 +16,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 typedef std::vector<std::vector<std::string> > vectorOfWords;
 typedef std::vector<std::string> vectorOfLines;

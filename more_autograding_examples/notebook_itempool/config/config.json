@@ -4,7 +4,7 @@
     "hide_submitted_files" : true,
 //    "hide_version_and_test_details" : true,
 
-    "assignment_message" : "#Welcome To My Favorite Notebook Gradeable\n  \
+    "assignment_message" : "# Welcome To My Favorite Notebook Gradeable\n  \
 \n  \
 This message will appear in a blue box at the top of the page.",
 
@@ -23,7 +23,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###What is `2 + 2`?"
+                  "markdown_string": "### What is `2 + 2`?"
               },
               {
                   "type": "multiple_choice",
@@ -50,7 +50,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###What is `3 + 3`?"
+                  "markdown_string": "### What is `3 + 3`?"
               },
               {
                   "type": "multiple_choice",
@@ -77,7 +77,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Select *all* statements that are true:"
+                  "markdown_string": "### Select *all* statements that are true:"
               },
               {
                   "type": "multiple_choice",
@@ -104,7 +104,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Select *all* numbers that are powers of 2:"
+                  "markdown_string": "### Select *all* numbers that are powers of 2:"
               },
               {
                   "type": "multiple_choice",
@@ -221,7 +221,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Who is your favorite author?"
+                  "markdown_string": "### Who is your favorite author?"
               },
               {
                   "type": "short_answer",
@@ -235,7 +235,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Write a haiku:\n  \
+                  "markdown_string": "### Write a haiku:\n  \
 Wikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
               },
               {
@@ -253,7 +253,7 @@ Wikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Finish the C++ code below to print all prime numbers less than 100.",
+                  "markdown_string": "### Finish the C++ code below to print all prime numbers less than 100.",
                   "testcase_ref" : "cpp_prime_compilation"
               },
               {
@@ -300,7 +300,7 @@ int main() {\n\
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Finish the Python code below to print all prime numbers less than 100."
+                  "markdown_string": "### Finish the Python code below to print all prime numbers less than 100."
               },
               {
                   "testcase_ref" : "python_prime",
@@ -337,7 +337,7 @@ for i in range(2, 100):\n\
     "notebook" : [
         {
             "type": "markdown",
-            "markdown_string": "#Instructions\n  \
+            "markdown_string": "# Instructions\n  \
 \n  \
 Here's a short list of instructions:\n  \
 * This is an open-book quiz.\n  \
@@ -346,7 +346,7 @@ Here's a short list of instructions:\n  \
         // ======================================================================================================
         {
             "type": "markdown",
-            "markdown_string": "#Let's do Math!"
+            "markdown_string": "# Let's do Math!"
         },
         {
             "type" : "item",
@@ -376,7 +376,7 @@ Here's a short list of instructions:\n  \
         // ======================================================================================================
         {
             "type": "markdown",
-            "markdown_string": "#At the Zoo!"
+            "markdown_string": "# At the Zoo!"
         },
         {
             "type" : "item",
@@ -396,7 +396,7 @@ Here's a short list of instructions:\n  \
         // ======================================================================================================
         {
             "type": "markdown",
-            "markdown_string": "#Story Time!\n  \
+            "markdown_string": "# Story Time!\n  \
 *Note: the problems in this section will not be auto-graded*"
         },
         {
@@ -410,7 +410,7 @@ Here's a short list of instructions:\n  \
         // ======================================================================================================
         {
             "type": "markdown",
-            "markdown_string": "#Hour of Code!"
+            "markdown_string": "# Hour of Code!"
         },
         {
             "type" : "item",
