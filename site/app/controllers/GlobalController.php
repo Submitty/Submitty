@@ -185,6 +185,16 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getConfig()->isDebug()) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['calendar']),
+                "title" => "Course Calendar",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-calendar",
+                "icon" => "fa-calendar"
+            ]);
+        }
+
         if ($this->core->getUser()->accessAdmin()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['email_status']),

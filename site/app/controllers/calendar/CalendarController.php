@@ -6,6 +6,8 @@ namespace app\controllers\calendar;
 
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
+use app\entities\calendar\CalendarMessage;
+use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\models\CalendarInfo;
 use app\models\gradeable\GradeableList;
@@ -28,8 +30,57 @@ class CalendarController extends AbstractController {
      */
     public function viewCalendar(): WebResponse {
         $user = $this->core->getUser();
-        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user);
 
-        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user));
+        $calendar_messages = [];
+
+        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $calendar_messages);
+
+        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $calendar_messages));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/calendar")
+     * @return WebResponse
+     */
+    public function viewCourseCalendar(): WebResponse {
+        $calendar_messages = [];
+
+        $gradeables = GradeableUtils::getGradeablesFromUserAndCourse($this->core, $this->core->getUser(), $calendar_messages);
+
+        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables, $calendar_messages), true);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/calendar/newMessage", methods={"POST"})
+     */
+    public function createMessage(): RedirectResponse {
+        $type = $_POST['type'];
+        $date = $_POST['date'];
+        $text = $_POST['text'];
+
+        $calendar_message = new CalendarMessage();
+        $int_type = null;
+        switch ($type) {
+            case "note":
+                $int_type = 0;
+                break;
+            case "announcement":
+                $int_type = 1;
+                break;
+            case "important":
+                $int_type = 2;
+                break;
+        }
+        if ($int_type === null) {
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+        $calendar_message->setType($int_type);
+        $calendar_message->setDate(new \DateTime($date));
+        $calendar_message->setText($text);
+
+        $this->core->getCourseEntityManager()->persist($calendar_message);
+        $this->core->getCourseEntityManager()->flush();
+
+        return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
     }
 }
