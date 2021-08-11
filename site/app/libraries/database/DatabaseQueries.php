@@ -144,16 +144,37 @@ class DatabaseQueries {
 
     /**
      * Gets a user from the database given a user_id.
+     *
+     * @param string $user_id
+     * @return User|null
      */
     public function getUserById(string $user_id): ?User {
         return $this->getUser($user_id);
     }
 
+    /**
+     * Gets a list of first and last names from the database given an array of IDs.
+     *
+     * @param array $user_id_list
+     * @return array|null
+     */
+    public function getUsersByIds(array $user_id_list): ?array {
+        return $this->getUsers($user_id_list);
+    }
+
+    /**
+     * @param $numeric_id
+     * @return User|null
+     */
     public function getUserByNumericId($numeric_id): ?User {
         return $this->getUser($numeric_id, true);
     }
 
-    public function getUserByIdOrNumericId($id) {
+    /**
+     * @param $id
+     * @return User|null
+     */
+    public function getUserByIdOrNumericId($id): ?User {
         $ret = $this->getUser($id);
         if ($ret === null) {
             return $this->getUser($id, true);
@@ -7086,20 +7107,40 @@ AND gc_id IN (
      *
      * @param string|int $user_id
      * @param bool $is_numeric
+     * @return User|null
      */
     private function getUser($user_id, bool $is_numeric = false): ?User {
-        if (!$is_numeric) {
-            $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", [$user_id]);
+        $result = $this->getUsers([$user_id], $is_numeric);
+        if ($result !== null && count($result) === 1) {
+            return $result[$user_id];
         }
         else {
-            $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id=?", [$user_id]);
+            return null;
+        }
+    }
+
+    /**
+     * Given an array of user IDs, return an array of corresponding user objects or null if any one of them wasn't found
+     *
+     * @param $user_id_list
+     * @param bool $is_numeric
+     * @return User|null
+     */
+    private function getUsers($user_id_list, bool $is_numeric = false): ?array {
+        $placeholders = $this->createParamaterList(count($user_id_list));
+
+        if (!$is_numeric) {
+            $this->submitty_db->query("SELECT * FROM users WHERE user_id IN {$placeholders}", $user_id_list);
+        }
+        else {
+            $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id IN {$placeholders}", $user_id_list);
         }
 
         if ($this->submitty_db->getRowCount() === 0) {
             return null;
         }
 
-        $details = $this->submitty_db->row();
+        $details_list = $this->submitty_db->rows();
 
         if ($this->course_db) {
             $this->course_db->query(
@@ -7122,20 +7163,29 @@ AND gc_id IN (
               FROM grading_registration
               GROUP BY user_id
             ) as sr ON u.user_id=sr.user_id
-            WHERE u.user_id=?",
-                [$user_id]
+            WHERE u.user_id IN {$placeholders}",
+                $user_id_list
             );
 
-            if ($this->course_db->getRowCount() > 0) {
-                $user = $this->course_db->row();
-                if (isset($user['grading_registration_sections'])) {
-                    $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+            $i = 0;
+            foreach ($details_list as &$details) {
+                if ($this->course_db->getRowCount() > 0) {
+                    $user = $this->course_db->rows()[$i];
+                    if (isset($user['grading_registration_sections'])) {
+                        $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                    }
+                    $details = array_merge($details, $user);
                 }
-                $details = array_merge($details, $user);
+                $i++;
             }
         }
 
-        return new User($this->core, $details);
+        $users = [];
+        foreach ($details_list as &$details) {
+            $users[$details['user_id']] = new User($this->core, $details);
+        }
+
+        return $users;
     }
 
 
