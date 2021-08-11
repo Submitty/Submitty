@@ -26,7 +26,6 @@ class CourseMaterialsView extends AbstractView {
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
-            //$seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
             if ($course_material->isDir()) {
                 $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
