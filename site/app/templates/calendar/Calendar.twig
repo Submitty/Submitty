@@ -2,13 +2,19 @@
 
 <script>
     const gradeables_by_date = {{ gradeables_by_date|json_encode|raw }};
+    const items_by_date = {{ items_by_date|json_encode|raw }};
     const curr_year = {{ curr_year }};
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
+    const isGlobal = {% if not in_course %}true{% else %}false{% endif %};
 
     window.addEventListener("load", function () {
         loadCalendar({{ view_month }}, {{ view_year }});
     });
+
+    function openNewMessageModal() {
+        $('#new-calendar-message-form').css('display', 'block');
+    }
 </script>
 
 {# Begin Calendar #}
@@ -16,6 +22,11 @@
     <h1>Calendar</h1>
     <div class="cal-content">
         <div class="cal-toolbar">
+            {% if in_course %}
+                <button type="button" onclick="openNewMessageModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Message
+                </button>
+            {% endif %}
         </div>
 
         <div class="calendar" style='margin-bottom: 20px' id="full-calendar">
@@ -68,3 +79,5 @@
         </div>
     {% endif %}
 </div>
+
+{{ include('calendar/NewCalendarMessage.twig') }}

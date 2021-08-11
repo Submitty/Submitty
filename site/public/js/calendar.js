@@ -6,6 +6,8 @@
 /* global curr_month */
 /* global curr_year */
 /* global gradeables_by_date */
+/* global  items_by_date */
+/* global isGlobal */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -70,9 +72,19 @@ function dateToStr(year, month, day) {
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
+ * @param type : string the calendar item type
  * @returns {string} the HTML string containing the calendar item
  */
-function generateCalendarItem(item) {
+function generateCalendarItem(item, type) {
+    switch (type) {
+        case 'gradeable':
+            return generateGradeableHtml(item);
+        case 'item':
+            return generateItemHtml(item);
+    }
+}
+
+function generateGradeableHtml(item) {
     // When hovering over an item, shows the name and due date
     // Due date information
     let due_string = '';
@@ -82,7 +94,7 @@ function generateCalendarItem(item) {
 
     // Put detail in the tooltip
     let tooltip = `Course: ${item['course']}&#10;` +
-                  `Title: ${item['title']}&#10;`;
+        `Title: ${item['title']}&#10;`;
     if (item['status_note'] !== '') {
         tooltip += `Status: ${item['status_note']}&#10;`;
     }
@@ -102,6 +114,15 @@ function generateCalendarItem(item) {
           ${(icon !== '') ? `<i class="fas ${icon} cal-icon"></i>` : ''} 
           ${item['title']}
         </a>`;
+}
+
+function generateItemHtml(item) {
+    if (isGlobal) {
+        return `<p>${item['course']}: ${item['text']}</p>`;
+    }
+    else {
+        return `<p>${item['text']}</p>`;
+    }
 }
 
 /**
@@ -150,7 +171,10 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     // List all gradeables of other items
     content += '<div class="cal-cell-items-panel">';
     for (const i in gradeables_by_date[cell_date_str]) {
-        content += generateCalendarItem(gradeables_by_date[cell_date_str][i]);
+        content += generateCalendarItem(gradeables_by_date[cell_date_str][i], 'gradeable');
+    }
+    for (const i in items_by_date[cell_date_str]) {
+        content += generateItemHtml(items_by_date[cell_date_str][i], 'item');
     }
     content += `
       </div>

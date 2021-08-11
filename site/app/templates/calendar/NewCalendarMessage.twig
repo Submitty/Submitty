@@ -1,0 +1,57 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}new-calendar-message-form{% endblock %}
+{% block title %}New Calendar Message{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Please select the type of message, when it should be, and the message it should show.
+    </p>
+    <label for="calendar-message-type">Message Type</label>
+    <select id="calendar-message-type" name="type">
+        <option value="note">Note</option>
+        <option value="announcement">Announcement</option>
+        <option value="important">Important</option>
+    </select><br>
+    <label for="calendar-message-text">Message Text</label>
+    <input type="text" id="calendar-message-text" name="text"><br>
+    <label for="edit-picker">Date</label>
+    <input id="edit-picker" class="edit-picker" type="text" name="date">
+    <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
+    <script>
+        flatpickr('.edit-picker', {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Today"
+                            }
+                        ],
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date();
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+            )],
+            allowInput: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+        });
+    </script>
+{% endblock %}
+{% block form %}
+    <form method="post" action="calendar/newMessage">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

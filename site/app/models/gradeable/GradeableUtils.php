@@ -2,6 +2,7 @@
 
 namespace app\models\gradeable;
 
+use app\entities\calendar\CalendarMessage;
 use app\libraries\Core;
 use app\models\Button;
 use app\models\Course;
@@ -17,7 +18,7 @@ class GradeableUtils {
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception
      */
-    public static function getGradeablesFromCourse(Core $core, Course $course): array {
+    public static function getGradeablesFromCourse(Core $core, Course $course, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
         $gradeables = [];
         /** @var Gradeable[] $visible_gradeables */
@@ -27,9 +28,13 @@ class GradeableUtils {
         /** @var array<string, Button> $submit_btns */
         $submit_btns = [];
 
-        // Load the database and configuration of a course
-        $core->loadCourseConfig($course->getSemester(), $course->getTitle());
-        $core->loadCourseDatabase();
+        if ($global) {
+            // Load the database and configuration of a course
+            $core->loadCourseConfig($course->getSemester(), $course->getTitle());
+            $core->loadCourseDatabase();
+        }
+
+        $calendar_messages[$course->getTitle()] = $core->getCourseEntityManager()->getRepository(CalendarMessage::class)->findAll();
 
         // Load all Gradeable objects of the current course
         foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
@@ -57,8 +62,10 @@ class GradeableUtils {
             }
         }
 
-        // Disconnect from the course database
-        $core->getCourseDB()->disconnect();
+        if ($global) {
+            // Disconnect from the course database
+            $core->getCourseDB()->disconnect();
+        }
 
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
     }
@@ -74,7 +81,7 @@ class GradeableUtils {
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database
      */
-    public static function getAllGradeableListFromUserId(Core $core, User $user): array {
+    public static function getAllGradeableListFromUserId(Core $core, User $user, array &$calendar_messages): array {
         $gradeables = [];
         $graded_gradeables = [];
         $submit_btns = [];
@@ -82,13 +89,31 @@ class GradeableUtils {
         // Load the gradeable information for each course
         $courses = $core->getQueries()->getCourseForUserId($user->getId());
         foreach ($courses as $course) {
-            $gradeables_of_course = self::getGradeablesFromCourse($core, $course);
+            $gradeables_of_course = self::getGradeablesFromCourse($core, $course, $calendar_messages);
             $gradeables = array_merge($gradeables, $gradeables_of_course["gradeables"]);
             $graded_gradeables = array_merge($graded_gradeables, $gradeables_of_course["graded_gradeables"]);
             $submit_btns = array_merge($submit_btns, $gradeables_of_course["submit_btns"]);
         }
 
         $core->getConfig()->setCourseLoaded(false);
+        return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
+    }
+
+    public static function getGradeablesFromUserAndCourse(Core $core, User $user, array &$calendar_messages) {
+        $gradeables = [];
+        $graded_gradeables = [];
+        $submit_btns = [];
+        $courses = $core->getQueries()->getCourseForUserId($user->getId());
+        foreach ($courses as $course) {
+            if ($course->getSemester() === $core->getConfig()->getSemester() && $course->getTitle() === $core->getConfig()->getCourse()) {
+                $gradeables_of_course = self::getGradeablesFromCourse($core, $course, $calendar_messages, false);
+                $gradeables = $gradeables_of_course["gradeables"];
+                $graded_gradeables = $gradeables_of_course["graded_gradeables"];
+                $submit_btns = $gradeables_of_course["submit_btns"];
+            }
+        }
+
+        //$core->getConfig()->setCourseLoaded(false);
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
     }
 }
