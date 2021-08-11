@@ -753,7 +753,7 @@ class PlagiarismController extends AbstractController {
         }
 
         usort($gradeable_ids_titles, function ($a, $b) {
-            return new Datetime($a['g_grade_due_date']) > new DateTime($b['g_grade_due_date']);
+            return new DateTime($a['g_grade_due_date']) > new DateTime($b['g_grade_due_date']);
         });
 
         $config = [];
