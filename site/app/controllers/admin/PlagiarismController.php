@@ -12,6 +12,7 @@ use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
 use Exception;
+use DateTime;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
@@ -751,9 +752,8 @@ class PlagiarismController extends AbstractController {
             $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format('F d Y H:i:s');
         }
 
-        // TODO: fix the sorting here, it's broken
         usort($gradeable_ids_titles, function ($a, $b) {
-            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+            return new Datetime($a['g_grade_due_date']) > new DateTime($b['g_grade_due_date']);
         });
 
         $config = [];
