@@ -727,6 +727,7 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_emails.py
     fi
 fi
 

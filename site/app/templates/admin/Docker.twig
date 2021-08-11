@@ -35,8 +35,8 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th>{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
-            {% for capability in worker['capabilities'] %}
-                {% if capability %}
+            {% for capability in capabilities %}
+                {% if capability in worker['capabilities'] %}
                     <td><i class="fas fa-check"></i></td>
                 {% else %}
                     <td></td>
