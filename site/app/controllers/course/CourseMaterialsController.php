@@ -320,7 +320,7 @@ class CourseMaterialsController extends AbstractController {
         $requested_path = "";
         if (isset($_POST['requested_path']) && $_POST['requested_path'] !== "") {
             $requested_path = $_POST['requested_path'];
-            $tmp_path = FileUtils::joinPaths($upload_path, $requested_path);
+            $tmp_path = $upload_path . "/" . $requested_path;
             $dirs = explode("/", $tmp_path);
             for ($i = 1; $i < count($dirs); $i++) {
                 if ($dirs[$i] === "") {
