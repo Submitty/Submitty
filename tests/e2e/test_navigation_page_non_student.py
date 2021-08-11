@@ -26,11 +26,10 @@ class TestNavigationPageNonStudent(BaseTestCase):
         sections = OrderedDict()
         sections["future"] = 4
         sections["beta"] = 3
-        sections["open"] = 3
+        sections["open"] = 4
         sections["closed"] = 3
         sections["items_being_graded"] = 9
         sections["graded"] = 10
-
         self.assertEqual(4, len(self.driver
                          .find_element(By.CLASS_NAME, 'gradeable-row')
                          .find_elements(By.CLASS_NAME, 'course-button')))
@@ -126,7 +125,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
                                 .find_element(By.ID, 'beta-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("open", elements[1].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(4, len(self.driver
                                 .find_element(By.ID, 'open-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("closed", elements[2].get_attribute('id'))
