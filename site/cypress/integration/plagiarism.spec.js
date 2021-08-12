@@ -114,7 +114,7 @@ describe('Plagiarism tests', () => {
         cy.get('[aria-label="Rerun Autograder Hidden and Extra Credit (C++ Hidden Tests)"]').click();
         // A ghost error of sorts seems to occur here.  Manual testing could not reproduce it,
         // nor could any potential source be found in the code.
-        Cypress.on('uncaught:exception', (err, runnable) => {
+        Cypress.on('uncaught:exception', () => {
             // prevent Cypress from failing when we see this exception
             return false;
         });
