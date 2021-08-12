@@ -200,7 +200,7 @@
             </a>
             <ul style="margin-left: 25px; margin-top: -5px; float: left">
                 <li>View Submissions</li>
-                {%  if team_assignment %}
+                {%  if team_assignment and can_manage_teams %}
                     <li>Manage Teams</li>
                 {% endif %}
                 {% if component_averages|length != 0 %}
