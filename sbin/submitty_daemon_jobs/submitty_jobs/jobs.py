@@ -352,3 +352,20 @@ class CreateCourse(AbstractJob):
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+
+
+class UpdateDockerImages(AbstractJob):
+    def run_job(self):
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "docker")
+        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file_path):
+            flag = flag | os.O_CREAT
+        log_fd = os.open(log_file_path, flag)
+        script_path = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'update_and_install_workers.py')
+        with os.fdopen(log_fd, 'a') as output_file:
+            subprocess.run(["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file)
+
+        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
+        logger.write_to_log(log_file_path, log_msg)

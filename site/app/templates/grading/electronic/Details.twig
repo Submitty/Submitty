@@ -54,6 +54,10 @@
             </div>
         </div>
     </div>
+    <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% if not is_instructor %}
+        <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
+    {% endif %}
     {% if can_regrade and not is_vcs %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
@@ -247,8 +251,6 @@
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
                 {{ _self.render_column_total(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "total_peer" %}
-                {{ _self.render_column_total_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_first" %}
                 {{ _self.render_column_user_first(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
@@ -437,13 +439,13 @@
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
 
 
@@ -613,28 +615,6 @@
     </td>
 {% endmacro %}
 
-{# Total Point Summary (peer) #}
-{% macro render_column_total_peer(context, section, graded_gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently) #}
-    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
-    {% set graded = gradeable.getGradedNonHiddenPoints() %}
-    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
-    {% for component in components %}
-        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
-        {% set graded = graded + component.getScore() %}
-    {% endfor %}
-    {#
-        instead of autograding_score it should be total autograding possible
-        I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
-    #}
-    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
-    <td>
-        {% if gradeable.validateVersions() %}
-            <div>{{ graded }} / {{ total_possible }}</div>
-        {% endif %}
-    </td>
-{% endmacro %}
-
 {# User ID #}
 {% macro render_column_user_id(context, section, graded_gradeable, index, info, column) %}
     <td>
@@ -794,3 +774,9 @@
     }
 </script>
 
+{% include 'grading/electronic/GradeableMessage.twig' with {
+    "course": course,
+    "semester": semester,
+    "gradeable_id": gradeable.getId,
+    "blind_status": blind_status
+}%}

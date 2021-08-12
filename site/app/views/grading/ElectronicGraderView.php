@@ -479,7 +479,7 @@ HTML;
             // See also note in ElectronicGradeController.php
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
-                if ($peer === 'false') {
+                if ($peer === false) {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                     $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 }
@@ -498,7 +498,6 @@ HTML;
                 else {
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
                 }
-                $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
         }
@@ -833,7 +832,12 @@ HTML;
             "direction" => $direction,
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "is_team" => $gradeable->isTeamAssignment(),
-            "is_vcs" => $gradeable->isVcs()
+            "is_vcs" => $gradeable->isVcs(),
+            "stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']),
+            "semester" => $this->core->getConfig()->getSemester(),
+            "course" => $this->core->getConfig()->getCourse(),
+            "blind_status" => $gradeable->getPeerBlind(),
+            "is_instructor" => $this->core->getUser()->getGroup() === 1
         ]);
     }
 
