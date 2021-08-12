@@ -7181,7 +7181,7 @@ AND gc_id IN (
         }
 
         $users = [];
-        foreach ($details_list as &$details) {
+        foreach ($details_list as $details) {
             $users[$details['user_id']] = new User($this->core, $details);
         }
 
