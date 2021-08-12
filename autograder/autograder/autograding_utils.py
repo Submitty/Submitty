@@ -479,11 +479,11 @@ def archive_autograding_results(
         # compute lateness (if there is a due date / submission deadline)
         gradeable_deadline_string = gradeable_config_obj["date_due"]
         if gradeable_deadline_string is None:
-            print ("NO DEADLINE")
-            gradeable_deadline_longstring = "None";
+            print("NO DEADLINE")
+            gradeable_deadline_longstring = "None"
             seconds_late = 0
         else:
-            print ("DEADLINE IS '"+str(gradeable_deadline_string)+"'")
+            print("DEADLINE IS '"+str(gradeable_deadline_string)+"'")
             gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
             gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
             seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
