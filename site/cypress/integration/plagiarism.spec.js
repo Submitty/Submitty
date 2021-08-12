@@ -65,12 +65,12 @@ describe('Plagiarism tests', () => {
         cy.get(':nth-child(2) > .plag-data > select').select('Autograder Hidden and Extra Credit (C++ Hidden Tests) (Due 01/01/1974)');
 
         cy.get('#threshold').clear().type('200');
-        cy.get('#sequence-length').clear().type('15');
+        cy.get('#sequence-length').clear().type('19');
 
         cy.get('input[type=submit]').click();
 
         // wait for Lichen to finish running and then make sure table looks good
-        cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
+        cy.get('[colspan="4"]', {timeout: 120000}).should('not.exist');
 
         cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(1)')
             .contains('Autograder Hidden and Extra Credit (C++ Hidden Tests)');
@@ -95,7 +95,7 @@ describe('Plagiarism tests', () => {
         cy.get('input[type=submit]').click();
 
         // wait for Lichen to finish running and then make sure table looks good again
-        cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
+        cy.get('[colspan="4"]', {timeout: 120000}).should('not.exist');
 
         cy.get('#grades_released_homework_autohiddenEC_1_table_row > :nth-child(1)')
             .contains('Autograder Hidden and Extra Credit (C++ Hidden Tests)');
@@ -120,7 +120,7 @@ describe('Plagiarism tests', () => {
         });
 
         // wait for Lichen to finish running
-        cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
+        cy.get('[colspan="4"]', {timeout: 120000}).should('not.exist');
 
         cy.get(':nth-child(7) > .btn').click(); // run log
 
