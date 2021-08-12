@@ -116,8 +116,8 @@ describe('Plagiarism tests', () => {
         // nor could any potential source be found in the code.
         Cypress.on('uncaught:exception', (err, runnable) => {
             // prevent Cypress from failing when we see this exception
-            return false
-        })
+            return false;
+        });
 
         // wait for Lichen to finish running
         cy.get('[colspan="4"]', {timeout: 60000}).should('not.exist');
