@@ -935,7 +935,7 @@ class AdminGradeableController extends AbstractController {
                 'depends_on' => null,
                 'depends_on_points' => null,
                 'has_due_date' => true,
-                'has_release_date' => false
+                'has_release_date' => true
             ]);
         }
         else {
