@@ -333,7 +333,7 @@ CREATE TABLE public.courses_users (
 --
 
 CREATE TABLE public.emails (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     user_id character varying NOT NULL,
     subject text NOT NULL,
     body text NOT NULL,

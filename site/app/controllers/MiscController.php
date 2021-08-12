@@ -293,10 +293,6 @@ class MiscController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $temp_dir = "/tmp";
-        //makes a random zip file name on the server
-        $temp_name = uniqid($this->core->getUser()->getId(), true);
-        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         $gradeable_path = $this->core->getConfig()->getCoursePath();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
@@ -347,15 +343,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
-
         $zip_stream->finish();
-        header("Content-type: application/zip");
-        header("Content-Disposition: attachment; filename=$zip_file_name");
-        header("Content-length: " . filesize($zip_name));
-        header("Pragma: no-cache");
-        header("Expires: 0");
-        readfile("$zip_name");
-        unlink($zip_name); //deletes the random zip file
     }
 
     /**

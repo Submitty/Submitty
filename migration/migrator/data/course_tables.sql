@@ -178,7 +178,9 @@ CREATE TABLE public.course_materials (
     type smallint NOT NULL,
     release_date timestamp with time zone,
     hidden_from_students boolean,
-    priority double precision NOT NULL
+    priority double precision NOT NULL,
+    url text,
+    url_title character varying(255)
 );
 
 
@@ -245,6 +247,9 @@ CREATE TABLE public.electronic_gradeable (
     eg_peer_blind integer DEFAULT 3,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
     eg_hidden_files character varying(1024),
+    eg_depends_on character varying(255) DEFAULT NULL::character varying,
+    eg_depends_on_points integer,
+    eg_has_release_date boolean DEFAULT true NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -858,7 +863,8 @@ CREATE TABLE public.queue_settings (
     id integer NOT NULL,
     open boolean NOT NULL,
     code text NOT NULL,
-    token text NOT NULL
+    token text NOT NULL,
+    regex_pattern character varying
 );
 
 
@@ -1740,6 +1746,22 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
+-- Name: electronic_gradeable fk_depends_on; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.electronic_gradeable
+    ADD CONSTRAINT fk_depends_on FOREIGN KEY (eg_depends_on) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2334,3 +2356,4 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
