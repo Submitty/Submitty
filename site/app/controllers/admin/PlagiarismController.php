@@ -12,6 +12,7 @@ use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
 use Exception;
+use DateTime;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 use app\views\admin\PlagiarismView;
@@ -112,6 +113,7 @@ class PlagiarismController extends AbstractController {
         foreach ($valid_courses as $item) {
             $ret[] = "{$item['semester']} {$item['course']}";
         }
+        sort($ret);
         return $ret;
     }
 
@@ -145,7 +147,7 @@ class PlagiarismController extends AbstractController {
                 $gradeables[] = $gradeable;
             }
         }
-
+        sort($gradeables);
         return $gradeables;
     }
 
@@ -828,8 +830,9 @@ class PlagiarismController extends AbstractController {
             $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
             $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format($this->core->getConfig()->getDateTimeFormat()->getFormat('late_days_allowed'));
         }
+
         usort($gradeable_ids_titles, function ($a, $b) {
-            return $a['g_grade_due_date'] > $b['g_grade_due_date'];
+            return new DateTime($a['g_grade_due_date']) > new DateTime($b['g_grade_due_date']);
         });
 
         $config = [];
