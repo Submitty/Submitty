@@ -275,7 +275,7 @@ class HomePageController extends AbstractController {
                 $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
-                $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId())
+                $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
             )
         );
     }

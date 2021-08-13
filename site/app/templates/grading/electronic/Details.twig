@@ -37,7 +37,7 @@
             <div class="action-btn-cont">
                 {% if show_all_sections_button %}
                 <a class="btn btn-default"
-                   href="{{ view_all_toggle_url }}">
+                   href="" onclick="changeSections()">
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </a>
                 {% endif %}
@@ -54,6 +54,10 @@
             </div>
         </div>
     </div>
+    <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% if not is_instructor %}
+        <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
+    {% endif %}
     {% if can_regrade and not is_vcs %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
@@ -110,7 +114,7 @@
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
                         <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">
-                            <a href="{{ details_base_url }}?view={{ (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null }}&sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
+                            <a href="{{ details_base_url }}?sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
                             {% endif %}
@@ -134,7 +138,7 @@
         {% if sections|length == 0 %}
             <tbody class="empty-info-header">
                 <tr class="info">
-                    <td colspan="{{ 42 + gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
+                    <td colspan="{{ columns|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
                 </tr>
             </tbody>
         {% else %}
@@ -165,11 +169,11 @@
                         {% for info in section.rows %}
                             {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
                         {% endfor %}
-                        {% if section.teamless_users is defined %}
-                            {% for info in section.teamless_users %}
-                                {{ _self.render_teamless_user(_context, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
-                            {% endfor %}
-                        {% endif %}
+                    {% endif %}
+                    {% if section.teamless_users is defined %}
+                        {% for info in section.teamless_users %}
+                            {{ _self.render_teamless_user(_context, section, info.user, info.new_team_onclick, loop.index + (section.rows is defined ? section.rows|length : 0), columns) }}
+                        {% endfor %}
                     {% endif %}
                 </tbody>
                 {# /Student list #}
@@ -689,6 +693,18 @@
 
 {# /Column functions #}
 <script>
+    function changeSections() {
+        const status = {{ view_all ? 1 : 0 }};
+        if (status) {
+            document.cookie = 'view=assigned; path=/;';
+            localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
+        } else {
+            document.cookie = 'view=all; path=/;';
+            localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
+        }
+        location.reload();
+    }
+
     function changeAnon() {
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
@@ -758,3 +774,9 @@
     }
 </script>
 
+{% include 'grading/electronic/GradeableMessage.twig' with {
+    "course": course,
+    "semester": semester,
+    "gradeable_id": gradeable.getId,
+    "blind_status": blind_status
+}%}
