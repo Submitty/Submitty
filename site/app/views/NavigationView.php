@@ -670,12 +670,18 @@ class NavigationView extends AbstractView {
                 if ($list_section != GradeableList::OPEN) {
                     $title = "PREVIEW GRADING";
                 }
-                return new Button($this->core, [
+                if (!$gradeable->isTaGrading()) {
+                    $title = "VIEW SUBMISSIONS";
+                }
+                $array = [
                     "title" => $title,
                     "class" => "btn btn-nav btn-nav-grade btn-default",
-                    "href" => $href,
-                    "progress" => 100 * $progress_bar
-                ]);
+                    "href" => $href
+                ];
+                if ($gradeable->isTaGrading()) {
+                    $array["progress"] = 100 * $progress_bar;
+                }
+                return new Button($this->core, $array);
             }
         }
 
