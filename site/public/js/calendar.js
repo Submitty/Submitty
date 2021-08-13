@@ -2,6 +2,7 @@
 /* exported nextMonth */
 /* exported loadCalendar */
 /* exported loadFullCalendar */
+/* exported editCalendarMessageForm */
 /* global curr_day */
 /* global curr_month */
 /* global curr_year */
@@ -75,12 +76,12 @@ function dateToStr(year, month, day) {
  * @param type : string the calendar item type
  * @returns {string} the HTML string containing the calendar item
  */
-function generateCalendarItem(item, type) {
+function generateCalendarItem(item, type, date) {
     switch (type) {
         case 'gradeable':
             return generateGradeableHtml(item);
         case 'item':
-            return generateItemHtml(item);
+            return generateItemHtml(item, date);
     }
 }
 
@@ -116,13 +117,31 @@ function generateGradeableHtml(item) {
         </a>`;
 }
 
-function generateItemHtml(item) {
+function generateItemHtml(item, date) {
+    let styleString = '';
+    switch (item['type']) {
+        case 'announcement':
+            styleString = 'style="font-weight: bold;"';
+            break;
+        case 'important':
+            styleString = 'style="font-style: italic;"';
+            break;
+    }
     if (isGlobal) {
-        return `<p>${item['course']}: ${item['text']}</p>`;
+        return `<p ${styleString}>${item['course']}: ${item['text']} <a onclick="editCalendarMessageForm('${item['type']}', '${item['text']}','${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
     }
     else {
-        return `<p>${item['text']}</p>`;
+        return `<p ${styleString}>${item['text']} <a onclick="editCalendarMessageForm('${item['type']}', '${item['text']}', '${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
     }
+}
+
+function editCalendarMessageForm(itemType, itemText, itemId, date) {
+    $('#calendar-message-type-edit').val(itemType);
+    $('#calendar-message-text-edit').val(itemText);
+    $('#edit-picker-edit').val(date);
+    $('#calendar-message-id').val(itemId);
+
+    $('#edit-calendar-message-form').css('display', 'block');
 }
 
 /**
@@ -174,7 +193,7 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
         content += generateCalendarItem(gradeables_by_date[cell_date_str][i], 'gradeable');
     }
     for (const i in items_by_date[cell_date_str]) {
-        content += generateItemHtml(items_by_date[cell_date_str][i], 'item');
+        content += generateCalendarItem(items_by_date[cell_date_str][i], 'item', cell_date_str);
     }
     content += `
       </div>
