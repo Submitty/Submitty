@@ -2,6 +2,9 @@
     <h1>
         Job Statistics
     </h1>
+    <h2>
+        Class Statistics
+    </h2>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -38,6 +41,35 @@
                 </tr>
             {% endfor %}
         {% endfor %}
+        </tbody>
+    </table>
+    <h2 style="padding-top: 1em;">
+        Machine Statistics
+    </h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Semester</th>
+                <th>Course</th>
+                <th>Gradeable Id</th>
+                <th>Elapsed Time</th>
+                <th>Error</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for machine, worker_info in progress["ongoing_job_info"] %}
+                    {% for info in worker_info %}
+                    <tr>
+                        <td> {{machine}} </td>
+                        <td> {{info["semester"]}} </td>
+                        <td> {{info["course"]}} </td>
+                        <td> {{info["gradeable_id"]}} </td>
+                        <td> {{info["elapsed_time"]}} </td>
+                        <td> {{info["error"]}} </td>
+                    </tr>
+                    {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
 </div>
