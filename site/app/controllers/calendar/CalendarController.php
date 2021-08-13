@@ -9,6 +9,7 @@ use app\controllers\GlobalController;
 use app\entities\calendar\CalendarMessage;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\routers\AccessControl;
 use app\models\CalendarInfo;
 use app\models\gradeable\GradeableList;
 use app\models\gradeable\GradeableUtils;
@@ -52,6 +53,7 @@ class CalendarController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/calendar/newMessage", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function createMessage(): RedirectResponse {
         $type = $_POST['type'];
@@ -81,6 +83,45 @@ class CalendarController extends AbstractController {
         $this->core->getCourseEntityManager()->persist($calendar_message);
         $this->core->getCourseEntityManager()->flush();
 
+        return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/calendar/editMessage", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function editMessage(): RedirectResponse {
+        $type = $_POST['type'];
+        $date = $_POST['date'];
+        $text = $_POST['text'];
+        $id = $_POST['id'];
+
+        $calendar_message = $this->core->getCourseEntityManager()->getRepository(CalendarMessage::class)
+            ->findOneBy(['id' => $id]);
+
+        if ($calendar_message === null) {
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
+        $calendar_message->setText($text);
+        $calendar_message->setDate(new \DateTime($date));
+        $int_type = null;
+        switch ($type) {
+            case "note":
+                $int_type = 0;
+                break;
+            case "announcement":
+                $int_type = 1;
+                break;
+            case "important":
+                $int_type = 2;
+                break;
+        }
+        if ($int_type === null) {
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+        $calendar_message->setType($int_type);
+        $this->core->getCourseEntityManager()->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
     }
 }

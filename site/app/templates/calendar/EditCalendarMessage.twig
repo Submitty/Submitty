@@ -1,21 +1,22 @@
 {% extends 'generic/Popup.twig' %}
-{% block popup_id %}new-calendar-message-form{% endblock %}
+{% block popup_id %}edit-calendar-message-form{% endblock %}
 {% block title %}New Calendar Message{% endblock %}
 {% block body %}
     <p class="std-margin">
-        Please select the type of message, when it should be, and the message it should show.
+        Edit or delete this calendar event.
     </p>
-    <label for="calendar-message-type">Message Type</label>
-    <select id="calendar-message-type" name="type">
+    <label for="calendar-message-type-edit">Message Type</label>
+    <select id="calendar-message-type-edit" name="type">
         <option value="note">Note</option>
         <option value="announcement">Announcement</option>
         <option value="important">Important</option>
     </select><br>
-    <label for="calendar-message-text">Message Text</label>
-    <input type="text" id="calendar-message-text" name="text"><br>
-    <label for="edit-picker">Date</label>
-    <input id="edit-picker" class="edit-picker" type="text" name="date">
+    <label for="calendar-message-text-edit">Message Text</label>
+    <input type="text" id="calendar-message-text-edit" name="text"><br>
+    <label for="edit-picker-edit">Date</label>
+    <input id="edit-picker-edit" class="edit-picker" type="text" name="date">
     <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
+    <input hidden id="calendar-message-id" name="id">
     <script>
         flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
@@ -46,7 +47,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="calendar/newMessage">
+    <form method="post" action="calendar/editMessage">
         {{ parent() }}
     </form>
 {% endblock %}

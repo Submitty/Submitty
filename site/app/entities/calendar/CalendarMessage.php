@@ -8,8 +8,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class CalendarMessage
- * @package app\entities\calendar
  * @ORM\Entity
  * @ORM\Table(name="calendar_messages")
  */
@@ -103,5 +101,20 @@ class CalendarMessage {
      */
     public function getType(): int {
         return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeString(): string {
+        switch ($this->type) {
+            case 0:
+                return 'note';
+            case 1:
+                return 'announcement';
+            case 2:
+                return 'important';
+        }
+        return '';
     }
 }

@@ -81,14 +81,15 @@ class CalendarInfo extends AbstractModel {
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
         ];
 
-        /** @var CalendarMessage $cal_items */
+        /** @var CalendarMessage $cal_item */
         foreach ($calendar_items as $course => $cal_items) {
             foreach ($cal_items as $cal_item) {
                 $date = $cal_item->getDate()->format('Y-m-d');
                 $curItem = [
                     'text' => $cal_item->getText(),
-                    'type' => $cal_item->getType(),
-                    'course' => $course
+                    'type' => $cal_item->getTypeString(),
+                    'course' => $course,
+                    'id' => $cal_item->getId()
                 ];
                 $info->items_by_date[$date][] = $curItem;
             }
