@@ -23,7 +23,11 @@ function updateTable() {
                     location.reload();
                 }
                 const table = document.getElementById("autograding-status-table");
+<<<<<<< Updated upstream
                 const new_row = table.insertRow(3);
+=======
+                const new_row = table.insertRow();
+>>>>>>> Stashed changes
                 new_cell = new_row.insertCell();
                 new_cell.innerHTML = json.time;
                 new_cell.className = "right-boarder";

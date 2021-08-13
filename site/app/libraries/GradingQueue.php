@@ -229,15 +229,24 @@ class GradingQueue {
 
         $machine_grading_counts = [];
         $capability_queue_counts = [];
+<<<<<<< Updated upstream
         $workers = [];
         $ongoing_job_info = [];
         $course_info = [];
+=======
+        $machine_stale_jobs = [];
+        $workers = [];
+>>>>>>> Stashed changes
 
         foreach ($open_autograding_workers_json as $machine => $details) {
             $machine_grading_counts[$machine] = 0;
             foreach ($details["capabilities"] as $c) {
                 $capability_queue_counts[$c] = 0;
             }
+<<<<<<< Updated upstream
+=======
+            $machine_stale_jobs[$machine] = 0;
+>>>>>>> Stashed changes
             $workers[$machine] = $details["num_autograding_workers"];
         }
 
@@ -309,9 +318,14 @@ class GradingQueue {
             "machine_grading_counts" => $machine_grading_counts,
             "capability_queue_counts" => $capability_queue_counts,
             "queue_counts" => $queue_counts,
+<<<<<<< Updated upstream
             "num_autograding_workers" => $workers,
             "course_info" => $course_info,
             "ongoing_job_info" => $ongoing_job_info
+=======
+            "job_files" => $job_files,
+            "num_autograding_workers" => $workers
+>>>>>>> Stashed changes
         ];
     }
 
