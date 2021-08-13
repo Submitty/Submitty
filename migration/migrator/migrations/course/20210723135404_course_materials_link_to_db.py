@@ -1,6 +1,7 @@
 """Migration for a given Submitty course database."""
 
 import json
+import os
 from pathlib import Path
 
 def up(config, database, semester, course):
@@ -30,24 +31,24 @@ def up(config, database, semester, course):
                 for itemkey, itemvalue in data.items():
                     url = None
                     url_title = None
-                    if 'external_link' in itemvalue and itemvalue['external_link'] is True:
+                    if 'external_link' in itemvalue and itemvalue['external_link'] is True and os.path.exists(itemkey):
                         f = open(itemkey)
                         data = json.load(f)
                         url = data['url']
                         url_title = data['name']
                         if url is not None and url_title is None:
                             url_title = url
-                    query = """
-                        UPDATE course_materials SET
-                        url = :url, url_title = :url_title
-                        WHERE path = :path
-                    """
-                    params = {
-                        'url': url,
-                        'url_title': url_title,
-                        'path': itemkey
-                    }
-                    database.session.execute(query, params)
+                        query = """
+                            UPDATE course_materials SET
+                            url = :url, url_title = :url_title
+                            WHERE path = :path
+                        """
+                        params = {
+                            'url': url,
+                            'url_title': url_title,
+                            'path': itemkey
+                        }
+                        database.session.execute(query, params)
 
 
 def down(config, database, semester, course):

@@ -908,10 +908,9 @@ class Course(object):
                             versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
 
                         if ((gradeable.gradeable_config is not None
-                           and (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                           and (gradeable.has_due_date is True and (gradeable.submission_due_date < NOW or random.random() < 0.5))
                            and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions))
                            or (gradeable.gradeable_config is not None and user.id in gradeable.plagiarized_user)):
-
                             # only create these directories if we're actually going to put something in them
                             if not os.path.exists(gradeable_path):
                                 os.makedirs(gradeable_path)
@@ -996,7 +995,7 @@ class Course(object):
                             with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
-                        if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
+                        if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
                             print("Inserting {} for {}...".format(gradeable.id, user.id))
                             # gd_overall_comment no longer does anything, and will be removed in a future update.
@@ -1045,7 +1044,7 @@ class Course(object):
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
 
-                    if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
+                    if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
                         res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment='')
                         gd_id = res.inserted_primary_key[0]
@@ -1062,12 +1061,14 @@ class Course(object):
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                             self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
-        #This segment adds the sample forum posts and sample polls for the sample course only
+        # This segment adds the sample data for features in the sample course only
         if self.code == "sample":
             self.add_sample_forum_data()
             print('Added forum data to sample course.')
             self.add_sample_polls_data()
             print('Added polls data to sample course.')
+            self.add_sample_queue_data()
+            print('Added office hours queue data to sample course.')
 
         self.conn.close()
         submitty_conn.close()
@@ -1296,6 +1297,84 @@ class Course(object):
                               student_id=response["student_id"],
                               option_id=response["option_id"])
 
+    def add_sample_queue_data(self):
+        # load the sample polls from input file
+        queue_data_path = os.path.join(SETUP_DATA_PATH, "queue", "queue_data.json")
+        with open(queue_data_path, 'r') as queue_file:
+            queue_data = json.load(queue_file)
+
+        # set sample course to have office hours queue enabled by default
+        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
+        with open(course_json_file, 'r+') as open_file:
+            course_json = json.load(open_file)
+            course_json['course_details']['queue_enabled'] = True
+            course_json['course_details']['queue_contact_info'] = True
+            course_json['course_details']['queue_message'] = queue_data["queue_message"]
+            course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
+            open_file.seek(0)
+            open_file.truncate()
+            json.dump(course_json, open_file, indent=2)
+
+        # generate values that depend on current date and time
+        # helped for the first time today, done --- LAB queue
+        queue_data["queue_entries"][0]["time_in"] = datetime.now() - timedelta(minutes=25)
+        queue_data["queue_entries"][0]["time_out"] = datetime.now() - timedelta(minutes=19)
+        queue_data["queue_entries"][0]["time_help_start"] = datetime.now() - timedelta(minutes=24)
+        # helped, done --- LAB queue
+        queue_data["queue_entries"][1]["time_in"] = datetime.now() - timedelta(minutes=24)
+        queue_data["queue_entries"][1]["time_out"] = datetime.now() - timedelta(minutes=15)
+        queue_data["queue_entries"][1]["time_help_start"] = datetime.now() - timedelta(minutes=23)
+        # removed by self --- LAB queue
+        queue_data["queue_entries"][2]["time_in"] = datetime.now() - timedelta(minutes=22)
+        queue_data["queue_entries"][2]["time_out"] = datetime.now() - timedelta(minutes=21)
+        # being helped --- HW queue
+        queue_data["queue_entries"][3]["time_in"] = datetime.now() - timedelta(minutes=23)
+        queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(minutes=14)
+        # waiting for help for second time today --- LAB queue
+        queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(minutes=21)
+        queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data["queue_entries"][0]["time_in"]
+        # paused --- HW queue
+        queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(minutes=20)
+        queue_data["queue_entries"][5]["time_paused_start"] = datetime.now() - timedelta(minutes=18)
+        # wait for the first time --- HW queue
+        queue_data["queue_entries"][6]["time_in"] = datetime.now() - timedelta(minutes=15)
+        # waiting for help for second time this week --- LAB queue
+        queue_data["queue_entries"][7]["time_in"] = datetime.now() - timedelta(minutes=10)
+        queue_data["queue_entries"][7]["last_time_in_queue"] = datetime.now() - timedelta(days=1, minutes=30)
+
+        queues_table = Table("queue_settings", self.metadata, autoload=True)
+        queue_entries_table = Table("queue", self.metadata, autoload=True)
+
+        # make two sample queues
+        self.conn.execute(queues_table.insert(),
+                          open=True,
+                          code="Lab Help",
+                          token="lab")
+        self.conn.execute(queues_table.insert(),
+                          open=True,
+                          code="Homework Debugging",
+                          token="hw_debug")
+
+        # add, help, remove, pause, etc. students in the queue
+        for queue_entry in queue_data["queue_entries"]:
+            self.conn.execute(queue_entries_table.insert(),
+                              current_state=queue_entry["current_state"],
+                              removal_type=queue_entry["removal_type"],
+                              queue_code=queue_entry["queue_code"],
+                              user_id=queue_entry["user_id"],
+                              name=queue_entry["name"],
+                              time_in=queue_entry["time_in"],
+                              time_out=queue_entry["time_out"],
+                              added_by=queue_entry["added_by"],
+                              help_started_by=queue_entry["help_started_by"],
+                              removed_by=queue_entry["removed_by"],
+                              contact_info=queue_entry["contact_info"],
+                              last_time_in_queue=queue_entry["last_time_in_queue"],
+                              time_help_start=queue_entry["time_help_start"],
+                              paused=queue_entry["paused"],
+                              time_paused=queue_entry["time_paused"],
+                              time_paused_start=queue_entry["time_paused_start"])
+
     def make_course_json(self):
         """
         This function generates customization_sample.json in case it has changed from the provided version in the test suite
@@ -1362,7 +1441,7 @@ class Course(object):
                 max_ta = 0
 
                 print_grades = True if g_type != 0 or (gradeable.submission_open_date < NOW) else False
-                release_grades = (gradeable.grade_released_date < NOW)
+                release_grades = (gradeable.has_release_date is True) and (gradeable.grade_released_date < NOW)
 
                 gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
                                                     "config", "complete_config")
@@ -1487,6 +1566,8 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.has_due_date = True
+        self.has_release_date = True
         self.allow_custom_marks = True
         self.plagiarism_submissions = []
         self.plagiarism_versions_per_user = 1
@@ -1607,6 +1688,8 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
+            self.has_due_date = gradeable['eg_has_due_date'] if 'eg_has_due_date' in gradeable else True
+            self.has_release_date = gradeable['eg_has_release_date'] if 'eg_has_release_date' in gradeable else True
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
@@ -1617,9 +1700,9 @@ class Gradeable(object):
                 else:
                     self.config_path = None
             assert self.ta_view_date < self.submission_open_date
-            assert self.submission_open_date < self.submission_due_date
-            assert self.submission_due_date < self.grade_start_date
-            assert self.grade_released_date <= self.grade_inquiry_start_date
+            assert self.has_due_date is False or self.submission_open_date < self.submission_due_date
+            assert self.has_due_date is False or self.submission_due_date < self.grade_start_date
+            assert self.has_release_date is False or self.grade_released_date <= self.grade_inquiry_start_date
             assert self.grade_inquiry_start_date < self.grade_inquiry_due_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
@@ -1637,7 +1720,7 @@ class Gradeable(object):
                                                 "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_due_date
-        assert self.grade_due_date <= self.grade_released_date
+        assert self.has_release_date is False or self.grade_due_date <= self.grade_released_date
 
         self.components = []
         for i in range(len(gradeable['components'])):
