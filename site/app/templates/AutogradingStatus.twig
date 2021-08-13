@@ -1,18 +1,29 @@
 <div class="content">
+    <p>
+        Click this button to stop the page from automatically updating
+    </p>
+    <button class="btn btn-primary" id="toggle-btn">
+        Pause Update
+    </button>
+</div>
+<div class="content">
     <h1>
         Job Statistics
     </h1>
     <h2>
-        Class Statistics
+        Course Statistics
     </h2>
-    <table class="table table-striped">
+    <table class="table table-striped" id="course-table">
         <thead>
             <tr>
+                <th>
+                    Semester
+                </th>
                 <th>
                     Course
                 </th>
                 <th>
-                    Gradeable ID
+                    Gradeable Id
                 </th>
                 <th>
                     Interactive
@@ -23,21 +34,15 @@
             </tr>
         </thead>
         <tbody>
-        {% for course, info in progress["course_info"] %}
+        {% for sem_course, info in progress["course_info"] %}
             {% for gradeable, types in info %}
                 <tr>
-                    <th>
-                        {{ course }}
-                    </th>
-                    <th>
-                        {{ gradeable }}
-                    </th>
-                    <th>
-                        {{ types["interactive"] }}
-                    </th>
-                    <th>
-                        {{ types["regrade"] }}
-                    </th>
+                    {% set course_name = sem_course|split("__") %}
+                    <td>{{ course_name[0] }}</td>
+                    <td>{{ course_name[1] }}</td>
+                    <td>{{ gradeable }}</td>
+                    <td>{{ types["interactive"] }}</td>
+                    <td>{{ types["regrade"] }}</td>
                 </tr>
             {% endfor %}
         {% endfor %}
@@ -46,13 +51,14 @@
     <h2 style="padding-top: 1em;">
         Machine Statistics
     </h2>
-    <table class="table table-striped">
+    <table class="table table-striped" id="machine-table">
         <thead>
             <tr>
                 <th>Machine</th>
                 <th>Semester</th>
                 <th>Course</th>
                 <th>Gradeable Id</th>
+                <th>User Id</th>
                 <th>Elapsed Time</th>
                 <th>Error</th>
             </tr>
@@ -65,6 +71,11 @@
                         <td> {{info["semester"]}} </td>
                         <td> {{info["course"]}} </td>
                         <td> {{info["gradeable_id"]}} </td>
+                        {% if info["semester"] ~ " " ~ info["course"] in courses %}
+                        <td> {{info["user_id"]}} </td>
+                        {% else %}
+                        <td>Hidden</td>
+                        {% endif %}
                         <td> {{info["elapsed_time"]}} </td>
                         <td> {{info["error"]}} </td>
                     </tr>
@@ -80,9 +91,6 @@
     </h1>
     <div id="data" data-machine-num="{{progress["machine_grading_counts"]|keys|length}}" data-capability-num="{{progress["capability_queue_counts"]|keys|length}}" hidden>
     </div>
-    <button class="btn btn-primary" id="stop-btn">
-        Stop Update
-    </button>
     <table class="table table-striped" id="autograding-status-table">
         <thead>
             <tr>
@@ -155,16 +163,16 @@
                     {{ time }}
                 </td>
                 <td>
-                    {{ progress["queue_counts"]["Ongoing grading"] }}
+                    {{ progress["queue_counts"]["interactive_ongoing"] }}
                 </td>
                 <td class="right-boarder">
-                    {{ progress["queue_counts"]["Grading"] }}
+                    {{ progress["queue_counts"]["interactive"] }}
                 </td>
                 <td>
-                    {{ progress["queue_counts"]["Ongoing regrade"] }}
+                    {{ progress["queue_counts"]["regrade_ongoing"] }}
                 </td>
                 <td class="right-boarder">
-                    {{ progress["queue_counts"]["Regrade"] }}
+                    {{ progress["queue_counts"]["regrade"] }}
                 </td>
                 {% for machine, count in progress["machine_grading_counts"] %}
                 {% if machine == progress["machine_grading_counts"]|keys|last %}

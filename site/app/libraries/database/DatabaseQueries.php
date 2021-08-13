@@ -3846,6 +3846,11 @@ SQL;
         return $return;
     }
 
+    public function getInstructorLevelAccessCourse($user_id) {
+        $this->submitty_db->query("SELECT DISTINCT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getCourseStatus($semester, $course) {
         $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", [$semester, $course]);
         return $this->submitty_db->rows()[0]['status'];

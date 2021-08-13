@@ -193,14 +193,6 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        if ($this->core->getUser()->accessFullGrading()) {
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['autograding_status']),
-                "title" => "Autograding Status",
-                "icon" => "fa-server"
-            ]);
-        }
-
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [
@@ -292,6 +284,11 @@ class GlobalController extends AbstractController {
                 "title" => "Gradebook",
                 "icon" => "fa-book-reader"
             ]);
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
+            ]);
         }
 
         // --------------------------------------------------------------------------
@@ -366,7 +363,8 @@ class GlobalController extends AbstractController {
     }
 
     // ==========================================================================================
-    public function prep_user_sidebar(&$sidebar_buttons) {
+    public function prep_user_sidebar(&$sidebar_buttons)
+    {
 
         // --------------------------------------------------------------------------
         // ALL USERS
@@ -430,17 +428,29 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['superuser','email']),
+                "href" => $this->core->buildUrl(['superuser', 'email']),
                 "title" => "Email All",
                 "icon" => "fas fa-paper-plane"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['superuser','email_status']),
+                "href" => $this->core->buildUrl(['superuser', 'email_status']),
                 "title" => "Email Status",
                 "icon" => "fas fa-mail-bulk"
             ]);
         }
+
+        // --------------------------------------------------------------------------
+        // INSTRUCTOR IN ANY COURSE
+        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
+        if (in_array($this->core->getUser()->getId(), $instructors)) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
+            ]);
+        }
+
         $sidebar_buttons[] = new Button($this->core, [
             "class" => "nav-row short-line",
         ]);

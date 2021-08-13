@@ -12,37 +12,57 @@ use app\views\AutogradingStatusView;
 use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @AccessControl(role="FULL_ACCESS_GRADER")
- * @AccessControl(role="INSTRUCTOR")
- */
 class AutogradingStatusController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/autograding_status", methods={"GET"})
+     * @Route("/autograding_status", methods={"GET"})
+     * @return WebResponse | MultiResponse
      */
     public function getGradingDonePage() {
+        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
+        $user_id = $this->core->getUser()->getId();
+        if (!in_array($user_id, $instructors)){
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
+            );
+        }
+        $course = [];
+        $tmp = $this->core->getQueries()->getInstructorLevelAccessCourse($user_id);
+        foreach ($tmp as $row) {
+            $course[] = $row["semester"] . " " . $row["course"];
+        }
         return new WebResponse(
             AutogradingStatusView::class,
             'displayPage',
-            $this->getAutogradingInfo()
+            $this->getAutogradingInfo(),
+            $course
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/autograding_status/get_update", methods={"GET"})
+     * @Route("autograding_status/get_update", methods={"GET"})
      * @return JsonResponse
      */
     public function getProgress(): JsonResponse {
         $info = $this->getAutogradingInfo();
+        $course = [];
+        $tmp = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
+        foreach ($tmp as $row) {
+            $course[] = $row["semester"] . " " . $row["course"];
+        }
+        foreach ($info["ongoing_job_info"] as &$i) {
+            foreach ($i as &$job) {
+                if (!in_array($job["semester"] . " " . $job["course"], $course)) {
+                    $job["user_id"] = "Hidden";
+                }
+            }
+        }
         $j = [
-            "time" => date("H:i:s", time()),
-            "interactive_ongoing" => $info["queue_counts"]["Ongoing grading"],
-            "interactive_queue" => $info["queue_counts"]["Grading"],
-            "regrade_ongoing" => $info["queue_counts"]["Ongoing regrade"],
-            "regrade_queue" => $info["queue_counts"]["Regrade"],
-            "machine_count" => $info["machine_grading_counts"],
-            "capability_count" => $info["capability_queue_counts"]
+            "time" => date("H:i:s", time())
         ];
+        $j = array_merge($j, $info);
+
+
         return JsonResponse::getSuccessResponse($j);
     }
 

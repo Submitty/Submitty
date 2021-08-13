@@ -47,7 +47,10 @@ class QueueItem{
         if ($is_grading) {
             $base = basename($json_file);
             $dir = dirname($json_file);
-            $this->grading_queue_obj = FileUtils::readJsonFile($dir . "/GRADING_" . $base);
+            $tmp = FileUtils::readJsonFile($dir . "/GRADING_" . $base);
+            if ($tmp != false) {
+                $this->grading_queue_obj = $tmp;
+            }
         }
         $this->start_time = filemtime($json_file);
         $this->elapsed_time = $epoch_time - $this->start_time;

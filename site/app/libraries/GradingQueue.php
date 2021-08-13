@@ -229,34 +229,25 @@ class GradingQueue {
 
         $machine_grading_counts = [];
         $capability_queue_counts = [];
-<<<<<<< Updated upstream
         $workers = [];
         $ongoing_job_info = [];
         $course_info = [];
-=======
-        $machine_stale_jobs = [];
-        $workers = [];
->>>>>>> Stashed changes
 
         foreach ($open_autograding_workers_json as $machine => $details) {
             $machine_grading_counts[$machine] = 0;
             foreach ($details["capabilities"] as $c) {
                 $capability_queue_counts[$c] = 0;
             }
-<<<<<<< Updated upstream
-=======
-            $machine_stale_jobs[$machine] = 0;
->>>>>>> Stashed changes
             $workers[$machine] = $details["num_autograding_workers"];
         }
 
         ksort($capability_queue_counts);
 
         $queue_counts = [];
-        $queue_counts["Grading"] = 0;
-        $queue_counts["Ongoing grading"] = 0;
-        $queue_counts["Regrade"] = 0;
-        $queue_counts["Ongoing regrade"] = 0;
+        $queue_counts["interactive"] = 0;
+        $queue_counts["interactive_ongoing"] = 0;
+        $queue_counts["regrade"] = 0;
+        $queue_counts["regrade_ongoing"] = 0;
 
         foreach ($this->queue_files as $full_path_file) {
             $path = FileUtils::joinPaths($this->queue_path, $full_path_file);
@@ -300,6 +291,7 @@ class GradingQueue {
                 "semester" => $file_segments[0],
                 "course" => $file_segments[1],
                 "gradeable_id" => $file_segments[2],
+                "user_id" => $file_segments[3],
                 "regrade" => $job_file["regrade"],
                 "elapsed_time" => $elapsed_time,
                 "error" => $job_file["error"],
@@ -318,14 +310,9 @@ class GradingQueue {
             "machine_grading_counts" => $machine_grading_counts,
             "capability_queue_counts" => $capability_queue_counts,
             "queue_counts" => $queue_counts,
-<<<<<<< Updated upstream
             "num_autograding_workers" => $workers,
             "course_info" => $course_info,
             "ongoing_job_info" => $ongoing_job_info
-=======
-            "job_files" => $job_files,
-            "num_autograding_workers" => $workers
->>>>>>> Stashed changes
         ];
     }
 
@@ -344,18 +331,18 @@ class GradingQueue {
             $regrade = $entry->isRegrade();
             if ($regrade) {
                 if ($is_grading) {
-                    $detailed_queue_counts["Ongoing regrade"] += 1;
+                    $detailed_queue_counts["regrade_ongoing"] += 1;
                 }
                 else {
-                    $detailed_queue_counts["Regrade"] += 1;
+                    $detailed_queue_counts["regrade"] += 1;
                 }
             }
             else {
                 if ($is_grading) {
-                    $detailed_queue_counts["Ongoing grading"] += 1;
+                    $detailed_queue_counts["interactive_ongoing"] += 1;
                 }
                 else {
-                    $detailed_queue_counts["Grading"] += 1;
+                    $detailed_queue_counts["interactive"] += 1;
                 }
             }
             $capability = "default";
