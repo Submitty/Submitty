@@ -4,7 +4,6 @@
 
 #autograding-status-table {
     border: 1px solid var(--text-black);
-    padding-right: 30px;
 }
 
 #course-table > *,

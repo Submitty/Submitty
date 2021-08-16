@@ -15,7 +15,14 @@ function updateTable() {
         success: function(response) {
             try {
                 const data = $('#data');
-                const json = JSON.parse(response).data;
+                let json = JSON.parse(response);
+                if (json.status !== 'success') {
+                    displayErrorMessage('This login session has expired, please log in again to continue to receive updates');
+                    return;
+                }
+
+                json = json.data;
+
                 // Check to see if any of the machine and capability info are outdated, if so, refresh the page
                 if (data.data('machine-num') != Object.keys(json.machine_grading_counts).length) {
                     location.reload();
@@ -23,6 +30,7 @@ function updateTable() {
                 if (data.data('capability-num') != Object.keys(json.capability_queue_counts).length) {
                     location.reload();
                 }
+
                 // Update Class Statistics table
                 let table = document.getElementById("course-table");
                 $("#course-table tbody").html("");
@@ -38,6 +46,7 @@ function updateTable() {
                         new_row.insertCell().innerHTML = info.regrade;
                     });
                 });
+
                 // Update Machine Statistics table
                 table = document.getElementById("machine-table");
                 $("#machine-table tbody").html("");
@@ -54,7 +63,6 @@ function updateTable() {
                         new_row.insertCell().innerHTML = elem.error;
                     });
                 });
-                
 
                 // Update Grading Monitor table
                 table = document.getElementById("autograding-status-table");
@@ -83,22 +91,23 @@ function updateTable() {
                 Object.keys(json.capability_queue_counts).forEach(key => {
                     new_row.insertCell().innerHTML = json.capability_queue_counts[key];
                 });
+                // Check if old logs should be removed to make room for new logs
                 if ($("#autograding-status-table tbody tr").length > max_log) {
                     // +3 to account for the thead
                     table.deleteRow(max_log + 3);
                 }
 
+                // Queue this function to be run again after specified delay
                 interval = setInterval(updateTable, refresh_freq);
             }
             catch (e) {
-                console.log(response);
                 console.log(e);
             }
         }
     });
 }
 
-function stopUpdate() {
+function toggleUpdate() {
     if ($(this).text() === "Pause Update") {
         clearInterval(interval);
         interval = null;
@@ -115,5 +124,5 @@ function stopUpdate() {
 $(document).ready(function() {
     interval = setInterval(updateTable, refresh_freq);
     $('#toggle-btn').text("Pause Update");
-    $('#toggle-btn').on('click', stopUpdate);
+    $('#toggle-btn').on('click', toggleUpdate);
 });

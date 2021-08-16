@@ -10,6 +10,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\GradingQueue;
 use app\views\AutogradingStatusView;
 use app\libraries\FileUtils;
+use PHPUnit\Util\Json;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AutogradingStatusController extends AbstractController {
@@ -26,25 +27,32 @@ class AutogradingStatusController extends AbstractController {
                 new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
             );
         }
-        $course = [];
-        $tmp = $this->core->getQueries()->getInstructorLevelAccessCourse($user_id);
-        foreach ($tmp as $row) {
-            $course[] = $row["semester"] . " " . $row["course"];
-        }
+
         return new WebResponse(
             AutogradingStatusView::class,
             'displayPage',
-            $this->getAutogradingInfo(),
-            $course
+            $this->getAutogradingInfo()
         );
     }
 
     /**
+     * Used to continuous in the page's continuous updates
      * @Route("autograding_status/get_update", methods={"GET"})
      * @return JsonResponse
      */
     public function getProgress(): JsonResponse {
+        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
+        $user_id = $this->core->getUser()->getId();
+        if (!in_array($user_id, $instructors)){
+            return JsonResponse::getFailResponse("You do not have access to this endpoint.");
+        }
         $info = $this->getAutogradingInfo();
+        return JsonResponse::getSuccessResponse($info);
+    }
+    // Uses the GradingQueue class to get all the info from the necessary files
+    private function getAutogradingInfo(): array {
+        $gq = new GradingQueue(null, null, $this->core->getConfig()->getSubmittyPath());
+        $info = $gq->getAutogradingInfo($this->core->getConfig()->getConfigPath());
         $course = [];
         $tmp = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
         foreach ($tmp as $row) {
@@ -60,14 +68,6 @@ class AutogradingStatusController extends AbstractController {
         $j = [
             "time" => date("H:i:s", time())
         ];
-        $j = array_merge($j, $info);
-
-
-        return JsonResponse::getSuccessResponse($j);
-    }
-
-    private function getAutogradingInfo(): array {
-        $gq = new GradingQueue(null, null, $this->core->getConfig()->getSubmittyPath());
-        return $gq->getAutogradingInfo($this->core->getConfig()->getConfigPath());
+        return array_merge($j, $info);
     }
 }

@@ -213,8 +213,15 @@ class GradingQueue {
     }
 
     /**
-     * Gets information on autograding, containing
-     *  - 
+     * Gets information on autograding queue, containing
+     *  - Submissions being graded
+     *      - Elapsed time in the queue
+     *      - The machine handling this grading job
+     *      - The submission's creator which should be hidden unless the one accessing this info is an instructor of the course
+     *  - Submissions in the queue
+     *      - Categorized by interactive (non-regrade) and regrade jobs
+     *      - The number of grading jobs requiring each capability
+     *  - The submissions' gradeable id and affiliated course
      * @return array
      */
     public function getAutogradingInfo(string $config_path): array {
@@ -279,12 +286,15 @@ class GradingQueue {
             $machine = substr($file_segments[0], 0, strrpos($file_segments[0],"_", -1));
             $file_segments = explode("__", $file_segments[1]);
             $elapsed_time = "";
+            // Calculate the days elapsed
             if ($job_file["elapsed_time"] > 60*60*24) {
-                $elapsed_time .= floor($job_file["elapsed_time"] / (60*60*24)) . " ";
+                $elapsed_time .= floor($job_file["elapsed_time"] / (60*60*24)) . " Days ";
                 $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60*60*24);
             }
+            // Calculate the hours elapsed
             $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / (60 * 60)), 2, "0", STR_PAD_LEFT) . ":" ;
             $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60);
+            // Format the string with the minutes and seconds elapsed
             $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60),2,"0", STR_PAD_LEFT) . ":"
                 . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT) ;
             $ongoing_job_info[$machine][] = [
@@ -316,8 +326,9 @@ class GradingQueue {
         ];
     }
 
-    private function updateDetailedQueueCount($queue_or_grading_file, $is_grading, $epoch_time, &$detailed_queue_counts,
-            &$capability_queue_counts, &$machine_grading_counts, $open_autograding_workers_json, &$course_info): array {
+    // Helper function used to interpret the job files and update the count variables appropriately
+    private function updateDetailedQueueCount(string $queue_or_grading_file, bool $is_grading, int $epoch_time, array &$detailed_queue_counts,
+        array &$capability_queue_counts, array &$machine_grading_counts, array $open_autograding_workers_json, array &$course_info): array {
         $stale = false;
         $error = "";
         $regrade = false;

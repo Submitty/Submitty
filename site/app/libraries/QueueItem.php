@@ -4,12 +4,7 @@ namespace app\libraries;
 
 /**
  * Class QueueItem
- * 
- * @method array    getGradingQueueObj()
- * @method int      getStartTime()
- * @method int      getElapsedTime()
- * @method array    getQueueObj()
- * @method bool     isRegrade()
+ * Helper class used to interpret the files read in the autograding json files
  */
 class QueueItem{
     /** @prop-read @var array */

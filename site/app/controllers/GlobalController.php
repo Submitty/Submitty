@@ -389,12 +389,16 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        // --------------------------------------------------------------------------
-        // FACULTY & SUPERUSERS ONLY
-        if ($this->core->getUser()->accessFaculty()) {
+        // Create the line for all faculties, superusers, and instructors
+        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
+        if ($this->core->getUser()->accessFaculty() || in_array($this->core->getUser()->getId(), $instructors)) {
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line",
             ]);
+        }
+        // --------------------------------------------------------------------------
+        // FACULTY & SUPERUSERS ONLY
+        if ($this->core->getUser()->accessFaculty()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['admin', 'docker']),
                 "title" => "Docker UI",
@@ -442,7 +446,6 @@ class GlobalController extends AbstractController {
 
         // --------------------------------------------------------------------------
         // INSTRUCTOR IN ANY COURSE
-        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
         if (in_array($this->core->getUser()->getId(), $instructors)) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['autograding_status']),
