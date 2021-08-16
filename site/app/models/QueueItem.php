@@ -1,6 +1,8 @@
 <?php
 
-namespace app\libraries;
+namespace app\models;
+
+use app\libraries\FileUtils;
 
 /**
  * Class QueueItem

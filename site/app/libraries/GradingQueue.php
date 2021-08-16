@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use app\models\gradeable\AutoGradedVersion;
+use app\models\QueueItem;
 
 /**
  * Class GradingQueue
@@ -268,8 +269,7 @@ class GradingQueue {
         foreach ($all_files as $worker => $files) {
             foreach ($files as $file) {
                 $path = FileUtils::joinPaths($this->grading_path, $worker, self::GRADING_FILE_PREFIX . $file);
-                $found = file_exists($path);
-                if ($found) {
+                if (file_exists($path)) {
                     $started[] = FileUtils::joinPaths($worker, $file);
                 }
                 else {
@@ -386,10 +386,10 @@ class GradingQueue {
                 $grading_machine = "NONE";
                 foreach ($open_autograding_workers_json as $machine => $details) {
                     $m = $details["address"];
-                    if ($details["username"] != "") {
+                    if ($details["username"] !== "") {
                         $m = "{$details['username']}@{$m}";
                     }
-                    if ($full_machine == $m) {
+                    if ($full_machine === $m) {
                         $grading_machine = $machine;
                         break;
                     }

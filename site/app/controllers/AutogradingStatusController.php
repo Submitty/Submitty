@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\libraries\Core;
 use app\libraries\response\MultiResponse;
+use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
@@ -17,10 +18,8 @@ class AutogradingStatusController extends AbstractController {
      * @Route("/autograding_status", methods={"GET"})
      * @return WebResponse | MultiResponse
      */
-    public function getGradingDonePage() {
-        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
-        $user_id = $this->core->getUser()->getId();
-        if (!in_array($user_id, $instructors)) {
+    public function getGradingDonePage(): ResponseInterface {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
@@ -36,7 +35,7 @@ class AutogradingStatusController extends AbstractController {
 
     /**
      * Used to continuous in the page's continuous updates
-     * @Route("autograding_status/get_update", methods={"GET"})
+     * @Route("/autograding_status/get_update", methods={"GET"})
      * @return JsonResponse
      */
     public function getProgress(): JsonResponse {
@@ -48,6 +47,7 @@ class AutogradingStatusController extends AbstractController {
         $info = $this->getAutogradingInfo();
         return JsonResponse::getSuccessResponse($info);
     }
+
     // Uses the GradingQueue class to get all the info from the necessary files
     private function getAutogradingInfo(): array {
         $gq = new GradingQueue(null, null, $this->core->getConfig()->getSubmittyPath());

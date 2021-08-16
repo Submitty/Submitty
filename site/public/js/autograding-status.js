@@ -1,3 +1,4 @@
+/* global buildUrl, csrfToken, displayErrorMessage, displaySuccessMessage */
 // Change this variable to change the frequency of the update request, measured in miliseconds
 const refresh_freq = 5000;
 // Change this variable to change the max number of entries in the table before the oldest entries are replaced
@@ -8,17 +9,14 @@ let interval = null;
 function updateTable() {
     clearInterval(interval);
     $.ajax({
-        // eslint-disable-next-line no-undef
         url: buildUrl(['autograding_status', 'get_update']),
         type: 'GET',
-        // eslint-disable-next-line no-undef
         data: {'csrf_token': csrfToken},
         success: function(response) {
             try {
                 const data = $('#data');
                 let json = JSON.parse(response);
                 if (json.status !== 'success') {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('This login session has expired, please log in again to continue to receive updates');
                     return;
                 }
@@ -26,10 +24,10 @@ function updateTable() {
                 json = json.data;
 
                 // Check to see if any of the machine and capability info are outdated, if so, refresh the page
-                if (data.data('machine-num') != Object.keys(json.machine_grading_counts).length) {
+                if (data.data('machine-num') !== Object.keys(json.machine_grading_counts).length) {
                     location.reload();
                 }
-                if (data.data('capability-num') != Object.keys(json.capability_queue_counts).length) {
+                if (data.data('capability-num') !== Object.keys(json.capability_queue_counts).length) {
                     location.reload();
                 }
 
@@ -81,7 +79,7 @@ function updateTable() {
                 new_cell.innerHTML = json.queue_counts.regrade;
                 new_cell.className = 'right-boarder';
                 Object.keys(json.machine_grading_counts).forEach((key, i) => {
-                    if (i == Object.keys(json.machine_grading_counts).length - 1) {
+                    if (i === Object.keys(json.machine_grading_counts).length - 1) {
                         new_cell = new_row.insertCell();
                         new_cell.innerHTML = json.machine_grading_counts[key];
                         new_cell.className = 'right-boarder';
@@ -113,13 +111,11 @@ function toggleUpdate() {
     if ($(this).text() === 'Pause Update') {
         clearInterval(interval);
         interval = null;
-        // eslint-disable-next-line no-undef
         displaySuccessMessage('Update has been stopped');
         $(this).text('Resume Update');
     }
     else {
         updateTable();
-        // eslint-disable-next-line no-undef
         displaySuccessMessage('Update has been resumed');
         $(this).text('Pause Update');
     }
