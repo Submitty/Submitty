@@ -273,7 +273,7 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
         }
-        if (isset($_POST['link_url']) && isset($_POST['link_title'])) {
+        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
             $path = $course_material->getPath();
             $dirs = explode("/", $path);
             array_pop($dirs);
@@ -375,7 +375,7 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("Invalid url");
             }
             $url_url = $_POST['url_url'];
-            if (isset($requested_path)) {
+            if (isset($requested_path) && $requested_path !== "") {
                 $this->addDirs($requested_path, $upload_path, $dirs_to_make);
             }
         }
