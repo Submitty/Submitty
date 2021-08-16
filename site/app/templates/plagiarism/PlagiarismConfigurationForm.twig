@@ -12,7 +12,7 @@
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id" id="gradeable_id">
                             {% for gradeable_id_title in config["gradeable_ids_titles"] %}
-                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} (Due {{ gradeable_id_title['g_grade_due_date'] }})</option>
+                                <option value="{{ gradeable_id_title['g_id'] }}">[{{ gradeable_id_title['g_id'] }}] {{ gradeable_id_title['g_title'] }} ({{ gradeable_id_title['g_grade_due_date'] }})</option>
                             {% endfor %}
                         </select>
                     {% else %}
@@ -113,7 +113,7 @@
             {##################################################################}
             <div class="plag-data-group">
                 <div class="plag-data-label">Sequence Length:</div>
-                <label for="sequence-length">This is the minimum size of matching regions</label>
+                <label for="sequence-length">Matching regions smaller than this limit won't be marked as plagiarism</label>
                 <div class="plag-data">
                     <input type="number" id="sequence-length" name="sequence_length" value="{{ config["sequence_length"] }}" placeholder="(Required)" min="1"/>
                 </div>

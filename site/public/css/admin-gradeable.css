@@ -250,14 +250,14 @@ div.btn-container {
 
 #zip_link_limited {
     text-decoration: none;
-    color: var(--text-black);
+    color: var(--btn-text-white);
     padding: 10px;
     padding-left: 0;
 }
 
 #zip_link_full {
     text-decoration: none;
-    color: var(--text-black);
+    color: var(--btn-default-text);
     padding: 10px;
     padding-left: 0;
 }

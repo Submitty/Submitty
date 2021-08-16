@@ -3857,6 +3857,25 @@ SQL;
         return $return;
     }
 
+    public function getAllCoursesForUserId(string $user_id): array {
+        $query = "
+        SELECT t.name AS term_name, u.semester, u.course, u.user_group
+        FROM courses_users u
+        INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+        INNER JOIN terms t ON u.semester=t.term_id
+        WHERE u.user_id=? AND (u.registration_section IS NOT NULL OR u.user_group<>4)
+        ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
+        ";
+        $this->submitty_db->query($query, [$user_id]);
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName();
+            $return[] = $course;
+        }
+        return $return;
+    }
+
     public function getCourseStatus($semester, $course) {
         $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", [$semester, $course]);
         return $this->submitty_db->rows()[0]['status'];
