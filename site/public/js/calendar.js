@@ -9,6 +9,7 @@
 /* global gradeables_by_date */
 /* global  items_by_date */
 /* global isGlobal */
+/* global isInstructor */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -128,10 +129,15 @@ function generateItemHtml(item, date) {
             break;
     }
     if (isGlobal) {
-        return `<p ${styleString}>${item['course']}: ${item['text']} <a onclick="editCalendarMessageForm('${item['type']}', '${item['text']}','${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
+        return `<p ${styleString}>${item['course']}: ${item['text']}`;
     }
     else {
-        return `<p ${styleString}>${item['text']} <a onclick="editCalendarMessageForm('${item['type']}', '${item['text']}', '${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
+        if (isInstructor) {
+            return `<p ${styleString}>${item['text']} <a onclick="editCalendarMessageForm('${item['type']}', '${item['text']}', '${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
+        }
+        else {
+            return `<p ${styleString}>${item['text']}</p>`;
+        }
     }
 }
 

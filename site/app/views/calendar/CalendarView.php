@@ -57,7 +57,8 @@ class CalendarView extends AbstractView {
             "gradeables_by_section" => $info->getGradeablesBySections(),
             "empty_message" => $info->getEmptyMessage(),
             "in_course" => $in_course,
-            "items_by_date" => $info->getItemsByDate()
+            "items_by_date" => $info->getItemsByDate(),
+            "is_instructor" => $this->core->getUser()->getGroup() === 1
         ]);
     }
 }
