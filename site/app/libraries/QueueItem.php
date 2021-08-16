@@ -8,15 +8,15 @@ namespace app\libraries;
  */
 class QueueItem {
     /** @prop-read @var array */
-    private array $grading_queue_obj = [];
+    private $grading_queue_obj = [];
     /** @prop-read @var int */
-    private int $start_time = 0;
+    private $start_time = 0;
     /** @prop-read @var int */
-    private int $elapsed_time = 0;
+    private $elapsed_time = 0;
     /** @prop-read @var array */
-    private array $queue_obj = [];
+    private $queue_obj = [];
     /** @prop-read @var bool */
-    private bool $regrade = false;
+    private $regrade = false;
 
     public function getGradingQueueObj(): array {
         return $this->grading_queue_obj;

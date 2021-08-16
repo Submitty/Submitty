@@ -7,7 +7,7 @@
 }
 
 #course-table > *,
-#machine-table > *{
+#machine-table > * {
     text-align: left;
 }
 
