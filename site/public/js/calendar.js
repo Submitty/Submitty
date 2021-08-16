@@ -1,15 +1,6 @@
-/* exported prevMonth */
-/* exported nextMonth */
-/* exported loadCalendar */
-/* exported loadFullCalendar */
-/* exported editCalendarMessageForm */
-/* global curr_day */
-/* global curr_month */
-/* global curr_year */
-/* global gradeables_by_date */
-/* global  items_by_date */
-/* global isGlobal */
-/* global isInstructor */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarMessageForm, deleteCalendarMessage */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, items_by_date */
+/* global isGlobal, isInstructor, csrfToken, buildCourseUrl */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -148,6 +139,31 @@ function editCalendarMessageForm(itemType, itemText, itemId, date) {
     $('#calendar-message-id').val(itemId);
 
     $('#edit-calendar-message-form').css('display', 'block');
+}
+
+function deleteCalendarMessage() {
+    const id = $('#calendar-message-id').val();
+    if (id !== '') {
+        const data = new FormData();
+        data.append('id', id);
+        data.append('csrf_token', csrfToken);
+        $.ajax({
+            url: buildCourseUrl(['calendar', 'deleteMessage']),
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    location.reload();
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+        });
+    }
 }
 
 /**

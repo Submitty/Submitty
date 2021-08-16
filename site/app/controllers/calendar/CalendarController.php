@@ -7,6 +7,7 @@ namespace app\controllers\calendar;
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
 use app\entities\calendar\CalendarMessage;
+use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
@@ -123,5 +124,22 @@ class CalendarController extends AbstractController {
         $calendar_message->setType($int_type);
         $this->core->getCourseEntityManager()->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/calendar/deleteMessage", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function deleteMessage(): JsonResponse {
+        $id = $_POST['id'];
+        $item = $this->core->getCourseEntityManager()->getRepository(CalendarMessage::class)
+            ->findOneBy(['id' => $id]);
+        if ($item !== null) {
+            $this->core->getCourseEntityManager()->remove($item);
+            $this->core->getCourseEntityManager()->flush();
+            $this->core->addSuccessMessage($item->getText() . " was successfully deleted.");
+            return JsonResponse::getSuccessResponse();
+        }
+        return JsonResponse::getErrorResponse("Failed to delete message");
     }
 }
