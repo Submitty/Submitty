@@ -418,7 +418,7 @@ class GradingQueue {
             }
         }
         catch (\Exception $e) {
-            $error .= "Could not read for {$queue_or_grading_file}: {$e}";
+            $error .= "Could not read for {$queue_or_grading_file}: {$e->getMessage()}";
         }
         return [
             "elapsed_time" => $elapsed_time,
