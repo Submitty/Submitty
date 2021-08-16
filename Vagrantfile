@@ -73,6 +73,7 @@ Vagrant.configure(2) do |config|
     # If this IP address changes, it must be changed in install_system.sh and 
     # CONFIGURE_SUBMITTY.pyto allow the ssh connection
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
+    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $worker_script
   end
 
@@ -82,6 +83,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
+    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
 
