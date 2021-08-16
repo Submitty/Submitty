@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="calendar_messages")
  */
-class CalendarMessage {
+class CalendarItem {
     const NOTE = 0;
     const ANNOUNCEMENT = 1;
     const IMPORTANT = 2;

@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\entities\calendar\CalendarMessage;
+use app\entities\calendar\CalendarItem;
 use app\libraries\Core;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
@@ -81,7 +81,7 @@ class CalendarInfo extends AbstractModel {
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
         ];
 
-        /** @var CalendarMessage $cal_item */
+        /** @var CalendarItem $cal_item */
         foreach ($calendar_items as $course => $cal_items) {
             foreach ($cal_items as $cal_item) {
                 $date = $cal_item->getDate()->format('Y-m-d');

@@ -2,7 +2,7 @@
 
 namespace app\models\gradeable;
 
-use app\entities\calendar\CalendarMessage;
+use app\entities\calendar\CalendarItem;
 use app\libraries\Core;
 use app\models\Button;
 use app\models\Course;
@@ -34,7 +34,7 @@ class GradeableUtils {
             $core->loadCourseDatabase();
         }
 
-        $calendar_messages[$course->getTitle()] = $core->getCourseEntityManager()->getRepository(CalendarMessage::class)->findAll();
+        $calendar_messages[$course->getTitle()] = $core->getCourseEntityManager()->getRepository(CalendarItem::class)->findAll();
 
         // Load all Gradeable objects of the current course
         foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {

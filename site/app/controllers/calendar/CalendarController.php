@@ -6,7 +6,7 @@ namespace app\controllers\calendar;
 
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
-use app\entities\calendar\CalendarMessage;
+use app\entities\calendar\CalendarItem;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
@@ -53,7 +53,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/newMessage", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/newItem", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function createMessage(): RedirectResponse {
@@ -61,7 +61,7 @@ class CalendarController extends AbstractController {
         $date = $_POST['date'];
         $text = $_POST['text'];
 
-        $calendar_message = new CalendarMessage();
+        $calendar_item = new CalendarItem();
         $int_type = null;
         switch ($type) {
             case "note":
@@ -77,18 +77,18 @@ class CalendarController extends AbstractController {
         if ($int_type === null) {
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
-        $calendar_message->setType($int_type);
-        $calendar_message->setDate(new \DateTime($date));
-        $calendar_message->setText($text);
+        $calendar_item->setType($int_type);
+        $calendar_item->setDate(new \DateTime($date));
+        $calendar_item->setText($text);
 
-        $this->core->getCourseEntityManager()->persist($calendar_message);
+        $this->core->getCourseEntityManager()->persist($calendar_item);
         $this->core->getCourseEntityManager()->flush();
 
         return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/editMessage", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/editItem", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function editMessage(): RedirectResponse {
@@ -97,15 +97,15 @@ class CalendarController extends AbstractController {
         $text = $_POST['text'];
         $id = $_POST['id'];
 
-        $calendar_message = $this->core->getCourseEntityManager()->getRepository(CalendarMessage::class)
+        $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
             ->findOneBy(['id' => $id]);
 
-        if ($calendar_message === null) {
+        if ($calendar_item === null) {
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
 
-        $calendar_message->setText($text);
-        $calendar_message->setDate(new \DateTime($date));
+        $calendar_item->setText($text);
+        $calendar_item->setDate(new \DateTime($date));
         $int_type = null;
         switch ($type) {
             case "note":
@@ -121,18 +121,18 @@ class CalendarController extends AbstractController {
         if ($int_type === null) {
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
-        $calendar_message->setType($int_type);
+        $calendar_item->setType($int_type);
         $this->core->getCourseEntityManager()->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/deleteMessage", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/deleteItem", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteMessage(): JsonResponse {
         $id = $_POST['id'];
-        $item = $this->core->getCourseEntityManager()->getRepository(CalendarMessage::class)
+        $item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
             ->findOneBy(['id' => $id]);
         if ($item !== null) {
             $this->core->getCourseEntityManager()->remove($item);
