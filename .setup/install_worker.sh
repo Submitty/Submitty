@@ -23,6 +23,7 @@ done
 # This script is used to set up the worker machine in a vagrant worker pair
 # made by running WORKER_PAIR=1 vagrant up
 
+GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUPERVISOR_USER=submitty
 
 echo "checking ${SUPERVISOR_USER} user"
