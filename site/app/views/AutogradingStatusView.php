@@ -13,6 +13,6 @@ class AutogradingStatusView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         return $this->core->getOutput()->renderTwigTemplate("AutogradingStatus.twig", [
             "progress" => $progress
-        ]); 
+        ]);
     }
 }

@@ -363,8 +363,7 @@ class GlobalController extends AbstractController {
     }
 
     // ==========================================================================================
-    public function prep_user_sidebar(&$sidebar_buttons)
-    {
+    public function prep_user_sidebar(&$sidebar_buttons) {
 
         // --------------------------------------------------------------------------
         // ALL USERS

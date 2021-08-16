@@ -9,8 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\GradingQueue;
 use app\views\AutogradingStatusView;
-use app\libraries\FileUtils;
-use PHPUnit\Util\Json;
+use app\views\ErrorView;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AutogradingStatusController extends AbstractController {
@@ -21,7 +20,7 @@ class AutogradingStatusController extends AbstractController {
     public function getGradingDonePage() {
         $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
         $user_id = $this->core->getUser()->getId();
-        if (!in_array($user_id, $instructors)){
+        if (!in_array($user_id, $instructors)) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
@@ -43,7 +42,7 @@ class AutogradingStatusController extends AbstractController {
     public function getProgress(): JsonResponse {
         $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
         $user_id = $this->core->getUser()->getId();
-        if (!in_array($user_id, $instructors)){
+        if (!in_array($user_id, $instructors)) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $info = $this->getAutogradingInfo();

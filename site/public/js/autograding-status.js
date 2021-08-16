@@ -6,17 +6,19 @@ const max_log = 60;
 let interval = null;
 
 function updateTable() {
-    console.log(buildCourseUrl(['autograding_status', 'get_update']));
     clearInterval(interval);
     $.ajax({
+        // eslint-disable-next-line no-undef
         url: buildUrl(['autograding_status', 'get_update']),
         type: 'GET',
+        // eslint-disable-next-line no-undef
         data: {'csrf_token': csrfToken},
         success: function(response) {
             try {
                 const data = $('#data');
                 let json = JSON.parse(response);
                 if (json.status !== 'success') {
+                    // eslint-disable-next-line no-undef
                     displayErrorMessage('This login session has expired, please log in again to continue to receive updates');
                     return;
                 }
@@ -32,13 +34,13 @@ function updateTable() {
                 }
 
                 // Update Class Statistics table
-                let table = document.getElementById("course-table");
-                $("#course-table tbody").html("");
+                let table = document.getElementById('course-table');
+                $('#course-table tbody').html('');
                 Object.keys(json.course_info).forEach(key1 => {
-                    let course_name = key1.split("__");
+                    const course_name = key1.split('__');
                     Object.keys(json.course_info[key1]).forEach(key2 => {
-                        let info = json.course_info[key1][key2];
-                        let new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
+                        const info = json.course_info[key1][key2];
+                        const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
                         new_row.insertCell().innerHTML = course_name[0];
                         new_row.insertCell().innerHTML = course_name[1];
                         new_row.insertCell().innerHTML = key2;
@@ -48,14 +50,14 @@ function updateTable() {
                 });
 
                 // Update Machine Statistics table
-                table = document.getElementById("machine-table");
-                $("#machine-table tbody").html("");
-                Object.keys(json.ongoing_job_info).forEach(function(key) {
-                    let info = json.ongoing_job_info[key];
-                    info.forEach(function(elem) {
-                        let new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
+                table = document.getElementById('machine-table');
+                $('#machine-table tbody').html('');
+                Object.keys(json.ongoing_job_info).forEach(key => {
+                    const info = json.ongoing_job_info[key];
+                    info.forEach(elem => {
+                        const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
                         new_row.insertCell().innerHTML = key;
-                        new_row.insertCell().innerHTML = elem.semester
+                        new_row.insertCell().innerHTML = elem.semester;
                         new_row.insertCell().innerHTML = elem.course;
                         new_row.insertCell().innerHTML = elem.gradeable_id;
                         new_row.insertCell().innerHTML = elem.user_id;
@@ -65,24 +67,24 @@ function updateTable() {
                 });
 
                 // Update Grading Monitor table
-                table = document.getElementById("autograding-status-table");
-                new_row = table.insertRow(3);
-                new_cell = new_row.insertCell();
+                table = document.getElementById('autograding-status-table');
+                const new_row = table.insertRow(3);
+                let new_cell = new_row.insertCell();
                 new_cell.innerHTML = json.time;
-                new_cell.className = "right-boarder";
+                new_cell.className = 'right-boarder';
                 new_row.insertCell().innerHTML = json.queue_counts.interactive_ongoing;
                 new_cell = new_row.insertCell();
                 new_cell.innerHTML = json.queue_counts.interactive;
-                new_cell.className = "right-boarder";
+                new_cell.className = 'right-boarder';
                 new_row.insertCell().innerHTML = json.queue_counts.regrade_ongoing;
                 new_cell = new_row.insertCell();
                 new_cell.innerHTML = json.queue_counts.regrade;
-                new_cell.className = "right-boarder";
-                Object.keys(json.machine_grading_counts).forEach(function(key, i) {
+                new_cell.className = 'right-boarder';
+                Object.keys(json.machine_grading_counts).forEach((key, i) => {
                     if (i == Object.keys(json.machine_grading_counts).length - 1) {
                         new_cell = new_row.insertCell();
                         new_cell.innerHTML = json.machine_grading_counts[key];
-                        new_cell.className = "right-boarder";
+                        new_cell.className = 'right-boarder';
                     }
                     else {
                         new_row.insertCell().innerHTML = json.machine_grading_counts[key];
@@ -92,7 +94,7 @@ function updateTable() {
                     new_row.insertCell().innerHTML = json.capability_queue_counts[key];
                 });
                 // Check if old logs should be removed to make room for new logs
-                if ($("#autograding-status-table tbody tr").length > max_log) {
+                if ($('#autograding-status-table tbody tr').length > max_log) {
                     // +3 to account for the thead
                     table.deleteRow(max_log + 3);
                 }
@@ -103,26 +105,28 @@ function updateTable() {
             catch (e) {
                 console.log(e);
             }
-        }
+        },
     });
 }
 
 function toggleUpdate() {
-    if ($(this).text() === "Pause Update") {
+    if ($(this).text() === 'Pause Update') {
         clearInterval(interval);
         interval = null;
-        displaySuccessMessage("Update has been stopped");
-        $(this).text("Resume Update")
+        // eslint-disable-next-line no-undef
+        displaySuccessMessage('Update has been stopped');
+        $(this).text('Resume Update');
     }
     else {
         updateTable();
-        displaySuccessMessage("Update has been resumed");
-        $(this).text("Pause Update");
+        // eslint-disable-next-line no-undef
+        displaySuccessMessage('Update has been resumed');
+        $(this).text('Pause Update');
     }
 }
 
-$(document).ready(function() {
+$(document).ready(() => {
     interval = setInterval(updateTable, refresh_freq);
-    $('#toggle-btn').text("Pause Update");
+    $('#toggle-btn').text('Pause Update');
     $('#toggle-btn').on('click', toggleUpdate);
 });

@@ -258,8 +258,7 @@ class GradingQueue {
 
         foreach ($this->queue_files as $full_path_file) {
             $path = FileUtils::joinPaths($this->queue_path, $full_path_file);
-            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
+            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts, $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
         }
 
         $started = [];
@@ -272,7 +271,8 @@ class GradingQueue {
                 $found = file_exists($path);
                 if ($found) {
                     $started[] = FileUtils::joinPaths($worker, $file);
-                } else {
+                }
+                else {
                     $not_yet_started[] = FileUtils::joinPaths($worker, $file);
                 }
             }
@@ -280,23 +280,22 @@ class GradingQueue {
 
         foreach ($started as $file) {
             $path = FileUtils::joinPaths($this->grading_path, $file);
-            $job_file = $this->updateDetailedQueueCount($path, true, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
+            $job_file = $this->updateDetailedQueueCount($path, true, $epoch_time, $queue_counts, $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
             $file_segments = explode("/", $file);
-            $machine = substr($file_segments[0], 0, strrpos($file_segments[0],"_", -1));
+            $machine = substr($file_segments[0], 0, strrpos($file_segments[0], "_", -1));
             $file_segments = explode("__", $file_segments[1]);
             $elapsed_time = "";
             // Calculate the days elapsed
-            if ($job_file["elapsed_time"] > 60*60*24) {
-                $elapsed_time .= floor($job_file["elapsed_time"] / (60*60*24)) . " Days ";
-                $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60*60*24);
+            if ($job_file["elapsed_time"] > 60 * 60 * 24) {
+                $elapsed_time .= floor($job_file["elapsed_time"] / (60 * 60 * 24)) . " Days ";
+                $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60 * 24);
             }
             // Calculate the hours elapsed
-            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / (60 * 60)), 2, "0", STR_PAD_LEFT) . ":" ;
+            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / (60 * 60)), 2, "0", STR_PAD_LEFT) . ":";
             $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60);
             // Format the string with the minutes and seconds elapsed
-            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60),2,"0", STR_PAD_LEFT) . ":"
-                . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT) ;
+            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60), 2, "0", STR_PAD_LEFT) . ":"
+                . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT);
             $ongoing_job_info[$machine][] = [
                 "semester" => $file_segments[0],
                 "course" => $file_segments[1],
@@ -312,8 +311,7 @@ class GradingQueue {
         // These are files in the grading directory but does not have a GRADING_ file, so grading has not started yet
         foreach ($not_yet_started as $file) {
             $path = FileUtils::joinPaths($this->grading_path, $file);
-            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts,
-                $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
+            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts, $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
         }
 
         return [
@@ -327,12 +325,11 @@ class GradingQueue {
     }
 
     // Helper function used to interpret the job files and update the count variables appropriately
-    private function updateDetailedQueueCount(string $queue_or_grading_file, bool $is_grading, int $epoch_time, array &$detailed_queue_counts,
-        array &$capability_queue_counts, array &$machine_grading_counts, array $open_autograding_workers_json, array &$course_info): array {
+    private function updateDetailedQueueCount(string $queue_or_grading_file, bool $is_grading, int $epoch_time, array &$detailed_queue_counts, array &$capability_queue_counts, array &$machine_grading_counts, array $open_autograding_workers_json, array &$course_info): array {
         $stale = false;
         $error = "";
         $regrade = false;
-        
+
         $elapsed_time = -1;
 
         $job_file = basename($queue_or_grading_file);
@@ -357,7 +354,7 @@ class GradingQueue {
                 }
             }
             $capability = "default";
-            if (in_array("required_capabilities",$entry->getQueueObj())) {
+            if (in_array("required_capabilities", $entry->getQueueObj())) {
                 $capability = $entry->getQueueObj()["required_capabilities"];
             }
 
@@ -370,8 +367,8 @@ class GradingQueue {
 
                     $enabled_worker = false;
                     foreach ($open_autograding_workers_json as $machine) {
-                        if ($machine["enabled"]){
-                            if (in_array($capability, $machine["capabilities"])){
+                        if ($machine["enabled"]) {
+                            if (in_array($capability, $machine["capabilities"])) {
                                 $enabled_worker = true;
                             }
                         }

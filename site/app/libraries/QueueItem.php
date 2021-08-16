@@ -6,7 +6,7 @@ namespace app\libraries;
  * Class QueueItem
  * Helper class used to interpret the files read in the autograding json files
  */
-class QueueItem{
+class QueueItem {
     /** @prop-read @var array */
     private array $grading_queue_obj = [];
     /** @prop-read @var int */
