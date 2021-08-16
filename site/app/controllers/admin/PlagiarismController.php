@@ -476,8 +476,9 @@ class PlagiarismController extends AbstractController {
         if (!$is_team_assignment) {
             $user_ids = [];
             foreach ($rankings_data as $item) {
-                $user_ids[] = $item[1];
+                $user_ids[$item[1]] = null;
             }
+            $user_ids = array_keys($user_ids);
 
             $user_ids_and_names = $this->core->getQueries()->getUsersByIds($user_ids);
             if ($user_ids_and_names === null) {
@@ -1316,8 +1317,9 @@ class PlagiarismController extends AbstractController {
         if (!$is_team_assignment) {
             $user_ids = [];
             foreach ($ranking as $item) {
-                $user_ids[] = $item[1];
+                $user_ids[$item[1]] = null;
             }
+            $user_ids = array_keys($user_ids);
 
             $user_ids_and_names = $this->core->getQueries()->getUsersByIds($user_ids);
             if ($user_ids_and_names === null) {

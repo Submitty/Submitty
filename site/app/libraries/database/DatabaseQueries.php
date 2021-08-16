@@ -7176,21 +7176,26 @@ AND gc_id IN (
                 $user_id_list
             );
 
-            $i = 0;
-            foreach ($details_list as &$details) {
-                if ($this->course_db->getRowCount() > 0) {
-                    $user = $this->course_db->rows()[$i];
-                    if (isset($user['grading_registration_sections'])) {
-                        $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
-                    }
-                    $details = array_merge($details, $user);
-                }
-                $i++;
-            }
+            $updated_details_list = [];
+             if ($this->course_db->getRowCount() > 0) {
+                 $i = 0;
+                 foreach ($details_list as $details) {
+                     $user = $this->course_db->rows()[$i];
+                     if (isset($user['grading_registration_sections'])) {
+                         $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                     }
+                     $updated_details_list[] = array_merge($details, $user);
+                     $i++;
+                 }
+                 $details_list = $updated_details_list;
+             }
         }
 
         $users = [];
         foreach ($details_list as $details) {
+            if (isset($users[$details['user_id']])) {
+                $test = $details['user_id'];
+            }
             $users[$details['user_id']] = new User($this->core, $details);
         }
 
