@@ -5,7 +5,7 @@
 </script>
 <div class="content plagiarism-result-cont">
     <div id="result-title-bar">
-        <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span> </h2>
+        <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span></h2>
         <span class="plag-results-header-right">
             <a class="btn btn-primary" onclick="showPlagiarismHighKey()">View Key</a>
             <a class="btn btn-primary" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
@@ -40,11 +40,17 @@
     <div class="code-cont">
         <div class="sub">
             <div class="sub-item left-sub-item">
-                <textarea id="code_box_1" name="code_box_1"></textarea>
+                <div class="loading-animation left-loader"></div>
+                <div class="left-sub-item-middle blurry">
+                    <textarea id="code_box_1" name="code_box_1"></textarea>
+                </div>
             </div>
             <div class="plag-drag-bar"></div>
             <div class="sub-item right-sub-item">
-                <textarea id="code_box_2" name="code_box_2"></textarea>
+                <div class="loading-animation right-loader"></div>
+                <div class="right-sub-item-middle blurry">
+                    <textarea id="code_box_2" name="code_box_2"></textarea>
+                </div>
             </div>
         </div>
     </div>
