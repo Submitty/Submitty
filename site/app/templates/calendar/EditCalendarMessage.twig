@@ -52,6 +52,7 @@
     </form>
 {% endblock %}
 {% block buttons %}
+    <input class="btn btn-danger" type="button" value="Delete" style="float: left;" onclick="deleteCalendarMessage()">
     {{ block('close_button') }}
     <input class="btn btn-primary" type="submit" value="Submit" />
 {% endblock %}
