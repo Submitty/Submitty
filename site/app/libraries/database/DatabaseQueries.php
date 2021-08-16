@@ -7193,9 +7193,6 @@ AND gc_id IN (
 
         $users = [];
         foreach ($details_list as $details) {
-            if (isset($users[$details['user_id']])) {
-                $test = $details['user_id'];
-            }
             $users[$details['user_id']] = new User($this->core, $details);
         }
 
