@@ -7177,18 +7177,18 @@ AND gc_id IN (
             );
 
             $updated_details_list = [];
-             if ($this->course_db->getRowCount() > 0) {
-                 $i = 0;
-                 foreach ($details_list as $details) {
-                     $user = $this->course_db->rows()[$i];
-                     if (isset($user['grading_registration_sections'])) {
-                         $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
-                     }
-                     $updated_details_list[] = array_merge($details, $user);
-                     $i++;
-                 }
-                 $details_list = $updated_details_list;
-             }
+            if ($this->course_db->getRowCount() > 0) {
+                $i = 0;
+                foreach ($details_list as $details) {
+                    $user = $this->course_db->rows()[$i];
+                    if (isset($user['grading_registration_sections'])) {
+                        $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                    }
+                    $updated_details_list[] = array_merge($details, $user);
+                    $i++;
+                }
+                $details_list = $updated_details_list;
+            }
         }
 
         $users = [];
