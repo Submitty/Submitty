@@ -153,6 +153,16 @@ class DatabaseQueries {
     }
 
     /**
+     * Gets a user from the database given a numeric user_id.
+     *
+     * @param int $numeric_id
+     * @return User|null
+     */
+    public function getUserByNumericId(int $numeric_id): ?User {
+        return $this->getUser($numeric_id, true);
+    }
+
+    /**
      * Gets a list of first and last names from the database given an array of IDs.
      *
      * @param array $user_id_list
@@ -162,26 +172,6 @@ class DatabaseQueries {
         return $this->getUsers($user_id_list);
     }
 
-    /**
-     * @param int $numeric_id
-     * @return User|null
-     */
-    public function getUserByNumericId(int $numeric_id): ?User {
-        return $this->getUser($numeric_id, true);
-    }
-
-    /**
-     * @param int|string $id
-     * @return User|null
-     */
-    public function getUserByIdOrNumericId($id): ?User {
-        $ret = $this->getUser($id);
-        if ($ret === null) {
-            return $this->getUser($id, true);
-        }
-
-        return $ret;
-    }
     /**
      * Retrieves all students from a course and their virtual attendance
      * information such as logs for the course materials page, and logs
