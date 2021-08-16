@@ -481,7 +481,8 @@ class PlagiarismController extends AbstractController {
 
             $user_ids_and_names = $this->core->getQueries()->getUsersByIds($user_ids);
             if ($user_ids_and_names === null) {
-                return JsonResponse::getErrorResponse("Error: Unable to load left dropdown list");
+                $this->core->addErrorMessage("Error: Unable to load left dropdown list");
+                return new RedirectResponse($error_return_url);
             }
         }
 
