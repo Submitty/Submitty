@@ -1,22 +1,22 @@
 {% extends 'generic/Popup.twig' %}
-{% block popup_id %}edit-calendar-message-form{% endblock %}
-{% block title %}New Calendar Message{% endblock %}
+{% block popup_id %}edit-calendar-item-form{% endblock %}
+{% block title %}Edit Calendar Item{% endblock %}
 {% block body %}
     <p class="std-margin">
-        Edit or delete this calendar event.
+        Edit or delete this calendar item.
     </p>
-    <label for="calendar-message-type-edit">Message Type</label>
-    <select id="calendar-message-type-edit" name="type">
+    <label for="calendar-item-type-edit">Message Type</label>
+    <select id="calendar-item-type-edit" name="type">
         <option value="note">Note</option>
         <option value="announcement">Announcement</option>
         <option value="important">Important</option>
     </select><br>
-    <label for="calendar-message-text-edit">Message Text</label>
-    <input type="text" id="calendar-message-text-edit" name="text"><br>
+    <label for="calendar-item-text-edit">Message Text</label>
+    <input type="text" id="calendar-item-text-edit" name="text"><br>
     <label for="edit-picker-edit">Date</label>
     <input id="edit-picker-edit" class="edit-picker" type="text" name="date">
     <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
-    <input hidden id="calendar-message-id" name="id">
+    <input hidden id="calendar-item-id" name="id">
     <script>
         flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
@@ -47,12 +47,12 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="calendar/editMessage">
+    <form method="post" action="calendar/editItem">
         {{ parent() }}
     </form>
 {% endblock %}
 {% block buttons %}
-    <input class="btn btn-danger" type="button" value="Delete" style="float: left;" onclick="deleteCalendarMessage()">
+    <input class="btn btn-danger" type="button" value="Delete" style="float: left;" onclick="deleteCalendarItem()">
     {{ block('close_button') }}
     <input class="btn btn-primary" type="submit" value="Submit" />
 {% endblock %}

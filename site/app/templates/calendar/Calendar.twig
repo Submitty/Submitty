@@ -13,8 +13,8 @@
         loadCalendar({{ view_month }}, {{ view_year }});
     });
 
-    function openNewMessageModal() {
-        $('#new-calendar-message-form').css('display', 'block');
+    function openNewItemModal() {
+        $('#new-calendar-item-form').css('display', 'block');
     }
 </script>
 
@@ -24,8 +24,8 @@
     <div class="cal-content">
         <div class="cal-toolbar">
             {% if in_course %}
-                <button type="button" onclick="openNewMessageModal()" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> New Message
+                <button type="button" onclick="openNewItemModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
         </div>
@@ -81,5 +81,5 @@
     {% endif %}
 </div>
 
-{{ include('calendar/NewCalendarMessage.twig') }}
-{{ include('calendar/EditCalendarMessage.twig') }}
+{{ include('calendar/NewCalendarItem.twig') }}
+{{ include('calendar/EditCalendarItem.twig') }}

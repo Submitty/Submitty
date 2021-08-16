@@ -1,4 +1,4 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarMessageForm, deleteCalendarMessage */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, items_by_date */
 /* global isGlobal, isInstructor, csrfToken, buildCourseUrl */
 
@@ -124,7 +124,7 @@ function generateItemHtml(item, date) {
     }
     else {
         if (isInstructor) {
-            return `<p ${styleString}>${item['text']} <a onclick="editCalendarMessageForm('${item['type']}', '${item['text']}', '${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
+            return `<p ${styleString}>${item['text']} <a onclick="editCalendarItemForm('${item['type']}', '${item['text']}', '${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
         }
         else {
             return `<p ${styleString}>${item['text']}</p>`;
@@ -132,23 +132,23 @@ function generateItemHtml(item, date) {
     }
 }
 
-function editCalendarMessageForm(itemType, itemText, itemId, date) {
-    $('#calendar-message-type-edit').val(itemType);
-    $('#calendar-message-text-edit').val(itemText);
+function editCalendarItemForm(itemType, itemText, itemId, date) {
+    $('#calendar-item-type-edit').val(itemType);
+    $('#calendar-item-text-edit').val(itemText);
     $('#edit-picker-edit').val(date);
-    $('#calendar-message-id').val(itemId);
+    $('#calendar-item-id').val(itemId);
 
-    $('#edit-calendar-message-form').css('display', 'block');
+    $('#edit-calendar-item-form').css('display', 'block');
 }
 
-function deleteCalendarMessage() {
-    const id = $('#calendar-message-id').val();
+function deleteCalendarItem() {
+    const id = $('#calendar-item-id').val();
     if (id !== '') {
         const data = new FormData();
         data.append('id', id);
         data.append('csrf_token', csrfToken);
         $.ajax({
-            url: buildCourseUrl(['calendar', 'deleteMessage']),
+            url: buildCourseUrl(['calendar', 'deleteItem']),
             type: 'POST',
             processData: false,
             contentType: false,
