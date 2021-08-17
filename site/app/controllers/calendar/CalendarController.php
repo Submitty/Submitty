@@ -61,6 +61,11 @@ class CalendarController extends AbstractController {
         $date = $_POST['date'];
         $text = $_POST['text'];
 
+        if (strip_tags($text) !== $text) {
+            $this->core->addErrorMessage("HTML cannot be used in this text");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
         $calendar_item = new CalendarItem();
         $int_type = null;
         switch ($type) {
@@ -75,6 +80,7 @@ class CalendarController extends AbstractController {
                 break;
         }
         if ($int_type === null) {
+            $this->core->addErrorMessage("That is not a valid calendar item type");
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
         $calendar_item->setType($int_type);
@@ -84,6 +90,7 @@ class CalendarController extends AbstractController {
         $this->core->getCourseEntityManager()->persist($calendar_item);
         $this->core->getCourseEntityManager()->flush();
 
+        $this->core->addSuccessMessage("Calendar item successfully added");
         return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
     }
 
