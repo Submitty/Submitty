@@ -202,8 +202,8 @@ class PlagiarismController extends AbstractController {
         }
 
         $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], ' ', $content));
-        $rankings = preg_split('/ +/', $content);
+        $content = trim($content);
+        $rankings = preg_split('/\s+/', $content);
         $rankings = array_chunk($rankings, 3);
         return $rankings;
     }
@@ -224,8 +224,8 @@ class PlagiarismController extends AbstractController {
         }
 
         $content = file_get_contents($file_path);
-        $content = trim(str_replace(["\r", "\n"], ' ', $content));
-        $rankings = preg_split('/ +/', $content);
+        $content = trim($content);
+        $rankings = preg_split('/\s+/', $content);
         $rankings = array_chunk($rankings, 4);
         return $rankings;
     }
@@ -470,11 +470,27 @@ class PlagiarismController extends AbstractController {
         }
 
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
+
+        $user_ids_and_names = [];
+        if (!$is_team_assignment) {
+            $user_ids = [];
+            foreach ($rankings_data as $item) {
+                $user_ids[$item[1]] = null;
+            }
+            $user_ids = array_keys($user_ids);
+
+            $user_ids_and_names = $this->core->getQueries()->getUsersByIds($user_ids);
+            if ($user_ids_and_names === null) {
+                $this->core->addErrorMessage("Error: Unable to load left dropdown list");
+                return new RedirectResponse($error_return_url);
+            }
+        }
+
         $rankings = [];
         foreach ($rankings_data as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[1]]->getDisplayedFirstName()} {$user_ids_and_names[$item[1]]->getDisplayedLastName()}";
             }
             $temp = [
                 "percent" => $item[0],
@@ -1294,12 +1310,27 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
 
-        $return = [];
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
+
+        $user_ids_and_names = [];
+        if (!$is_team_assignment) {
+            $user_ids = [];
+            foreach ($ranking as $item) {
+                $user_ids[$item[1]] = null;
+            }
+            $user_ids = array_keys($user_ids);
+
+            $user_ids_and_names = $this->core->getQueries()->getUsersByIds($user_ids);
+            if ($user_ids_and_names === null) {
+                return JsonResponse::getErrorResponse("Error: Unable to load right dropdown list");
+            }
+        }
+
+        $return = [];
         foreach ($ranking as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$this->core->getQueries()->getUserById($item[1])->getDisplayedFirstName()} {$this->core->getQueries()->getUserById($item[1])->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[1]]->getDisplayedFirstName()} {$user_ids_and_names[$item[1]]->getDisplayedLastName()}";
             }
             $temp = [
                 "percent" => $item[0],
