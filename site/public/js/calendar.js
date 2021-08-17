@@ -124,7 +124,11 @@ function generateItemHtml(item, date) {
     }
     else {
         if (isInstructor) {
-            return `<p ${styleString}>${item['text']} <a onclick="editCalendarItemForm('${item['type']}', '${item['text']}', '${item['id']}', '${date}')"><i class="fas fa-pencil-alt"></i></a></p>`;
+            const string =  `<p ${styleString}>${item['text']} <a data-id="${item['id']}" data-type="${item['type']}" data-text="${window.btoa(item['text'])}" data-date="${date}" class="calendar-item-edit-button"><i class="fas fa-pencil-alt"></i></a></p>`;
+            /*document.getElementById(item['id']).onclick = function () {
+                editCalendarItemForm(item['type'], item['text'], item['id'], date);
+            };*/
+            return string;
         }
         else {
             return `<p ${styleString}>${item['text']}</p>`;
@@ -394,6 +398,10 @@ function generateFullCalendar(start, end, semester_name) {
  */
 function loadCalendar(month_, year_) {
     $('#full-calendar').html(generateCalendarOfMonth(year_, month_));
+    $('.calendar-item-edit-button').on('click', function () {
+        const dataset = this.dataset;
+        editCalendarItemForm(dataset.type, window.atob(dataset.text), dataset.id, dataset.date);
+    });
 }
 
 /**

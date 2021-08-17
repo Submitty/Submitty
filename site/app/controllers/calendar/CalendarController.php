@@ -104,6 +104,11 @@ class CalendarController extends AbstractController {
         $text = $_POST['text'];
         $id = $_POST['id'];
 
+        if (strip_tags($text) !== $text) {
+            $this->core->addErrorMessage("HTML cannot be used in this text");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
         $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
             ->findOneBy(['id' => $id]);
 
