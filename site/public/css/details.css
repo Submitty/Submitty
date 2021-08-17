@@ -292,3 +292,8 @@
 .randomize_cancel_btn {
     float: left;
 }
+
+.gradeable_message li {
+    margin-left:30px;
+    margin-bottom:10px;
+}
