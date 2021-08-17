@@ -74,8 +74,17 @@ class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
      */
-    public function downloadCourseMaterialZip($dir_name, $path) {
-        $root_path = realpath(htmlspecialchars_decode(rawurldecode($path)));
+    public function downloadCourseMaterialZip($course_material_id) {
+        //$root_path = realpath(htmlspecialchars_decode(rawurldecode($path)));
+        $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['id' => $course_material_id]);
+        if ($cm === null) {
+            $this->core->addErrorMessage("Invalid course material ID");
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
+        $root_path = $cm->getPath();
+        $dir_name = explode("/", $root_path);
+        $dir_name = array_pop($dir_name);
 
         // check if the user has access to course materials
         if (!$this->core->getAccess()->canI("path.read", ["dir" => 'course_materials', "path" => $root_path])) {

@@ -45,22 +45,22 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(course_materials, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, material_list, date_format) }}
+        {{ _self.display_files(course_materials, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, material_list, date_format, folder_ids) }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format) %}
+{% macro display_files(course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids) %}
     {% for name, course_material in course_materials %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format) }}
+            {{ _self.display_folder(name, course_material, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids) }}
         {% else %}
-            {{ _self.display_file(name, course_material, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, date_format) }}
+            {{ _self.display_file(name, course_material, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, date_format, folder_ids) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(name, course_material, user_group, user_section, id, indent, display_file_url, date_format) %}
+{% macro display_file(name, course_material, user_group, user_section, id, indent, display_file_url, date_format, folder_ids) %}
     {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
         <div class="file-container">
             <div class="file-viewer">
@@ -73,10 +73,10 @@
                 {% endif %}
                 {% set extension = name|split('.')|last|lower %}
                 {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                    <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ course_material.getPath | url_encode }}" aria-label="Pop up {{ name }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                    <a target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" aria-label="Pop up {{ name }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                 {% endif %}
                 {% if not course_material.isLink %}
-                    <a class="key_to_click" onclick='downloadFile("{{ course_material.getPath | url_encode }}", "course_materials")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+                    <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                 {% endif %}
                 {% if user_group == 1 %}
                     {% if course_material.isLink %}
@@ -144,9 +144,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format) %}
+{% macro display_folder(name, course_materials, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids) %}
     {% if indent == -1 %}
-        {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format) }}
+        {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids) }}
     {% else %}
         <div class="folder-container">
             <div class="div-viewer">
@@ -154,7 +154,7 @@
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
                 </a>
-                <a onclick="downloadCourseMaterialZip('{{ name }}', '{{ folder_path | url_encode }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
+                <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
                     <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_path }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_path | url_encode  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
@@ -168,7 +168,7 @@
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
-                {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format) }}
+                {{ _self.display_files(course_materials, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids) }}
             </div>
         </div>
     {% endif %}

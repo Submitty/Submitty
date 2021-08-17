@@ -668,6 +668,10 @@ function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
+function downloadCourseMaterial(id) {
+    window.location = buildCourseUrl(['download']) + `?course_material_id=${id}`;
+}
+
 function downloadStudentAnnotations(url, path, dir) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
 }
@@ -677,8 +681,8 @@ function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_ano
     return false;
 }
 
-function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
+function downloadCourseMaterialZip(id) {
+    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?course_material_id=' + id;
 }
 
 function checkColorActivated() {
