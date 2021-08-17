@@ -648,11 +648,11 @@ class DiffViewer {
         if (count($lines) + $num_blanks > 1000 || $num_chars >= 50000) {
             $html .= "<p>...</p>";
             if ($type === self::EXPECTED) {
-                $truncate_error = "<p style='color: red;'>This file has been truncated. Please contact instructor if you feel that you need the full file.</p>";
+                $truncate_error = "<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p>";
                 $html = $truncate_error . $html . $truncate_error;
             }
             elseif ($type === self::ACTUAL) {
-                $truncate_error = "<p style='color: red;'>This file has been truncated. Please download it to see the full file.</p>";
+                $truncate_error = "<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please download it to see the full file.</b></p>";
                 $html = $truncate_error . $html . $truncate_error;
             }
         }
