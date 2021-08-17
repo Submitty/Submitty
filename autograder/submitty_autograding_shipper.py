@@ -1364,11 +1364,11 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
         )
         return False
 
-    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-    config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
-
     if not can_short_circuit(config_obj):
         return False
+
+    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+    config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
 
     # Augment the queue object
     base, path = os.path.split(queue_file)
