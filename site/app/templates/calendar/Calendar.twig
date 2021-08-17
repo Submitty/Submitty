@@ -23,7 +23,7 @@
     <h1>Calendar</h1>
     <div class="cal-content">
         <div class="cal-toolbar">
-            {% if in_course %}
+            {% if in_course and is_instructor %}
                 <button type="button" onclick="openNewItemModal()" class="btn btn-primary">
                     <i class="fas fa-plus"></i> New Item
                 </button>
