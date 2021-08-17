@@ -178,4 +178,12 @@ class CourseMaterial {
     public function getUrlTitle(): string {
         return $this->url_title;
     }
+
+    public function setUrl(string $url): void {
+        $this->url = $url;
+    }
+
+    public function setUrlTitle(string $url_title): void {
+        $this->url_title = $url_title;
+    }
 }
