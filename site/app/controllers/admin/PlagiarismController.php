@@ -362,26 +362,14 @@ class PlagiarismController extends AbstractController {
             $timestamp = "N/A";
             $students = "N/A";
             $submissions = "N/A";
-            $in_queue = false;
-            $processing = false;
             $ranking_available = false;
-            $matches_and_topmatch = "0 students matched, N/A top match";
+            $matches_and_top_match = "0 students matched, N/A top match";
             $gradeable_link = "";
             $rerun_plagiarism_link = "";
             $edit_plagiarism_link = "";
             $delete_form_action = "";
             $nightly_rerun_link = "";
             $night_rerun_status = ""; // TODO: future feature
-
-            if ($has_results) {
-                $timestamp = date($gradeable_date_format, filemtime($overall_ranking_file));
-                $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
-                $submissions = 0;
-                foreach ($students as $student) {
-                    $submissions += count(array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users", $student)), ['.', '..']));
-                }
-                $students = count($students);
-            }
 
             if (file_exists($this->getProcessingQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
                 // lichen job in processing stage for this gradeable but not completed
@@ -398,10 +386,21 @@ class PlagiarismController extends AbstractController {
                 $in_queue = false;
                 $processing = false;
                 if ($has_results) {
-                    $ranking_content = trim(str_replace(["\r", "\n"], '', file_get_contents($overall_ranking_file)));
-                    $rankings = array_chunk(preg_split('/ +/', $ranking_content), 3);
-                    $ranking_available = true;
-                    $matches_and_topmatch = count($rankings) . " students matched, {$rankings[0][0]} top match";
+                    $timestamp = date($gradeable_date_format, filemtime($overall_ranking_file));
+                    $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
+                    $submissions = 0;
+                    foreach ($students as $student) {
+                        $submissions += count(array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users", $student)), ['.', '..']));
+                    }
+                    $students = count($students);
+                    try {
+                        $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
+                        $matches_and_top_match = count($rankings) . " students matched, {$rankings[0][0]} top match";
+                        $ranking_available = true;
+                    }
+                    catch (Exception $e) {
+                        $this->core->addErrorMessage($e->getMessage());
+                    }
                     $gradeable_link = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $gradeable['g_id']]) . "?config_id={$gradeable['g_config_version']}";
                 }
                 $rerun_plagiarism_link = $this->core->buildCourseUrl(["plagiarism", "gradeable", $gradeable['g_id'], "rerun"]) . "?config_id={$gradeable['g_config_version']}";
@@ -420,7 +419,7 @@ class PlagiarismController extends AbstractController {
                 'in_queue' => $in_queue,
                 'processing' => $processing,
                 'ranking_available' => $ranking_available,
-                'matches_and_topmatch' => $matches_and_topmatch,
+                'matches_and_topmatch' => $matches_and_top_match,
                 'gradeable_link' => $gradeable_link,
                 'rerun_plagiarism_link' => $rerun_plagiarism_link,
                 'edit_plagiarism_link' => $edit_plagiarism_link,
@@ -454,7 +453,7 @@ class PlagiarismController extends AbstractController {
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
-            $this->core->addErrorMessage($e);
+            $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($error_return_url);
         }
 
