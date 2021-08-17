@@ -4,10 +4,9 @@ const refresh_freq = 5000;
 // Change this variable to change the max number of entries in the table before the oldest entries are replaced
 const max_log = 60;
 
-let interval = null;
+let time_id = -1;
 
 function updateTable() {
-    clearInterval(interval);
     $.ajax({
         url: buildUrl(['autograding_status', 'get_update']),
         type: 'GET',
@@ -98,7 +97,7 @@ function updateTable() {
                 }
 
                 // Queue this function to be run again after specified delay
-                interval = setInterval(updateTable, refresh_freq);
+                time_id = setTimeout(updateTable, refresh_freq);
             }
             catch (e) {
                 console.log(e);
@@ -109,8 +108,7 @@ function updateTable() {
 
 function toggleUpdate() {
     if ($(this).text() === 'Pause Update') {
-        clearInterval(interval);
-        interval = null;
+        clearTimeout(time_id);
         displaySuccessMessage('Update has been stopped');
         $(this).text('Resume Update');
     }
@@ -122,7 +120,7 @@ function toggleUpdate() {
 }
 
 $(document).ready(() => {
-    interval = setInterval(updateTable, refresh_freq);
     $('#toggle-btn').text('Pause Update');
     $('#toggle-btn').on('click', toggleUpdate);
+    time_id = setTimeout(updateTable, refresh_freq);
 });
