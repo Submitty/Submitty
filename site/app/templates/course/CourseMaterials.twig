@@ -79,7 +79,14 @@
                     <a class="key_to_click" onclick='downloadFile("{{ course_material.getPath | url_encode }}", "course_materials")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                 {% endif %}
                 {% if user_group == 1 %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getPath }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    {% if course_material.isLink %}
+                        {% set url_title = course_material.getUrlTitle %}
+                        {% set url_url = course_material.getUrl %}
+                    {% else %}
+                        {% set url_title = "" %}
+                        {% set url_url = "" %}
+                    {% endif %}
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getPath }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getPath | url_encode }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                     <label for="date_to_release_{{ id }}">Share to student on</label>
                     <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>

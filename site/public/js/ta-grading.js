@@ -45,7 +45,14 @@ const taLayoutDet = {
 };
 
 let settingsCallbacks = {
-  "general-setting-arrow-function": changeStudentArrowTooltips
+  "general-setting-arrow-function": changeStudentArrowTooltips,
+  "general-setting-navigate-assigned-students-only": function(value) {
+    if (value == 'true') {
+      document.cookie = "view=assigned; path=/;";
+    } else {
+      document.cookie = "view=all; path=/;";
+    }
+  }
 }
 
 // Grading Panel header width
@@ -91,7 +98,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
-  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  for (let i = 0; i < settingsData.length; i++) {
+    for (let x = 0; x < settingsData[i].values.length; x++) {
+      let storageCode = settingsData[i].values[x].storageCode;
+      let item = localStorage.getItem(storageCode);
+      if (item && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](item);
+      }
+    }
+  }
 
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');
@@ -607,6 +622,7 @@ function gotoMainPage() {
 function gotoPrevStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -632,6 +648,10 @@ function gotoPrevStudent() {
       break;
   }
 
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
+  }
+
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;
@@ -649,6 +669,7 @@ function gotoPrevStudent() {
 function gotoNextStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -672,6 +693,10 @@ function gotoNextStudent() {
     case "active-inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
+  }
+
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {

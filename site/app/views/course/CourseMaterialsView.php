@@ -82,7 +82,7 @@ class CourseMaterialsView extends AbstractView {
             $dirs = explode("/", $rel_path);
             $file_name = array_pop($dirs);
             if ($course_material->isLink()) {
-                $file_name = $course_material->getUrlTitle();
+                $file_name = $course_material->getUrlTitle() . $course_material->getPath();
             }
             $path_to_place = &$final_structure;
             $path = "";

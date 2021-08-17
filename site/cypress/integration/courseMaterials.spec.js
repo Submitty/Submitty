@@ -57,7 +57,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#upload1').attachFile('file1.txt' , { subjectType: 'drag-n-drop' });
 
-        const fpath = 'option1/1234/!@#$%^&*()/';
+        const fpath = 'option1/1234/!@#$%^&*()';
         cy.get('#input-provide-full-path').type(fpath);
         cy.get('#submit-materials').click();
         cy.get('.file-viewer').should('have.length', 2);
