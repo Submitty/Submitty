@@ -1801,19 +1801,11 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 
 --
--- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_allowed_minutes_override
-    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: course_materials_sections fk_section_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
 
 
 --
@@ -1821,6 +1813,14 @@ ALTER TABLE ONLY public.course_materials_sections
 --
 
 ALTER TABLE ONLY public.course_materials_access
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
     ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
