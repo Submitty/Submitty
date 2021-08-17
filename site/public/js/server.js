@@ -275,7 +275,7 @@ function newEditCourseMaterialsFolderForm(path, dir) {
     captureTabInModal("edit-course-materials-folder-form");
 }
 
-function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
 
     let form = $("#edit-course-materials-form");
 
@@ -305,6 +305,20 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
         $("#show-some-section-selection-edit", form).hide();
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
+    }
+    if (is_link === "1") {
+        const title_label = $("#edit-url-title-label", form);
+        const url_label = $("#edit-url-url-label", form);
+        title_label.prop('hidden', false);
+        url_label.prop('hidden', false);
+        title_label.css('display', 'block');
+        url_label.css('display', 'block');
+        const title = $("#edit-url-title");
+        title.prop('disabled', false);
+        title.val(link_title);
+        const url = $("#edit-url-url");
+        url.prop('disabled', false);
+        url.val(link_url);
     }
     $("#material-edit-form", form).attr('data-directory', path);
     $("#edit-picker", form).attr('value', release_time);
