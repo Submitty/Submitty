@@ -163,6 +163,7 @@ class DockerView extends AbstractView {
                     $error_logs = [];
                     $machine_to_update = [];
                     $fail_images = [];
+                    $reset = false;
                 }
 
                 $matches = [];
