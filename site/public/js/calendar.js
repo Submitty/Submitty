@@ -1,6 +1,6 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, items_by_date */
-/* global isGlobal, isInstructor, csrfToken, buildCourseUrl */
+/* global isGlobal, csrfToken, buildCourseUrl */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -130,7 +130,7 @@ function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#edit-picker-edit').val(date);
     $('#calendar-item-id').val(itemId);
 
-    $('#edit-calendar-item-form').css('display', 'block');
+    $('#edit-calendar-item-form').show();
 }
 
 function deleteCalendarItem() {

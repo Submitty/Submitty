@@ -85,6 +85,9 @@ class CalendarItem {
      * @param string $text
      */
     public function setText(string $text): void {
+        if (strlen($text) > 255) {
+            throw new \InvalidArgumentException();
+        }
         $this->text = $text;
     }
 
@@ -92,7 +95,26 @@ class CalendarItem {
      * @param int $type
      */
     public function setType(int $type): void {
-        $this->type = $type;
+        if ($type === self::ANNOUNCEMENT || $type === self::TEXT) {
+            $this->type = $type;
+        }
+        throw new \InvalidArgumentException();
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setStringType(string $type): void {
+        switch ($type) {
+            case 'text':
+                $this->type = self::TEXT;
+                break;
+            case 'ann':
+                $this->type = self::ANNOUNCEMENT;
+                break;
+            default:
+                throw new \InvalidArgumentException();
+        }
     }
 
     /**
@@ -104,14 +126,15 @@ class CalendarItem {
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function getTypeString(): string {
         switch ($this->type) {
-            case 0:
+            case self::TEXT:
                 return 'text';
-            case 1:
+            case self::ANNOUNCEMENT:
                 return 'ann';
         }
-        return '';
+        throw new \Exception();
     }
 }
