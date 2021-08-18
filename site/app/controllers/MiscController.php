@@ -2,13 +2,17 @@
 
 namespace app\controllers;
 
+use app\libraries\Access;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
@@ -143,6 +147,11 @@ class MiscController extends AbstractController {
         else {
             $contents = file_get_contents($corrected_name);
             if (!is_null($ta_grading) && $ta_grading === "true") {
+                $newlines = substr_count($contents, "\n");
+                $carriage_returns = substr_count($contents, "\r");
+                if ($newlines + $carriage_returns > 2000) {
+                    return new WebResponse(MiscView::class, 'tooLarge');
+                }
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
             }
             else {
@@ -228,6 +237,51 @@ class MiscController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")
+     */
+    public function downloadTestCaseResult(string $gradeable_id, int $version, int $test_case, string $file_name, string $user_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($user_id !== $this->core->getUser()->getId()) {
+            if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+                $this->core->addErrorMessage("You do not have permission to download this file!");
+                return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+            }
+        }
+        $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
+        $file_path = null;
+        $testcase = $autograde->getTestcases()[$test_case - 1];
+        if (!$testcase->getTestcase()->isHidden() && $testcase->hasAutochecks()) {
+            foreach ($testcase->getAutochecks() as $autocheck) {
+                $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
+                $actual_file_name = array_pop($path);
+                if ($file_name === $actual_file_name) {
+                    $file_path = $autocheck->getDiffViewer()->getActualFilename();
+                    break;
+                }
+            }
+        }
+        if ($file_path !== null) {
+            if (file_exists($file_path)) {
+                $this->core->getOutput()->useHeader(false);
+                $this->core->getOutput()->useFooter(false);
+                header('Content-Type: application/octet-stream');
+                header("Content-Transfer-Encoding: Binary");
+                header("Content-disposition: attachment; filename=\"{$file_name}\"");
+                readfile($file_path);
+            }
+            else {
+                $this->core->addErrorMessage("That file does not seem to exist");
+                return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+            }
+        }
+        else {
+            $this->core->addErrorMessage("That file does not seem to exist");
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+        }
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
     public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
@@ -293,10 +347,6 @@ class MiscController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $temp_dir = "/tmp";
-        //makes a random zip file name on the server
-        $temp_name = uniqid($this->core->getUser()->getId(), true);
-        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         $gradeable_path = $this->core->getConfig()->getCoursePath();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
@@ -347,15 +397,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
-
         $zip_stream->finish();
-        header("Content-type: application/zip");
-        header("Content-Disposition: attachment; filename=$zip_file_name");
-        header("Content-length: " . filesize($zip_name));
-        header("Pragma: no-cache");
-        header("Expires: 0");
-        readfile("$zip_name");
-        unlink($zip_name); //deletes the random zip file
     }
 
     /**

@@ -11,6 +11,15 @@
     <div id="viewer" class="pdfViewer"></div>
 </div>
 
+<!-- Provide template of download button to copy over to toolbar since this page is the only one that gets the necessary info -->
+<template id="download-annotations-btn-template">
+    {% if can_download is defined and can_download %}
+        <button id="download-annotations-btn" class='btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ download_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs")' aria-label="Download the file">
+            Download <i class="fas fa-download" title="Download the file"></i>
+        </button>
+    {% endif %}
+</template>
+
 <script>
     window['csrfToken'] = "{{ csrfToken }}";
     try {
@@ -37,4 +46,10 @@
     {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
     {% endif %}
+
+    //render download annotations button on toolbar
+    $(function() {
+        const download_annotations_button = document.getElementById('download-annotations-btn-template').content.cloneNode(true);
+        $('#pdf-buttons').append(download_annotations_button);
+    });
 </script>

@@ -55,6 +55,18 @@
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
+        <label hidden id="edit-url-title-label">
+            <span>
+                <strong>Edit link title:</strong>
+            </span>
+            <input id="edit-url-title" type="text" size="26" disabled>
+        </label>
+        <label hidden id="edit-url-url-label">
+            <span>
+                <strong>Edit link url:</strong>
+            </span>
+            <input id="edit-url-url" type="text" size="26" disabled>
+        </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script>
@@ -79,13 +91,20 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort, sections_lock, null);
+                let url_title = document.getElementById("edit-url-title");
+                let url_url = document.getElementById("edit-url-url");
+                let url_title_val = url_title.disabled ? null : url_title.value;
+                let url_url_val = url_url.disabled ? null : url_url.value;
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
         };
 
         flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
                     button: [
+                        {
+                            label: "Beginning of time"
+                        },
                         {
                             label: "Now"
                         },
@@ -101,13 +120,16 @@
                         let date;
                         switch (index) {
                             case 0:
-                                date = new Date();
+                                date = new Date("1001-01-01 00:00:00");
                                 break;
                             case 1:
                                 date = new Date();
-                                date.setDate(date.getDate() + 1);
                                 break;
                             case 2:
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
+                                break;
+                            case 3:
                                 date = new Date("9998-01-01 00:00:00");
                                 break;
                         }
