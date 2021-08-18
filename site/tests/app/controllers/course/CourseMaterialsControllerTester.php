@@ -97,7 +97,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . $name,
             $this->core->getDateTimeNow(),
             false,
-            0
+            0,
+            null,
+            null
         );
     }
 

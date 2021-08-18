@@ -123,7 +123,7 @@ class HomeworkView extends AbstractView {
         }
 
         $regrade_available = $this->core->getConfig()->isRegradeEnabled()
-            && $gradeable->isTaGradeReleased()
+            && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
@@ -131,7 +131,7 @@ class HomeworkView extends AbstractView {
             && $submission_count !== 0;
 
         if (
-            $gradeable->isTaGradeReleased()
+            ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()
             && $submission_count !== 0
             && $active_version !== 0
@@ -634,7 +634,12 @@ class HomeworkView extends AbstractView {
 
                 if (array_key_exists('id', $data)) {
                     $id = $data['id'];
-                    $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
+                    if (is_numeric($id)) {
+                        $is_valid = $this->core->getQueries()->getUserByNumericId($id) !== null;
+                    }
+                    else {
+                        $is_valid = $this->core->getQueries()->getUserById($id) !== null;
+                    }
                 }
                 else {
                     //set the blank id as invalid for now, after a page refresh it will recorrect
@@ -1256,7 +1261,7 @@ class HomeworkView extends AbstractView {
             ],
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'component' => [
-                'id' => 0
+                'id' => $gc_id
             ]
         ]);
     }
