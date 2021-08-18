@@ -1,6 +1,6 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem */
-/* global curr_day, curr_month, curr_year, gradeables_by_date, items_by_date */
-/* global isGlobal, csrfToken, buildCourseUrl */
+/* global curr_day, curr_month, curr_year, gradeables_by_date */
+/* global csrfToken, buildCourseUrl */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];

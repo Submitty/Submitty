@@ -48,16 +48,12 @@ class CalendarItem {
         return $this->id;
     }
 
-    public function isNote(): bool {
-        return $this->type === self::NOTE;
-    }
-
     public function isAnnouncement(): bool {
         return $this->type === self::ANNOUNCEMENT;
     }
 
-    public function isImportant(): bool {
-        return $this->type === self::IMPORTANT;
+    public function isText(): bool {
+        return $this->type === self::TEXT;
     }
 
     /**
