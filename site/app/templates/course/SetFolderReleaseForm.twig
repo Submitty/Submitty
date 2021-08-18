@@ -31,9 +31,9 @@
             releaseDate.value = newDateTime;
         }
 
-        function setChild(dirArr,releaseDate,handleData) {
+        function setChild(id,releaseDate,handleData) {
             //send the array of folder paths and set the time to the new one
-            changeFolderNewDateTime(dirArr,releaseDate.value,function (output) {
+            changeFolderNewDateTime(id,releaseDate.value,function (output) {
                 if(output){
                     if(handleData){
                         handleData(true);
@@ -44,7 +44,8 @@
 
         function confirmReleaseDate() {
             var directory = document.getElementById("submit_time");
-            var dirArr = JSON.parse(directory.dataset.indir);
+            //var dirArr = JSON.parse(directory.dataset.indir);
+            var id = directory.dataset.id;
             var ID = directory.dataset.iden;
 
             var releaseDate = document.getElementById("date_to_release");
@@ -53,7 +54,7 @@
                 window.alert("No blank time allowed");
                 return;
             }
-            setChild(dirArr, releaseDate, function (output) {
+            setChild(id, releaseDate, function (output) {
                 //when done reload
                 if (output) {
                     var selectedDiv = 'date_to_release_' + ID;

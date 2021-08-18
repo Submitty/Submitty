@@ -1,0 +1,93 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}set-all-release-form{% endblock %}
+{% block title %}Set Release Date for All{% endblock %}
+{% block body %}
+
+
+
+    <div style="margin: auto; text-align: center;">
+        <label for="date_to_release_all">
+            <b>Change the release date for all course materials</b>
+        </label>
+        <br/>
+        <br/>
+        <input name="release_date" id="date_to_release_all" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewAllDateTime('date_to_release_all')"/>
+    </div>
+    <script>
+
+        function getNewAllDateTime(id){
+            var releaseDate = document.getElementById(id);
+            // pass filename to server to record the new date and time of the file to be released
+            var newDateTime = $("#"+id).val();
+            //set the value to the new date and time
+            releaseDate.value = newDateTime;
+        }
+
+        function confirmReleaseAllDate() {
+            let releaseDate = document.getElementById("date_to_release_all");
+            //makes sure you cannot set to null times
+            if (releaseDate.value === "") {
+                window.alert("No blank time allowed");
+                return;
+            }
+            setAllRelease(releaseDate.value);
+        }
+
+
+        flatpickr("#date_to_release_all", {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Beginning of time"
+                            },
+                            {
+                                label: "Now"
+                            },
+                            {
+                                label: "Tomorrow"
+                            },
+                            {
+                                label: "End of time"
+                            }
+                        ],
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date("1001-01-01 00:00:00");
+                                    break;
+                                case 1:
+                                    date = new Date();
+                                    break;
+                                case 2:
+                                    date = new Date();
+                                    date.setDate(date.getDate() + 1);
+                                    break;
+                                case 3:
+                                    date = new Date("9998-01-01 00:00:00");
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+            )],
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+        });
+    </script>
+
+{% endblock %}
+
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary key_to_click" tabindex="0" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirmReleaseAllDate()"/>
+
+{% endblock %}

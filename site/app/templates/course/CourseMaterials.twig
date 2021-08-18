@@ -12,12 +12,7 @@
             <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
             {# button to set the release dates of all files in the page/course materials #}
             <a
-                    onclick='setFolderRelease("{{ base_course_material_path }}","","",
-                            [{% for file in material_list %} {% if not file.isDir %}
-                                "{{ file.getPath }}",
-                        {% endif %}
-                            {% endfor %}]
-                            )'
+                    onclick='openSetAllRelease()'
                     class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
                     tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
@@ -86,9 +81,9 @@
                         {% set url_title = "" %}
                         {% set url_url = "" %}
                     {% endif %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getPath }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getId }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
-                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getPath | url_encode }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getId }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                     <label for="date_to_release_{{ id }}">Share to student on</label>
                     <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>
                 {% if not course_material.getSections|length == 0 %}
@@ -157,14 +152,8 @@
                 <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
                     <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_path }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_path | url_encode  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                    <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}",
-                            [{% for file in material_list %}
-                        {% if folder_path in file.getPath and not file.isDir %}
-                                "{{ file.getPath }}",
-                        {% endif %}
-                {% endfor %}]
-                            )' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
+                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
@@ -288,3 +277,4 @@
 {% include 'course/EditCourseMaterialsForm.twig' %}
 {% include 'course/EditCourseMaterialsFolderForm.twig' %}
 {% include('course/DeleteCourseMaterialForm.twig') %}
+{% include('course/SetAllReleaseForm.twig') %}
