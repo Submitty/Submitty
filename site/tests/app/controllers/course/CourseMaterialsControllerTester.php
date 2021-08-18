@@ -92,7 +92,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             'release_date' => $this->core->getDateTimeNow(),
             'type' => 0
         ];
-        return new CourseMaterial(
+        $course_material = new CourseMaterial(
             CourseMaterial::FILE,
             $this->upload_path . $name,
             $this->core->getDateTimeNow(),
@@ -101,6 +101,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             null,
             null
         );
+        $course_material->setId(0);
+        return $course_material;
     }
 
     public function testCourseMaterialsUpload() {
@@ -252,10 +254,14 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->with(['path' => $this->upload_path . "/" . $name])
+            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
+        $repository
+            ->expects($this->once())
+            ->method('findAll')
+            ->willReturn([$course_material]);
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(2))
+            ->expects($this->exactly(3))
             ->method('getRepository')
             ->with(CourseMaterial::class)
             ->willReturn($repository);
@@ -270,12 +276,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $exptected_ret = ['status' => 'success', 'data' => 'Successfully uploaded!'];
         $this->assertEquals($exptected_ret, $ret->json);
 
-        $_POST['fn'][] = FileUtils::joinPaths($this->upload_path, $name);
+        $_POST['id'] = $course_material->getId();
         $new_date = new \DateTime('2005-01-01');
 
         $course_material->setReleaseDate($new_date);
 
-        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date->format('Y-m-d H:i:sO'));
+        $ret = $controller->modifyCourseMaterialsFileTimeStamp($new_date->format('Y-m-d H:i:sO'));
         $exptected_ret = ['status' => 'success', 'data' => 'Time successfully set.'];
         $this->assertEquals($exptected_ret, $ret->json);
     }
@@ -309,7 +315,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->with(['path' => $this->upload_path . "/" . $name])
+            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
@@ -329,6 +335,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_POST = [];
 
+        $_POST['id'] = $course_material->getId();
         $_POST['sections'] = '1,2';
         $_POST['sections_lock'] = "true";
         $_POST['requested_path'] = FileUtils::joinPaths($this->upload_path, $name);
@@ -372,16 +379,16 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $repository = $this->createMock(EntityRepository::class);
         $repository
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->with(['path' => $this->upload_path . "/" . $name])
+            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
         $repository
             ->expects($this->once())
             ->method('findAll')
             ->willReturn([$course_material]);
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(2))
+            ->expects($this->exactly(3))
             ->method('getRepository')
             ->with(CourseMaterial::class)
             ->willReturn($repository);
@@ -404,7 +411,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->method('remove')
             ->with($course_material);
 
-        $controller->deleteCourseMaterial($path);
+        $id = $course_material->getId();
+
+        $controller->deleteCourseMaterial($id);
 
         $files = FileUtils::getAllFiles($this->upload_path);
         $this->assertEquals(0, count($files));
