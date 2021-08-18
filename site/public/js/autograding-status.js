@@ -5,6 +5,7 @@ const refresh_freq = 5000;
 const max_log = 60;
 
 let time_id = -1;
+let update = true;
 
 function updateTable() {
     $.ajax({
@@ -96,7 +97,9 @@ function updateTable() {
                 }
 
                 // Queue this function to be run again after specified delay
-                time_id = setTimeout(updateTable, refresh_freq);
+                if (update) {
+                    time_id = setTimeout(updateTable, refresh_freq);
+                }
             }
             catch (e) {
                 console.log(e);
@@ -107,11 +110,13 @@ function updateTable() {
 
 function toggleUpdate() {
     if ($(this).text() === 'Pause Update') {
+        update = false;
         clearTimeout(time_id);
         displaySuccessMessage('Update has been stopped');
         $(this).text('Resume Update');
     }
     else {
+        update = true;
         updateTable();
         displaySuccessMessage('Update has been resumed');
         $(this).text('Pause Update');
