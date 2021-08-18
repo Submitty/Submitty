@@ -10,7 +10,7 @@
             <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
             <pre class="error-log">
                 {% for error_log in error_logs %}
-                    {{error_log ~ "\n"}}
+                    {{error_log}} <br>
                 {% endfor %}
             </pre>
         {% endif %}

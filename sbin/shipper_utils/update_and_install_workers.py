@@ -54,17 +54,28 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
             try:
-              repo, tag = image.split(':')
-              client.images.pull(repository=repo, tag=tag)
+                repo, tag = image.split(':')
+                client.images.pull(repository=repo, tag=tag)
             except Exception as e:
-              print(f"ERROR: Could not pull {image}")
-              traceback.print_exc()
-              success = False
+                print(f"ERROR: Could not pull {image}")
+                traceback.print_exc()
+                success = False
+        docker_info = client.info()
+        docker_images_obj = client.images.list()
+        #print the details of the image
+        for i in docker_images_obj:
+            # rip relevant information
+            data = i.attrs
+            print(f"{image}-id: {i.short_id}")
+            print(f"{image}-tag: ", end = "")
+            print(', '.join(data["RepoTags"]))
+            print(f'{image}-created: {data["Created"]}')
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
+        commands.append('ls -la')
         success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
     return success
@@ -87,6 +98,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             for command in commands:
                 print(f'{host}: performing {command}')
                 (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=60)
+                print(stdout.read().decode('ascii'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
                     print(f"ERROR: Failure performing {operation} on {user}@{host}")
