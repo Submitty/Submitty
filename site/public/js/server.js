@@ -1374,14 +1374,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         cache: false,
         contentType: false,
         success: function(data) {
-            try {
-                if (data.status === 'success') {
-                    $('#save_status').html('All Changes Saved');
-                } else {
-                    $('#save_status').html('Error Saving Changes');
-                }
-            } catch(err){
-                return;
+            if (data.status === 'success') {
+                $('#save_status').html('All Changes Saved');
+            } else {
+                $('#save_status').html('Error Saving Changes');
             }
         },
         error: function() {
