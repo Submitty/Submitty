@@ -7,38 +7,23 @@ use app\libraries\FileUtils;
 /**
  * Class QueueItem
  * Helper class used to interpret the files read in the autograding json files
+ * @method array getGradingQueueObj()
+ * @method int getStartTime()
+ * @method int getElapsedTime()
+ * @method array getQueueObj()
+ * @method bool isRegrade()
  */
-class QueueItem {
+class QueueItem extends AbstractModel {
     /** @prop-read @var array */
-    private $grading_queue_obj = [];
+    protected $grading_queue_obj = [];
     /** @prop-read @var int */
-    private $start_time = 0;
+    protected $start_time = 0;
     /** @prop-read @var int */
-    private $elapsed_time = 0;
+    protected $elapsed_time = 0;
     /** @prop-read @var array */
-    private $queue_obj = [];
+    protected $queue_obj = [];
     /** @prop-read @var bool */
-    private $regrade = false;
-
-    public function getGradingQueueObj(): array {
-        return $this->grading_queue_obj;
-    }
-
-    public function getStartTime(): int {
-        return $this->start_time;
-    }
-
-    public function getElapsedTime(): int {
-        return $this->elapsed_time;
-    }
-
-    public function getQueueObj(): array {
-        return $this->queue_obj;
-    }
-
-    public function isRegrade(): bool {
-        return $this->regrade;
-    }
+    protected $regrade = false;
 
     public function __construct(string $json_file, int $epoch_time, bool $is_grading) {
         if ($is_grading) {
