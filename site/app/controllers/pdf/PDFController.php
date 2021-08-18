@@ -180,6 +180,7 @@ class PDFController extends AbstractController {
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id = $file_path_parts[$index];
+                var_dump($user_id);
                 $anon_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
                 $anon_path = $anon_path . "/" . $anon_id;
             }
@@ -257,8 +258,15 @@ class PDFController extends AbstractController {
                 }
             }
         }
-
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num, false, $is_peer_grader);
+        var_dump(explode('/', $file_path));
+        $anon_path;
+        if (in_array('checkout', explode('/', $file_path))) {
+            $anon_path = $file_path;
+        }
+        else {
+            $anon_path = $this->getAnonPath($file_path);
+        }
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $anon_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
 
     /**
