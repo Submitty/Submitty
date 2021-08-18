@@ -34,7 +34,7 @@ class PDFController extends AbstractController {
         }
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
-        $md5_path = md5($path);
+        $md5_path = md5($anon_path);
         if (is_dir($annotation_path)) {
             $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
@@ -80,7 +80,7 @@ class PDFController extends AbstractController {
         $annotation_jsons = [];
 
         $latest_timestamp = filemtime($path);
-        $md5_path = md5($path);
+        $md5_path = md5($anon_path);
         if (is_dir($annotation_path)) {
             $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
@@ -215,8 +215,10 @@ class PDFController extends AbstractController {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id);
         }
         $grader_id = $this->core->getUser()->getId();
+        $is_peer_grader = false;
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->hasPeerComponent()) {
+                $is_peer_grader = true;
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
                 if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($id, $user_ids)) {
@@ -256,7 +258,7 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
 
     /**
