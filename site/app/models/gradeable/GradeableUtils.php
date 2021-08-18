@@ -99,7 +99,7 @@ class GradeableUtils {
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
     }
 
-    public static function getGradeablesFromUserAndCourse(Core $core, User $user, array &$calendar_messages) {
+    public static function getGradeablesFromUserAndCourse(Core $core, User $user, array &$calendar_messages): array {
         $gradeables = [];
         $graded_gradeables = [];
         $submit_btns = [];
@@ -113,7 +113,6 @@ class GradeableUtils {
             }
         }
 
-        //$core->getConfig()->setCourseLoaded(false);
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
     }
 }

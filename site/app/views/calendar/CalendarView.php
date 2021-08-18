@@ -6,6 +6,7 @@ namespace app\views\calendar;
 
 use app\libraries\FileUtils;
 use app\models\CalendarInfo;
+use app\models\User;
 use app\views\AbstractView;
 use app\views\NavigationView;
 
@@ -53,14 +54,11 @@ class CalendarView extends AbstractView {
             "curr_month" => date("n"), // the current month
             "curr_day" => date("d"),   // the current date
             'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
-            //"gradeables_by_date" => $info->getGradeablesByDate(),
-            //"gradeables_by_section" => $info->getGradeablesBySections(),
             "gradeables_by_date" => $info->getItemsByDate(),
             "gradeables_by_section" => $info->getItemsBySections(),
             "empty_message" => $info->getEmptyMessage(),
             "in_course" => $in_course,
-            //"items_by_date" => $info->getItemsByDate(),
-            "is_instructor" => $this->core->getUser()->getGroup() === 1
+            "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR
         ]);
     }
 }

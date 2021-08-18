@@ -67,25 +67,21 @@ class CalendarController extends AbstractController {
         }
 
         $calendar_item = new CalendarItem();
-        $int_type = null;
-        switch ($type) {
-            case "note":
-                $int_type = 0;
-                break;
-            case "announcement":
-                $int_type = 1;
-                break;
-            case "important":
-                $int_type = 2;
-                break;
+        try {
+            $calendar_item->setStringType($type);
         }
-        if ($int_type === null) {
+        catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage("That is not a valid calendar item type");
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
-        $calendar_item->setType($int_type);
         $calendar_item->setDate(new \DateTime($date));
-        $calendar_item->setText($text);
+        try {
+            $calendar_item->setText($text);
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage("Text exceeds 255 characters which is not allowed");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
 
         $this->core->getCourseEntityManager()->persist($calendar_item);
         $this->core->getCourseEntityManager()->flush();
@@ -118,22 +114,13 @@ class CalendarController extends AbstractController {
 
         $calendar_item->setText($text);
         $calendar_item->setDate(new \DateTime($date));
-        $int_type = null;
-        switch ($type) {
-            case "note":
-                $int_type = 0;
-                break;
-            case "announcement":
-                $int_type = 1;
-                break;
-            case "important":
-                $int_type = 2;
-                break;
+        try {
+            $calendar_item->setStringType($type);
         }
-        if ($int_type === null) {
+        catch (\InvalidArgumentException  $e) {
+            $this->core->addErrorMessage("That is not a valid calendar item type");
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
-        $calendar_item->setType($int_type);
         $this->core->getCourseEntityManager()->flush();
         return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
     }
