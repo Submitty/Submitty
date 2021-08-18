@@ -68,16 +68,7 @@ function dateToStr(year, month, day) {
  * @param type : string the calendar item type
  * @returns {string} the HTML string containing the calendar item
  */
-function generateCalendarItem(item, type, date) {
-    switch (type) {
-        case 'gradeable':
-            return generateGradeableHtml(item);
-        case 'item':
-            return generateItemHtml(item, date);
-    }
-}
-
-function generateGradeableHtml(item) {
+function generateCalendarItem(item) {
     // When hovering over an item, shows the name and due date
     // Due date information
     let due_string = '';
@@ -109,7 +100,7 @@ function generateGradeableHtml(item) {
         </a>`;
 }
 
-function generateItemHtml(item, date) {
+/*function generateItemHtml(item, date) {
     let styleString = '';
     switch (item['type']) {
         case 'announcement':
@@ -125,16 +116,13 @@ function generateItemHtml(item, date) {
     else {
         if (isInstructor) {
             const string =  `<p ${styleString}>${item['text']} <a data-id="${item['id']}" data-type="${item['type']}" data-text="${window.btoa(item['text'])}" data-date="${date}" class="calendar-item-edit-button"><i class="fas fa-pencil-alt"></i></a></p>`;
-            /*document.getElementById(item['id']).onclick = function () {
-                editCalendarItemForm(item['type'], item['text'], item['id'], date);
-            };*/
             return string;
         }
         else {
             return `<p ${styleString}>${item['text']}</p>`;
         }
     }
-}
+}*/
 
 function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#calendar-item-type-edit').val(itemType);
@@ -216,10 +204,7 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     // List all gradeables of other items
     content += '<div class="cal-cell-items-panel">';
     for (const i in gradeables_by_date[cell_date_str]) {
-        content += generateCalendarItem(gradeables_by_date[cell_date_str][i], 'gradeable');
-    }
-    for (const i in items_by_date[cell_date_str]) {
-        content += generateCalendarItem(items_by_date[cell_date_str][i], 'item', cell_date_str);
+        content += generateCalendarItem(gradeables_by_date[cell_date_str][i]);
     }
     content += `
       </div>

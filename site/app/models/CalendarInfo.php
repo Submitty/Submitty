@@ -36,7 +36,7 @@ class CalendarInfo extends AbstractModel {
      * 'show_due'     => bool     (whether to show the due date when mouse is hovering over),
      * 'icon'         => string   (the icon showed before the item),
      */
-    private $gradeables_by_date = [];
+    private $items_by_date = [];
 
     /**
      * @see GradeableList for constant integers used as keys
@@ -48,12 +48,7 @@ class CalendarInfo extends AbstractModel {
      * "section_id" => string (the id of the section. Will be used as the HTML id)
      * "gradeables" => array. The structure of this array is same as the element of value of $gradeables_by_date
      */
-    private $gradeables_by_sections = [];
-
-    /**
-     * @var array
-     */
-    private $items_by_date = [];
+    private $items_by_sections = [];
 
     /** @var string */
     private $empty_message = "";
@@ -80,20 +75,6 @@ class CalendarInfo extends AbstractModel {
             GradeableList::CLOSED => $gradeable_list->getClosedGradeables(),
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
         ];
-
-        foreach ($calendar_items as $course => $cal_items) {
-            /** @var CalendarItem $cal_item */
-            foreach ($cal_items as $cal_item) {
-                $date = $cal_item->getDate()->format('Y-m-d');
-                $curItem = [
-                    'text' => $cal_item->getText(),
-                    'type' => $cal_item->getTypeString(),
-                    'course' => $course,
-                    'id' => $cal_item->getId()
-                ];
-                $info->items_by_date[$date][] = $curItem;
-            }
-        }
 
         foreach ($gradeable_list_sections as $section => $gradeables) {
             /** @var int $section */
@@ -135,11 +116,29 @@ class CalendarInfo extends AbstractModel {
 
                 // Put gradeables in by-date maps according to section (close/open)
                 $dueDate = ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format('Y-m-d') : '';
-                $info->gradeables_by_date[$dueDate][] = $currGradeable;
+                $info->items_by_date[$dueDate][] = $currGradeable;
             }
 
             // Put data of current section into the by-section map
-            $info->gradeables_by_sections[] = $curr_section;
+            $info->items_by_sections[] = $curr_section;
+        }
+
+        foreach ($calendar_items as $course => $cal_items) {
+            /** @var CalendarItem $cal_item */
+            foreach ($cal_items as $cal_item) {
+                $date = $cal_item->getDate()->format('Y-m-d');
+                $curItem = [
+                    'title' => $cal_item->getText(),
+                    'status' => $cal_item->getTypeString(),
+                    'course' => $course,
+                    'icon' => '',
+                    'url' => '',
+                    'show_due' => false,
+                    'submission' => '',
+                    'status_note' => ''
+                ];
+                $info->items_by_date[$date][] = $curItem;
+            }
         }
 
         $info->empty_message = "There are currently no assignments posted.  Please check back later.";
@@ -147,19 +146,15 @@ class CalendarInfo extends AbstractModel {
         return $info;
     }
 
-    public function getGradeablesByDate(): array {
-        return $this->gradeables_by_date;
+    public function getItemsByDate(): array {
+        return $this->items_by_date;
     }
 
-    public function getGradeablesBySections(): array {
-        return $this->gradeables_by_sections;
+    public function getItemsBySections(): array {
+        return $this->items_by_sections;
     }
 
     public function getEmptyMessage(): string {
         return $this->empty_message;
-    }
-
-    public function getItemsByDate(): array {
-        return $this->items_by_date;
     }
 }

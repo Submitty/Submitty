@@ -146,6 +146,7 @@ h2.cal-month-title {
 .cal-day-cell {
     min-height: 100px;
     max-height: 195px;
+    height: 100px;
 }
 
 .cal-cell-expand {

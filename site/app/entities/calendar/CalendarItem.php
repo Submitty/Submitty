@@ -12,9 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="calendar_messages")
  */
 class CalendarItem {
-    const NOTE = 0;
+    const TEXT = 0;
     const ANNOUNCEMENT = 1;
-    const IMPORTANT = 2;
 
     /**
      * @ORM\Id
@@ -109,11 +108,9 @@ class CalendarItem {
     public function getTypeString(): string {
         switch ($this->type) {
             case 0:
-                return 'note';
+                return 'text';
             case 1:
-                return 'announcement';
-            case 2:
-                return 'important';
+                return 'ann';
         }
         return '';
     }
