@@ -66,16 +66,16 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         for i in docker_images_obj:
             # rip relevant information
             data = i.attrs
-            print(f"{image}-id: {i.short_id}")
-            print(f"{image}-tag: ", end = "")
+            print(f"tag: ", end = "")
             print(', '.join(data["RepoTags"]))
-            print(f'{image}-created: {data["Created"]}')
+            print(f"id: {i.short_id}")
+            print(f'created: {data["Created"]}')
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
-        commands.append('ls -la')
+        commands.append(os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'update_worker_docker.sh'))
         success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
     return success

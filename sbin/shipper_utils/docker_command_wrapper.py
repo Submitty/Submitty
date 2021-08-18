@@ -35,4 +35,4 @@ if __name__ == '__main__':
     except Exception:
         traceback.print_exc()
         sys.exit(1)
-    sys.exit(99)
+    sys.exit(0)
