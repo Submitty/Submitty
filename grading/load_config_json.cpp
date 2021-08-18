@@ -131,9 +131,6 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     whole_config.erase("assignment_message");
   }
 
-  //std::string tmp_string = whole_config.value("gradeable_message", std::string(""));
-  //whole_config["gradeable_message"] = tmp_string;
-  std::string tmp_string;
   json_set_default(whole_config,"gradeable_message",std::string(""));
 
   if (whole_config.find("load_gradeable_message") == whole_config.end()) {
@@ -142,8 +139,8 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     o["first_time_only"] = false;
     whole_config["load_gradeable_message"] = o;
   } else {
-    whole_config["load_gradeable_message"]["message"] = whole_config["load_gradeable_message"].value("message", std::string(""));
-    whole_config["load_gradeable_message"]["first_time_only"] = whole_config["load_gradeable_message"].value("first_time_only", false);
+    json_set_default(whole_config["load_gradeable_message"],"message",std::string(""));
+    json_set_default(whole_config["load_gradeable_message"],"first_time_only",false);
   }
 
   if (whole_config.find("early_submission_incentive") == whole_config.end()) {
@@ -154,28 +151,16 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     o["test_cases"] = std::vector<int>();
     whole_config["early_submission_incentive"] = o;
   } else {
-    whole_config["early_submission_incentive"]["message"] = whole_config["early_submission_incentive"].value("message", "");
-    whole_config["early_submission_incentive"]["minimum_days_early"] = whole_config["early_submission_incentive"].value("minimum_days_early", 0);
-    whole_config["early_submission_incentive"]["minimum_points"] = whole_config["early_submission_incentive"].value("minimum_points", 0);
-    whole_config["early_submission_incentive"]["test_cases"] = whole_config["early_submission_incentive"].value("test_cases", std::vector<int>());
+    json_set_default(whole_config["early_submission_incentive"],"message",std::string(""));
+    json_set_default(whole_config["early_submission_incentive"],"minimum_days_early",0);
+    json_set_default(whole_config["early_submission_incentive"],"minimum_points",0);
+    json_set_default(whole_config["early_submission_incentive"],"test_cases",std::vector<int>());
   }
 
-  //int tmp_int = whole_config.value("max_submission_size", MAX_SUBMISSION_SIZE);
-  //whole_config["max_submission_size"] = tmp_int;
   json_set_default(whole_config, "max_submission_size", MAX_SUBMISSION_SIZE);
-  //tmp_string = whole_config.value("required_capabilities","default");
-  //whole_config["required_capabilities"] = tmp_string;
   json_set_default(whole_config, "required_capabilities", "default");
 
-  // Configure defaults for hide_submitted_files
-  //if (whole_config.find("hide_submitted_files") == whole_config.end()) {
-  //  whole_config["hide_submitted_files"] = false;
-  //}
   json_set_default(whole_config, "hide_submitted_files", false);
-  // Configure defaults for hide_version_and_test_details
-  //if (whole_config.find("hide_version_and_test_details") == whole_config.end()) {
-  //  whole_config["hide_version_and_test_details"] = false;
-  //}
   json_set_default(whole_config, "hide_version_and_test_details", false);
 
   // By default, we have one drop zone without a part label / sub
