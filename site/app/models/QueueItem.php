@@ -49,7 +49,7 @@ class QueueItem {
                 $this->grading_queue_obj = $tmp;
             }
         }
-        $this->start_time = filemtime($json_file);
+        $this->start_time = filectime($json_file);
         $this->elapsed_time = $epoch_time - $this->start_time;
         $this->queue_obj = FileUtils::readJsonFile($json_file);
         $this->regrade = $this->queue_obj["regrade"];

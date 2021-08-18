@@ -3852,7 +3852,7 @@ SQL;
      * @return array
      */
     public function getInstructorLevelAccessCourse(string $user_id): array {
-        $this->submitty_db->query("SELECT DISTINCT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        $this->submitty_db->query("SELECT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
         return $this->submitty_db->rows();
     }
 

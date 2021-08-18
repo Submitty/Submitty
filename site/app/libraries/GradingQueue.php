@@ -259,7 +259,16 @@ class GradingQueue {
 
         foreach ($this->queue_files as $full_path_file) {
             $path = FileUtils::joinPaths($this->queue_path, $full_path_file);
-            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts, $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
+            $this->updateDetailedQueueCount(
+                $path,
+                false,
+                $epoch_time,
+                $queue_counts,
+                $capability_queue_counts,
+                $machine_grading_counts,
+                $open_autograding_workers_json,
+                $course_info
+            );
         }
 
         $started = [];
@@ -280,7 +289,16 @@ class GradingQueue {
 
         foreach ($started as $file) {
             $path = FileUtils::joinPaths($this->grading_path, $file);
-            $job_file = $this->updateDetailedQueueCount($path, true, $epoch_time, $queue_counts, $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
+            $job_file = $this->updateDetailedQueueCount(
+                $path,
+                true,
+                $epoch_time,
+                $queue_counts,
+                $capability_queue_counts,
+                $machine_grading_counts,
+                $open_autograding_workers_json,
+                $course_info
+            );
             $file_segments = explode("/", $file);
             $machine = substr($file_segments[0], 0, strrpos($file_segments[0], "_", -1));
             $file_segments = explode("__", $file_segments[1]);
@@ -311,7 +329,16 @@ class GradingQueue {
         // These are files in the grading directory but does not have a GRADING_ file, so grading has not started yet
         foreach ($not_yet_started as $file) {
             $path = FileUtils::joinPaths($this->grading_path, $file);
-            $this->updateDetailedQueueCount($path, false, $epoch_time, $queue_counts, $capability_queue_counts, $machine_grading_counts, $open_autograding_workers_json, $course_info);
+            $this->updateDetailedQueueCount(
+                $path,
+                false,
+                $epoch_time,
+                $queue_counts,
+                $capability_queue_counts,
+                $machine_grading_counts,
+                $open_autograding_workers_json,
+                $course_info
+            );
         }
 
         return [
@@ -325,7 +352,16 @@ class GradingQueue {
     }
 
     // Helper function used to interpret the job files and update the count variables appropriately
-    private function updateDetailedQueueCount(string $queue_or_grading_file, bool $is_grading, int $epoch_time, array &$detailed_queue_counts, array &$capability_queue_counts, array &$machine_grading_counts, array $open_autograding_workers_json, array &$course_info): array {
+    private function updateDetailedQueueCount(
+        string $queue_or_grading_file,
+        bool $is_grading,
+        int $epoch_time,
+        array &$detailed_queue_counts,
+        array &$capability_queue_counts,
+        array &$machine_grading_counts,
+        array $open_autograding_workers_json,
+        array &$course_info
+    ): array {
         $stale = false;
         $error = "";
         $regrade = false;

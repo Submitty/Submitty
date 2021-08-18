@@ -39,9 +39,7 @@ class AutogradingStatusController extends AbstractController {
      * @return JsonResponse
      */
     public function getProgress(): JsonResponse {
-        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
-        $user_id = $this->core->getUser()->getId();
-        if (!in_array($user_id, $instructors)) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $info = $this->getAutogradingInfo();

@@ -7,7 +7,7 @@ use app\models\User;
 use app\models\AutogradingStatusController;
 
 class AutogradingStatusView extends AbstractView {
-    public function displayPage($progress) {
+    public function displayPage(array $progress) {
         $this->core->getOutput()->addInternalJs("autograding-status.js");
         $this->core->getOutput()->addInternalCss("autograding-status.css");
         $this->core->getOutput()->addInternalCss('table.css');

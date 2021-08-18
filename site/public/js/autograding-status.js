@@ -1,4 +1,4 @@
-/* global buildUrl, csrfToken, displayErrorMessage, displaySuccessMessage */
+/* global buildUrl, displayErrorMessage, displaySuccessMessage */
 // Change this variable to change the frequency of the update request, measured in miliseconds
 const refresh_freq = 5000;
 // Change this variable to change the max number of entries in the table before the oldest entries are replaced
@@ -10,7 +10,6 @@ function updateTable() {
     $.ajax({
         url: buildUrl(['autograding_status', 'get_update']),
         type: 'GET',
-        data: {'csrf_token': csrfToken},
         success: function(response) {
             try {
                 const data = $('#data');

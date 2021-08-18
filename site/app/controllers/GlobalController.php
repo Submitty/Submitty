@@ -389,8 +389,10 @@ class GlobalController extends AbstractController {
         }
 
         // Create the line for all faculties, superusers, and instructors
-        $instructors = $this->core->getQueries()->getActiveUserIds(true, false, false, false, true);
-        if ($this->core->getUser()->accessFaculty() || in_array($this->core->getUser()->getId(), $instructors)) {
+        if (
+            $this->core->getUser()->accessFaculty()
+            || !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))
+        ) {
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line",
             ]);
@@ -445,7 +447,7 @@ class GlobalController extends AbstractController {
 
         // --------------------------------------------------------------------------
         // INSTRUCTOR IN ANY COURSE
-        if (in_array($this->core->getUser()->getId(), $instructors)) {
+        if (!empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['autograding_status']),
                 "title" => "Autograding Status",
