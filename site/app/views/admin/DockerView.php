@@ -129,7 +129,7 @@ class DockerView extends AbstractView {
         asort($capabilities);
         $capability_to_color = [];
         for ($i = 0; $i < count($capabilities); $i++) {
-            $capability_to_color[$capabilities[$i]] = min($i+1, 20);
+            $capability_to_color[$capabilities[$i]] = min($i + 1, 20);
         }
 
         $array_list = scandir(
