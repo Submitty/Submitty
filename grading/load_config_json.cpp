@@ -984,27 +984,16 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
     Execution_Helper(single_testcase);
   }
 
-  std::string tmp_string = single_testcase.value("testcase_label", "");
-  single_testcase["testcase_label"] = tmp_string;
-  tmp_string = single_testcase.value("details","");
-  single_testcase["details"] = tmp_string;
-  if (single_testcase.find("extra_credit") == single_testcase.end()) {
-    single_testcase["extra_credit"] = false;
-  }
-  if (single_testcase.find("release_hidden_details") == single_testcase.end()) {
-    single_testcase["release_hidden_details"] = false;
-  }
-  if (single_testcase.find("hidden") == single_testcase.end()) {
-    single_testcase["hidden"] = false;
-  }
+  json_set_default(single_testcase,"testcase_label",std::string(""));
+  json_set_default(single_testcase,"details",std::string(""));
+  json_set_default(single_testcase,"extra_credit",false);
+  json_set_default(single_testcase,"release_hidden_details",false);
+  json_set_default(single_testcase,"hidden",false);
   assert(!(single_testcase["release_hidden_details"] && !single_testcase["hidden"]));
-  if (single_testcase.find("view_testcase_message") == single_testcase.end()) {
-    single_testcase["view_testcase_message"] = true;
-  }
-  if (single_testcase.find("publish_action") == single_testcase.end()) {
-    single_testcase["publish_actions"] = false;
-  }
 
+  json_set_default(single_testcase,"view_testcase_message",true);
+  json_set_default(single_testcase,"publish_actions",false);
+  
   nlohmann::json::iterator itr = single_testcase.find("validation");
   if (itr != single_testcase.end()) {
     assert (itr->is_array());

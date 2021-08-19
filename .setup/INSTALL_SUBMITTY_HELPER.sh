@@ -55,10 +55,10 @@ fi
 # FORCE CORRECT TIME SKEW
 # This may happen on a development virtual machine
 if [ ${UTM_ARM} == 1 ]; then
-    #sudo service ntp stop
-    #sudo ntpd -gq
-    #sudo service ntp start
-    #sudo timedatectl set-timezone America/New_York
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
 
     echo "skipping"
     
