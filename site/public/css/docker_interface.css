@@ -78,7 +78,7 @@
 }
 
 .filter-buttons {
-    color: var(--text-black);
+    color: black;
 }
 
 .filter-buttons:hover,
