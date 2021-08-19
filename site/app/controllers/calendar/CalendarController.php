@@ -35,9 +35,11 @@ class CalendarController extends AbstractController {
 
         $calendar_messages = [];
 
-        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $calendar_messages);
+        $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
 
-        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $calendar_messages));
+        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $courses, $calendar_messages);
+
+        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $courses, $calendar_messages));
     }
 
     /**
@@ -47,7 +49,7 @@ class CalendarController extends AbstractController {
     public function viewCourseCalendar(): WebResponse {
         $calendar_messages = [];
 
-        $gradeables = GradeableUtils::getGradeablesFromUserAndCourse($this->core, $this->core->getUser(), $calendar_messages);
+        $gradeables = GradeableUtils::getGradeablesFromUserAndCourse($this->core, $calendar_messages);
 
         return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables, $calendar_messages), true);
     }

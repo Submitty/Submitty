@@ -211,19 +211,27 @@ a.cal-gradeable-status-text:focus {
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
-    color: #218ffd;  /* This color is from DS website */
+    /*color: #218ffd;  /* This color is from DS website */
+    color: var(--text-black);
     padding: 0 0 0 0;
     font-style: italic;
-    border: none;
+    /*border: none;*/
+    border-style: solid;
+    border-width: 3px;
+    /*border-color: #218ffd;*/
     box-shadow: none;
 }
 
 a.cal-gradeable-status-ann:hover {
-    color: #218ffd;
+    /*color: #218ffd;*/
+    color: var(--text-black);
     padding: 0 0 0 0;
     font-style: italic;
     cursor: default;
-    border: none;
+    /*border: none;*/
+    border-style: solid;
+    border-width: 3px;
+    /*border-color: #218ffd;*/
 }
 
 a.cal-gradeable-status-ann:focus {
@@ -252,6 +260,11 @@ a.cal-gradeable-status-link:focus {
     color: var(--external-link-active);
     padding: 0 0 0 0;
     border: none;
+}
+
+.calendar_color_blue {
+    background-color: #218ffd;
+    color: var(--text-black) !important;
 }
 
 @media (max-width: 800px) {

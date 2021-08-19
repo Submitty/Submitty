@@ -92,6 +92,7 @@ function generateCalendarItem(item) {
     const disabled = item['disabled'] ? 'disabled' : '';
     return `<a class="btn ${item['class']} cal-gradeable-status-${item['status']} cal-gradeable-item"
            title="${tooltip}" 
+           style="${(item['type'] === 'gradeable') ? `background-color: ${item['color']}` : `border-color: ${item['color']}`}"
            ${(link !== '') ? `href="${link}"` : ''} 
            ${(onclick !== '') ? `onclick="${onclick}"` : ''} 
            ${disabled}>
