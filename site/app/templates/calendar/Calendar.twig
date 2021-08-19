@@ -20,6 +20,11 @@
 {# Begin Calendar #}
 <div class="content">
     <h1>Calendar</h1>
+    <div class="cal-legend">
+        {% for course, color in colors %}
+            <p>{{ course }}: {{ color }}</p>
+        {% endfor %}
+    </div>
     <div class="cal-content">
         <div class="cal-toolbar">
             {% if in_course and is_instructor %}
