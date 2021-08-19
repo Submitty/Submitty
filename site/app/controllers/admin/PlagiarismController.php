@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\controllers\admin;
 
 use app\libraries\response\ResponseInterface;
@@ -16,6 +18,7 @@ use DateTime;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 use app\views\admin\PlagiarismView;
+use app\entities\plagiarism\PlagiarismConfig;
 
 /**
  * Class PlagiarismController
@@ -520,7 +523,7 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
     public function saveNewPlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
-        $course_path = $this->core->getConfig()->getCoursePath();
+        $em = $this->core->getCourseEntityManager();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
@@ -543,12 +546,10 @@ class PlagiarismController extends AbstractController {
         }
 
 
-        if ($config_id !== null) {
-            // Check if Lichen job is already running
-            if (file_exists($this->getQueuePath($gradeable_id, $config_id)) || file_exists($this->getProcessingQueuePath($gradeable_id, $config_id))) {
-                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
-                return new RedirectResponse($return_url);
-            }
+        // Check if Lichen job is already running
+        if (file_exists($this->getQueuePath($gradeable_id, $config_id)) || file_exists($this->getProcessingQueuePath($gradeable_id, $config_id))) {
+            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+            return new RedirectResponse($return_url);
         }
 
 
@@ -564,7 +565,7 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
         $regex_directories = $_POST["regex_dir"];
-        $regex_for_selecting_files = $_POST['regex_to_select_files'];
+        $regex_for_selecting_files = preg_split('/\s+/', $_POST['regex_to_select_files']);
 
 
         // Language ////////////////////////////////////////////////////////////
@@ -676,15 +677,16 @@ class PlagiarismController extends AbstractController {
 
         // Generate a unique number for this version of the gradeable //////////
         if ($new_or_edit === "new") {
-            $config_id = 1;
-            if (is_dir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id))) {
-                foreach (scandir(FileUtils::joinPaths($course_path, "lichen", $gradeable_id)) as $file) {
-                    if ($file !== '.' && $file !== '..' && is_numeric($file) && intval($file) >= $config_id) {
-                        $config_id = intval($file) + 1;
-                    }
-                }
+            try {
+                $config_id = $em->getRepository(PlagiarismConfig::class)
+                                ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"])
+                                ->getConfigID() + 1;
+                $config_id = strval($config_id);
             }
-            $config_id = strval($config_id);
+            catch(Exception $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($return_url);
+            }
         }
 
 
@@ -714,26 +716,14 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-
-        // Save the config.json ////////////////////////////////////////////////
-        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
-        $json_data = [
-            "semester" => $semester,
-            "course" => $course,
-            "gradeable" => $gradeable_id,
-            "config_id" => $config_id,
-            "version" => $version_option,
-            "regex" => $regex_for_selecting_files,
-            "regex_dirs" => $regex_directories,
-            "language" => $language,
-            "threshold" => $threshold,
-            "sequence_length" => $sequence_length,
-            "prior_term_gradeables" => $prev_term_gradeables,
-            "ignore_submissions" => $ignore_submission_option
-        ];
-
-        if (!@file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT))) {
-            $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
+        // Save the config /////////////////////////////////////////////////////
+        try {
+            $plagiarism_config = new PlagiarismConfig($gradeable_id, intval($config_id), $version_option, $regex_for_selecting_files, $regex_directories, $language, $threshold, $sequence_length, $ignore_submission_option);
+            $em->persist($plagiarism_config);
+            $em->flush();
+        }
+        catch(Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($return_url);
         }
 
