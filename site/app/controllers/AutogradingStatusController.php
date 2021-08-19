@@ -51,8 +51,8 @@ class AutogradingStatusController extends AbstractController {
         $gq = new GradingQueue(null, null, $this->core->getConfig()->getSubmittyPath());
         $info = $gq->getAutogradingInfo($this->core->getConfig()->getConfigPath());
         $course = [];
-        $tmp = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
-        foreach ($tmp as $row) {
+        $courses_full = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
+        foreach ($courses_full as $row) {
             $course[] = $row["semester"] . " " . $row["course"];
         }
         foreach ($info["ongoing_job_info"] as &$i) {
