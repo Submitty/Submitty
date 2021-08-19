@@ -35,26 +35,7 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
-        try {
-            $response = $this->core->curlRequest(
-                FileUtils::joinPaths($this->core->getConfig()->getCgiUrl(), "docker_ui.cgi")
-            );
-        }
-        catch (CurlException $exc) {
-            $msg = "Failed to get response from CGI process, please try again";
-            return new MultiResponse(
-                JsonResponse::getFailResponse($msg),
-                new WebResponse("Error", "errorPage", $msg)
-            );
-        }
-        $json = json_decode($response, true);
-
-        if ($json['success'] === false) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse($json['error']),
-                new WebResponse("Error", "errorPage", $json['error'])
-            );
-        }
+        $json = [];
 
         $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
