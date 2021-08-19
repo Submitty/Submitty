@@ -81,7 +81,6 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
      */
     public function downloadCourseMaterialZip($course_material_id) {
-        //$root_path = realpath(htmlspecialchars_decode(rawurldecode($path)));
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['id' => $course_material_id]);
         if ($cm === null) {
@@ -184,6 +183,9 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($newdatatime): JsonResponse {
+        if (!isset($_POST['id'])) {
+            return JsonResponse::getErrorResponse("You must specify an ID");
+        }
         $id = $_POST['id'];
 
         if (!isset($newdatatime)) {
