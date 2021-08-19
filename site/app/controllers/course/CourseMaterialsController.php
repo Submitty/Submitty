@@ -274,21 +274,23 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
         if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            $path = $course_material->getPath();
-            $dirs = explode("/", $path);
-            array_pop($dirs);
-            $path = implode("/", $dirs);
-            $path = FileUtils::joinPaths($path, urlencode("link-" . $_POST['link_title']));
-            $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                ->findOneBy(['path' => $path]);
-            if ($tmp_course_material !== null) {
-                return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
+            if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
+                $path = $course_material->getPath();
+                $dirs = explode("/", $path);
+                array_pop($dirs);
+                $path = implode("/", $dirs);
+                $path = FileUtils::joinPaths($path, urlencode("link-" . $_POST['link_title']));
+                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $path]);
+                if ($tmp_course_material !== null) {
+                    return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
+                }
+                FileUtils::writeFile($path, "");
+                unlink($course_material->getPath());
+                $course_material->setUrlTitle($_POST['link_title']);
+                $course_material->setPath($path);
             }
-            FileUtils::writeFile($path, "");
-            unlink($course_material->getPath());
             $course_material->setUrl($_POST['link_url']);
-            $course_material->setUrlTitle($_POST['link_title']);
-            $course_material->setPath($path);
         }
 
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
