@@ -385,7 +385,8 @@ class PlagiarismController extends AbstractController {
 
         usort($all_configurations, function ($a, $b) {
             return $a['g_grade_due_date'] > $b['g_grade_due_date']
-                   || ($a["g_grade_due_date"] === $b["g_grade_due_date"] && $a["g_config_version"] > $b["g_config_version"]);
+                   || ($a["g_grade_due_date"] == $b["g_grade_due_date"] && $a["g_title"] > $b["g_title"])
+                   || ($a["g_grade_due_date"] == $b["g_grade_due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]);
         });
 
         // TODO: return to this and enable later
