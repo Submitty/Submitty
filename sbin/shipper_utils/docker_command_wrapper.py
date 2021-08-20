@@ -22,16 +22,6 @@ if __name__ == '__main__':
     try:
         repo, tag = args.image.split(':')
         client.images.pull(repository=repo, tag=tag)
-        docker_info = client.info()
-        docker_images_obj = client.images.list()
-        #print the details of the image
-        for i in docker_images_obj:
-            # rip relevant information
-            data = i.attrs
-            print(f"{args.image}-id: {i.id}")
-            print(f"{args.image}-tag: ", end = "")
-            print(', '.join(data["RepoTags"]))
-            print(f'{args.image}-created: {data["Created"]}')
     except Exception:
         traceback.print_exc()
         sys.exit(1)
