@@ -363,7 +363,6 @@ class PlagiarismController extends AbstractController {
      */
     public function plagiarismMainPage(string $refresh_page = "NO_REFRESH"): WebResponse {
         $em = $this->core->getCourseEntityManager();
-        $course_path = $this->core->getConfig()->getCoursePath();
         $all_configurations = [];
 
         $configs = $em->getRepository(PlagiarismConfig::class)->findAll();
@@ -813,6 +812,7 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         try {
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
@@ -826,13 +826,6 @@ class PlagiarismController extends AbstractController {
         # Re run only if following checks are passed.
         if (file_exists($lichen_job_file) || file_exists($lichen_job_file_processing)) {
             $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
-            return new RedirectResponse($return_url);
-        }
-
-        $json_config_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
-
-        if (!file_exists($json_config_file)) {
-            $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
             return new RedirectResponse($return_url);
         }
 
@@ -989,9 +982,9 @@ class PlagiarismController extends AbstractController {
      */
     public function deletePlagiarismResultAndConfig(string $gradeable_id, string $config_id): RedirectResponse {
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
-        $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
 
         try {
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
@@ -1004,13 +997,12 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
-        if (!file_exists($config_path)) {
-            $this->core->addErrorMessage("Plagiarism results for the configuration are already deleted. Refresh the page.");
-            return new RedirectResponse($return_url);
-        }
-
         try {
+            $em = $this->core->getCourseEntityManager();
+            $to_be_deleted = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+            $em->remove($to_be_deleted);
             $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id, $config_id);
+            $em->flush();
         }
         catch (Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
@@ -1075,13 +1067,13 @@ class PlagiarismController extends AbstractController {
      */
     public function getRunLog(string $gradeable_id, string $config_id): JsonResponse {
         try {
-            $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
+            $this->verifyGradeableAndConfigAreValid($gradeable_id, intval($config_id));
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
 
-        $log_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "logs", "lichen_job_output.txt");
+        $log_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, intval($config_id)), "logs", "lichen_job_output.txt");
 
         if (!file_exists($log_file)) {
             return JsonResponse::getErrorResponse("Error: Unable to find run log.");
@@ -1370,20 +1362,13 @@ class PlagiarismController extends AbstractController {
      * @return JsonResponse
      */
     public function checkRefreshLichenMainPage(): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+        $configs = $em->getRepository(PlagiarismConfig::class)->findAll();
+
         $gradeables_in_progress = 0;
-        $gradeables_with_plagiarism_result = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        foreach ($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if (is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id_title['g_id']))) {
-                foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen", $gradeable_id_title['g_id'])) as $config_id) {
-                    if ($config_id !== '.' && $config_id !== '..' && file_exists(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id_title['g_id'], $config_id), "config.json"))) {
-                        if (
-                            file_exists($this->getQueuePath($gradeable_id_title['g_id'], $config_id))
-                            || file_exists($this->getProcessingQueuePath($gradeable_id_title['g_id'], $config_id))
-                        ) {
-                            $gradeables_in_progress++;
-                        }
-                    }
-                }
+        foreach($configs as $config) {
+            if (file_exists($this->getQueuePath($config->getGradeableID(), $config->getConfigID())) || file_exists($this->getProcessingQueuePath($config->getGradeableID(), $config->getConfigID()))) {
+                $gradeables_in_progress++;
             }
         }
 
