@@ -9,6 +9,7 @@ import subprocess
 import docker
 import traceback
 import argparse
+import get_docker_info
 from submitty_utils import ssh_proxy_jump
 
 
@@ -63,13 +64,8 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_info = client.info()
         docker_images_obj = client.images.list()
         #print the details of the image
-        for i in docker_images_obj:
-            # rip relevant information
-            print(f"\tTag: ", end = "")
-            print(', '.join(data["RepoTags"]))
-            data = i.attrs
-            print(f"\tId: {i.short_id}")
-            print(f'\tCreated: {data["Created"]}')
+        get_docker_info.printDockerInfo()
+        
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')

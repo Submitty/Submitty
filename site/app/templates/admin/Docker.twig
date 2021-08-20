@@ -68,7 +68,11 @@
         <thead>
             <tr>
                 <th>Image Name</th>
+                <th>Id</th>
+                <th>Size</th>
                 <th>Tag</th>
+                <th>Created</th>
+                <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
             </tr>
         </thead>
@@ -78,11 +82,27 @@
                 {% set full = key|split(":")  %}
                 {% set name = full[0] %}
                 {% set tag = full[1] %}
+                {% set used_name = key %}
+                {% for alias in aliases[key] %}
+                    {% if alias in image_info|keys %}
+                        {% set used_name = alias %}
+                    {% endif %}
+                {% endfor %}
                 <td>{{ name }}</th>
+                <td>{{ image_info[used_name]["id"] | trim("sha256:")}}</td>
+                <td>{{ image_info[used_name]["size"] }}</td>
                 <td>{{ tag }} </td>
+                <td>{{ image_info[used_name]["created"] }}</td>
+                <td>
+                    <ul class="tag-list">
+                        {% for alias in aliases[key] %}
+                            <li>{{ alias }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
                 <td>
                     {% for capability in value %}
-                        <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                        <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
                     {% endfor %}
                 </td>
             </tr>
