@@ -307,38 +307,35 @@
         getGradeables(semester_course_dropdown[0]);
     }
 
-    // LANGUAGE, SEQUENCE LENGTH, THRESHOLD ////////////////////////////////////
-    $('[name="threshold"], [name="sequence_length"]').change(function(){
-        if($(this).val().length === 0){
-            $(this)[0].setCustomValidity('Input is required');
-        }
-        else if(!(/^[\d]+$/g).test($(this).val())) {
-            $(this)[0].setCustomValidity('Input must only contain numeric characters');
-        } else {
-            $(this)[0].setCustomValidity('');
-        }
-    });
+    // SEQUENCE LENGTH + LANGUAGE //////////////////////////////////////////////
 
-    $("select[name='language']").change(function() {
-        var form = $("#save-configuration-form")
+    function updateSequenceLengthForLanguage() {
+        const form = $("#save-configuration-form")
         // Following code is used to set default window size for different languages
         // that will appear in 'configureNewGradeableForPlagiarismForm'
         // to change the default values, just change the val attribute for the language.
 
-        if ($('[name="language"]', form).val() == "python") {
-            $('[name="sequence_length"]', form).val('10');
+        if ($('[name="language"]', form).val() === "python") {
+            $('[name="sequence_length"]', form).val('14');
         }
-        else if ($('[name="language"]', form).val() == "cpp") {
-            $('[name="sequence_length"]', form).val('2');
+        else if ($('[name="language"]', form).val() === "cpp") {
+            $('[name="sequence_length"]', form).val('14');
         }
-        else if ($('[name="language"]', form).val() == "java") {
-            $('[name="sequence_length"]', form).val('3');
+        else if ($('[name="language"]', form).val() === "java") {
+            $('[name="sequence_length"]', form).val('14');
         }
-        else if ($('[name="language"]', form).val() == "plaintext") {
-            $('[name="sequence_length"]', form).val('4');
+        else if ($('[name="language"]', form).val() === "plaintext") {
+            $('[name="sequence_length"]', form).val('14');
         }
-        else if ($('[name="language"]', form).val() == "mips") {
+        else if ($('[name="language"]', form).val() === "mips") {
             $('[name="sequence_length"]', form).val('5');
         }
+    }
+
+    $(document).ready(function() {
+        updateSequenceLengthForLanguage();
+        $("select[name='language']").change(function() {
+            updateSequenceLengthForLanguage();
+        });
     });
 </script>
