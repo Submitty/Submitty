@@ -4,6 +4,7 @@ import docker
 import sys
 import traceback
 
+
 def parse_arguments():
     """Parse the arguments provided to the script."""
     parser = argparse.ArgumentParser(description='A wrapper for the various\

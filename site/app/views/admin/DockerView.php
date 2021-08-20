@@ -170,7 +170,7 @@ class DockerView extends AbstractView {
                         $image_info[$alias] = [
                             "id" => $id,
                             "created" => \DateTime::createFromFormat('Y-m-d\TH:i:s+', $created)->format("Y-m-d H:i:s"),
-                            "size" => Utils::formatBytes('mb',$size, true)
+                            "size" => Utils::formatBytes('mb', $size, true)
                         ];
                     }
                 }
