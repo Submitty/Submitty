@@ -121,10 +121,10 @@ class PlagiarismConfig {
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function getVersionStatus(): bool {
-        return $this->getVersionStatus();
+    public function getVersionStatus(): string {
+        return $this->version;
     }
 
     /**
@@ -149,8 +149,14 @@ class PlagiarismConfig {
 
     /**
      * @param array $regex
+     * @throws Exception
      */
     public function setRegexArray(array $regex): void {
+        foreach ($regex as $r) {
+            if (str_contains($r, "..")) {
+                throw new Exception("Error: Regex contains invalid component '..'");
+            }
+        }
         $this->regex = $regex;
     }
 
