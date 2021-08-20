@@ -779,7 +779,19 @@ class PlagiarismController extends AbstractController {
 
         // Save the config /////////////////////////////////////////////////////
         try {
-            $plagiarism_config = new PlagiarismConfig($gradeable_id, $config_id, $version_option, $regex_for_selecting_files, $regex_directories, $language, $threshold, $sequence_length, $ignore_submission_option);
+            if ($new_or_edit === "new") {
+                $plagiarism_config = new PlagiarismConfig($gradeable_id, $config_id, $version_option, $regex_for_selecting_files, $regex_directories, $language, $threshold, $sequence_length, $ignore_submission_option);
+            }
+            else {
+                $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+                $plagiarism_config->setVersionStatus($version_option);
+                $plagiarism_config->setRegexArray($regex_for_selecting_files);
+                $plagiarism_config->setRegexDirs($regex_directories);
+                $plagiarism_config->setLanguage($language);
+                $plagiarism_config->setThreshold($threshold);
+                $plagiarism_config->setSequenceLength($sequence_length);
+                $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
+            }
             $em->persist($plagiarism_config);
             $em->flush();
         }
@@ -900,28 +912,21 @@ class PlagiarismController extends AbstractController {
      * @return ResponseInterface
      */
     public function editPlagiarismSavedConfig(string $gradeable_id, string $config_id): ResponseInterface {
-        $config_path = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         // Error checking
         try {
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
             $this->core->addErrorMessage($e);
             return new RedirectResponse($return_url);
         }
-        if (!file_exists($config_path)) {
-            $this->core->addErrorMessage("Saved configuration not found.");
-            return new RedirectResponse($return_url);
-        }
 
-        // get the config from the config file
-        $saved_config = json_decode(file_get_contents($config_path), true);
-        $title = "";
-        if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
-            $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
-        }
+        // get the config
+        $em = $this->core->getCourseEntityManager();
+        $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
 
         // check to see if there are any provided code files
         $has_provided_code = false;
@@ -933,8 +938,8 @@ class PlagiarismController extends AbstractController {
                 $provided_code_filenames[] = $filename;
             }
         }
-        $ignore = $this->getIgnoreSubmissionType($saved_config['ignore_submissions']);
-        $prior_term_gradeables_array = $saved_config['prior_term_gradeables'];
+        $ignore = $this->getIgnoreSubmissionType($plagiarism_config->getIgnoredSubmissions());
+        $prior_term_gradeables_array = [];
         foreach ($prior_term_gradeables_array as &$gradeable) {
             try {
                 $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"], $gradeable_id);
@@ -946,21 +951,21 @@ class PlagiarismController extends AbstractController {
         }
         $config = [];
 
-        $config["gradeable_id"] = $saved_config['gradeable'];
-        $config["config_id"] = $saved_config['config_id'];
-        $config["title"] = $title;
+        $config["gradeable_id"] = $plagiarism_config->getGradeableID();
+        $config["config_id"] = $plagiarism_config->getConfigID();
+        $config["title"] = $this->core->getQueries()->getGradeableConfig($plagiarism_config->getGradeableID())->getTitle();;
         $config["gradeable_ids_titles"] = [];
         $config["provided_code"] = $has_provided_code;
         $config["provided_code_filenames"] = $provided_code_filenames;
-        $config["version"] = $saved_config['version'];
-        $config["regex"] = $saved_config['regex'];
-        $config["regex_dirs"] = $saved_config['regex_dirs'];
+        $config["version"] = $plagiarism_config->getVersionStatus();
+        $config["regex"] = implode(", ", $plagiarism_config->getRegexArray());
+        $config["regex_dirs"] = $plagiarism_config->getRegexDirs();
         $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
-        $config["language"][$saved_config['language']] = "selected";
-        $config["threshold"] = (int) $saved_config['threshold'];
-        $config["sequence_length"] = (int) $saved_config['sequence_length'];
-        $config["prior_terms"] = count($saved_config['prior_term_gradeables']) > 0;
-        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
+        $config["language"][$plagiarism_config->getLanguage()] = "selected";
+        $config["threshold"] = $plagiarism_config->getThreshold();
+        $config["sequence_length"] = $plagiarism_config->getSequenceLength();
+        $config["prior_terms"] = count([]) > 0;
+        $config["prior_semester_courses"] = $this->getPriorSemesterCourses() ?? [];
         $config["prior_term_gradeables"] = $prior_term_gradeables_array;
         $config["ignore_submissions"] = $ignore[0];
         $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
