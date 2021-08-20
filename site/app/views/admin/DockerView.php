@@ -17,14 +17,6 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-        //sort containers alphabetically
-        $sort_containers = function (array $containers, string $key, int $order = SORT_ASC): array {
-            $names = array_column($containers, $key);
-            array_multisort($names, $order, $containers);
-            return $containers;
-        };
-
-
         $images = [];
         foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
             foreach ($image_list as $image) {
@@ -43,7 +35,6 @@ class DockerView extends AbstractView {
             $worker_temp['name'] = $name;
             $worker_temp['capabilities'] = [];
             $worker_temp['images'] = [];
-            $image_names = [];
             foreach ($worker['capabilities'] as $capability) {
                 $capabilities[] = $capability;
                 $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
@@ -53,7 +44,6 @@ class DockerView extends AbstractView {
                 $worker_temp['images_not_found'] = [];
                 if (array_key_exists($capability, $docker_data['autograding_containers'])) {
                     foreach ($docker_data['autograding_containers'][$capability] as $image) {
-                        $image_names[] = $image;
                         $image_to_capability[$image][] = $capability;
                     }
                 }
@@ -101,7 +91,6 @@ class DockerView extends AbstractView {
             $reset = false;
             $content = rtrim($content);
             $buffer = strtok($content, "\n");
-            $image_to_capability_tmp = [];
             $current_machine = "";
             while ($buffer !== false) {
                 if ($reset) {
