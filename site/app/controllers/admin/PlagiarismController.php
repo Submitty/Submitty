@@ -525,6 +525,7 @@ class PlagiarismController extends AbstractController {
         $gradeable_title = $gradeable_config->getTitle();
 
         try {
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
@@ -965,7 +966,7 @@ class PlagiarismController extends AbstractController {
         $config["threshold"] = $plagiarism_config->getThreshold();
         $config["sequence_length"] = $plagiarism_config->getSequenceLength();
         $config["prior_terms"] = count([]) > 0;
-        $config["prior_semester_courses"] = $this->getPriorSemesterCourses() ?? [];
+        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
         $config["prior_term_gradeables"] = $prior_term_gradeables_array;
         $config["ignore_submissions"] = $ignore[0];
         $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
@@ -1102,6 +1103,7 @@ class PlagiarismController extends AbstractController {
     public function ajaxGetVersionList(string $gradeable_id, string $config_id, string $user_id_1): JsonResponse {
         // error checking
         try {
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
@@ -1167,13 +1169,15 @@ class PlagiarismController extends AbstractController {
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id, string $version, string $source_gradeable = null): JsonResponse {
         // error checking
         try {
+            $version = intval($version);
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, intval($config_id));
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
         // check for backwards crawling
-        if (str_contains($user_id, '..') || str_contains($version, '..') || ($source_gradeable !== null && str_contains($source_gradeable, '..'))) {
+        if (str_contains($user_id, '..') || ($source_gradeable !== null && str_contains($source_gradeable, '..'))) {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
@@ -1208,6 +1212,9 @@ class PlagiarismController extends AbstractController {
     public function ajaxGetColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): JsonResponse {
         // error checking
         try {
+            $version_user_1 = intval($version_user_1);
+            $version_user_2 = intval($version_user_2);
+            $config_id = intval($config_id);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
@@ -1310,12 +1317,14 @@ class PlagiarismController extends AbstractController {
     public function ajaxGetUser2DropdownList(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1): JsonResponse {
         // error checking
         try {
+            $config_id = intval($config_id);
+            $version_user_1 = intval($version_user_1);
             $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
-        if (str_contains($user_id_1, '..') || str_contains($version_user_1, '..')) {
+        if (str_contains($user_id_1, '..')) {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
