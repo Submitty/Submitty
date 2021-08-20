@@ -24,7 +24,8 @@
     <table class="machine-table">
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
-            <td rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</td>
+            <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
             <th colspan={{capabilities|length}}>Capabilities</th>
         </tr>
         <tr>
@@ -36,6 +37,7 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th>{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
+            <td>{{ machine_docker_version[worker['name']] }}</td>
             {% for capability in capabilities %}
                 {% if capability in worker['capabilities'] %}
                     <td><i class="fas fa-check"></i></td>
@@ -89,16 +91,30 @@
                     {% endif %}
                 {% endfor %}
                 <td>{{ name }}</th>
-                <td>{{ image_info[used_name]["id"] | trim("sha256:")}}</td>
-                <td>{{ image_info[used_name]["size"] }}</td>
-                <td>{{ tag }} </td>
-                <td>{{ image_info[used_name]["created"] }}</td>
                 <td>
-                    <ul class="tag-list">
-                        {% for alias in aliases[key] %}
-                            <li>{{ alias }}</li>
-                        {% endfor %}
-                    </ul>
+                    {% if used_name in image_info|keys %}
+                        {{ image_info[used_name]["id"] | trim("sha256:")}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if used_name in image_info|keys %}
+                        {{ image_info[used_name]["size"] }}
+                    {% endif %}
+                </td>
+                <td>{{ tag }} </td>
+                <td>
+                    {% if used_name in image_info|keys %}
+                        {{ image_info[used_name]["created"] }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if key in aliases|keys %}
+                        <ul class="tag-list">
+                            {% for alias in aliases[key] %}
+                                <li>{{ alias }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </td>
                 <td>
                     {% for capability in value %}
