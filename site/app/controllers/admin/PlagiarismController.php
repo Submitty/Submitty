@@ -889,8 +889,8 @@ class PlagiarismController extends AbstractController {
         $config["regex_dirs"] = ["submissions"];
         $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
         $config["language"]["plaintext"] = "selected";
-        $config["threshold"] = 5;
-        $config["sequence_length"] = 4;
+        $config["threshold"] = 15;
+        $config["sequence_length"] = 10;
         $config["prior_terms"] = false;
         $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
         $config["prior_term_gradeables"] = [];
