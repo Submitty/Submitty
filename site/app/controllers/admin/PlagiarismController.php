@@ -321,7 +321,7 @@ class PlagiarismController extends AbstractController {
                 "language" => $config->getLanguage(),
                 "threshold" => $config->getThreshold(),
                 "sequence_length" => $config->getSequenceLength(),
-                "prior_term_gradeables" => [],
+                "prior_term_gradeables" => $config->getOtherGradeables(),
                 "ignore_submissions" => $config->getIgnoredSubmissions()
             ];
 
@@ -781,7 +781,7 @@ class PlagiarismController extends AbstractController {
         // Save the config /////////////////////////////////////////////////////
         try {
             if ($new_or_edit === "new") {
-                $plagiarism_config = new PlagiarismConfig($gradeable_id, $config_id, $version_option, $regex_for_selecting_files, $regex_directories, $language, $threshold, $sequence_length, $ignore_submission_option);
+                $plagiarism_config = new PlagiarismConfig($gradeable_id, $config_id, $version_option, $regex_for_selecting_files, $regex_directories, $language, $threshold, $sequence_length, $prev_term_gradeables, $ignore_submission_option);
             }
             else {
                 $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
@@ -791,9 +791,11 @@ class PlagiarismController extends AbstractController {
                 $plagiarism_config->setLanguage($language);
                 $plagiarism_config->setThreshold($threshold);
                 $plagiarism_config->setSequenceLength($sequence_length);
+                $plagiarism_config->setOtherGradeables($prev_term_gradeables);
                 $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
             }
             $em->persist($plagiarism_config);
+
             $em->flush();
         }
         catch(Exception $e) {
@@ -940,7 +942,7 @@ class PlagiarismController extends AbstractController {
             }
         }
         $ignore = $this->getIgnoreSubmissionType($plagiarism_config->getIgnoredSubmissions());
-        $prior_term_gradeables_array = [];
+        $prior_term_gradeables_array = $plagiarism_config->getOtherGradeables();
         foreach ($prior_term_gradeables_array as &$gradeable) {
             try {
                 $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"], $gradeable_id);
@@ -965,7 +967,7 @@ class PlagiarismController extends AbstractController {
         $config["language"][$plagiarism_config->getLanguage()] = "selected";
         $config["threshold"] = $plagiarism_config->getThreshold();
         $config["sequence_length"] = $plagiarism_config->getSequenceLength();
-        $config["prior_terms"] = count([]) > 0;
+        $config["prior_terms"] = count($plagiarism_config->getOtherGradeables()) > 0;
         $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
         $config["prior_term_gradeables"] = $prior_term_gradeables_array;
         $config["ignore_submissions"] = $ignore[0];

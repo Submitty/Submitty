@@ -74,6 +74,12 @@ class PlagiarismConfig {
     protected $sequence_length;
 
     /**
+     * @ORM\Column(type="json")
+     * @var array
+     */
+    protected $other_gradeables;
+
+    /**
      * @ORM\Column(type="simple_array")
      * @var array
      */
@@ -94,7 +100,18 @@ class PlagiarismConfig {
      * @param array $ignored_submissions
      * @throws Exception
      */
-    public function __construct(string $gradeable_id, int $config_id, string $version, array $regex, array $regex_dirs, string $language, int $threshold, int $sequence_length, array $ignored_submissions) {
+    public function __construct(
+        string $gradeable_id,
+        int $config_id,
+        string $version,
+        array $regex,
+        array $regex_dirs,
+        string $language,
+        int $threshold,
+        int $sequence_length,
+        array $other_gradeables,
+        array $ignored_submissions
+    ) {
         $this->gradeable_id = $gradeable_id;
         $this->config_id = $config_id;
         $this->setVersionStatus($version);
@@ -103,7 +120,15 @@ class PlagiarismConfig {
         $this->setLanguage($language);
         $this->setThreshold($threshold);
         $this->setSequenceLength($sequence_length);
+        $this->setOtherGradeables($other_gradeables);
         $this->setIgnoredSubmissions($ignored_submissions);
+    }
+
+    /**
+     * @return int
+     */
+    public function getUniqueID(): int {
+        return $this->id;
     }
 
     /**
@@ -232,6 +257,20 @@ class PlagiarismConfig {
         else {
             throw new Exception("Error: Invalid sequence length");
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getOtherGradeables(): array {
+        return $this->other_gradeables;
+    }
+
+    /**
+     * @param array $other_gradeables
+     */
+    public function setOtherGradeables(array $other_gradeables): void {
+        $this->other_gradeables = $other_gradeables;
     }
 
     /**
