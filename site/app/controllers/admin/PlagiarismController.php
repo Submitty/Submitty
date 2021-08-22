@@ -739,14 +739,14 @@ class PlagiarismController extends AbstractController {
             try {
                 $config_id = $em->getRepository(PlagiarismConfig::class)
                                 ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"]);
-                if ($config_id === null){
+                if ($config_id === null) {
                     $config_id = 1;
                 }
                 else {
                     $config_id = $config_id->getConfigID() + 1;
                 }
             }
-            catch(Exception $e) {
+            catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
@@ -799,7 +799,7 @@ class PlagiarismController extends AbstractController {
 
             $em->flush();
         }
-        catch(Exception $e) {
+        catch (Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($return_url);
         }
@@ -957,7 +957,7 @@ class PlagiarismController extends AbstractController {
 
         $config["gradeable_id"] = $plagiarism_config->getGradeableID();
         $config["config_id"] = $plagiarism_config->getConfigID();
-        $config["title"] = $this->core->getQueries()->getGradeableConfig($plagiarism_config->getGradeableID())->getTitle();;
+        $config["title"] = $this->core->getQueries()->getGradeableConfig($plagiarism_config->getGradeableID())->getTitle();
         $config["gradeable_ids_titles"] = [];
         $config["provided_code"] = $has_provided_code;
         $config["provided_code_filenames"] = $provided_code_filenames;
@@ -1383,7 +1383,7 @@ class PlagiarismController extends AbstractController {
         $configs = $em->getRepository(PlagiarismConfig::class)->findAll();
 
         $gradeables_in_progress = 0;
-        foreach($configs as $config) {
+        foreach ($configs as $config) {
             if (file_exists($this->getQueuePath($config->getGradeableID(), $config->getConfigID())) || file_exists($this->getProcessingQueuePath($config->getGradeableID(), $config->getConfigID()))) {
                 $gradeables_in_progress++;
             }
