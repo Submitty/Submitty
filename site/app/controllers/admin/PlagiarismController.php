@@ -80,7 +80,7 @@ class PlagiarismController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @param string $config_id
+     * @param int $config_id
      * @return string
      */
     private function getQueuePath(string $gradeable_id, int $config_id): string {
@@ -592,7 +592,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @param string $new_or_edit
      * @param string $gradeable_id
-     * @param int $config_id
+     * @param string $config_id
      * @return RedirectResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
