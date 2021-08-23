@@ -162,13 +162,7 @@ class PDFController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
 
-        $file_path;
-        if (in_array('checkout', explode('/', $annotation_info['file_path']))) {
-            $file_path = md5($this->getAnonPath($annotation_info['file_path']));
-        }
-        else {
-            $file_path = md5($annotation_info["file_path"]);
-        }
+        $file_path = md5($annotation_info["file_path"]);
 
         $annotation_body = [
             'file_path' => $file_path,
@@ -249,10 +243,22 @@ class PDFController extends AbstractController {
                 }
             }
         }
+
+        $anon_path;
+        $download_path;
+        if (in_array('checkout', explode('/', $file_path))) {
+            $anon_path = $this->convertToAnonPath($file_path);
+        }
+        else {
+            $anon_path = $file_path;
+            $file_path = $this->getAnonPath($file_path);
+        }
+
+        $download_path = $file_path;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
-        $file_path_md5 = md5($file_path);
+        $file_path_md5 = md5($anon_path);
         if (is_dir($annotation_dir)) {
             $dir_iter = new \FilesystemIterator($annotation_dir);
             foreach ($dir_iter as $annotation_file) {
@@ -266,18 +272,6 @@ class PDFController extends AbstractController {
                 }
             }
         }
-
-        $anon_path;
-        $download_path;
-        if (in_array('checkout', explode('/', $file_path))) {
-            $anon_path = $this->convertToAnonPath($file_path);
-        }
-        else {
-            $anon_path = $file_path;
-            $file_path = $this->getAnonPath($file_path);
-        }
-
-        $download_path = $file_path;
 
 
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $download_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
