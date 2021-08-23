@@ -74,7 +74,7 @@
                 let sectionsEdit = [];
                 let cmTime = document.getElementById("edit-picker").value;
                 let sort = document.getElementById("edit-sort").value;
-                let requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
+                let id = document.getElementById("material-edit-form").getAttribute("data-id");
                 let hideFromStudents = 'off';
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
@@ -95,7 +95,7 @@
                 let url_url = document.getElementById("edit-url-url");
                 let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
         };
 
         flatpickr('.edit-picker', {

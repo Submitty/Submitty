@@ -103,7 +103,7 @@ class Component extends AbstractModel {
         $this->setStudentComment($details['student_comment']);
         $this->setPoints($details);
         $this->setText($details['text']);
-        $this->setPeerComponent($details['peer']);
+        $this->setPeerComponent($details['peer_component']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
         $this->setIsItempoolLinked($details['is_itempool_linked'] ?? false);
