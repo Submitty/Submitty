@@ -192,7 +192,7 @@ class DatabaseQueries {
         C AS
         (SELECT distinct on (user_id) user_id,submission_time
         FROM electronic_gradeable_data
-        ORDER BY user_id, submission_time),
+        ORDER BY user_id, submission_time desc),
         D AS
         (SELECT distinct on (user_id) user_id, timestamp
         FROM viewed_responses
