@@ -173,6 +173,28 @@
     --simple-half-credit-light-blue: #88d0f4;
     --simple-save-error-red: #da4f49;
 
+    /* For categorizing objects */
+    --category-color-1: #c3a2d2;
+    --category-color-2: #99b270;
+    --category-color-3: #cd98aa;
+    --category-color-4: #6bb88f;
+    --category-color-5: #c8938d;
+    --category-color-6: #6b9fb8;
+    --category-color-7: #c39e83;
+    --category-color-8: #98a3cd;
+    --category-color-9: #8ac78e;
+    --category-color-10: #b39b61;
+    --category-color-11: #6eb9aa;
+    --category-color-12: #b4be79;
+    --category-color-13: #94a2cc;
+    --category-color-14: #80be79;
+    --category-color-15: #b48b64;
+    --category-color-16: #b9b26e;
+    --category-color-17: #83a0c3;
+    --category-color-18: #ada5d4;
+    --category-color-19: #e57fcf;
+    --category-color-20: #c0c246;
+
     /* other */
     --box-shadow-very-transparent: rgba(0, 0, 0, 0.12);
     --box-shadow-slightly-transparent: rgba(0, 0, 0, 0.2);
@@ -184,6 +206,8 @@
     --file-browser-blue: #2627ee;
     --extra-credit-blue: #0a6495;
     --viewed-content: #e8f0f7;
+    --code-box-background-light-gray: #fafafa;
+    --code-box-font-color-dark-gray: #343a42;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
@@ -372,4 +396,6 @@
     --file-browser-blue: #ffffff;
     --extra-credit-blue: #2dacf0;
     --viewed-content: #50535a;
+    --code-box-background-light-gray: #282c34;
+    --code-box-font-color-dark-gray: #abb2bf;
 }

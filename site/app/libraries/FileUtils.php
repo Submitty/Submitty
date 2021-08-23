@@ -189,7 +189,7 @@ class FileUtils {
      *
      * @return bool
      */
-    public static function createDir($dir, $recursive = false, $mode = null) {
+    public static function createDir($dir, $recursive = false, $mode = null): bool {
         $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {

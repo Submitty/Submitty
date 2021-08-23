@@ -60,9 +60,11 @@
   <table class="table">
     <thead>
       <tr>
+      {% if 0 in week_day_this_week_data %}
         {% for key, item in week_day_this_week_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
+      {% endif %}
       </tr>
     </thead>
     <tbody>

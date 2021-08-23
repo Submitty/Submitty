@@ -1,4 +1,4 @@
-/* global CodeMirror, getFocusableElements */
+/* global CodeMirror, CodeMirrorSpellChecker, getFocusableElements */
 /* exported getLargeCodeMirror, getSmallCodeMirror, rowsToPixels */
 
 /**
@@ -19,7 +19,10 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
     // If no mode is set must explicitly set it to null otherwise codemirror will attempt to guess the language and
     // highlight.  This is not desirable when collecting plain text.
     if (!codemirror_config.mode) {
-        codemirror_config.mode = null;
+        CodeMirrorSpellChecker({
+            codeMirrorInstance:  CodeMirror,
+        });
+        codemirror_config.mode = 'spell-checker';
     }
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
@@ -39,7 +42,11 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
     codemirror_config.scrollbarStyle = null;
     codemirror_config.lineNumbers = false;
-    codemirror_config.mode = null;
+    codemirror_config.mode = 'spell-checker';
+
+    CodeMirrorSpellChecker({
+        codeMirrorInstance:  CodeMirror,
+    });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
     cm.setSize(150, 30);

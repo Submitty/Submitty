@@ -1,13 +1,4 @@
-var csrfToken = undefined;
-
-window.addEventListener("load", function() {
-  for (const elem in document.body.dataset) {
-    window[elem] = document.body.dataset[elem];
-  }
-});
-
 window.addEventListener("resize", checkSidebarCollapse);
-
 
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
@@ -208,8 +199,8 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(path, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?path=" + path;
+function newDeleteCourseMaterialForm(id, file_name) {
+    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
 
@@ -270,7 +261,21 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsFolderForm(id, dir) {
+    let form = $('#edit-course-materials-folder-form');
+
+    $('#hide-materials-checkbox-edit', form).prop('checked', false);
+    $('#material-folder-edit-form', form).attr('data-id', id);
+    $("#show-some-section-selection-edit", form).hide();
+    $("#all-sections-showing-yes", form).prop('checked',false);
+    $("#all-sections-showing-no", form).prop('checked',true);
+    $('#edit-folder-sort', form).attr('value', dir);
+    disableFullUpdate();
+    form.css("display", "block");
+    captureTabInModal("edit-course-materials-folder-form");
+}
+
+function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
 
     let form = $("#edit-course-materials-form");
 
@@ -278,7 +283,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students == "on"){
+    if(this_hide_from_students === "1"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
 
@@ -288,7 +293,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
-    if(this_file_section != null){
+    if(this_file_section.length !== 0){
         for(let index = 0; index < this_file_section.length; ++index){
             $("#section-edit-" + this_file_section[index], form).prop('checked',true);
         }
@@ -301,7 +306,21 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    $("#material-edit-form", form).attr('data-directory', path);
+    if (is_link === "1") {
+        const title_label = $("#edit-url-title-label", form);
+        const url_label = $("#edit-url-url-label", form);
+        title_label.prop('hidden', false);
+        url_label.prop('hidden', false);
+        title_label.css('display', 'block');
+        url_label.css('display', 'block');
+        const title = $("#edit-url-title");
+        title.prop('disabled', false);
+        title.val(link_title);
+        const url = $("#edit-url-url");
+        url.prop('disabled', false);
+        url.val(link_url);
+    }
+    $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     form.css("display", "block");
@@ -354,7 +373,7 @@ function releaseTabFromModal(formName){
     lastActiveElement.focus();
 }
 
-function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
+function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
 
     $('.popup-form').css('display', 'none');
 
@@ -368,9 +387,8 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     $('[name="release_date"]', form).val(releaseDates);
     $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
 
-    inDir = JSON.stringify(inDir);
     $('[name="submit"]',form).attr('data-iden',id);
-    $('[name="submit"]',form).attr('data-inDir',inDir);
+    $('[name="submit"]',form).attr('data-id',cm_id);
 
 }
 
@@ -649,6 +667,14 @@ function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
+function downloadCourseMaterial(id) {
+    window.location = buildCourseUrl(['download']) + `?course_material_id=${id}`;
+}
+
+function downloadTestCaseResult(testcase, name, version, gradeable, user) {
+    window.location = buildCourseUrl(['gradeable', gradeable, 'downloadTestCaseResult']) + `?version=${version}&test_case=${testcase+1}&file_name=${name}&user_id=${user}`;
+}
+
 function downloadStudentAnnotations(url, path, dir) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
 }
@@ -658,15 +684,15 @@ function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_ano
     return false;
 }
 
-function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
+function downloadCourseMaterialZip(id) {
+    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?course_material_id=' + id;
 }
 
 function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.code ? pos + 1 : 0;
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
             setInterval(function() { $("*").addClass("rainbow"); }, 100);
             $(document.body).off('keyup', colorEvent);
@@ -837,12 +863,12 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         var height = max_height;
     }
     if (force_height != -1) {
-        document.getElementById(id).height = force_height + "px";
+        $("iframe#" + id).height(force_height);
     } else if (height >= max_height) {
-        document.getElementById(id).height= max_height + "px";
+        $("iframe#" + id).height(max_height);
     }
     else {
-        document.getElementById(id).height = (height+18) + "px";
+        $("iframe#" + id).height(height + 18);
     }
     //Workarounds for FireFox changing height/width of img sometime after this code runs
     if(img.length !== 0) {
@@ -1165,14 +1191,34 @@ function setChildNewDateTime(path, changeDate,handleData) {
     });
 }
 
-function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+function openSetAllRelease() {
+    $('#set-all-release-form').css('display', 'block');
+}
+
+function setAllRelease(newdatatime) {
+    let url = buildCourseUrl(['course_materials', 'release_all']);
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'csrf_token': csrfToken, 'newdatatime': newdatatime},
+        success: function (res) {
+            const jsondata = JSON.parse(res);
+            if (jsondata.status !== 'success') {
+                alert("Failed to set dates");
+            }
+            location.reload();
+        }
+    })
+}
+
+function changeFolderNewDateTime(id, newdatatime,handleData) {
     // send to server to handle folder date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?newdatatime=' + newdatatime;
     var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
+        data: {'id':id, 'csrf_token': csrfToken},
         success: function(data) {
             var jsondata = JSON.parse(data);
             if (jsondata.status === 'fail') {

@@ -92,13 +92,13 @@ function switch_feedback_modes() {
                     {% endif %}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
             {# /Peer Component boxes #}
         {% endif %}
 
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
-            {% for user in ordered_graders|filter(user => overall_comments[user] is not empty) %}
+            {% for user in ordered_graders|filter(user => overall_comments[user] is defined) %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
                         Overall note from {{peer_aliases[user]}}:
@@ -220,7 +220,7 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% for grader in ordered_graders %}
@@ -253,7 +253,7 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if overall_comments[anon_grader_id_mapping[grader]] is not empty %}
+                {% if overall_comments[anon_grader_id_mapping[grader]] is defined %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">
                             Overall note from grader:
@@ -265,7 +265,7 @@ function switch_feedback_modes() {
                 {% endif %}
 
             {% for file in uploaded_pdfs %}
-                {% if file.encoded_name in annotated_file_names and grader in file.graders%}
+                {% if file.encoded_name is defined and file.encoded_name in annotated_file_names and grader in file.graders%}
                     </br>
                     <p>
                         {{file.name}} :

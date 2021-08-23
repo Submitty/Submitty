@@ -11,7 +11,6 @@ import shutil
 import string
 import tzlocal
 import tempfile
-import readline
 
 
 def get_uid(user):
@@ -54,6 +53,7 @@ parser.add_argument('--worker', action='store_true', default=False, help='Config
 parser.add_argument('--worker-pair', default=False, help='Configure Submitty alongside a worker VM')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
+parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
 
 args = parser.parse_args()
 
@@ -75,6 +75,8 @@ if not os.path.isdir(SUBMITTY_DATA_DIR) or not os.access(SUBMITTY_DATA_DIR, os.R
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
+
+WEBSOCKET_PORT = args.websocket_port
 
 ##############################################################################
 
@@ -368,6 +370,7 @@ else:
     config['vcs_url'] = VCS_URL
     config['submission_url'] = SUBMISSION_URL
     config['cgi_url'] = CGI_URL
+    config['websocket_port'] = WEBSOCKET_PORT
 
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT
@@ -446,14 +449,14 @@ for full_file_name, tmp_file_name in rescued:
     #copy autograding workers back
     shutil.move(tmp_file_name, full_file_name)
     #make sure the permissions are correct.
-    shutil.chown(full_file_name, 'root',DAEMON_GID)
-    os.chmod(full_file_name, 0o460)
+    shutil.chown(full_file_name, 'root', DAEMON_GID)
+    os.chmod(full_file_name, 0o660)
 
 #remove the tmp folder
 os.removedirs(tmp_folder)
 
 ##############################################################################
-# WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
+# WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/config
 
 if not args.worker:
     if not os.path.isfile(WORKERS_JSON):
@@ -498,7 +501,6 @@ if not args.worker:
             "default": [
                           "submitty/clang:6.0",
                           "submitty/autograding-default:latest",
-                          "submitty/java:8",
                           "submitty/java:11",
                           "submitty/python:3.6",
                           "submittyrpi/csci1200:default"
@@ -509,9 +511,9 @@ if not args.worker:
             json.dump(container_dict, container_file, indent=4)
 
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
-      shutil.chown(file, 'root',DAEMON_GID)
-      os.chmod(file, 0o460)
+      os.chmod(file, 0o660)
 
+    shutil.chown(WORKERS_JSON, PHP_USER, DAEMON_GID)
     shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
 ##############################################################################
@@ -549,6 +551,7 @@ if not args.worker:
     config['submission_url'] = SUBMISSION_URL
     config['vcs_url'] = VCS_URL
     config['cgi_url'] = CGI_URL
+    config['websocket_port'] = WEBSOCKET_PORT
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE

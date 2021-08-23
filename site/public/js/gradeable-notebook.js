@@ -1,15 +1,13 @@
-/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, gatherInputAnswersByType, saveAndWarnUnsubmitted */
+/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, saveAndWarnUnsubmitted */
 
 /**
  * Checks all radio buttons or checkboxes that were previously checked in the recent submission
  *
  * @param mc_field_id The id of the multiple choice fieldset
  */
-function setMultipleChoices(mc_field_id) {
+function setMultipleChoices(mc_field_id, viewing_inactive_version) {
     let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
-
     prev_checked = prev_checked.split('\n');
-
     // For each input inside the fieldset see if its value is inside the prev checked array
     $(`#${mc_field_id} :input`).each((index,element) => {
 
@@ -19,6 +17,9 @@ function setMultipleChoices(mc_field_id) {
             $(element).prop('checked', true);
         }
         else {
+            if (viewing_inactive_version) {
+                $(element).prop('disabled', true);
+            }
             $(element).prop('checked', false);
         }
     });
@@ -47,8 +48,7 @@ function clearMultipleChoices(mc_field_id) {
 function setCodeBox(codebox_id, state) {
     // Get initial and previous submission values
     const initial_value = $(`#${codebox_id}`).attr('data-initial_value');
-    const recent_submission = $(`#${codebox_id}`).attr('data-recent_submission');
-
+    const version_submission =  $(`#${codebox_id}`).attr('data-version_submission');
     // Get the codebox
     const codebox = $(`#${codebox_id} .CodeMirror`).get(0).CodeMirror;
 
@@ -56,7 +56,7 @@ function setCodeBox(codebox_id, state) {
         codebox.setValue(initial_value);
     }
     else {
-        codebox.setValue(recent_submission);
+        codebox.setValue(version_submission);
     }
 }
 
@@ -79,13 +79,47 @@ function notebookAutosaveKey() {
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
-    if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
-        localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
-            timestamp: Date.now(),
-            multiple_choice: gatherInputAnswersByType('multiple_choice'),
-            codebox: gatherInputAnswersByType('codebox'),
-        }));
-    }
+    const mc_inputs=[];
+    const codebox_inputs = [];
+
+    //loop through multiple choice questions and save answers
+    $('.multiple_choice').each(function(){
+        let file_name='';
+        $(this).children('fieldset').each(function(){
+            file_name = $(this).data('filename');
+            if (file_name) {
+                const answers = [];
+                //grab selected answers
+                $(this).find('input').each(function(){
+                    if ($(this)[0].checked) {
+                        answers.push($(this)[0].defaultValue);
+                    }
+                });
+                mc_inputs.push({file_name, answers});
+            }
+        });
+    });
+
+    //save short answers
+    $('.short_answer').each(function(){
+        $(this).find('div[name^="codebox_"]').each(function(){
+            const file_name = ($(this).data('filename') || '').trim();
+            if (file_name) {
+                //grab input
+                const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
+                if (editor) {
+                    const value = editor.getValue();
+                    codebox_inputs.push({file_name, value});
+                }
+            }
+        });
+    });
+
+    localStorage.setItem(notebookAutosaveKey(), JSON.stringify({
+        timestamp: Date.now(),
+        multiple_choice: mc_inputs,
+        codebox: codebox_inputs,
+    }));
 }
 
 /**
@@ -94,43 +128,71 @@ function saveNotebookToLocal() {
  */
 function restoreNotebookFromLocal() {
     if (typeof autosaveEnabled !== 'undefined' && autosaveEnabled) {
-        const state = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
-
-        if (state === null) {
+        const inputs = JSON.parse(localStorage.getItem(notebookAutosaveKey()));
+        if (inputs === null) {
             return;
         }
+        //to prevent data loss when these changes get installed on production
+        const not_found = [];
 
-        // First, we restore multiple choice answers
-        for (const id in state.multiple_choice) {
-            const values = state.multiple_choice[id];
-            // Extract the index from the ID generated from gatherInputAnswersByType()
-            // Index is stored after multiple_choice_, so substring it out
-            const index = id.substring('multiple_choice_'.length);
-            $(`#mc_field_${index} :input`).each((_index, element) => {
-                $(element).prop('checked', values.includes(element.value)).change();
+        //restore multiple choice
+        for (const id in inputs.multiple_choice) {
+            const {file_name, answers} = inputs.multiple_choice[id];
+            let found = false;
+            $(`fieldset.mc[data-filename="${file_name}"] input`).each(function(){
+                found = true;
+                //check off proper inputs
+                for (let i = 0; i < answers.length; i++) {
+                    if ($(this)[0].defaultValue === answers[i]) {
+                        $(this).prop('checked', true);
+                        $(this).trigger('change');
+                    }
+                }
             });
-        }
-        // Next, we restore short-answer boxes
-        for (const id in state.short_answer) {
-            const answer = state.short_answer[id][0];
-            // Restore the answer and trigger change events (for setting button states)
-            // (see https://stackoverflow.com/questions/4672505/why-does-the-jquery-change-event-not-trigger-when-i-set-the-value-of-a-select-us)
-            $(`#${id}`).val(answer).trigger('input');
-        }
-        // Finally, we restore codeboxes
-        for (const id in state.codebox) {
-            const answer = state.codebox[id][0];
-            const codebox = $(`#${id} .CodeMirror`).get(0);
-            // If this box no longer exists, then don't attempt to update the
-            // answer. The autosave data is probably for an older version of
-            // the gradeable at this point, see issue #5351.
-            if (!codebox) {
-                continue;
+            if (!found) {
+                not_found.push(inputs.multiple_choice[id]);
             }
-            const cm = codebox.CodeMirror;
-            // This automatically triggers the event handler for the clear and
-            // recent buttons.
-            cm.setValue(answer);
+        }
+
+        //restore short answers
+        for (const id in inputs.codebox) {
+            const {file_name, value} = inputs.codebox[id];
+            const question = $(`.short_answer > div[data-filename="${file_name}"]`);
+            //fill in proper values if question is found
+            if (question.length > 0) {
+                const editor = question[0].querySelector('.CodeMirror').CodeMirror;
+                editor.setValue(value);
+            }
+            else {
+                not_found.push(inputs.codebox[id][0]);
+            }
+        }
+
+        //if there are answers that could not be placed anywhere
+        if (not_found.length > 0) {
+            const old_answers_div = document.createElement('div');
+            old_answers_div.id = 'old-answers';
+            old_answers_div.classList.add('box');
+            old_answers_div.style.backgroundColor = 'var(--alert-background-danger-red)';
+
+            //create header text to warn user
+            const old_answers_header = document.createElement('h4');
+            old_answers_header.style.color = 'var(--focus-danger-red)';
+            old_answers_header.innerHTML = 'Answer(s) could not be restored. You will have to copy and paste them in the proper place.';
+            //add header to container
+            old_answers_div.appendChild(old_answers_header);
+
+            // for ... of loop loops through all elements in array, while for ... in loop loops through
+            // all indexes/keys in arrays/objects
+            const old_answers_list = document.createElement('ol');
+            old_answers_list.style.marginLeft = '3em';
+            for (const i in not_found) {
+                const answer_text = document.createElement('li');
+                answer_text.innerHTML = not_found[i];
+                old_answers_list.appendChild(answer_text);
+            }
+            old_answers_div.appendChild(old_answers_list);
+            $(old_answers_div).insertAfter('#gradeable-info');
         }
     }
 }
@@ -142,10 +204,6 @@ $(document).ready(() => {
 
         // Set global javascript variable to allow submission for notebook
         window.is_notebook = true;
-
-        // Enable submit button
-        $('#submit').attr('disabled', false);
-
     });
 
     $('#submit').click(() => {
@@ -194,15 +252,14 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', true);
         }
         else {
-            $(clear_button_id).attr('disabled', false);
+            $(clear_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
         }
 
         if (code === recent_submission) {
             $(recent_button_id).attr('disabled', true);
         }
         else {
-            $(recent_button_id).attr('disabled', false);
-            $('#submit').attr('disabled', false);
+            $(recent_button_id).attr('disabled', !!$(clear_button_id).attr('data-older_version'));
             window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));
@@ -225,7 +282,7 @@ $(document).ready(() => {
         }
         else if (action == 'recent') {
             setMultipleChoices(field_set_id);
-            $(`#mc_${index}_clear_button`).attr('disabled', false);
+            $(`#mc_${index}_clear_button`).attr('disabled', true);
             $(`#mc_${index}_recent_button`).attr('disabled', true);
         }
 
@@ -240,11 +297,11 @@ $(document).ready(() => {
 
         // Enable recent button
         $(`#mc_${index}_clear_button`).attr('disabled', false);
+        $(`#mc_${index}_recent_button`).attr('disabled', false);
         const prev_checked_items = this.getAttribute('data-prev_checked');
         const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');
         if (curr_checked_items !== prev_checked_items) {
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $('#submit').attr('disabled', false);
             $(`#mc_${index}_recent_button`).attr('disabled', false);
         }
         else {
@@ -310,7 +367,6 @@ $(document).ready(() => {
         else {
             $(recent_button_id).attr('disabled', false);
             window.onbeforeunload = saveAndWarnUnsubmitted;
-            $('#submit').attr('disabled', false);
         }
     });
 

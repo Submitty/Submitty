@@ -11,6 +11,10 @@
     {% if view %}
         <input type="hidden" name="view" value="{{ view }}" />
     {% endif %}
+    <div id="admin-team-name">
+        <label for="admin-team-name-form">Team Name: </label>
+        <input type="text" id="admin-team-name-form" name="team_name">
+    </div>
     <div id="admin-team-members" class="left-panel" tabIndex="-1"></div>
     <div class="right-panel" tabIndex="-1">
         <label for="admin_team_reg_section" tabIndex="-1">Registration Section:</label><br />

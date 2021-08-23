@@ -391,6 +391,7 @@ progress::-webkit-progress-value {
 .panels-container {
     margin: 0;
     background: var(--standard-medium-gray);
+    position:relative;
 }
 
 .two-panel-cont {
@@ -406,6 +407,11 @@ progress::-webkit-progress-value {
 .two-panel-item {
     min-width: 200px;
     width: 50%;
+    position: relative;
+}
+
+.panel-item-section {
+    position: relative;
 }
 
 .panel-item-section.left-top,
@@ -500,11 +506,12 @@ progress::-webkit-progress-value {
     width: 9px;
 }
 
-#panel-instructions {
+.panel-instructions {
     color: dimgray;
-    display: flex;
-    justify-content: center;
-    padding-top: 20%;
+    position: absolute;
+    top: 50%;
+    width:100%;
+    text-align: center;
 }
 
 #grading-panel-student-name {
@@ -1342,6 +1349,11 @@ tr.is_publish {
     z-index: 30;
 }
 
+#image-rotate-icons-bar, #notebook-image-rotate-icons-bar {
+    display: none;
+    padding: 0px 10px;
+}
+
 #file-content {
     height: 90%;
     width: 100%;
@@ -1454,11 +1466,6 @@ tr.is_publish {
     max-height: 400px;
     margin-bottom: 10px;
     resize: none;
-}
-
-/* Notebook panel */
-#notebook-main-view {
-    padding: 10px;
 }
 
 input[type="radio"][disabled=""]:checked::before {

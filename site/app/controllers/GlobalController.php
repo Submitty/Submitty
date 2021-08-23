@@ -419,8 +419,19 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-update",
                 "icon" => "fas fa-sync"
             ]);
-        }
 
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser','email']),
+                "title" => "Email All",
+                "icon" => "fas fa-paper-plane"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser','email_status']),
+                "title" => "Email Status",
+                "icon" => "fas fa-mail-bulk"
+            ]);
+        }
         $sidebar_buttons[] = new Button($this->core, [
             "class" => "nav-row short-line",
         ]);
