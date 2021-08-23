@@ -463,12 +463,6 @@ class PlagiarismController extends AbstractController {
                 $processing = false;
                 if ($has_results) {
                     $timestamp = date($gradeable_date_format, filemtime($overall_ranking_file));
-                    $students = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users")), ['.', '..']);
-                    $submissions = 0;
-                    foreach ($students as $student) {
-                        $submissions += count(array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable['g_id'], $gradeable['g_config_version']), "users", $student)), ['.', '..']));
-                    }
-                    $students = count($students);
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
                         $matches_and_top_match = count($rankings) . " students matched, {$rankings[0][0]} top match";
@@ -477,6 +471,10 @@ class PlagiarismController extends AbstractController {
                     catch (Exception $e) {
                         $this->core->addErrorMessage($e->getMessage());
                     }
+
+                    $students = $this->core->getQueries()->getTotalStudentsWithSubmissions($gradeable['g_id']);
+                    $submissions = $this->core->getQueries()->getTotalSubmissionsToGradeable($gradeable['g_id']);
+
                     $gradeable_link = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $gradeable['g_id']]) . "?config_id={$gradeable['g_config_version']}";
                 }
                 $rerun_plagiarism_link = $this->core->buildCourseUrl(["plagiarism", "gradeable", $gradeable['g_id'], "rerun"]) . "?config_id={$gradeable['g_config_version']}";
