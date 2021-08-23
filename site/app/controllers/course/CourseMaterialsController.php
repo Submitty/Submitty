@@ -34,10 +34,16 @@ class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      */
-    public function deleteCourseMaterial($path) {
+    public function deleteCourseMaterial($id) {
+        $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['id' => $id]);
+        if ($cm === null) {
+            $this->core->addErrorMessage("Failed to delete course material");
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
         // security check
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($cm->getPath())));
 
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
@@ -74,8 +80,16 @@ class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
      */
-    public function downloadCourseMaterialZip($dir_name, $path) {
-        $root_path = realpath(htmlspecialchars_decode(rawurldecode($path)));
+    public function downloadCourseMaterialZip($course_material_id) {
+        $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['id' => $course_material_id]);
+        if ($cm === null) {
+            $this->core->addErrorMessage("Invalid course material ID");
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
+        $root_path = $cm->getPath();
+        $dir_name = explode("/", $root_path);
+        $dir_name = array_pop($dir_name);
 
         // check if the user has access to course materials
         if (!$this->core->getAccess()->canI("path.read", ["dir" => 'course_materials', "path" => $root_path])) {
@@ -132,11 +146,47 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
+     * @return JsonResponse
+     */
+    public function setReleaseAll(): JsonResponse {
+        $newdatetime = $_POST['newdatatime'];
+        $newdatetime = htmlspecialchars($newdatetime);
+        $new_date_time = DateUtils::parseDateTime($newdatetime, $this->core->getDateTimeNow()->getTimezone());
+
+        $course_materials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findAll();
+        foreach ($course_materials as $course_material) {
+            if (!$course_material->isDir()) {
+                $course_material->setReleaseDate($new_date_time);
+            }
+        }
+        $this->core->getCourseEntityManager()->flush();
+        return JsonResponse::getSuccessResponse();
+    }
+
+    private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
+        if ($courseMaterial->isDir()) {
+            foreach ($courseMaterials as $cm) {
+                if (Utils::startsWith($cm->getPath(), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                    $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
+                }
+            }
+        }
+        else {
+            $courseMaterial->setReleaseDate($dateTime);
+        }
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime): JsonResponse {
-        $data = $_POST['fn'];
+    public function modifyCourseMaterialsFileTimeStamp($newdatatime): JsonResponse {
+        if (!isset($_POST['id'])) {
+            return JsonResponse::getErrorResponse("You must specify an ID");
+        }
+        $id = $_POST['id'];
 
         if (!isset($newdatatime)) {
             $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -145,31 +195,21 @@ class CourseMaterialsController extends AbstractController {
         $new_data_time = htmlspecialchars($newdatatime);
         $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getDateTimeNow()->getTimezone());
 
-        //only one will not iterate correctly
-        if (is_string($data)) {
-            $data = [$data];
-        }
-
         $has_error = false;
         $success = false;
 
-        foreach ($data as $filename) {
-            if (!isset($filename)) {
-                $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
-            }
+        $courseMaterial = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['id' => $id]);
+        $courseMaterials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findAll();
 
-            $file_name = htmlspecialchars($filename);
-            $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                ->findOneBy(['path' => $file_name]);
-            if ($course_material !== null) {
-                $course_material->setReleaseDate($new_data_time);
-            }
-            else {
-                $has_error = true;
-            }
+        if ($courseMaterial === null || $courseMaterials === null) {
+            $has_error = true;
         }
-
-        $this->core->getCourseEntityManager()->flush();
+        else {
+            $this->setFileTimeStamp($courseMaterial, $courseMaterials, $new_data_time);
+            $this->core->getCourseEntityManager()->flush();
+        }
 
         if ($has_error) {
             return JsonResponse::getErrorResponse("Failed to find one of the course materials.");
@@ -199,13 +239,13 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
-        $requested_path = $_POST['requested_path'] ?? '';
-        if ($requested_path === '') {
-            return JsonResponse::getErrorResponse("Requested path cannot be empty");
+        $id = $_POST['id'] ?? '';
+        if ($id === '') {
+            return JsonResponse::getErrorResponse("Id cannot be empty");
         }
         /** @var CourseMaterial $course_material */
         $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-            ->findOneBy(['path' => $requested_path]);
+            ->findOneBy(['id' => $id]);
         if ($course_material == null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
