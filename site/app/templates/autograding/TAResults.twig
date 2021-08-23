@@ -75,9 +75,8 @@ $( document ).ready(function() {
                                 {% if file.encoded_name in annotated_file_names %}
                                     <p style="text-align:center; vertical-align: middle;">
                                         <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> 
-                                            Download <i class="fas fa-download" title="Download the file"></i>
-                                        </button>
+                                        <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
+                                        <i class="fas fa-download" title="Download the file"></i></button>
                                     </p>
                                     {% if loop.index != files|length %}
                                         <br />

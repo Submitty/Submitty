@@ -14,7 +14,7 @@
 <!-- Provide template of download button to copy over to toolbar since this page is the only one that gets the necessary info -->
 <template id="download-annotations-btn-template">
     {% if can_download is defined and can_download %}
-        <button id="download-annotations-btn" class='btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ download_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs")' aria-label="Download the file">
+        <button id="download-annotations-btn" class='btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ file_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs")' aria-label="Download the file">
             Download <i class="fas fa-download" title="Download the file"></i>
         </button>
     {% endif %}
@@ -44,7 +44,7 @@
     {% elseif student_popup is defined and student_popup %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}");
     {% else %}
-    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
+    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ anon_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
     {% endif %}
 
     //render download annotations button on toolbar
