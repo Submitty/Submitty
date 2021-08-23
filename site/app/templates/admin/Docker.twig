@@ -56,7 +56,7 @@
             <div style="display:inline-block;">
                 <button class="btn btn-primary" id="show-all">Show All</button>
                 {% for capability in capabilities %}
-                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:var(--category-color-{{capability_to_color[capability]}}); border-color: {{capability_to_color[capability]}}">
+                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:var(--category-color-{{capability_to_color[capability]}});">
                         {{capability}}
                     </button>
                 {% endfor %}
