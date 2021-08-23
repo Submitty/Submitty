@@ -95,6 +95,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/autograding_status', 'Autograding Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -127,6 +128,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/autograding_status', 'Autograding Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -163,6 +165,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/autograding_status', 'Autograding Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]

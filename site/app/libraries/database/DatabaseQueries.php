@@ -192,7 +192,7 @@ class DatabaseQueries {
         C AS
         (SELECT distinct on (user_id) user_id,submission_time
         FROM electronic_gradeable_data
-        ORDER BY user_id, submission_time),
+        ORDER BY user_id, submission_time desc),
         D AS
         (SELECT distinct on (user_id) user_id, timestamp
         FROM viewed_responses
@@ -3862,6 +3862,16 @@ SQL;
         return $return;
     }
 
+    /**
+     * Get all courses where the user with the specified user_id is assigned as an instructor
+     * @param string $user_id
+     * @return array
+     */
+    public function getInstructorLevelAccessCourse(string $user_id): array {
+        $this->submitty_db->query("SELECT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.semester, u.course, u.user_group
@@ -4743,7 +4753,7 @@ AND gc_id IN (
                   json_agg(gc_max_value) AS array_max_value,
                   json_agg(gc_upper_clamp) AS array_upper_clamp,
                   json_agg(gc_is_text) AS array_text,
-                  json_agg(gc_is_peer) AS array_peer,
+                  json_agg(gc_is_peer) AS array_peer_component,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
                   json_agg(gc_is_itempool_linked) AS array_is_itempool_linked,
@@ -4799,7 +4809,7 @@ AND gc_id IN (
                 'max_value',
                 'upper_clamp',
                 'text',
-                'peer',
+                'peer_component',
                 'order',
                 'page',
                 'is_itempool_linked',
