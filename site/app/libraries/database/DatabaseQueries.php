@@ -3857,6 +3857,16 @@ SQL;
         return $return;
     }
 
+    /**
+     * Get all courses where the user with the specified user_id is assigned as an instructor
+     * @param string $user_id
+     * @return array
+     */
+    public function getInstructorLevelAccessCourse(string $user_id): array {
+        $this->submitty_db->query("SELECT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.semester, u.course, u.user_group
