@@ -59,7 +59,7 @@
             {{ other_textarea_attributes }}
         {% endif %}
     >{{ markdown_area_value is defined ? markdown_area_value : '' }}</textarea>
-    <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "0px" }}" hidden></div>
+    <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "0px" }}; max-height:{{ max_height is defined ? max_height : "none" }}" hidden></div>
 </div>
 
 <script>
