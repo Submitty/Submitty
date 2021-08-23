@@ -118,7 +118,25 @@ class GradeableList extends AbstractModel {
         ];
         foreach ($sort_array as $list => $function) {
             uasort($this->$list, function (Gradeable $a, Gradeable $b) use ($function) {
-                if ($a->$function() == $b->$function()) {
+                $skip = false;
+                if ($a->hasDueDate() && !$b->hasDueDate()) {
+                    return 1;
+                }
+                elseif (!$a->hasDueDate() && $b->hasDueDate()) {
+                    return -1;
+                }
+                elseif (!$a->hasDueDate() && !$b->hasDueDate()) {
+                    if ($a->getSubmissionOpenDate() > $b->getSubmissionOpenDate()) {
+                        return 1;
+                    }
+                    elseif ($a->getSubmissionOpenDate() < $b->getSubmissionOpenDate()) {
+                        return -1;
+                    }
+                    else {
+                        $skip = true;
+                    }
+                }
+                if ($skip || $a->$function() == $b->$function()) {
                     if (strtolower($a->getTitle()) == strtolower($b->getTitle())) {
                         if (strtolower($a->getId()) < strtolower($b->getId())) {
                             return -1;

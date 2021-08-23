@@ -199,8 +199,8 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(path, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?path=" + path;
+function newDeleteCourseMaterialForm(id, file_name) {
+    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
 
@@ -261,11 +261,11 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsFolderForm(path, dir) {
+function newEditCourseMaterialsFolderForm(id, dir) {
     let form = $('#edit-course-materials-folder-form');
 
     $('#hide-materials-checkbox-edit', form).prop('checked', false);
-    $('#material-folder-edit-form', form).attr('data-directory', path);
+    $('#material-folder-edit-form', form).attr('data-id', id);
     $("#show-some-section-selection-edit", form).hide();
     $("#all-sections-showing-yes", form).prop('checked',false);
     $("#all-sections-showing-no", form).prop('checked',true);
@@ -275,7 +275,7 @@ function newEditCourseMaterialsFolderForm(path, dir) {
     captureTabInModal("edit-course-materials-folder-form");
 }
 
-function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
 
     let form = $("#edit-course-materials-form");
 
@@ -306,7 +306,21 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    $("#material-edit-form", form).attr('data-directory', path);
+    if (is_link === "1") {
+        const title_label = $("#edit-url-title-label", form);
+        const url_label = $("#edit-url-url-label", form);
+        title_label.prop('hidden', false);
+        url_label.prop('hidden', false);
+        title_label.css('display', 'block');
+        url_label.css('display', 'block');
+        const title = $("#edit-url-title");
+        title.prop('disabled', false);
+        title.val(link_title);
+        const url = $("#edit-url-url");
+        url.prop('disabled', false);
+        url.val(link_url);
+    }
+    $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     form.css("display", "block");
@@ -359,7 +373,7 @@ function releaseTabFromModal(formName){
     lastActiveElement.focus();
 }
 
-function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
+function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
 
     $('.popup-form').css('display', 'none');
 
@@ -373,9 +387,8 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     $('[name="release_date"]', form).val(releaseDates);
     $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
 
-    inDir = JSON.stringify(inDir);
     $('[name="submit"]',form).attr('data-iden',id);
-    $('[name="submit"]',form).attr('data-inDir',inDir);
+    $('[name="submit"]',form).attr('data-id',cm_id);
 
 }
 
@@ -654,6 +667,14 @@ function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
 }
 
+function downloadCourseMaterial(id) {
+    window.location = buildCourseUrl(['download']) + `?course_material_id=${id}`;
+}
+
+function downloadTestCaseResult(testcase, name, version, gradeable, user) {
+    window.location = buildCourseUrl(['gradeable', gradeable, 'downloadTestCaseResult']) + `?version=${version}&test_case=${testcase+1}&file_name=${name}&user_id=${user}`;
+}
+
 function downloadStudentAnnotations(url, path, dir) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
 }
@@ -663,8 +684,8 @@ function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_ano
     return false;
 }
 
-function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
+function downloadCourseMaterialZip(id) {
+    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?course_material_id=' + id;
 }
 
 function checkColorActivated() {
@@ -1170,14 +1191,34 @@ function setChildNewDateTime(path, changeDate,handleData) {
     });
 }
 
-function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+function openSetAllRelease() {
+    $('#set-all-release-form').css('display', 'block');
+}
+
+function setAllRelease(newdatatime) {
+    let url = buildCourseUrl(['course_materials', 'release_all']);
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'csrf_token': csrfToken, 'newdatatime': newdatatime},
+        success: function (res) {
+            const jsondata = JSON.parse(res);
+            if (jsondata.status !== 'success') {
+                alert("Failed to set dates");
+            }
+            location.reload();
+        }
+    })
+}
+
+function changeFolderNewDateTime(id, newdatatime,handleData) {
     // send to server to handle folder date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?newdatatime=' + newdatatime;
     var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
+        data: {'id':id, 'csrf_token': csrfToken},
         success: function(data) {
             var jsondata = JSON.parse(data);
             if (jsondata.status === 'fail') {

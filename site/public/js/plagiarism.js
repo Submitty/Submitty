@@ -108,6 +108,8 @@ function user1DropdownChanged(state) {
     state.editor2.refresh();
 
     // the call to trigger the chain of updates
+    showLoadingIndicatorRight();
+    showLoadingIndicatorLeft();
     loadUser1VersionDropdownList(state);
 }
 
@@ -127,6 +129,8 @@ function user1VersionDropdownChanged(state) {
     state.editor2.refresh();
 
     // the call to trigger the chain of updates
+    showLoadingIndicatorRight();
+    showLoadingIndicatorLeft();
     loadUser2DropdownList(state);
     loadConcatenatedFileForEditor(state, 1);
 }
@@ -148,6 +152,7 @@ function user2DropdownChanged(state) {
     }
 
     // load new content for the editor
+    showLoadingIndicatorRight();
     loadConcatenatedFileForEditor(state, 2);
     loadColorInfo(state);
 }
@@ -325,7 +330,7 @@ function refreshColorInfo(state) {
     let previousSelectedMark = null;
     state.editor1.operation(() => {
         state.editor2.operation(() => {
-            // codemirror doesn't preovide an easy way to remove text marks so we just wipe the contents of the document and reset
+            // codemirror doesn't provide an easy way to remove text marks so we just wipe the contents of the document and reset
             const val = state.editor1.getDoc().getValue();
             const scrollPos = state.editor1.getScrollInfo();
             state.editor1.getDoc().setValue('');
@@ -414,6 +419,8 @@ function refreshColorInfo(state) {
     if (previousSelectedMark !== null) {
         handleClickedMark_editor1(state, previousSelectedMark);
     }
+    hideLoadingIndicatorLeft();
+    hideLoadingIndicatorRight();
 }
 
 
@@ -469,6 +476,7 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
             $(`#others_menu_${i}`).on('click', () => {
                 // hiding the popup and resetting the text color immediately makes the page feel faster
                 $('#popup_to_show_matches_id').css('display', 'none');
+                showLoadingIndicatorRight();
                 clickedMark.className = clickedMark.attributes.original_color;
                 state.editor2.getDoc().setValue('');
                 state.editor2.refresh();
@@ -617,6 +625,30 @@ function handleClickedMarks(state) {
 
         handleClickedMark_editor2(state, clickedMark);
     };
+}
+
+
+function showLoadingIndicatorLeft() {
+    $('.left-sub-item-middle').addClass('blurry');
+    $('.left-loader').css('display', 'block');
+}
+
+
+function hideLoadingIndicatorLeft() {
+    $('.left-sub-item-middle').removeClass('blurry');
+    $('.left-loader').css('display', 'none');
+}
+
+
+function showLoadingIndicatorRight() {
+    $('.right-sub-item-middle').addClass('blurry');
+    $('.right-loader').css('display', 'block');
+}
+
+
+function hideLoadingIndicatorRight() {
+    $('.right-sub-item-middle').removeClass('blurry');
+    $('.right-loader').css('display', 'none');
 }
 
 

@@ -634,7 +634,12 @@ class HomeworkView extends AbstractView {
 
                 if (array_key_exists('id', $data)) {
                     $id = $data['id'];
-                    $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
+                    if (is_numeric($id)) {
+                        $is_valid = $this->core->getQueries()->getUserByNumericId($id) !== null;
+                    }
+                    else {
+                        $is_valid = $this->core->getQueries()->getUserById($id) !== null;
+                    }
                 }
                 else {
                     //set the blank id as invalid for now, after a page refresh it will recorrect

@@ -21,6 +21,7 @@ class CourseMaterialsView extends AbstractView {
         $base_course_material_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials');
         $directories = [];
         $directory_priorities = [];
+        $folder_ids = [];
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
@@ -28,6 +29,7 @@ class CourseMaterialsView extends AbstractView {
                 $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
+                $folder_ids[$course_material->getPath()] = $course_material->getId();
             }
         }
         $sort_priority = function (CourseMaterial $a, CourseMaterial $b) use ($base_course_material_path) {
@@ -80,7 +82,7 @@ class CourseMaterialsView extends AbstractView {
             $dirs = explode("/", $rel_path);
             $file_name = array_pop($dirs);
             if ($course_material->isLink()) {
-                $file_name = $course_material->getUrlTitle();
+                $file_name = $course_material->getUrlTitle() . $course_material->getPath();
             }
             $path_to_place = &$final_structure;
             $path = "";
@@ -128,7 +130,8 @@ class CourseMaterialsView extends AbstractView {
             "material_list" => $course_materials_db,
             "materials_exist" => count($course_materials_db) != 0,
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
-            "course_materials" => $final_structure
+            "course_materials" => $final_structure,
+            "folder_ids" => $folder_ids
         ]);
     }
 }
