@@ -192,7 +192,7 @@ class DatabaseQueries {
         C AS
         (SELECT distinct on (user_id) user_id,submission_time
         FROM electronic_gradeable_data
-        ORDER BY user_id, submission_time),
+        ORDER BY user_id, submission_time desc),
         D AS
         (SELECT distinct on (user_id) user_id, timestamp
         FROM viewed_responses
@@ -3855,6 +3855,16 @@ SQL;
             $return[] = $course;
         }
         return $return;
+    }
+
+    /**
+     * Get all courses where the user with the specified user_id is assigned as an instructor
+     * @param string $user_id
+     * @return array
+     */
+    public function getInstructorLevelAccessCourse(string $user_id): array {
+        $this->submitty_db->query("SELECT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        return $this->submitty_db->rows();
     }
 
     public function getAllCoursesForUserId(string $user_id): array {
