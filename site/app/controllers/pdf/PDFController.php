@@ -165,7 +165,7 @@ class PDFController extends AbstractController {
         $file_path = md5($annotation_info["file_path"]);
 
         $annotation_body = [
-            'file_path' => $file_path,
+            'file_path' => $annotation_info['file_path'],
             'grader_id' => $grader_id,
             'annotations' => isset($_POST['annotation_layer']) ? json_decode($_POST['annotation_layer'], true) : []
         ];
@@ -182,7 +182,6 @@ class PDFController extends AbstractController {
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id = $file_path_parts[$index];
-                var_dump($user_id);
                 $anon_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
                 $anon_path = $anon_path . "/" . $anon_id;
             }
