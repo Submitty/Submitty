@@ -45,7 +45,14 @@ const taLayoutDet = {
 };
 
 let settingsCallbacks = {
-  "general-setting-arrow-function": changeStudentArrowTooltips
+  "general-setting-arrow-function": changeStudentArrowTooltips,
+  "general-setting-navigate-assigned-students-only": function(value) {
+    if (value == 'true') {
+      document.cookie = "view=assigned; path=/;";
+    } else {
+      document.cookie = "view=all; path=/;";
+    }
+  }
 }
 
 // Grading Panel header width
@@ -91,7 +98,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
-  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  for (let i = 0; i < settingsData.length; i++) {
+    for (let x = 0; x < settingsData[i].values.length; x++) {
+      let storageCode = settingsData[i].values[x].storageCode;
+      let item = localStorage.getItem(storageCode);
+      if (item && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](item);
+      }
+    }
+  }
 
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');
@@ -607,6 +622,7 @@ function gotoMainPage() {
 function gotoPrevStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -632,6 +648,10 @@ function gotoPrevStudent() {
       break;
   }
 
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
+  }
+
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;
@@ -649,6 +669,7 @@ function gotoPrevStudent() {
 function gotoNextStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -672,6 +693,10 @@ function gotoNextStudent() {
     case "active-inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
+  }
+
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {
@@ -705,7 +730,6 @@ function resetSinglePanelLayout() {
   $("#two-panel-exchange-btn").removeClass("active");
 
   $('.panels-container').append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
-  $('.panels-container :not(.panel-instructions').css('z-index', '2');
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
@@ -951,7 +975,6 @@ function togglePanelLayoutModes(forceVal = false) {
 
 // Handles the DOM manipulation to update the two panel layout
 function updatePanelLayoutModes () {
-  $('.panels-container *').css('z-index', '');
   // fetch the panels by their ids
   const leftTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftTop);
   const leftBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftBottom);
@@ -1395,6 +1418,97 @@ function newEditPeerComponentsForm() {
   captureTabInModal("edit-peer-components-form");
 }
 
+function rotateImage(url, rotateBy) {
+  let rotate = sessionStorage.getItem("image-rotate-" + url);
+  if (rotate) {
+    rotate = parseInt(rotate);
+    if (rotate === NaN) {
+      rotate = 0;
+    }
+  } else {
+    rotate = 0;
+  }
+  if (rotateBy === "cw") {
+    rotate = (rotate + 90) % 360;
+  } else if (rotateBy === "ccw") {
+    rotate = (rotate - 90) % 360;
+  }
+  $('iframe[src="' + url + '"]').each(function() {
+    let img = $(this).contents().find('img');
+    if (img && $(this).data('rotate') !== rotate) {
+      $(this).data('rotate', rotate);
+      if ($(this).data('observingImageResize') === undefined) {
+        $(this).data('observingImageResize', false);
+      }
+      resizeImageIFrame(img, $(this));
+      if ($(this).data('observingImageResize') === false) {
+        let iFrameTarget = $(this);
+        let observer = new ResizeObserver(function(entries, obs) {
+          resizeImageIFrame(img, iFrameTarget);
+        });
+        observer.observe($(this)[0]);
+        $(this).data('observingImageResize', true);
+      }
+    }
+  });
+  sessionStorage.setItem("image-rotate-" + url, rotate);
+}
+
+function resizeImageIFrame(imageTarget, iFrameTarget) {
+  if (imageTarget.parent().is(":visible")) {
+    let rotateAngle = iFrameTarget.data('rotate');
+    if (rotateAngle === 0) {
+      imageTarget.css("transform", "");
+    } else {
+      imageTarget.css("transform", "rotate(" + rotateAngle + "deg)");
+    }
+    imageTarget.css("transform", "translateY(" + (-imageTarget.get(0).getBoundingClientRect().top) + "px) rotate(" + rotateAngle + "deg)");
+    let iFrameBody = iFrameTarget.contents().find("body").first();
+    boundsHeight = iFrameBody[0].scrollHeight;
+    let height = 500;
+    if (iFrameTarget.css("max-height").length !== 0 && parseInt(iFrameTarget.css("max-height")) >= 0) {
+      height = parseInt(iFrameTarget.css("max-height"));      
+    }
+    if (boundsHeight > height) {
+      iFrameBody.css("overflow-y", "");
+      iFrameTarget.height(height);
+    } else {
+      iFrameBody.css("overflow-y", "hidden");
+      iFrameTarget.height(boundsHeight);
+    }
+  }
+}
+
+function imageRotateIcons(iframe) {
+  let iframeTarget = $('iframe#' + iframe);
+  let contentType = iframeTarget.contents().get(0).contentType;
+  
+  if (contentType != undefined && contentType.startsWith('image')) {
+    if (iframeTarget.attr("id").endsWith("_full_panel_iframe")) {
+      let imageRotateBar = iframeTarget.parent().parent().parent().find(".image-rotate-bar").first();
+      imageRotateBar.show();
+      imageRotateBar.find(".image-rotate-icon-ccw").first().attr("onclick", "rotateImage('" + iframeTarget.attr('src') + "', 'ccw')");
+      imageRotateBar.find(".image-rotate-icon-cw").first().attr("onclick", "rotateImage('" + iframeTarget.attr('src') + "', 'cw')");
+      if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
+        rotateImage(iframeTarget.attr("src"), "none");
+      }
+    } else if(iframeTarget.parent().data("image-rotate-icons") !== true) {
+      iframeTarget.parent().data("image-rotate-icons", true);
+      iframeTarget.before(`<div class="image-rotate-bar">
+                              <a class="image-rotate-icon-ccw" onclick="rotateImage('${iframeTarget.attr('src')}', 'ccw')">
+                              <i class="fas fa-undo" title="Rotate image counterclockwise"></i></a>
+                              <a class="image-rotate-icon-cw" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
+                              <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
+                              </div>`);
+      
+      if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
+        rotateImage(iframeTarget.attr("src"), "none");
+      }
+    }
+    
+  }
+}
+
 function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submission") {
   let iframe = $('#file_viewer_' + num);
   let display_file_url = buildCourseUrl(['display_file']);
@@ -1424,7 +1538,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull});"
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull}); imageRotateIcons('${iframeId}');"
                 src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
                 width="95%">
         </iframe>
@@ -1459,6 +1573,7 @@ let fileFullPanelOptions = {
     saveStatus: "#save_status",
     fileContent: "#file-content",
     fullPanel: "full_panel",
+    imageRotateBar: "#image-rotate-icons-bar",
     pdf: true
   },
   notebook: { //Notebook panel
@@ -1471,6 +1586,7 @@ let fileFullPanelOptions = {
     saveStatus: "#notebook_save_status", //TODO
     fileContent: "#notebook-file-content",
     fullPanel: "notebook_full_panel",
+    imageRotateBar: "#notebook-image-rotate-icons-bar",
     pdf: false
   }
 }
@@ -1480,6 +1596,8 @@ function viewFileFullPanel(name, path, page_num = 0, panel="submission") {
   if($(fileFullPanelOptions[panel]["viewer"]).length != 0){
     $(fileFullPanelOptions[panel]["viewer"]).remove();
   }
+
+  $(fileFullPanelOptions[panel]["imageRotateBar"]).hide();
 
   let promise = loadPDF(name, path, page_num, panel);
   $(fileFullPanelOptions[panel]["fileView"]).show();

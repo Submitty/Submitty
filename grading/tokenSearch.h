@@ -17,7 +17,7 @@
 #include "tokens.h"
 
 #include "TestCase.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 /* METHOD: RabinKarpSingle
  * ARGS: token: string with token to search for, searchstring: string of where to search for token

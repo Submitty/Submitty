@@ -231,6 +231,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
+            'websocket_port' => 8443,
             'submitty_path' => $this->temp_dir,
             'course_path' => $this->temp_dir . '/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir . '/logs',

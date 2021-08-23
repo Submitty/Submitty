@@ -1349,6 +1349,11 @@ tr.is_publish {
     z-index: 30;
 }
 
+#image-rotate-icons-bar, #notebook-image-rotate-icons-bar {
+    display: none;
+    padding: 0px 10px;
+}
+
 #file-content {
     height: 90%;
     width: 100%;
@@ -1461,11 +1466,6 @@ tr.is_publish {
     max-height: 400px;
     margin-bottom: 10px;
     resize: none;
-}
-
-/* Notebook panel */
-#notebook-main-view {
-    padding: 10px;
 }
 
 input[type="radio"][disabled=""]:checked::before {
