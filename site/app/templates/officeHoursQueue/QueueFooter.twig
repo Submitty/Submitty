@@ -105,7 +105,8 @@
   }
 
   function unhideId(element, id) {
-    element.parentElement.innerHTML = id;
+    element.parentElement.append("<" + id + ">");
+    element.remove();
   }
 
   function updateTimerInterval() {

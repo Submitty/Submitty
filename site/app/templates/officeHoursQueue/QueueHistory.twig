@@ -15,7 +15,6 @@
     <thead>
       <tr>
         <th scope="col">#</th>
-        <th scope="col" class="mobile-hide">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Queue</th>
         <th scope="col">Time Entered</th>
@@ -35,12 +34,12 @@
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
             <th scope="row">{{history_count}}</th>
-            <td class="mobile-hide">
+            <td>
+              {{ entry['name'] }}
               <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
                 <i class="fas fa-eye"></i>
               </a>
             </td>
-            <td>{{ entry['name'] }}</td>
             <td>{{ entry['queue_code'] }}</td>
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
 
