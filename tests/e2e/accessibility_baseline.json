@@ -11,7 +11,7 @@
     "/courses/{}/{}/gradeable/future_no_tas_test/grading?view=all": [],
     "/courses/{}/{}/gradeable/open_homework/grading/status": [],
     "/courses/{}/{}/gradeable/open_homework/bulk_stats": [],
-    "/courses/{}/{}/gradeable/open_homework/grading/details?view=all": [],
+    "/courses/{}/{}/gradeable/open_homework/grading/details": [],
     "/courses/{}/{}/gradeable/open_homework": [
         "Bad value “text” for attribute “role” on element “div”.",
         "Attribute “fname” not allowed on element “tr” at this point."
@@ -32,7 +32,8 @@
     "/courses/{}/{}/config": [],
     "/courses/{}/{}/theme": [],
     "/courses/{}/{}/office_hours_queue": [
-        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+        "Attribute “help_time” not allowed on element “td” at this point."
     ],
     "/courses/s20/sample/polls": [],
     "/courses/s20/sample/polls/newPoll": [],

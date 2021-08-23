@@ -1841,6 +1841,7 @@ function importComponentsFromFile() {
             }
         },
         error: function (e) {
+            console.log(e);
             alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                 "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]");
         }

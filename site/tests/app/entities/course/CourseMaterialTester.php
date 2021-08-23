@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\app\models\course;
+namespace tests\app\entities\course;
 
 use app\entities\course\CourseMaterial;
 use app\entities\course\CourseMaterialSection;
@@ -20,7 +20,9 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['path'],
             $details['release_date'],
             $details['hidden_from_students'],
-            $details['priority']
+            $details['priority'],
+            null,
+            null
         );
         $sections = ['1', '2'];
         foreach ($sections as $section) {
@@ -52,7 +54,9 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['path'],
             $details['release_date'],
             $details['hidden_from_students'],
-            $details['priority']
+            $details['priority'],
+            null,
+            null
         );
         $this->assertEquals($details['type'], $course_material->getType());
         $this->assertEquals($details['path'], $course_material->getPath());

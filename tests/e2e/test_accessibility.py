@@ -28,7 +28,7 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/gradeable/future_no_tas_test/grading?view=all',
         '/courses/{}/{}/gradeable/open_homework/grading/status',
         '/courses/{}/{}/gradeable/open_homework/bulk_stats',
-        '/courses/{}/{}/gradeable/open_homework/grading/details?view=all',
+        '/courses/{}/{}/gradeable/open_homework/grading/details',
         '/courses/{}/{}/gradeable/open_homework',
         '/courses/{}/{}/gradeable/open_team_homework/team',
         '/courses/{}/{}/gradeable/grades_released_homework_autota',
@@ -58,6 +58,7 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/polls',
         '/courses/{}/{}/polls/newPoll',
         '/courses/{}/{}/sql_toolbox',
+        '/admin/docker',
     ]
 
     urls_formatted = []

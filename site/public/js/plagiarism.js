@@ -56,6 +56,12 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         'editor1': editor1,
         'editor2': editor2,
         'color_info': [],
+        'previous_selection': {
+            'start_line': -1,
+            'end_line': -1,
+            'start_char': -1,
+            'end_char': -1,
+        },
     };
 
     // force the page to load default data for user 1 with highest % match
@@ -102,6 +108,8 @@ function user1DropdownChanged(state) {
     state.editor2.refresh();
 
     // the call to trigger the chain of updates
+    showLoadingIndicatorRight();
+    showLoadingIndicatorLeft();
     loadUser1VersionDropdownList(state);
 }
 
@@ -121,6 +129,8 @@ function user1VersionDropdownChanged(state) {
     state.editor2.refresh();
 
     // the call to trigger the chain of updates
+    showLoadingIndicatorRight();
+    showLoadingIndicatorLeft();
     loadUser2DropdownList(state);
     loadConcatenatedFileForEditor(state, 1);
 }
@@ -142,6 +152,7 @@ function user2DropdownChanged(state) {
     }
 
     // load new content for the editor
+    showLoadingIndicatorRight();
     loadConcatenatedFileForEditor(state, 2);
     loadColorInfo(state);
 }
@@ -316,9 +327,10 @@ function refreshUser2Dropdown(state) {
 
 
 function refreshColorInfo(state) {
+    let previousSelectedMark = null;
     state.editor1.operation(() => {
         state.editor2.operation(() => {
-            // codemirror doesn't preovide an easy way to remove text marks so we just wipe the contents of the document and reset
+            // codemirror doesn't provide an easy way to remove text marks so we just wipe the contents of the document and reset
             const val = state.editor1.getDoc().getValue();
             const scrollPos = state.editor1.getScrollInfo();
             state.editor1.getDoc().setValue('');
@@ -345,8 +357,10 @@ function refreshColorInfo(state) {
 
                 const mp_text_marks = [];
 
+                const wasPreviousSelection = interval.start_line - 1 === state.previous_selection.start_line && interval.end_line - 1 === state.previous_selection.end_line && interval.start_char - 1 === state.previous_selection.start_char && interval.end_char - 1 === state.previous_selection.end_char;
+
                 $.each(interval.matching_positions, (i, mp) => {
-                    const color = 'specific-match-style';
+                    const color2 = 'specific-match-style';
                     mp_text_marks[i] = state.editor2.markText(
                         { // start position
                             line: mp.start_line - 1,
@@ -358,16 +372,18 @@ function refreshColorInfo(state) {
                         },
                         {
                             attributes: {
-                                'original_color': color,
+                                'original_color': color2,
                                 'start_line': mp.start_line - 1,
-                                'end_line': mp.start_line - 1,
+                                'end_line': mp.end_line - 1,
+                                'start_char': mp.start_char - 1,
+                                'end_char': mp.end_char - 1,
                             },
-                            className: color,
+                            className: color2,
                         },
                     );
                 });
 
-                state.editor1.markText(
+                const mark = state.editor1.markText(
                     { // start position
                         line: interval.start_line - 1,
                         ch: interval.start_char - 1,
@@ -383,13 +399,146 @@ function refreshColorInfo(state) {
                             'type': interval.type,
                             'matching_positions': mp_text_marks,
                             'others': interval.others,
+                            'start_line': interval.start_line - 1,
+                            'end_line': interval.end_line - 1,
+                            'start_char': interval.start_char - 1,
+                            'end_char': interval.end_char - 1,
                         },
-                        className: color,
+                        className: wasPreviousSelection ? 'selected-style-red' : color,
                     },
                 );
+                if (wasPreviousSelection) {
+                    previousSelectedMark = mark;
+                }
             });
         });
     });
+    state.editor1.refresh();
+    state.editor2.refresh();
+
+    if (previousSelectedMark !== null) {
+        handleClickedMark_editor1(state, previousSelectedMark);
+    }
+    hideLoadingIndicatorLeft();
+    hideLoadingIndicatorRight();
+}
+
+
+function handleClickedMark_editor1(state, clickedMark, e = null) {
+    // mark the clicked mark on both sides
+    if (clickedMark.attributes.type === 'specific-match' && !clickedMark.attributes.selected) {
+        clickedMark.attributes.selected = true;
+        clickedMark.className = 'selected-style-red';
+
+        // highlight the matching regions on the right side
+        state.editor2.operation(() => {
+            $.each(clickedMark.attributes.matching_positions, (i, mp) => {
+                mp.className = 'selected-style-red';
+            });
+            state.editor2.scrollIntoView({line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0}, 400);
+        });
+
+        // highlight the other matching regions on the left side
+        state.editor1.getAllMarks().forEach(mark => {
+            $.each(mark.attributes.matching_positions, (i, mp) => {
+                if (mp.attributes.start_line === clickedMark.attributes.matching_positions[0].attributes.start_line &&
+                    mp.attributes.end_line === clickedMark.attributes.matching_positions[0].attributes.end_line &&
+                    mp.attributes.start_char === clickedMark.attributes.matching_positions[0].attributes.start_char &&
+                    mp.attributes.end_char === clickedMark.attributes.matching_positions[0].attributes.end_char
+                ) {
+                    mark.attributes.selected = true;
+                    mark.className = 'selected-style-red';
+                }
+            });
+        });
+    }
+    else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
+        clickedMark.attributes.selected = true;
+        clickedMark.className = 'selected-style-blue';
+
+        $('#popup_to_show_matches_id').css('left', `${e.clientX}px`);
+        $('#popup_to_show_matches_id').css('top', `${e.clientY}px`);
+        $('#popup_to_show_matches_id').empty();
+
+        $.each(clickedMark.attributes.others, (i, other) => {
+            let humanified_source_gradeable = other.source_gradeable;
+            humanified_source_gradeable = humanified_source_gradeable.replaceAll('__', '/');
+
+            const sg = other.source_gradeable === state.this_term_course_gradeable ? '' : ` (${humanified_source_gradeable})`;
+
+            $('#popup_to_show_matches_id').append(`
+                    <li id="others_menu_${i}" class="ui-menu-item">
+                        <div tabindex="-1" class="ui-menu-item-wrapper">
+                            ${other.user_id}: ${other.version}${sg}
+                        </div>
+                    </li>
+                `);
+            $(`#others_menu_${i}`).on('click', () => {
+                // hiding the popup and resetting the text color immediately makes the page feel faster
+                $('#popup_to_show_matches_id').css('display', 'none');
+                showLoadingIndicatorRight();
+                clickedMark.className = clickedMark.attributes.original_color;
+                state.editor2.getDoc().setValue('');
+                state.editor2.refresh();
+                state.editor1.refresh();
+
+                // set the selected user in the user 2 dropdown
+                $.each(state.user_2_dropdown_list, (i, item) => {
+                    if (item.user_id === other.user_id && item.version === other.version && item.source_gradeable === other.source_gradeable) {
+                        state.user_2_selected = item;
+
+                        state.previous_selection.start_line = clickedMark.attributes.start_line;
+                        state.previous_selection.end_line = clickedMark.attributes.end_line;
+                        state.previous_selection.start_char = clickedMark.attributes.start_char;
+                        state.previous_selection.end_char = clickedMark.attributes.end_char;
+                    }
+                });
+
+                // all async so order doesn't particularly matter
+                loadConcatenatedFileForEditor(state, 2);
+                loadColorInfo(state);
+                refreshUser2Dropdown(state);
+            });
+        });
+        $('#popup_to_show_matches_id').css('display', 'block');
+    }
+
+    // Refresh editors
+    state.editor1.refresh();
+    state.editor2.refresh();
+}
+
+
+function handleClickedMark_editor2(state, clickedMark) {
+    clickedMark.className = 'selected-style-red';
+    state.editor1.operation(() => {
+        let first_mark = true;
+        state.editor1.getAllMarks().forEach(mark => {
+            let mark_does_contain_mp = false;
+            $.each(mark.attributes.matching_positions, (i, mp) => {
+                if (mp.attributes.start_line === clickedMark.attributes.start_line &&
+                    mp.attributes.end_line === clickedMark.attributes.end_line &&
+                    mp.attributes.start_char === clickedMark.attributes.start_char &&
+                    mp.attributes.end_char === clickedMark.attributes.end_char
+                ) {
+                    mark_does_contain_mp = true;
+                }
+            });
+            if (mark_does_contain_mp) {
+                mark.attributes.selected = true;
+                mark.className = 'selected-style-red';
+                $.each(mark.attributes.matching_positions, (i, mp) => {
+                    mp.className = 'selected-style-red';
+                    if (first_mark) {
+                        state.editor1.scrollIntoView({line: mark.attributes.end_line, ch: 0}, 400);
+                        first_mark = false;
+                    }
+                });
+            }
+        });
+    });
+
+    // Refresh editors
     state.editor1.refresh();
     state.editor2.refresh();
 }
@@ -434,69 +583,72 @@ function handleClickedMarks(state) {
             return;
         }
 
-
-        // mark the clicked mark on both sides
-        if (clickedMark.attributes.type === 'specific-match' && !clickedMark.attributes.selected) {
-            clickedMark.attributes.selected = true;
-            clickedMark.className = 'selected-style-red';
-
-            // highlight the matching regions on the right side
-            state.editor2.operation(() => {
-                $.each(clickedMark.attributes.matching_positions, (i, mp) => {
-                    mp.className = 'selected-style-red';
-                });
-                state.editor2.scrollIntoView({line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0}, 400);
-            });
-        }
-        else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
-            clickedMark.attributes.selected = true;
-            clickedMark.className = 'selected-style-blue';
-
-            $('#popup_to_show_matches_id').css('left', `${e.clientX}px`);
-            $('#popup_to_show_matches_id').css('top', `${e.clientY}px`);
-            $('#popup_to_show_matches_id').empty();
-
-            $.each(clickedMark.attributes.others, (i, other) => {
-                let humanified_source_gradeable = other.source_gradeable;
-                humanified_source_gradeable = humanified_source_gradeable.replaceAll('__', '/');
-
-                const sg = other.source_gradeable === state.this_term_course_gradeable ? '' : ` (${humanified_source_gradeable})`;
-
-                $('#popup_to_show_matches_id').append(`
-                    <li id="others_menu_${i}" class="ui-menu-item">
-                        <div tabindex="-1" class="ui-menu-item-wrapper">
-                            ${other.user_id}: ${other.version}${sg}
-                        </div>
-                    </li>
-                `);
-                $(`#others_menu_${i}`).on('click', () => {
-                    // hiding the popup and resetting the text color immediately makes the page feel faster
-                    $('#popup_to_show_matches_id').css('display', 'none');
-                    clickedMark.className = clickedMark.attributes.original_color;
-                    state.editor2.getDoc().setValue('');
-                    state.editor2.refresh();
-                    state.editor1.refresh();
-
-                    // set the selected user in the user 2 dropdown
-                    $.each(state.user_2_dropdown_list, (i, item) => {
-                        if (item.user_id === other.user_id && item.version === other.version && item.source_gradeable === other.source_gradeable) {
-                            state.user_2_selected = item;
-                        }
-                    });
-
-                    // all async so order doesn't particularly matter
-                    loadConcatenatedFileForEditor(state, 2);
-                    loadColorInfo(state);
-                    refreshUser2Dropdown(state);
-                });
-            });
-            $('#popup_to_show_matches_id').css('display', 'block');
-        }
-
-        // Refresh editors
-        state.editor1.refresh();
-        state.editor2.refresh();
+        handleClickedMark_editor1(state, clickedMark, e);
     };
+
+    state.editor2.getWrapperElement().onmouseup = function(e) {
+        const lineCh = state.editor2.coordsChar({ left: e.clientX, top: e.clientY });
+        const markers = state.editor2.findMarksAt(lineCh);
+
+
+        // hide the "others" popup in case it was visible
+        $('#popup_to_show_matches_id').css('display', 'none');
+
+
+        // Only grab the first one if there is overlap...
+        const clickedMark = markers[0];
+
+        // reset all previous marks
+        const marks_editor1 = state.editor1.getAllMarks();
+        state.editor1.operation(() => {
+            marks_editor1.forEach(mark => {
+                if (markers.length === 0 || mark !== clickedMark) {
+                    mark.className = mark.attributes.original_color;
+                    mark.attributes.selected = false;
+                }
+            });
+        });
+        const marks_editor2 = state.editor2.getAllMarks();
+        state.editor2.operation(() => {
+            marks_editor2.forEach(mark => {
+                mark.className = mark.attributes.original_color;
+            });
+        });
+
+
+        // Did not select a marker
+        if (markers.length === 0) {
+            state.editor1.refresh();
+            state.editor2.refresh();
+            return;
+        }
+
+        handleClickedMark_editor2(state, clickedMark);
+    };
+}
+
+
+function showLoadingIndicatorLeft() {
+    $('.left-sub-item-middle').addClass('blurry');
+    $('.left-loader').css('display', 'block');
+}
+
+
+function hideLoadingIndicatorLeft() {
+    $('.left-sub-item-middle').removeClass('blurry');
+    $('.left-loader').css('display', 'none');
+}
+
+
+function showLoadingIndicatorRight() {
+    $('.right-sub-item-middle').addClass('blurry');
+    $('.right-loader').css('display', 'block');
+}
+
+
+function hideLoadingIndicatorRight() {
+    $('.right-sub-item-middle').removeClass('blurry');
+    $('.right-loader').css('display', 'none');
 }
 
 

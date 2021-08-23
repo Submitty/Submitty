@@ -19,7 +19,7 @@
   "require": {
     "aptoma/twig-markdown": "3.4.0",
     "cboden/ratchet": "0.4.3",
-    "doctrine/annotations": "1.13.1",
+    "doctrine/annotations": "1.13.2",
     "doctrine/cache": "1.11.3",
     "doctrine/orm": "2.9.3",
     "egulias/email-validator": "3.1.1",
@@ -27,19 +27,19 @@
     "league/commonmark": "1.6.6",
     "maennchen/zipstream-php": "2.1.0",
     "php-ds/php-ds": "1.3.0",
-    "ramsey/uuid": "4.1.1",
+    "ramsey/uuid": "4.2.1",
     "spatie/commonmark-highlighter": "2.1.1",
     "symfony/config": "4.4.27",
     "symfony/http-foundation": "4.4.29",
     "symfony/routing": "4.4.27",
-    "textalk/websocket": "1.5.4",
+    "textalk/websocket": "1.5.5",
     "twig/twig": "2.13.1"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",
     "phpstan/phpstan": "0.12.94",
-    "phpunit/phpunit": "8.5.18",
+    "phpunit/phpunit": "8.5.19",
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {
