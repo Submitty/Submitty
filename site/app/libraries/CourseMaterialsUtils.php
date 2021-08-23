@@ -50,10 +50,13 @@ class CourseMaterialsUtils {
      *                the file.
      */
     public static function accessCourseMaterialCheck(Core $core, string $path): string {
-        //$json = FileUtils::readJsonFile($core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
         $course_material = $core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['path' => $path]);
 
+        return self::finalAccessCourseMaterialCheck($core, $course_material);
+    }
+
+    public static function finalAccessCourseMaterialCheck(Core $core, CourseMaterial $course_material) {
         if (!CourseMaterialsUtils::isMaterialReleased($course_material)) {
             return 'You may not access this file until it is released.';
         }

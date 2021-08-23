@@ -23,6 +23,7 @@ class CourseMaterialsView extends AbstractView {
         $directories = [];
         $directory_priorities = [];
         $seen = [];
+        $folder_ids = [];
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
@@ -30,6 +31,7 @@ class CourseMaterialsView extends AbstractView {
                 $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
+                $folder_ids[$course_material->getPath()] = $course_material->getId();
             }
         }
         $sort_priority = function (CourseMaterial $a, CourseMaterial $b) use ($base_course_material_path) {
@@ -133,7 +135,8 @@ class CourseMaterialsView extends AbstractView {
             "material_list" => $course_materials_db,
             "materials_exist" => count($course_materials_db) != 0,
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
-            "course_materials" => $final_structure
+            "course_materials" => $final_structure,
+            "folder_ids" => $folder_ids
         ]);
     }
 

@@ -55,7 +55,7 @@
             <div style="display:inline-block;">
                 <button class="btn btn-primary" id="show-all">Show All</button>
                 {% for capability in capabilities %}
-                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:{{capability_to_color[capability]}}; border-color: {{capability_to_color[capability]}}">
+                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:var(--category-color-{{capability_to_color[capability]}}); border-color: {{capability_to_color[capability]}}">
                         {{capability}}
                     </button>
                 {% endfor %}
@@ -63,9 +63,9 @@
         </div>
     {% endif %}
     
-    <table class="table striped-table docker-table mobile-table">
+    <table class="table table-striped docker-table mobile-table">
         <thead>
-            <tr style="background: #000000">
+            <tr>
                 <th>Image Name</th>
                 <th>Tag</th>
                 <th>ID</th>
@@ -93,13 +93,13 @@
                 <td>
                     {% if value["name"] ~ ':' ~ value["tag"] in image_to_capability|keys %}
                         {% for capability in image_to_capability[value["name"] ~':'~ value["tag"]] %}
-                            <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                            <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
                         {% endfor %}
                     {% else %}
                         {% for name in value["additional_names"] %}
                             {% if name in image_to_capability|keys %}
                                 {% for capability in image_to_capability[name] %}
-                                    <span class="badge" style="background-color:{{capability_to_color[capability]}}">{{capability}}</span>
+                                    <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
                                 {% endfor %}
                             {% endif %}
                         {% endfor %}

@@ -144,23 +144,34 @@ class DatabaseQueries {
 
     /**
      * Gets a user from the database given a user_id.
+     *
+     * @param string $user_id
+     * @return User|null
      */
     public function getUserById(string $user_id): ?User {
         return $this->getUser($user_id);
     }
 
-    public function getUserByNumericId($numeric_id): ?User {
+    /**
+     * Gets a user from the database given a numeric user_id.
+     *
+     * @param int $numeric_id
+     * @return User|null
+     */
+    public function getUserByNumericId(int $numeric_id): ?User {
         return $this->getUser($numeric_id, true);
     }
 
-    public function getUserByIdOrNumericId($id) {
-        $ret = $this->getUser($id);
-        if ($ret === null) {
-            return $this->getUser($id, true);
-        }
-
-        return $ret;
+    /**
+     * Gets a list of first and last names from the database given an array of IDs.
+     *
+     * @param array $user_id_list
+     * @return array|null
+     */
+    public function getUsersByIds(array $user_id_list): ?array {
+        return $this->getUsers($user_id_list);
     }
+
     /**
      * Retrieves all students from a course and their virtual attendance
      * information such as logs for the course materials page, and logs
@@ -181,7 +192,7 @@ class DatabaseQueries {
         C AS
         (SELECT distinct on (user_id) user_id,submission_time
         FROM electronic_gradeable_data
-        ORDER BY user_id, submission_time),
+        ORDER BY user_id, submission_time desc),
         D AS
         (SELECT distinct on (user_id) user_id, timestamp
         FROM viewed_responses
@@ -3846,6 +3857,16 @@ SQL;
         return $return;
     }
 
+    /**
+     * Get all courses where the user with the specified user_id is assigned as an instructor
+     * @param string $user_id
+     * @return array
+     */
+    public function getInstructorLevelAccessCourse(string $user_id): array {
+        $this->submitty_db->query("SELECT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.semester, u.course, u.user_group
@@ -4727,7 +4748,7 @@ AND gc_id IN (
                   json_agg(gc_max_value) AS array_max_value,
                   json_agg(gc_upper_clamp) AS array_upper_clamp,
                   json_agg(gc_is_text) AS array_text,
-                  json_agg(gc_is_peer) AS array_peer,
+                  json_agg(gc_is_peer) AS array_peer_component,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
                   json_agg(gc_is_itempool_linked) AS array_is_itempool_linked,
@@ -4783,7 +4804,7 @@ AND gc_id IN (
                 'max_value',
                 'upper_clamp',
                 'text',
-                'peer',
+                'peer_component',
                 'order',
                 'page',
                 'is_itempool_linked',
@@ -7105,20 +7126,40 @@ AND gc_id IN (
      *
      * @param string|int $user_id
      * @param bool $is_numeric
+     * @return User|null
      */
     private function getUser($user_id, bool $is_numeric = false): ?User {
-        if (!$is_numeric) {
-            $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", [$user_id]);
+        $result = $this->getUsers([$user_id], $is_numeric);
+        if ($result !== null && count($result) === 1) {
+            return $result[$user_id];
         }
         else {
-            $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id=?", [$user_id]);
+            return null;
+        }
+    }
+
+    /**
+     * Given an array of user IDs, return an array of corresponding user objects or null if any one of them wasn't found
+     *
+     * @param array $user_id_list
+     * @param bool $is_numeric
+     * @return array|null
+     */
+    private function getUsers(array $user_id_list, bool $is_numeric = false): ?array {
+        $placeholders = $this->createParamaterList(count($user_id_list));
+
+        if (!$is_numeric) {
+            $this->submitty_db->query("SELECT * FROM users WHERE user_id IN {$placeholders}", $user_id_list);
+        }
+        else {
+            $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id IN {$placeholders}", $user_id_list);
         }
 
         if ($this->submitty_db->getRowCount() === 0) {
             return null;
         }
 
-        $details = $this->submitty_db->row();
+        $details_list = $this->submitty_db->rows();
 
         if ($this->course_db) {
             $this->course_db->query(
@@ -7141,20 +7182,31 @@ AND gc_id IN (
               FROM grading_registration
               GROUP BY user_id
             ) as sr ON u.user_id=sr.user_id
-            WHERE u.user_id=?",
-                [$user_id]
+            WHERE u.user_id IN {$placeholders}",
+                $user_id_list
             );
 
+            $updated_details_list = [];
             if ($this->course_db->getRowCount() > 0) {
-                $user = $this->course_db->row();
-                if (isset($user['grading_registration_sections'])) {
-                    $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                $i = 0;
+                foreach ($details_list as $details) {
+                    $user = $this->course_db->rows()[$i];
+                    if (isset($user['grading_registration_sections'])) {
+                        $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                    }
+                    $updated_details_list[] = array_merge($details, $user);
+                    $i++;
                 }
-                $details = array_merge($details, $user);
+                $details_list = $updated_details_list;
             }
         }
 
-        return new User($this->core, $details);
+        $users = [];
+        foreach ($details_list as $details) {
+            $users[$details['user_id']] = new User($this->core, $details);
+        }
+
+        return $users;
     }
 
 

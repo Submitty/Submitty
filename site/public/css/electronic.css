@@ -516,7 +516,7 @@ progress::-webkit-progress-value {
 
 #grading-panel-student-name {
     position: absolute;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
     left: 5px;
     top: 5px;
