@@ -243,7 +243,12 @@ class MiscController extends AbstractController {
         }
 
         if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-            $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+            if ($cm === null) {
+                $access_failure = 'Course material not found';
+            }
+            else {
+                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+            }
             if ($access_failure) {
                 $this->core->getOutput()->showError($access_failure);
                 return false;
