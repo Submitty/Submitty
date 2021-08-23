@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\libraries\Access;
+use app\entities\course\CourseMaterial;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -98,9 +98,23 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/display_file")
      */
-    public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
+    public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null) {
+        $cm = null;
         //Is this per-gradeable?
-        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+        if ($course_material_id === null && ($dir !== null && $path !== null)) {
+            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+        }
+        else {
+            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['id' => $course_material_id]);
+            if ($cm !== null) {
+                $path = $cm->getPath();
+                $dir = 'course_materials';
+            }
+            else {
+                $path = null;
+            }
+        }
 
         if (!is_null($gradeable_id)) {
             $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -124,7 +138,7 @@ class MiscController extends AbstractController {
             }
 
             if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-                $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
                 if ($access_failure) {
                     $this->core->getOutput()->showError($access_failure);
                     return false;
@@ -199,9 +213,20 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/download")
      */
-    public function downloadCourseFile($dir, $path) {
+    public function downloadCourseFile($dir = null, $path = null, $course_material_id = null) {
         // security check
-        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+        $cm = null;
+        if ($course_material_id === null && ($dir !== null && $path !== null)) {
+            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+        }
+        elseif ($course_material_id !== null) {
+            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['id' => $course_material_id]);
+            if ($cm !== null) {
+                $dir = 'course_materials';
+                $path = $cm->getPath();
+            }
+        }
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
