@@ -285,28 +285,24 @@ class PlagiarismController extends AbstractController {
         }
     }
 
-
     /**
-     * @param string $job
+     * Returns a data structure containing the contents of a config.json file
+     *
      * @param string $gradeable_id
      * @param int $config_id
+     * @return array
      * @throws Exception
      */
-    private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
+    private function getJsonForConfig(string $gradeable_id, int $config_id): array {
         $em = $this->core->getCourseEntityManager();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
         $config = $em->getRepository(PlagiarismConfig::class)
-                     ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+            ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
 
         if ($config === null) {
             throw new Exception("Error: Unable to find plagiarism configuration");
-        }
-
-        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
-        if (file_exists($json_file)) {
-            unlink($json_file);
         }
 
         $regex_dirs = [];
@@ -320,22 +316,42 @@ class PlagiarismController extends AbstractController {
             $regex_dirs[] = "checkout";
         }
 
-        if ($job === "RunLichen") {
-            $json_data = [
-                "semester" => $semester,
-                "course" => $course,
-                "gradeable" => $gradeable_id,
-                "config_id" => $config_id,
-                "version" => $config->getVersionStatus(),
-                "regex" => $config->getRegexArray(),
-                "regex_dirs" => $regex_dirs,
-                "language" => $config->getLanguage(),
-                "threshold" => $config->getThreshold(),
-                "sequence_length" => $config->getSequenceLength(),
-                "prior_term_gradeables" => $config->getOtherGradeables(),
-                "ignore_submissions" => $config->getIgnoredSubmissions()
-            ];
+        $json_data = [
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable_id,
+            "config_id" => $config_id,
+            "version" => $config->getVersionStatus(),
+            "regex" => $config->getRegexArray(),
+            "regex_dirs" => $regex_dirs,
+            "language" => $config->getLanguage(),
+            "threshold" => $config->getThreshold(),
+            "sequence_length" => $config->getSequenceLength(),
+            "prior_term_gradeables" => $config->getOtherGradeables(),
+            "ignore_submissions" => $config->getIgnoredSubmissions()
+        ];
+        return $json_data;
+    }
 
+
+    /**
+     * @param string $job
+     * @param string $gradeable_id
+     * @param int $config_id
+     * @throws Exception
+     */
+    private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
+        if (file_exists($json_file)) {
+            unlink($json_file);
+        }
+
+        $json_data = $this->getJsonForConfig($gradeable_id, $config_id);
+
+        if ($job === "RunLichen") {
             $lichen_job_data = [
                 "job" => $job,
                 "semester" => $semester,
@@ -457,6 +473,7 @@ class PlagiarismController extends AbstractController {
             $delete_form_action = "";
             $nightly_rerun_link = "";
             $night_rerun_status = ""; // TODO: future feature
+            $download_config_file_link = $this->core->buildCourseUrl(["plagiarism", "gradeable", $gradeable['g_id'], "download_config_file"]) . "?config_id={$gradeable['g_config_version']}";
 
             if (file_exists($this->getProcessingQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
                 // lichen job in processing stage for this gradeable but not completed
@@ -510,7 +527,8 @@ class PlagiarismController extends AbstractController {
                 'edit_plagiarism_link' => $edit_plagiarism_link,
                 'delete_form_action' => $delete_form_action,
                 'nightly_rerun_link' => $nightly_rerun_link,
-                'night_rerun_status' => $night_rerun_status
+                'night_rerun_status' => $night_rerun_status,
+                'download_config_file_link' => $download_config_file_link
             ];
         }
 
@@ -605,7 +623,7 @@ class PlagiarismController extends AbstractController {
      * @return RedirectResponse
      * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
-    public function saveNewPlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
+    public function savePlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -614,15 +632,13 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']);
         if ($new_or_edit === "new") {
             $gradeable_id = $_POST["gradeable_id"];
-        }
-        elseif ($new_or_edit === "edit") {
+        } elseif ($new_or_edit === "edit") {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . "?gradeable_id={$gradeable_id}&config_id={$config_id}";
         }
 
         try {
             $config_id = intval($config_id);
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $this->core->addErrorMessage("Error: Config ID must be a valid integer configuration ID");
             return new RedirectResponse($return_url);
         }
@@ -633,134 +649,199 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
-
-        // Version /////////////////////////////////////////////////////////////
-        $version_option = $_POST['version_option'] ?? "";
-
-
-        // Regex ///////////////////////////////////////////////////////////////
-        // TODO: Can we find a way to validate the regex more thoroughly to tell the user their regex was invalid before feeding it to Lichen?
-        if (!isset($_POST["regex_dir"]) || !isset($_POST["regex_to_select_files"])) {
-            $this->core->addErrorMessage("Error: Unable to read regex fields");
-            return new RedirectResponse($return_url);
-        }
-        $regex_directories = $_POST["regex_dir"];
-        $regex_for_selecting_files = preg_split('/\s+/', $_POST['regex_to_select_files']);
-
-
-        // Language ////////////////////////////////////////////////////////////
-        $language = $_POST["language"] ?? "";
-
-
-        // Common code threshold ///////////////////////////////////////////////
-        $threshold = (int) $_POST['threshold'] ?? 0;
-
-
-        // Sequence length /////////////////////////////////////////////////////
-        $sequence_length = (int) $_POST['sequence_length'] ?? 0;
-
-
-        // Prior terms /////////////////////////////////////////////////////////
-        $prev_term_gradeables = [];
-        if ($_POST["past_terms_option"] === "past_terms") {
-            if (isset($_POST["prior_semester_course"]) !== isset($_POST["prior_gradeable"])) {
-                $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
-                $this->core->redirect($return_url);
-            }
-            foreach ($_POST["prior_semester_course"] as $index => $sem_course) {
-                if (!isset($_POST["prior_gradeable"][$index])) {
-                    $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
-                    $this->core->redirect($return_url);
-                }
-                else {
-                    $tokens = explode(" ", $sem_course);
-                    if (count($tokens) !== 2) {
-                        $this->core->addErrorMessage("Invalid input provided for prior semester and course");
-                        $this->core->redirect($return_url);
-                    }
-                    $prior_semester = $tokens[0];
-                    $prior_course = $tokens[1];
-                    $prior_gradeable = $_POST["prior_gradeable"][$index];
-                    // Error checking
-                    if (str_contains($prior_semester, '..') || str_contains($prior_course, '..') || str_contains($prior_gradeable, '..')) {
-                        $this->core->addErrorMessage("Error: prior term gradeables string contains invalid component '..'");
-                        return new RedirectResponse($return_url);
-                    }
-                    $prior_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $prior_semester, $prior_course, "submissions", $prior_gradeable);
-                    if (!is_dir($prior_g_submissions_path) || count(scandir($prior_g_submissions_path)) === 2) {
-                        $this->core->addErrorMessage("Error: submssions to prior term gradeable provided not found");
-                        return new RedirectResponse($return_url);
-                    }
-                    $to_append = [
-                        "prior_semester" => $prior_semester,
-                        "prior_course" => $prior_course,
-                        "prior_gradeable" => $prior_gradeable
-                    ];
-                    if ($prior_semester === $semester && $prior_course === $course && $prior_gradeable === $gradeable_id) {
-                        $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
-                        return new RedirectResponse($return_url);
-                    }
-                    if (in_array($to_append, $prev_term_gradeables)) {
-                        $this->core->addErrorMessage("Error: duplicate other gradeable found: {$prior_semester} {$prior_course} {$prior_gradeable}");
-                        return new RedirectResponse($return_url);
-                    }
-                    $prev_term_gradeables[] = $to_append;
-                }
-            }
-        }
-
-
-        // Submissions to ignore ///////////////////////////////////////////////
-        $ignore_submission_option = [];
-        if (isset($_POST['ignore_submission_option'])) {
-            // error checking
-            $valid_inputs = ["ignore_instructors", "ignore_full_access_graders", "ignore_limited_access_graders", "ignore_others"];
-            foreach ($_POST['ignore_submission_option'] as $ignore_type) {
-                if (!in_array($ignore_type, $valid_inputs)) {
-                    $this->core->addErrorMessage("Invalid type provided for users to ignore");
-                    return new RedirectResponse($return_url);
-                }
-            }
-            // get user_id in the user categories specified
-            $graders = $this->core->getQueries()->getAllGraders();
-            foreach ($graders as $grader) {
-                if (
-                    $grader->getGroup() == User::GROUP_INSTRUCTOR && in_array("ignore_instructors", $_POST['ignore_submission_option'])
-                    || $grader->getGroup() == User::GROUP_FULL_ACCESS_GRADER && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
-                    || $grader->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
-                ) {
-                    array_push($ignore_submission_option, $grader->getId());
-                }
-            }
-            // parse and append user id's specified in "Others"
-            if (in_array("ignore_others", $_POST['ignore_submission_option']) && isset($_POST["ignore_others_list"])) {
-                // parse and push to the array of users
-                $other_users = explode(", ", $_POST["ignore_others_list"]);
-                foreach ($other_users as $other_user) {
-                    array_push($ignore_submission_option, $other_user);
-                }
-            }
-        }
-
-
         // Generate a unique number for this version of the gradeable //////////
         if ($new_or_edit === "new") {
             try {
                 $config_id = $em->getRepository(PlagiarismConfig::class)
-                                ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"]);
+                    ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"]);
                 if ($config_id === null) {
                     $config_id = 1;
-                }
-                else {
+                } else {
                     $config_id = $config_id->getConfigID() + 1;
                 }
-            }
-            catch (Exception $e) {
+            } catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
         }
 
+        // Save configuration form data
+        if ($new_or_edit === "new" && isset($_POST["config_option"]) && $_POST["config_option"] === "upload_config") { // uploaded config file
+
+        }
+        elseif ($new_or_edit === "new" && isset($_POST["config_option"]) && $_POST["config_option"] === "import_config") { // imported from another config
+            try {
+                /** @var PlagiarismConfig $source_config */
+                $source_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $_POST["import-config-gradeable"], "config_id" => $_POST["import-config-config-id"]]);
+                $new_config = new PlagiarismConfig(
+                    $gradeable_id,
+                    $config_id,
+                    $source_config->getVersionStatus(),
+                    $source_config->getRegexArray(),
+                    $source_config->isRegexDirSubmissionsSelected(),
+                    $source_config->isRegexDirResultsSelected(),
+                    $source_config->isRegexDirCheckoutSelected(),
+                    $source_config->getLanguage(),
+                    $source_config->getThreshold(),
+                    $source_config->getSequenceLength(),
+                    $source_config->getOtherGradeables(),
+                    $source_config->getIgnoredSubmissions()
+                );
+                $em->persist($new_config);
+                $em->flush();
+            }
+            catch (Exception $e) {
+                $this->core->addErrorMessage("Error: Unable to load source configuration");
+                return new RedirectResponse($return_url);
+            }
+        }
+        else { // either editing an existing config or saving a new one with manual config data entry
+            // Version /////////////////////////////////////////////////////////////
+            $version_option = $_POST['version_option'] ?? "";
+
+
+            // Regex ///////////////////////////////////////////////////////////////
+            // TODO: Can we find a way to validate the regex more thoroughly to tell the user their regex was invalid before feeding it to Lichen?
+            if (!isset($_POST["regex_dir"]) || !isset($_POST["regex_to_select_files"])) {
+                $this->core->addErrorMessage("Error: Unable to read regex fields");
+                return new RedirectResponse($return_url);
+            }
+            $regex_directories = $_POST["regex_dir"];
+            $regex_for_selecting_files = preg_split('/\s+/', $_POST['regex_to_select_files']);
+
+
+            // Language ////////////////////////////////////////////////////////////
+            $language = $_POST["language"] ?? "";
+
+
+            // Common code threshold ///////////////////////////////////////////////
+            $threshold = (int)$_POST['threshold'] ?? 0;
+
+
+            // Sequence length /////////////////////////////////////////////////////
+            $sequence_length = (int)$_POST['sequence_length'] ?? 0;
+
+
+            // Prior terms /////////////////////////////////////////////////////////
+            $prev_term_gradeables = [];
+            if ($_POST["past_terms_option"] === "past_terms") {
+                if (isset($_POST["prior_semester_course"]) !== isset($_POST["prior_gradeable"])) {
+                    $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                    $this->core->redirect($return_url);
+                }
+                foreach ($_POST["prior_semester_course"] as $index => $sem_course) {
+                    if (!isset($_POST["prior_gradeable"][$index])) {
+                        $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                        $this->core->redirect($return_url);
+                    } else {
+                        $tokens = explode(" ", $sem_course);
+                        if (count($tokens) !== 2) {
+                            $this->core->addErrorMessage("Invalid input provided for prior semester and course");
+                            $this->core->redirect($return_url);
+                        }
+                        $prior_semester = $tokens[0];
+                        $prior_course = $tokens[1];
+                        $prior_gradeable = $_POST["prior_gradeable"][$index];
+                        // Error checking
+                        if (str_contains($prior_semester, '..') || str_contains($prior_course, '..') || str_contains($prior_gradeable, '..')) {
+                            $this->core->addErrorMessage("Error: prior term gradeables string contains invalid component '..'");
+                            return new RedirectResponse($return_url);
+                        }
+                        $prior_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $prior_semester, $prior_course, "submissions", $prior_gradeable);
+                        if (!is_dir($prior_g_submissions_path) || count(scandir($prior_g_submissions_path)) === 2) {
+                            $this->core->addErrorMessage("Error: submssions to prior term gradeable provided not found");
+                            return new RedirectResponse($return_url);
+                        }
+                        $to_append = [
+                            "prior_semester" => $prior_semester,
+                            "prior_course" => $prior_course,
+                            "prior_gradeable" => $prior_gradeable
+                        ];
+                        if ($prior_semester === $semester && $prior_course === $course && $prior_gradeable === $gradeable_id) {
+                            $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
+                            return new RedirectResponse($return_url);
+                        }
+                        if (in_array($to_append, $prev_term_gradeables)) {
+                            $this->core->addErrorMessage("Error: duplicate other gradeable found: {$prior_semester} {$prior_course} {$prior_gradeable}");
+                            return new RedirectResponse($return_url);
+                        }
+                        $prev_term_gradeables[] = $to_append;
+                    }
+                }
+            }
+
+
+            // Submissions to ignore ///////////////////////////////////////////////
+            $ignore_submission_option = [];
+            if (isset($_POST['ignore_submission_option'])) {
+                // error checking
+                $valid_inputs = ["ignore_instructors", "ignore_full_access_graders", "ignore_limited_access_graders", "ignore_others"];
+                foreach ($_POST['ignore_submission_option'] as $ignore_type) {
+                    if (!in_array($ignore_type, $valid_inputs)) {
+                        $this->core->addErrorMessage("Invalid type provided for users to ignore");
+                        return new RedirectResponse($return_url);
+                    }
+                }
+                // get user_id in the user categories specified
+                $graders = $this->core->getQueries()->getAllGraders();
+                foreach ($graders as $grader) {
+                    if (
+                        $grader->getGroup() == User::GROUP_INSTRUCTOR && in_array("ignore_instructors", $_POST['ignore_submission_option'])
+                        || $grader->getGroup() == User::GROUP_FULL_ACCESS_GRADER && in_array("ignore_full_access_graders", $_POST['ignore_submission_option'])
+                        || $grader->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && in_array("ignore_limited_access_graders", $_POST['ignore_submission_option'])
+                    ) {
+                        array_push($ignore_submission_option, $grader->getId());
+                    }
+                }
+                // parse and append user id's specified in "Others"
+                if (in_array("ignore_others", $_POST['ignore_submission_option']) && isset($_POST["ignore_others_list"])) {
+                    // parse and push to the array of users
+                    $other_users = explode(", ", $_POST["ignore_others_list"]);
+                    foreach ($other_users as $other_user) {
+                        array_push($ignore_submission_option, $other_user);
+                    }
+                }
+            }
+
+            // Save the config /////////////////////////////////////////////////////
+            try {
+                if ($new_or_edit === "new") {
+                    $plagiarism_config = new PlagiarismConfig(
+                        $gradeable_id,
+                        $config_id,
+                        $version_option,
+                        $regex_for_selecting_files,
+                        in_array("submissions", $regex_directories),
+                        in_array("results", $regex_directories),
+                        in_array("checkout", $regex_directories),
+                        $language,
+                        $threshold,
+                        $sequence_length,
+                        $prev_term_gradeables,
+                        $ignore_submission_option
+                    );
+                } else {
+                    /** @var PlagiarismConfig $plagiarism_config */
+                    $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+                    $plagiarism_config->setVersionStatus($version_option);
+                    $plagiarism_config->setRegexArray($regex_for_selecting_files);
+                    $plagiarism_config->setRegexDirSubmissions(in_array("submissions", $regex_directories));
+                    $plagiarism_config->setRegexDirResults(in_array("results", $regex_directories));
+                    $plagiarism_config->setRegexDirCheckout(in_array("checkout", $regex_directories));
+                    $plagiarism_config->setLanguage($language);
+                    $plagiarism_config->setThreshold($threshold);
+                    $plagiarism_config->setSequenceLength($sequence_length);
+                    $plagiarism_config->setOtherGradeables($prev_term_gradeables);
+                    $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
+                }
+                $em->persist($plagiarism_config);
+
+                $em->flush();
+            } catch (Exception $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($return_url);
+            }
+        }
 
         // Create directory structure //////////////////////////////////////////
         if (!is_dir($this->getConfigDirectoryPath($gradeable_id, $config_id))) {
@@ -781,51 +862,10 @@ class PlagiarismController extends AbstractController {
             // save the code
             try {
                 $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id, $config_id);
-            }
-            catch (Exception $e) {
+            } catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
-        }
-
-        // Save the config /////////////////////////////////////////////////////
-        try {
-            if ($new_or_edit === "new") {
-                $plagiarism_config = new PlagiarismConfig(
-                    $gradeable_id,
-                    $config_id,
-                    $version_option,
-                    $regex_for_selecting_files,
-                    in_array("submissions", $regex_directories),
-                    in_array("results", $regex_directories),
-                    in_array("checkout", $regex_directories),
-                    $language,
-                    $threshold,
-                    $sequence_length,
-                    $prev_term_gradeables,
-                    $ignore_submission_option
-                );
-            }
-            else {
-                $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
-                $plagiarism_config->setVersionStatus($version_option);
-                $plagiarism_config->setRegexArray($regex_for_selecting_files);
-                $plagiarism_config->setRegexDirSubmissions(in_array("submissions", $regex_directories));
-                $plagiarism_config->setRegexDirResults(in_array("results", $regex_directories));
-                $plagiarism_config->setRegexDirCheckout(in_array("checkout", $regex_directories));
-                $plagiarism_config->setLanguage($language);
-                $plagiarism_config->setThreshold($threshold);
-                $plagiarism_config->setSequenceLength($sequence_length);
-                $plagiarism_config->setOtherGradeables($prev_term_gradeables);
-                $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
-            }
-            $em->persist($plagiarism_config);
-
-            $em->flush();
-        }
-        catch (Exception $e) {
-            $this->core->addErrorMessage($e->getMessage());
-            return new RedirectResponse($return_url);
         }
 
         // Create the Lichen job ///////////////////////////////////////////////
@@ -839,46 +879,6 @@ class PlagiarismController extends AbstractController {
 
         $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for {$gradeable_id} configuration #{$config_id}");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
-    }
-
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
-     * @param string $gradeable_id
-     * @param string $config_id
-     * @return RedirectResponse
-     */
-    public function reRunPlagiarism(string $gradeable_id, string $config_id): RedirectResponse {
-        $return_url = $this->core->buildCourseUrl(['plagiarism']);
-
-        try {
-            $config_id = intval($config_id);
-            $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
-        }
-        catch (Exception $e) {
-            $this->core->addErrorMessage($e->getMessage());
-            return new RedirectResponse($return_url);
-        }
-
-        $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
-        $lichen_job_file_processing = $this->getProcessingQueuePath($gradeable_id, $config_id);
-
-        # Re run only if following checks are passed.
-        if (file_exists($lichen_job_file) || file_exists($lichen_job_file_processing)) {
-            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
-            return new RedirectResponse($return_url);
-        }
-
-        try {
-            $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
-        }
-        catch (Exception $e) {
-            $this->core->addErrorMessage($e->getMessage());
-            return new RedirectResponse($return_url);
-        }
-
-        $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for {$gradeable_id} configuration #{$config_id}");
-        return new RedirectResponse($return_url . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
     }
 
 
@@ -1026,8 +1026,49 @@ class PlagiarismController extends AbstractController {
             ['admin', 'Plagiarism'],
             'configurePlagiarismForm',
             'edit',
-            $config
+            $config,
+            [] // placeholder
         );
+    }
+
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
+     * @param string $gradeable_id
+     * @param string $config_id
+     * @return RedirectResponse
+     */
+    public function reRunPlagiarism(string $gradeable_id, string $config_id): RedirectResponse {
+        $return_url = $this->core->buildCourseUrl(['plagiarism']);
+
+        try {
+            $config_id = intval($config_id);
+            $this->verifyGradeableAndConfigAreValid($gradeable_id, $config_id);
+        }
+        catch (Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($return_url);
+        }
+
+        $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
+        $lichen_job_file_processing = $this->getProcessingQueuePath($gradeable_id, $config_id);
+
+        # Re run only if following checks are passed.
+        if (file_exists($lichen_job_file) || file_exists($lichen_job_file_processing)) {
+            $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+            return new RedirectResponse($return_url);
+        }
+
+        try {
+            $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
+        }
+        catch (Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($return_url);
+        }
+
+        $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for {$gradeable_id} configuration #{$config_id}");
+        return new RedirectResponse($return_url . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
     }
 
 
@@ -1068,6 +1109,24 @@ class PlagiarismController extends AbstractController {
 
         $this->core->addSuccessMessage("Lichen results and saved configuration will be deleted.");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
+    }
+
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/download_config_file")
+     * @param string $gradeable_id
+     * @param string $config_id
+     */
+    public function downloadConfigFile(string $gradeable_id, string $config_id) {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        try {
+            $result = $this->getJsonForConfig($gradeable_id, intval($config_id));
+            echo json_encode($result, JSON_PRETTY_PRINT);
+        }
+        catch (Exception $e) {
+            echo $e->getMessage();
+        }
     }
 
     /**
