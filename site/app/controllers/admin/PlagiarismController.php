@@ -316,7 +316,7 @@ class PlagiarismController extends AbstractController {
             $regex_dirs[] = "checkout";
         }
 
-        $json_data = [
+        return [
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $gradeable_id,
@@ -330,7 +330,6 @@ class PlagiarismController extends AbstractController {
             "prior_term_gradeables" => $config->getOtherGradeables(),
             "ignore_submissions" => $config->getIgnoredSubmissions()
         ];
-        return $json_data;
     }
 
 
@@ -632,13 +631,15 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']);
         if ($new_or_edit === "new") {
             $gradeable_id = $_POST["gradeable_id"];
-        } elseif ($new_or_edit === "edit") {
+        }
+        elseif ($new_or_edit === "edit") {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . "?gradeable_id={$gradeable_id}&config_id={$config_id}";
         }
 
         try {
             $config_id = intval($config_id);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             $this->core->addErrorMessage("Error: Config ID must be a valid integer configuration ID");
             return new RedirectResponse($return_url);
         }
@@ -656,10 +657,12 @@ class PlagiarismController extends AbstractController {
                     ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"]);
                 if ($config_id === null) {
                     $config_id = 1;
-                } else {
+                }
+                else {
                     $config_id = $config_id->getConfigID() + 1;
                 }
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
@@ -744,11 +747,11 @@ class PlagiarismController extends AbstractController {
 
 
             // Common code threshold ///////////////////////////////////////////////
-            $threshold = (int)$_POST['threshold'] ?? 0;
+            $threshold = (int) $_POST['threshold'] ?? 0;
 
 
             // Sequence length /////////////////////////////////////////////////////
-            $sequence_length = (int)$_POST['sequence_length'] ?? 0;
+            $sequence_length = (int) $_POST['sequence_length'] ?? 0;
 
 
             // Prior terms /////////////////////////////////////////////////////////
@@ -762,7 +765,8 @@ class PlagiarismController extends AbstractController {
                     if (!isset($_POST["prior_gradeable"][$index])) {
                         $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
                         $this->core->redirect($return_url);
-                    } else {
+                    }
+                    else {
                         $tokens = explode(" ", $sem_course);
                         if (count($tokens) !== 2) {
                             $this->core->addErrorMessage("Invalid input provided for prior semester and course");
@@ -849,7 +853,8 @@ class PlagiarismController extends AbstractController {
                         $prev_term_gradeables,
                         $ignore_submission_option
                     );
-                } else {
+                }
+                else {
                     /** @var PlagiarismConfig $plagiarism_config */
                     $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
                     $plagiarism_config->setVersionStatus($version_option);
@@ -866,7 +871,8 @@ class PlagiarismController extends AbstractController {
                 $em->persist($plagiarism_config);
 
                 $em->flush();
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
@@ -891,7 +897,8 @@ class PlagiarismController extends AbstractController {
             // save the code
             try {
                 $this->saveNewProvidedCode($_FILES['provided_code_file']['tmp_name'], $_FILES['provided_code_file']['name'], $gradeable_id, $config_id);
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
