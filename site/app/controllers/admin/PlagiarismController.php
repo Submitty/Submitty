@@ -902,6 +902,17 @@ class PlagiarismController extends AbstractController {
             return new DateTime($a['g_grade_due_date']) > new DateTime($b['g_grade_due_date']);
         });
 
+        $em = $this->core->getCourseEntityManager();
+        $all_configs = $em->getRepository(PlagiarismConfig::class)->findAll();
+
+        $gradeables_with_plag_configs = [];
+        foreach ($all_configs as $item) {
+            if (!isset($gradeables_with_plag_configs[$item->getGradeableID()])) {
+                $gradeables_with_plag_configs[$item->getGradeableID()] = [];
+            }
+            $gradeables_with_plag_configs[$item->getGradeableID()][] = $item->getConfigID();
+        }
+
         $config = [];
 
         // Default values for the form
@@ -928,7 +939,8 @@ class PlagiarismController extends AbstractController {
             ['admin', 'Plagiarism'],
             'configurePlagiarismForm',
             'new',
-            $config
+            $config,
+            $gradeables_with_plag_configs
         );
     }
 
