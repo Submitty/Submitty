@@ -20,8 +20,7 @@ def printDockerInfo():
         return True
     except docker.errors.APIError:
         print("APIError was raised.")
-    finally:
-        return False
+    return False
 
 
 if __name__ == '__main__':
