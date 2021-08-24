@@ -5,6 +5,7 @@ namespace app\views\admin;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\views\AbstractView;
+use ParseError;
 
 class DockerView extends AbstractView {
     public function displayDockerPage(array $docker_data) {
