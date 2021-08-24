@@ -147,7 +147,7 @@ class DockerView extends AbstractView {
                     $buffer = strtok("\n");
                     $is_match = preg_match("/\t-id: (.+)/", $buffer, $matches);
                     if (!$buffer || !$is_match) {
-                        throwException(ParseError("Unexpected log input, attempted to read image id"));
+                        throw new ParseError("Unexpected log input, attempted to read image id");
                     }
                     $id = $matches[1];
 
@@ -155,7 +155,7 @@ class DockerView extends AbstractView {
                     $buffer = strtok("\n");
                     $is_match = preg_match("/\t-created: (.+)/", $buffer, $matches);
                     if (!$buffer || !$is_match) {
-                        throwException(ParseError("Unexpected log input, attempted to read image creation date"));
+                        throw new ParseError("Unexpected log input, attempted to read image creation date");
                     }
                     $created = $matches[1];
 
@@ -163,7 +163,7 @@ class DockerView extends AbstractView {
                     $buffer = strtok("\n");
                     $is_match = preg_match("/\t-size: (.+)/", $buffer, $matches);
                     if (!$buffer || !$is_match) {
-                        throwException(ParseError("Unexpected log input, attempted to read image size"));
+                        throw new ParseError("Unexpected log input, attempted to read image size");
                     }
                     $size = $matches[1];
 
