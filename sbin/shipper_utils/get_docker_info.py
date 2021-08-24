@@ -18,12 +18,12 @@ def printDockerInfo():
             print(f"\t-id: {image.short_id}")
             print(f'\t-created: {data["Created"]}')
             print(f'\t-size: {data["Size"]}')
-    except Exception:
+        return True
+    except docker.errors.APIError:
+        print("APIError was raised.")
+    finally:
         return False
-    return True
 
 
 if __name__ == '__main__':
-    if (not printDockerInfo()):
-        sys.exit(1)
-    sys.exit(0)
+    printDockerInfo()

@@ -30,9 +30,11 @@ class DockerView extends AbstractView {
         $worker_machines = [];
         $no_image_capabilities = [];
         $image_to_capability = [];
+        $machine_docker_version = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
             $worker_temp = [];
             $worker_temp['name'] = $name;
+            $machine_docker_version[$name] = "Error";
             $worker_temp['capabilities'] = [];
             $worker_temp['images'] = [];
             foreach ($worker['capabilities'] as $capability) {
@@ -74,7 +76,6 @@ class DockerView extends AbstractView {
         $machine_to_update = [];
         $error_logs = [];
         $image_info = [];
-        $machine_docker_version = [];
         // Maps the images name to the name used to store the image information
         $aliases = [];
         // To account for the . and .. directories
@@ -102,37 +103,37 @@ class DockerView extends AbstractView {
 
                 $matches = [];
 
-                $isMatch = preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $matches);
-                if ($isMatch === 1) {
+                $is_match = preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $matches);
+                if ($is_match === 1) {
                     $last_ran = $matches[1];
                     $reset = true;
                 }
 
-                $isMatch = preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $buffer, $matches);
-                if ($isMatch) {
+                $is_match = preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $buffer, $matches);
+                if ($is_match) {
                     $machine_to_update[$matches[1]] = false;
                     $error_logs[] = $buffer;
                 }
 
-                $isMatch = preg_match("/ERROR: Could not pull (.+)/", $buffer, $matches);
-                if ($isMatch) {
+                $is_match = preg_match("/ERROR: Could not pull (.+)/", $buffer, $matches);
+                if ($is_match) {
                     $fail_images = $matches[1];
                     $error_logs[] = $buffer;
                 }
                 // Note the machine currently described by the log
-                $isMatch = preg_match("/UPDATE MACHINE: (.+)/", $buffer, $matches);
-                if ($isMatch) {
+                $is_match = preg_match("/UPDATE MACHINE: (.+)/", $buffer, $matches);
+                if ($is_match) {
                     $current_machine = $matches[1];
                 }
 
                 // Parse the docker version
-                $isMatch = preg_match("/Docker Version: (.+)/", $buffer, $matches);
-                if ($isMatch) {
+                $is_match = preg_match("/Docker Version: (.+)/", $buffer, $matches);
+                if ($is_match) {
                     $machine_docker_version[$current_machine] = $matches[1];
                 }
                 // Check if the log entry is describing a machine
-                $isMatch = preg_match("/Tag: (.+)/", $buffer, $matches);
-                if ($isMatch) {
+                $is_match = preg_match("/Tag: (.+)/", $buffer, $matches);
+                if ($is_match) {
                     $image_arr = explode(", ", $matches[1]);
                     $current_image = $image_arr[0];
                     array_shift($image_arr);
@@ -144,24 +145,24 @@ class DockerView extends AbstractView {
                     // Read the next 3 lines for more info
                     // read id
                     $buffer = strtok("\n");
-                    $isMatch = preg_match("/\t-id: (.+)/", $buffer, $matches);
-                    if (!$buffer || !$isMatch) {
+                    $is_match = preg_match("/\t-id: (.+)/", $buffer, $matches);
+                    if (!$buffer || !$is_match) {
                         throwException(ParseError("Unexpected log input, attempted to read image id"));
                     }
                     $id = $matches[1];
 
                     // read created
                     $buffer = strtok("\n");
-                    $isMatch = preg_match("/\t-created: (.+)/", $buffer, $matches);
-                    if (!$buffer || !$isMatch) {
+                    $is_match = preg_match("/\t-created: (.+)/", $buffer, $matches);
+                    if (!$buffer || !$is_match) {
                         throwException(ParseError("Unexpected log input, attempted to read image creation date"));
                     }
                     $created = $matches[1];
 
                     // read size
                     $buffer = strtok("\n");
-                    $isMatch = preg_match("/\t-size: (.+)/", $buffer, $matches);
-                    if (!$buffer || !$isMatch) {
+                    $is_match = preg_match("/\t-size: (.+)/", $buffer, $matches);
+                    if (!$buffer || !$is_match) {
                         throwException(ParseError("Unexpected log input, attempted to read image size"));
                     }
                     $size = $matches[1];
@@ -173,6 +174,11 @@ class DockerView extends AbstractView {
                             "size" => Utils::formatBytes('mb', $size, true)
                         ];
                     }
+                }
+
+                $is_match = preg_match("/APIError was raised./", $buffer, $matches);
+                if ($is_match) {
+                    $error_logs[] = "APIError has occured, please update the machines.";
                 }
                 if (preg_last_error() != PREG_NO_ERROR) {
                     $error_logs[] = "Error while parsing the logs";
