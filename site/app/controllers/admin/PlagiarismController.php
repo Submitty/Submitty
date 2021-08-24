@@ -667,9 +667,38 @@ class PlagiarismController extends AbstractController {
 
         // Save configuration form data
         if ($new_or_edit === "new" && isset($_POST["config_option"]) && $_POST["config_option"] === "upload_config") { // uploaded config file
+            // error checking
+            if (empty($_FILES) || !isset($_FILES["upload_config_file"]) || !isset($_FILES["upload_config_file"]["tmp_name"]) || $_FILES["upload_config_file"]["tmp_name"] === "") {
+                $this->core->addErrorMessage("Error: File upload failed");
+                return new RedirectResponse($return_url);
+            }
+            // load, parse, and save the config info
+            try {
+                $data = json_decode(file_get_contents($_FILES["upload_config_file"]["tmp_name"]), true);
 
+                $new_config = new PlagiarismConfig(
+                    $gradeable_id,
+                    $config_id,
+                    $data["version"],
+                    $data["regex"],
+                    in_array("submissions", $data["regex_dirs"]),
+                    in_array("results", $data["regex_dirs"]),
+                    in_array("checkout", $data["regex_dirs"]),
+                    $data["language"],
+                    $data["threshold"],
+                    $data["sequence_length"],
+                    $data["prior_term_gradeables"],
+                    $data["ignore_submissions"]
+                );
+                $em->persist($new_config);
+                $em->flush();
+            }
+            catch (Exception $e) {
+                $this->core->addErrorMessage($e->getMessage());
+                return new RedirectResponse($return_url);
+            }
         }
-        elseif ($new_or_edit === "new" && isset($_POST["config_option"]) && $_POST["config_option"] === "import_config") { // imported from another config
+        elseif ($new_or_edit === "new" && isset($_POST["config_option"]) && $_POST["config_option"] === "import_config") { // imported from another existing config
             try {
                 /** @var PlagiarismConfig $source_config */
                 $source_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $_POST["import-config-gradeable"], "config_id" => $_POST["import-config-config-id"]]);
