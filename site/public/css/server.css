@@ -2030,6 +2030,21 @@ header > * {
     width: 100%;
 }
 
+<<<<<<< HEAD
+=======
+.custom-scrollbar::-webkit-scrollbar {
+    background-color: var(--hover-dark-border-actionable-blue);
+    width: 5px;
+    height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--actionable-blue);
+    border-radius: 5px;
+    height: 10%;
+}
+
+>>>>>>> origin/master
 .badge-1 {
     background-color: var(--category-color-1);
     color: var(--text-black);
