@@ -23,7 +23,9 @@ def up(config, database, semester, course):
             config_id smallint CHECK (config_id > 0) NOT NULL,
             version varchar(255) NOT NULL,
             regex text,
-            regex_dirs text,
+            regex_dir_submissions bool NOT NULL,
+            regex_dir_results bool NOT NULL,
+            regex_dir_checkout bool NOT NULL,
             language varchar(255) NOT NULL,
             threshold smallint CHECK (threshold > 1) NOT NULL,
             sequence_length smallint CHECK (sequence_length > 1) NOT NULL,
@@ -52,8 +54,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute(
-        """
-        DROP TABLE lichen CASCADE;
-        """
-    )
+    pass

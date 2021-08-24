@@ -50,10 +50,22 @@ class PlagiarismConfig {
     protected $regex;
 
     /**
-     * @ORM\Column(type="simple_array")
-     * @var array
+     * @ORM\Column(type="boolean")
+     * @var bool
      */
-    protected $regex_dirs;
+    protected $regex_dir_submissions;
+
+    /**
+     * @ORM\Column(type="boolean")
+     * @var bool
+     */
+    protected $regex_dir_results;
+
+    /**
+     * @ORM\Column(type="boolean")
+     * @var bool
+     */
+    protected $regex_dir_checkout;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -105,7 +117,9 @@ class PlagiarismConfig {
         int $config_id,
         string $version,
         array $regex,
-        array $regex_dirs,
+        bool $regex_dir_submissions,
+        bool $regex_dir_results,
+        bool $regex_dir_checkout,
         string $language,
         int $threshold,
         int $sequence_length,
@@ -116,7 +130,9 @@ class PlagiarismConfig {
         $this->config_id = $config_id;
         $this->setVersionStatus($version);
         $this->setRegexArray($regex);
-        $this->setRegexDirs($regex_dirs);
+        $this->setRegexDirSubmissions($regex_dir_submissions);
+        $this->setRegexDirResults($regex_dir_results);
+        $this->setRegexDirCheckout($regex_dir_checkout);
         $this->setLanguage($language);
         $this->setThreshold($threshold);
         $this->setSequenceLength($sequence_length);
@@ -186,17 +202,45 @@ class PlagiarismConfig {
     }
 
     /**
-     * @return array
+     * @return bool
      */
-    public function getRegexDirs(): array {
-        return $this->regex_dirs;
+    public function isRegexDirSubmissionsSelected(): bool {
+        return $this->regex_dir_submissions;
     }
 
     /**
-     * @param array $dir_array
+     * @param bool $is_selected
      */
-    public function setRegexDirs(array $dir_array): void {
-        $this->regex_dirs = $dir_array;
+    public function setRegexDirSubmissions(bool $is_selected): void {
+        $this->regex_dir_submissions = $is_selected;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRegexDirResultsSelected(): bool {
+        return $this->regex_dir_results;
+    }
+
+    /**
+     * @param bool $is_selected
+     */
+    public function setRegexDirResults(bool $is_selected): void {
+        $this->regex_dir_results = $is_selected;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRegexDirCheckoutSelected(): bool {
+        return $this->regex_dir_checkout;
+    }
+
+    /**
+     * @param bool $is_selected
+     */
+    public function setRegexDirCheckout(bool $is_selected): void {
+        $this->regex_dir_checkout = $is_selected;
     }
 
     /**

@@ -309,6 +309,17 @@ class PlagiarismController extends AbstractController {
             unlink($json_file);
         }
 
+        $regex_dirs = [];
+        if ($config->isRegexDirSubmissionsSelected()) {
+            $regex_dirs[] = "submissions";
+        }
+        if ($config->isRegexDirResultsSelected()) {
+            $regex_dirs[] = "results";
+        }
+        if ($config->isRegexDirCheckoutSelected()) {
+            $regex_dirs[] = "checkout";
+        }
+
         if ($job === "RunLichen") {
             $json_data = [
                 "semester" => $semester,
@@ -317,7 +328,7 @@ class PlagiarismController extends AbstractController {
                 "config_id" => $config_id,
                 "version" => $config->getVersionStatus(),
                 "regex" => $config->getRegexArray(),
-                "regex_dirs" => $config->getRegexDirs(),
+                "regex_dirs" => $regex_dirs,
                 "language" => $config->getLanguage(),
                 "threshold" => $config->getThreshold(),
                 "sequence_length" => $config->getSequenceLength(),
@@ -780,13 +791,28 @@ class PlagiarismController extends AbstractController {
         // Save the config /////////////////////////////////////////////////////
         try {
             if ($new_or_edit === "new") {
-                $plagiarism_config = new PlagiarismConfig($gradeable_id, $config_id, $version_option, $regex_for_selecting_files, $regex_directories, $language, $threshold, $sequence_length, $prev_term_gradeables, $ignore_submission_option);
+                $plagiarism_config = new PlagiarismConfig(
+                    $gradeable_id,
+                    $config_id,
+                    $version_option,
+                    $regex_for_selecting_files,
+                    in_array("submissions", $regex_directories),
+                    in_array("results", $regex_directories),
+                    in_array("checkout", $regex_directories),
+                    $language,
+                    $threshold,
+                    $sequence_length,
+                    $prev_term_gradeables,
+                    $ignore_submission_option
+                );
             }
             else {
                 $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
                 $plagiarism_config->setVersionStatus($version_option);
                 $plagiarism_config->setRegexArray($regex_for_selecting_files);
-                $plagiarism_config->setRegexDirs($regex_directories);
+                $plagiarism_config->setRegexDirSubmissions(in_array("submissions", $regex_directories));
+                $plagiarism_config->setRegexDirResults(in_array("results", $regex_directories));
+                $plagiarism_config->setRegexDirCheckout(in_array("checkout", $regex_directories));
                 $plagiarism_config->setLanguage($language);
                 $plagiarism_config->setThreshold($threshold);
                 $plagiarism_config->setSequenceLength($sequence_length);
@@ -951,6 +977,18 @@ class PlagiarismController extends AbstractController {
                 return new RedirectResponse($return_url);
             }
         }
+
+        $regex_dirs = [];
+        if ($plagiarism_config->isRegexDirSubmissionsSelected()) {
+            $regex_dirs[] = "submissions";
+        }
+        if ($plagiarism_config->isRegexDirResultsSelected()) {
+            $regex_dirs[] = "results";
+        }
+        if ($plagiarism_config->isRegexDirCheckoutSelected()) {
+            $regex_dirs[] = "checkout";
+        }
+
         $config = [];
 
         $config["gradeable_id"] = $plagiarism_config->getGradeableID();
@@ -961,7 +999,7 @@ class PlagiarismController extends AbstractController {
         $config["provided_code_filenames"] = $provided_code_filenames;
         $config["version"] = $plagiarism_config->getVersionStatus();
         $config["regex"] = implode(", ", $plagiarism_config->getRegexArray());
-        $config["regex_dirs"] = $plagiarism_config->getRegexDirs();
+        $config["regex_dirs"] = $regex_dirs;
         $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
         $config["language"][$plagiarism_config->getLanguage()] = "selected";
         $config["threshold"] = $plagiarism_config->getThreshold();
