@@ -105,10 +105,13 @@ class PlagiarismConfig {
      * @param int $config_id
      * @param string $version
      * @param array $regex
-     * @param array $regex_dirs
+     * @param bool $regex_dir_submissions
+     * @param bool $regex_dir_results
+     * @param bool $regex_dir_checkout
      * @param string $language
      * @param int $threshold
      * @param int $sequence_length
+     * @param array $other_gradeables
      * @param array $ignored_submissions
      * @throws Exception
      */
