@@ -185,6 +185,38 @@ CREATE TABLE public.course_materials (
 
 
 --
+-- Name: course_materials_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.course_materials_access (
+    id integer NOT NULL,
+    course_material_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: course_materials_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_access_id_seq OWNED BY public.course_materials_access.id;
+
+
+--
 -- Name: course_materials_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1150,6 +1182,13 @@ ALTER TABLE ONLY public.course_materials ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
+-- Name: course_materials_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT nextval('public.course_materials_access_id_seq'::regclass);
+
+
+--
 -- Name: gradeable_access id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1746,22 +1785,6 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: electronic_gradeable fk_depends_on; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.electronic_gradeable
-    ADD CONSTRAINT fk_depends_on FOREIGN KEY (eg_depends_on) REFERENCES public.electronic_gradeable(g_id);
-
-
---
--- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_allowed_minutes_override
-    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
 -- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1770,11 +1793,35 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
+-- Name: electronic_gradeable fk_depends_on; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.electronic_gradeable
+    ADD CONSTRAINT fk_depends_on FOREIGN KEY (eg_depends_on) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
 -- Name: course_materials_sections fk_section_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
+
+
+--
+-- Name: course_materials_access fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_access
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --
