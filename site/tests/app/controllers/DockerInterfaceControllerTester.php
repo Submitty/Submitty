@@ -22,21 +22,15 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
 
 
     public function testShowDockerInterface() {
-        $mock_data = [
-            'success' => true,
-            'docker_images' => [],
-            'docker_info' => []
-        ];
-
-
-        $this->core->expects($this->once())->method("curlRequest")->willReturn(json_encode($mock_data));
+        $mock_data = [];
 
         $docker = new DockerInterfaceController($this->core);
         $response = ($docker->showDockerInterface());
         $api = $response->json_response->json;
         $mock_data['autograding_containers'] = false;
+        $mock_data['autograding_workers'] = false;
 
         $this->assertTrue($api['status'] === "success");
-        $this->assertEquals($api['data'], $mock_data);
+        $this->assertEquals($mock_data, $api['data']);
     }
 }
