@@ -328,7 +328,7 @@ class BulkUpload(CourseJob):
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
-        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
+        for key in ['semester', 'course', 'head_instructor', 'group_name']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
@@ -341,10 +341,7 @@ class CreateCourse(AbstractJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         head_instructor = self.job_details['head_instructor']
-        base_course_semester = self.job_details['base_course_semester']
-        base_course_title = self.job_details['base_course_title']
-
-        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
+        base_group = self.job_details['group_name']
 
         log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
             semester, course, head_instructor, base_group
@@ -355,3 +352,20 @@ class CreateCourse(AbstractJob):
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+
+
+class UpdateDockerImages(AbstractJob):
+    def run_job(self):
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "docker")
+        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file_path):
+            flag = flag | os.O_CREAT
+        log_fd = os.open(log_file_path, flag)
+        script_path = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'update_and_install_workers.py')
+        with os.fdopen(log_fd, 'a') as output_file:
+            subprocess.run(["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file)
+
+        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
+        logger.write_to_log(log_file_path, log_msg)

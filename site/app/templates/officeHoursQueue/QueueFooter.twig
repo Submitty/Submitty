@@ -105,7 +105,8 @@
   }
 
   function unhideId(element, id) {
-    element.parentElement.innerHTML = id;
+    element.parentElement.append("<" + id + ">");
+    element.remove();
   }
 
   function updateTimerInterval() {
@@ -146,7 +147,7 @@
   {% if viewer.isGrader() %}
 
       $('#old_queue_code').change(function(){
-          document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';
+          document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
       });
 
       var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
@@ -303,7 +304,7 @@
   }
 
   function toggleQueue(index, code){
-      $.post( `{{base_url}}/${code}/toggle`, {
+      $.post( `{{base_url}}/${encodeURIComponent(code)}/toggle`, {
           csrf_token: '{{ csrf_token }}',
           queue_code: code,
           queue_state: $(`#toggle-queue-${index}`)[0].checked ? 0:1

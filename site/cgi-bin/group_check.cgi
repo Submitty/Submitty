@@ -17,12 +17,20 @@ print()
 arguments = cgi.FieldStorage()
 status = 'fail'
 
-base_path = arguments.getvalue('base_path', None)
+group_name = arguments.getvalue('group_name', None)
 head_instructor = arguments.getvalue('head_instructor', None)
 
-if base_path and head_instructor:
-    base_group = Path(base_path).group()
-    if head_instructor in grp.getgrnam(base_group).gr_mem:
+group_mandatory_users = ['submitty_php', 'submitty_daemon', 'submitty_cgi'];
+
+for member in grp.getgrnam(group_name).gr_mem:
+    if member in group_mandatory_users:
+        group_mandatory_users.remove(member)
+
+if len(group_mandatory_users) is not 0:
+    status = 'error'
+
+if group_name and head_instructor:
+    if head_instructor in grp.getgrnam(group_name).gr_mem and len(group_mandatory_users) is 0:
         status = 'success'
 
 print(json.dumps({ "status": status }))

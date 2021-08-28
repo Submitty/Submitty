@@ -1,0 +1,7 @@
+[Submitty sample]: New Announcement: Test 1 grade is now out
+[Submitty sample]: New Announcement: Homework 5 is now posted
+[Submitty sample]: New Announcement: Homework 5 grade is now released!
+[Submitty sample]: New Announcement: Final grade released on rainbow grades!
+[Submitty sample]: Grade Inquiry Reopened: Grades Released Homework - student
+[Submitty sample]: Grade Inquiry Opened: Grades Released Homework - student
+[Submitty sample]: Grade Inquiry Resolved: Grades Released Homework - student

@@ -95,6 +95,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/autograding_status', 'Autograding Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -127,6 +128,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/autograding_status', 'Autograding Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -141,8 +143,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/gradeable', 'New Gradeable'],
             [base_url + '/config', 'Course Settings'],
             [base_url + '/sql_toolbox', 'SQL Toolbox'],
-            # the office hours queue is not initially enabled in the sample course
-            # [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            [base_url + '/polls', 'Submini Polls'],
             [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/email_status', 'Email Status'],
@@ -163,6 +165,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
+            [self.test_url + '/autograding_status', 'Autograding Status'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -205,8 +208,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
-            # the office hours queue is not initially enabled in the sample course
-            # [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            [base_url + '/polls', 'Submini Polls'],
             # sample course has no course materials to start, so this link will not appear
             # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
@@ -257,8 +260,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
-            # the office hours queue is not initially enabled in the sample course
-            # [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            [base_url + '/polls', 'Submini Polls'],
             # sample course has no course materials in start, so this link will not appear
             # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
