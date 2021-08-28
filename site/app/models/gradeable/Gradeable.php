@@ -308,7 +308,7 @@ class Gradeable extends AbstractModel {
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
             $this->setAllowCustomMarks($details['allow_custom_marks']);
-            $this->setAllowedMinutes($details['allowed_minutes'] ?? 0);
+            $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
             if (array_key_exists('hidden_files', $details)) {
