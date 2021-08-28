@@ -122,18 +122,22 @@ add_executable(validate.out
 ###################################################################################
 
 #delete this line
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 target_link_libraries(custom_functions seccomp)
-#target_link_libraries(compile.out                ${GRADINGLIB}  seccomp  custom_functions  pthread)
+
 target_link_libraries(compile.out                ${GRADINGLIB}  seccomp  custom_functions)
 target_link_libraries(run.out                    ${GRADINGLIB}  seccomp  custom_functions)
 target_link_libraries(validate.out               ${GRADINGLIB}  seccomp  custom_functions)
 
-set_property(TARGET custom_functions         APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -static")
-set_property(TARGET compile.out              APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -static")
-set_property(TARGET run.out                  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -static")
-set_property(TARGET validate.out             APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -static")
+set_property(TARGET custom_functions         APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET compile.out              APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET run.out                  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET validate.out             APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+
+set_property(TARGET compile.out              APPEND_STRING PROPERTY LINK_FLAGS "-static")
+set_property(TARGET run.out                  APPEND_STRING PROPERTY LINK_FLAGS "-static")
+set_property(TARGET validate.out             APPEND_STRING PROPERTY LINK_FLAGS "-static")
 
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})

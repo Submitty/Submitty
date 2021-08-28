@@ -32,9 +32,8 @@ add_library(submitty_grading STATIC
 ###################################################################################
 
 #delete this line
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
-#target_link_libraries(submitty_grading seccomp pthread)
 target_link_libraries(submitty_grading seccomp)
 
 set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
