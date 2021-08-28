@@ -9,14 +9,18 @@
         <th scope="col">Total Time Paused</th>
         <th scope="col">Queue</th>
         <th scope="col">Remove</th>
-        <th scope="col" class="mobile-hide">ID</th>
       </tr>
     </thead>
     <tbody>
       {% for entry in viewer.getCurrentQueue() %}
         <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
           <th scope="row" class="row_number">{{entry['row_number'] }}</th>
-          <td>{{ entry['name'] }}</td>
+          <td>
+            {{ entry['name'] }}
+            <a class="post-user-info" onclick="unhideId(this,'{{ entry['user_id'] }}')" onkeypress="unhideId(this,'{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
+              <i class="fas fa-eye"></i>
+            </a>
+          </td>
 
           {% if entry['current_state'] == 'waiting' %}
             <td>
@@ -26,17 +30,22 @@
                 {% if entry['paused'] %}
                   <button type="submit" class="btn btn-primary help_btn" title="Student paused" data-ready="false">
                     <i class="fas fa-pause"></i>
-                    Help</button>
+                    Help
+                  </button>
                 {% elseif viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week" data-ready="true">
                     <i class="fas fa-star"></i>
-                    Help</button>
+                    Help
+                  </button>
                 {% elseif viewer.firstTimeInQueueToday(entry['last_time_in_queue']) %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today" data-ready="true">
                     <i class="fas fa-star-half"></i>
-                    Help</button>
+                    Help
+                  </button>
                 {% else %}
-                  <button type="submit" class="btn btn-primary help_btn" data-ready="true">Help</button>
+                  <button type="submit" class="btn btn-primary help_btn" data-ready="true">
+                    Help
+                  </button>
                 {% endif %}
               </form>
             </td>
@@ -77,11 +86,6 @@
               <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
               <button type="submit" class="btn btn-default remove_from_queue_btn">Remove</button>
             </form>
-          </td>
-          <td class="mobile-hide">
-            <a class="post-user-info" onclick="unhideId(this,'{{ entry['user_id'] }}')" onkeypress="unhideId(this,'{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
-              <i class="fas fa-eye"></i>
-            </a>
           </td>
         </tr>
         {% if viewer.isContactInfoEnabled() %}
