@@ -31,7 +31,6 @@ add_library(submitty_grading STATIC
 
 ###################################################################################
 
-#delete this line
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 target_link_libraries(submitty_grading seccomp)
