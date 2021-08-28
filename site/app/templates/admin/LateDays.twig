@@ -4,8 +4,13 @@
     <form id="late-day-form" class="exception-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <p>
-            Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
-            Students may use these additional late days for any future homeworks (after the specificed date).
+            The default number of late days available to each student at the start of term is configured on the Course
+            Settings page and is currently set to: {{ initial_late_days }}
+        </p>
+        <br>
+        <p>
+            Use this form to set the total number of late days for a student.<br>
+            Students may use these late days for any future homeworks (after the specified date).
         </p>
         <fieldset class="single-student">
             <legend class="option-title">Single Student Entry</legend>
@@ -14,12 +19,12 @@
                 <input class="option-input" type="text" name="user_id" id="user_id">
             </label>
             <label for="datestamp">
-                Datestamp:
+                Date to be Applied:
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
-                Late Days:
-                <input class="option-input" type="text" name="late_days" id="late_days">
+                Total Late Days:
+                <input class="option-input" type="number" name="late_days" id="late_days">
             </label>
             <div>
                 <input class="btn btn-primary" type="submit" value="Submit">
@@ -68,7 +73,7 @@
                         <td>{{ user.getSinceTimestamp() }}</td>
                         <td>
                             <a
-                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
+                                aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >
                                 <i class="fas fa-trash"></i>

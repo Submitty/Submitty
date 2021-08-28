@@ -604,7 +604,7 @@ class GradeableListTester extends BaseUnitTest {
         $core->getQueries()->method('getHasSubmission')->will($this->onConsecutiveCalls(false, true, false, false, true));
 
         $list = new GradeableList($core);
-        $this->assertCount(5, $list->getSubmittableElectronicGradeables());
+        $this->assertCount(4, $list->getSubmittableElectronicGradeables());
 
         $actual = $list->getFutureGradeables();
         $this->assertCount(0, $actual);
