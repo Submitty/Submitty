@@ -11,7 +11,7 @@ import smtplib
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData, Table, bindparam
+from sqlalchemy import create_engine, MetaData, Table, bindparam, text
 import sys
 import psutil
 
@@ -85,6 +85,7 @@ try:
     EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
     EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
     EMAIL_REPLY_TO = EMAIL_CONFIG['email_reply_to']
+    EMAIL_INTERNAL_DOMAIN = EMAIL_CONFIG['email_internal_domain']
 
     DB_HOST = DATABASE_CONFIG['database_host']
     DB_USER = DATABASE_CONFIG['database_user']
@@ -132,14 +133,12 @@ def construct_mail_client():
 
 
 def get_email_queue(db):
-    """Get an active queue of emails waiting to be sent."""
-    result = db.execute(
-        "SELECT emails.id, emails.user_id, users.user_email, emails.subject," +
-        " emails.body FROM emails INNER JOIN users ON" +
-        " emails.user_id = users.user_id WHERE" +
-        " emails.sent is NULL AND emails.error = ''" +
-        " ORDER BY id LIMIT 100;")
-
+    """Get an active queue of internal emails waiting to be sent."""
+    query = """SELECT id, user_id, email_address, subject, body FROM emails
+    WHERE email_address SIMILAR TO :format AND sent is NULL AND
+    error = '' ORDER BY id LIMIT 100;"""
+    domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
+    result = db.execute(text(query), format=domain_format)
     queued_emails = []
     for row in result:
         queued_emails.append({
@@ -150,6 +149,29 @@ def get_email_queue(db):
             'body': row[4]
             })
 
+    return queued_emails
+
+
+def get_external_queue(db, num):
+    """Get an active queue of external emails waiting to be sent."""
+    query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
+    email_address NOT SIMILAR TO :format"""
+    domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
+    result = db.execute(text(query), format=domain_format)
+    query = """SELECT id, user_id, email_address, subject, body FROM emails
+    WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
+    error = '' ORDER BY id LIMIT :lim;"""
+    result = db.execute(text(query), format=domain_format,
+                        lim=min(500-int(result.fetchone()[0]), num))
+    queued_emails = []
+    for row in result:
+        queued_emails.append({
+            'id': row[0],
+            'user_id': row[1],
+            'send_to': row[2],
+            'subject': row[3],
+            'body': row[4]
+            })
     return queued_emails
 
 
@@ -190,11 +212,14 @@ def send_email():
     """Send queued emails."""
     db, metadata = setup_db()
     queued_emails = get_email_queue(db)
-    if len(queued_emails) == 0:
-        return
     mail_client = construct_mail_client()
 
     success_count = 0
+
+    queued_emails = queued_emails + get_external_queue(db, 100-len(queued_emails))
+
+    if len(queued_emails) == 0:
+        return
 
     for email_data in queued_emails:
         if email_data["send_to"] == "":

@@ -135,10 +135,10 @@ class Access {
         $this->permissions["grading.electronic.delete_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.electronic.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.get_marked_users.full_stats"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.electronic.show_edit_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.show_edit_teams"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["grading.electronic.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.verify_grader"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
@@ -414,7 +414,7 @@ class Access {
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !((($group === User::GROUP_STUDENT && $gradeable->isPeerGrading()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        !((($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
@@ -500,7 +500,7 @@ class Access {
 
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Make sure a component allows students to access it via peer grading
-                if (!$component->isPeer()) {
+                if (!$component->isPeerComponent()) {
                     return false;
                 }
             }
@@ -638,7 +638,7 @@ class Access {
             return false;
         }
 
-        if (!$gradeable->isPeerGrading()) {
+        if (!$gradeable->hasPeerComponent()) {
             return false;
         }
         else {
@@ -746,6 +746,10 @@ class Access {
         //To array of [type, value]
         $subparts = array_combine($subpart_types, $subpart_values);
 
+        if (is_link($path)) {
+            return false;
+        }
+
         //So we can extract parameters from the path
         foreach ($subpart_types as $type) {
             $value = $subparts[$type];
@@ -766,6 +770,7 @@ class Access {
                     }
                     $hidden_files = $args["gradeable"]->getHiddenFiles();
                     foreach (explode(",", $hidden_files) as $file_regex) {
+                        $file_regex = trim($file_regex);
                         if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
                             return false;
                         }

@@ -1,4 +1,4 @@
-import { runSqlQuery, init } from '../../public/mjs/sql-toolbox';
+import {runSqlQuery, init, generateCSV} from '../../public/mjs/sql-toolbox';
 import { test } from '@jest/globals';
 import { mockFetch } from './utils';
 
@@ -11,8 +11,20 @@ beforeEach(() => {
 
     document.body.innerHTML = `
         <form>
+        <div>
+            <button id="sql-database-schema">Database Schema Documentation</button>
+            <div id="sql-database-schema-content" hidden>
+                <ul>
+                    <li>
+                        <a class="sql-database-table"></a>
+                        <div class="sql-database-columns"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
         <textarea name='sql'>SELECT * FROM users;</textarea>
         <div id='run-sql-btn'>Submit</div>
+        <button id="download-sql-btn">Download CSV</button>
         </form>
         <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
         <table id='query-results'></table>
@@ -21,6 +33,35 @@ beforeEach(() => {
 
 afterEach(() => {
     console.error = originalError;
+});
+
+test('csv generation', () => {
+    document.body.innerHTML = `
+        <table id='table-foo'>
+            <thread>
+                <tr>
+                    <td>#</td>
+                    <td>col_1</td>
+                    <td>col_2</td>
+                </tr>
+            </thread>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>foo</td>
+                    <td>bar</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>baz</td>
+                    <td>qux</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+    expect(generateCSV('table-foo')).toEqual('"col_1","col_2",\n' +
+        '"foo","bar",\n' +
+        '"baz","qux",\n');
 });
 
 test('success with results', async () => {

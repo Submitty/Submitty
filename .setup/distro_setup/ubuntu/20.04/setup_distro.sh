@@ -10,6 +10,7 @@ if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://localhost:1511'
     export SUBMISSION_PORT=1511
     export DATABASE_PORT=16442
+    export WEBSOCKET_PORT=8443
 fi
 
 #################################################################
@@ -65,7 +66,7 @@ apt-get install -qqy scrot
 
 apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb \
 p7zip-full patchutils libpq-dev unzip valgrind zip libboost-all-dev gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp flex bison poppler-utils
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 
 apt-get install -qqy ninja-build
 

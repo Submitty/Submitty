@@ -1,5 +1,5 @@
 .icon-ok {
-    background: url('../img/glyphicons-halflings.png') no-repeat -288px 0px;
+    background: url('../img/glyphicons-halflings.png') no-repeat -288px 0;
     color: var(--standard-deep-dark-gray);
     display: inline-block;
     height: 14px;
@@ -23,7 +23,7 @@
 }
 
 .icon-plus {
-    background: url('../img/glyphicons-halflings.png') no-repeat 0px -96px;
+    background: url('../img/glyphicons-halflings.png') no-repeat 0 -96px;
     color: var(--standard-deep-dark-gray);
     display: inline-block;
     height: 14px;

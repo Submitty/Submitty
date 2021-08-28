@@ -225,4 +225,17 @@ class DateUtils {
         $time = new \DateTime();
         return $time->format('YmdHis');
     }
+
+    /**
+     * Converts the given number of seconds into a string formatted as minutes:seconds
+     * with the minutes being able to go over 59.
+     *
+     * @param int $int The number of seconds that will be converted
+     * @return string
+     */
+    public static function timeIntToString(int $int): string {
+        $m = intdiv($int, 60);
+        $s = $int % 60;
+        return $m . ":" . ($s < 10 ? "0" : "") . $s;
+    }
 }

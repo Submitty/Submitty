@@ -1,6 +1,7 @@
 <div class="content gradeable_message markdown">
-    <div>{{ load_gradeable_message | markdown }}</div>
-    </div>
+    {% include "misc/Markdown.twig" with {
+        "content" : load_gradeable_message
+    } only %}
     <div class="content">
     <a id="continue" href="{{ button_forward }}"class="btn btn-primary btn-lg" style="float: right">Accept, Continue to<br>'{{ gradeable_name }}'</a>
     <a id="back" href="{{ button_back }}" class="btn btn-primary btn-lg">Cancel, Return to<br>Home Page</a>

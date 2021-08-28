@@ -1,0 +1,50 @@
+.update-sysadmin,
+.update-security,
+.update-important {
+    background-color: var(--alert-background-danger-red);
+}
+
+[data-theme="dark"] .update-sysadmin,
+[data-theme="dark"] .update-security,
+[data-theme="dark"] .update-important {
+    background-color: var(--alert-danger-red);
+}
+
+.release-filtered {
+    background-color: var(--selected-nav-sidebar);
+    border: 0.3px dotted var(--text-black);
+}
+
+.no-content {
+    background-color: transparent !important;
+}
+
+.version-header {
+    display: flex;
+    align-items: center;
+}
+
+.version-header:hover {
+    cursor: pointer;
+}
+
+.version-header .badge {
+    float: none;
+}
+
+.version-header > h1 {
+    display: inline;
+}
+
+.version-header .btn-toggle-release {
+    margin-left: auto;
+}
+
+.important-text {
+    color: var(--focus-danger-red);
+}
+
+#toolbar {
+    position: sticky;
+    top: 10px;
+}

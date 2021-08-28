@@ -1,34 +1,43 @@
-.actor{
+.actor {
     stroke: var(--standard-light-blue);
     fill: var(--standard-pale-blue);
 }
-text.actor{
+
+text.actor {
     word-wrap: break-word;
 }
-.actor-line{
+
+.actor-line {
     stroke: var(--standard-medium-dark-gray);
 }
+
 .messageLine0{
 
 }
-.positive-end{
+
+.positive-end {
     content: '\f00c';
     font-family: 'Font Awesome 5 Free';
 }
+
 .messageLine1{
 
 }
-.negative-end{
-    content: '\f12a' ;
+
+.negative-end {
+    content: '\f12a';
     font-family: 'Font Awesome 5 Free';
 }
-.labelText{
+
+.labelText {
     word-wrap: break-word;
 }
-.note{
+
+.note {
     stroke: var(--standard-light-yellow);
     fill: var(--standard-pale-yellow);
 }
-.noteText{
+
+.noteText {
     word-wrap: break-word;
 }

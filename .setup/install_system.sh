@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -107,14 +108,16 @@ The vagrant box comes with some handy aliases:
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
+    lichen_install               - runs Lichen/install_lichen.sh
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
     ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
-    SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
-    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP, CGI_USER,
-    CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
+    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
+    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
 EOF
 )
 
@@ -122,6 +125,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
 export DAEMON_USER=${DAEMON_USER}
@@ -135,6 +139,8 @@ export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+alias install_lichen='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
+alias lichen_install='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
 alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias submitty_install_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
@@ -178,46 +184,14 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 # PYTHON PACKAGE SETUP
 #########################
 
-pip3 install python-pam
-pip3 install PyYAML
-pip3 install psycopg2-binary
-pip3 install "sqlalchemy<1.4.0"
-pip3 install pylint
-pip3 install psutil
-pip3 install python-dateutil
-pip3 install watchdog
-pip3 install xlsx2csv
-pip3 install pause
-pip3 install paramiko
-pip3 install tzlocal
-pip3 install PyPDF2
-pip3 install distro
-pip3 install jsonschema
-pip3 install jsonref
-pip3 install docker
-
-# for Lichen / Plagiarism Detection
-pip3 install parso
-
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-pip3 install clang
-
 #libraries for QR code processing:
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
-#python libraries for QR bulk upload
-pip3 install pyzbar
-pip3 install pdf2image
-pip3 install opencv-python
-pip3 install numpy
+pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
-#python libraries for OCR for digit recognition
-pip3 install onnxruntime
-
-# Install an email catcher
 if [ ${VAGRANT} == 1 ]; then
-    pip3 install nullsmtpd
+    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
 #################################################################
@@ -497,6 +471,9 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
+    if [ ${VAGRANT} == 1 ]; then
+        sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
+    fi
 
     #################################################################
     # PHP SETUP
@@ -661,7 +638,8 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
+25
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -749,6 +727,7 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_emails.py
     fi
 fi
 

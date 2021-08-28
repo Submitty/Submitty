@@ -169,6 +169,52 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 
 
 --
+-- Name: course_materials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.course_materials (
+    id integer NOT NULL,
+    path character varying(255),
+    type smallint NOT NULL,
+    release_date timestamp with time zone,
+    hidden_from_students boolean,
+    priority double precision NOT NULL,
+    url text,
+    url_title character varying(255)
+);
+
+
+--
+-- Name: course_materials_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.course_materials_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: course_materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.course_materials_id_seq OWNED BY public.course_materials.id;
+
+
+--
+-- Name: course_materials_sections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.course_materials_sections (
+    course_material_id integer NOT NULL,
+    section_id character varying(255) NOT NULL
+);
+
+
+--
 -- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -201,6 +247,9 @@ CREATE TABLE public.electronic_gradeable (
     eg_peer_blind integer DEFAULT 3,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
     eg_hidden_files character varying(1024),
+    eg_depends_on character varying(255) DEFAULT NULL::character varying,
+    eg_depends_on_points integer,
+    eg_has_release_date boolean DEFAULT true NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -281,12 +330,11 @@ CREATE TABLE public.gradeable (
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
     g_grade_released_date timestamp(6) with time zone NOT NULL,
-    g_grade_locked_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
+    g_allowed_minutes integer,
+    g_allow_custom_marks boolean DEFAULT true NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
 );
@@ -325,6 +373,17 @@ CREATE SEQUENCE public.gradeable_access_id_seq
 --
 
 ALTER SEQUENCE public.gradeable_access_id_seq OWNED BY public.gradeable_access.id;
+
+
+--
+-- Name: gradeable_allowed_minutes_override; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_allowed_minutes_override (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    allowed_minutes integer NOT NULL
+);
 
 
 --
@@ -507,7 +566,8 @@ CREATE TABLE public.gradeable_teams (
     g_id character varying(255) NOT NULL,
     anon_id character varying(255),
     registration_section character varying(255),
-    rotating_section integer
+    rotating_section integer,
+    team_name character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -550,7 +610,7 @@ CREATE TABLE public.late_day_exceptions (
 CREATE TABLE public.late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp(6) with time zone NOT NULL
+    since_timestamp date NOT NULL
 );
 
 
@@ -685,7 +745,8 @@ CREATE TABLE public.polls (
     question text NOT NULL,
     status text NOT NULL,
     release_date date NOT NULL,
-    image_path text
+    image_path text,
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
 );
 
 
@@ -768,7 +829,9 @@ CREATE TABLE public.queue (
     contact_info text,
     last_time_in_queue timestamp with time zone,
     time_help_start timestamp with time zone,
-    paused boolean DEFAULT false NOT NULL
+    paused boolean DEFAULT false NOT NULL,
+    time_paused integer DEFAULT 0 NOT NULL,
+    time_paused_start timestamp with time zone
 );
 
 
@@ -800,7 +863,8 @@ CREATE TABLE public.queue_settings (
     id integer NOT NULL,
     open boolean NOT NULL,
     code text NOT NULL,
-    token text NOT NULL
+    token text NOT NULL,
+    regex_pattern character varying
 );
 
 
@@ -1005,6 +1069,8 @@ CREATE TABLE public.threads (
     is_visible boolean NOT NULL,
     status integer DEFAULT 0 NOT NULL,
     lock_thread_date timestamp with time zone,
+    pinned_expiration timestamp with time zone DEFAULT '1900-01-01 00:00:00-05'::timestamp with time zone NOT NULL,
+    announced timestamp(6) with time zone DEFAULT NULL::timestamp with time zone,
     CONSTRAINT threads_status_check CHECK ((status = ANY (ARRAY['-1'::integer, 0, 1])))
 );
 
@@ -1052,6 +1118,8 @@ CREATE TABLE public.users (
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary_notify boolean DEFAULT false,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1072,6 +1140,13 @@ CREATE TABLE public.viewed_responses (
 --
 
 ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nextval('public.categories_list_category_id_seq'::regclass);
+
+
+--
+-- Name: course_materials id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials ALTER COLUMN id SET DEFAULT nextval('public.course_materials_id_seq'::regclass);
 
 
 --
@@ -1189,6 +1264,22 @@ ALTER TABLE ONLY public.categories_list
 
 
 --
+-- Name: course_materials course_materials_path_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_path_key UNIQUE (path);
+
+
+--
+-- Name: course_materials course_materials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: electronic_gradeable_data egd_g_user_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1210,6 +1301,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_data g_id_gd_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_data
+    ADD CONSTRAINT g_id_gd_team_id_unique UNIQUE (g_id, gd_team_id);
 
 
 --
@@ -1402,6 +1501,14 @@ ALTER TABLE ONLY public.peer_assign
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: course_materials_sections pk_course_material_section; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id);
 
 
 --
@@ -1636,6 +1743,38 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable_version
     ADD CONSTRAINT electronic_gradeable_version_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: electronic_gradeable fk_depends_on; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.electronic_gradeable
+    ADD CONSTRAINT fk_depends_on FOREIGN KEY (eg_depends_on) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
+
+
+--
+-- Name: course_materials_sections fk_section_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
 
 
 --

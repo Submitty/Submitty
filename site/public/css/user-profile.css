@@ -73,7 +73,8 @@
     display: inline;
 }
 
-#basic_info span:first-of-type, #time_zone_selector_label a {
+#basic_info span:first-of-type,
+#time_zone_selector_label a {
     margin-right: 15px;
 }
 
@@ -92,7 +93,8 @@
     margin: 0;
 }
 
-.flex-row-col label, .flex-row-col select {
+.flex-row-col label,
+.flex-row-col select {
     flex: 1;
     min-width: 0;
 }
@@ -101,11 +103,36 @@
     text-transform: capitalize;
 }
 
+#user-secondary-email-change {
+    width: 20em;
+}
+
+.icon {
+    background: none!important;
+    border: none;
+    padding: 0!important;
+    color: var(--external-link-blue);
+    text-decoration: none;
+    font-family: 'Source Sans Pro', 'sans-serif'!important;
+    font-size: 100%;
+    cursor: pointer;
+}
+
+.fas {
+    color: var(--btn-default-text);
+}
+
+.fas:hover {
+    color: var(--external-link-blue);
+}
+
 @media (max-width: 401px) {
     .content {
         margin: 10px 0 0 0;
     }
-    #basic_info span:first-of-type, #time_zone_selector_label a {
+
+    #basic_info span:first-of-type,
+    #time_zone_selector_label a {
         margin-right: 4px;
     }
 }

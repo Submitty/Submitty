@@ -40,7 +40,7 @@
         {% set full_class = "" %}
         {% set class = "" %}
         {% set id = "" %}
-        {% if highlight_gradeable == gradeable.getId() %}
+        {% if highlight_gradeable is defined and highlight_gradeable == gradeable.getId() %}
             {% set full_class = 'class="blue-background"' %}
             {% set class = 'blue-background' %}
             {% set id = 'id="curr-status"' %}

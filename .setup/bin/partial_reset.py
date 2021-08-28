@@ -17,7 +17,9 @@ import shutil
 import json
 import subprocess
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ='safe')
 
 CURRENT_PATH = Path(__file__).resolve().parent
 SETUP_DATA_PATH = Path(CURRENT_PATH, "..", "data").resolve()
@@ -36,7 +38,7 @@ def load_data_yaml(file_path):
     if not file_path.is_file():
         raise IOError("Missing the yaml file {}".format(file_path))
     with file_path.open() as open_file:
-        yaml_file = yaml.safe_load(open_file)
+        yaml_file = yaml.load(open_file)
     return yaml_file
 
 

@@ -192,15 +192,23 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             new_scores[elem.data("id")] = elem.data("score");
 
             // update css to reflect score
-            if (elem.data("score") === 1.0) elem.css("background-color", "#149bdf");
-            else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
-            else elem.css("background-color", "");
+            if (elem.data('score') === 1.0) {
+                elem.addClass('simple-full-credit');
+            }
+            else if (elem.data('score') === 0.5) {
+                elem.removeClass('simple-full-credit');
+                elem.addClass('simple-half-credit');
+            }
+            else {
+                elem.removeClass('simple-half-credit');
+                elem.css('background-color', '');
+            }
 
             //set new grader data
             elem.data("grader", $('#data-table').data('current-grader'));
 
             // create border we can animate to reflect ajax status
-            elem.css("border-right", "60px solid #ddd");
+            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         }
     });
 
@@ -470,7 +478,7 @@ function setupNumericTextCells() {
                 reader.readAsText(f);
                 reader.onload = function(evt) {
                     var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
-                    var lines = (reader.result).trim().split(/\r\n|\n/);
+                    var lines = (reader.result).trim().split(/\r\n|\n|\r/);
                     var tempArray = lines[0].split(',');
                     var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
                     for (var k = 0; k < lines.length && !breakOut; k++) {
@@ -860,15 +868,18 @@ function checkpointSocketHandler(elem_id, score, grader) {
   elem.find('.simple-grade-grader').text(grader);
   switch (score) {
     case 1.0:
-      elem.css("background-color", "#149bdf");
-      break;
+        elem.addClass('simple-full-credit');
+        break;
     case 0.5:
-      elem.css("background-color", "#88d0f4")
-      break;
+        elem.removeClass('simple-full-credit');
+        elem.addClass('simple-half-credit');
+        break;
     default:
-      elem.css("background-color", "")
+        elem.removeClass('simple-half-credit');
+        elem.css('background-color', '');
+        break;
   }
-  elem.css("border-right", "60px solid #ddd");
+  elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
   elem.animate({"border-right-width": "0px"}, 400);
 }
 

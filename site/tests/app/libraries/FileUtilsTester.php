@@ -796,6 +796,10 @@ STRING;
         file_put_contents(FileUtils::joinPaths($this->path, 'c', 'e', 'g.cpp'), 'gg');
         file_put_contents(FileUtils::joinPaths($this->path, 'd', 'h.h'), 'hh');
         file_put_contents(FileUtils::joinPaths($this->path, 'd', 'a.txt'), 'gg');
+        // directory symlink
+        symlink(FileUtils::joinPaths($this->path, 'd'), FileUtils::joinPaths($this->path, 'e'));
+        // file symlink
+        symlink(FileUtils::joinPaths($this->path, 'd', 'a.txt'), FileUtils::joinPaths($this->path, 'f'));
     }
 
     public function testGetAllFiles(): void {

@@ -6,18 +6,19 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-SOURCE="${BASH_SOURCE[0]}"
-CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+# Note: This script is source by install_system.sh and so caution should be used on naming variables
+# to ensure there is no collision.
+SETUP_DISTRO_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 
-if [ ! -d ${CURRENT_DIR}/${DISTRO}/${VERSION} ]; then
+if [ ! -d ${SETUP_DISTRO_DIR}/${DISTRO}/${VERSION} ]; then
     (>&2 echo "Unknown distro: ${DISTRO} ${VERSION}")
     exit 1
 fi
 
 echo "Setting up distro: ${DISTRO} ${VERSION}"
-source ${CURRENT_DIR}/${DISTRO}/${VERSION}/setup_distro.sh
+source ${SETUP_DISTRO_DIR}/${DISTRO}/${VERSION}/setup_distro.sh
 
 # Read through our arguments to get "extra" packages to install for our distro
 # ${@} are populated by whatever calls install_system.sh which then sources this
@@ -26,9 +27,9 @@ IFS=',' read -ra ADDR <<< "${@}"
 if [ ${#ADDR[@]} ]; then
     echo "Installing extra packages..."
     for i in "${ADDR[@]}"; do
-        if [ -f ${CURRENT_DIR}/${DISTRO}/${VERSION}/${i}.sh ]; then
-            echo "Running ${CURRENT_DIR}/${DISTRO}/${VERSION}/${i}.sh"
-            source ${CURRENT_DIR}/${DISTRO}/${VERSION}/${i}.sh
+        if [ -f ${SETUP_DISTRO_DIR}/${DISTRO}/${VERSION}/${i}.sh ]; then
+            echo "Running ${SETUP_DISTRO_DIR}/${DISTRO}/${VERSION}/${i}.sh"
+            source ${SETUP_DISTRO_DIR}/${DISTRO}/${VERSION}/${i}.sh
         else
             echo "Could not find ${i}.sh for ${DISTRO} ${VERSION}"
         fi

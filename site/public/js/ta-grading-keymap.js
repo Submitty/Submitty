@@ -12,19 +12,55 @@ var remapping = {
     index: 0
 };
 
-let settingsData = [{
+let settingsData = [
+    {
+        id: "general-setting-list",
+        name: "General",
+        values: [
+            {
+                name: "Prev/Next student arrow functionality",
+                storageCode: "general-setting-arrow-function",
+                options: {
+                    "Prev/Next Student": "default",
+                    "Prev/Next Ungraded Student": "ungraded",
+                    "Prev/Next Itempool Student": "itempool",
+                    "Prev/Next Ungraded Itempool Student": "ungraded-itempool",
+                    "Prev/Next Grade Inquiry": "inquiry",
+                    "Prev/Next Active Grade Inquiry": "active-inquiry",
+                }, 
+                default: "Prev/Next Student"
+            },
+            {
+                name: "Prev/Next buttons navigate through",
+                storageCode: "general-setting-navigate-assigned-students-only",
+                options: function() {
+                    if ($('#ta-grading-settings-list').attr("data-full_access") !== "true") {
+                        return {};
+                    }
+                    return {
+                        "All students": "false",
+                        "Only students in assigned registration/rotation sections": "true"
+                    };
+                }, 
+                default: "Only students in assigned registration/rotation sections"
+            }
+        ]
+    },
+    {
         id: "notebook-setting-list",
-        name: "Notebook",
-        values: [{
-                    name: "Expand files in notebook file submission on page load",
-                    storageCode: "notebook-setting-file-submission-expand",
-                    options: {
-                        "No": "false", 
-                        "Yes": "true"
-                    }, 
-                    default: "No"
-                }]
-        }
+        name: "Notebook",   
+        values: [
+            {
+                name: "Expand files in notebook file submission on page load",
+                storageCode: "notebook-setting-file-submission-expand",
+                options: {
+                    "No": "false", 
+                    "Yes": "true"
+                }, 
+                default: "No"
+            }
+        ]
+    }
 ];
 
 window.onkeyup = function(e) {
@@ -153,6 +189,10 @@ Twig.twig({
 function loadTAGradingSettingData() {
     for(var i = 0; i < settingsData.length; i++) {
         for(var x = 0; x < settingsData[i].values.length; x++) {
+            if(typeof(settingsData[i].values[x].options) === "function") {
+                settingsData[i].values[x].options = settingsData[i].values[x].options();
+            }
+
             settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
             if(settingsData[i].values[x].currValue === null) {
                 localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);

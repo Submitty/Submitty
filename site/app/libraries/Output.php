@@ -7,7 +7,17 @@ use app\exceptions\OutputException;
 use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
-use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
+use League\CommonMark\Extension\Autolink\AutolinkExtension;
+use League\CommonMark\Block\Element\FencedCode;
+use League\CommonMark\Block\Element\IndentedCode;
+use League\CommonMark\Inline\Element\Code;
+use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\Environment;
+use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
+use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
+use app\libraries\CustomCodeBlockRenderer;
+use app\libraries\CustomCodeInlineRenderer;
+use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
 use Ds\Set;
 
@@ -90,7 +100,8 @@ class Output {
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
             'cache' => $debug ? false : $cache_path,
-            'debug' => $debug
+            'debug' => $debug,
+            'strict_variables' => $debug
         ]);
 
         if ($debug) {
@@ -127,8 +138,16 @@ HTML;
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
-        $engine = new ParsedownEngine();
-        $engine->setSafeMode(true);
+
+        $environment = Environment::createCommonMarkEnvironment();
+        $environment->addExtension(new AutolinkExtension());
+        $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
+        $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
+        $environment->mergeConfig([]);
+
+        $converter = new CommonMarkConverter(['html_input' => 'escape'], $environment);
+        $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
 
@@ -192,7 +211,7 @@ HTML;
      * Output()->renderTemplate(array("submission", "Global"), "header")
      * Would load views\submission\GlobalView->header()
      *
-     * @return string
+     * @return null|string
      */
     public function renderTemplate($view, string $function, ...$args) {
         if (!$this->render) {
@@ -213,7 +232,7 @@ HTML;
      * Please avoid using this function unless absolutely necessary.
      * Please use renderJsonSuccess, renderJsonFail and renderJsonError
      * instead to ensure JSON responses have consistent format.
-     * @param $json
+     * @param mixed $json
      */
     public function renderJson($json) {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
@@ -293,7 +312,7 @@ HTML;
 
     /**
      * Renders success/error messages and/or JSON responses.
-     * @param $message
+     * @param string $message
      * @param bool $success
      * @param bool $show_msg
      * @return array
@@ -365,7 +384,7 @@ HTML;
      * All views inheriet from BaseView which make them be a singleton and have the
      * getInstance method.
      *
-     * @param string $view
+     * @param string $class
      *
      * @return string
      */
@@ -423,8 +442,6 @@ HTML;
 
     /**
      * Returns the stored output buffer that we've been building
-     *
-     * @return string
      */
     public function displayOutput() {
         echo($this->getOutput());
@@ -450,8 +467,9 @@ HTML;
         if ($this->twig === null) {
             $this->loadTwig(false);
         }
-        /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = $this->getView(ErrorView::class)->exceptionPage($exception);
+        /** @var \app\views\ErrorView $view */
+        $view = $this->getView(ErrorView::class);
+        $exceptionPage = $view->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -610,6 +628,8 @@ HTML;
      */
     public function setTwigTimeZone(string $time_zone): void {
         $tz = $time_zone === 'NOT_SET/NOT_SET' ? $this->core->getConfig()->getTimezone() : $time_zone;
-        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone($tz);
+        /** @var \Twig\Extension\CoreExtension $extension */
+        $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
+        $extension->setTimezone($tz);
     }
 }

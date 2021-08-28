@@ -9,6 +9,21 @@
   <option value="5" {{ gradeable.getPrecision() == 5 ? 'selected' : '' }}>5</option>
   <option value="10" {{ gradeable.getPrecision() == 10 ? 'selected' : '' }}>10</option>
 </select>
+<br>
+<br>
+<fieldset>
+    <legend>
+    Will graders be allowed to use custom marks?
+        {% if has_custom_marks %}
+            <h5 id="custom_marks_warning" style="display: none;">WARNING: Grading has begun and custom marks have already been used.</h5>
+        {% endif %}
+    </legend>
+    <input type="radio" id="yes_custom_marks" name="allow_custom_marks" value="true"
+            {{ allow_custom_marks ? 'checked' : '' }} /> <label for="yes_custom_marks">Yes</label>
+    <input type="radio" id="no_custom_marks" name="allow_custom_marks" value="false"
+            {{ not allow_custom_marks ? 'checked' : '' }} /> <label for="no_custom_marks">No</label>
+</fieldset>
+<br>
 <div class="electronic_file ignore" id="gradeable_rubric" data-itempool-available="{{ itempool_available}}" data-itempool-options="{{ itempool_options }}">
     <fieldset>
         <legend>
@@ -39,6 +54,9 @@
 
 <script>
     $(document).ready(function() {
+        if ($('#no_custom_marks').is(':checked')) {
+            $("#custom_marks_warning").show();
+        }
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val(), $('#gradeable_rubric').attr('data-notebook'), JSON.parse($('#gradeable_rubric').attr('data-itempool-options'))).then( function() {
                 $('body').on('DOMSubtreeModified', '.component-container', function() {
@@ -53,5 +71,13 @@
                 });
             });
         });
+        //toggle warning message if custom marks have already been used and the settings are changed
+        $("#no_custom_marks").click(function(){
+            $("#custom_marks_warning").show();
+        })
+        $("#yes_custom_marks").click(function(){
+            $("#custom_marks_warning").hide();
+        })
     });
+
 </script>

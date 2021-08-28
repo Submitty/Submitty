@@ -154,9 +154,9 @@
                 <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
                     <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
                     <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
-                            {{ gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
+                            {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
                     <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
-                            {{ not gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
+                            {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
                 </fieldset>
             {% endif %}
 
@@ -328,7 +328,7 @@
         if ($('#radio_electronic_file').is(':checked')) {
             elecDateBoxes.prop('disabled', false);
             $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
-            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
+            $('#date_team_lock').prop('disabled', {{ gradeable is not null and gradeable.isTeamAssignment() ? 'false' : 'true' }});
             $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
             {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if grade inquiries are not enabled #}
@@ -340,6 +340,14 @@
                 gradeInqOpenDate.prop('disabled', $(this).is(':checked'));
                 gradeInqDueDate.prop('disabled', $(this).is(':checked'));
             });
+
+            $('#date_released').prop('disabled', !$('#has_release_date_yes').is(':checked'));
+
+            const has_due_date = $('#has_due_date_yes').is(':checked');
+
+            $('#date_due').prop('disabled', !has_due_date);
+
+
         }
         $('#hide_dates').hide();
         $('#show_all_dates').show();
@@ -469,6 +477,26 @@
         }
         else {
             lateSubmissionParts.hide();
+        }
+        updateDateDisplay();
+    }
+
+    function onHasReleaseDate() {
+        if ($('#has_release_date_yes').is(':checked')) {
+            disableElementChildren('.release_date_date', false);
+        }
+        else {
+            disableElementChildren('.release_date_date', true);
+        }
+        updateDateDisplay();
+    }
+
+    function onHasDueDate() {
+        if ($('#has_due_date_yes').is(':checked')) {
+            disableElementChildren('.due_date_date', false);
+        }
+        else {
+            disableElementChildren('.due_date_date', true);
         }
         updateDateDisplay();
     }

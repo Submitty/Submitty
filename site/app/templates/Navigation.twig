@@ -34,7 +34,7 @@
         {% for list_section, info in sections %}
             <div id="{{ info.section_id }}"
                  class="course-section-heading
-                 {% if info.is_panel_expanded %} panel-head-active {% endif %}"
+                 {% if info.is_panel_expanded is defined and info.is_panel_expanded %} panel-head-active {% endif %}"
             >
                 <div class="course-section-title">
                     <i class="collapse-icon fas fa-caret-right"></i>
@@ -51,7 +51,7 @@
 
             <div id="{{ info.section_id }}-section"
                  class="course-section
-                 {% if info.is_panel_expanded %} panel-active {% endif %}"
+                 {% if info.is_panel_expanded is defined and info.is_panel_expanded %} panel-active {% endif %}"
             >
                 {% for g_info in info.gradeables %}
                 <div id="{{ g_info.id }}" class="gradeable-row">
@@ -86,7 +86,7 @@
         {% endfor %}
         </div>
     {% else %}
-        <div class="container">
+        <div class="container no-assignments-message">
             <p>There are currently no assignments posted.  Please check back later.</p>
         </div>
     {% endif %}

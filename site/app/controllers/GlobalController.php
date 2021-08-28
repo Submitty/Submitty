@@ -185,6 +185,14 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getUser()->accessAdmin()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['email_status']),
+                "title" => "Email Status",
+                "icon" => "fa-envelope"
+            ]);
+        }
+
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [
@@ -257,6 +265,16 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getUser()->accessAdmin()) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['activity']),
+                "title" => "Student Activity Dashboard",
+                "class" => "nav-row",
+                "id" => "nav-sizebar-activity-dashboard",
+                "icon" => "fa-table"
+            ]);
+        }
+
         if (
             $this->core->getUser()->accessAdmin()
             && $this->core->getConfig()->displayRainbowGradesSummary()
@@ -265,6 +283,11 @@ class GlobalController extends AbstractController {
                 "href" => $this->core->buildCourseUrl(["gradebook"]),
                 "title" => "Gradebook",
                 "icon" => "fa-book-reader"
+            ]);
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
             ]);
         }
 
@@ -365,12 +388,19 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        // --------------------------------------------------------------------------
-        // FACULTY & SUPERUSERS ONLY
-        if ($this->core->getUser()->accessFaculty()) {
+        $is_instructor = !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()));
+        // Create the line for all faculties, superusers, and instructors
+        if (
+            $this->core->getUser()->accessFaculty()
+            || $is_instructor
+        ) {
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line",
             ]);
+        }
+        // --------------------------------------------------------------------------
+        // FACULTY & SUPERUSERS ONLY
+        if ($this->core->getUser()->accessFaculty()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['admin', 'docker']),
                 "title" => "Docker UI",
@@ -401,6 +431,28 @@ class GlobalController extends AbstractController {
                 "title" => "System Update",
                 "id" => "nav-sidebar-update",
                 "icon" => "fas fa-sync"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'email']),
+                "title" => "Email All",
+                "icon" => "fas fa-paper-plane"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'email_status']),
+                "title" => "Email Status",
+                "icon" => "fas fa-mail-bulk"
+            ]);
+        }
+
+        // --------------------------------------------------------------------------
+        // INSTRUCTOR IN ANY COURSE
+        if ($is_instructor) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
             ]);
         }
 

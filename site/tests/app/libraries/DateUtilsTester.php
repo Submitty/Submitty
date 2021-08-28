@@ -212,8 +212,29 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
             'user_firstname' => 'test',
             'user_lastname' => 'person',
             'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
             'time_zone' => $timezone,
         ]);
         $this->assertSame($expected, DateUtils::convertTimeStamp($user, $timestamp, $format));
+    }
+
+    public function timeIntToStringProvider(): array {
+        return [
+            [0, '0:00'],
+            [5, '0:05'],
+            [15, '0:15'],
+            [300, '5:00'],
+            [1815, '30:15'],
+            [3600, '60:00'],
+            [7200, '120:00'],
+        ];
+    }
+
+    /**
+     * @dataProvider timeIntToStringProvider
+     */
+    public function testTimeIntoToString(int $time, string $expected): void {
+        $this->assertSame($expected, DateUtils::timeIntToString($time));
     }
 }

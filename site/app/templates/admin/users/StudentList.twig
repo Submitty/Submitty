@@ -58,7 +58,7 @@
                                     <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
                                 </form>
                             </td>
-                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
                             <td><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedFirstName() }}', '{{ student.getDisplayedLastName() }}');" aria-label="delete student {{ student.getDisplayedFirstName() }} {{ student.getDisplayedLastName() }}"><i class="fas fa-trash"></i></a></td>
                         </tr>
                     {% endfor %}

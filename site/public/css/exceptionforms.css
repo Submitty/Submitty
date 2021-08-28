@@ -22,23 +22,24 @@ fieldset {
     width: 100% !important;
 }
 
-#late-day-table td:nth-of-type(1):before { content: "Student ID"; }
-#late-day-table td:nth-of-type(2):before { content: "First Name"; }
-#late-day-table td:nth-of-type(3):before { content: "Last Name"; }
-#late-day-table td:nth-of-type(4):before { content: "Total Allowed Late Days"; }
-#late-day-table td:nth-of-type(5):before { content: "Effective Date"; }
-#late-day-table td:nth-of-type(6):before { content: "Delete"; }
+#late-day-table td:nth-of-type(1)::before { content: "Student ID"; }
+#late-day-table td:nth-of-type(2)::before { content: "First Name"; }
+#late-day-table td:nth-of-type(3)::before { content: "Last Name"; }
+#late-day-table td:nth-of-type(4)::before { content: "Total Allowed Late Days"; }
+#late-day-table td:nth-of-type(5)::before { content: "Effective Date"; }
+#late-day-table td:nth-of-type(6)::before { content: "Delete"; }
 
-#extensions-table td:nth-of-type(1):before { content: "Student ID"; }
-#extensions-table td:nth-of-type(2):before { content: "First Name"; }
-#extensions-table td:nth-of-type(3):before { content: "Last Name"; }
-#extensions-table td:nth-of-type(4):before { content: "Number of Days of Extension"; }
-#extensions-table td:nth-of-type(5):before { content: "Delete"; }
+#extensions-table td:nth-of-type(1)::before { content: "Student ID"; }
+#extensions-table td:nth-of-type(2)::before { content: "First Name"; }
+#extensions-table td:nth-of-type(3)::before { content: "Last Name"; }
+#extensions-table td:nth-of-type(4)::before { content: "Number of Days of Extension"; }
+#extensions-table td:nth-of-type(5)::before { content: "Delete"; }
 
 @media (min-width: 768px) {
     #extensions-table {
         text-align: left;
     }
+
     .single-student label {
         flex: 0 0 0;
         width: 420px;

@@ -236,21 +236,25 @@ class TestForum(BaseTestCase):
         reply_content3 = "E2E sample reply 3 content E2E"
 
         self.init_and_enable_discussion()
-        for upload_attachment in [False, True]:
-            assert not self.thread_exists(title)
-            attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
-            assert self.thread_exists(title)
-            self.find_posts(content, must_exists=True, check_attachment=attachment)
-            self.view_thread(title)
-            self.find_posts(content, must_exists=True)
-            self.reply_and_test(content, reply_content1, first_post=True, upload_attachment=upload_attachment)
-            self.reply_and_test(reply_content1, reply_content2, first_post=False)
-            self.reply_and_test(reply_content2, reply_content3, first_post=False, upload_attachment=upload_attachment)
+        try:
+            for upload_attachment in [False, True]:
+                assert not self.thread_exists(title)
+                attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
+                assert self.thread_exists(title)
+                self.find_posts(content, must_exists=True, check_attachment=attachment)
+                self.view_thread(title)
+                self.find_posts(content, must_exists=True)
+                self.reply_and_test(content, reply_content1, first_post=True, upload_attachment=upload_attachment)
+                self.reply_and_test(reply_content1, reply_content2, first_post=False)
+                self.reply_and_test(reply_content2, reply_content3, first_post=False, upload_attachment=upload_attachment)
 
-            self.resolve_thread(title)
-            self.announce_thread(title)
-            self.delete_thread(title)
-            assert not self.thread_exists(title)
+                self.resolve_thread(title)
+                self.announce_thread(title)
+                self.delete_thread(title)
+                assert not self.thread_exists(title)
+        except Exception as e:
+            print(self.driver.page_source)
+            raise e
 
     def test_forum_merge_thread(self):
         self.init_and_enable_discussion()

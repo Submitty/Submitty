@@ -26,8 +26,8 @@ class TestMyProfile(BaseTestCase):
     def test_basic_info(self):
         self.setup_test_start()
         student_id = self.driver.find_element(By.XPATH, "//div[@id='username-row']/span[@class='value']").text
-        student_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/span[@class='value']").text
-        student_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/span[@class='value']").text
+        student_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").text
+        student_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/button").text
         user_time_zone = self.driver.find_element(By.ID, "time_zone_selector_label").get_attribute('data-user_time_zone')
         time_zone_selector = Select(self.driver.find_element(By.ID, "time_zone_drop_down"))
         self.assertEqual(self.student_id, student_id)
@@ -58,7 +58,7 @@ class TestMyProfile(BaseTestCase):
         new_first_name = "Rachel"
         new_last_name = "Green"
         # click on the edit-preferred-name link
-        self.driver.find_element(By.XPATH, "//div[@id='basic_info']/span[2]/a").click()
+        self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-username-form")))
         # Hit submit without any changes
         self.driver.find_element(By.XPATH, "//div[@id='edit-username-form']/form/div/div/div[2]/div[2]/div/input").click()
@@ -66,7 +66,7 @@ class TestMyProfile(BaseTestCase):
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "error-js-0")))
 
         # again click on the edit-preferred-name link
-        self.driver.find_element(By.XPATH, "//div[@id='basic_info']/span[2]/a").click()
+        self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-username-form")))
         # Clear the previous name and enter new names
         self.driver.find_element(By.ID, "user-firstname-change").clear()
@@ -74,20 +74,19 @@ class TestMyProfile(BaseTestCase):
         self.driver.find_element(By.ID, "user-firstname-change").send_keys(new_first_name)
         self.driver.find_element(By.ID, "user-lastname-change").send_keys(new_last_name)
         self.driver.find_element(By.XPATH, "//div[@id='edit-username-form']/form/div/div/div[2]/div[2]/div/input").click()
-
         # Look for success message
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "success-js-1")))
 
         # edit form should be out-of-the screen
         self.assertFalse(self.driver.find_element(By.ID, "edit-username-form").is_displayed())
         # Assert that names are updated
-        displayed_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/span[@class='value']").text
-        displayed_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/span[@class='value']").text
+        displayed_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").text
+        displayed_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/button").text
         self.assertEqual(new_first_name, displayed_first_name)
         self.assertEqual(new_last_name, displayed_last_name)
 
         # Reset the names back to original
-        self.driver.find_element(By.XPATH, "//div[@id='basic_info']/span[2]/a").click()
+        self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").click()
         self.driver.find_element(By.ID, "user-firstname-change").clear()
         self.driver.find_element(By.ID, "user-lastname-change").clear()
         self.driver.find_element(By.ID, "user-firstname-change").send_keys(self.student_first_name)

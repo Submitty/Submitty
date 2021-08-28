@@ -337,17 +337,15 @@
                     try {
                         var json = JSON.parse(data);
                         if(json['status'] == 'fail') {
-                            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close key_to_click" tabindex="0" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                            displayErrorMessage(json['message']);
                         }
                         else {
-                            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close key_to_click" tabindex="0" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['data'] + '</div>';
+                            displaySuccessMessage(json['data']);
                         }
                     } catch(err) {
-                        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close key_to_click" tabindex="0" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                        displayErrorMessage('Error parsing data. Please try again.');
                     }
                     $('#notification-settings').css('display', 'none');
-                    $('#messages').empty();
-                    $('#messages').append(message);
                 }
             });
         });

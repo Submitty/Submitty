@@ -846,7 +846,7 @@ void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
       assert(source_name.find("\'") == std::string::npos);
 
       if(!pre_command["pattern"].is_string()){
-         (*my_testcase)["pattern"] = "";
+         pre_command["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
         //The pattern must not container .. or $

@@ -18,8 +18,23 @@ SUBMITTY_INSTALL_DIR = os.path.realpath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
 )
 
+INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./test_suite/integrationTests/"
+)
+
+COMPILE_CONFIGURE_BIN_PATH = os.path.join(
+    INTEGRATION_TEST_ROOT_FOLDER,
+    'compile_configure_bin.sh'
+)
+
+CONFIGURE_BIN_PATH = os.path.join(
+    INTEGRATION_TEST_ROOT_FOLDER, 
+    "configure.bin"
+)
+
 BUILD_MAIN_CONFIGUE_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
+    INTEGRATION_TEST_ROOT_FOLDER,
     'build_main_configure.sh'
 )
 
@@ -28,11 +43,21 @@ BUILD_MAIN_CONFIGUE_PATH = os.path.join(
 if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
     raise SystemExit('You must install the test suite before being able to run it.')
 
-SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
-GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
+SUBMITTY_TUTORIAL_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./GIT_CHECKOUT/Tutorial"
+)
+
+GRADING_SOURCE_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./src/grading"
+)
 
 LOG_FILE = None
-LOG_DIR = SUBMITTY_INSTALL_DIR + "/test_suite/log"
+LOG_DIR = os.path.join(
+    SUBMITTY_INSTALL_DIR,
+    "./test_suite/log"
+)
 
 
 def print(*args, **kwargs):
@@ -109,6 +134,7 @@ def run_tests(names):
         key = name[0]
         case = to_run[key]
         arguments.append((name, case))
+    __setup()
     # Concurrency note:
     # Its best to use something close to cpu_count() here, as single-thread
     # performance is important for some modules that are compute-intensive,
@@ -123,6 +149,17 @@ def run_tests(names):
     else:
         with bold + green:
             print(f"All {len(names)} modules passed")
+
+def __setup():
+    subprocess.check_output([
+            "/bin/bash", 
+            COMPILE_CONFIGURE_BIN_PATH,
+            SUBMITTY_INSTALL_DIR, 
+            CONFIGURE_BIN_PATH
+        ],
+        stderr=subprocess.STDOUT
+    )
+    pass
 
 
 # Concurrency note:
@@ -286,7 +323,7 @@ class TestcaseWrapper:
 
         # First, we need to compile and run configure.out
         with open(os.path.join(self.testcase_path, "log", "main_configure_build.txt"), "w") as configure_output:
-            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR],
+            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR, CONFIGURE_BIN_PATH],
                                           cwd=os.path.join(self.testcase_path, "build"), stdout=configure_output, stderr=configure_output)
             if return_code != 0:
                 raise RuntimeError(f"Failed to generate main configure: {return_code}")

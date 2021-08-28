@@ -35,7 +35,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
  * @method \DateTime getGradeReleasedDate()
- * @method \DateTime getGradeLockedDate()
  * @method int getMinGradingGroup()
  * @method \DateTime getGradeInquiryStartDate()
  * @method \DateTime getGradeInquiryDueDate()
@@ -72,6 +71,11 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method Component[] getComponents()
+ * @method void setAllowedMinutes($minutes)
+ * @method string getDependsOn()
+ * @method void setDependsOn($depends_on)
+ * @method int getDependsOnPoints()
+ * @method void setDependsOnPoints($depends_on_points)
  * @method bool isRegradeAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
@@ -81,6 +85,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
+ * @method void setHasReleaseDate($has_release_date)
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
@@ -91,6 +96,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getPeerBlind()
  * @method void setInstructorBlind($peer_blind)
  * @method int getInstructorBlind()
+ * @method bool getAllowCustomMarks()
+ * @method void setAllowCustomMarks($allow_custom_marks)
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -187,6 +194,8 @@ class Gradeable extends AbstractModel {
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
+    /** @prop @var bool if graders will be allowed to use custom marks */
+    protected $allow_custom_marks = true;
     /** @prop @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed
      */
@@ -194,7 +203,17 @@ class Gradeable extends AbstractModel {
     /** @prop @var float The point precision for manual grading */
     protected $precision = 0.0;
     /** @prop @var bool If this gradeable has a due date or not */
-    protected $has_due_date = false;
+    protected $has_due_date = true;
+    /** @prop @var bool If this gradeable has a grade release date or not */
+    protected $has_release_date = true;
+    /** @prop @var int The amount of time given to a default student to complete assignment */
+    protected $allowed_minutes = null;
+    /** @prop @var array Contains all of the allowed time overrides */
+    protected $allowed_minutes_overrides = [];
+    /** @prop @var string The dependent gradeable that must be completed before this one */
+    protected $depends_on = null;
+    /** @prop @var int The amount of points a user must reach to unlock this gradeable */
+    protected $depends_on_points = null;
 
     /* Dates for all types of gradeables */
 
@@ -206,8 +225,6 @@ class Gradeable extends AbstractModel {
     protected $grade_due_date = null;
     /** @prop @var \DateTime The date that grades will be released to students */
     protected $grade_released_date = null;
-    /** @prop @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
-    protected $grade_locked_date = null;
 
     /* Dates for electronic gradeables*/
 
@@ -283,12 +300,17 @@ class Gradeable extends AbstractModel {
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
+            $this->setHasReleaseDate($details['has_release_date']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            $this->setAllowCustomMarks($details['allow_custom_marks']);
+            $this->setAllowedMinutes($details['allowed_minutes'] ?? 0);
+            $this->setDependsOn($details['depends_on']);
+            $this->setDependsOnPoints($details['depends_on_points']);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }
@@ -319,13 +341,12 @@ class Gradeable extends AbstractModel {
      */
     const date_properties = [
         'ta_view_start_date',
+        'team_lock_date',
         'submission_open_date',
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_locked_date',
-        'team_lock_date',
         'grade_inquiry_start_date',
         'grade_inquiry_due_date'
     ];
@@ -340,7 +361,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date' => 'Grading Open',
         'grade_due_date' => 'Grading Due',
         'grade_released_date' => 'Grades Released',
-        'grade_locked_date' => 'Grades Locked',
         'team_lock_date' => 'Teams Locked',
         'late_days' => 'Late Days',
         'grade_inquiry_start_date' => 'Grade Inquiries Open',
@@ -352,12 +372,12 @@ class Gradeable extends AbstractModel {
      */
     const date_validated_properties = [
         'ta_view_start_date',
+        'team_lock_date',
         'submission_open_date',
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_locked_date',
         'grade_inquiry_start_date',
         'grade_inquiry_due_date'
     ];
@@ -380,8 +400,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'grade_start_date',
-        'grade_due_date',
         'grade_released_date'
     ];
 
@@ -629,32 +647,44 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $date_values array of \DateTime objects indexed by $date_properties
      * @return string[] Array of error messages indexed by $date_properties
      */
-    private static function validateDateSet(array $date_properties, array $date_values) {
+    private static function validateDateSet(array $date_properties, array $date_values, bool $hasDueDate, bool $hasReleaseDate) {
         // A message to set if the date is null, which happens when: the provided date is null,
         //  or the parsing failed.  In either case, this is an appropriate message
         $invalid_format_message = 'Invalid date-time value!';
-
-        // If the dates are null, then their format is invalid
         $errors = [];
-        foreach ($date_properties as $property) {
-            $date = $date_values[$property] = $date_values[$property] ?? null;
-            if ($date === null) {
-                $errors[$property] = $invalid_format_message;
-            }
-        }
+
+        $no_due_date_reqs = [
+            'ta_view_start_date',
+            'submission_open_date',
+            'grade_inquiry_start_date',
+            'grade_inquiry_due_date'
+        ];
+
+        $no_release_date_reqs = [
+            'ta_view_start_date',
+            'submission_open_date',
+            'submission_due_date',
+            'grade_start_date',
+            'grade_due_date',
+            'grade_inquiry_start_date',
+            'grade_inquiry_due_date'
+        ];
 
         // Now, check if they are in increasing order
         $prev_property = null;
         foreach ($date_properties as $property) {
-            if ($prev_property !== null) {
+            if ($prev_property !== null && ($hasDueDate || in_array($property, $no_due_date_reqs)) && ($hasReleaseDate || in_array($property, $no_release_date_reqs))) {
                 if ($date_values[$prev_property] !== null && $date_values[$property] !== null) {
                     if ($date_values[$prev_property] > $date_values[$property]) {
                         $errors[$prev_property] = self::date_display_names[$prev_property] . ' Date must come before '
                             . self::date_display_names[$property] . ' Date';
                     }
                 }
+                $prev_property = $property;
             }
-            $prev_property = $property;
+            if ($prev_property === null) {
+                $prev_property = $property;
+            }
         }
 
         return $errors;
@@ -709,7 +739,7 @@ class Gradeable extends AbstractModel {
         $date_set = $this->getDateValidationSet();
 
         // Get the validation errors
-        $errors = self::validateDateSet($date_set, $dates);
+        $errors = self::validateDateSet($date_set, $dates, $this->hasDueDate(), $this->hasReleaseDate());
 
         // Put any special exceptions to the normal validation rules here...
 
@@ -732,26 +762,36 @@ class Gradeable extends AbstractModel {
         //  into the second parameter.
         $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
+            $prev_date = null;
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
-                if ($i === 0) {
+                if ($prev_date === null) {
+                    $prev_date = $date_values[$property];
                     continue;
                 }
-
-                // Don't coerce a date on the black list
-                if (in_array($property, $black_list)) {
-                    continue;
-                }
-
-                // Get a value for the date to compare against
-                $prev_date = $date_values[$date_properties[$i - 1]];
 
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
-                // Coerce the date if it is out of bounds
-                if ($date === null || $compare($date, $prev_date)) {
+                // Don't coerce a date on the black list
+                if (in_array($property, $black_list)) {
+                    $prev_date = $date_values[$property];
+                    continue;
+                }
+
+                if ($date === null) {
                     $date_values[$property] = $prev_date;
+                    continue;
+                }
+
+                // Coerce the date if it is out of bounds
+                if ($compare($date, $prev_date)) {
+                    $date_values[$property] = $prev_date;
+                }
+
+                // Get a value for the date to compare against next
+                if ($date !== null) {
+                    $prev_date = $date;
                 }
             }
             return $date_values;
@@ -801,7 +841,6 @@ class Gradeable extends AbstractModel {
         $this->grade_start_date = $dates['grade_start_date'];
         $this->grade_due_date = $dates['grade_due_date'];
         $this->grade_released_date = $dates['grade_released_date'];
-        $this->grade_locked_date = $dates['grade_locked_date'];
 
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             // Set team lock date even if not team assignment because it is NOT NULL in the db
@@ -842,7 +881,12 @@ class Gradeable extends AbstractModel {
         $date_strings = [];
         $now = $this->core->getDateTimeNow();
         foreach (self::date_properties as $property) {
-            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now, $add_utc_offset);
+            if ($this->$property == null) {
+                $date_strings[$property] = null;
+            }
+            else {
+                $date_strings[$property] = DateUtils::dateTimeToString($this->$property, $add_utc_offset);
+            }
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
@@ -854,6 +898,17 @@ class Gradeable extends AbstractModel {
      */
     public function hasDueDate() {
         return $this->has_due_date;
+    }
+
+    /**
+     * Gets if this gradeable has a due date or not for electronic gradeables
+     * @return bool
+     */
+    public function hasReleaseDate() {
+        if (!$this->hasDueDate()) {
+            return false;
+        }
+        return $this->has_release_date;
     }
 
     /**
@@ -904,11 +959,6 @@ class Gradeable extends AbstractModel {
 
     /** @internal */
     public function setGradeReleasedDate($date) {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-
-    /** @internal */
-    public function setGradeLockedDate($date) {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
@@ -1480,7 +1530,7 @@ class Gradeable extends AbstractModel {
      */
     public function getNonPeerComponents() {
         return array_filter($this->components, function (Component $component) {
-            return !$component->isPeer();
+            return !$component->isPeerComponent();
         });
     }
 
@@ -1490,7 +1540,7 @@ class Gradeable extends AbstractModel {
      */
     public function getPeerComponents() {
         return array_filter($this->components, function (Component $component) {
-            return $component->isPeer();
+            return $component->isPeerComponent();
         });
     }
 
@@ -1624,7 +1674,7 @@ class Gradeable extends AbstractModel {
      * Gets if students can make submissions at this time
      * @return bool
      */
-    public function canStudentSubmit() {
+    public function canStudentSubmit(): bool {
         return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
             (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
     }
@@ -1645,7 +1695,7 @@ class Gradeable extends AbstractModel {
     public function getTaPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if (!$component->isPeer()) {
+            if (!$component->isPeerComponent()) {
                 $total += $component->getMaxValue();
             }
         }
@@ -1659,16 +1709,20 @@ class Gradeable extends AbstractModel {
     public function getPeerPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 $total += $component->getMaxValue();
             }
         }
         return $total;
     }
 
-    public function isPeerGrading() {
+    /**
+     * Gets if a gradeable has peer component(s)
+     * @return bool
+     */
+    public function hasPeerComponent() {
         foreach ($this->getComponents() as $component) {
-            if ($component->isPeer()) {
+            if ($component->isPeerComponent()) {
                 return true;
             }
         }
@@ -1681,7 +1735,7 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getGradingSectionsForUser(User $user) {
-        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
+        if ($this->hasPeerComponent() && $user->getGroup() === User::GROUP_STUDENT) {
             if ($this->isTeamAssignment()) {
                 $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
                 $teams = [];
@@ -1774,7 +1828,7 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getAllGradingSections() {
-        if ($this->isPeerGrading()) {
+        if ($this->hasPeerComponent()) {
             //Todo: What are all sections when you have peer grading?
         }
 
@@ -1827,7 +1881,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && ($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -1863,7 +1917,7 @@ class Gradeable extends AbstractModel {
      * @throws \Exception If creating directories for the team fails, or writing team history fails
      *  Note: The team in the database may have already been created if an exception is thrown
      */
-    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1, string $team_name = null) {
         $all_members = $members;
         $all_members[] = $leader;
 
@@ -1893,7 +1947,7 @@ class Gradeable extends AbstractModel {
         }
 
         // Create the team in the database
-        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section);
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section, $team_name);
 
         // Force the other team members to accept the invitation from this newly created team
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
@@ -1994,7 +2048,7 @@ class Gradeable extends AbstractModel {
      * @return int
      */
     public function getWouldBeDaysLate() {
-        return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
+        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null) : 0);
     }
 
     /**
@@ -2077,5 +2131,71 @@ class Gradeable extends AbstractModel {
         );
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
+    }
+
+    /**
+     * Determine if $this gradeable has an allowed time.
+     *
+     * @return bool True if has allowed, false otherwise.
+     */
+    public function hasAllowedTime(): bool {
+        return $this->allowed_minutes !== null;
+    }
+
+    /**
+     * Retrieve users allowed time for this exam
+     *
+     * @return int Number of minutes allowed
+     */
+    public function getUserAllowedTime(User $user): ?int {
+        if ($this->allowed_minutes === null) {
+            return null;
+        }
+        if (empty($this->allowed_minutes_overrides) || $this->allowed_minutes_overrides === null) {
+            return $this->allowed_minutes;
+        }
+        if (isset($this->allowed_minutes_overrides[$user->getId()])) {
+            return $this->allowed_minutes_overrides[$user->getId()];
+        }
+        else {
+            return $this->allowed_minutes;
+        }
+    }
+
+    /**
+     * Setup the allowed time overrides array
+     *
+     * @return void
+     */
+    public function setAllowedMinutesOverrides(array $overrides): void {
+        foreach ($overrides as $override) {
+            $this->allowed_minutes_overrides[$override['user_id']] = $override['allowed_minutes'];
+        }
+    }
+
+    /**
+     * Determines if gradeable is locked for user
+     *
+     * @param string $user_id
+     * @return bool
+     */
+    public function isLocked(string $user_id): bool {
+        if ($this->depends_on !== null && $this->depends_on_points !== null) {
+            $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
+            if ($dependent_gradeable != null) {
+                $dependent_gradeable_graded = $this->core->getQueries()->getGradedGradeable($dependent_gradeable, $user_id);
+                if ($dependent_gradeable_graded != null) {
+                    if ($dependent_gradeable_graded->hasSubmission()) {
+                        if ($dependent_gradeable_graded->getAutoGradingScore() >= $this->depends_on_points) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            return false;
+        }
+        return true;
     }
 }

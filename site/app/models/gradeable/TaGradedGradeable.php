@@ -247,11 +247,35 @@ class TaGradedGradeable extends AbstractModel {
      * Gets the manual grading points the student earned
      * @return float
      */
-    public function getTotalScore($grader = null) {
+    public function getTotalScore($grader = null): float {
         $points_earned = 0.0;
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
             $points_earned += $container->getTotalScore($grader);
+        }
+        return $points_earned;
+    }
+    /**
+     * Gets the instructor/ta score the student earned
+     * @return float
+     */
+    public function getTotalTaScore($grader = null): float {
+        $points_earned = 0.0;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $points_earned += $container->getTotalTaScore($grader);
+        }
+        return $points_earned;
+    }
+    /**
+     * Gets the instructor/ta score for peer components that the student earned
+     * @return float
+     */
+    public function getTotalPeerScore($grader = null): float {
+        $points_earned = 0.0;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $points_earned += $container->getTotalPeerScore($grader);
         }
         return $points_earned;
     }
@@ -400,7 +424,7 @@ class TaGradedGradeable extends AbstractModel {
     public function deleteGradedComponent(Component $component, User $grader = null) {
         $container = $this->getGradedComponentContainer($component);
 
-        if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
+        if ($grader === null || !$component->getGradeable()->hasPeerComponent()) {
             // If the grader is null or we aren't peer grading, then delete all component grades for this component
             $this->deleted_graded_components = array_merge(
                 $this->deleted_graded_components,

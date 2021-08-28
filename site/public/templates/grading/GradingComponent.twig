@@ -14,7 +14,7 @@ Required inputs:
 {% set show_verify_grader = can_verify_graders and graded_component is defined and graded_component.grader_id|length != 0 and grader_id != graded_component.grader_id and graded_component.verifier_id is not defined %}
 
 {% block component_click %}
-    {{ grading_disabled ? '' : 'onClickComponent(this)' }}
+    {{ grading_disabled ? '' : 'onClickComponent(this, true)' }}
 {% endblock %}
  
 {# This is causing a lot of console errros in edit gradeable #}
@@ -53,10 +53,11 @@ Required inputs:
     {% endfor %}
 {% endblock %}
 
+{% if ta_grading_peer or not peer_component %}
 {% block extra_mark_rows %}
-    {# Custom mark (only display in non-edit mode #}
+    {# Custom mark (only display in non-edit mode and custom marks are enabled #}
     {% set f_mark = component.marks|first %}
-    {% if not edit_marks_enabled %}
+    {% if not edit_marks_enabled and allow_custom_marks %}
         <div class="custom-mark-container mark-container row"
              data-mark_id="0">
             <span class="mark-selector-container">
@@ -79,13 +80,29 @@ Required inputs:
                 }
             </script>
             <span class="col-no-gutters mark-points">
+                <label for="extra-mark-{{ component.id }}" tabIndex="0" class="screen-reader">Extra Mark</label>
                 <input id = "extra-mark-{{ component.id }}"
+                       class="custom-mark-number-input"
                        type="number"
                        step="{{ precision }}"
                        style="background-color:var(--default-white)"
                        onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
+                <div class="plus-minus">
+                    <i onclick="increment(this)"class="fa fa-caret-up custom-mark-arrow-icon"></i>
+                    <i onclick="decrement(this)"class="fa fa-caret-down custom-mark-arrow-icon"></i>
+                </div>
                         <script>
+                             function increment(me) {
+                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() + {{ precision }});
+                                 return onCustomMarkChange(me);
+                             }
+
+                             function decrement(me) {
+                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() - {{ precision }});
+                                 return onCustomMarkChange(me);
+                             }
+
                             {% if f_mark.title == "Full Credit" %}
                                 if(document.getElementById("extra-mark-{{ component.id }}").value>0){
                                     document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
@@ -117,6 +134,7 @@ Required inputs:
     {% endif %}
     {# /Custom mark #}
 {% endblock %}
+{% endif %}
 
 {% block mark_list_footer %}
     {# Component is closed, so show just the received marks #}

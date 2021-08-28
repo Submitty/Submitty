@@ -1,6 +1,6 @@
 {
 	"required_capabilities": "notebook",
-    "assignment_message" : "#A Notebook with File Submission",
+    "assignment_message" : "# A Notebook with File Submission",
     "autograding" : {
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
         "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
@@ -11,12 +11,12 @@
     "notebook" : [
         {
             "type": "markdown",
-            "markdown_string": "#Let's do Math!"
+            "markdown_string": "# Let's do Math!"
         },
         // ===================================================
         {
             "type": "markdown",
-            "markdown_string": "###Problem 1: What is `2 + 2`?"
+            "markdown_string": "### Problem 1: What is `2 + 2`?"
         },
         {
             "type": "multiple_choice",
@@ -33,7 +33,7 @@
         // ===================================================
         {
             "type": "markdown",
-            "markdown_string": "###Problem 2: Draw a House\n  \
+            "markdown_string": "### Problem 2: Draw a House\n  \
 Upload an image file (.png or .jpg or .pdf).\n  \n\
 *Note: this section will not be auto-graded*"
         },
@@ -45,7 +45,7 @@ Upload an image file (.png or .jpg or .pdf).\n  \n\
         // ===================================================
         {
             "type": "markdown",
-            "markdown_string": "###Problem 3: Animal Identification"
+            "markdown_string": "### Problem 3: Animal Identification"
         },
         {
             "type": "image",
@@ -66,7 +66,7 @@ Upload an image file (.png or .jpg or .pdf).\n  \n\
         // ===================================================
         {
             "type": "markdown",
-            "markdown_string": "###Problem 4: Poetry\n  \
+            "markdown_string": "### Problem 4: Poetry\n  \
 Upload at least 2 samples of your writing in separate files (.txt or .pdf or .docx).\n  \n\
 *Note: this section will not be auto-graded*"
         },

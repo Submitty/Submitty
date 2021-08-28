@@ -17,7 +17,7 @@ aside {
         margin: 6px 15px;
     }
 
-    aside i  {
+    aside i {
         color: var(--text-black) !important;
         width: 30px;
         min-width: 30px;
@@ -81,14 +81,14 @@ aside {
     }
 
     aside.collapsed i {
-        padding: 2px 0px;
+        padding: 2px 0;
         margin: 0 15px;
     }
 
     aside.collapsed .icon-title {
-        width: 0px;
+        width: 0;
         overflow: hidden;
-        min-width: 0px;
+        min-width: 0;
         white-space: nowrap;
     }
 
@@ -100,6 +100,6 @@ aside {
     }
 
     [data-theme="dark"] aside ul {
-      background-color: var(--background-blue);
+        background-color: var(--background-blue);
     }
 }

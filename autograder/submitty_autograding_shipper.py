@@ -746,6 +746,27 @@ def valid_github_repo_id(repoid):
     return True
 
 
+def calculate_size_cleanup_symlinks(directory):
+    total_size = 0
+    included_symlinks = False
+    for root, subdirectories, files in os.walk(directory):
+        for subdirectory in subdirectories:
+            sd = os.path.join(root, subdirectory)
+            if (os.path.islink(sd)):
+                os.remove(sd)
+                included_symlinks = True
+        for file in files:
+            f = os.path.join(root, file)
+            if (not os.path.exists(f)):
+                os.remove(f)
+            elif (os.path.islink(f)):
+                os.remove(f)
+                included_symlinks = True
+            else:
+                total_size += os.stat(f).st_size
+    return (total_size, included_symlinks)
+
+
 def checkout_vcs_repo(config, my_file):
     print("SHIPPER CHECKOUT VCS REPO ", my_file)
 
@@ -960,6 +981,16 @@ def checkout_vcs_repo(config, my_file):
                 "And check to be sure the submitty_daemon user has appropriate access "
                 "credentials.\n",
                 file=f)
+
+    # remove the .git directory (storing full history and metafiles)
+    git_path = os.path.join(checkout_path, ".git")
+    shutil.rmtree(git_path, ignore_errors=True)
+
+    # calculate total file size, and remove symlinks
+    (checkout_size, checkout_included_symlinks) = calculate_size_cleanup_symlinks(checkout_path)
+
+    obj["checkout_total_size"] = checkout_size
+    obj["checkout_included_symlinks"] = checkout_included_symlinks
 
     return obj
 
@@ -1244,9 +1275,13 @@ def history_short_circuit_helper(
     with open(submit_timestamp_path) as fd:
         submit_timestamp = dateutils.read_submitty_date(fd.read().rstrip())
     submit_time = dateutils.write_submitty_date(submit_timestamp)
-    gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
 
-    seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
+    # compute lateness (if there is a due date / submission deadline)
+    if gradeable_deadline is None:
+        seconds_late = 0
+    else:
+        gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
+        seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
 
     first_access = ''
     access_duration = -1
@@ -1329,11 +1364,11 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
         )
         return False
 
-    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-    config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
-
     if not can_short_circuit(config_obj):
         return False
+
+    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+    config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
 
     # Augment the queue object
     base, path = os.path.split(queue_file)

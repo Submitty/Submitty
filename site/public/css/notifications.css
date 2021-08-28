@@ -67,7 +67,7 @@
 }
 
 .button-row {
-    width:100%;
+    width: 100%;
     display: flex;
 }
 
@@ -83,6 +83,7 @@
 
     .notification {
         display: table-row;
+
         /* padding: 0; */
     }
 

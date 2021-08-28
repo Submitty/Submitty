@@ -1,5 +1,5 @@
 <div class='{{ post.is_staff ? "post_box important" : "post_box" }}' data-post_id="{{ post.id }}">
-    <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
+    <div>{% include "forum/RenderPost.twig" with { "post_content": post.content, render_markdown: true } only %}</div>
     <hr>
     {% if grade_inquiry_per_component_allowed and component.id == 0 %}
         <div style="float:left">

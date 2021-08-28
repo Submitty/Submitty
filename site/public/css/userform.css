@@ -3,13 +3,15 @@
     flex-wrap: wrap;
 }
 
-#edit-user-form-content > label, #edit-user-form-content > a {
+#edit-user-form-content > label,
+#edit-user-form-content > a {
     flex: 1 0 34%;
     margin: 6px;
     min-width: 200px;
 }
 
-#edit-user-form-content > label.full-width, #edit-user-form-content > a.full-width {
+#edit-user-form-content > label.full-width,
+#edit-user-form-content > a.full-width {
     flex: 1 0 70%;
 }
 
@@ -28,12 +30,16 @@
 
 input[type=text]:valid {
     background-color: transparent;
- }
+}
 
 input[type=text]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
+[data-theme="dark"] input[type=text]:invalid {
     background-color: var(--alert-danger-red);
 }
 
-input[type=text]:invalid::placeholder {
+[data-theme="dark"] input[type=text]:invalid::placeholder {
     color: var(--alert-invalid-entry-pink);
 }

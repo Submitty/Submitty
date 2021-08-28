@@ -128,7 +128,7 @@ class GradedGradeable extends AbstractModel {
      */
     public function isPeerGradingComplete() {
         foreach ($this->ta_graded_gradeable->getGradedComponentContainers() as $container) {
-            if (!$container->isComplete() && $container->getComponent() != null && $container->getComponent()->isPeer()) {
+            if (!$container->isComplete() && $container->getComponent() != null && $container->getComponent()->isPeerComponent()) {
                 return false;
             }
         }

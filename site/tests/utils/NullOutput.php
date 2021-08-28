@@ -17,6 +17,7 @@ class NullOutput extends Output {
     }
 
     public function renderTemplate($view, string $function, ...$args) {
+        return null;
     }
 
     public function renderString($string) {

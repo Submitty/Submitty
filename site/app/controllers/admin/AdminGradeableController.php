@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\GradeableList;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -208,7 +209,18 @@ class AdminGradeableController extends AbstractController {
             }
         }
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
+        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
+        $gradeable_max_points = ["" => 0];
+        $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
+        /** @var Gradeable $a_gradeable */
+        foreach ($gradeables as $a_gradeable) {
+            $auto_config = $a_gradeable->getAutogradingConfig();
+            if ($auto_config != null) {
+                $gradeable_max_points[$a_gradeable->getId()] = $auto_config->getTotalNonHiddenNonExtraCredit();
+            }
+        }
+        $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
@@ -234,6 +246,7 @@ class AdminGradeableController extends AbstractController {
             'regrade_allowed' => $gradeable->isRegradeAllowed(),
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
+            'electronic' => $gradeable->getType() === GradeableType::ELECTRONIC_FILE,
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
@@ -263,10 +276,14 @@ class AdminGradeableController extends AbstractController {
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
-            'peer' => $gradeable->isPeerGrading(),
+            'peer' => $gradeable->hasPeerComponent(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $gradeable->getHiddenFiles()
+            'hidden_files' => $gradeable->getHiddenFiles(),
+            'template_list' => $template_list,
+            'gradeable_max_points' =>  $gradeable_max_points,
+            'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
+            'has_custom_marks' => $hasCustomMarks
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -330,7 +347,7 @@ class AdminGradeableController extends AbstractController {
      * TODO: This was extracted from the rubric saving code for electronic files
      */
     private function shufflePeerGrading(Gradeable $gradeable) {
-        if ($gradeable->isPeerGrading()) {
+        if ($gradeable->hasPeerComponent()) {
             //$old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
             //$make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
             //if ($make_peer_assignments) {
@@ -463,7 +480,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => 1
         ]);
         $component->setText(false);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -487,7 +504,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => $details['max_score']
         ]);
         $component->setText(false);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -505,7 +522,7 @@ class AdminGradeableController extends AbstractController {
             'upper_clamp' => 0
         ]);
         $component->setText(true);
-        $component->setPeer(false);
+        $component->setPeerComponent(false);
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
@@ -902,7 +919,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
-                'has_due_date' => true,
+                'allow_custom_marks' => true,
 
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
@@ -914,7 +931,11 @@ class AdminGradeableController extends AbstractController {
                 'late_submission_allowed' => true,
                 'hidden_files' => "",
                 'limited_access_blind' => 1,
-                'peer_blind' => 3
+                'peer_blind' => 3,
+                'depends_on' => null,
+                'depends_on_points' => null,
+                'has_due_date' => true,
+                'has_release_date' => true
             ]);
         }
         else {
@@ -929,7 +950,6 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'has_due_date' => false,
                 'hidden_files' => ""
             ]);
         }
@@ -937,6 +957,9 @@ class AdminGradeableController extends AbstractController {
         // Setup good default dates
         $tonight = $this->core->getDateTimeNow();
         $tonight->setTime(23, 59, 59);
+        if ($tonight->diff($this->core->getDateTimeNow())->h < 12) {
+            $tonight->add(new \DateInterval('P1D'));
+        }
         $gradeable_create_data = array_merge($gradeable_create_data, [
             'ta_view_start_date' => (clone $tonight),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
@@ -1012,7 +1035,6 @@ class AdminGradeableController extends AbstractController {
 
     private function updateGradeable(Gradeable $gradeable, $details) {
         $errors = [];
-
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
 
@@ -1020,7 +1042,6 @@ class AdminGradeableController extends AbstractController {
         if (count($details) === 0) {
             throw new \InvalidArgumentException('Request contained no properties, perhaps the name was blank?');
         }
-
         // Trigger a rebuild if the config changes
         $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
@@ -1037,18 +1058,21 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date'
+            'has_due_date',
+            'has_release_date',
+            'allow_custom_marks'
         ];
 
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
             'precision',
-            'grader_assignment_method'
+            'grader_assignment_method',
+            'depends_on_points'
         ];
-
         // Date properties all need to be set at once
-        $dates = $gradeable->getDates();
+        //$dates = $gradeable->getDates();
+        $dates = [];
         $date_set = false;
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {
@@ -1076,6 +1100,32 @@ class AdminGradeableController extends AbstractController {
                 continue;
             }
 
+            if ($prop === "depends_on") {
+                try {
+                    $temp_gradeable = $this->tryGetGradeable($post_val, false);
+                    if ($temp_gradeable == false) {
+                        $post_val = null;
+                    }
+                    else {
+                        $depends_on_points = $details['depends_on_points'];
+                        if ($depends_on_points == null) {
+                            $depends_on_points = $gradeable->getDependsOnPoints();
+                        }
+                        if ($depends_on_points == null) {
+                            $gradeable->setDependsOnPoints(0);
+                        }
+                        else {
+                            if ($depends_on_points < 0 || $depends_on_points > $temp_gradeable->getDependsOnPoints()) {
+                                $errors['depends_on_points'] = "Invalid depends on points!";
+                            }
+                        }
+                    }
+                }
+                catch (\Exception $e) {
+                    $post_val = null;
+                    $errors[$prop] = $e->getMessage();
+                }
+            }
             // Converts string array sep by ',' to json
             if ($prop === $discussion_ids) {
                 $post_val = array_map('intval', explode(',', $post_val));
@@ -1183,7 +1233,7 @@ class AdminGradeableController extends AbstractController {
         $jsonProperties = [
             'gradeable_id' => $gradeable->getId(),
             'config_path' => $gradeable->getAutogradingConfigPath(),
-            'date_due' => DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+            'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
         ];
@@ -1336,13 +1386,19 @@ class AdminGradeableController extends AbstractController {
         $success = null;
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
-            if ($dates['grade_released_date'] > $now) {
-                $this->shiftDates($dates, 'grade_released_date', $now);
-                $message .= "Released grades for ";
-                $success = true;
+            if ($gradeable->hasReleaseDate()) {
+                if ($dates['grade_released_date'] > $now) {
+                    $this->shiftDates($dates, 'grade_released_date', $now);
+                    $message .= "Released grades for ";
+                    $success = true;
+                }
+                else {
+                    $message .= "Grades already released for ";
+                    $success = false;
+                }
             }
             else {
-                $message .= "Grades already released for";
+                $message .= "Can't release grades for ";
                 $success = false;
             }
         }
@@ -1380,13 +1436,19 @@ class AdminGradeableController extends AbstractController {
             }
         }
         elseif ($action === "close_submissions") {
-            if ($dates['submission_due_date'] > $now) {
-                $this->shiftDates($dates, 'submission_due_date', $now);
-                $message .= "Closed assignment ";
-                $success = true;
+            if ($gradeable->hasDueDate()) {
+                if ($dates['submission_due_date'] > $now) {
+                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $message .= "Closed assignment ";
+                    $success = true;
+                }
+                else {
+                    $message .= "Grading already closed for ";
+                    $success = false;
+                }
             }
             else {
-                $message .= "Grading already closed for ";
+                $message .= "Can't close submissions for ";
                 $success = false;
             }
         }
@@ -1476,5 +1538,19 @@ class AdminGradeableController extends AbstractController {
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/max_points")
+     */
+    public function maxPoints($gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable !== false) {
+            $autogradingConfig = $gradeable->getAutogradingConfig();
+            $points = $autogradingConfig->getTotalHiddenNonExtraCredit() + $autogradingConfig->getTotalNonHidden();
+            $this->core->getOutput()->renderJsonSuccess($points);
+            return;
+        }
+        $this->core->getOutput()->renderJsonError("Unknown gradeable");
     }
 }

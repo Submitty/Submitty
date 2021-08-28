@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 #include "grading/TestCase.h"
-#include "grading/json.hpp"
+#include <nlohmann/json.hpp>
 
 TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
 

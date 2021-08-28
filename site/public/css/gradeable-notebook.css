@@ -6,9 +6,13 @@
 .notebook h6,
 .notebook h7 {
     margin-top: 2rem;
-    margin-bottom: .3rem;
+    margin-bottom: 0.3rem;
     margin-left: 0;
     margin-right: 0;
+}
+
+.notebook > div {
+    margin-top: 20px;
 }
 
 /* Push recent and clear buttons down a little bit and shrink them slightly */
@@ -28,6 +32,7 @@
 }
 
 /* Display notebook multiple choice descriptions on same line as radio button or checkbox */
+
 /* Input field is the first child */
 .mc > label > :nth-child(2) {
     display: inline;
@@ -59,8 +64,8 @@
 }
 
 textarea.sa-box {
-    width: 60em; 
-    height: 100%; 
+    width: 60em;
+    height: 100%;
     min-height: 110px;
 }
 
@@ -74,11 +79,6 @@ textarea.sa-box {
 .mc input[type='checkbox'],
 .mc input[type='radio'] {
     margin: 5px;
-}
-
-.mc pre {
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
 
 /* Add some margin for informational content that is inside <p> tags */

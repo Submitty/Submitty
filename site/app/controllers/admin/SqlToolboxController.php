@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\db\Table;
 use app\exceptions\DatabaseException;
 use app\libraries\database\QueryIdentifier;
 use app\libraries\response\JsonResponse;
@@ -24,7 +25,14 @@ class SqlToolboxController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"GET"})
      */
     public function showToolbox(): WebResponse {
-        return new WebResponse(SqlToolboxView::class, 'showToolbox');
+        return new WebResponse(
+            SqlToolboxView::class,
+            'showToolbox',
+            $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
+                ['schema' => 'public'],
+                ['name' => 'ASC']
+            )
+        );
     }
 
     /**
