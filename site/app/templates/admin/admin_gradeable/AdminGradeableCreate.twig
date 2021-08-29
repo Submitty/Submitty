@@ -303,7 +303,7 @@
 </div>
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+    <button class="btn btn-primary" type="submit" id="startBtn" disabled style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
 
@@ -355,7 +355,12 @@
 
     //
     // Event Handlers
-    //
+    // 
+
+    $('#gradeable_type_container').on('change', function() {
+     $('#startBtn').prop('disabled', false);
+    });
+
     function onGradeableTypeChange() {
         // Hide red text once user selects an option
         if($('#radio_electronic_file').is(':checked') ||
