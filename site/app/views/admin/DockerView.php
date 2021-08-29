@@ -18,17 +18,6 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-<<<<<<< HEAD
-=======
-        //sort containers alphabetically
-        $sort_containers = function (array $containers, string $key, int $order = SORT_ASC): array {
-            $names = array_column($containers, $key);
-            array_multisort($names, $order, $containers);
-            return $containers;
-        };
-
-
->>>>>>> origin/master
         $images = [];
         foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
             foreach ($image_list as $image) {
