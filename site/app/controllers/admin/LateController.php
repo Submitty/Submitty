@@ -27,7 +27,8 @@ class LateController extends AbstractController {
                 ['admin', 'LateDay'],
                 'displayLateDays',
                 $this->core->getQueries()->getUsersWithLateDays(),
-                $this->core->getQueries()->getAllUsers()
+                $this->core->getQueries()->getAllUsers(),
+                $this->core->getConfig()->getDefaultStudentLateDays()
             )
         );
     }

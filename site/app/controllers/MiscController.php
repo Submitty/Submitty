@@ -103,6 +103,10 @@ class MiscController extends AbstractController {
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
             $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+            if ($dir === 'course_materials') {
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $path]);
+            }
         }
         else {
             $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -138,11 +142,20 @@ class MiscController extends AbstractController {
             }
 
             if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+                if ($cm === null) {
+                    $access_failure = 'Course material not found';
+                }
+                else {
+                    $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+                }
                 if ($access_failure) {
                     $this->core->getOutput()->showError($access_failure);
                     return false;
                 }
+            }
+
+            if ($dir === "course_materials") {
+                CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
             }
         }
 
@@ -234,11 +247,20 @@ class MiscController extends AbstractController {
         }
 
         if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-            $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+            if ($cm === null) {
+                $access_failure = 'Course material not found';
+            }
+            else {
+                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+            }
             if ($access_failure) {
                 $this->core->getOutput()->showError($access_failure);
                 return false;
             }
+        }
+
+        if ($dir === "course_materials") {
+            CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
         if ($dir == 'submissions') {
