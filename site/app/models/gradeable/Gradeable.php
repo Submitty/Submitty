@@ -400,6 +400,8 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
+        'grade_start_date',
+        'grade_due_date',
         'grade_released_date'
     ];
 
@@ -763,6 +765,7 @@ class Gradeable extends AbstractModel {
         $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             $prev_date = null;
+            $black_list = [];
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
                 if ($prev_date === null) {
