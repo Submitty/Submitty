@@ -85,16 +85,16 @@
                 {% set name = full[0] %}
                 {% set tag = full[1] %}
                 {% set used_name = key %}
-                {% if key in aliases %}
-                {% for alias in aliases[key] %}
-                    {% if alias in image_info|keys %}
-                        {% set used_name = alias %}
-                    {% endif %}
-                {% endfor %}
+                {% if key in aliases|keys %}
+                    {% for alias in aliases[key] %}
+                        {% if alias in image_info|keys %}
+                            {% set used_name = alias %}
+                        {% endif %}
+                    {% endfor %}
                 {% else %}
                     {% set used_name = null %}
                 {% endif %}
-                <td>{{ name }}</th>
+                <td>{{ name ~ ',' ~ used_name }}</th>
                 <td>
                     {% if used_name in image_info|keys %}
                         {{ image_info[used_name]["id"] | trim("sha256:")}}
