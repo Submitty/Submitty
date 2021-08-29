@@ -94,7 +94,7 @@
                 {% else %}
                     {% set used_name = null %}
                 {% endif %}
-                <td>{{ name ~ ',' ~ used_name }}</th>
+                <td>{{ name }}</th>
                 <td>
                     {% if used_name in image_info|keys %}
                         {{ image_info[used_name]["id"] | trim("sha256:")}}
