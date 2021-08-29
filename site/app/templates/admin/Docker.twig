@@ -73,11 +73,8 @@
                 <th>Id</th>
                 <th>Size</th>
                 <th>Tag</th>
-<<<<<<< HEAD
                 <th>Created</th>
                 <th>Alias</th>
-=======
->>>>>>> origin/master
                 <th>Capabilities Containing This Image</th>
             </tr>
         </thead>
@@ -87,7 +84,6 @@
                 {% set full = key|split(":")  %}
                 {% set name = full[0] %}
                 {% set tag = full[1] %}
-<<<<<<< HEAD
                 {% set used_name = key %}
                 {% if key in aliases %}
                 {% for alias in aliases[key] %}
@@ -108,14 +104,6 @@
                     {% if used_name in image_info|keys %}
                         {{ image_info[used_name]["size"] }}
                     {% endif %}
-=======
-                <td>{{ name }}</th>
-                <td>{{ tag }} </td>
-                <td>
-                    {% for capability in value %}
-                        <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
-                    {% endfor %}
->>>>>>> origin/master
                 </td>
                 <td>{{ tag }} </td>
                 <td>
