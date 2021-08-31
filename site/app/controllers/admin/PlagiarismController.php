@@ -679,6 +679,38 @@ class PlagiarismController extends AbstractController {
             try {
                 $data = json_decode(file_get_contents($_FILES["upload_config_file"]["tmp_name"]), true);
 
+                // This is a little ugly/repetitive but it can be frustrating for users to get nondescriptive errors
+                // so we try to make potential error cases a little more helpful
+                $error_message = "";
+                if (!isset($data["version"])) {
+                    $error_message = "Error: Invalid or missing version field";
+                }
+                else if (!isset($data["regex"])) {
+                    $error_message = "Error: Invalid or missing regex field";
+                }
+                else if (!isset($data["regex_dirs"])) {
+                    $error_message = "Error: Invalid or missing regex_dirs field";
+                }
+                else if (!isset($data["language"])) {
+                    $error_message = "Error: Invalid or missing language field";
+                }
+                else if (!isset($data["threshold"])) {
+                    $error_message = "Error: Invalid or missing threshold field";
+                }
+                else if (!isset($data["sequence_length"])) {
+                    $error_message = "Error: Invalid or missing sequence_length field";
+                }
+                else if (!isset($data["prior_term_gradeables"])) {
+                    $error_message = "Error: Invalid or missing prior_term_gradeables field";
+                }
+                else if (!isset($data["ignore_submissions"])) {
+                    $error_message = "Error: Invalid or missing ignore_submissions field";
+                }
+
+                if ($error_message !== "") {
+                    throw new Exception($error_message);
+                }
+
                 $new_config = new PlagiarismConfig(
                     $gradeable_id,
                     $config_id,
