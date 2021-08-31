@@ -85,12 +85,9 @@
     overflow-x: scroll;
 }
 
-.markdown th {
+.markdown th, td{
     border: 1px solid var(--text-black);
-}
-
-.markdown td {
-    border: 1px solid var(--text-black);
+    padding: 3px;
 }
 
 .markdown-preview {
