@@ -138,8 +138,10 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
-        updateDueDate();
-        updateReleaseDate();
+        if ($(this).hasClass('date-radio')) {
+            updateDueDate();
+            updateReleaseDate();
+        }
         if ($(this).hasClass('ignore')) {
             return;
         }

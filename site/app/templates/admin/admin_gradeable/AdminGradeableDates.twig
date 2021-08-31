@@ -22,8 +22,8 @@
             <div>
                 <fieldset>
                     <legend>Will this assignment have a due date?</legend>
-                    <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
-                    <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
+                    <input id="has_due_date_yes" class="date-radio" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
+                    <input id="has_due_date_no" class="date-radio" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
                 </fieldset>
             </div>
 
@@ -51,8 +51,8 @@
         <div>
             <fieldset>
                 <legend>Will this assignment have a grades released date?</legend>
-                <input id="has_release_date_yes" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
-                <input id="has_release_date_no" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
+                <input id="has_release_date_yes" class="date-radio" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
+                <input id="has_release_date_no" class="date-radio" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
             </fieldset>
         </div>
 
