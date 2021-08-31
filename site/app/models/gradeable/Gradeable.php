@@ -308,7 +308,7 @@ class Gradeable extends AbstractModel {
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
             $this->setAllowCustomMarks($details['allow_custom_marks']);
-            $this->setAllowedMinutes($details['allowed_minutes']);
+            $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
             if (array_key_exists('hidden_files', $details)) {
@@ -341,12 +341,12 @@ class Gradeable extends AbstractModel {
      */
     const date_properties = [
         'ta_view_start_date',
+        'team_lock_date',
         'submission_open_date',
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'team_lock_date',
         'grade_inquiry_start_date',
         'grade_inquiry_due_date'
     ];
@@ -372,6 +372,7 @@ class Gradeable extends AbstractModel {
      */
     const date_validated_properties = [
         'ta_view_start_date',
+        'team_lock_date',
         'submission_open_date',
         'submission_due_date',
         'grade_start_date',
@@ -399,8 +400,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'grade_start_date',
-        'grade_due_date',
         'grade_released_date'
     ];
 
@@ -775,7 +774,13 @@ class Gradeable extends AbstractModel {
                 $date = $date_values[$property] ?? null;
 
                 // Don't coerce a date on the black list
-                if (in_array($property, $black_list) || $date == null) {
+                if (in_array($property, $black_list)) {
+                    $prev_date = $date_values[$property];
+                    continue;
+                }
+
+                if ($date === null) {
+                    $date_values[$property] = $prev_date;
                     continue;
                 }
 

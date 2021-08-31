@@ -934,8 +934,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
-                'has_due_date' => false,
-                'has_release_date' => false
+                'has_due_date' => true,
+                'has_release_date' => true
             ]);
         }
         else {
@@ -957,6 +957,9 @@ class AdminGradeableController extends AbstractController {
         // Setup good default dates
         $tonight = $this->core->getDateTimeNow();
         $tonight->setTime(23, 59, 59);
+        if ($tonight->diff($this->core->getDateTimeNow())->h < 12) {
+            $tonight->add(new \DateInterval('P1D'));
+        }
         $gradeable_create_data = array_merge($gradeable_create_data, [
             'ta_view_start_date' => (clone $tonight),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
@@ -1068,7 +1071,8 @@ class AdminGradeableController extends AbstractController {
             'depends_on_points'
         ];
         // Date properties all need to be set at once
-        $dates = $gradeable->getDates();
+        //$dates = $gradeable->getDates();
+        $dates = [];
         $date_set = false;
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {

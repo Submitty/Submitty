@@ -389,11 +389,6 @@ parameters:
 			path: app/models/forum/Forum.php
 
 		-
-			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:getTotalPoints\\(\\) should return int but returns float\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
 			message: "#^Comparison operation \"\\=\\=\" between \\(array\\|float\\|int\\) and 0 results in an error\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php

@@ -45,7 +45,7 @@ class QueryIdentifier {
                 }
 
                 $token = '';
-                while (preg_match("/[a-zA-Z0-9\._]/", $tokens[$pos])) {
+                while ($pos < $tokenCount && preg_match("/[a-zA-Z0-9\._]/", $tokens[$pos])) {
                     $token .= $tokens[$pos];
                     $pos++;
                 }

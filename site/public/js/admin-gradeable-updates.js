@@ -175,9 +175,9 @@ $(document).ready(function () {
         };
 
         // If its date-related, then submit all date data
-        if ($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
+        if ($('#gradeable-dates').find('input[name="' + this.name + '"]:enabled').length > 0
             || $(this).hasClass('date-related')) {
-            $('#gradeable-dates :input,.date-related').each(addDataToRequest);
+            $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             function (response_data) {
