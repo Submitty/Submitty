@@ -98,6 +98,37 @@ function updateGradeableErrorCallback(message, response_data) {
     updateErrorMessage();
 }
 
+function updateDueDate() {
+    let cont = $('#due_date_container');
+    let cont1 = $('#late_days_options_container');
+    let cont2 = $('#manual_grading_container');
+    let cont3 = $('#release_container');
+    if($('#has_due_date_no').is(':checked')) {
+        cont.hide();
+        cont1.hide();
+        cont2.hide();
+        cont3.hide();
+    }
+    else {
+        cont.show();
+        cont1.show();
+        cont2.show();
+        cont3.show();
+    }
+    onHasDueDate();
+}
+
+function updateReleaseDate() {
+    let cont = $('#release_date_container');
+    if($('#has_release_date_no').is(':checked')) {
+        cont.hide();
+    }
+    else {
+        cont.show();
+    }
+    onHasReleaseDate();
+}
+
 $(document).ready(function () {
     window.onbeforeunload = function (event) {
         if (Object.keys(errors).length !== 0) {
@@ -107,6 +138,8 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
+        updateDueDate();
+        updateReleaseDate();
         if ($(this).hasClass('ignore')) {
             return;
         }

@@ -401,8 +401,7 @@ class Gradeable extends AbstractModel {
         'ta_view_start_date',
         'submission_open_date',
         'grade_start_date',
-        'grade_due_date',
-        'grade_released_date'
+        'grade_due_date'
     ];
 
     /**
@@ -411,8 +410,7 @@ class Gradeable extends AbstractModel {
      */
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
-        'submission_open_date',
-        'grade_released_date'
+        'submission_open_date'
     ];
 
     /**
@@ -422,8 +420,7 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_exam = [
         'ta_view_start_date',
         'grade_start_date',
-        'grade_due_date',
-        'grade_released_date'
+        'grade_due_date'
     ];
 
     /**
@@ -432,8 +429,7 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_bare = [
-        'ta_view_start_date',
-        'grade_released_date'
+        'ta_view_start_date'
     ];
 
     public function toArray() {
@@ -728,6 +724,9 @@ class Gradeable extends AbstractModel {
         else {
             $result = self::date_properties_simple;
         }
+        if ($this->hasReleaseDate()) {
+            $result[] = 'grade_released_date';
+        }
         return $result;
     }
 
@@ -765,7 +764,6 @@ class Gradeable extends AbstractModel {
         $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             $prev_date = null;
-            $black_list = [];
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
                 if ($prev_date === null) {
