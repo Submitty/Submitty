@@ -685,25 +685,25 @@ class PlagiarismController extends AbstractController {
                 if (!isset($data["version"])) {
                     $error_message = "Error: Invalid or missing version field";
                 }
-                else if (!isset($data["regex"])) {
+                elseif (!isset($data["regex"])) {
                     $error_message = "Error: Invalid or missing regex field";
                 }
-                else if (!isset($data["regex_dirs"])) {
+                elseif (!isset($data["regex_dirs"])) {
                     $error_message = "Error: Invalid or missing regex_dirs field";
                 }
-                else if (!isset($data["language"])) {
+                elseif (!isset($data["language"])) {
                     $error_message = "Error: Invalid or missing language field";
                 }
-                else if (!isset($data["threshold"])) {
+                elseif (!isset($data["threshold"])) {
                     $error_message = "Error: Invalid or missing threshold field";
                 }
-                else if (!isset($data["sequence_length"])) {
+                elseif (!isset($data["sequence_length"])) {
                     $error_message = "Error: Invalid or missing sequence_length field";
                 }
-                else if (!isset($data["prior_term_gradeables"])) {
+                elseif (!isset($data["prior_term_gradeables"])) {
                     $error_message = "Error: Invalid or missing prior_term_gradeables field";
                 }
-                else if (!isset($data["ignore_submissions"])) {
+                elseif (!isset($data["ignore_submissions"])) {
                     $error_message = "Error: Invalid or missing ignore_submissions field";
                 }
 
