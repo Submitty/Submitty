@@ -60,6 +60,12 @@ class CourseMaterial {
     protected $priority;
 
     /**
+     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialAccess", mappedBy="course_material", cascade={"persist"}, orphanRemoval=true)
+     * @var Collection<CourseMaterialAccess>
+     */
+    protected $accesses;
+
+    /**
      * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var Collection<CourseMaterialSection>
      */
@@ -167,8 +173,22 @@ class CourseMaterial {
         return $this->id;
     }
 
+    public function setId(int $id): void {
+        $this->id = $id;
+    }
+
     public function removeSection(CourseMaterialSection $section): void {
         $this->sections->removeElement($section);
+    }
+
+    public function addAccess(CourseMaterialAccess $access): void {
+        $this->accesses[] = $access;
+    }
+
+    public function userHasViewed(string $user_id): bool {
+        return $this->accesses->filter(function (CourseMaterialAccess $courseMaterialAccess) use ($user_id) {
+                return $courseMaterialAccess->getUserId() === $user_id;
+        })->count() > 0;
     }
 
     public function getUrl(): string {

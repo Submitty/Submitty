@@ -4,6 +4,7 @@ namespace app\libraries;
 
 use app\controllers\MiscController;
 use app\entities\course\CourseMaterial;
+use app\entities\course\CourseMaterialAccess;
 use app\exceptions\MalformedDataException;
 use app\models\User;
 
@@ -49,10 +50,13 @@ class CourseMaterialsUtils {
      *                the file.
      */
     public static function accessCourseMaterialCheck(Core $core, string $path): string {
-        //$json = FileUtils::readJsonFile($core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json');
         $course_material = $core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['path' => $path]);
 
+        return self::finalAccessCourseMaterialCheck($core, $course_material);
+    }
+
+    public static function finalAccessCourseMaterialCheck(Core $core, CourseMaterial $course_material) {
         if (!CourseMaterialsUtils::isMaterialReleased($course_material)) {
             return 'You may not access this file until it is released.';
         }
@@ -62,5 +66,18 @@ class CourseMaterialsUtils {
         }
 
         return '';
+    }
+
+    public static function insertCourseMaterialAccess(Core $core, string $path) {
+        $course_material = $core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['path' => $path]);
+        $course_material_access = new CourseMaterialAccess(
+            $course_material,
+            $core->getUser()->getId(),
+            $core->getDateTimeNow()
+        );
+        $course_material->addAccess($course_material_access);
+        $core->getCourseEntityManager()->persist($course_material_access);
+        $core->getCourseEntityManager()->flush();
     }
 }
