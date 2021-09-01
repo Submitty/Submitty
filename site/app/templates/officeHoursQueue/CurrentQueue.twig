@@ -6,7 +6,9 @@
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Time</th>
-        <th scope="col">Contact Information</th>
+        {% if viewer.isContactInfoEnabled() %}
+            <th scope="col">Contact Information</th>
+        {% endif %}
         <th scope="col">Total Time Paused</th>
         <th scope="col">Queue</th>
         <th scope="col">Remove</th>
