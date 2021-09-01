@@ -5497,6 +5497,8 @@ AND gc_id IN (
      */
     public function updateGradeable(\app\models\gradeable\Gradeable $gradeable) {
 
+
+
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
             $params = [
