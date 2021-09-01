@@ -22,33 +22,45 @@
             <div>
                 <fieldset>
                     <legend>Will this assignment have a due date?</legend>
-                    <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
-                    <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
+                    <input id="has_due_date_yes" class="date-radio" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
+                    <input id="has_due_date_no" class="date-radio" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
                 </fieldset>
             </div>
 
-            <div id="due_date_container" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
+            <div id="due_date_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
                 <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format, timezone_string) }}">
                 <label for="date_due">Due Date</label>
             </div>
         </div>
     </div>
+    <div id="manual_grading_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
+        <div class="manual_grading manual_grading_dates">
+            <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format, timezone_string) }}"
+            {% if not gradeable.getTaGrading() %}disabled{% endif %}>
+            <label for="date_grade">TA/Instructor Manual Grading Open Date (grading may begin)</label>
 
-    <div class="manual_grading manual_grading_dates">
-        <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format, timezone_string) }}">
-        <label for="date_grade">TA/Instructor Manual Grading Open Date (grading may begin)</label>
+            <br />
 
-        <br />
+            <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format, timezone_string) }}">
+            <label for="date_grade_due">TA/Instructor Manual Grading Due Date</label>
 
-        <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format, timezone_string) }}">
-        <label for="date_grade_due">TA/Instructor Manual Grading Due Date</label>
-
-        <br />
+            <br />
+        </div>
     </div>
+    <div id="release_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
+        <div {% if not electronic %}hidden{% endif %} id="release_toggle_container">
+            <fieldset>
+                <legend>Will this assignment have a grades released date?</legend>
+                <input id="has_release_date_yes" class="date-radio" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
+                <input id="has_release_date_no" class="date-radio" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
+            </fieldset>
+        </div>
 
-    <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
-    <label for="date_released">Grades Released Date (grades will be visible to students)</label>
-
+        <div id="release_date_container" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
+            <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
+            <label for="date_released">Grades Released Date (grades will be visible to students)</label>
+        </div>
+    </div>
     <br />
 
     <div class="electronic_file electronic_file_dates">
@@ -62,7 +74,7 @@
             <label for="date_grade_inquiry_due">Grade Inquiry Due Date (Grade Inquiries must be initiated by this date)</label>
         </div>
 
-        <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
+        <div id="late_days_options_container" class="due_date_date" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
             <fieldset>
                 <legend>Should submissions be accepted after the due date?</legend>
                 <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
@@ -98,8 +110,13 @@
 </div>
 
 <script>
+    var is_electronic = {% if electronic %}true{% else %}false{% endif %};
+
     function showAllDates() {
         $('#gradeable-dates').find('div,input').show();
+        if (!is_electronic) {
+            $('#release_toggle_container').hide();
+        }
         $('#gray_date_warning').show();
         $('#hide_dates').show();
         $('#show_all_dates').hide();
@@ -113,24 +130,16 @@
         onManualGradingChange();
         onIsRegradeAllowedChange();
         onLateSubmissionAllowedChanged();
+        if (is_electronic) {
+            onHasReleaseDate();
+            onHasDueDate();
+        }
         if (onStudentSubmitChange !== undefined) {
             onStudentSubmitChange();
         }
     }
 
     $(document).ready(function() {
-        $('input[name=has_due_date]').change(function() {
-            let cont = $('#due_date_container');
-            let cont1 = $('#late_days_options_container');
-            if($('#has_due_date_no').is(':checked')) {
-                cont.hide();
-                cont1.hide();
-            }
-            else {
-                cont.show();
-                cont1.show();
-            }
-        });
         flatpickr(".date_picker", {
             plugins: [ShortcutButtonsPlugin(
                     {

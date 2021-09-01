@@ -15,6 +15,17 @@ function onReady(){
     else {
         $('.component-tab').first().click();
     }
+
+    //prevent spam submission
+    $('#grade-inquiry-actions').on('click', function() {
+        $(this).find('.gi-submit .gi-submit-empty').prop('disabled', true);
+    });
+
+    const reply_text_area_has_text = $('.reply-text-form').find('[name="replyTextArea"]').val() !== '';
+    $('.gi-show-not-empty').toggle(reply_text_area_has_text);
+    $('.gi-show-empty').toggle(!reply_text_area_has_text);
+    $('.gi-submit').prop('disabled', !reply_text_area_has_text);
+    $('.gi-submit-empty').prop('disabled', reply_text_area_has_text);
 }
 
 function onComponentTabClicked(tab) {
@@ -40,12 +51,18 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
-    const buttons = $('.gi-submit:not(#gi_ignore_disabled)');
+    const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
+    must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
+    const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
+    must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
+
     if (reply_text_area.val() === '') {
-        buttons.prop('disabled',true);
+        $('.gi-show-empty').show();
+        $('.gi-show-not-empty').hide();
     }
     else {
-        buttons.prop('disabled',false);
+        $('.gi-show-not-empty').show();
+        $('.gi-show-empty').hide();
     }
 }
 
@@ -64,7 +81,7 @@ function onGradeInquirySubmitClicked(button) {
     // and ignore their response
     const text_area = $(`#reply-text-area-${component_id}`);
     const submit_button_id = button_clicked.attr('id');
-    if (submit_button_id != null && submit_button_id.includes('grading-close')){
+    if (submit_button_id && submit_button_id === 'grading-close'){
         if (text_area.val().trim()) {
             if (!confirm('The text you entered will not be posted. Are you sure you want to close the grade inquiry?')) {
                 return;
@@ -118,6 +135,8 @@ function onGradeInquirySubmitClicked(button) {
     });
     // allow form resubmission
     form.data('submitted',false);
+    $('.gi-submit').prop('disabled', true);
+    $('.gi-submit-empty').prop('disabled', false);
 }
 
 function initGradingInquirySocketClient() {
@@ -170,7 +189,6 @@ function newPostRender(gc_id, post_id, new_post) {
             last_post = component_grade_inquiry.children('.grade-inquiry-header-div').last();
         }
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
-        component_grade_inquiry.find(`[data-post_id=${post_id}]`).children('div').first().remove();
     }
     else {
         const last_post = $('.grade-inquiry').children('.post_box').last();

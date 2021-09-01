@@ -50,15 +50,6 @@ describe('Test cases involving the late days allowed page', () => {
             cy.get('#error-0 > span').should('be.visible');
         });
 
-        it('decimal late days are invalid', () => {
-            cy.get('#user_id').type('bitdiddle');
-            cy.get('#datestamp').type('2021-01-01');
-            cy.get('#user_id').click(); // dismiss the calendar view
-            cy.get('#late_days').type('5.5');
-            cy.get('input[type=submit]').click();
-            cy.get('#error-0 > span').should('be.visible');
-        });
-
         it('correctly add a late day and then update it', () => {
             // add some late days for bitdiddle
             cy.get('#user_id').type('bitdiddle');

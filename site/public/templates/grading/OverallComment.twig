@@ -39,7 +39,7 @@ Required Parameters:
             onclick : "previewOverallCommentMarkdown.call(this, '" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ~ "')", 
             render_buttons : true,
             min_height : "100px",
-            textarea_onkeydown : "auto_grow(this)",
+            max_height : "150px",
             textarea_onchange : grading_disabled ? '' : 'onChangeOverallComment()',
             data_previous_comment : (overall_comment["logged_in_user"]["comment"]|escape)
         } only %}

@@ -299,7 +299,8 @@ class ForumThreadView extends AbstractView {
                 "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => $post_content_limit
+                "post_content_limit" => $post_content_limit,
+                "render_markdown" => $markdown_enabled
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -1200,7 +1201,8 @@ class ForumThreadView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
-            "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d')
+            "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d'),
+            "render_markdown" => isset($_COOKIE['markdown_enabled']) ? $_COOKIE['markdown_enabled'] : 0
         ]);
     }
 
