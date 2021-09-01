@@ -183,7 +183,7 @@ class Gradeable extends AbstractModel {
     /** @prop @var int The maximum team size (if the gradeable is a team assignment) */
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
-    protected $ta_grading = false;
+    protected $ta_grading = true;
     /** @prop @var bool If the gradeable is a 'scanned exam' */
     protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */

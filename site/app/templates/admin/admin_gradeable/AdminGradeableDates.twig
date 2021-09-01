@@ -48,9 +48,8 @@
         </div>
     </div>
     <div id="release_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
-        <div>
+        <div {% if not electronic %}hidden{% endif %} id="release_toggle_container">
             <fieldset>
-                <legend>Will this assignment have a grades released date?</legend>
                 <input id="has_release_date_yes" class="date-radio" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
                 <input id="has_release_date_no" class="date-radio" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
             </fieldset>
@@ -110,8 +109,11 @@
 </div>
 
 <script>
+    var is_electronic = {% if electronic %}true{% else %}false{% endif %};
+
     function showAllDates() {
         $('#gradeable-dates').find('div,input').show();
+        $('#release_toggle_container').hide();
         $('#gray_date_warning').show();
         $('#hide_dates').show();
         $('#show_all_dates').hide();
@@ -125,8 +127,10 @@
         onManualGradingChange();
         onIsRegradeAllowedChange();
         onLateSubmissionAllowedChanged();
-        onHasReleaseDate();
-        onHasDueDate();
+        if (is_electronic) {
+            onHasReleaseDate();
+            onHasDueDate();
+        }
         if (onStudentSubmitChange !== undefined) {
             onStudentSubmitChange();
         }

@@ -108,6 +108,7 @@ function updateDueDate() {
         cont1.hide();
         cont2.hide();
         cont3.hide();
+        $('#has_release_date_no').prop('checked', true);
     }
     else {
         cont.show();
@@ -138,8 +139,10 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
-        if ($(this).hasClass('date-radio')) {
+        if ($(this).hasClass('date-radio') && is_electronic) {
             updateDueDate();
+        }
+        if ($(this).hasClass('date-radio')) {
             updateReleaseDate();
         }
         if ($(this).hasClass('ignore')) {
