@@ -183,7 +183,7 @@ class Gradeable extends AbstractModel {
     /** @prop @var int The maximum team size (if the gradeable is a team assignment) */
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
-    protected $ta_grading = false;
+    protected $ta_grading = true;
     /** @prop @var bool If the gradeable is a 'scanned exam' */
     protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */
@@ -400,7 +400,8 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'grade_released_date'
+        'grade_start_date',
+        'grade_due_date'
     ];
 
     /**
@@ -409,8 +410,7 @@ class Gradeable extends AbstractModel {
      */
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
-        'submission_open_date',
-        'grade_released_date'
+        'submission_open_date'
     ];
 
     /**
@@ -420,8 +420,7 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_exam = [
         'ta_view_start_date',
         'grade_start_date',
-        'grade_due_date',
-        'grade_released_date'
+        'grade_due_date'
     ];
 
     /**
@@ -430,8 +429,7 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_bare = [
-        'ta_view_start_date',
-        'grade_released_date'
+        'ta_view_start_date'
     ];
 
     public function toArray() {
@@ -725,6 +723,9 @@ class Gradeable extends AbstractModel {
         }
         else {
             $result = self::date_properties_simple;
+        }
+        if ($this->hasReleaseDate()) {
+            $result[] = 'grade_released_date';
         }
         return $result;
     }
