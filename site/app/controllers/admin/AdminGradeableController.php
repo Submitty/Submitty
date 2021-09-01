@@ -1161,6 +1161,10 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        if (!$gradeable->hasDueDate() && $gradeable->hasReleaseDate()) {
+            $gradeable->setHasReleaseDate(false);
+        }
+
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
         if ($date_set) {
