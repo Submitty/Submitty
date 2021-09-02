@@ -303,7 +303,7 @@
 </div>
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <button class="btn btn-primary" type="submit" id="button" disabled="disabled" style="margin-left:10px;">Create New Gradeable</button>
+    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
 
@@ -536,20 +536,15 @@
         
         $("input[type='radio']").change(validate);
         
-        function validate() 
-        {
-            var sub1 = $('input[type]');
-            var sub2 = $('input[electronic_gradeable_presets]');
-            //var sub3 = $('input[vcs]');
-            //var sub4 = $('input[scanned_exam]');
-            
-            if ( $(sub1).is(':checked') || $(sub2).is(':checked')) 
-            {
-                $(".btn#button").removeAttr("disabled", false);
+        function validate() {
+            const sub1 = $('input[type]');
+            const sub2 = $('input[electronic_gradeable_presets]');
+           
+            if ( $(sub1).is(':checked') || $(sub2).is(':checked')) {
+                $(".btn#create-gradeable-btn").removeAttr("disabled", false);
             } 
-            else 
-            {
-                $(".btn#button").attr("disabled", true);
+            else {
+                $(".btn#create-gradeable-btn").attr("disabled", true);
             }
         }
 
