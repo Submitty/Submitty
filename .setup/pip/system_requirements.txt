@@ -42,7 +42,7 @@ PyPDF2==1.26.0
 distro==1.6.0
 jsonschema==3.2.0
 jsonref==0.2
-docker==5.0.1
+docker==5.0.0
 
 # For Lichen / Plagiarism Detection
 parso==0.8.2
