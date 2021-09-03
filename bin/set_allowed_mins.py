@@ -94,7 +94,8 @@ def main():
             override = timelimit_case['validation'][0]['override']
         try:
             if HAS_ERROR:
-                print("WARNING: You do not have access to set allowed minutes from CLI. Please use website to set that.")
+                print("WARNING: You do not have access to set allowed minutes from CLI." +
+                " Please use website to set that.")
                 exit()
             db, metadata = setup_db()
             send_data(db, allowed_minutes, override)
