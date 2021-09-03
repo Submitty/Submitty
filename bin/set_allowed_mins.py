@@ -95,7 +95,7 @@ def main():
         try:
             if HAS_ERROR:
                 print("WARNING: You do not have access to set allowed minutes from CLI." +
-                " Please use website to set that.")
+                      " Please use website to set that.")
                 exit()
             db, metadata = setup_db()
             send_data(db, allowed_minutes, override)
