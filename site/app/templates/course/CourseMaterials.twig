@@ -64,11 +64,12 @@
                     <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</a>
                 {% else %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
-                    <a target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" style="text-decoration: none;">{{ name }}</a>
                 {% endif %}
                 {% set extension = name|split('.')|last|lower %}
                 {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                    <a target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" aria-label="Pop up {{ name }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                    <a class="popout-item" onmouseover="hoverColor(this)" onmouseout="defaultColor()" target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" aria-label="Pop up {{ name }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                {% else %}
+                    {{ name }}
                 {% endif %}
                 {% if not course_material.isLink %}
                     <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
@@ -189,6 +190,18 @@
         }
         return "";
     }
+
+    //set color to external-link-hover
+    function hoverColor(item){
+        $(item).css("color", "#a1a1ec");
+        $(item).children().css("color", "#a1a1ec");
+    }
+
+    function defaultColor(){
+        $(".popout-item").css("color", "white");
+        $(".fa-window-restore").css("color", "white");
+    }
+
     window.onload = function () {
         // hide the folders which have no content for the current user ..ie empty folders
         hideEmptyCourseMaterialFolders();
