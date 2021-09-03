@@ -10,6 +10,9 @@ import datetime
 import os
 import sys
 import json
+import errno
+
+HAS_ERROR = False
 
 try:
     CONFIG_PATH = os.path.join(
@@ -18,17 +21,22 @@ try:
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-        DATABASE_CONFIG = json.load(open_file)
+    try:
+        with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+            DATABASE_CONFIG = json.load(open_file)
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            HAS_ERROR = True
 
 except Exception as config_fail_error:
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
     sys.exit(1)
 
-DB_HOST = DATABASE_CONFIG['database_host']
-DB_USER = DATABASE_CONFIG['database_user']
-DB_PASSWORD = DATABASE_CONFIG['database_password']
+if not HAS_ERROR:
+    DB_HOST = DATABASE_CONFIG['database_host']
+    DB_USER = DATABASE_CONFIG['database_user']
+    DB_PASSWORD = DATABASE_CONFIG['database_password']
 
 CONFIG_FILE_PATH = sys.argv[1]
 SEMESTER = sys.argv[2]
@@ -68,7 +76,6 @@ def send_data(db, allowed_minutes, override):
 
 
 def main():
-    db, metadata = setup_db()
     with open(CONFIG_FILE_PATH) as config_file:
         json_string = config_file.read()
     CONFIG_FILE = json.loads(json_string)
@@ -86,6 +93,10 @@ def main():
         if 'override' in timelimit_case['validation'][0]:
             override = timelimit_case['validation'][0]['override']
         try:
+            if HAS_ERROR:
+                print("WARNING: You do not have access to set allowed minutes from CLI. Please use website to set that.")
+                exit()
+            db, metadata = setup_db()
             send_data(db, allowed_minutes, override)
         except exc.IntegrityError:
             sys.exit(1)
