@@ -692,7 +692,7 @@ class Gradeable extends AbstractModel {
      * Gets the dates that require validation for the gradeable's current configuration.
      * @return string[] array of date property names that need validation
      */
-    private function getDateValidationSet($regrade_modified = false) {
+    private function getDateValidationSet(bool $regrade_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
@@ -760,7 +760,7 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $dates Array of dates, indexed by property name
      * @return \DateTime[] Array of dates, indexed by property name
      */
-    private function coerceDates(array $dates, $regrade_modified = false) {
+    private function coerceDates(array $dates, bool $regrade_modified = false) {
         // Takes an array of date properties (in order) and date values (indexed by property)
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced

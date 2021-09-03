@@ -1088,6 +1088,7 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // Set default value which may be set in loop below
         $regrade_modified = false;
 
         // Apply other new values for all properties submitted
