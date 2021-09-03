@@ -22,7 +22,7 @@ th {
 
 .current_queue_row,
 a > i.fas {
-    color: var(--btn-text-black);
+    color: var(--text-black);
 }
 
 .announcement-setting {
