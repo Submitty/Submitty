@@ -64,7 +64,7 @@
                     <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</a>
                 {% else %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
-                    {{ name }}
+                    <a target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" style="text-decoration: none;">{{ name }}</a>
                 {% endif %}
                 {% set extension = name|split('.')|last|lower %}
                 {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
