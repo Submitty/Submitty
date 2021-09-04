@@ -224,7 +224,8 @@
             </div>
             {% endif %}
             <div class="system-message warning" id="socket-server-system-message" hidden>
-                You are not connected to socket server. You will not receive live updates. Please notify system administrator if issue persists.
+                Warning: Failed to connect to websocket server. This page will not dynamically update.
+                Manually reload this page to see updates. Notify the sysadmin {{ sysadmin_email }}.
             </div>
             <div id='messages'>
                 <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
