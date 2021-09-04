@@ -85,6 +85,7 @@ class WebSocketClient {
                     //this.onerror(error);
                     break;
             }
+            $('#socket-server-system-message').show();
         };
     }
 

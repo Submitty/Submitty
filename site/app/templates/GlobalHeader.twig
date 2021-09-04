@@ -223,6 +223,9 @@
                 {{ system_message }}
             </div>
             {% endif %}
+            <div class="system-message warning" id="socket-server-system-message" hidden>
+                You are not connected to socket server. You will not receive live updates. Please notify system administrator if issue persists.
+            </div>
             <div id='messages'>
                 <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
                 {% for message in messages %}
