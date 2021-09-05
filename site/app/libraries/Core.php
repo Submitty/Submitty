@@ -8,9 +8,11 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
+use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,8 +38,14 @@ class Core {
     /** @var EntityManager */
     private $submitty_entity_manager;
 
+    /** @var DebugStack */
+    private $submitty_debug_stack;
+
     /** @var EntityManager */
     private $course_entity_manager;
+
+    /** @var DebugStack */
+    private $course_debug_stack;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -170,7 +178,7 @@ class Core {
         $this->session_manager = $manager;
     }
 
-    private function createEntityManager(AbstractDatabase $database): EntityManager {
+    private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
         $config = Setup::createAnnotationMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
@@ -178,6 +186,10 @@ class Core {
             null,
             false
         );
+
+        if ($debug_stack) {
+            $config->setSQLLogger($debug_stack);
+        }
 
         $conn = [
             'driver' => 'pdo_pgsql',
@@ -205,7 +217,8 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
+        $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -216,6 +229,17 @@ class Core {
         return $this->submitty_entity_manager;
     }
 
+    public function getSubmittyQueries(): array {
+        if (!$this->config->isDebug() || !$this->submitty_db) {
+            return [];
+        }
+        $queries = $this->submitty_db->getPrintQueries();
+        foreach ($this->submitty_debug_stack->queries as $query) {
+            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
+        }
+        return $queries;
+    }
+
     public function loadCourseDatabase(): void {
         if (!$this->config->isCourseLoaded()) {
             return;
@@ -224,7 +248,8 @@ class Core {
         $this->course_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->course_entity_manager = $this->createEntityManager($this->course_db);
+        $this->course_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
+        $this->course_entity_manager = $this->createEntityManager($this->course_db, $this->course_debug_stack);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
@@ -237,6 +262,17 @@ class Core {
 
     public function getCourseEntityManager(): EntityManager {
         return $this->course_entity_manager;
+    }
+
+    public function getCourseQueries(): array {
+        if (!$this->config->isDebug() || !$this->course_db) {
+            return [];
+        }
+        $queries = $this->course_db->getPrintQueries();
+        foreach ($this->course_debug_stack->queries as $query) {
+            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
+        }
+        return $queries;
     }
 
     public function loadForum() {
