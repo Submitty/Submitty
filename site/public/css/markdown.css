@@ -86,7 +86,7 @@
 }
 
 .markdown th, td{
-    border: 1px solid var(--text-black);
+    border: 1px solid var(--standard-light-gray);
     padding: 3px;
 }
 
