@@ -50,7 +50,8 @@ parser.add_argument('--setup-for-sample-courses', action='store_true', default=F
                     help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
                          "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
-parser.add_argument('--worker-pair', default=False, help='Configure Submitty alongside a worker VM')
+parser.add_argument('--worker-pair', default=False, help='Configure Submitty alongside a worker VM. This should only'
+                                                         'be used during development using Vagrant.')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
@@ -478,15 +479,16 @@ if not args.worker:
                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
                 "enabled": True
             }
+            if args.setup_for_sample_courses:
+                worker_dict['submitty-worker']['capabilities'].extend([
+                    'cpp',
+                    'python',
+                    'et-cetera',
+                    'notebook',
+                ])
 
         if args.setup_for_sample_courses:
             worker_dict['primary']['capabilities'].extend([
-                'cpp',
-                'python',
-                'et-cetera',
-                'notebook',
-            ])
-            worker_dict['submitty-worker']['capabilities'].extend([
                 'cpp',
                 'python',
                 'et-cetera',

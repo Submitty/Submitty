@@ -1,24 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_worker.sh [--no-rpi]
-
-# Read through the flags passed to the script reading them in and setting
-# appropriate bash variables, breaking out of this once we hit something we
-# don't recognize as a flag
-
-export NO_RPI=0
-while :; do
-    case $1 in
-        --no-rpi)
-            export NO_RPI=1
-            ;;
-        *) # No more options, so break out of the loop.
-            break
-    esac
-
-    shift
-done
+#   install_worker.sh [<extra> <extra> ...]
 
 # This script is used to set up the worker machine in a vagrant worker pair
 # made by running WORKER_PAIR=1 vagrant up
@@ -36,7 +19,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${SUPERVISOR_USER} ; then
     [ -d "/home/${SUPERVISOR_USER}" ] && echo "Directory /home/${SUPERVISOR_USER} exists." || echo "Error: Directory /home/${SUPERVISOR_USER} does not exists."
 fi
 
-bash ${GIT_PATH}/.setup/install_system.sh --worker 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker_system.log
+bash ${GIT_PATH}/.setup/install_system.sh --worker --vagrant-worker ${@} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker_system.log
 echo "--- FINISHED INSTALLING SYSTEM ---"
 echo "installing worker..."
 

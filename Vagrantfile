@@ -50,7 +50,7 @@ $worker_script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/install_worker.sh 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
+bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
 Vagrant.configure(2) do |config|
@@ -59,15 +59,6 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  # This is what RPI uses as of Fall 2018, though currently migrating to 20.04
-  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
-    ubuntu.vm.box = 'bento/ubuntu-18.04'
-    ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8433, host: 8433   # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
-    ubuntu.vm.provision 'shell', inline: $script
-  end
-
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-20.04'
     # If this IP address changes, it must be changed in install_system.sh and 
@@ -75,6 +66,15 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $worker_script
+  end
+
+  # This is what RPI uses as of Fall 2018, though currently migrating to 20.04
+  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-18.04'
+    ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
+    ubuntu.vm.network 'forwarded_port', guest: 8433, host: 8433   # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
+    ubuntu.vm.provision 'shell', inline: $script
   end
 
   # Our primary development target, RPI uses it as of Fall 2021

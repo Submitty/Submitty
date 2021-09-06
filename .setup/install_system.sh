@@ -63,6 +63,7 @@ export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
 export WORKER_PAIR=0
+export VAGRANT_WORKER=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -82,6 +83,10 @@ while :; do
         --worker-pair)
             export WORKER_PAIR=1
             echo "worker_pair"
+            ;;
+        --vagrant-worker)
+            export VAGRANT_WORKER=1
+            echo "vagrant_worker"
             ;;
         *) # No more options, so break out of the loop.
             break
@@ -169,11 +174,13 @@ else
 fi
 
 if [ ${WORKER} == 1 ]; then
-    # Setting it up to allow SSH as root by default
-    mkdir -p -m 700 /root/.ssh
-    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    if [ ${VAGRANT_WORKER} == 1]; then
+        # Setting it up to allow SSH as root by default
+        mkdir -p -m 700 /root/.ssh
+        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
-    sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+        sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+    fi
     echo "Installing Submitty in worker mode."
 else
     echo "Installing primary Submitty."
@@ -629,7 +636,11 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
-    echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    if [ ${VAGRANT_WORKER} == 1]; then
+        "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    else
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    fi
 else
     if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
