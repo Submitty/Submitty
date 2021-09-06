@@ -49,6 +49,7 @@
                         <th>Grader</th>
                         <th>Students</th>
                         <th>Edit Students</th>
+                        <th>Remove</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,6 +63,9 @@
                             </td>
                             <td>
                                 <a aria-label="edit {{key}}'s students"><i class="fas fa-pencil-alt"></i></a>
+                            </td>
+                            <td>
+                                <a aria-label="remove grader"><i class="fas fa-trash-alt" onclick="removeGraderAlert('{{key}}')"></i></a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -139,9 +143,6 @@
         $('#removed-all').empty();
         let add_students_div = $("#students-to-add");
         add_students_div.empty();
-        add_students_div.append("Remove Grader:<br />");
-        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\''+grader_to_edit+'\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true" /> <br><br>');
-        //set the right panel to allow adding new students
         add_students_div.append("Add New Students:<br />")
         let student_autofill = JSON.parse($('#student-autofill').val());
         add_students_div.append('<input class="add_user_ids" type="text" name="add_user_id_0" /><br>');
@@ -150,6 +151,30 @@
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
         add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-edit-peers-form\',\'#students-to-add\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
+    }
+    function removeGraderForm(icon_clicked) {
+        //make admin peers popup appear
+        $('.popup-form').css('display', 'none');
+        let form = $("#admin-gradeable-edit-peers-form");
+        form.css("display", "block");
+        captureTabInModal("admin-gradeable-edit-peers-form");
+        $('#admin-gradeable-edit-peers-submit').prop('disabled', false);
+        $('#submit-error').text("");
+        //set the title for popup
+        let grader_to_edit = icon_clicked.parents('tr').find('.peer-table-grader').text();
+        let title_div = $("#admin-gradeable-edit-peers-title");
+        title_div.empty();
+        title_div.append('Edit Students for ' + grader_to_edit);
+        //set the left panel to list all current students to edit
+        $('#removed-all').empty();
+        let add_students_div = $("#students-to-add");
+        $("#students-to-add").removeClass('right-panel');
+        add_students_div.empty();
+        $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
+        add_students_div.empty();
+        add_students_div.append("Remove Grader:<br />");
+        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\'' + grader_to_edit + '\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true" /> <br><br>');
+        //set the right panel to allow adding new students
     }
 
     function checkNewStudentsValid(grader_id, user_input, valid_students, new_grader) {
@@ -329,6 +354,11 @@
         let valid_students = [];
         $("#peer-table").on("click", ".fa-pencil-alt", function() {
             editGraderPeerForm($(this));
+            valid_grader = true;
+            valid_students = [];
+        });
+        $("#peer-table").on("click", ".fa-trash-alt", function() {
+            removeGraderForm($(this));
             valid_grader = true;
             valid_students = [];
         });
