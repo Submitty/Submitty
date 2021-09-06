@@ -359,8 +359,6 @@
         });
         $("#peer-table").on("click", ".fa-trash-alt", function() {
             removeGraderForm($(this));
-            valid_grader = true;
-            valid_students = [];
         });
         $('#admin-gradeable-edit-peers-form').on('blur', ":text.add_user_ids", function() {
             let grader_id = $("#admin-gradeable-edit-peers-title").text().substr(18);
