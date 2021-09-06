@@ -804,6 +804,7 @@ class Gradeable extends AbstractModel {
 
         // Blacklist the dates checked by validation
         $black_list = $this->getDateValidationSet($regrade_modified);
+        $black_list[] = "team_lock_date";
 
         // First coerce in the forward direction, then in the reverse direction
         return $coerce_dates(
