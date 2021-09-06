@@ -14,3 +14,8 @@
     color: var(--standard-dark-green);
     float: none;
 }
+
+a.popout-item:hover *,
+a.popout-item:hover {
+    color: var(--external-link-hover);
+}

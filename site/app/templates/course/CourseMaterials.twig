@@ -67,7 +67,7 @@
                 {% endif %}
                 {% set extension = name|split('.')|last|lower %}
                 {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                    <a class="popout-item" onmouseover="hoverColor(this)" onmouseout="defaultColor()" target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" aria-label="Pop up {{ name }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                    <a class="popout-item" target="_blank" href="{{ display_file_url }}?course_material_id={{ course_material.getId }}" aria-label="Pop up {{ name }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                 {% else %}
                     {{ name }}
                 {% endif %}
@@ -189,17 +189,6 @@
             }
         }
         return "";
-    }
-
-    //set color to external-link-hover
-    function hoverColor(item){
-        $(item).css("color", "#a1a1ec");
-        $(item).children().css("color", "#a1a1ec");
-    }
-
-    function defaultColor(){
-        $(".popout-item").css("color", "white");
-        $(".fa-window-restore").css("color", "white");
     }
 
     window.onload = function () {
