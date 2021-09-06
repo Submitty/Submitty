@@ -19,7 +19,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${SUPERVISOR_USER} ; then
     [ -d "/home/${SUPERVISOR_USER}" ] && echo "Directory /home/${SUPERVISOR_USER} exists." || echo "Error: Directory /home/${SUPERVISOR_USER} does not exists."
 fi
 
-bash ${GIT_PATH}/.setup/install_system.sh --worker --vagrant-worker ${@} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker_system.log
+bash ${GIT_PATH}/.setup/install_system.sh --worker --vagrant ${@} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker_system.log
 echo "--- FINISHED INSTALLING SYSTEM ---"
 echo "installing worker..."
 

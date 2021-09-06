@@ -63,7 +63,6 @@ export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
 export WORKER_PAIR=0
-export VAGRANT_WORKER=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -84,10 +83,6 @@ while :; do
             export WORKER_PAIR=1
             echo "worker_pair"
             ;;
-        --vagrant-worker)
-            export VAGRANT_WORKER=1
-            echo "vagrant_worker"
-            ;;
         *) # No more options, so break out of the loop.
             break
     esac
@@ -96,7 +91,7 @@ while :; do
 done
 
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     echo "Non-interactive vagrant script..."
 
     export DEBIAN_FRONTEND=noninteractive
@@ -174,7 +169,7 @@ else
 fi
 
 if [ ${WORKER} == 1 ]; then
-    if [ ${VAGRANT_WORKER} == 1]; then
+    if [ ${VAGRANT} == 1 ]; then
         # Setting it up to allow SSH as root by default
         mkdir -p -m 700 /root/.ssh
         cp /home/vagrant/.ssh/authorized_keys /root/.ssh
@@ -207,7 +202,7 @@ apt-get install libzbar0 --yes
 
 pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
     pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
@@ -223,7 +218,7 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
@@ -267,7 +262,7 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -636,7 +631,7 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
-    if [ ${VAGRANT_WORKER} == 1]; then
+    if [ ${VAGRANT} == 1]; then
         "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
@@ -759,7 +754,7 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -803,7 +798,7 @@ echo -e "Finished preferred_name_logging setup."
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""
