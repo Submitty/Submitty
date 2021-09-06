@@ -62,7 +62,7 @@ Vagrant.configure(2) do |config|
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-20.04'
     # If this IP address changes, it must be changed in install_system.sh and 
-    # CONFIGURE_SUBMITTY.pyto allow the ssh connection
+    # CONFIGURE_SUBMITTY.py to allow the ssh connection
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $worker_script
