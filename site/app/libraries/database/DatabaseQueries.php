@@ -2601,7 +2601,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  Mark      $mark
      * @param  User      $grader
      * @param  Gradeable $gradeable
-     * @param  bool      $anon
+     * @param  string      $anon
      * @return string[]
      */
     public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = 'unblind') {
