@@ -1323,15 +1323,16 @@ function deleteCategory(category_id, category_desc, csrf_token){
     })
 }
 
-function editCategory(category_id, category_desc, category_color, csrf_token) {
+function editCategory(category_id, category_desc, category_color, changed, csrf_token) {
+    console.log(arguments);
     if(category_desc === null && category_color === null) {
         return;
     }
     var data = {category_id: category_id, csrf_token: csrf_token};
-    if(category_desc !== null) {
+    if(category_desc !== null && changed === 'desc') {
         data['category_desc'] = category_desc;
     }
-    if(category_color !== null) {
+    if(category_color !== null && changed === 'color') {
         data['category_color'] = category_color;
     }
     var url = buildCourseUrl(['forum', 'categories', 'edit']);
