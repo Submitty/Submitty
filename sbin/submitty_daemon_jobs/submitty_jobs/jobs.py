@@ -168,13 +168,13 @@ class RunLichen(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = self.job_details['config_id']
+        config_id = int(self.job_details['config_id']) # We cast to an int to prevent malicious json files from containing invalid path components
         config_data = self.job_details['config_data']
 
         # error checking
-        # prevent against backwards crawling
+        # prevent backwards crawling
         if '..' in semester or '..' in course or '..' in gradeable:
-            print('invalid path component ".." in string')
+            print('Error: Invalid path component ".." in string')
             return
 
         # paths

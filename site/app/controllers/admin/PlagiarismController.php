@@ -372,11 +372,7 @@ class PlagiarismController extends AbstractController {
 
         $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
 
-        if (file_exists($lichen_job_file) && !is_writable($lichen_job_file)) {
-            throw new Exception("Error: Failed to create lichen job. Try again");
-        }
-
-        if (!file_put_contents($lichen_job_file, json_encode($lichen_job_data, JSON_PRETTY_PRINT))) {
+        if (!FileUtils::writeJsonFile($lichen_job_file, $lichen_job_data)) {
             throw new Exception("Error: Failed to write lichen job file. Try again");
         }
     }
@@ -993,10 +989,10 @@ class PlagiarismController extends AbstractController {
         $config["version"] = "all_versions";
         $config["regex"] = "";
         $config["regex_dirs"] = ["submissions"];
-        $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
+        $config["language"] = array_fill_keys(array_keys(PlagiarismUtils::SUPPORTED_LANGUAGES), "");
         $config["language"]["plaintext"] = "selected";
-        $config["threshold"] = 15;
-        $config["sequence_length"] = 10;
+        $config["threshold"] = PlagiarismUtils::DEFAULT_THRESHOLD;
+        $config["sequence_length"] = PlagiarismUtils::SUPPORTED_LANGUAGES["plaintext"]["sequence_length"];
         $config["prior_terms"] = false;
         $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
         $config["prior_term_gradeables"] = [];
@@ -1080,7 +1076,7 @@ class PlagiarismController extends AbstractController {
         $config["version"] = $plagiarism_config->getVersionStatus();
         $config["regex"] = implode(", ", $plagiarism_config->getRegexArray());
         $config["regex_dirs"] = $regex_dirs;
-        $config["language"] = array_fill_keys(PlagiarismUtils::getSupportedLanguages(), "");
+        $config["language"] = array_fill_keys(array_keys(PlagiarismUtils::SUPPORTED_LANGUAGES), "");
         $config["language"][$plagiarism_config->getLanguage()] = "selected";
         $config["threshold"] = $plagiarism_config->getThreshold();
         $config["sequence_length"] = $plagiarism_config->getSequenceLength();

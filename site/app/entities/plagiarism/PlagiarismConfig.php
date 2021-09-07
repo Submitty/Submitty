@@ -101,18 +101,6 @@ class PlagiarismConfig {
 
     /**
      * PlagiarismConfig constructor.
-     * @param string $gradeable_id
-     * @param int $config_id
-     * @param string $version
-     * @param array $regex
-     * @param bool $regex_dir_submissions
-     * @param bool $regex_dir_results
-     * @param bool $regex_dir_checkout
-     * @param string $language
-     * @param int $threshold
-     * @param int $sequence_length
-     * @param array $other_gradeables
-     * @param array $ignored_submissions
      * @throws Exception
      */
     public function __construct(
@@ -143,36 +131,23 @@ class PlagiarismConfig {
         $this->setIgnoredSubmissions($ignored_submissions);
     }
 
-    /**
-     * @return int
-     */
     public function getUniqueID(): int {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function getGradeableID(): string {
         return $this->gradeable_id;
     }
 
-    /**
-     * @return int
-     */
     public function getConfigID(): int {
         return $this->config_id;
     }
 
-    /**
-     * @return string
-     */
     public function getVersionStatus(): string {
         return $this->version;
     }
 
     /**
-     * @param string $version_code
      * @throws Exception
      */
     public function setVersionStatus(string $version_code): void {
@@ -184,15 +159,11 @@ class PlagiarismConfig {
         }
     }
 
-    /**
-     * @return array
-     */
     public function getRegexArray(): array {
         return $this->regex;
     }
 
     /**
-     * @param array $regex
      * @throws Exception
      */
     public function setRegexArray(array $regex): void {
@@ -204,61 +175,39 @@ class PlagiarismConfig {
         $this->regex = $regex;
     }
 
-    /**
-     * @return bool
-     */
     public function isRegexDirSubmissionsSelected(): bool {
         return $this->regex_dir_submissions;
     }
 
-    /**
-     * @param bool $is_selected
-     */
     public function setRegexDirSubmissions(bool $is_selected): void {
         $this->regex_dir_submissions = $is_selected;
     }
 
-    /**
-     * @return bool
-     */
     public function isRegexDirResultsSelected(): bool {
         return $this->regex_dir_results;
     }
 
-    /**
-     * @param bool $is_selected
-     */
     public function setRegexDirResults(bool $is_selected): void {
         $this->regex_dir_results = $is_selected;
     }
 
-    /**
-     * @return bool
-     */
     public function isRegexDirCheckoutSelected(): bool {
         return $this->regex_dir_checkout;
     }
 
-    /**
-     * @param bool $is_selected
-     */
     public function setRegexDirCheckout(bool $is_selected): void {
         $this->regex_dir_checkout = $is_selected;
     }
 
-    /**
-     * @return string
-     */
     public function getLanguage(): string {
         return $this->language;
     }
 
     /**
-     * @param string $language
      * @throws Exception
      */
     public function setLanguage(string $language): void {
-        if (in_array($language, PlagiarismUtils::getSupportedLanguages())) {
+        if (in_array($language, array_keys(PlagiarismUtils::SUPPORTED_LANGUAGES))) {
             $this->language = $language;
         }
         else {
@@ -266,15 +215,11 @@ class PlagiarismConfig {
         }
     }
 
-    /**
-     * @return int
-     */
     public function getThreshold(): int {
         return $this->threshold;
     }
 
     /**
-     * @param int $threshold
      * @throws Exception
      */
     public function setThreshold(int $threshold): void {
@@ -286,15 +231,11 @@ class PlagiarismConfig {
         }
     }
 
-    /**
-     * @return int
-     */
     public function getSequenceLength(): int {
         return $this->sequence_length;
     }
 
     /**
-     * @param int $sequence_length
      * @throws Exception
      */
     public function setSequenceLength(int $sequence_length): void {
@@ -306,30 +247,18 @@ class PlagiarismConfig {
         }
     }
 
-    /**
-     * @return array
-     */
     public function getOtherGradeables(): array {
         return $this->other_gradeables;
     }
 
-    /**
-     * @param array $other_gradeables
-     */
     public function setOtherGradeables(array $other_gradeables): void {
         $this->other_gradeables = $other_gradeables;
     }
 
-    /**
-     * @return array
-     */
     public function getIgnoredSubmissions(): array {
         return $this->ignore_submissions;
     }
 
-    /**
-     * @param array $ignored_submissions
-     */
     public function setIgnoredSubmissions(array $ignored_submissions): void {
         $this->ignore_submissions = $ignored_submissions;
     }
