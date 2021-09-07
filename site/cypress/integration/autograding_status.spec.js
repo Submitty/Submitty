@@ -77,5 +77,4 @@ describe('Pre autograding test', () => {
         cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '0'));
         cy.get('#autograding-status-table tbody tr td').eq(11).then(element => cy.get(element).should('contain', '102'));
     });
-
 });
