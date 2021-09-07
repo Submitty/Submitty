@@ -2833,6 +2833,13 @@ class ElectronicGraderController extends AbstractController {
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
 
+        $submitter_anon_ids;
+        if ($anon != 'unblind') {
+            $submitter_anon_ids = $submitter_ids;
+        } else {
+            $submitter_anon_ids = $this->core->getQueries()->getAnonId($submitter_ids);
+        }
+
         $section_graded_component_count = 0;
         $section_total_component_count  = 0;
         $total_graded_component_count   = 0;
@@ -2848,7 +2855,8 @@ class ElectronicGraderController extends AbstractController {
             'total_graded_component_count'   => $total_graded_component_count,
             'section_total_component_count' => $section_total_component_count,
             'total_total_component_count'   => $total_total_component_count,
-            'submitter_ids' => $submitter_ids
+            'submitter_ids' => $submitter_ids,
+            'submitter_anon_ids' => $submitter_anon_ids
         ];
     }
 
