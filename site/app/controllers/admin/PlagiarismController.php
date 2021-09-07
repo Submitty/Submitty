@@ -705,7 +705,7 @@ class PlagiarismController extends AbstractController {
                 }
 
                 if ($error_message !== "") {
-                    throw new Exception($error_message);
+                    throw new ValidationException($error_message, []);
                 }
 
                 $new_config = new PlagiarismConfig(
@@ -723,9 +723,8 @@ class PlagiarismController extends AbstractController {
                     $data["ignore_submissions"]
                 );
                 $em->persist($new_config);
-                $em->flush();
             }
-            catch (Exception $e) {
+            catch (ValidationException $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
@@ -749,9 +748,8 @@ class PlagiarismController extends AbstractController {
                     $source_config->getIgnoredSubmissions()
                 );
                 $em->persist($new_config);
-                $em->flush();
             }
-            catch (Exception $e) {
+            catch (ValidationException $e) {
                 $this->core->addErrorMessage("Error: Unable to load source configuration");
                 return new RedirectResponse($return_url);
             }
