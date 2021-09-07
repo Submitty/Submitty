@@ -168,7 +168,8 @@ class RunLichen(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = int(self.job_details['config_id']) # We cast to an int to prevent malicious json files from containing invalid path components
+        # We cast to an int to prevent malicious json files from containing invalid path components
+        config_id = int(self.job_details['config_id'])
         config_data = self.job_details['config_data']
 
         # error checking

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\controllers\admin;
 
+use app\exceptions\ValidationException;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -897,10 +898,8 @@ class PlagiarismController extends AbstractController {
                     $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
                 }
                 $em->persist($plagiarism_config);
-
-                $em->flush();
             }
-            catch (Exception $e) {
+            catch (ValidationException $e) {
                 $this->core->addErrorMessage($e->getMessage());
                 return new RedirectResponse($return_url);
             }
@@ -940,6 +939,9 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Failed to add configuration to Lichen queue. Create the configuration again.");
             return new RedirectResponse($return_url);
         }
+
+        // We don't want to catch any errors here becasue if something goes wrong, we want to know about it as developers/sysadmins
+        $em->flush();
 
         $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for {$gradeable_id} configuration #{$config_id}");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));

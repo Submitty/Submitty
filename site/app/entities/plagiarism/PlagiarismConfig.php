@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\entities\plagiarism;
 
+use app\exceptions\ValidationException;
 use Exception;
 use Doctrine\ORM\Mapping as ORM;
 use app\libraries\plagiarism\PlagiarismUtils;
@@ -148,14 +149,14 @@ class PlagiarismConfig {
     }
 
     /**
-     * @throws Exception
+     * @throws ValidationException
      */
     public function setVersionStatus(string $version_code): void {
         if ($version_code === "active_version" || $version_code === "all_versions") {
             $this->version = $version_code;
         }
         else {
-            throw new Exception("Error: Version must either be 'active_version' or 'all_versions', $version_code provided.");
+            throw new ValidationException("Error: Version must either be 'active_version' or 'all_versions', $version_code provided.", []);
         }
     }
 
@@ -164,12 +165,12 @@ class PlagiarismConfig {
     }
 
     /**
-     * @throws Exception
+     * @throws ValidationException
      */
     public function setRegexArray(array $regex): void {
         foreach ($regex as $r) {
             if (str_contains($r, "..")) {
-                throw new Exception("Error: Regex contains invalid component '..'");
+                throw new ValidationException("Error: Regex contains invalid component '..'", []);
             }
         }
         $this->regex = $regex;
@@ -204,14 +205,14 @@ class PlagiarismConfig {
     }
 
     /**
-     * @throws Exception
+     * @throws ValidationException
      */
     public function setLanguage(string $language): void {
         if (in_array($language, array_keys(PlagiarismUtils::SUPPORTED_LANGUAGES))) {
             $this->language = $language;
         }
         else {
-            throw new Exception("Error: Provided language not in list of allowed languages");
+            throw new ValidationException("Error: Provided language not in list of allowed languages", []);
         }
     }
 
@@ -220,14 +221,14 @@ class PlagiarismConfig {
     }
 
     /**
-     * @throws Exception
+     * @throws ValidationException
      */
     public function setThreshold(int $threshold): void {
         if ($threshold > 1) {
             $this->threshold = $threshold;
         }
         else {
-            throw new Exception("Error: Invalid threshold value");
+            throw new ValidationException("Error: Invalid threshold value", []);
         }
     }
 
@@ -236,14 +237,14 @@ class PlagiarismConfig {
     }
 
     /**
-     * @throws Exception
+     * @throws ValidationException
      */
     public function setSequenceLength(int $sequence_length): void {
         if ($sequence_length > 1) {
             $this->sequence_length = $sequence_length;
         }
         else {
-            throw new Exception("Error: Invalid sequence length");
+            throw new ValidationException("Error: Invalid sequence length", []);
         }
     }
 
