@@ -195,24 +195,24 @@
     const prior_semester_course_list = JSON.parse(`{{ config["prior_semester_courses"] | json_encode() | raw }}`);
 
     // SUBMIT FORM /////////////////////////////////////////////////////////////
-    $(document).ready(function() {
-        form.submit(function () {
+    $(document).ready(() => {
+        form.submit(() => {
             $('#submit-form').attr('disabled', true);
         });
     });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
-    $("#no-code-provided-id").change(function() {
+    $("#no-code-provided-id").change(() => {
         $("#current-code-file").hide();
         $("#provided-code-file").hide();
     });
 
-    $("#code-provided-id").change(function() {
+    $("#code-provided-id").change(() => {
         $("#current-code-file").show();
         $("#provided-code-file").show();
     });
 
-    $(document).ready(function() {
+    $(document).ready(() => {
         if ({{ config["provided_code"] ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
             $("#current-code-file").show();
             $("#provided-code-file").show();
@@ -220,22 +220,22 @@
     });
 
     // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
-    $(document).ready(function() {
+    $(document).ready(() => {
         if ({{ config["prior_terms"] ? "true" : "false" }} && $("#past-terms-id").is(":checked")) {
             $("#prev-gradeable-div").show();
         }
     });
 
-    $('#add-more-prev-gradeable', form).on('click', function(){
+    $('#add-more-prev-gradeable', form).on('click', () => {
         addMorePriorTermGradeable();
     });
 
-    $("#no-past-terms-id").change(function() {
+    $("#no-past-terms-id").change(() => {
         $(".past-terms-wrapper").hide();
         $('#past-terms-content', form).html('');
     });
 
-    $("#past-terms-id").change(function() {
+    $("#past-terms-id").change(() => {
         $(".past-terms-wrapper").show();
         addMorePriorTermGradeable();
     });
@@ -263,7 +263,7 @@
                 semester_course: semester_course_dropdown.val(),
                 this_gradeable: {{ new_or_edit == "edit" ? ("'" ~ config["gradeable_id"] ~ "'")|raw : "$('#gradeable_id').val()" }}
             },
-            success: function(data) {
+            success: (data) => {
                 data = JSON.parse(data);
                 if (data.status !== 'success') {
                     alert(data.message);
@@ -271,11 +271,11 @@
                 }
 
                 gradeable_dropdown.empty();
-                $.each(data.data, function(index, gradeable) {
+                $.each(data.data, (index, gradeable) => {
                     gradeable_dropdown.append(`<option value='${gradeable}'>${gradeable}</option>`);
                 });
             },
-            error: function(e) {
+            error: (e) => {
                 gradeable_dropdown.empty();
                 gradeable_dropdown.append("<option value=''>Error: Ajax request failed</option>");
             }
@@ -299,7 +299,7 @@
         `);
         // fill in the left dropdown
         let semester_course_dropdown = $(`#prior-g-option-${first_free_index}`).children().first();
-        $.each(prior_semester_course_list, function(index, semester_course) {
+        $.each(prior_semester_course_list, (index, semester_course) => {
             let tokens_array = semester_course.split(" ");
             semester_course_dropdown.append(`<option value='${semester_course}'>${tokens_array[0]}/${tokens_array[1]}</option>`);
         });
@@ -315,27 +315,14 @@
         // that will appear in 'configureNewGradeableForPlagiarismForm'
         // to change the default values, just change the val attribute for the language.
 
-        if ($('[name="language"]', form).val() === "python") {
-            $('[name="sequence_length"]', form).val('14');
-        }
-        else if ($('[name="language"]', form).val() === "cpp") {
-            $('[name="sequence_length"]', form).val('14');
-        }
-        else if ($('[name="language"]', form).val() === "java") {
-            $('[name="sequence_length"]', form).val('14');
-        }
-        else if ($('[name="language"]', form).val() === "plaintext") {
-            $('[name="sequence_length"]', form).val('14');
-        }
-        else if ($('[name="language"]', form).val() === "mips") {
-            $('[name="sequence_length"]', form).val('5');
-        }
+        {% for key, value in supported_languages %}
+            if ($('[name="language"]', form).val() === '{{ key }}') {
+                $('[name="sequence_length"]', form).val({{ supported_languages[key]["sequence_length"] }});
+            }
+        {% endfor %}
     }
 
-    $(document).ready(function() {
+    $("select[name='language']").change(() => {
         updateSequenceLengthForLanguage();
-        $("select[name='language']").change(function() {
-            updateSequenceLengthForLanguage();
-        });
     });
 </script>
