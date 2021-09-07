@@ -1253,6 +1253,7 @@ function addNewCategory(csrf_token){
         type: "POST",
         data: {
             newCategory: newCategory,
+            rank: $('[id^="categorylistitem-').length,
             csrf_token: csrf_token
         },
         success: function(data){
@@ -1284,6 +1285,7 @@ function addNewCategory(csrf_token){
             $('#ui-category-list').append(newelement);
             $(".category-list-no-element").hide();
             refreshCategories();
+            window.location.reload();
         },
         error: function(){
             window.alert("Something went wrong while trying to add a new category. Please try again.");
