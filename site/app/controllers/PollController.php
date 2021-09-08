@@ -422,9 +422,7 @@ class PollController extends AbstractController {
         }
         if (!in_array($_POST["student_histogram_release_setting"], PollUtils::getStudentHistogramReleaseSettings())) {
             $this->core->addErrorMessage("Invalid student histogram release setting");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
