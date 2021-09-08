@@ -3,6 +3,7 @@
 namespace tests\app\libraries\routers;
 
 use app\libraries\routers\WebRouter;
+use app\models\Config;
 use tests\BaseUnitTest;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -12,6 +13,9 @@ use Symfony\Component\HttpFoundation\Request;
 class WebRouterTester extends BaseUnitTest {
     public function testLogin() {
         $core = $this->createMockCore(['logged_in' => false]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/authentication/login"
         );
@@ -26,6 +30,9 @@ class WebRouterTester extends BaseUnitTest {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = 'test';
         $core = $this->createMockCore(['logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/authentication/logout"
         );
@@ -36,6 +43,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testRedirectToLoginFromCourse() {
         $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/courses/s19/sample"
         );
@@ -48,6 +58,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testRedirectToHomeFromLogin() {
         $core = $this->createMockCore(['logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/authentication/login"
         );
@@ -57,6 +70,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testParamAttackLoggedIn() {
         $core = $this->createMockCore(['logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/authentication/login",
             "GET",
@@ -68,6 +84,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testParamAttackNotLoggedIn() {
         $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/courses/s19/sample",
             "GET",
@@ -87,6 +106,9 @@ class WebRouterTester extends BaseUnitTest {
      */
     public function testRedirectToLoginFromRandomUrl($url) {
         $core = $this->createMockCore(['logged_in' => false]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create($url);
         $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildUrl(['authentication', 'login']), $response->redirect_response->url);
@@ -98,6 +120,9 @@ class WebRouterTester extends BaseUnitTest {
      */
     public function testRedirectToHomeFromRandomUrl($url) {
         $core = $this->createMockCore(['logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create($url);
         $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
@@ -120,6 +145,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testNoCsrfToken() {
         $core = $this->createMockCore(['csrf_token' => false, 'logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/user_profile/change_preferred_names",
             "POST"
@@ -142,6 +170,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testWithCsrfToken() {
         $core = $this->createMockCore(['csrf_token' => true, 'logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/home/change_username",
             "POST"
@@ -159,6 +190,9 @@ class WebRouterTester extends BaseUnitTest {
      */
     public function testApiNotFound($url) {
         $core = $this->createMockCore(['logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/api" . $url
         );
@@ -171,6 +205,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testApiWrongMethod() {
         $core = $this->createMockCore(['logged_in' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/api/token"
         );
@@ -183,6 +220,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testApiNoToken() {
         $core = $this->createMockCore(['logged_in' => false]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/api/courses"
         );
@@ -195,6 +235,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testApiNotFaculty() {
         $core = $this->createMockCore(['logged_in' => true, 'access_faculty' => false]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/api/courses"
         );
@@ -207,6 +250,9 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testCheckPostMaxSize() {
         $core = $this->createMockCore(['logged_in' => true], ['access_faculty' => true]);
+        $config = new Config($this->core);
+        $config->setDebug(true);
+        $core->setConfig($config);
         $request = Request::create(
             "/api/token",
             "POST"
