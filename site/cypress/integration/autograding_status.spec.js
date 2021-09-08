@@ -18,6 +18,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been stopped');
             cy.get('#toggle-btn').should('have.text', 'Resume Update').click().should('have.text', 'Pause Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been resumed');
+            cy.logout();
         });
 
         it('Should show newly added autograding jobs', () => {
