@@ -82,6 +82,9 @@ select {
     background-color: var(--standard-plum-purple);
     color: white;
 }
+table th{
+    border: 1px solid var(--standard-light-gray);
+}
 
 a.nav-bar {
     padding: 6px 12px;
