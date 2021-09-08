@@ -2211,7 +2211,7 @@ class Gradeable extends AbstractModel {
      *
      * @return string
      */
-    public function getPrerequisite(): string  {
+    public function getPrerequisite(): string {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             return $dependent_gradeable->getId();
@@ -2220,5 +2220,4 @@ class Gradeable extends AbstractModel {
             return '';
         }
     }
-
 }
