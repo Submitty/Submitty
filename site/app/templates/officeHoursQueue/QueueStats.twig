@@ -87,9 +87,11 @@
   <table class="table">
     <thead>
       <tr>
+      {% if not week_day_data is empty %}
         {% for key, item in week_day_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
+      {% endif %}
       </tr>
     </thead>
     <tbody>
@@ -112,9 +114,11 @@
   <table class="table">
     <thead>
       <tr>
+      {% if not queue_data is empty %}
         {% for key, item in queue_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
+      {% endif %}
       </tr>
     </thead>
     <tbody>
@@ -133,12 +137,14 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in week_number_data[0] %}
-          {% if key == "yearnum" %}
-          {% else %}
-            <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
-          {% endif %}
-        {% endfor %}
+        {% if not week_number_data is empty %}
+          {% for key, item in week_number_data[0] %}
+            {% if key == "yearnum" %}
+              {% else %}
+                <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
       </tr>
     </thead>
     <tbody>
