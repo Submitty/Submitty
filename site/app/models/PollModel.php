@@ -35,8 +35,10 @@ class PollModel extends AbstractModel {
     protected $status;
     /** @prop-read string|null */
     protected $image_path;
+    /** @prop-read string */
+    protected $student_histogram_release_setting;
 
-    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path) {
+    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path, $student_histogram_release_setting) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
@@ -48,6 +50,7 @@ class PollModel extends AbstractModel {
         $this->user_responses = $user_responses;
         $this->release_date = $release_date;
         $this->image_path = $image_path;
+        $this->student_histogram_release_setting = $student_histogram_release_setting;
     }
 
     public function getResponses() {
@@ -128,5 +131,21 @@ class PollModel extends AbstractModel {
 
     public function isToday() {
         return date("Y-m-d") == $this->release_date;
+    }
+
+    public function isStudentHistogramAvailableNever() {
+        return $this->student_histogram_release_setting == "never";
+    }
+
+    public function isStudentHistogramAvailableWhenEnded() {
+        return $this->student_histogram_release_setting == "when_ended";
+    }
+
+    public function isStudentHistogramAvailableAlways() {
+        return $this->student_histogram_release_setting == "always";
+    }
+
+    public function isStudentHistogramAvailable() {
+        return ($this->isStudentHistogramAvailableAlways() && !$this->isClosed()) || ($this->isStudentHistogramAvailableWhenEnded() && $this->isEnded());
     }
 }

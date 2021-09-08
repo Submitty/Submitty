@@ -31,7 +31,8 @@ class PollUtils {
                 "correct_responses" => $poll->getAnswers(),
                 "release_date" => $poll->getReleaseDate(),
                 "status" => $poll->getStatus(),
-                "image_path" => $poll->getImagePath()
+                "image_path" => $poll->getImagePath(),
+                "student_histogram_release_setting" => $poll->getStudentHistogramReleaseSetting()
             ];
         }
         return $data;
@@ -52,5 +53,13 @@ class PollUtils {
         return (($poll_type == "single-response-single-correct")
                 || ($poll_type == "single-response-multiple-correct")
                 || ($poll_type == "single-response-survey"));
+    }
+
+    public static function getStudentHistogramReleaseSettings(): array {
+        return [
+            "never",
+            "when_ended",
+            "always"
+        ];
     }
 }
