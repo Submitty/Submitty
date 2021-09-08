@@ -70,8 +70,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#autograding-status-table tbody tr td').eq(7).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(8).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(9).then(element => cy.get(element).should('contain', '0'));
-            cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '0'));
-            cy.get('#autograding-status-table tbody tr td').eq(11).then(element => cy.get(element).should('contain', '101'));
+            cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '101'));
 
             // add a non regrade job and see that the site is updated
 
@@ -99,8 +98,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#autograding-status-table tbody tr td').eq(7).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(8).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(9).then(element => cy.get(element).should('contain', '0'));
-            cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '0'));
-            cy.get('#autograding-status-table tbody tr td:gt(6)').should('contain', '102');
+            cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '102'));
         });
     });
 });
