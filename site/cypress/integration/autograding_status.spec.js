@@ -21,6 +21,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         });
 
         it('Should show newly added autograding jobs', () => {
+            cy.viewport(1920,1200);
             cy.visit('/');
             cy.login();
             cy.wait(500);
@@ -39,6 +40,27 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#course-table tbody tr td').eq(3).then(element => cy.get(element).should('contain', '0'));
             cy.get('#course-table tbody tr td').eq(4).then(element => cy.get(element).should('contain', '101'));
 
+            // dynamically set the column num of the capabilities
+            /*
+            const capabilities = new Map();
+            cy.get('#autograding-status-table thead tr th').eq(11)
+                .then(element => cy.get(element).invoke('text')
+                .then(text => {capabilities.set(text.trim(), 7);}));
+            cy.get('#autograding-status-table thead tr th').eq(12)
+                .then(element => cy.get(element).invoke('text')
+                .then(text => {capabilities.set(text.trim(), 8);}));
+            cy.get('#autograding-status-table thead tr th').eq(13)
+                .then(element => cy.get(element).invoke('text')
+                .then(text => {capabilities.set(text.trim(), 9);}));
+            cy.get('#autograding-status-table thead tr th').eq(14)
+                .then(element => cy.get(element).invoke('text')
+                .then(text => {capabilities.set(text.trim(), 10);}));
+            cy.get('#autograding-status-table thead tr th').eq(15)
+                .then(element => cy.get(element).invoke('text')
+                .then(text => {capabilities.set(text.trim(), 11);}));
+            */
+            //console.log(capabilities);
+            cy.wait(500);
             cy.get('#autograding-status-table tbody tr td').eq(1).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(2).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(3).then(element => cy.get(element).should('contain', '0'));
@@ -78,7 +100,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#autograding-status-table tbody tr td').eq(8).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(9).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '0'));
-            cy.get('#autograding-status-table tbody tr td').eq(11).then(element => cy.get(element).should('contain', '102'));
+            cy.get('#autograding-status-table tbody tr td:gt(6)').should('contain', '102');
         });
     });
 });
