@@ -11,12 +11,9 @@ use Symfony\Component\HttpFoundation\Request;
  * @runTestsInSeparateProcesses
  */
 class WebRouterTester extends BaseUnitTest {
-
     public function createMockCore($config_values = [], $user_config = [], $queries = [], $access = []) {
+        $config_values['debug'] = true;
         $core = parent::createMockCore($config_values, $user_config, $queries, $access);
-        $config = new Config($core);
-        $config->setDebug(true);
-        $core->setConfig($config);
         return $core;
     }
 
