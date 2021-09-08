@@ -15,7 +15,8 @@
     float: none;
 }
 
+a.popout-item:hover,
 a.popout-item:hover *,
-a.popout-item:hover {
+a.popout-item > .fas:hover {
     color: var(--external-link-hover);
 }
