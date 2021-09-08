@@ -93,6 +93,11 @@ textarea.sa-box {
     margin-bottom: 0;
 }
 
+.notebook fieldset label p {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
 img {
     margin-top: 10px;
 }
