@@ -1260,7 +1260,8 @@ class Course(object):
                               status=poll["status"],
                               release_date=poll["release_date"],
                               image_path=poll["image_path"],
-                              question_type=poll["question_type"])
+                              question_type=poll["question_type"],
+                              student_histogram_release_setting=poll["student_histogram_release_setting"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
                                   option_id=i,
