@@ -1570,6 +1570,8 @@ function getFocusableElements() {
 function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
     const enablePreview = preview_element.is(':hidden');
 
+    console.log(preview_button)
+
     $.ajax({
         url: buildCourseUrl(['markdown', 'preview']),
         type: 'POST',
@@ -1588,6 +1590,9 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, dat
                 preview_button.empty();
                 preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
 
+                console.log("hello");
+                preview_button.data("mode", "preview");
+
             }
             else {
                 preview_element.hide();
@@ -1595,6 +1600,9 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, dat
 
                 preview_button.empty();
                 preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+
+                console.log("hi")
+                preview_button.data("mode", "edit");
             }
         },
         error: function() {
