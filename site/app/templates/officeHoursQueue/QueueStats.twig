@@ -140,8 +140,8 @@
         {% if not week_number_data is empty %}
           {% for key, item in week_number_data[0] %}
             {% if key == "yearnum" %}
-              {% else %}
-                <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+            {% else %}
+              <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
             {% endif %}
           {% endfor %}
         {% endif %}
