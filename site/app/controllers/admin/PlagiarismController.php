@@ -929,17 +929,18 @@ class PlagiarismController extends AbstractController {
             }
         }
 
+        // We don't want to catch any errors here because if something goes wrong, we want to know about it as developers/sysadmins
+        $em->flush();
+
         // Create the Lichen job ///////////////////////////////////////////////
         try {
             $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         }
         catch (Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
             $this->core->addErrorMessage("Failed to add configuration to Lichen queue. Create the configuration again.");
             return new RedirectResponse($return_url);
         }
-
-        // We don't want to catch any errors here becasue if something goes wrong, we want to know about it as developers/sysadmins
-        $em->flush();
 
         $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for {$gradeable_id} configuration #{$config_id}");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
