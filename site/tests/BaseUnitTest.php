@@ -65,9 +65,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
-        if (isset($config_values['debug'])) {
-            $config->method('isDebug')->willReturn($config_values['debug']);
-        }
+        $config->method('isDebug')->willReturn($config_values['debug'] ?? true);
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
