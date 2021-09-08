@@ -765,7 +765,7 @@ class Gradeable extends AbstractModel {
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
         //  into the second parameter.
-        $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
+        $coerce_dates = function (array $date_properties, array $skip_coercion_dates, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             $prev_date = null;
             foreach ($date_properties as $i => $property) {
@@ -778,8 +778,8 @@ class Gradeable extends AbstractModel {
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
-                // Don't coerce a date on the black list
-                if (in_array($property, $black_list)) {
+                // Don't coerce a date on the skip list
+                if (in_array($property, $skip_coercion_dates)) {
                     $prev_date = $date_values[$property];
                     continue;
                 }
@@ -802,16 +802,19 @@ class Gradeable extends AbstractModel {
             return $date_values;
         };
 
-        // Blacklist the dates checked by validation
-        $black_list = $this->getDateValidationSet($regrade_modified);
+        // Don't coerce the dates checked by validation
+        $skip_coercion_dates = $this->getDateValidationSet($regrade_modified);
+        if ($this->isTeamAssignment()) {
+            $skip_coercion_dates[] = "team_lock_date";
+        }
 
         // First coerce in the forward direction, then in the reverse direction
         return $coerce_dates(
             array_reverse(self::date_validated_properties),
-            $black_list,
+            $skip_coercion_dates,
             $coerce_dates(
                 self::date_validated_properties,
-                $black_list,
+                $skip_coercion_dates,
                 $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
