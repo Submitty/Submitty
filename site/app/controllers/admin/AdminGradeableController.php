@@ -1088,6 +1088,9 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // Set default value which may be set in loop below
+        $regrade_modified = false;
+
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
             // Convert boolean values into booleans
@@ -1143,6 +1146,12 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
+            if ($prop === 'regrade_allowed') {
+                if ($post_val !== $gradeable->isRegradeAllowed()) {
+                    $regrade_modified = true;
+                }
+            }
+
             // Try to set the property
             try {
                 //convert the property name to a setter name
@@ -1169,7 +1178,7 @@ class AdminGradeableController extends AbstractController {
         //  affect date validation
         if ($date_set) {
             try {
-                $gradeable->setDates($dates);
+                $gradeable->setDates($dates, $regrade_modified);
                 $updated_properties = $gradeable->getDateStrings(false);
             }
             catch (ValidationException $e) {
