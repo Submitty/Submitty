@@ -16,7 +16,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         it('Should start at pause update', () => {
             cy.get('#toggle-btn').should('have.text', 'Pause Update').click().should('have.text', 'Resume Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been stopped');
-            
+
             // Check that the table isn't gaining new entries
             cy.wait(5000);
             cy.get('#autograding-status-table tbody tr').eq(1).should('not.exist');

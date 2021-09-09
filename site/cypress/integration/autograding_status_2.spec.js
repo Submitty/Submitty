@@ -1,4 +1,3 @@
-import {getCurrentSemester} from '../support/utils.js';
 import {skipOn} from '@cypress/skip-test';
 
 const autograding_status_path = 'autograding_status';
