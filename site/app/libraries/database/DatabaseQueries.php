@@ -2601,14 +2601,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  Mark      $mark
      * @param  User      $grader
      * @param  Gradeable $gradeable
-     * @param  bool      $anon
+     * @param  string      $anon
      * @return string[]
      */
-    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = false) {
+    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = 'unblind') {
          // Switch the column based on gradeable team-ness
          $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
          // TODO: anon teams?
-         $user_type = ($type == 'user' && $anon) ? 'anon' : $type;
+         $user_type = ($type == 'user' && $anon != 'unblind') ? 'anon' : $type;
          $row_type = $user_type . "_id";
 
          $params = [$grader->getId(), $mark->getId()];
@@ -2644,12 +2644,12 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
     }
 
-    public function getAllSubmittersWhoGotMark($mark, $anon = false) {
+    public function getAllSubmittersWhoGotMark($mark, $anon = 'unblind') {
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-        $row_type = ($anon && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
+        $row_type = ($anon != 'unblind' && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
         //TODO: anon teams?
-        if ($anon && $type != 'team') {
+        if ($anon != 'unblind' && $type != 'team') {
             $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
             $this->course_db->query(
                 "
