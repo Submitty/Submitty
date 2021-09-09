@@ -2833,6 +2833,8 @@ class ElectronicGraderController extends AbstractController {
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
 
+        $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getAnonId($submitter_ids);
+
         $section_graded_component_count = 0;
         $section_total_component_count  = 0;
         $total_graded_component_count   = 0;
@@ -2848,7 +2850,8 @@ class ElectronicGraderController extends AbstractController {
             'total_graded_component_count'   => $total_graded_component_count,
             'section_total_component_count' => $section_total_component_count,
             'total_total_component_count'   => $total_total_component_count,
-            'submitter_ids' => $submitter_ids
+            'submitter_ids' => $submitter_ids,
+            'submitter_anon_ids' => $submitter_anon_ids
         ];
     }
 
@@ -3014,8 +3017,12 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        $gradeable->setPeerFeedback($this->core->getQueries()->getAnonId($grader_id), $user_id, $feedback);
-        $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        if ($gradeable->setPeerFeedback($this->core->getQueries()->getUserFromAnon($grader_id)[$grader_id], $user_id, $feedback)) {
+            $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        }
+        else {
+            $this->core->getOutput()->renderJsonError("Failed to save feedback");
+        }
         return true;
     }
 
