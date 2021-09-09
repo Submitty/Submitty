@@ -16,8 +16,18 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         it('Should start at pause update', () => {
             cy.get('#toggle-btn').should('have.text', 'Pause Update').click().should('have.text', 'Resume Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been stopped');
+            
+            // Check that the table isn't gaining new entries
+            cy.wait(5000);
+            cy.get('#autograding-status-table tbody tr').eq(1).should('not.exist');
+
             cy.get('#toggle-btn').should('have.text', 'Resume Update').click().should('have.text', 'Pause Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been resumed');
+
+            // Check that the table is gaining new entries
+            cy.wait(5000);
+            cy.get('#autograding-status-table tbody tr').eq(1).should('exist');
+
             cy.logout();
         });
 
@@ -41,26 +51,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#course-table tbody tr td').eq(3).then(element => cy.get(element).should('contain', '0'));
             cy.get('#course-table tbody tr td').eq(4).then(element => cy.get(element).should('contain', '101'));
 
-            // dynamically set the column num of the capabilities
-            /*
-            const capabilities = new Map();
-            cy.get('#autograding-status-table thead tr th').eq(11)
-                .then(element => cy.get(element).invoke('text')
-                .then(text => {capabilities.set(text.trim(), 7);}));
-            cy.get('#autograding-status-table thead tr th').eq(12)
-                .then(element => cy.get(element).invoke('text')
-                .then(text => {capabilities.set(text.trim(), 8);}));
-            cy.get('#autograding-status-table thead tr th').eq(13)
-                .then(element => cy.get(element).invoke('text')
-                .then(text => {capabilities.set(text.trim(), 9);}));
-            cy.get('#autograding-status-table thead tr th').eq(14)
-                .then(element => cy.get(element).invoke('text')
-                .then(text => {capabilities.set(text.trim(), 10);}));
-            cy.get('#autograding-status-table thead tr th').eq(15)
-                .then(element => cy.get(element).invoke('text')
-                .then(text => {capabilities.set(text.trim(), 11);}));
-            */
-            //console.log(capabilities);
             cy.wait(500);
             cy.get('#autograding-status-table tbody tr td').eq(1).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(2).then(element => cy.get(element).should('contain', '0'));
@@ -100,6 +90,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#autograding-status-table tbody tr td').eq(8).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(9).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '102'));
+
+            cy.logout();
         });
     });
 });
