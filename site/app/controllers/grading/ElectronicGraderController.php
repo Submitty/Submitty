@@ -3017,8 +3017,12 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        $gradeable->setPeerFeedback($this->core->getQueries()->getAnonId($grader_id), $user_id, $feedback);
-        $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        if ($gradeable->setPeerFeedback($this->core->getQueries()->getUserFromAnon($grader_id)[$grader_id], $user_id, $feedback)) {
+            $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        }
+        else {
+            $this->core->getOutput()->renderJsonError("Failed to save feedback");
+        }
         return true;
     }
 
