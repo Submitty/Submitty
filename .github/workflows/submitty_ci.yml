@@ -463,7 +463,7 @@ jobs:
             uses: cypress-io/github-action@v2
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status.spec.js
+              spec: cypress/integration/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -472,6 +472,16 @@ jobs:
           - name: Restart autograding shipper
             run: |
               sudo systemctl restart submitty_autograding_shipper
+
+          - name: Run autograding status test
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/integration/autograding_status_2.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              headless: true
+              env: autograding_shipper_off=True
 
           - name: Restart autograding worker
             run: |
