@@ -14,8 +14,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
         it('should show the gradeables being grading', () => {
             cy.get('#machine-table tbody tr').eq(3).should('exist');
-            cy.get('#machine-table tbody tr td').should('contain', 'future_no_tas_homework')
             cy.get('#machine-table tbody tr td').should('contain', 'future_no_tas_homework');
+            cy.get('#machine-table tbody tr td').should('contain', 'closed_homework');
         });
     });
 });
