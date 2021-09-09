@@ -86,6 +86,13 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
+# clear old annotation cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
+fi
+# create annotation cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/annotations
+
 # Update ownership to PHP_USER for affected files and folders
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
