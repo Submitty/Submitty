@@ -245,13 +245,6 @@ button,
  * TABLE STYLES
  ***************************/
 
-@media (prefers-color-scheme: dark) {
-    .multi-field, #mult-field-0 {
-      color: #f9f9f9;
-      background: #222222;
-    }
-  }
-
 table a {
     text-decoration: none;
 }
