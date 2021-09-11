@@ -667,35 +667,6 @@ function setupSimpleGrading(action) {
         }
     }
 
-    // default key movement
-    $(document).on("keydown", function(event) {
-        // if input cell selected, use this to check if cursor is in the right place
-        var input_cell = $("input.cell-grade:focus");
-
-        // if there is no selection OR there is a selection to the far left with 0 length
-        if(event.code === "ArrowLeft" && (!input_cell.length || (
-                input_cell[0].selectionStart == 0 &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
-            event.preventDefault();
-            movement("left");
-        }
-        else if(event.code === "ArrowUp") {
-            event.preventDefault();
-            movement("up");
-        }
-        // if there is no selection OR there is a selection to the far right with 0 length
-        else if(event.code === "ArrowRight" && (!input_cell.length || (
-                input_cell[0].selectionEnd == input_cell[0].value.length &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
-            event.preventDefault();
-            movement("right");
-        }
-        else if(event.code === "ArrowDown") {
-            event.preventDefault();
-            movement("down");
-        }
-    });
-
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
     // make arrow keys in lab section changeable now

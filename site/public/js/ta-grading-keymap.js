@@ -73,7 +73,7 @@ window.onkeyup = function(e) {
 
 window.onkeydown = function(e) {
     if (remapping.active) {
-        e.preventDefault();
+        //e.preventDefault();
         return;
     }
 
@@ -82,7 +82,7 @@ window.onkeydown = function(e) {
         return;
     }
 
-    if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
+    if ((e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
 
     var codeName = eventToKeyCode(e);
 
