@@ -299,7 +299,6 @@
         
         const time_taken = Math.floor((curTime - loadTime)/1000);
         const minutes_taken = Math.floor(time_taken / 60);
-        console.log(minutes_taken);
         if (minutes_taken >= interval ) {
             if (localStorage.getItem(notebookPopupSubmitKey()) === 'yes' && curTime < user_deadline && showPopup) {
                 $(".notebook-submit-popup").show();
