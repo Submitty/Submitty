@@ -19,9 +19,11 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in overall_data[0] %}
-          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
-        {% endfor %}
+        {% if not overall_data is empty %}
+          {% for key, item in overall_data[0] %}
+            <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+          {% endfor %}
+        {% endif %}
       </tr>
     </thead>
     <tbody>
@@ -39,9 +41,11 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in today_data[0] %}
-          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
-        {% endfor %}
+        {% if not today_data is empty %}
+          {% for key, item in today_data[0] %}
+            <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+          {% endfor %}
+        {% endif %}
       </tr>
     </thead>
     <tbody>
