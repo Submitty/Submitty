@@ -92,7 +92,8 @@
     margin-bottom: 1em;
 }
 
-.docker-warning, #docker-name-example {
+.docker-warning,
+#docker-name-example {
     margin-bottom: 1em;
     padding: 10px;
 }
