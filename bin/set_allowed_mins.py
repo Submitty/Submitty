@@ -40,14 +40,14 @@ def setup_db():
             db_config['database_user'],
             db_config['database_password'],
             db_name, db_config['database_host']
-            )
+        )
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(
             db_config['database_user'],
             db_config['database_password'],
             db_config['database_host'],
             db_name
-            )
+        )
 
     engine = create_engine(conn_string)
     db = engine.connect()
