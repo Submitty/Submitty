@@ -178,6 +178,9 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
     if [[ "$#" -ge 1 && $1 == "quick" ]] ; then
+        # pop this argument from the list of arguments...
+        shift
+
         rm -rf ${SUBMITTY_INSTALL_DIR}/site/app
         rm -rf ${SUBMITTY_INSTALL_DIR}/site/cache
         rm -rf ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
