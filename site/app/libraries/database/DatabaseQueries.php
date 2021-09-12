@@ -7623,8 +7623,8 @@ SQL;
      * @return int
      */
     public function getTotalStudentsWithSubmissions(string $gradeable_id): int {
-        $this->course_db->query('SELECT DISTINCT user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
-        return count($this->course_db->rows());
+        $this->course_db->query('SELECT DISTINCT COUNT(*) user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["user_id"];
     }
 
     /**
@@ -7634,7 +7634,7 @@ SQL;
      * @return int
      */
     public function getTotalSubmissionsToGradeable(string $gradeable_id): int {
-        $this->course_db->query('SELECT * FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
-        return count($this->course_db->rows());
+        $this->course_db->query('SELECT COUNT(*) FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["count"];
     }
 }

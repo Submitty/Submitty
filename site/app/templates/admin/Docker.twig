@@ -12,7 +12,7 @@
         <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
         <pre class="error-log">
             {% for error_log in error_logs %}
-                {{error_log ~ "\n"}}
+                {{error_log }} <br>
             {% endfor %}
         </pre>
     {% endif %}
@@ -24,7 +24,8 @@
     <table class="machine-table">
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
-            <td rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</td>
+            <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
             <th colspan={{capabilities|length}}>Capabilities</th>
         </tr>
         <tr>
@@ -36,6 +37,7 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th>{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
+            <td>{{ machine_docker_version[worker['name']] }}</td>
             {% for capability in capabilities %}
                 {% if capability in worker['capabilities'] %}
                     <td><i class="fas fa-check"></i></td>
@@ -68,7 +70,11 @@
         <thead>
             <tr>
                 <th>Image Name</th>
+                <th>Id</th>
+                <th>Size</th>
                 <th>Tag</th>
+                <th>Created</th>
+                <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
             </tr>
         </thead>
@@ -78,8 +84,42 @@
                 {% set full = key|split(":")  %}
                 {% set name = full[0] %}
                 {% set tag = full[1] %}
+                {% set used_name = key %}
+                {% if key in aliases|keys %}
+                    {% for alias in aliases[key] %}
+                        {% if alias in image_info|keys %}
+                            {% set used_name = alias %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {% set used_name = null %}
+                {% endif %}
                 <td>{{ name }}</th>
+                <td>
+                    {% if used_name in image_info|keys %}
+                        {{ image_info[used_name]["id"] | trim("sha256:")}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if used_name in image_info|keys %}
+                        {{ image_info[used_name]["size"] }}
+                    {% endif %}
+                </td>
                 <td>{{ tag }} </td>
+                <td>
+                    {% if used_name in image_info|keys %}
+                        {{ image_info[used_name]["created"] }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if key in aliases|keys %}
+                        <ul class="tag-list">
+                            {% for alias in aliases[key] %}
+                                <li>{{ alias }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </td>
                 <td>
                     {% for capability in value %}
                         <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>

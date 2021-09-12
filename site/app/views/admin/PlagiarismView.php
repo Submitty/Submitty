@@ -79,7 +79,8 @@ class PlagiarismView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
             "gradeables_with_plag_configs" => $gradeables_with_plag_configs,
-            "config" => $config
+            "config" => $config,
+            "supported_languages" => PlagiarismUtils::SUPPORTED_LANGUAGES
         ]);
     }
 }
