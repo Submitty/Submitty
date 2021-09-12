@@ -7,6 +7,7 @@ namespace app\entities\plagiarism;
 use Exception;
 use Doctrine\ORM\Mapping as ORM;
 use app\libraries\plagiarism\PlagiarismUtils;
+use DateTime;
 
 /**
  * Class PlagiarismConfig
@@ -97,6 +98,12 @@ class PlagiarismConfig {
      */
     protected $ignore_submissions;
 
+    /**
+     * @ORM\Column(type="datetime")
+     * @var DateTime
+     */
+    protected $last_run_timestamp;
+
     /* FUNCTIONS */
 
     /**
@@ -141,6 +148,7 @@ class PlagiarismConfig {
         $this->setSequenceLength($sequence_length);
         $this->setOtherGradeables($other_gradeables);
         $this->setIgnoredSubmissions($ignored_submissions);
+        $this->setLastRunToCurrentTime();
     }
 
     /**
@@ -332,5 +340,13 @@ class PlagiarismConfig {
      */
     public function setIgnoredSubmissions(array $ignored_submissions): void {
         $this->ignore_submissions = $ignored_submissions;
+    }
+
+    public function getLastRunTimestamp(): DateTime {
+        return $this->last_run_timestamp;
+    }
+
+    public function setLastRunToCurrentTime(): void {
+        $this->last_run_timestamp = new DateTime();
     }
 }

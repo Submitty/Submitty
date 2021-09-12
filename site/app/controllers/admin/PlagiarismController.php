@@ -404,7 +404,8 @@ class PlagiarismController extends AbstractController {
                 "g_id" => $config->getGradeableID(),
                 "g_title" => $all_gradeables[$config->getGradeableID()],
                 "g_grade_due_date" => $this->core->getQueries()->getDateForGradeableById($config->getGradeableID()),
-                "g_config_version" => $config->getConfigID()
+                "g_config_version" => $config->getConfigID(),
+                "last_run_timestamp" => $config->getLastRunTimestamp()
             ];
             $all_configurations[] = $configuration;
         }
@@ -461,7 +462,7 @@ class PlagiarismController extends AbstractController {
             // if we have an overall ranking file, it means that the Lichen job finished successfully and there are matches
             $has_results = file_exists($overall_ranking_file) && file_get_contents($overall_ranking_file) !== "";
 
-            $timestamp = "N/A";
+            $timestamp = $gradeable["last_run_timestamp"]->format($gradeable_date_format);
             $students = "N/A";
             $submissions = "N/A";
             $ranking_available = false;
@@ -489,7 +490,6 @@ class PlagiarismController extends AbstractController {
                 $in_queue = false;
                 $processing = false;
                 if ($has_results) {
-                    $timestamp = date($gradeable_date_format, filemtime($overall_ranking_file));
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
                         $matches_and_top_match = count($rankings) . " students matched, {$rankings[0][0]} top match";
