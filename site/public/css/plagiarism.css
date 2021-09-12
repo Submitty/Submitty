@@ -12,14 +12,6 @@
     white-space: nowrap;
 }
 
-td .plag-action-btn-cont {
-    display: flex;
-}
-
-td .plag-action-btn-cont a:not(:last-child) {
-    margin-right: 40px;
-}
-
 .config-id-title {
     color: var(--standard-medium-gray);
     font-weight: normal;
@@ -33,6 +25,29 @@ td .plag-action-btn-cont a:not(:last-child) {
     text-align: left;
     width: inherit;
     background-color: var(--table-info);
+}
+
+th {
+    padding: 0 0.25em;
+}
+
+td {
+    border-left-style: none;
+    border-right-style: none;
+}
+
+.padded-icon-column {
+    padding: 0 0.5em !important;
+}
+
+.unread {
+    background-color: var(--viewed-content);
+}
+
+.unread td:first-child {
+    border-left-color: var(--actionable-blue);
+    border-left-width: 3px;
+    border-left-style: solid;
 }
 
 .run-log-data pre {

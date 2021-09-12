@@ -460,10 +460,10 @@ class PlagiarismController extends AbstractController {
             $has_results = file_exists($overall_ranking_file) && file_get_contents($overall_ranking_file) !== "";
 
             $timestamp = $gradeable["last_run_timestamp"]->format($gradeable_date_format);
-            $students = "N/A";
-            $submissions = "N/A";
+            $submissions = $this->core->getQueries()->getTotalSubmissionsToGradeable($gradeable['g_id']);
             $ranking_available = false;
-            $matches_and_top_match = "0 students matched, N/A top match";
+            $matching_submission_count = 0;
+            $top_match_percent = "N/A";
             $gradeable_link = "";
             $rerun_plagiarism_link = "";
             $edit_plagiarism_link = "";
@@ -489,15 +489,13 @@ class PlagiarismController extends AbstractController {
                 if ($has_results) {
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
-                        $matches_and_top_match = count($rankings) . " students matched, {$rankings[0][0]} top match";
+                        $top_match_percent = $rankings[0][0];
+                        $matching_submission_count = count($rankings);
                         $ranking_available = true;
                     }
                     catch (Exception $e) {
                         $this->core->addErrorMessage($e->getMessage());
                     }
-
-                    $students = $this->core->getQueries()->getTotalStudentsWithSubmissions($gradeable['g_id']);
-                    $submissions = $this->core->getQueries()->getTotalSubmissionsToGradeable($gradeable['g_id']);
 
                     $gradeable_link = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $gradeable['g_id']]) . "?config_id={$gradeable['g_config_version']}";
                 }
@@ -512,12 +510,12 @@ class PlagiarismController extends AbstractController {
                 'config_id' => $gradeable['g_config_version'],
                 'duedate' => $gradeable['g_grade_due_date']->format($gradeable_date_format),
                 'timestamp' => $timestamp,
-                'students' => $students,
                 'submissions' => $submissions,
                 'in_queue' => $in_queue,
                 'processing' => $processing,
                 'ranking_available' => $ranking_available,
-                'matches_and_topmatch' => $matches_and_top_match,
+                'top_match_percent' => $top_match_percent,
+                'matching_submission_count' => $matching_submission_count,
                 'gradeable_link' => $gradeable_link,
                 'rerun_plagiarism_link' => $rerun_plagiarism_link,
                 'edit_plagiarism_link' => $edit_plagiarism_link,
