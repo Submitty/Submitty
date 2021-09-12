@@ -114,7 +114,7 @@ class TestSimpleGrader(BaseTestCase):
                 next_score = "3.4" if score == "3.1" else "3.1"
                 grade_elem.clear()
                 grade_elem.send_keys(next_score)
-                grade_elem.send_keys(Keys.ARROW_RIGHT)
+                grade_elem.send_keys(Keys.TAB)
             # wait until ajax is done, then refresh the page and wait until the element comes back with the updated data
             self.wait_after_ajax()
             self.driver.refresh()
@@ -124,7 +124,7 @@ class TestSimpleGrader(BaseTestCase):
                 grade_elem = self.driver.find_element(By.ID, "cell-0-0")
                 grade_elem.clear()
                 grade_elem.send_keys("3.3")
-                grade_elem.send_keys(Keys.ARROW_RIGHT)
+                grade_elem.send_keys(Keys.TAB)
 
         lab_func = self.insert_kwargs(template_func, is_lab=True)
         test_func = self.insert_kwargs(template_func, is_lab=False)
