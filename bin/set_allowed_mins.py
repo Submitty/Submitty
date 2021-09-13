@@ -39,7 +39,8 @@ def setup_db():
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
             db_config['database_user'],
             db_config['database_password'],
-            db_name, db_config['database_host']
+            db_name,
+            db_config['database_host']
         )
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(
