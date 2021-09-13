@@ -20,7 +20,7 @@
     "aptoma/twig-markdown": "3.4.0",
     "cboden/ratchet": "0.4.3",
     "doctrine/annotations": "1.13.2",
-    "doctrine/orm": "2.9.3",
+    "doctrine/orm": "2.9.5",
     "egulias/email-validator": "3.1.1",
     "lcobucci/jwt": "3.4.5",
     "league/commonmark": "1.6.6",
