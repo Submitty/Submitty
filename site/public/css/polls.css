@@ -60,5 +60,5 @@ input[type="radio"][disabled=""]:checked::before {
 }
 
 form {
-    display:inline;
+    display: inline;
 }
