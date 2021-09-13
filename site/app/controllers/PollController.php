@@ -546,7 +546,15 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+
         $poll = $this->core->getQueries()->getPoll($poll_id);
+
+        if ($poll == null) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
 
         if (!$this->core->getUser()->accessAdmin() && !$poll->isStudentHistogramAvailable()) {
             return MultiResponse::RedirectOnlyResponse(
@@ -555,12 +563,7 @@ class PollController extends AbstractController {
         }
 
         $results = $this->core->getQueries()->getResults($poll_id);
-        if ($poll == null) {
-            $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
-        }
+        
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Poll',
