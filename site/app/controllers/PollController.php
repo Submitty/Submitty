@@ -563,7 +563,7 @@ class PollController extends AbstractController {
         }
 
         $results = $this->core->getQueries()->getResults($poll_id);
-        
+
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Poll',
