@@ -728,6 +728,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             csrf_token: csrf_token
         },
         success: function(data){
+            //console.log("some data", data)
             try {
                 var json = JSON.parse(data);
             } catch (err){
@@ -738,6 +739,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 displayErrorMessage(json['message']);
                 return;
             }
+            console.log("json", json)
             json = json['data'];
             var post_content = json.post;
             var lines = post_content.split(/\r|\r\n|\n/).length;
@@ -758,6 +760,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             var editUserPrompt = document.getElementById('edit_user_prompt');
             editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
             contentBox.value = post_content;
+            console.log(contentBox);
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
             if(change_anon) {
@@ -1597,6 +1600,7 @@ function toggleMarkdown(post_box_id, triggered) {
 
 function previewForumMarkdown(){
   let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
+  console.log("post_box_num", post_box_num);
   if (post_box_num === undefined) {
     post_box_num = '';
   }
