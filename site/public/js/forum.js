@@ -828,6 +828,17 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
     });
 }
 
+function cancelEditPostForum() {
+  let preview_button = $(`#markdown_buttons_0`).find('.preview-button');
+  let data_mode = preview_button.attr('data-mode');
+  if (data_mode === 'preview') {
+    preview_button.trigger('click');
+  }
+  $('#edit-user-post').css('display', 'none');
+  $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
+  $('#title').val('');
+  $(this).closest('form').trigger('reinitialize.areYouSure');
+}
 
 function changeDisplayOptions(option){
     thread_id = $('#current-thread').val();
