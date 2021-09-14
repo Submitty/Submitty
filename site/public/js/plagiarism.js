@@ -62,6 +62,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
             'start_char': -1,
             'end_char': -1,
         },
+        'anon_mode_enabled': false,
     };
 
     // force the page to load default data for user 1 with highest % match
@@ -83,6 +84,18 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
 
     $('#swap-students-button').click(() => {
         swapStudents(state);
+    });
+
+    $('#show-plag-high-key-btn').click(() => {
+        showPlagiarismHighKey();
+    });
+
+    $('#toggle-fullscreen-btn').click(() => {
+        toggleFullScreenMode();
+    });
+
+    $('#toggle-anon-mode-btn').click(() => {
+        toggleAnonymousMode(state);
     });
 
     handleClickedMarks(state);
@@ -652,15 +665,24 @@ function hideLoadingIndicatorRight() {
 }
 
 
-// eslint-disable-next-line no-unused-vars
 function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
 }
 
 
-// eslint-disable-next-line no-unused-vars
 function toggleFullScreenMode() {
     $('main#main').toggleClass('full-screen-mode');
+}
+
+function toggleAnonymousMode(state) {
+    if (state.anon_mode_enabled) {
+        $('#toggle-anon-mode-btn').text('Enter Anonymous Mode');
+        state.anon_mode_enabled = false;
+    }
+    else {
+        $('#toggle-anon-mode-btn').text('Exit Anonymous Mode');
+        state.anon_mode_enabled = true;
+    }
 }
 
 
