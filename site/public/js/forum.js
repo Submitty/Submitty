@@ -1594,7 +1594,7 @@ function toggleMarkdown(post_box_id, triggered) {
   $(`#markdown_buttons_${post_box_id}`).toggle();
   $(this).toggleClass('markdown-active markdown-inactive');
   if( $(this).hasClass('markdown-inactive') && post_box_id === 0) {
-    $(`#markdown_buttons_0`).find(".preview-button").trigger('click');
+    $(`#markdown_buttons_0`).find('.preview-button').trigger('click');
   }
   if (!triggered) {
     $('.markdown-toggle').not(this).each(function() {
