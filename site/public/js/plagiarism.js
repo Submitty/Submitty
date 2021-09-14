@@ -65,6 +65,9 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         'anon_mode_enabled': false,
     };
 
+    // put data in the user 1 dropdown
+    recreateUser1Dropdown(state);
+
     // force the page to load default data for user 1 with highest % match
     loadUser1VersionDropdownList(state);
 
@@ -289,6 +292,20 @@ function requestAjaxData(url, f, es) {
 // VIEWS ///////////////////////////////////////////////////////////////////////
 // functions that get data from the global state and load it into UI elements
 
+function recreateUser1Dropdown(state) {
+    $('#user-1-dropdown-list').empty();
+    $.each(state.user_1_dropdown_list, (i, element) => {
+        if (state.anon_mode_enabled) {
+            const hashedDisplayName = hashString(element.display_name);
+            const hashedUserID = hashString(element.user_id);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`)
+        }
+        else {
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${element.display_name} &lt;${element.user_id}&gt;</option>`)
+        }
+    });
+}
+
 function refreshUser1VersionDropdown(state) {
     // grab data for the version dropdown and append them as options to the html element
     $('#user-1-version-dropdown-list').empty();
@@ -320,7 +337,16 @@ function refreshUser2Dropdown(state) {
         if (users === state.user_2_selected) {
             append_options += ' selected';
         }
-        append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `;
+
+        if (state.anon_mode_enabled) {
+            const hashedDisplayName = hashString(users.display_name);
+            const hashedUserID = hashString(users.user_id);
+            append_options += `>(${users.percent} Match) ${hashedDisplayName} &lt;${hashedUserID}&gt; (version: ${users.version}) `;
+        }
+        else {
+            append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `;
+        }
+
         if (users.source_gradeable !== state.this_term_course_gradeable) {
             let humanified_source_gradeable = users.source_gradeable;
             humanified_source_gradeable = humanified_source_gradeable.replaceAll('__', '/');
@@ -479,10 +505,11 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
 
             const sg = other.source_gradeable === state.this_term_course_gradeable ? '' : ` (${humanified_source_gradeable})`;
 
+            const other_user_id = state.anon_mode_enabled ? hashString(other.user_id) : other.user_id;
             $('#popup_to_show_matches_id').append(`
                     <li id="others_menu_${i}" class="ui-menu-item">
                         <div tabindex="-1" class="ui-menu-item-wrapper">
-                            ${other.user_id}: ${other.version}${sg}
+                            ${other_user_id}: ${other.version}${sg}
                         </div>
                     </li>
                 `);
@@ -674,6 +701,7 @@ function toggleFullScreenMode() {
     $('main#main').toggleClass('full-screen-mode');
 }
 
+
 function toggleAnonymousMode(state) {
     if (state.anon_mode_enabled) {
         $('#toggle-anon-mode-btn').text('Enter Anonymous Mode');
@@ -683,6 +711,10 @@ function toggleAnonymousMode(state) {
         $('#toggle-anon-mode-btn').text('Exit Anonymous Mode');
         state.anon_mode_enabled = true;
     }
+
+    // update the user 1 dropdown, which triggers the other dropdowns to update as well
+    recreateUser1Dropdown(state);
+    user1DropdownChanged(state);
 }
 
 
@@ -693,4 +725,16 @@ function swapStudents(state) {
     $('#user-1-version-dropdown-list').val(state.user_2_selected.version);
     $('#user-1-dropdown-list').val(state.user_2_selected.user_id);
     user1DropdownChanged(state);
+}
+
+
+// takes in a string and outputs an 8-character hash of it
+function hashString(input) {
+    let result = 0;
+    for (let i = 0; i < input.length; i++) {
+        result = ((result << 5) - result) + input.charCodeAt(i);
+        result = result & result;
+    }
+    result = Math.abs(result);
+    return result.toString(16);
 }

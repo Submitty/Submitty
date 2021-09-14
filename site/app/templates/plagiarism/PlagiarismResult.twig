@@ -17,9 +17,7 @@
         <div class="plag-flex-row">
             <span class="plag-flex-item">
                 <select id="user-1-dropdown-list" name="user_id_1" class="user1-select">
-                    {% for ranking in rankings %}
-                        <option value="{{ ranking["user_id"] }}">(Max Match: {{ ranking["percent"] }}) {{ ranking["display_name"] }} &lt;{{ ranking["user_id"] }}&gt;</option>
-                    {% endfor %}
+                    <option>Loading...</option>
                 </select>
             </span>
             <a id="swap-students-button" class="btn btn-secondary pl-1 pr-1" title="Switch Focused Student"><i class="fa fa-long-arrow-alt-left fa-lg"></i></a>
