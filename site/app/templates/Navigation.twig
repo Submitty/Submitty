@@ -96,7 +96,7 @@
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
-        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}" tabindex="0"
+        <a class="locked-gradeable-tooltip {{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}" tabindex="0"
             {% if button.isDisabled() %}
                 disabled
                 onclick="alert('Please complete {{ button.getPrerequisite()}} first' )"
@@ -115,6 +115,9 @@
                 aria-label="{{ button.getAriaLabel() }}"
             {% endif %}
         >
+            {% if button.isDisabled() %}
+                <span class="locked-gradeable-tooltiptext" disabled="none">Please complete {{ button.getPrerequisite()}} first</span>
+            {% endif %}
             {% if button.getBadge() > 0 %}
                 <span class="notification-badge">{{  button.getBadge() }} </span>
             {% endif %}
@@ -140,3 +143,4 @@
         {% endif %}
     {% endif %}
 {% endmacro %}
+
