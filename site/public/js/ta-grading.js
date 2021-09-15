@@ -189,15 +189,15 @@ $(function () {
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
 
-  // Dynamically resize the textarea height as per the provided content
-  document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
-    textarea.addEventListener('keyup', function () {
-      setTimeout(function() {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-      },0);
-    });
-  });
+  // // Dynamically resize the textarea height as per the provided content
+  // document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
+  //   textarea.addEventListener('keyup', function () {
+  //     setTimeout(function() {
+  //       textarea.style.height = 'auto';
+  //       textarea.style.height = textarea.scrollHeight + 'px';
+  //     },0);
+  //   });
+  // });
 
 });
 

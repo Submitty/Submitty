@@ -25,7 +25,7 @@
         <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
         <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
         <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
-        <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0">Preview <i class="fas fa-eye fa-1x"></i></button>
+        <button title="Preview Markdown" type="button" onclick="{{ onclick }}" class="btn btn-default btn-markdown key_to_click" tabindex="0" data-initialize_preview="{{initialize_preview is defined ? initialize_preview : false}}">Preview <i class="fas fa-eye fa-1x"></i></button>
         <a target="_blank" href="https://submitty.org/student/communication/markdown">
             Supports Markdown
             <i style="font-style:normal;" class="fa-question-circle"></i>
@@ -41,7 +41,8 @@
             placeholder="{{ placeholder }}"
         {% endif %}
         rows="10" cols="30"
-        maxlength="5000"
+        {# 524288 characters is the default max length for text input fields #}
+        maxlength="{{no_maxlength is defined and no_maxlength ? '524288' : '5000'}}"
         {% if textarea_onchange is defined %}
             onchange="{{ textarea_onchange }}"
         {% endif %}
@@ -66,4 +67,8 @@
     $('#{{markdown_area_id}}').ready(function() {
         enableTabsInTextArea("#{{markdown_area_id}}");
     })
+    $('button[data-initialized="1"]').ready(function() {
+        $(this).trigger('click');
+    })
+    $('#{{markdown_area_id}}').closest('.markdown-area').find('[data-initialize_preview="1"]').trigger('click');
 </script>
