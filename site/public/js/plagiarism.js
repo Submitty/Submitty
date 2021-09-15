@@ -296,7 +296,7 @@ function recreateUser1Dropdown(state) {
     $('#user-1-dropdown-list').empty();
     $.each(state.user_1_dropdown_list, (i, element) => {
         if (state.anon_mode_enabled) {
-            const hashedDisplayName = hashString(element.display_name);
+            const hashedDisplayName = element.display_name !== '' ? hashString(element.display_name) : '';
             const hashedUserID = hashString(element.user_id);
             $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
         }
@@ -339,7 +339,7 @@ function refreshUser2Dropdown(state) {
         }
 
         if (state.anon_mode_enabled) {
-            const hashedDisplayName = hashString(users.display_name);
+            const hashedDisplayName = users.display_name !== '' ? hashString(users.display_name) : '';
             const hashedUserID = hashString(users.user_id);
             append_options += `>(${users.percent} Match) ${hashedDisplayName} &lt;${hashedUserID}&gt; (version: ${users.version}) `;
         }
