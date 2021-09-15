@@ -24,7 +24,7 @@ th {
     color: var(--btn-text-black);
 }
 
-.current_queue_row, a > i.fas {
+.current_queue_row a > i.fas {
     color: var(--btn-text-black);
 }
 
