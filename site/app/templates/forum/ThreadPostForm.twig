@@ -189,7 +189,7 @@
             </div>
         {% endif %}
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
-        <a onclick="cancelEditPostForum.call()"
+        <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
