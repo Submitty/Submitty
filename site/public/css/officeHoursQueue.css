@@ -20,6 +20,14 @@ th {
     display: none;
 }
 
+.current_queue_row {
+    color: var(--btn-text-black);
+}
+
+.current_queue_row, a > i.fas {
+    color: var(--btn-text-black);
+}
+
 .announcement-setting {
     min-height: 7em;
     flex: 1 0 auto;
