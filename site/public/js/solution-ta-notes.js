@@ -43,6 +43,6 @@ function previewSolutionNotesMarkdown() {
     const preview_element = $(`#solution_notes_preview_${component_id}`);
     const preview_button = $(this);
     const content = markdown_textarea.val();
-    
+
     previewMarkdown(markdown_textarea, preview_element, preview_button, {content: content});
 }

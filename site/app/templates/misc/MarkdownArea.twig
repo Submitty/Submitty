@@ -66,9 +66,6 @@
 <script>
     $('#{{markdown_area_id}}').ready(function() {
         enableTabsInTextArea("#{{markdown_area_id}}");
-    })
-    $('button[data-initialized="1"]').ready(function() {
-        $(this).trigger('click');
-    })
+    });
     $('#{{markdown_area_id}}').closest('.markdown-area').find('[data-initialize_preview="1"]').trigger('click');
 </script>
