@@ -778,15 +778,17 @@ HTML;
         $message_warning = false;
         if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER) {
             if ($view_all) {
-                if (sizeof($grader_registration_sections) !== 0) {
+                if (count($grader_registration_sections) !== 0) {
                     $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Select "View Your Sections" to see only your sections.';
                     $message_warning = true;
                 }
-            } else if(sizeof($grader_registration_sections) === 0) {
+            }
+            elseif (count($grader_registration_sections) === 0) {
                 $message = 'Notice: You are not assigned to grade any students for this gradeable. Select "View All" to see the whole class.';
                 $message_warning = true;
             }
-        } else if(sizeof($grader_registration_sections) === 0) {
+        }
+        elseif (count($grader_registration_sections) === 0) {
             $message = 'Notice: You are not assigned to grade any students for this gradeable.';
         }
 
