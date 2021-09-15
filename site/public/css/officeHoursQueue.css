@@ -20,10 +20,7 @@ th {
     display: none;
 }
 
-.current_queue_row {
-    color: var(--btn-text-black);
-}
-
+.current_queue_row,
 .current_queue_row a > i.fas {
     color: var(--btn-text-black);
 }
