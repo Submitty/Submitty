@@ -779,7 +779,7 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    student_histogram_release_setting text NOT NULL
+    release_histogram character varying(10) NOT NULL
 );
 
 

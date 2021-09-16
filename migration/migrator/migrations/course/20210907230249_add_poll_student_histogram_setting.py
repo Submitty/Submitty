@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS student_histogram_release_setting TEXT DEFAULT 'never'")
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS release_histogram character varying(10) DEFAULT 'never'")
 
 
 def down(config, database, semester, course):

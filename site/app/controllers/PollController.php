@@ -654,7 +654,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, poll histograms
                 were not available to students. */
             $release_histogram = array_key_exists("release_histogram", $poll) ? $poll["release_histogram"] : "never";
-            if (!in_array($release_histogram, PollUtils::getStudentHistogramReleases())) {
+            if (!in_array($release_histogram, PollUtils::getHistogramReleases())) {
                 $num_errors = $num_errors + 1;
                 continue;
             }
