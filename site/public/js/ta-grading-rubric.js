@@ -1660,7 +1660,7 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
     }
     search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
-        search_params.set('who_id', id);
+        search_params.set('who_id', stats.submitter_anon_ids[id] ?? id);
         submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
     });
     popup.find('.student-names').html(submitterHtmlElements.join(', '));

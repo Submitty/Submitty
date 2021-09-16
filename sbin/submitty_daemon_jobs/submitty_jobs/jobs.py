@@ -195,7 +195,7 @@ class DeleteLichenResult(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = self.job_details['config_id']
+        config_id = int(self.job_details['config_id'])
 
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
 
