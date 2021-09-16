@@ -303,6 +303,8 @@ function setButtonStatus() {
         $("#submit").prop("disabled", false);
     }
 
+    $(".popup-submit").prop("disabled", false);
+
     // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
     // toggled the necessary flag that we're on a submission that would have previous (to prevent costly dom
     // lookups for the existance of #getprev id in the page)
@@ -317,6 +319,7 @@ function setButtonStatus() {
     else if (use_previous) {
         $("#getprev").prop("disabled", false);
     }
+
 }
 
 // LABELS FOR SELECTED FILES
@@ -384,6 +387,7 @@ function addLabel(filename, filesize, part, previous){
 
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
+    showPopup = true;
     if (!inactive_version) {
         setButtonStatus();
     }

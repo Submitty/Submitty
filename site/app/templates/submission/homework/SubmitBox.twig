@@ -274,7 +274,7 @@
             {% endif %}
 
         {% endif %}
-        <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
+        <input type="submit" id="submit" class="submit-gradeable btn btn-primary" value="Grade My Repository" />
     {% else %}
 
     {% if is_notebook %}
@@ -288,7 +288,9 @@
             "highest_version" : highest_version,
             "max_file_uploads" : max_file_uploads,
             "old_files" : old_files,
-            'viewing_inactive_version' : viewing_inactive_version
+            "viewing_inactive_version" : viewing_inactive_version,
+            "is_timed" : is_timed,
+            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0
         } %}
     {% endif %}
 
@@ -338,16 +340,18 @@
             </form>
         {% endif %}
         {# /Page selector #}
+        
         {% if can_student_submit %}
             <div class="upload-message">
                 {% include "misc/Markdown.twig" with {
                     "content" : upload_message
                 } only %}
             </div>
-                <button type="button" id="submit" class="btn btn-success">
-                    {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
-                </button>
+            <button type="button" id="submit" class="submit-gradeable btn btn-success">
+                {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
+            </button>
         {% endif %}
+        
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
@@ -463,7 +467,9 @@
         }
     }
     $(function() {
-        $("#submit").click(function(e){ // Submit button
+        $(".submit-gradeable").click(function(e){ // Submit button
+            $(".submit-gradeable").prop('disabled',true);
+            window.onbeforeunload = null;
             var user_id = "";
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
@@ -538,7 +544,7 @@
             e.stopPropagation();
         });
     });
-    initializeTimer('{{ gradeable_id }}');
+    initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
 
 

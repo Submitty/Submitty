@@ -303,7 +303,7 @@
 </div>
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
 
@@ -533,6 +533,21 @@
         //
         // Gradeable Type Radio Button Events
         //
+        
+        $("input[type='radio']").change(validate);
+        
+        function validate() {
+            const sub1 = $('input[type]');
+            const sub2 = $('input[electronic_gradeable_presets]');
+           
+            if ( $(sub1).is(':checked') || $(sub2).is(':checked')) {
+                $(".btn#create-gradeable-btn").removeAttr("disabled", false);
+            } 
+            else {
+                $(".btn#create-gradeable-btn").attr("disabled", true);
+            }
+        }
+
 
         // Hide team settings if it isn't a electronic gradeable
         onGradeableTypeChange();
