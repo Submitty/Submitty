@@ -556,7 +556,7 @@ class PollController extends AbstractController {
             );
         }
 
-        if (!$this->core->getUser()->accessAdmin() && !$poll->isStudentHistogramAvailable()) {
+        if (!$this->core->getUser()->accessAdmin() && !$poll->isHistogramAvailable()) {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );

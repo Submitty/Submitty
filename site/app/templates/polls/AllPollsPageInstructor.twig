@@ -58,7 +58,7 @@
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">
-                                {% if poll.isStudentHistogramAvailable() %}
+                                {% if poll.isHistogramAvailable() %}
                                     <i class="fas fa-lock-open">
                                 {% else %}
                                     <i class="fas fa-lock">
@@ -129,7 +129,7 @@
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">
-                                {% if poll.isStudentHistogramAvailable() %}
+                                {% if poll.isHistogramAvailable() %}
                                     <i class="fas fa-lock-open">
                                 {% else %}
                                     <i class="fas fa-lock">
@@ -189,7 +189,7 @@
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">
-                                {% if poll.isStudentHistogramAvailable() %}
+                                {% if poll.isHistogramAvailable() %}
                                     <i class="fas fa-lock-open">
                                 {% else %}
                                     <i class="fas fa-lock">

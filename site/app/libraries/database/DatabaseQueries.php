@@ -7501,7 +7501,7 @@ SQL;
         $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
     }
 
-    public function getStudentHistogramSetting($poll_id) {
+    public function getHistogramSetting($poll_id) {
         $this->course_db->query("SELECT release_histogram FROM polls WHERE poll_id = ?", [$poll_id]);
         return $this->course_db->rows()[0]["release_histogram"];
     }

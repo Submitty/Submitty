@@ -130,9 +130,9 @@
                 Release response histogram to students:
             </label>
             <select id="student-histogram-release-setting" name="release_histogram">
-                <option value="never" {{ poll.isStudentHistogramAvailableNever() ? "selected": "" }}>Never</option>
-                <option value="when_ended" {{ poll.isStudentHistogramAvailableWhenEnded() ? "selected": "" }}>After Poll Ended</option>
-                <option value="always" {{ poll.isStudentHistogramAvailableAlways() ? "selected": "" }}>Always</option>
+                <option value="never" {{ poll.isHistogramAvailableNever() ? "selected": "" }}>Never</option>
+                <option value="when_ended" {{ poll.isHistogramAvailableWhenEnded() ? "selected": "" }}>After Poll Ended</option>
+                <option value="always" {{ poll.isHistogramAvailableAlways() ? "selected": "" }}>Always</option>
             </select>
 
             <br/>

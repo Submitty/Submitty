@@ -133,19 +133,19 @@ class PollModel extends AbstractModel {
         return date("Y-m-d") == $this->release_date;
     }
 
-    public function isStudentHistogramAvailableNever() {
+    public function isHistogramAvailableNever() {
         return $this->release_histogram == "never";
     }
 
-    public function isStudentHistogramAvailableWhenEnded() {
+    public function isHistogramAvailableWhenEnded() {
         return $this->release_histogram == "when_ended";
     }
 
-    public function isStudentHistogramAvailableAlways() {
+    public function isHistogramAvailableAlways() {
         return $this->release_histogram == "always";
     }
 
-    public function isStudentHistogramAvailable() {
-        return ($this->isStudentHistogramAvailableAlways() && !$this->isClosed()) || ($this->isStudentHistogramAvailableWhenEnded() && $this->isEnded());
+    public function isHistogramAvailable() {
+        return ($this->isHistogramAvailableAlways() && !$this->isClosed()) || ($this->isHistogramAvailableWhenEnded() && $this->isEnded());
     }
 }
