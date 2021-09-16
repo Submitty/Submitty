@@ -145,7 +145,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        if (!in_array($_POST["release_histogram"], PollUtils::getHistogramReleases())) {
+        if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
             $this->core->addErrorMessage("Invalid student histogram release setting");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -420,7 +420,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid poll question type");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        if (!in_array($_POST["release_histogram"], PollUtils::getHistogramReleases())) {
+        if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
             $this->core->addErrorMessage("Invalid student histogram release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -654,7 +654,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, poll histograms
                 were not available to students. */
             $release_histogram = array_key_exists("release_histogram", $poll) ? $poll["release_histogram"] : "never";
-            if (!in_array($release_histogram, PollUtils::getHistogramReleases())) {
+            if (!in_array($release_histogram, PollUtils::getReleaseHistogramSettings())) {
                 $num_errors = $num_errors + 1;
                 continue;
             }

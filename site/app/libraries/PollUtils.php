@@ -32,7 +32,7 @@ class PollUtils {
                 "release_date" => $poll->getReleaseDate(),
                 "status" => $poll->getStatus(),
                 "image_path" => $poll->getImagePath(),
-                "release_histogram" => $poll->getHistogramRelease()
+                "release_histogram" => $poll->getReleaseHistogram()
             ];
         }
         return $data;
@@ -55,7 +55,7 @@ class PollUtils {
                 || ($poll_type == "single-response-survey"));
     }
 
-    public static function getHistogramReleases(): array {
+    public static function getReleaseHistogramSettings(): array {
         return [
             "never",
             "when_ended",

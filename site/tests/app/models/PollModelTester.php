@@ -197,8 +197,8 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testHistogramRelease(): void {
-        $this->assertEquals($this->my_polls[0]->getHistogramRelease(), "never");
-        $this->assertEquals($this->my_polls[1]->getHistogramRelease(), "always");
-        $this->assertEquals($this->my_polls[2]->getHistogramReleaset(), "when_ended");
+        $this->assertEquals($this->my_polls[0]->getReleaseHistogram(), "never");
+        $this->assertEquals($this->my_polls[1]->getReleaseHistogram(), "always");
+        $this->assertEquals($this->my_polls[2]->getReleaseHistogram(), "when_ended");
     }
 }
