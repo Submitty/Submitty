@@ -42,7 +42,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "release_date" => "2020-01-11",
                 "status" => "closed",
                 "image_path" => null,
-                "student_histogram_release_setting" => "never"
+                "release_histogram" => "never"
             ],
             [
                 "id" => 1,
@@ -54,7 +54,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "release_date" => "2020-01-12",
                 "status" => "open",
                 "image_path" => null,
-                "student_histogram_release_setting" => "always"
+                "release_histogram" => "always"
             ],
             [
                 "id" => 2,
@@ -66,7 +66,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "release_date" => "2020-01-13",
                 "status" => "ended",
                 "image_path" => null,
-                "student_histogram_release_setting" => "when_ended"
+                "release_histogram" => "when_ended"
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);

@@ -196,9 +196,9 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->my_polls[2]->getImagePath(), "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png");
     }
 
-    public function testStudentHistogramReleaseSetting(): void {
-        $this->assertEquals($this->my_polls[0]->getStudentHistogramReleaseSetting(), "never");
-        $this->assertEquals($this->my_polls[1]->getStudentHistogramReleaseSetting(), "always");
-        $this->assertEquals($this->my_polls[2]->getStudentHistogramReleaseSetting(), "when_ended");
+    public function testHistogramRelease(): void {
+        $this->assertEquals($this->my_polls[0]->getStudentHistogramRelease(), "never");
+        $this->assertEquals($this->my_polls[1]->getStudentHistogramRelease(), "always");
+        $this->assertEquals($this->my_polls[2]->getStudentHistogramRelease(), "when_ended");
     }
 }
