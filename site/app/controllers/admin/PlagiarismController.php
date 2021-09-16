@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace app\controllers\admin;
 
+use app\exceptions\DatabaseException;
+use app\exceptions\FileWriteException;
 use app\exceptions\ValidationException;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
@@ -291,7 +293,6 @@ class PlagiarismController extends AbstractController {
      * @param string $job
      * @param string $gradeable_id
      * @param int $config_id
-     * @throws Exception
      */
     private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
         $em = $this->core->getCourseEntityManager();
@@ -302,7 +303,7 @@ class PlagiarismController extends AbstractController {
                      ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
 
         if ($config === null) {
-            throw new Exception("Error: Unable to find plagiarism configuration");
+            throw new DatabaseException("Error: Unable to find plagiarism configuration");
         }
 
         $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
@@ -359,7 +360,7 @@ class PlagiarismController extends AbstractController {
         $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
 
         if (!FileUtils::writeJsonFile($lichen_job_file, $lichen_job_data)) {
-            throw new Exception("Error: Failed to write lichen job file. Try again");
+            throw new FileWriteException("Error: Failed to write lichen job file. Try again");
         }
     }
 
@@ -616,13 +617,11 @@ class PlagiarismController extends AbstractController {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . "?gradeable_id={$gradeable_id}&config_id={$config_id}";
         }
 
-        try {
-            $config_id = intval($config_id);
-        }
-        catch (Exception $e) {
+        if (!is_numeric($config_id) && $new_or_edit !== "new") {
             $this->core->addErrorMessage("Error: Config ID must be a valid integer configuration ID");
             return new RedirectResponse($return_url);
         }
+        $config_id = intval($config_id);
 
         // Check if Lichen job is already running
         if (file_exists($this->getQueuePath($gradeable_id, $config_id)) || file_exists($this->getProcessingQueuePath($gradeable_id, $config_id))) {
@@ -742,19 +741,13 @@ class PlagiarismController extends AbstractController {
 
         // Generate a unique number for this version of the gradeable //////////
         if ($new_or_edit === "new") {
-            try {
-                $config_id = $em->getRepository(PlagiarismConfig::class)
-                                ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"]);
-                if ($config_id === null) {
-                    $config_id = 1;
-                }
-                else {
-                    $config_id = $config_id->getConfigID() + 1;
-                }
+            $config_id = $em->getRepository(PlagiarismConfig::class)
+                            ->findOneBy(["gradeable_id" => $gradeable_id], ["config_id" => "DESC"]);
+            if ($config_id === null) {
+                $config_id = 1;
             }
-            catch (Exception $e) {
-                $this->core->addErrorMessage($e->getMessage());
-                return new RedirectResponse($return_url);
+            else {
+                $config_id = $config_id->getConfigID() + 1;
             }
         }
 
@@ -823,17 +816,16 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
+        $em->flush();
+
         // Create the Lichen job ///////////////////////////////////////////////
         try {
             $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         }
-        catch (Exception $e) {
+        catch (DatabaseException | FileWriteException $e) {
             $this->core->addErrorMessage("Failed to add configuration to Lichen queue. Create the configuration again.");
             return new RedirectResponse($return_url);
         }
-
-        // We don't want to catch any errors here becasue if something goes wrong, we want to know about it as developers/sysadmins
-        $em->flush();
 
         $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for {$gradeable_id} configuration #{$config_id}");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
@@ -1040,17 +1032,19 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
+        $em = $this->core->getCourseEntityManager();
+        $to_be_deleted = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+        $em->remove($to_be_deleted);
+
         try {
-            $em = $this->core->getCourseEntityManager();
-            $to_be_deleted = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
-            $em->remove($to_be_deleted);
             $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id, $config_id);
-            $em->flush();
         }
-        catch (Exception $e) {
+        catch (FileWriteException | DatabaseException $e) {
             $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($return_url);
         }
+
+        $em->flush();
 
         $this->core->addSuccessMessage("Lichen results and saved configuration will be deleted.");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
