@@ -265,7 +265,7 @@
     // UPLOAD CONFIG ///////////////////////////////////////////////////////////
     function reloadConfigs(gradeable_id) {
         $("#import-config-config-id").empty();
-        $.each(gradeables_with_plag_configs[gradeable_id], function(indeex, item) {
+        $.each(gradeables_with_plag_configs[gradeable_id], function(index, item) {
             $("#import-config-config-id").append(`<option value="${item}">Config: ${item}</option>`);
         });
     }
