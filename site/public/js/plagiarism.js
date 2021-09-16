@@ -62,8 +62,15 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
             'start_char': -1,
             'end_char': -1,
         },
-        'anon_mode_enabled': false,
+        'anon_mode_enabled': localStorage.getItem('plagiarism-anon-mode-enabled') === 'true',
     };
+
+    if (state.anon_mode_enabled) {
+        $('#toggle-anon-mode-btn').text('Exit Anonymous Mode');
+    }
+    else {
+        $('#toggle-anon-mode-btn').text('Enter Anonymous Mode');
+    }
 
     // put data in the user 1 dropdown
     recreateUser1Dropdown(state);
@@ -706,10 +713,12 @@ function toggleAnonymousMode(state) {
     if (state.anon_mode_enabled) {
         $('#toggle-anon-mode-btn').text('Enter Anonymous Mode');
         state.anon_mode_enabled = false;
+        localStorage.removeItem('plagiarism-anon-mode-enabled');
     }
     else {
         $('#toggle-anon-mode-btn').text('Exit Anonymous Mode');
         state.anon_mode_enabled = true;
+        localStorage.setItem('plagiarism-anon-mode-enabled', 'true');
     }
 
     // update the user 1 dropdown, which triggers the other dropdowns to update as well
