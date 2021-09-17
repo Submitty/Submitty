@@ -58,3 +58,7 @@ input[type="radio"][disabled=""]:checked::before {
 .active {
     background: var(--always-default-white);
 }
+
+form {
+    display: inline;
+}
