@@ -86,8 +86,12 @@
 
         function addNumeric(label, max_score, extra_credit) {
             var wrapper = $('.numerics-table');
+            
+            var rowaddition = "<tr class='multi-field' id='mult-field-0'><td><input name='numeric_label_0' aria-label='label for numeric item 0' class='numeric_label' value='0' type='text'></td><td><input name='max_score_0' aria-label='max score for numeric item 0' class='max_score' value='0' onchange='calculateTotalScore();' type='text'></td><td><input type='checkbox' name='numeric_extra_0' aria-label='is numeric item 0 counted as extra credit?' class='numeric_extra extra' value='' onchange='calculateTotalScore();'></td></tr>";
+
             numNumeric++;
-            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numNumeric).find('.numeric_label').val(label).focus();
+            
+            $(rowaddition, wrapper).appendTo(wrapper).attr('id', 'mult-field-' + numNumeric).find('.numeric_label').val(label).focus();
             $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric).attr('aria-label', 'is numeric item ' + numNumeric + ' counted as extra credit?').change(() => saveRubric(false));
             $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric).attr('aria-label', 'label for numeric item ' + numNumeric).change(() => saveRubric(false));
             $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).attr('aria-label', 'max score for numeric item' + numNumeric).val(max_score).change(() => saveRubric(false));
