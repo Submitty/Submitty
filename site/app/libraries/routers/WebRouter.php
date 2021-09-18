@@ -16,7 +16,10 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\models\User;
+use Doctrine\Common\Annotations\PsrCachedReader;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class WebRouter {
     /** @var Core  */
@@ -25,7 +28,7 @@ class WebRouter {
     /** @var Request  */
     protected $request;
 
-    /** @var AnnotationReader */
+    /** @var PsrCachedReader */
     protected $reader;
 
     /** @var array */
@@ -41,9 +44,15 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'annotations');
+
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
-        $this->reader = new AnnotationReader();
+        $this->reader = new PsrCachedReader(
+            new AnnotationReader(),
+            new FilesystemAdapter("", 0, $cache_path),
+            $this->core->getConfig()->isDebug()
+        );
         $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));

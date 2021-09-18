@@ -338,6 +338,7 @@ else:
             EMAIL_REPLY_TO = defaults['email_reply_to']
             EMAIL_SERVER_HOSTNAME = defaults['email_server_hostname']
             EMAIL_SERVER_PORT = defaults['email_server_port']
+            EMAIL_INTERNAL_DOMAIN = defaults['email_internal_domain']
             break
     print()
 

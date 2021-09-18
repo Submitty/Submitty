@@ -737,6 +737,19 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
+function markViewed(ids, redirect) {
+    let data = new FormData();
+    data.append("ids", ids);
+    data.append("csrf_token", csrfToken);
+    $.ajax({
+        url: buildCourseUrl(['course_materials', 'view']),
+        type: "POST",
+        data: data,
+        contentType: false,
+        processData: false
+    });
+}
+
 function hideEmptyCourseMaterialFolders() {
   // fetch all the folders and remove those one which have no `file` within.
   $('.folder-container').each(function() {
@@ -1408,7 +1421,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
     formData.append('grader_id', grader_id);
     formData.append('user_id', user_id);
     formData.append('feedback', feedback);
-    $.ajax({
+    $.getJSON({
         url: url,
         type: "POST",
         data: formData,
@@ -1416,10 +1429,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         cache: false,
         contentType: false,
         success: function(data) {
-            try {
+            if (data.status === 'success') {
                 $('#save_status').html('All Changes Saved');
-            } catch(err){
-                return;
+            } else {
+                $('#save_status').html('Error Saving Changes');
             }
         },
         error: function() {
@@ -1574,6 +1587,7 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, dat
 
                 preview_button.empty();
                 preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+                preview_button.attr('data-mode', 'preview');
 
             }
             else {
@@ -1582,6 +1596,7 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, dat
 
                 preview_button.empty();
                 preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+                preview_button.attr('data-mode', 'edit');
             }
         },
         error: function() {

@@ -2601,14 +2601,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  Mark      $mark
      * @param  User      $grader
      * @param  Gradeable $gradeable
-     * @param  bool      $anon
+     * @param  string      $anon
      * @return string[]
      */
-    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = false) {
+    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable, $anon = 'unblind') {
          // Switch the column based on gradeable team-ness
          $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
          // TODO: anon teams?
-         $user_type = ($type == 'user' && $anon) ? 'anon' : $type;
+         $user_type = ($type == 'user' && $anon != 'unblind') ? 'anon' : $type;
          $row_type = $user_type . "_id";
 
          $params = [$grader->getId(), $mark->getId()];
@@ -2644,12 +2644,12 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
     }
 
-    public function getAllSubmittersWhoGotMark($mark, $anon = false) {
+    public function getAllSubmittersWhoGotMark($mark, $anon = 'unblind') {
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-        $row_type = ($anon && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
+        $row_type = ($anon != 'unblind' && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
         //TODO: anon teams?
-        if ($anon && $type != 'team') {
+        if ($anon != 'unblind' && $type != 'team') {
             $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
             $this->course_db->query(
                 "
@@ -3763,12 +3763,17 @@ SQL;
     }
 
     /**
-     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     * Adds an assignment for someone to get the peer feedback for a given user for a given gradeable
      *
      * @param string $gradeable_id
      */
-    public function getAllPeerFeedback($gradeable_id) {
-        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+    public function getPeerFeedbackForUser($gradeable_id, $user_id, $anon = false) {
+        if ($anon) {
+            $this->course_db->query("SELECT u.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN users u ON u.user_id=p.grader_id WHERE p.g_id = ? AND p.user_id = ? ORDER BY p.grader_id", [$gradeable_id, $user_id]);
+        }
+        else {
+            $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $user_id]);
+        }
         $return = [];
         foreach ($this->course_db->rows() as $id) {
             $return[$id['grader_id']][$id['user_id']]['feedback'] = $id['feedback'];
@@ -5496,6 +5501,8 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable $gradeable The gradeable to update
      */
     public function updateGradeable(\app\models\gradeable\Gradeable $gradeable) {
+
+
 
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
@@ -7318,8 +7325,8 @@ AND gc_id IN (
     }
     //// BEGIN ONLINE POLLING QUERIES ////
 
-    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders) {
-        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path) VALUES (?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null]);
+    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $release_histogram) {
+        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path, release_histogram) VALUES (?, ?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null, $release_histogram]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -7404,7 +7411,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"], $row["release_histogram"]);
     }
 
     public function getResponses($poll_id) {
@@ -7450,9 +7457,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path) {
+    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path, $release_histogram) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ?, release_histogram = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $release_histogram, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -7497,6 +7504,11 @@ SQL;
 
     public function setPollImage($poll_id, $image_path) {
         $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
+    }
+
+    public function getHistogramSetting($poll_id) {
+        $this->course_db->query("SELECT release_histogram FROM polls WHERE poll_id = ?", [$poll_id]);
+        return $this->course_db->rows()[0]["release_histogram"];
     }
 
     //// END ONLINE POLLING QUERIES ////

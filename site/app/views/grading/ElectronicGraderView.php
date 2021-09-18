@@ -971,6 +971,7 @@ HTML;
             // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
             if ($pattern_match_flag == true) {
                 $error_message = [
+                    "color" => "var(--standard-vibrant-yellow)", // canary yellow
                     "message" => "Multiple files within submissions"
                 ];
             }

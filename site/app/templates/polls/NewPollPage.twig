@@ -40,9 +40,21 @@
                 Expected release date:
             </label>
             <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value=""/>
-            <br/>
 
+            <br/><br/>
+            
+            <label for="student-histogram-release-setting" class="option-title">
+                Release response histogram to students:
+            </label>
+            <select id="student-histogram-release-setting" name="release_histogram">
+                <option value="never">Never</option>
+                <option value="when_ended">After Poll Ended</option>
+                <option value="always">Always</option>
+            </select>
+
+            <br/>
             <hr>
+
             <h2> Responses: </h2>
             <div id="responses">
 
@@ -112,6 +124,17 @@
                 Expected release date:
             </label>
             <input id="poll-date" class="poll-date" name="release_date" autocomplete="off" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            <br/><br/>
+
+            <label for="student-histogram-release-setting" class="option-title">
+                Release response histogram to students:
+            </label>
+            <select id="student-histogram-release-setting" name="release_histogram">
+                <option value="never" {{ poll.isHistogramAvailableNever() ? "selected": "" }}>Never</option>
+                <option value="when_ended" {{ poll.isHistogramAvailableWhenEnded() ? "selected": "" }}>After Poll Ended</option>
+                <option value="always" {{ poll.isHistogramAvailableAlways() ? "selected": "" }}>Always</option>
+            </select>
+
             <br/>
             <hr>
             <h2> Responses: </h2>

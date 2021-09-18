@@ -1,0 +1,22 @@
+.course-material-badge {
+    background-color: var(--standard-dark-green);
+    min-width: 10px;
+    color: white;
+    float: none;
+}
+
+[data-theme="dark"] .course-material-badge {
+    background-color: transparent;
+    border-color: var(--standard-dark-green);
+    border-width: 1px;
+    border-style: solid;
+    min-width: 10px;
+    color: var(--standard-dark-green);
+    float: none;
+}
+
+a.popout-item:hover,
+a.popout-item:hover *,
+a.popout-item > .fas:hover {
+    color: var(--external-link-hover);
+}
