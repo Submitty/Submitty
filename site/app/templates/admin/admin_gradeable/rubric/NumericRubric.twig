@@ -87,7 +87,7 @@
         function addNumeric(label, max_score, extra_credit) {
             var wrapper = $('.numerics-table');
             
-            var rowaddition = "<tr class='multi-field' id='mult-field-0'><td><input name='numeric_label_0' aria-label='label for numeric item 0' class='numeric_label' value='0' type='text'></td><td><input name='max_score_0' aria-label='max score for numeric item 0' class='max_score' value='0' onchange='calculateTotalScore();' type='text'></td><td><input type='checkbox' name='numeric_extra_0' aria-label='is numeric item 0 counted as extra credit?' class='numeric_extra extra' value='' onchange='calculateTotalScore();'></td></tr>";
+            var rowaddition = "<tr class='multi-field' id='mult-field-0' style='display:none;'><td><input style='width: 200px' name='numeric_label_0' aria-label='label for numeric item 0' class='numeric_label' value='0' type='text'></td><td><input style='width: 60px' name='max_score_0' aria-label='max score for numeric item 0' class='max_score' value='0' onchange='calculateTotalScore();' type='text'></td><td><input type='checkbox' name='numeric_extra_0' aria-label='is numeric item 0 counted as extra credit?' class='numeric_extra extra' value='' onchange='calculateTotalScore();'></td></tr>";
 
             numNumeric++;
             
@@ -111,8 +111,11 @@
 
         function addText(label) {
             var wrapper = $('.text-table');
+
+            var rowaddition="<tr class='multi-field' id='mult-field-0' style='display:none;'><td><input style='width: 200px' name='text_label_0' aria-label='label for text item 0' type='text' class='text_label' value='0'/></td></tr>";
+
             numText++;
-            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
+            $(rowaddition, wrapper).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
             $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).attr('aria-label', 'label for text item ' + numText).change(() => saveRubric(false));
             $('#mult-field-' + numText, wrapper).show();
         }
