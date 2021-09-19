@@ -223,7 +223,7 @@
             {% elseif cell.type == "file_submission" %}
                 {% set num_file_submissions = num_file_submissions + 1 %}
 
-                {% if is_grader_view | default(null) %}
+                {% if is_grader_view %}
                     {% if old_files is empty %}
                         <p>No files were submitted</p>
                     {% endif %}
@@ -341,7 +341,7 @@
 
     $(function(){
 
-        {% if is_grader_view | default(null) %}
+        {% if is_grader_view %}
             //disable inputs if we're viewing from the grader's view
             let nb = document.getElementsByClassName("notebook")[0];
             let tgts = nb.querySelectorAll('input');
