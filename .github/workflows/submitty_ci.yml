@@ -382,6 +382,11 @@ jobs:
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
+          - name: Setup ldap
+            run: |
+              cd $SUBMITTY_REPOSITORY}
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+
           - name: Set up apache
             run: |
               cd $SUBMITTY_REPOSITORY
@@ -415,9 +420,6 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
-
-          - name: Setup ldap
-            run: sudo bash .setup/testing/setup_ldap.sh
 
           - uses: nanasess/setup-chromedriver@master
           - name: Setup chromedriver
