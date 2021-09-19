@@ -34,7 +34,7 @@ class Config:
         self.authentication = self._get_data('authentication')
 
     def _get_data(self, filename):
-        path = self.config_path / filename + '.json'
+        path = self.config_path / (filename + '.json')
         if not path.exists():
             return {}
         with path.open('r') as open_file:
