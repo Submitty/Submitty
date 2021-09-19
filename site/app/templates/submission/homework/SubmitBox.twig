@@ -290,7 +290,8 @@
             "old_files" : old_files,
             "viewing_inactive_version" : viewing_inactive_version,
             "is_timed" : is_timed,
-            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0
+            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
+            "is_grader_view" : is_grader_view
         } %}
     {% endif %}
 
@@ -324,7 +325,7 @@
                       </tr>
                     </table>
                     {% if viewing_inactive_version %}
-                        <h3 {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>Switch to most recent version to upload files</h3>
+                        <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
                     {% else %}
                         <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
                     {% endif %}
@@ -375,7 +376,7 @@
 
         <script>
             $(function() {
-                setButtonStatus();
+                setButtonStatus({{ viewing_inactive_version }});
                 initMaxNoFiles({{ max_file_uploads }});
             });
 

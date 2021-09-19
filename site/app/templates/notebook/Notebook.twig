@@ -409,7 +409,7 @@
              role="text"
              aria-label="Press enter to upload your part {{ index }} file"
         >
-            <h2 class="label" id="label{{index}}">
+            <h2 class="label" id="label{{index}}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
                 Drag your {{ label }} file(s) here or click to open file browser
             </h2>
             <input type="file" name="files" id="input-file{{index}}" 
@@ -419,21 +419,29 @@
                         disabled="disabled"
                     {% endif %}
             />
-            <table class="file-upload-table" id="file-upload-table-{{index}}">
-            <tr style="background:transparent; display:none;">
-                <th>File Name:</th>
-                <th>Size:</th>
-            </tr>
-            </table>
-            <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+            {% if not viewing_inactive_version %}
+                <table class="file-upload-table" id="file-upload-table-{{index}}">
+                <tr style="background:transparent; display:none;">
+                    <th>File Name:</th>
+                    <th>Size:</th>
+                </tr>
+                </table>
+            {% endif %}
+            {% if viewing_inactive_version %}
+                <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
+            {% else %}
+                <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+            {% endif %}
         </div>
     </div>
 
     <script>
         $(function(){
             //initialize the dropzone just created
-            initMaxNoFiles({{max_file_uploads}});
-            initializeDropZone("upload{{ index }}");
+            {% if not viewing_inactive_version %}
+                initMaxNoFiles({{max_file_uploads}});
+                initializeDropZone("upload{{ index }}");
+            {% endif %}
         });
     </script>
 {% endmacro %}
