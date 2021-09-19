@@ -277,7 +277,7 @@ class SubmissionController extends AbstractController {
 
         //For every userid, we have to check that its real.
         foreach ($user_ids as $id) {
-            $user = $this->core->getQueries()->getUserById($id);
+            $user = is_numeric($id) ? $this->core->getQueries()->getUserByNumericId($id) : $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
                 return $this->core->getOutput()->renderJsonFail($msg);
@@ -534,6 +534,15 @@ class SubmissionController extends AbstractController {
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
+        if(is_numeric($user_id)){
+            //get the correct id if we're given a numeric id
+            $user_obj = $this->core->getQueries()->getUserByNumericId($user_id);
+            if (!$user_obj) {
+                return $this->uploadResult("Failed to get user from numeric id", false);
+            }
+
+            $user_id = $user_obj->getId();
+        }
 
         $path = $_POST['path'];
 
@@ -595,6 +604,10 @@ class SubmissionController extends AbstractController {
                 $who_id = $team_id;
                 $user_id = "";
             }
+        }
+
+        if($graded_gradeable === null){
+            return $this->uploadResult("Failed to get graded gradeable for the user.", false);
         }
 
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);

@@ -7138,7 +7138,8 @@ AND gc_id IN (
     private function getUser($user_id, bool $is_numeric = false): ?User {
         $result = $this->getUsers([$user_id], $is_numeric);
         if ($result !== null && count($result) === 1) {
-            return $result[$user_id];
+            //return first element
+            return array_pop($result);
         }
         else {
             return null;
