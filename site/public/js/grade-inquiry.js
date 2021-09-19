@@ -127,7 +127,7 @@ function onGradeInquirySubmitClicked(button) {
                         window.socketClient.send({'type': data.type, 'submitter_id': submitter_id});
                     }
                 }
-                else{
+                else {
                     alert(json['message']);
                 }
             }
