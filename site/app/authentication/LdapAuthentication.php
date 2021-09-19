@@ -16,6 +16,6 @@ class LdapAuthentication extends AbstractAuthentication {
         ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 
-        return @ldap_bind($ldap, "{$settings['uid']}={$this->username},{$settings['bind_dn']}", $this->password);
+        return @ldap_bind($ldap, "{$settings['uid']}={$this->user_id},{$settings['bind_dn']}", $this->password);
     }
 }
