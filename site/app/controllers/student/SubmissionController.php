@@ -534,7 +534,7 @@ class SubmissionController extends AbstractController {
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
-        if(is_numeric($user_id)){
+        if (is_numeric($user_id)) {
             //get the correct id if we're given a numeric id
             $user_obj = $this->core->getQueries()->getUserByNumericId($user_id);
             if (!$user_obj) {
@@ -606,7 +606,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        if($graded_gradeable === null){
+        if ($graded_gradeable === null) {
             return $this->uploadResult("Failed to get graded gradeable for the user.", false);
         }
 
