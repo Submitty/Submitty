@@ -712,7 +712,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
  * @param {String} qr_prefix
  * @param {String} qr_suffix
  */
-function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes = false, use_ocr = false, qr_prefix = "", qr_suffix="") {
+function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes, use_ocr, qr_prefix, qr_suffix) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
