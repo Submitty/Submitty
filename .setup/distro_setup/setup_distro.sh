@@ -109,4 +109,6 @@ ${DATABASE_LINE}
 objectClass: organizationalUnit
 objectClass: top
 ou: users" > /tmp/base.ldif
+    ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f /tmp/base.ldif
+    rm -f /tmp/base.ldif
 fi
