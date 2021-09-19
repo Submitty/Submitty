@@ -160,7 +160,7 @@ defaults = {
     'submission_url': '',
     'supervisor_user': 'submitty',
     'vcs_url': '',
-    'authentication_method': 1,
+    'authentication_method': 0,
     'institution_name' : '',
     'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
     'institution_homepage' : '',
@@ -199,7 +199,7 @@ if os.path.isfile(AUTHENTICATION_JSON):
     with open(AUTHENTICATION_JSON) as authentication_file:
         loaded_defaults.update(json.load(authentication_file))
 
-#no need to authenticate on a worker machine (no website)
+# no need to authenticate on a worker machine (no website)
 if not args.worker:
     if 'authentication_method' in loaded_defaults:
         loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method'])
@@ -282,10 +282,10 @@ else:
 
     while True:
         try:
-            auth = int(get_input('Enter number?', defaults['authentication_method']))
+            auth = int(get_input('Enter number?', defaults['authentication_method'])) - 1
         except ValueError:
             auth = 0
-        if auth not in range(1, len(authentication_methods)):
+        if auth in range(len(authentication_methods)):
             break
         print(f'Number must in between 1 - {len(authentication_methods)} (inclusive)!')
     print()

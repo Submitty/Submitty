@@ -99,4 +99,14 @@ ${DATABASE_LINE}
 ############################################################
 " > /etc/motd
     chmod 644 /etc/motd
+
+    # setup up LDAP stuff
+    echo "" >> /etc/ldap/ldap.conf
+    echo "BASE   dc=vagrant,dc=local" >> /etc/ldap/ldap.conf
+    echo "URI    ldap://localhost" >> /etc/ldap/ldap.conf
+
+    echo -e "dn: ou=users,dc=vagrant,dc=local
+objectClass: organizationalUnit
+objectClass: top
+ou: users" > /tmp/base.ldif
 fi

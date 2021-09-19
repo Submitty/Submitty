@@ -55,6 +55,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = [
             "authentication_method" => "PamAuthentication",
+            "ldap_options" => []
+        ];
+        $config = array_merge($config, $extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "authentication.json"), $config);
+
+        $config = [
             "database_host" => "/var/run/postgresql",
             "database_port" => 5432,
             "database_user" => "submitty_dbuser",
@@ -244,6 +250,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
             'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
+            'ldap_options' => [],
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
             'default_hw_late_days' => 0,

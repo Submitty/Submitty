@@ -31,6 +31,11 @@ class Config:
         self.submitty = self._get_data('submitty')
         self.submitty_users = self._get_data('submitty_users')
 
+        self.authentication = self._get_data('authentication')
+
     def _get_data(self, filename):
-        with Path(self.config_path, filename + '.json').open('r') as open_file:
+        path = self.config_path / filename + '.json'
+        if not path.exists():
+            return {}
+        with path.open('r') as open_file:
             return json.load(open_file, object_pairs_hook=OrderedDict)
