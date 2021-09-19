@@ -126,6 +126,8 @@ function onGradeInquirySubmitClicked(button) {
                         newDiscussionRender(data.new_discussion);
                         window.socketClient.send({'type': data.type, 'submitter_id': submitter_id});
                     }
+                }else{
+                    alert(json['message']);
                 }
             }
             catch (e) {
