@@ -1671,7 +1671,7 @@ HTML;
             "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
             "is_timed" => $is_timed,
             "allowed_minutes" => $allowed_minutes
-            ],
+            ]
         );
     }
 }
