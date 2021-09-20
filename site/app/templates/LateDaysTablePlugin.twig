@@ -8,7 +8,7 @@
             {% if diff >= 0 %}
                 <li>{{ late_days_update.since_timestamp|date('m/d/Y') }}: Earned {{ diff }} late day(s)</li>
             {% else %}
-                <li>{{ late_days_ulidate.since_timestamp|date('m/d/Y') }}: Lost {{ -diff }} late day(s)</p>
+                <li>{{ late_days_update.since_timestamp|date('m/d/Y') }}: Lost {{ -diff }} late day(s)</p>
             {% endif %}
             {% set cumulative_days = late_days_update.allowed_late_days %}
         {% endfor %}
