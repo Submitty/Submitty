@@ -58,7 +58,9 @@ function setLateDays() {
     const new_date = new Date($('#late-calendar').val());
     const old_date = new Date($('#due-date').data('date'));
     const diff = (new_date.getTime() - old_date.getTime()) / (1000 * 3600 * 24);
-    document.getElementById('late-days').value = diff;
+    if (!isNaN(diff)) {
+        document.getElementById('late-days').value = diff;
+    }
 }
 
 function confirmExtension(option){
