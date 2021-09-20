@@ -785,7 +785,6 @@ class SubmissionController extends AbstractController {
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
-
         // FIXME: Add this as part of the graded gradeable saving query
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
