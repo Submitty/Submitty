@@ -90,4 +90,10 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         {% endif %}
     </form>
+
+    {% if poll.isHistogramAvailable() %}
+        <a href="{{ base_url }}/viewResults/{{ poll.getId() }}">
+            <button type="submit" class="btn btn-primary"> View Class Answers </button>
+        </a>
+    {% endif %}
 </div>
