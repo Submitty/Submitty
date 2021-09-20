@@ -189,10 +189,7 @@
             </div>
         {% endif %}
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
-        <a onclick="$('#edit-user-post').css('display', 'none');
-                 $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
-                 $('#title').val('');
-                 $(this).closest('form').trigger('reinitialize.areYouSure');"
+        <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />

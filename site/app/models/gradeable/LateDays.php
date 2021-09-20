@@ -230,7 +230,7 @@ class LateDays extends AbstractModel {
         // Sort by 'timestamp'
         usort($late_day_events, function ($e1, $e2) {
             $diff = 0;
-            if ($e1['timestamp'] !== null && $e1['timestamp'] !== null) {
+            if ($e1['timestamp'] !== null && $e2['timestamp'] !== null) {
                 $diff = $e1['timestamp']->getTimestamp() - $e2['timestamp']->getTimestamp();
             }
             elseif ($e2['timestamp'] !== null) {

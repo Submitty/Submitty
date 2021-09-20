@@ -615,10 +615,12 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
+            return false;
         }
         else {
             $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
+        return true;
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
