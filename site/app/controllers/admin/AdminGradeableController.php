@@ -1087,6 +1087,10 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // TO DO: Update late day cache for admin late day update
+        // TO DO: Update late day cache for admin gradeable due date update
+        $late_day_status = null;
+
         // Set default value which may be set in loop below
         $regrade_modified = false;
 
