@@ -37,7 +37,6 @@
             </span>
             <div class="solution-edit" id="sol-textbox-cont-{{ component_id }}-edit">
                 <label for="textbox-solution-{{ component_id }}" tabIndex="0" class="screen-reader">Solution for {{ component_title }}</label>
-                {# {% set initialize_preview = not is_first_edit %} #}
                 {% include "misc/MarkdownArea.twig" with {
                     "markdown_area_id" : "textbox-solution-" ~ component_id,
                     "class" : "solution-ta-notes-textbox",
