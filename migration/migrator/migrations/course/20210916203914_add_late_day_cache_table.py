@@ -25,7 +25,8 @@ def up(config, database, semester, course):
         );
     ''')
 
-    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_user_team_id_unique UNIQUE (g_id, user_id, team_id);')
+    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);')
+    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);')
     database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES gradeable(g_id);')
     database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES users(user_id);')
     database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT late_day_cache_team FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id);')
