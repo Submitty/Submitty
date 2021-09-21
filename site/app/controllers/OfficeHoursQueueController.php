@@ -64,6 +64,8 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        $require_contact_info = $_POST['require_contact_information'];
+
         //Replace whitespace with "_"
         $queue_code = trim($_POST['code']);
         $token = trim($_POST['token']);
