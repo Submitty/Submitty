@@ -79,33 +79,6 @@
     display: inline;
 }
 
-.locked-gradeable-tooltip {
-    position: relative;
-    display: inline-block;
-}
-
-/* Tooltip text */
-.locked-gradeable-tooltip .locked-gradeable-tooltiptext {
-    visibility: hidden;
-    background-color: var(--standard-vibrant-dark-blue);
-    color: white;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
-
-    /* Position the tooltip text - see examples below! */
-    position: absolute;
-    z-index: 3;
-    top: -10%;
-    right: 105%;
-    margin-left: -60px;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.locked-gradeable-tooltip:hover .locked-gradeable-tooltiptext {
-    visibility: visible;
-}
-
 @media (max-width: 401px) {
     .course-section-heading,
     .course-main .course-title {
