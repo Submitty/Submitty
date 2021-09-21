@@ -111,3 +111,7 @@
 .btn-markdown {
     margin: 5px;
 }
+
+#peer-table th{
+    border: 1px solid var(--standard-light-gray);
+}
