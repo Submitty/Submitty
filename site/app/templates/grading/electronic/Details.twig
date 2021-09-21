@@ -69,6 +69,11 @@
             </div>
         </div>
     {% endif %}
+    {% if message is not empty %}
+    <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
+        {{ message }}
+    </div>
+    {% endif %}
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
