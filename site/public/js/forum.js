@@ -788,7 +788,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 var thread_title = json.title;
                 var thread_lock_date =  json.lock_thread_date;
                 var thread_status = json.thread_status;
-                var expiration = json.expiration;
+                var expiration = json.expiration.replace("-", "/");
+                expiration = expiration.replace("-", "/");
                 $("#title").prop('disabled', false);
                 $(".edit_thread").show();
                 $('#label_lock_thread').show();
@@ -798,7 +799,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 if (Date.parse(expiration) > new Date()) {
                   $(".expiration").show();
                 }
-                $("#expirationDate").val(expiration);
+                $("#expirationDate").val(json.expiration);
 
                 // Categories
                 $(".cat-buttons").removeClass('btn-selected');
