@@ -496,18 +496,32 @@ class GradingOrder extends AbstractModel {
         );
         $gg_idx = [];
         $unsorted = [];
+        $items = [];
         foreach ($iter as $gg) {
-            $idx = $this->getSubmitterIndex($gg->getSubmitter());
-            //Should never happen, but better to be safe
-            if ($idx === false) {
-                $unsorted[] = $gg;
-            }
-            else {
-                $gg_idx[$idx] = $gg;
+            $items[$gg->getSubmitter()->getId()] = $gg;
+        }
+        $count = 0;
+
+        //Iterate through all sections and their submitters to find this one
+        foreach ($this->section_submitters as $name => $section) {
+            for ($i = 0; $i < count($section); $i++) {
+                $testSub = $section[$i]->getId();
+
+                //Found them
+                if (isset($items[$testSub])) {
+                    $gg_idx[$count] = $items[$testSub];
+                    unset($items[$testSub]);
+                }
+
+                $count++;
             }
         }
+        foreach ($items as $item => $val) {
+            $unsorted[] = $val;
+        }
+
         //Since the array's elements were not added in the same order as the indices, sort to fix it
-        ksort($gg_idx);
+        // ksort($gg_idx);
         return array_merge($gg_idx, $unsorted);
     }
 
