@@ -14,20 +14,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
 -- Name: notifications_component; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -134,7 +120,7 @@ $_$;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
@@ -779,7 +765,7 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    release_histogram character varying(10) NOT NULL
+    release_histogram character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -897,7 +883,8 @@ CREATE TABLE public.queue_settings (
     open boolean NOT NULL,
     code text NOT NULL,
     token text NOT NULL,
-    regex_pattern character varying
+    regex_pattern character varying,
+    contact_information boolean DEFAULT true NOT NULL
 );
 
 
