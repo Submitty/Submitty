@@ -5790,6 +5790,11 @@ AND gc_id IN (
 
     private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
         $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
+        if ($comment === "") {
+            $this->deleteOverallComment($g_id, $grader_id, $ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment());
+            return;
+        }
+
         $user_id = null;
         $team_id = null;
 
