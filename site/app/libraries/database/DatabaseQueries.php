@@ -2309,7 +2309,17 @@ ORDER BY rotating_section"
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC"
+            "SELECT 
+                COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
+                COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
+                user_id,
+                user_group
+            FROM
+                users
+            WHERE
+                user_group < 4
+            ORDER BY
+                user_group, user_id ASC"
         );
         $users = [];
 
