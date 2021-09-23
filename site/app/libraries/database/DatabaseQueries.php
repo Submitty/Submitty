@@ -6241,7 +6241,7 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['id'];
     }
 
-    public function getQueueHasContactInformation($queue_code){
+    public function getQueueHasContactInformation($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['contact_information'];
     }
