@@ -4304,7 +4304,7 @@ AND gc_id IN (
      * Gets All Parent Authors who this user responded to
      *
      * @param string $post_author_id current_user_id
-     * @param string $post_id        the parent post id
+     * @param string $post_id        the parent post idgetAllQueues
      */
     public function getAllParentAuthors(string $post_author_id, string $post_id) {
         $params = [$post_id];
@@ -6178,7 +6178,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token, $regex_pattern) {
+    public function openQueue($queue_code, $token, $regex_pattern, $require_contact_info) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6186,7 +6186,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern) VALUES (TRUE, TRIM(?), TRIM(?), ?)", [$queue_code,$token,$regex_pattern]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info]);
         return true;
     }
 

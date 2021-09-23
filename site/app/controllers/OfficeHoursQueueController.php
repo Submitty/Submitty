@@ -64,7 +64,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $require_contact_info = $_POST['require_contact_information'];
+        $require_contact_info = $_POST['require_contact_information'] == "on";
 
         //Replace whitespace with "_"
         $queue_code = trim($_POST['code']);
@@ -80,7 +80,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
         $regex_pattern = isset($_POST['regex']) ? trim($_POST['regex']) : '';
-        if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern)) {
+        if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern, $require_contact_info)) {
             $this->core->addSuccessMessage("New queue added");
             Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
         }
