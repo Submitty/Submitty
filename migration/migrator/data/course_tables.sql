@@ -808,7 +808,8 @@ CREATE TABLE public.polls (
     status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
-    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
+    release_histogram character varying(10) NOT NULL
 );
 
 
