@@ -6428,6 +6428,9 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
+    public function changeQueueContactInformation($contact_information, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET contact_information = ? WHERE code = ?", [$contact_information, $queue_code]);
+    }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');

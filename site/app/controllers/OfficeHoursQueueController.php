@@ -452,6 +452,29 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_contact_information", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     * @return MultiResponse
+     */
+    public function changeContactInformation($queue_code) {
+        if (empty($queue_code)) {
+            $this->core->addErrorMessage("Missing queue name");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $contact_information = $_POST['contact_information'] == "true";
+
+        $queue_code = trim($_POST['code']);
+        $this->core->getQueries()->changeQueueContactInformation($contact_information, $queue_code);
+        $this->core->addSuccessMessage("Queue Contact Information Changed");
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse
      */
