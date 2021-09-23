@@ -7635,4 +7635,26 @@ SQL;
         $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
         return $this->course_db->rows();
     }
+
+    /**
+     * Gets the number of students who have submitted to a given gradeable
+     *
+     * @param string $gradeable_id
+     * @return int
+     */
+    public function getTotalStudentsWithSubmissions(string $gradeable_id): int {
+        $this->course_db->query('SELECT DISTINCT COUNT(*) user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["user_id"];
+    }
+
+    /**
+     * Gets the total number of submissions made to a given gradeable
+     *
+     * @param string $gradeable_id
+     * @return int
+     */
+    public function getTotalSubmissionsToGradeable(string $gradeable_id): int {
+        $this->course_db->query('SELECT COUNT(*) FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["count"];
+    }
 }
