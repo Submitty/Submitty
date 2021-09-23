@@ -66,9 +66,12 @@
           <td style="text-align: left;">
               <b>Name: </b>{{queue['code']}}<br>
               <b>Access Code: </b>{{queue['token']}}<br>
-              {% if queue['regex_pattern'] is defined and queue['regex_pattern'] != '' %}
+              <b>Contact Information: </b>{{ queue['contact_information'] ? "On" : "Off" }}<br>
+              {% if queue['regex_pattern'] is defined and queue['regex_pattern'] != '' and queue['contact_information'] %}
                 <b>Regex Pattern: </b>{{queue['regex_pattern']}}</td>
               {% endif %}
+
+
           <td>
               <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
           </td>
