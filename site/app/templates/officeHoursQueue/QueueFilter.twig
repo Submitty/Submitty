@@ -19,22 +19,20 @@
     <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Access Code</button>
   </form>
     <br>
-    {% if viewer.isContactInfoEnabled() %}
-        <hr>
-        <span class="option-title">Modify regex pattern</span>
-        <form method="post" id="change_queue_regex" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <select id="old_queue_code_2" class="form-control" name="code" aria-label="Access Code" required="required">
-                <option value="">Queue Name</option>
-                {% for queue in viewer.getAllQueues() %}
-                    <option value="{{queue['code']}}">{{queue['code']}}</option>
-                {% endfor %}
-            </select>
-            <input type="text" id="old_queue_regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="New Access Code" required="required" style="min-width: 40%;">
-            <button id="change_regex_btn" type="submit" class="btn btn-primary">Change Queue Regex Pattern </button>
-        </form>
-        <br>
-    {% endif %}
+    <hr>
+    <span class="option-title">Modify regex pattern</span>
+    <form method="post" id="change_queue_regex" action="{{base_url}}/no_code_added/change_regex" style="height:auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <select id="old_queue_code_2" class="form-control" name="code" aria-label="Access Code" required="required">
+            <option value="">Queue Name</option>
+            {% for queue in viewer.getAllQueues() %}
+                <option value="{{queue['code']}}">{{queue['code']}}</option>
+            {% endfor %}
+        </select>
+        <input type="text" id="old_queue_regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="New Access Code" required="required" style="min-width: 40%;">
+        <button id="change_regex_btn" type="submit" class="btn btn-primary">Change Queue Regex Pattern </button>
+    </form>
+    <br>
   <span class="option-title"> Modify queue status </span>
   <table class="table table-striped" style="width:100%;">
     <thead>

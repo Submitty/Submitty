@@ -121,24 +121,22 @@ class OfficeHoursQueueController extends AbstractController {
         }
         $contact_info = null;
         if($this->core->getQueries()->getQueueHasContactInformation($queue_code)) {
-            if ($this->core->getConfig()->getQueueContactInfo()) {
-                if (empty($_POST['contact_info'])) {
-                    $this->core->addErrorMessage("Missing contact info");
-                    return MultiResponse::RedirectOnlyResponse(
-                        new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-                    );
-                } else {
-                    $contact_info = trim($_POST['contact_info']);
-                    //make sure contact information matches instructors regex pattern
-                    $regex_pattern = $this->core->getQueries()->getQueueRegex($queue_code)[0]['regex_pattern'];
-                    if ($regex_pattern !== '') {
-                        $regex_pattern = '#' . $regex_pattern . '#';
-                        if (preg_match($regex_pattern, $contact_info) == 0) {
-                            $this->core->addErrorMessage("Invalid contact information format.  Please re-read the course-specific instructions about the necessary information you should provide when you join this office hours queue.");
-                            return MultiResponse::RedirectOnlyResponse(
-                                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-                            );
-                        }
+            if (empty($_POST['contact_info'])) {
+                $this->core->addErrorMessage("Missing contact info");
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                );
+            } else {
+                $contact_info = trim($_POST['contact_info']);
+                //make sure contact information matches instructors regex pattern
+                $regex_pattern = $this->core->getQueries()->getQueueRegex($queue_code)[0]['regex_pattern'];
+                if ($regex_pattern !== '') {
+                    $regex_pattern = '#' . $regex_pattern . '#';
+                    if (preg_match($regex_pattern, $contact_info) == 0) {
+                        $this->core->addErrorMessage("Invalid contact information format.  Please re-read the course-specific instructions about the necessary information you should provide when you join this office hours queue.");
+                        return MultiResponse::RedirectOnlyResponse(
+                            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                        );
                     }
                 }
             }

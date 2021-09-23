@@ -64,7 +64,6 @@ use app\libraries\FileUtils;
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
- * @method bool getQueueContactInfo()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
  * @method void setSemester(string $semester)
