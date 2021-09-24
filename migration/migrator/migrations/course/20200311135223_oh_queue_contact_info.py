@@ -24,9 +24,6 @@ def up(config, database, semester, course):
         with open(config_file, 'r') as in_file:
             j = json.load(in_file)
 
-        if 'queue_contact_info' not in j['course_details']:
-            j['course_details']['queue_contact_info'] = False
-
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
 
