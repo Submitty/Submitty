@@ -121,7 +121,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
         $contact_info = null;
         if ($this->core->getQueries()->getQueueHasContactInformation($queue_code)) {
-            if (empty($_POST['contact_info'])) {
+            if (!isset($_POST['contact_info'])) {
                 $this->core->addErrorMessage("Missing contact info");
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -455,24 +455,21 @@ class OfficeHoursQueueController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_contact_information", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     public function changeContactInformation($queue_code) {
-        if (empty($queue_code)) {
+        if (!isset($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
         }
 
-        $contact_information = $_POST['contact_information'] == "true";
+        $contact_information = $_POST['contact_information'] === "true";
 
         $queue_code = trim($_POST['code']);
         $this->core->getQueries()->changeQueueContactInformation($contact_information, $queue_code);
         $this->core->addSuccessMessage("Queue Contact Information Changed");
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+
     }
 
     /**

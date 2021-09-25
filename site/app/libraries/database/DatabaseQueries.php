@@ -4304,7 +4304,7 @@ AND gc_id IN (
      * Gets All Parent Authors who this user responded to
      *
      * @param string $post_author_id current_user_id
-     * @param string $post_id        the parent post idgetAllQueues
+     * @param string $post_id        the parent post id
      */
     public function getAllParentAuthors(string $post_author_id, string $post_id) {
         $params = [$post_id];
@@ -6241,7 +6241,7 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['id'];
     }
 
-    public function getQueueHasContactInformation($queue_code) {
+    public function getQueueHasContactInformation(string $queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['contact_information'];
     }
@@ -6428,7 +6428,7 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
-    public function changeQueueContactInformation($contact_information, $queue_code) {
+    public function changeQueueContactInformation(bool $contact_information,string $queue_code) {
         $this->course_db->query("UPDATE queue_settings SET contact_information = ? WHERE code = ?", [$contact_information, $queue_code]);
     }
 

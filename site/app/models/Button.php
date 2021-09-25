@@ -15,7 +15,6 @@ use app\libraries\Core;
  * @method string getClass()
  * @method string|null getId()
  * @method bool isDisabled()
- * @method string getPrerequisite()
  * @method bool isTitleOnHover()
  * @method float|null getProgress()
  * @method string|null getAriaLabel()
@@ -55,8 +54,6 @@ class Button extends AbstractModel {
     protected $id;
     /** @prop @var bool $disabled */
     protected $disabled;
-    /** @prop @var string $prerequisite */
-    protected $prerequisite;
     /** @prop @var float|null $progress */
     protected $progress;
     /** @prop @var bool $title_on_hover */
@@ -84,7 +81,6 @@ class Button extends AbstractModel {
         $this->class    = $details["class"] ?? "btn";
         $this->id       = $details["id"] ?? null;
         $this->disabled = $details["disabled"] ?? false;
-        $this->prerequisite = $details["prerequisite"] ?? null;
         $this->progress = $details["progress"] ?? null;
         if ($this->progress !== null) {
             $this->progress = floatval($this->progress);
