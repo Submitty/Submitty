@@ -78,7 +78,8 @@ class PlagiarismView extends AbstractView {
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$config["gradeable_id"]}&config_id={$config["config_id"]}",
             "csrf_token" => $this->core->getCsrfToken(),
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
-            "config" => $config
+            "config" => $config,
+            "supported_languages" => PlagiarismUtils::SUPPORTED_LANGUAGES
         ]);
     }
 }

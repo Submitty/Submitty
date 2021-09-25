@@ -31,7 +31,7 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 $(`#sol-textbox-cont-${component_id}-saved .solution-notes-text`).text(res.data.solution_text);
             }
             else {
-                displayErrorMessage('Something went wrong while upating the solution...');
+                displayErrorMessage('Something went wrong while updating the solution...');
             }
         },
         error: function(err) {
