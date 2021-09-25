@@ -66,13 +66,17 @@ class OfficeHoursQueueController extends AbstractController {
 
         $require_contact_info = $_POST['require_contact_information'] == "on";
 
+
         //Replace whitespace with "_"
         $queue_code = trim($_POST['code']);
-        $token = trim($_POST['token']);
+        $token = trim($_POST['token'] ?? '');
 
         $re = '/^[\sa-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
-        preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
+        $matches_token = 1;
+        if ($token !== "") {
+            preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
+        }
         if (count($matches_code) !== 1 || count($matches_token) !== 1) {
             $this->core->addErrorMessage('Queue name and secret code must only contain letters, numbers, spaces, "_", and "-"');
             return MultiResponse::RedirectOnlyResponse(
@@ -119,6 +123,7 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
+
         $contact_info = null;
         if ($this->core->getQueries()->getQueueHasContactInformation($queue_code)) {
             if (!isset($_POST['contact_info'])) {
@@ -143,7 +148,7 @@ class OfficeHoursQueueController extends AbstractController {
             }
         }
         $queue_code = trim($queue_code);
-        $token = trim($_POST['token']);
+        $token = trim($_POST['token'] ?? '');
 
         $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {

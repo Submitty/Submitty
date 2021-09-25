@@ -7,10 +7,11 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048" style="margin-top: 1rem;"><br>
         <div class="access-code-input" style="margin-top: 1rem;">
-            <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
-            <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
+            <input type="text" id="new-queue-token" name="token" placeholder="Access Code" aria-label="Access Code" maxlength="2048">
+            <a id="new_queue_rand_token" onclick="genRandCode('new-queue-token')" onkeypress="genRandCode('new-queue-token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
                 <i class="fas fa-dice"></i>
-            </a>
+            </a><br>
+            <p>NOTE: Access Codes are optional</p>
         </div>
     <br>
     Require contact information
