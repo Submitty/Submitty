@@ -414,51 +414,6 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @param string $job
-     * @param string $gradeable_id
-     * @param int $config_id
-     * @throws Exception
-     */
-    private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-
-        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
-        if (file_exists($json_file)) {
-            unlink($json_file);
-        }
-
-        $json_data = $this->getJsonForConfig($gradeable_id, $config_id);
-
-        if ($job === "RunLichen") {
-            $lichen_job_data = [
-                "job" => $job,
-                "semester" => $semester,
-                "course" => $course,
-                "gradeable" => $gradeable_id,
-                "config_id" => $config_id,
-                "config_data" => $json_data
-            ];
-        }
-        else {
-            $lichen_job_data = [
-                "job" => $job,
-                "semester" => $semester,
-                "course" => $course,
-                "gradeable" => $gradeable_id,
-                "config_id" => $config_id
-            ];
-        }
-
-        $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
-
-        if (!FileUtils::writeJsonFile($lichen_job_file, $lichen_job_data)) {
-            throw new FileWriteException("Error: Failed to write lichen job file. Try again");
-        }
-    }
-
-
-    /**
      * @Route("/courses/{_semester}/{_course}/plagiarism")
      * @param string $refresh_page
      * @return WebResponse
