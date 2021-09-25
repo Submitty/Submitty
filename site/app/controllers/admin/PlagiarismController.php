@@ -288,6 +288,83 @@ class PlagiarismController extends AbstractController {
         }
     }
 
+
+    /**
+     * @param string $job
+     * @param string $gradeable_id
+     * @param int $config_id
+     */
+    private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
+        $em = $this->core->getCourseEntityManager();
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        $config = $em->getRepository(PlagiarismConfig::class)
+                     ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+
+        if ($config === null) {
+            throw new DatabaseException("Error: Unable to find plagiarism configuration");
+        }
+
+        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
+        if (file_exists($json_file)) {
+            unlink($json_file);
+        }
+
+        $regex_dirs = [];
+        if ($config->isRegexDirSubmissionsSelected()) {
+            $regex_dirs[] = "submissions";
+        }
+        if ($config->isRegexDirResultsSelected()) {
+            $regex_dirs[] = "results";
+        }
+        if ($config->isRegexDirCheckoutSelected()) {
+            $regex_dirs[] = "checkout";
+        }
+
+        if ($job === "RunLichen") {
+            $json_data = [
+                "semester" => $semester,
+                "course" => $course,
+                "gradeable" => $gradeable_id,
+                "config_id" => $config_id,
+                "version" => $config->getVersionStatus(),
+                "regex" => $config->getRegexArray(),
+                "regex_dirs" => $regex_dirs,
+                "language" => $config->getLanguage(),
+                "threshold" => $config->getThreshold(),
+                "sequence_length" => $config->getSequenceLength(),
+                "prior_term_gradeables" => $config->getOtherGradeables(),
+                "ignore_submissions" => $config->getIgnoredSubmissions()
+            ];
+
+            $lichen_job_data = [
+                "job" => $job,
+                "semester" => $semester,
+                "course" => $course,
+                "gradeable" => $gradeable_id,
+                "config_id" => $config_id,
+                "config_data" => $json_data
+            ];
+        }
+        else {
+            $lichen_job_data = [
+                "job" => $job,
+                "semester" => $semester,
+                "course" => $course,
+                "gradeable" => $gradeable_id,
+                "config_id" => $config_id
+            ];
+        }
+
+        $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
+
+        if (!FileUtils::writeJsonFile($lichen_job_file, $lichen_job_data)) {
+            throw new FileWriteException("Error: Failed to write lichen job file. Try again");
+        }
+    }
+
+
     /**
      * Returns a data structure containing the contents of a config.json file
      *
@@ -930,6 +1007,8 @@ class PlagiarismController extends AbstractController {
         }
 
         // We don't want to catch any errors here because if something goes wrong, we want to know about it as developers/sysadmins
+        $em->flush();
+
         $em->flush();
 
         $em->flush();
