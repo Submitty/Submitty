@@ -469,7 +469,6 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->getQueries()->changeQueueContactInformation($contact_information, $queue_code);
         $this->core->addSuccessMessage("Queue Contact Information Changed");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
-
     }
 
     /**

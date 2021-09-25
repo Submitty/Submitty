@@ -6428,7 +6428,7 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
-    public function changeQueueContactInformation(bool $contact_information,string $queue_code) {
+    public function changeQueueContactInformation(bool $contact_information, string $queue_code) {
         $this->course_db->query("UPDATE queue_settings SET contact_information = ? WHERE code = ?", [$contact_information, $queue_code]);
     }
 
