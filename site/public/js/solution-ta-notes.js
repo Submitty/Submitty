@@ -1,5 +1,5 @@
-/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken */
-/* exported updateSolutionTaNotes, showSolutionTextboxCont, cancelEditingSolution */
+/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken, previewMarkdown */
+/* exported updateSolutionTaNotes, previewSolutionNotesMarkdown */
 function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     const data = {
         solution_text: $(`#textbox-solution-${component_id}`).val().trim(),
@@ -17,9 +17,6 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 displaySuccessMessage('Solution has been updated successfully...');
                 // Dom manipulation after the Updating/adding the solution note
                 $(`#solution-box-${component_id}`).attr('data-first-edit', 0);
-                $(`#edit-solution-btn-${component_id}`).removeClass('hide');
-                $(`#sol-textbox-cont-${component_id}-saved`).removeClass('hide');
-                $(`#sol-textbox-cont-${component_id}-edit`).addClass('hide');
 
                 // Updating the last edit info
                 $(`#solution-box-${component_id} .last-edit`).removeClass('hide');
@@ -40,26 +37,12 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     });
 }
 
-function showSolutionTextboxCont(currentEle, solTextboxCont, noSolutionCont) {
-    $(currentEle).addClass('hide');
-    // Show the textbox to start writing out the solutions
-    if ($(solTextboxCont).hasClass('hide')) {
-        $(solTextboxCont).removeClass('hide');
-        $(noSolutionCont).addClass('hide');
-    }
-}
+function previewSolutionNotesMarkdown() {
+    const component_id = $(this).closest('.solution-cont').data('component_id');
+    const markdown_textarea = $(`textarea#textbox-solution-${component_id}`);
+    const preview_element = $(`#solution_notes_preview_${component_id}`);
+    const preview_button = $(this);
+    const content = markdown_textarea.val();
 
-function cancelEditingSolution(componentId) {
-    const isFirstEdit = $(`#solution-box-${componentId}`).attr('data-first-edit');
-
-    if (+isFirstEdit) {
-        $(`#show-sol-btn-${componentId}`).removeClass('hide');
-        $(`.solution-notes-text-${componentId}`).removeClass('hide');
-        $(`#sol-textbox-cont-${componentId}-edit`).addClass('hide');
-    }
-    else {
-        $(`#edit-solution-btn-${componentId}`).removeClass('hide');
-        $(`#sol-textbox-cont-${componentId}-saved`).removeClass('hide');
-        $(`#sol-textbox-cont-${componentId}-edit`).addClass('hide');
-    }
+    previewMarkdown(markdown_textarea, preview_element, preview_button, {content: content});
 }
