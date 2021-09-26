@@ -10,7 +10,12 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit('/');
             cy.login();
             cy.wait(500);
+            cy.viewport(1920,1200);
             cy.visit(autograding_status_path);
+        });
+
+        afterEach(() => {
+            cy.logout();
         });
 
         it('Should start at pause update', () => {
@@ -18,21 +23,19 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been stopped');
 
             // Check that the table isn't gaining new entries
-            cy.wait(5000);
+            cy.wait(7500);
             cy.get('#autograding-status-table tbody tr').eq(1).should('not.exist');
 
             cy.get('#toggle-btn').should('have.text', 'Resume Update').click().should('have.text', 'Pause Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been resumed');
 
             // Check that the table is gaining new entries
-            cy.wait(5000);
+            cy.wait(7500);
             cy.get('#autograding-status-table tbody tr').eq(1).should('exist');
 
-            cy.logout();
         });
 
         it('Should show newly added autograding jobs', () => {
-            cy.viewport(1920,1200);
             cy.visit('/');
             cy.login();
             cy.wait(500);
@@ -91,7 +94,15 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#autograding-status-table tbody tr td').eq(9).then(element => cy.get(element).should('contain', '0'));
             cy.get('#autograding-status-table tbody tr td').eq(10).then(element => cy.get(element).should('contain', '102'));
 
-            cy.logout();
+        });
+
+        it('should only allow instructor level users', () => {
+            // attempt to visit page as student
+            cy.visit([]);
+            cy.login('student');
+            cy.visit(autograding_status_path);
+            cy.get('#autograding-status-table').should('not.exist');
+            cy.visit('/');
         });
     });
 });
