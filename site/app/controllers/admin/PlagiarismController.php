@@ -710,36 +710,19 @@ class PlagiarismController extends AbstractController {
 
                 // This is a little ugly/repetitive but it can be frustrating for users to get nondescriptive errors
                 // so we try to make potential error cases a little more helpful
+                $keys = ["version", "regex", "regex_dirs", "language", "threshold", "sequence_length", "prior_term_gradeables", "ignore_submissions"];
                 $error_message = "";
-                if (!isset($data["version"])) {
-                    $error_message = "Error: Invalid or missing version field";
-                }
-                elseif (!isset($data["regex"])) {
-                    $error_message = "Error: Invalid or missing regex field";
-                }
-                elseif (!isset($data["regex_dirs"])) {
-                    $error_message = "Error: Invalid or missing regex_dirs field";
-                }
-                elseif (!isset($data["language"])) {
-                    $error_message = "Error: Invalid or missing language field";
-                }
-                elseif (!isset($data["threshold"])) {
-                    $error_message = "Error: Invalid or missing threshold field";
-                }
-                elseif (!isset($data["sequence_length"])) {
-                    $error_message = "Error: Invalid or missing sequence_length field";
-                }
-                elseif (!isset($data["prior_term_gradeables"])) {
-                    $error_message = "Error: Invalid or missing prior_term_gradeables field";
-                }
-                elseif (!isset($data["ignore_submissions"])) {
-                    $error_message = "Error: Invalid or missing ignore_submissions field";
+                foreach ($keys as $key) {
+                    if (!isset($data[$key])) {
+                        $error_message .= "Error: Invalid or missing field: {$key}\n";
+                    }
                 }
 
                 if ($error_message !== "") {
                     throw new ValidationException($error_message, []);
                 }
 
+                // Input validation to check for invalid inputs occurs here
                 $new_config = new PlagiarismConfig(
                     $gradeable_id,
                     $config_id,
