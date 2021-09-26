@@ -38,7 +38,7 @@ $(document).ready(() => {
                 post_string = escapeSpecialChars(post_string);
                 let thread_title = thread_titles[i];
                 thread_title = escapeSpecialChars(thread_title);
-                $(this).parent().parent().parent().append(`<tr id="${ids[i]}"><td></td><td>${timestamps[i]}</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="${thread_ids[i]}"><pre class="pre_forum" style="white-space: pre-wrap;">${thread_title}</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="${thread_ids[i]}"><pre class="pre_forum" style="white-space: pre-wrap;">${post_string}</pre></td></tr> `);
+                $(this).parent().parent().parent().append(`<tr id="${ids[i]}"><td></td><td>${timestamps[i]}</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${thread_title}</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td></tr> `);
             }
             $(this).html('Collapse');
             $(this).data('action','collapse');

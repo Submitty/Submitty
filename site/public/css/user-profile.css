@@ -108,12 +108,12 @@
 }
 
 .icon {
-    background: none!important;
+    background: none !important;
     border: none;
-    padding: 0!important;
+    padding: 0 !important;
     color: var(--external-link-blue);
     text-decoration: none;
-    font-family: 'Source Sans Pro', 'sans-serif'!important;
+    font-family: 'Source Sans Pro', 'sans-serif' !important;
     font-size: 100%;
     cursor: pointer;
 }
