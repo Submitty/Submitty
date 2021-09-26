@@ -8,7 +8,7 @@
           }
         ];
         {% for answer, number in results %}
-            data[0].x.push("{{ poll.getResponseString(answer) }}");
+            data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
             data[0].y.push({{ number }});
         {% endfor %}
         const layout = {
