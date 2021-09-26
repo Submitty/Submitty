@@ -1592,22 +1592,24 @@ function bookmarkThread(thread_id, type){
 
 function toggleMarkdown(post_box_id, triggered) {
   if(post_box_id === undefined) post_box_id = '';
+  //display/hide the markdown header
   $(`#markdown_header_${post_box_id}`).toggle();
-  console.log(`#markdown_header_${post_box_id}`, $(`#markdown_header_${post_box_id}`));
   $(this).toggleClass('markdown-active markdown-inactive');
-  // FIX MARKDOWN PREVIEW
-  if( $(this).hasClass('markdown-inactive') && post_box_id === 0) {
-    const markdown_header = $('#markdown_header_0');
+  //if markdown has just been turned off, make sure we exit preview mode if it is active
+  if($(this).hasClass('markdown-inactive')) {
+    const markdown_header = $(`#markdown_header_${post_box_id}`);
     const edit_button = markdown_header.find('.markdown-write-mode');
     if (markdown_header.attr('data-mode') === 'preview') {
       edit_button.trigger('click');
     }
   }
+  //trigger this event for all other markdown toggle buttons (since the setting should be persistent)
   if (!triggered) {
     $('.markdown-toggle').not(this).each(function() {
       toggleMarkdown.call(this, this.id.split('_')[2], true);
     });
   }
+  //set various settings related to new markdown state
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
   document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;

@@ -1561,15 +1561,16 @@ function getFocusableElements() {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
- * @param preview_element JQuery element of the span the markdown will be inserted into
- * @param preview_button JQuery element of the "Preview Markdown" button
- *                       Should have title="Preview Markdown"
- * @param data Object whose properties will get sent through a POST request
+ * @param {string} mode String representing what mode to switch the markdown area to.
+ *                      - `'preview'` activates preview mode
+ *                      - Anything else will activate write/edit mode
+ * @param {JQuery} markdown_textarea JQuery element of the textarea where the markdown is being entered
+ * @param {JQuery} preview_element JQuery element of the span the markdown will be inserted into
+ * @param {Object} data Object whose properties will get sent through a POST request
  */
-function previewMarkdown(mode, markdown_textarea, preview_element, preview_button, data) {
+function previewMarkdown(mode, markdown_textarea, preview_element, data) {
     const enablePreview = mode === 'preview';
-    const markdown_header = markdown_textarea.closest('.markdown-area').find('.markdown-header');
+    const markdown_header = markdown_textarea.closest('.markdown-area').find('.markdown-area-header');
     $.ajax({
         url: buildCourseUrl(['markdown', 'preview']),
         type: 'POST',

@@ -71,6 +71,7 @@
 <script>
     $('.markdown-mode-tab').on('click', function(){
         $(this).addClass('active');
-        $('.markdown-mode-tab').not(this).removeClass('active');
+        const markdown_area = $(this).closest('.markdown-area');
+        markdown_area.find('.markdown-mode-tab').not(this).removeClass('active');
     });
 </script>
