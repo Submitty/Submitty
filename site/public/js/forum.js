@@ -1592,13 +1592,15 @@ function bookmarkThread(thread_id, type){
 
 function toggleMarkdown(post_box_id, triggered) {
   if(post_box_id === undefined) post_box_id = '';
-  $(`#markdown_buttons_${post_box_id}`).toggle();
+  $(`#markdown_header_${post_box_id}`).toggle();
+  console.log(`#markdown_header_${post_box_id}`, $(`#markdown_header_${post_box_id}`));
   $(this).toggleClass('markdown-active markdown-inactive');
+  // FIX MARKDOWN PREVIEW
   if( $(this).hasClass('markdown-inactive') && post_box_id === 0) {
-    let preview_button = $(`#markdown_buttons_0`).find('.preview-button')
-    let data_mode = preview_button.attr("data-mode");
-    if (data_mode === 'preview') {
-      preview_button.trigger('click');
+    const markdown_header = $('#markdown_header_0');
+    const edit_button = markdown_header.find('.markdown-write-mode');
+    if (markdown_header.attr('data-mode') === 'preview') {
+      edit_button.trigger('click');
     }
   }
   if (!triggered) {
@@ -1611,7 +1613,8 @@ function toggleMarkdown(post_box_id, triggered) {
   document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
 }
 
-function previewForumMarkdown(){
+function previewForumMarkdown(mode){
+  console.log('mode', mode);
   let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
   if (post_box_num === undefined) {
     post_box_num = '';
@@ -1621,7 +1624,7 @@ function previewForumMarkdown(){
   const preview_button = $(this);
   const post_content = reply_box.val();
 
-  previewMarkdown(reply_box, preview_box, preview_button, { content: post_content });
+  previewMarkdown(mode, reply_box, preview_box, preview_button, { content: post_content });
 }
 
 function checkInputMaxLength(obj){

@@ -101,6 +101,11 @@
     max-height: 300px;
 }
 
+.markdown-area {
+    border-radius: 6px 6px 6px 6px;
+    border: 1px solid var(--standard-light-gray);
+}
+
 .markdown-area textarea {
     resize: vertical;
     min-height: 100px;
@@ -108,8 +113,62 @@
     width: -webkit-fill-available;
 }
 
+.markdown-area-header {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--standard-pale-gray);
+    padding: 0 10px 0 10px;
+    border-radius: 6px 6px 0 0;
+}
+
+.markdown-area-body {
+    padding: 16px;
+}
+
+.markdown-mode-buttons {
+    display: flex;
+    margin-top: 10px;
+}
+
+.markdown-area-toolbar {
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+}
+
+.markdown-tool {
+    cursor: pointer;
+    margin-left: 3px;
+}
+
+.markdown-mode-tab {
+    font-size: 14px;
+    margin-left: 5px;
+    padding-left: 16px;
+    padding-right: 16px;
+    min-height: 35px;
+    cursor:pointer;
+}
+
+.markdown-mode-tab.active {
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 6px 6px 0 0;
+    border-bottom-style: none;
+}
+
+.markdown-mode-tab:not(.active) {
+    border: 1px solid var(--standard-pale-gray);
+    background-color: var(--standard-pale-gray);
+    color: var(--standard-medium-gray);
+    transition: color 0.5s 0s;
+}
+
+.markdown-mode-tab:not(.active):hover {
+    color: var(--text-black);
+}
+
 .btn-markdown {
-    margin: 5px;
+    margin-left: 5px;
 }
 
 #peer-table th{
