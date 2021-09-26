@@ -27,6 +27,7 @@ let num_clipboard_files = 0;
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
+
 function initializeDragAndDrop() {
     file_array = [];
     previous_files = [];
@@ -281,7 +282,7 @@ function deleteSingleFile(filename, part, previous) {
     setButtonStatus();
 }
 
-function setButtonStatus() {
+function setButtonStatus(inactive_version = false) {
 
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     var labels = 0;
@@ -304,7 +305,9 @@ function setButtonStatus() {
     }
 
     $(".popup-submit").prop("disabled", false);
-
+    if (inactive_version) {
+        $("#submit").prop("disabled", true);
+    }
     // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
     // toggled the necessary flag that we're on a submission that would have previous (to prevent costly dom
     // lookups for the existance of #getprev id in the page)

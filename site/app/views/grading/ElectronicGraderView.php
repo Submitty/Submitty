@@ -481,7 +481,7 @@ HTML;
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 if ($peer === false) {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
                 }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
@@ -772,6 +772,26 @@ HTML;
             ];
         }
 
+        $grader_registration_sections = $gradeable->getGraderAssignmentMethod() === Gradeable::ROTATING_SECTION ? $gradeable->getRotatingGraderSections()[$this->core->getUser()->getId()] ?? [] : $this->core->getUser()->getGradingRegistrationSections();
+
+        $message = "";
+        $message_warning = false;
+        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER) {
+            if ($view_all) {
+                if (count($grader_registration_sections) !== 0) {
+                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Select "View Your Sections" to see only your sections.';
+                    $message_warning = true;
+                }
+            }
+            elseif (count($grader_registration_sections) === 0) {
+                $message = 'Notice: You are not assigned to grade any students for this gradeable. Select "View All" to see the whole class.';
+                $message_warning = true;
+            }
+        }
+        elseif (count($grader_registration_sections) === 0) {
+            $message = 'Notice: You are not assigned to grade any students for this gradeable.';
+        }
+
         $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : [];
         foreach ($team_gradeable_view_history as $team_id => $team) {
             $not_viewed_yet = true;
@@ -837,7 +857,9 @@ HTML;
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "blind_status" => $gradeable->getPeerBlind(),
-            "is_instructor" => $this->core->getUser()->getGroup() === 1
+            "is_instructor" => $this->core->getUser()->getGroup() === 1,
+            "message" => $message,
+            "message_warning" => $message_warning
         ]);
     }
 
@@ -1080,11 +1102,15 @@ HTML;
                 $gradeable->getId(),
                 $highest_version,
                 $old_files,
-                $graded_gradeable->getSubmitter()->getId()
+                $graded_gradeable->getSubmitter()->getId(),
+                $gradeable->hasAllowedTime(),
+                $gradeable->getUserAllowedTime($graded_gradeable->getSubmitter()->getUser()) ?? -1
             );
         }
 
         CodeMirrorUtils::loadDefaultDependencies($this->core);
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
@@ -1646,7 +1672,7 @@ HTML;
     }
 
 
-    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id): string {
+    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id, bool $is_timed, int $allowed_minutes): string {
         return $this->core->getOutput()->renderTwigTemplate(
             "grading/electronic/NotebookPanel.twig",
             [
@@ -1666,7 +1692,9 @@ HTML;
             "old_files" => $old_files,
             "is_grader_view" => true,
             "max_file_uploads" => ini_get('max_file_uploads'),
-            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css')
+            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
+            "is_timed" => $is_timed,
+            "allowed_minutes" => $allowed_minutes
             ]
         );
     }
