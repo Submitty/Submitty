@@ -1102,7 +1102,9 @@ HTML;
                 $gradeable->getId(),
                 $highest_version,
                 $old_files,
-                $graded_gradeable->getSubmitter()->getId()
+                $graded_gradeable->getSubmitter()->getId(),
+                $gradeable->hasAllowedTime(),
+                $gradeable->getUserAllowedTime($graded_gradeable->getSubmitter()->getUser()) ?? -1
             );
         }
 
@@ -1668,7 +1670,7 @@ HTML;
     }
 
 
-    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id): string {
+    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id, bool $is_timed, int $allowed_minutes): string {
         return $this->core->getOutput()->renderTwigTemplate(
             "grading/electronic/NotebookPanel.twig",
             [
@@ -1688,7 +1690,9 @@ HTML;
             "old_files" => $old_files,
             "is_grader_view" => true,
             "max_file_uploads" => ini_get('max_file_uploads'),
-            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css')
+            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
+            "is_timed" => $is_timed,
+            "allowed_minutes" => $allowed_minutes
             ]
         );
     }
