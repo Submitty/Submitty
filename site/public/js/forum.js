@@ -1616,7 +1616,6 @@ function toggleMarkdown(post_box_id, triggered) {
 }
 
 function previewForumMarkdown(mode){
-  console.log('mode', mode);
   let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
   if (post_box_num === undefined) {
     post_box_num = '';
@@ -1626,7 +1625,7 @@ function previewForumMarkdown(mode){
   const preview_button = $(this);
   const post_content = reply_box.val();
 
-  previewMarkdown(mode, reply_box, preview_box, preview_button, { content: post_content });
+  previewMarkdown(mode, reply_box, preview_box, { content: post_content });
 }
 
 function checkInputMaxLength(obj){

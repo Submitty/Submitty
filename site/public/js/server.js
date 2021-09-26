@@ -1571,6 +1571,13 @@ function getFocusableElements() {
 function previewMarkdown(mode, markdown_textarea, preview_element, data) {
     const enablePreview = mode === 'preview';
     const markdown_header = markdown_textarea.closest('.markdown-area').find('.markdown-area-header');
+
+    //basic type checking
+    if (! (typeof mode === 'string'))              throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
+    if (! (typeof markdown_textarea === 'object')) throw new TypeError(`Expected type 'JQuery' for 'markdown_textarea'. Got ${typeof markdown_textarea}`);
+    if (! (typeof preview_element === 'object'))   throw new TypeError(`Expected type 'JQuery' for 'previeW_element'. Got ${typeof markdown_textarea}`);
+    if (! (typeof data === 'object'))              throw new TypeError(`Expected type 'JQuery' for 'data'. Got ${typeof markdown_textarea}`);
+
     $.ajax({
         url: buildCourseUrl(['markdown', 'preview']),
         type: 'POST',
