@@ -12,19 +12,23 @@ use app\libraries\TokenManager;
 class Server implements MessageComponentInterface {
 
     // Holds the mapping between pages that have open socket clients and those clients
-    private $clients = [];
+    /** @var array */
+    private array $clients = [];
 
     // Holds the mapping between Connection Objects IDs (key) and user current course&page (value)
-    private $pages = [];
+    /** @var array */
+    private array $pages = [];
 
     // Holds the mapping between Connection Objects IDs (key) and User_ID (value)
-    private $sessions = [];
+    /** @var array */
+    private array $sessions = [];
 
     // Holds the mapping between User_ID (key) and Connection objects (value)
-    private $users = [];
+    /** @var array  */
+    private array $users = [];
 
     /** @var Core */
-    private $core;
+    private Core $core;
 
     public function __construct(Core $core) {
         $this->core = $core;
