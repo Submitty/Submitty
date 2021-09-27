@@ -80,6 +80,10 @@ nav a > i.f {
     padding-left: 7px;
 }
 
+.breadcrumb-heading {
+    font-size: 24px;
+}
+
 #logout-button {
     margin: 15px;
     text-decoration: none;

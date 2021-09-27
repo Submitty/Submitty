@@ -1576,6 +1576,15 @@ end of styles used in the admin gradeable page
     border: 1px solid var(--text-black);
 }
 
+.wrapper-layout-header > th {
+    padding: 4px;
+    border: 1px solid var(--text-black);
+}
+
+.wrapper-upload .wrapper-layout-header {
+    background-color: var(--standard-pale-gray);
+}
+
 .query-list {
     width: 2em;
 }
