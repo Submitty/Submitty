@@ -13,22 +13,22 @@ class Server implements MessageComponentInterface {
 
     // Holds the mapping between pages that have open socket clients and those clients
     /** @var array */
-    private array $clients = [];
+    private $clients = [];
 
     // Holds the mapping between Connection Objects IDs (key) and user current course&page (value)
     /** @var array */
-    private array $pages = [];
+    private $pages = [];
 
     // Holds the mapping between Connection Objects IDs (key) and User_ID (value)
     /** @var array */
-    private array $sessions = [];
+    private $sessions = [];
 
     // Holds the mapping between User_ID (key) and Connection objects (value)
     /** @var array  */
-    private array $users = [];
+    private $users = [];
 
     /** @var Core */
-    private Core $core;
+    private $core;
 
     public function __construct(Core $core) {
         $this->core = $core;
