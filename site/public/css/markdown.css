@@ -123,6 +123,8 @@
 
 .markdown-area-body {
     padding: 16px;
+    background: var(--default-white);
+    border-radius: 0 0 6px 6px;
 }
 
 .markdown-mode-buttons {
