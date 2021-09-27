@@ -89,9 +89,6 @@
             {% if textarea_onpaste is defined %}
                 onpaste="{{ textarea_onpaste }}"
             {% endif %}
-            {% if textarea_maxlength is defined %}
-                maxlength="{{ textarea_maxlength }}"
-            {% endif %}
             data-previous-comment="{{ data_previous_comment is defined ? data_previous_comment : '' }}"
             {% if other_textarea_attributes is defined %}
                 {{ other_textarea_attributes }}

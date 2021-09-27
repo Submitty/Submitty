@@ -61,10 +61,10 @@
             <a target="_blank" href="https://submitty.org/student/communication/markdown">
                 <i style="font-style:normal;" class="fa-question-circle"></i>
             </a>
-            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown btn-markdown-link key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
-            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown btn-markdown-code key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
-            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown btn-markdown-bold key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $('#{{ markdown_area_id }}'))" class="btn btn-default btn-markdown btn-markdown-italic key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
+            <button type="button" title="Insert a link" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'link')" class="btn btn-default btn-markdown btn-markdown-link key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+            <button title="Insert a code segment" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'code')" class="btn btn-default btn-markdown btn-markdown-code key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+            <button title="Insert bold text" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'bold')" class="btn btn-default btn-markdown btn-markdown-bold key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode.call($('#{{ markdown_area_id }}'), 'italic')" class="btn btn-default btn-markdown btn-markdown-italic key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         </div>
     </div>
     <div class="markdown-area-body">
@@ -79,7 +79,7 @@
             {% endif %}
             rows="10" cols="30"
             {# 524288 characters is the default max length for text input fields #}
-            maxlength="{{no_maxlength|default(null) ? '524288' : '5000'}}"
+            maxlength="{{ (no_maxlength|default(null) ? '524288' : (textarea_maxlength|default(null) ? textarea_maxlength :'5000'))}}"
             {% if textarea_onchange is defined %}
                 onchange="{{ textarea_onchange }}"
             {% endif %}
@@ -88,9 +88,6 @@
             {% endif %}
             {% if textarea_onpaste is defined %}
                 onpaste="{{ textarea_onpaste }}"
-            {% endif %}
-            {% if textarea_maxlength is defined %}
-                maxlength="{{ textarea_maxlength }}"
             {% endif %}
             data-previous-comment="{{ data_previous_comment is defined ? data_previous_comment : '' }}"
             {% if other_textarea_attributes is defined %}
