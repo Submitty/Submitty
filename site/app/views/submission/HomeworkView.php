@@ -48,10 +48,11 @@ class HomeworkView extends AbstractView {
 
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
+        $is_team_assignment = $gradeable->isTeamAssignment();
 
         // Only show the late banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
-        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team)) {
+        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
@@ -498,7 +499,9 @@ class HomeworkView extends AbstractView {
             'max_file_uploads' => ini_get('max_file_uploads'),
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
+            'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
+            'is_grader_view' => false
         ]);
     }
 

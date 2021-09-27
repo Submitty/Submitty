@@ -223,6 +223,11 @@
                 {{ system_message }}
             </div>
             {% endif %}
+            <div class="system-message warning" id="socket-server-system-message" hidden>
+                Warning: Failed to connect to websocket server. This page will not dynamically update.
+                Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
+                sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
+            </div>
             <div id='messages'>
                 <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
                 {% for message in messages %}
