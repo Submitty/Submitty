@@ -121,6 +121,10 @@
     border-radius: 6px 6px 0 0;
 }
 
+[data-theme="dark"] .markdown-area-header {
+    background-color: var(--standard-deep-dark-gray);
+}
+
 .markdown-area-body {
     padding: 16px;
     background: var(--default-white);
@@ -157,6 +161,7 @@
     border-radius: 6px 6px 0 0;
     border-bottom-style: none;
     background-color: var(--default-white);
+    color: var(--text-black);
 }
 
 .markdown-mode-tab:not(.active) {
@@ -164,6 +169,11 @@
     background-color: var(--standard-pale-gray);
     color: var(--standard-medium-gray);
     transition: color 0.5s 0s;
+}
+
+[data-theme="dark"] .markdown-mode-tab:not(.active) {
+    background-color: var(--standard-deep-dark-gray);
+    border-color: var(--standard-deep-dark-gray);
 }
 
 .markdown-mode-tab:not(.active):hover {

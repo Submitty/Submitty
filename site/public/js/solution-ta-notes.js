@@ -37,12 +37,11 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     });
 }
 
-function previewSolutionNotesMarkdown() {
+function previewSolutionNotesMarkdown(mode) {
     const component_id = $(this).closest('.solution-cont').data('component_id');
     const markdown_textarea = $(`textarea#textbox-solution-${component_id}`);
     const preview_element = $(`#solution_notes_preview_${component_id}`);
-    const preview_button = $(this);
     const content = markdown_textarea.val();
 
-    previewMarkdown(markdown_textarea, preview_element, preview_button, {content: content});
+    previewMarkdown(mode, markdown_textarea, preview_element, {content: content});
 }

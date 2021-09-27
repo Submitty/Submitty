@@ -43,13 +43,12 @@
                     "markdown_area_value" : solution_notes,
                     "placeholder" : "Start writing the solution for " ~ component_title ~ " component.",
                     "preview_div_id" : "solution_notes_preview_" ~ component_id,
-                    "onclick" : "previewSolutionNotesMarkdown.call(this)",
-                    "render_buttons" : true,
+                    "onclick" : "previewSolutionNotesMarkdown",
+                    "render_header" : true,
                     "min_height" : "150px",
                     "max_height" : "400px",
                     "no_maxlength" : true,
                     "initialize_preview" : is_first_edit != true,
-                    "is_preview_primary" : true
                 } only %}
                 <div>
                     <button type="primary"
