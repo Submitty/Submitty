@@ -1032,8 +1032,8 @@ function enableTabsInTextArea(jQuerySelector) {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t) {
-        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+    t.keydown(function(event) {
+        if (event.which == 27) {  //ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
@@ -1042,7 +1042,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!t.shiftKey && t.code === "Tab") { //TAB was pressed without SHIFT, text indent
+        else if (!event.shiftKey && event.code === "Tab") { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1570,7 +1570,9 @@ function getFocusableElements() {
  */
 function previewMarkdown(mode, markdown_textarea, preview_element, data) {
     const enablePreview = mode === 'preview';
-    const markdown_header = markdown_textarea.closest('.markdown-area').find('.markdown-area-header');
+    const markdown_area = markdown_textarea.closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    const accessibility_message = markdown_area.find('.accessibility-message');
 
     //basic type checking
     if (! (typeof mode === 'string'))              throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
@@ -1593,11 +1595,13 @@ function previewMarkdown(mode, markdown_textarea, preview_element, data) {
                 preview_element.show();
                 markdown_textarea.hide();
                 markdown_header.attr('data-mode', 'preview');
+                accessibility_message.hide();
             }
             else {
                 preview_element.hide();
                 markdown_textarea.show();
                 markdown_header.attr('data-mode', 'edit');
+                accessibility_message.show();
             }
         },
         error: function() {
@@ -1635,29 +1639,35 @@ function renderMarkdown(markdownContainer, url, content) {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param type Number representing the type of markdown preset to insert
- *             0: code
- *             1: link
- *             2: bold text
- *             3: italic text
- * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ * @param {string} type string representing what type of markdown preset to insert.
+ *                      * `'code'`
+ *                      * `'link'`
+ *                      * `'bold'`
+ *                      * `'italic'`
  */
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
+function addMarkdownCode(type){
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    //don't allow markdown insertion if we are in preview mode
+    if (markdown_header.attr('data-mode') === 'preview') return;
+
+    const cursor = $(this).prop('selectionStart');
+    const text = $(this).val();
+    let insert = '';
+    switch (type) {
+        case 'code':
+            insert = '```\ncode\n```';
+            break;
+        case 'link':
+            insert = '[display text](url)';
+            break;
+        case 'bold':
+            insert = '__bold text__';
+            break;
+        case 'italic':
+            insert = '_italic text_';
+            break;
     }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).focus();
 }

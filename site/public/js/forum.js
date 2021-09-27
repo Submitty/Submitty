@@ -1722,7 +1722,6 @@ function loadThreadHandler(){
                 $('#posts_list').empty().html(JSON.parse(json.data.html));
                 window.history.pushState({"pageTitle":document.title},"", url);
 
-                enableTabsInTextArea('.post_content_reply');
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
