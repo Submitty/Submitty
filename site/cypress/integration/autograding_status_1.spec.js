@@ -103,6 +103,21 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit(autograding_status_path);
             cy.get('#autograding-status-table').should('not.exist');
             cy.visit('/');
+            
+            // attempt as a ta (no instructor level access)
+            cy.logout();
+            cy.login('ta');
+            cy.visit(autograding_status_path);
+            cy.get('#autograding-status-table').should('not.exist');
+            cy.visit('/');
+
+            // attempt as a grader
+            cy.logout();
+            cy.login('grader');
+            cy.visit(autograding_status_path);
+            cy.get('#autograding-status-table').should('not.exist');
+            
+            cy.visit('/');
         });
     });
 });
