@@ -39,8 +39,8 @@ class MarkdownWidget extends Widget {
                     preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
-                    onclick : `previewNotebookBuilderMarkdown.call(this, ${NUM_MARKDOWN})`,
-                    render_buttons : true,
+                    onclick : `previewNotebookBuilderMarkdown.bind(this, ${NUM_MARKDOWN})`,
+                    render_header : true,
                     min_height : "100px",
                 },
                 csrf_token: csrfToken
@@ -75,11 +75,10 @@ class MarkdownWidget extends Widget {
     }
 }
 
-function previewNotebookBuilderMarkdown(markdown_num) {
+function previewNotebookBuilderMarkdown(markdown_num, mode) {
     const markdown_area = $(`#notebook-builder-markdown-${markdown_num}`);
     const preview_element = $(`#notebook-builder-markdown-preview-${markdown_num}`);
-    const preview_button = $(this);
     const markdown_content = markdown_area.val();
 
-    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
+    previewMarkdown(mode, markdown_area, preview_element, { content: markdown_content });
 }

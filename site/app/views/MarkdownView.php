@@ -18,22 +18,26 @@ class MarkdownView extends AbstractView {
         $this->core->getOutput()->disableRender();
         $args = [];
         $keys = [
+            'class',
+            'data_previous_comment',
+            'initialize_preview',
             'markdown_area_id',
             'markdown_area_name',
             'markdown_area_value',
-            'class',
+            'markdown_header_id',
+            'max_height',
+            'min_height',
+            'no_maxlength',
             'onclick',
-            'markdown_buttons_id',
             'other_textarea_attributes',
-            'render_buttons',
             'placeholder',
             'preview_div_id',
+            'render_header',
+            'root_class',
+            'textarea_maxlength',
             'textarea_onchange',
             'textarea_onkeydown',
             'textarea_onpaste',
-            'textarea_maxlength',
-            'data_previous_comment',
-            'min_height'
         ];
         foreach ($keys as $key) {
             if (isset($data[$key])) {

@@ -1,9 +1,10 @@
 {#
 ************************
     --- WHEN UPDATING THIS FILE MAKE SURE TO ALSO UPDATE site/public/templates/misc/MarkdownArea.twig ---
-    --- IMPORTANT: When adding new variables to this file, be sure to update the array in /app/controllers/MarkdownController.php
-                   THIS IS NECESSARY for OverallComment.twig, the Notebook Builder (and any other future pages that fetch the MarkdownArea.twig template
-                   via AJAX or have MarkdownArea.twig included in a template that is located in the public directory (common in TAGrading) )
+                   This is necessary for site/public/templates/grading/OverallComment.twig and any other future pages that have have MarkdownArea.twig included 
+                   in a template that is located in the public directory (common in TAGrading)
+    --- IMPORTANT: When adding new variables to this file, be sure to update the array in site/app/view/MarkdownView.php
+                   THIS IS NECESSARY for the Notebook Builder and any other future pages that fetch the MarkdownArea.twig template via AJAX
 ************************
     markdown_area_id: required
     class: optional, a string with classes separated by a space to be applied to the markdown_area
