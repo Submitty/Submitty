@@ -154,6 +154,7 @@
     border: 1px solid var(--standard-light-gray);
     border-radius: 6px 6px 0 0;
     border-bottom-style: none;
+    background-color: var(--default-white);
 }
 
 .markdown-mode-tab:not(.active) {
