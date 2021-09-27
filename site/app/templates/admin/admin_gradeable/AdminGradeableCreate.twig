@@ -594,6 +594,11 @@
         //Hide Grade Inquiry Date if Grade Inquiries are not enabled
         onIsRegradeAllowedChange();
         $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
+        $('.grade_inquiry_per_component_allowed').change(function() {
+            if ($('#no_grade_inquiry_per_component_allowed').prop('checked') && !confirm('* WARNING *\nThere are already grade inquiries, continuing with this action will permanently change the database for those entries.  Do you want to proceed?')) {
+                $('#yes_grade_inquiry_per_component_allowed').prop('checked', true);
+            }
+        });
 
         onLateSubmissionAllowedChanged();
         $('input[name=late_submission_allowed]').change(onLateSubmissionAllowedChanged);

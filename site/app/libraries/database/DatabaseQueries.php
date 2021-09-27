@@ -4590,6 +4590,14 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+    public function convertInquiryComponentId($gradeable) {
+        $ids = $this->course_db->query("SELECT id FROM regrade_requests WHERE g_id='" . $gradeable->getId() . "';");
+        if (array_key_exists('id', $ids)) {
+            $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id='" . $ids['id'] . "';");
+        }
+        return;
+    }
+
     public function getRegradeDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];

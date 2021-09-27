@@ -591,7 +591,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             },
             error: function (response) {
                 setGradeableUpdateComplete();
-                console.error('Failed to parse response from server: ' + response);
+                console.error('Failed to parse response from server: ', response);
             }
         });
     }
