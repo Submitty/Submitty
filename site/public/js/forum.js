@@ -830,10 +830,10 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
 }
 
 function cancelEditPostForum() {
-  let preview_button = $(`#markdown_buttons_0`).find('.preview-button');
-  let data_mode = preview_button.attr('data-mode');
-  if (data_mode === 'preview') {
-    preview_button.trigger('click');
+  const markdown_header = $(`#markdown_header_0`);
+  const edit_button = markdown_header.find('.markdown-write-mode');
+  if (markdown_header.attr('data-mode') === 'preview') {
+    edit_button.trigger('click');
   }
   $('#edit-user-post').css('display', 'none');
   $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
@@ -1622,7 +1622,6 @@ function previewForumMarkdown(mode){
   }
   const reply_box = $(`textarea#reply_box_${post_box_num}`);
   const preview_box = $(`#preview_box_${post_box_num}`);
-  const preview_button = $(this);
   const post_content = reply_box.val();
 
   previewMarkdown(mode, reply_box, preview_box, { content: post_content });
