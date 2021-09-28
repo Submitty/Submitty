@@ -1564,21 +1564,26 @@ function getFocusableElements() {
  * @param {string} mode String representing what mode to switch the markdown area to.
  *                      - `'preview'` activates preview mode
  *                      - Anything else will activate write/edit mode
- * @param {JQuery} markdown_textarea JQuery element of the textarea where the markdown is being entered
- * @param {JQuery} preview_element JQuery element of the span the markdown will be inserted into
- * @param {Object} data Object whose properties will get sent through a POST request
  */
-function previewMarkdown(mode, markdown_textarea, preview_element, data) {
+function previewMarkdown(mode, data = {}) {
     const enablePreview = mode === 'preview';
-    const markdown_area = markdown_textarea.closest('.markdown-area');
+    const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
+    const markdown_textarea = markdown_area.find('.markdown-textarea');
+    const markdown_preview = markdown_area.find('.markdown-preview');
     const accessibility_message = markdown_area.find('.accessibility-message');
 
-    //basic type checking
-    if (! (typeof mode === 'string'))              throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
-    if (! (typeof markdown_textarea === 'object')) throw new TypeError(`Expected type 'JQuery' for 'markdown_textarea'. Got ${typeof markdown_textarea}`);
-    if (! (typeof preview_element === 'object'))   throw new TypeError(`Expected type 'JQuery' for 'previeW_element'. Got ${typeof markdown_textarea}`);
-    if (! (typeof data === 'object'))              throw new TypeError(`Expected type 'JQuery' for 'data'. Got ${typeof markdown_textarea}`);
+    //add content to data object
+    data = Object.assign(data, { content: markdown_textarea.val() });
+
+    //basic sanity checking
+    if (!(typeof mode === 'string'))   throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
+    if (!(typeof data === 'object'))   throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
+    if (!markdown_area.length)         throw new Error(`Could not obtain markdown_area.`);
+    if (!markdown_header.length)       throw new Error(`Could not obtain markdown_header.`);
+    if (!markdown_textarea.length)     throw new Error(`Could not obtain markdown_textarea`);
+    if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
+    if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
     $.ajax({
         url: buildCourseUrl(['markdown', 'preview']),
@@ -1588,17 +1593,17 @@ function previewMarkdown(mode, markdown_textarea, preview_element, data) {
             ...data,
             csrf_token: csrfToken
         },
-        success: function(data){
+        success: function(markdown_data){
             if (enablePreview) {
-                preview_element.empty();
-                preview_element.append(data);
-                preview_element.show();
+                markdown_preview.empty();
+                markdown_preview.append(markdown_data);
+                markdown_preview.show();
                 markdown_textarea.hide();
                 markdown_header.attr('data-mode', 'preview');
                 accessibility_message.hide();
             }
             else {
-                preview_element.hide();
+                markdown_preview.hide();
                 markdown_textarea.show();
                 markdown_header.attr('data-mode', 'edit');
                 accessibility_message.show();
