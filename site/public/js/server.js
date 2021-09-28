@@ -612,6 +612,11 @@ function gradeableChange(url, sel){
 }
 function versionChange(url, sel){
     url = url + sel.value;
+    console.log(url);
+    window.location.href = url;
+}
+
+function switchToMostRecent(url){
     window.location.href = url;
 }
 
