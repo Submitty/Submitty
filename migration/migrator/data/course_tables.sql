@@ -639,14 +639,14 @@ CREATE TABLE public.late_day_cache (
     g_id character varying(255),
     user_id character varying(255),
     team_id character varying(255),
-    g_title character varying(255) NOT NULL,
-    submission_due_date timestamp without time zone NOT NULL,
+    g_title character varying(255),
+    late_day_date timestamp without time zone NOT NULL,
     late_days_remaining integer,
     late_days_allowed integer,
     submission_days_late integer,
     late_day_exceptions integer,
     late_day_status integer,
-    late_days_charged integer,
+    late_days_change integer NOT NULL,
     CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -1591,21 +1591,6 @@ ALTER TABLE ONLY public.late_days
 
 
 --
--- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.lichen
-    ADD CONSTRAINT lichen_gradeable_id_config_id_key UNIQUE (gradeable_id, config_id);
-
-
---
--- Name: lichen lichen_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.lichen
-    ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
-
-
 -- Name: late_day_cache ldc_g_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1619,6 +1604,22 @@ ALTER TABLE ONLY public.late_day_cache
 
 ALTER TABLE ONLY public.late_day_cache
     ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+
+
+--
+-- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT lichen_gradeable_id_config_id_key UNIQUE (gradeable_id, config_id);
+
+
+--
+-- Name: lichen lichen_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
 
 
 --
@@ -1909,14 +1910,6 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
--- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_access
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
 
 
 --
