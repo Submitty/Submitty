@@ -1651,21 +1651,6 @@ ALTER TABLE ONLY public.late_day_cache
 -- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.lichen
-    ADD CONSTRAINT lichen_gradeable_id_config_id_key UNIQUE (gradeable_id, config_id);
-
-
---
--- Name: lichen lichen_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.lichen
-    ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
-
-
--- Name: late_day_cache ldc_g_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
 ALTER TABLE ONLY public.late_day_cache
     ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);
 
@@ -1676,6 +1661,22 @@ ALTER TABLE ONLY public.late_day_cache
 
 ALTER TABLE ONLY public.late_day_cache
     ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+
+
+--
+-- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT lichen_gradeable_id_config_id_key UNIQUE (gradeable_id, config_id);
+
+
+--
+-- Name: lichen lichen_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
 
 
 --
