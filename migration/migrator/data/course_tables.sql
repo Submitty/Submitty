@@ -1622,6 +1622,21 @@ ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
 
 
+-- Name: late_day_cache ldc_g_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);
+
+
+--
+-- Name: late_day_cache ldc_g_user_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+
+
 --
 -- Name: migrations_course migrations_course_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
