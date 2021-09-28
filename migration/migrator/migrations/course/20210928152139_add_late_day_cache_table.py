@@ -16,11 +16,17 @@ def up(config, database, semester, course):
     """
     database.execute('''
         CREATE TABLE IF NOT EXISTS late_day_cache (
-            g_id VARCHAR(255) NOT NULL, 
+            g_id VARCHAR(255),
             user_id VARCHAR(255), 
-            team_id VARCHAR(255), 
-            late_day_status INTEGER, 
+            team_id VARCHAR(255),
+            g_title VARCHAR(255) NOT NULL,
+            submission_due_date TIMESTAMP WITHOUT TIME zone NOT NULL,
             late_days_remaining INTEGER,
+            late_days_allowed INTEGER,
+            submission_days_late INTEGER,
+            late_day_exceptions INTEGER, 
+            late_day_status INTEGER, 
+            late_days_charged INTEGER,
             CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
         );
     ''')
