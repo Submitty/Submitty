@@ -10,6 +10,7 @@ class CourseMaterialsView extends AbstractView {
 
     public function listCourseMaterials(array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -21,6 +22,7 @@ class CourseMaterialsView extends AbstractView {
         $base_course_material_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials');
         $directories = [];
         $directory_priorities = [];
+        $seen = [];
         $folder_ids = [];
 
         /** @var CourseMaterial $course_material */
@@ -119,12 +121,15 @@ class CourseMaterialsView extends AbstractView {
                 [$file_name => $course_material] + array_slice($path_to_place, $index, null, true);
         }
 
+        $this->setSeen($final_structure, $seen, $base_course_material_path);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
             "reg_sections" => $this->core->getQueries()->getRegistrationSections(),
             "csrf_token" => $this->core->getCsrfToken(),
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
+            "seen" => $seen,
             "base_course_material_path" => $base_course_material_path,
             "directory_priorities" => $directory_priorities,
             "material_list" => $course_materials_db,
@@ -133,5 +138,31 @@ class CourseMaterialsView extends AbstractView {
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids
         ]);
+    }
+
+    private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {
+        $has_unseen = false;
+        foreach ($course_materials as $path => $course_material) {
+            /** @var CourseMaterial $course_material */
+            if (is_array($course_material)) {
+                if ($this->setSeen($course_material, $seen, FileUtils::joinPaths($cur_path, $path))) {
+                    $seen[FileUtils::joinPaths($cur_path, $path)] = false;
+                }
+                else {
+                    $seen[FileUtils::joinPaths($cur_path, $path)] = true;
+                }
+            }
+            else {
+                $seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
+                $reg_sec = $this->core->getUser()->getRegistrationSection();
+                if ($reg_sec !== null && !$course_material->isSectionAllowed($reg_sec)) {
+                    $seen[$course_material->getPath()] = true;
+                }
+                if (!$seen[$course_material->getPath()]) {
+                    $has_unseen = true;
+                }
+            }
+        }
+        return $has_unseen;
     }
 }

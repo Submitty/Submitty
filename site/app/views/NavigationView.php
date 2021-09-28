@@ -591,10 +591,11 @@ class NavigationView extends AbstractView {
                 }
             }
         }
-
+        $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;
             $title = "LOCKED";
+            $prerequisite = $gradeable->getPrerequisite();
         }
 
         return new Button($core, [
@@ -605,7 +606,8 @@ class NavigationView extends AbstractView {
             "progress" => $progress,
             "disabled" => $disabled,
             "class" => "btn {$class} btn-nav btn-nav-submit",
-            "name" => "submit-btn"
+            "name" => "submit-btn",
+            "prerequisite" => $prerequisite
         ]);
     }
 

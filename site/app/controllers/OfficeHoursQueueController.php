@@ -57,20 +57,16 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        if (empty($_POST['token'])) {
-            $this->core->addErrorMessage("Missing secret code");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-
         //Replace whitespace with "_"
         $queue_code = trim($_POST['code']);
-        $token = trim($_POST['token']);
+        $token = trim($_POST['token'] ?? '');
 
         $re = '/^[\sa-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
-        preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
+        $matches_token = 1;
+        if ($token !== "") {
+            preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
+        }
         if (count($matches_code) !== 1 || count($matches_token) !== 1) {
             $this->core->addErrorMessage('Queue name and secret code must only contain letters, numbers, spaces, "_", and "-"');
             return MultiResponse::RedirectOnlyResponse(
@@ -111,13 +107,6 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        if (empty($_POST['token'])) {
-            $this->core->addErrorMessage("Missing secret code");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-
         $contact_info = null;
         if ($this->core->getConfig()->getQueueContactInfo()) {
             if (empty($_POST['contact_info'])) {
@@ -127,11 +116,11 @@ class OfficeHoursQueueController extends AbstractController {
                 );
             }
             else {
+                $contact_info = trim($_POST['contact_info']);
                 //make sure contact information matches instructors regex pattern
                 $regex_pattern = $this->core->getQueries()->getQueueRegex($queue_code)[0]['regex_pattern'];
                 if ($regex_pattern !== '') {
                     $regex_pattern = '#' . $regex_pattern . '#';
-                    $contact_info = trim($_POST['contact_info']);
                     if (preg_match($regex_pattern, $contact_info) == 0) {
                         $this->core->addErrorMessage("Invalid contact information format.  Please re-read the course-specific instructions about the necessary information you should provide when you join this office hours queue.");
                         return MultiResponse::RedirectOnlyResponse(
@@ -143,7 +132,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $queue_code = trim($queue_code);
-        $token = trim($_POST['token']);
+        $token = trim($_POST['token'] ?? '');
 
         $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {
@@ -616,7 +605,7 @@ class OfficeHoursQueueController extends AbstractController {
         $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
         try {
             $client = new Client($this->core);
-            $client->send($msg_array);
+            $client->json_send($msg_array);
         }
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");

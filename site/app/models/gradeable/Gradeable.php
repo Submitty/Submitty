@@ -183,7 +183,7 @@ class Gradeable extends AbstractModel {
     /** @prop @var int The maximum team size (if the gradeable is a team assignment) */
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
-    protected $ta_grading = false;
+    protected $ta_grading = true;
     /** @prop @var bool If the gradeable is a 'scanned exam' */
     protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */
@@ -308,7 +308,7 @@ class Gradeable extends AbstractModel {
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
             $this->setAllowCustomMarks($details['allow_custom_marks']);
-            $this->setAllowedMinutes($details['allowed_minutes'] ?? 0);
+            $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
             if (array_key_exists('hidden_files', $details)) {
@@ -400,7 +400,8 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'grade_released_date'
+        'grade_start_date',
+        'grade_due_date'
     ];
 
     /**
@@ -409,8 +410,7 @@ class Gradeable extends AbstractModel {
      */
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
-        'submission_open_date',
-        'grade_released_date'
+        'submission_open_date'
     ];
 
     /**
@@ -420,8 +420,7 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_exam = [
         'ta_view_start_date',
         'grade_start_date',
-        'grade_due_date',
-        'grade_released_date'
+        'grade_due_date'
     ];
 
     /**
@@ -430,8 +429,7 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_bare = [
-        'ta_view_start_date',
-        'grade_released_date'
+        'ta_view_start_date'
     ];
 
     public function toArray() {
@@ -617,10 +615,12 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
+            return false;
         }
         else {
             $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
+        return true;
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
@@ -694,7 +694,7 @@ class Gradeable extends AbstractModel {
      * Gets the dates that require validation for the gradeable's current configuration.
      * @return string[] array of date property names that need validation
      */
-    private function getDateValidationSet() {
+    private function getDateValidationSet(bool $regrade_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
@@ -717,14 +717,21 @@ class Gradeable extends AbstractModel {
                 array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
             }
 
+            if ($this->hasReleaseDate()) {
+                $result[] = 'grade_released_date';
+            }
+
             // Only add in grade inquiry dates if its allowed & enabled
-            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed() && !$regrade_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
         }
         else {
             $result = self::date_properties_simple;
+            if ($this->hasReleaseDate()) {
+                $result[] = 'grade_released_date';
+            }
         }
         return $result;
     }
@@ -755,12 +762,12 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $dates Array of dates, indexed by property name
      * @return \DateTime[] Array of dates, indexed by property name
      */
-    private function coerceDates(array $dates) {
+    private function coerceDates(array $dates, bool $regrade_modified = false) {
         // Takes an array of date properties (in order) and date values (indexed by property)
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
         //  into the second parameter.
-        $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
+        $coerce_dates = function (array $date_properties, array $skip_coercion_dates, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             $prev_date = null;
             foreach ($date_properties as $i => $property) {
@@ -773,8 +780,8 @@ class Gradeable extends AbstractModel {
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
-                // Don't coerce a date on the black list
-                if (in_array($property, $black_list)) {
+                // Don't coerce a date on the skip list
+                if (in_array($property, $skip_coercion_dates)) {
                     $prev_date = $date_values[$property];
                     continue;
                 }
@@ -797,16 +804,19 @@ class Gradeable extends AbstractModel {
             return $date_values;
         };
 
-        // Blacklist the dates checked by validation
-        $black_list = $this->getDateValidationSet();
+        // Don't coerce the dates checked by validation
+        $skip_coercion_dates = $this->getDateValidationSet($regrade_modified);
+        if ($this->isTeamAssignment()) {
+            $skip_coercion_dates[] = "team_lock_date";
+        }
 
         // First coerce in the forward direction, then in the reverse direction
         return $coerce_dates(
             array_reverse(self::date_validated_properties),
-            $black_list,
+            $skip_coercion_dates,
             $coerce_dates(
                 self::date_validated_properties,
-                $black_list,
+                $skip_coercion_dates,
                 $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
@@ -823,7 +833,7 @@ class Gradeable extends AbstractModel {
      * @param array $dates An array of dates/date strings indexed by property name
      * @throws ValidationException With all messages for each invalid property
      */
-    public function setDates(array $dates) {
+    public function setDates(array $dates, bool $regrade_modified = false) {
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
         $dates = $this->parseDates($dates);
 
@@ -832,7 +842,7 @@ class Gradeable extends AbstractModel {
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
-        $dates = $this->coerceDates($dates);
+        $dates = $this->coerceDates($dates, $regrade_modified);
 
         // Manually set each property (instead of iterating over self::date_properties) so the user
         //  can't set dates irrelevant to the gradeable settings
@@ -2197,5 +2207,19 @@ class Gradeable extends AbstractModel {
             return false;
         }
         return true;
+    }
+    /**
+     * Returns prerequisite for a gradeable
+     *
+     * @return string
+     */
+    public function getPrerequisite(): string {
+        if ($this->depends_on !== null && $this->depends_on_points !== null) {
+            $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
+            return $dependent_gradeable->getTitle();
+        }
+        else {
+            return '';
+        }
     }
 }

@@ -69,6 +69,11 @@
             </div>
         </div>
     {% endif %}
+    {% if message is not empty %}
+    <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
+        {{ message }}
+    </div>
+    {% endif %}
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
@@ -388,7 +393,7 @@
                             circle grader-NULL }}"></i>
                         {% else %}
                             {# Indicates Non-Peer Component (Hidden)#}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% endif %}
                     {% else %}
                         {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
@@ -400,7 +405,7 @@
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] < 4   %}
                             {# Indicates Non-Peer Component (Hidden) #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% else %}
                             {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
