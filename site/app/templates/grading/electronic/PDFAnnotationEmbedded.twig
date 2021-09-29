@@ -50,6 +50,10 @@
     //render download annotations button on toolbar
     $(function() {
         const download_annotations_button = document.getElementById('download-annotations-btn-template').content.cloneNode(true);
-        $('#pdf-buttons').append(download_annotations_button);
+        if ($('#pdf-buttons').has('#download-annotations-btn').length) {
+            $('#pdf-buttons', '#download-annotations-btn').replaceWith(download_annotations_button);
+        } else {
+            $('#pdf-buttons').append(download_annotations_button);
+        }
     });
 </script>
