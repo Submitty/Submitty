@@ -3048,6 +3048,7 @@ class ElectronicGraderController extends AbstractController {
         }
         $ta_graded_gradeable->removeOverallComment($peer_id);
         $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id);
+        $this->core->getQueries()->deleteTaGradedGradeableByIds($gradeable_id, $peer_id);
         $ta_graded_gradeable->resetUserViewedDate();
 
         // Finally, save the graded gradeable
