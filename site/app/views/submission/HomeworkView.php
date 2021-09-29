@@ -441,7 +441,6 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
-        
         $recent_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         $numberUtils = new NumberUtils();
         // TODO: go through this list and remove the variables that are not used
