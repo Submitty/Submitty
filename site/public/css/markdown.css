@@ -9,6 +9,7 @@
  */
 
 .markdown {
+    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
     font-family: 'Source Sans Pro', 'sans-serif';
     white-space: normal;
     position: relative;
@@ -66,7 +67,7 @@
 }
 
 .markdown .line-numbers {
-    position:absolute;
+    position: absolute;
     top: 1em;
     padding-right: 1px;
     font-size: 13px;
@@ -85,7 +86,8 @@
     overflow-x: scroll;
 }
 
-.markdown th, td{
+.markdown th,
+.markdown td {
     border: 1px solid var(--standard-light-gray);
     padding: 3px;
 }
@@ -112,6 +114,6 @@
     margin: 5px;
 }
 
-#peer-table th{
+#peer-table th {
     border: 1px solid var(--standard-light-gray);
 }

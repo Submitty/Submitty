@@ -500,7 +500,8 @@ class HomeworkView extends AbstractView {
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
-            'can_student_submit' => $canStudentSubmit
+            'can_student_submit' => $canStudentSubmit,
+            'is_grader_view' => false
         ]);
     }
 

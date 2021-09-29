@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5b4652c413535d237a267ea9c7d5910",
+    "content-hash": "2ceae9d7b5b541e7e7cfbf4d02786307",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2855,16 +2855,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v4.4.30",
+            "version": "v4.4.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "f1c33520a5a439dfd7bd4d5e9cec26c6b79054cc"
+                "reference": "4d9074f2777dfde2b78c5c60affa66c5e7518117"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/f1c33520a5a439dfd7bd4d5e9cec26c6b79054cc",
-                "reference": "f1c33520a5a439dfd7bd4d5e9cec26c6b79054cc",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/4d9074f2777dfde2b78c5c60affa66c5e7518117",
+                "reference": "4d9074f2777dfde2b78c5c60affa66c5e7518117",
                 "shasum": ""
             },
             "require": {
@@ -2878,7 +2878,7 @@
                 "symfony/var-exporter": "^4.2|^5.0"
             },
             "conflict": {
-                "doctrine/dbal": "<2.6",
+                "doctrine/dbal": "<2.7",
                 "symfony/dependency-injection": "<3.4",
                 "symfony/http-kernel": "<4.4|>=5.0",
                 "symfony/var-dumper": "<4.4"
@@ -2891,7 +2891,7 @@
             "require-dev": {
                 "cache/integration-tests": "dev-master",
                 "doctrine/cache": "^1.6|^2.0",
-                "doctrine/dbal": "^2.6|^3.0",
+                "doctrine/dbal": "^2.7|^3.0",
                 "predis/predis": "^1.1",
                 "psr/simple-cache": "^1.0",
                 "symfony/config": "^4.2|^5.0",
@@ -2930,7 +2930,7 @@
                 "psr6"
             ],
             "support": {
-                "source": "https://github.com/symfony/cache/tree/v4.4.30"
+                "source": "https://github.com/symfony/cache/tree/v4.4.31"
             },
             "funding": [
                 {
@@ -2946,7 +2946,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-08-25T08:17:29+00:00"
+            "time": "2021-09-25T11:31:41+00:00"
         },
         {
             "name": "symfony/cache-contracts",
@@ -4219,16 +4219,16 @@
         },
         {
             "name": "symfony/var-exporter",
-            "version": "v4.4.30",
+            "version": "v4.4.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-exporter.git",
-                "reference": "67d0cbfac22a7f21bf6b94dd85de35df7b8a435e"
+                "reference": "ae5e31445bef9e27d0999ba2354dc04049508ede"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/67d0cbfac22a7f21bf6b94dd85de35df7b8a435e",
-                "reference": "67d0cbfac22a7f21bf6b94dd85de35df7b8a435e",
+                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/ae5e31445bef9e27d0999ba2354dc04049508ede",
+                "reference": "ae5e31445bef9e27d0999ba2354dc04049508ede",
                 "shasum": ""
             },
             "require": {
@@ -4272,7 +4272,7 @@
                 "serialize"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-exporter/tree/v4.4.30"
+                "source": "https://github.com/symfony/var-exporter/tree/v4.4.31"
             },
             "funding": [
                 {
@@ -4288,7 +4288,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-08-04T22:42:04+00:00"
+            "time": "2021-08-30T16:02:49+00:00"
         },
         {
             "name": "textalk/websocket",
