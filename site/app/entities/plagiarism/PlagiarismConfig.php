@@ -102,7 +102,7 @@ class PlagiarismConfig {
 
     /**
      * PlagiarismConfig constructor.
-     * @throws Exception
+     * @throws ValidationException
      */
     public function __construct(
         string $gradeable_id,
