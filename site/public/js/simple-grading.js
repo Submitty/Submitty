@@ -670,29 +670,31 @@ function setupSimpleGrading(action) {
     // default key movement
     $(document).on("keydown", function(event) {
         // if input cell selected, use this to check if cursor is in the right place
-        var input_cell = $("input.cell-grade:focus");
+        var input_cell = $("cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
-        if(event.code === "ArrowLeft" && (!input_cell.length || (
-                input_cell[0].selectionStart == 0 &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
-            event.preventDefault();
-            movement("left");
-        }
-        else if(event.code === "ArrowUp") {
-            event.preventDefault();
-            movement("up");
-        }
-        // if there is no selection OR there is a selection to the far right with 0 length
-        else if(event.code === "ArrowRight" && (!input_cell.length || (
-                input_cell[0].selectionEnd == input_cell[0].value.length &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
-            event.preventDefault();
-            movement("right");
-        }
-        else if(event.code === "ArrowDown") {
-            event.preventDefault();
-            movement("down");
+        if ($(event.target).attr('clicked') == null || $(event.target).attr('clicked') < 2) {
+            if(event.code === "ArrowLeft" && (!input_cell.length || (
+                    input_cell[0].selectionStart == 0 &&
+                    input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+                event.preventDefault();
+                movement("left");
+            }
+            else if(event.code === "ArrowUp") {
+                event.preventDefault();
+                movement("up");
+            }
+            // if there is no selection OR there is a selection to the far right with 0 length
+            else if(event.code === "ArrowRight" && (!input_cell.length || (
+                    input_cell[0].selectionEnd == input_cell[0].value.length &&
+                    input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+                event.preventDefault();
+                movement("right");
+            }
+            else if(event.code === "ArrowDown") {
+                event.preventDefault();
+                movement("down");
+            }
         }
     });
 
@@ -897,4 +899,18 @@ function numericSocketHandler(elem_id, value, total) {
   }
   if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
     elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
+}
+
+function cellGradeOnclick(e) {
+    $(e).focus();
+    if ($(e).attr('clicked') >= 1) {
+        $(e).attr('clicked', 2);
+    }
+    else {
+        $(e).attr('clicked', 1);
+    }
+    $('.edit-zone').attr('target', e);
+    $('.edit-zone').css('display', 'block');
+    $('.edit-zone').val($(e).val());
+    console.log($(e).attr('clicked'));
 }

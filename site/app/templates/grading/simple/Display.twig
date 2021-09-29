@@ -301,7 +301,7 @@
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_score }}"
                     value="{{ component_score }}"
-                    onclick="this.select()"
+                    onclick="cellGradeOnclick()"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
@@ -326,6 +326,8 @@
         }
         function minimizeHeight(el) {
             el.style.height = '30px';
+            $(el).attr('clicked', 0);
+            $('.edit-zone').hide();
         }
     </script>
 
@@ -337,7 +339,7 @@
             <textarea class="option-small-box cell-grade"
                   tabindex="0" id="cell-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
-                  onclick="this.select()"
+                  onclick="cellGradeOnclick(this)"
                   onfocus="adjustHeight(this);"
                   onblur="minimizeHeight(this);"
                   onkeyup="adjustHeight(this);"

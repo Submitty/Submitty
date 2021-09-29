@@ -24,6 +24,11 @@
     display: none !important;
 }
 
+.edit-zone {
+    width: 76vw;
+    resize: none;
+}
+
 .simple-full-credit {
     color: var(--simple-full-credit-dark-blue);
 }
