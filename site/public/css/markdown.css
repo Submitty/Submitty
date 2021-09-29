@@ -85,12 +85,9 @@
     overflow-x: scroll;
 }
 
-.markdown th {
-    border: 1px solid var(--text-black);
-}
-
-.markdown td {
-    border: 1px solid var(--text-black);
+.markdown th, td{
+    border: 1px solid var(--standard-light-gray);
+    padding: 3px;
 }
 
 .markdown-preview {
@@ -113,4 +110,8 @@
 
 .btn-markdown {
     margin: 5px;
+}
+
+#peer-table th{
+    border: 1px solid var(--standard-light-gray);
 }

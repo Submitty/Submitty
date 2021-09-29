@@ -55,7 +55,7 @@ class HomeworkView extends AbstractView {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
-        if (!$gradeable->canStudentSubmit()) {
+        if (!$gradeable->canStudentSubmit() && $gradeable->getSubmissionOpenDate() < $this->core->getDateTimeNow()) {
             $return .= $this->renderSubmissionsClosedBox();
         }
 
@@ -498,7 +498,8 @@ class HomeworkView extends AbstractView {
             'max_file_uploads' => ini_get('max_file_uploads'),
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
-            'can_student_submit' => $canStudentSubmit,
+            'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
+            'can_student_submit' => $canStudentSubmit
         ]);
     }
 

@@ -481,7 +481,7 @@ HTML;
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 if ($peer === false) {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
                 }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
@@ -971,6 +971,7 @@ HTML;
             // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
             if ($pattern_match_flag == true) {
                 $error_message = [
+                    "color" => "var(--standard-vibrant-yellow)", // canary yellow
                     "message" => "Multiple files within submissions"
                 ];
             }

@@ -3,6 +3,7 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\entities\course\CourseMaterialAccess;
 use app\entities\course\CourseMaterialSection;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -29,6 +30,24 @@ class CourseMaterialsController extends AbstractController {
             'listCourseMaterials',
             $course_materials
         );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/course_materials/view", methods={"POST"})
+     */
+    public function markViewed(): JsonResponse {
+        $ids = $_POST['ids'];
+        if (!is_array($ids)) {
+            $ids = [$ids];
+        }
+        $cms = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findBy(['id' => $ids]);
+        foreach ($cms as $cm) {
+            $cm_access = new CourseMaterialAccess($cm, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
+            $cm->addAccess($cm_access);
+        }
+        $this->core->getCourseEntityManager()->flush();
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
@@ -125,6 +144,8 @@ class CourseMaterialsController extends AbstractController {
                             $relativePath = substr($file_path, strlen($root_path) + 1);
                             $isFolderEmptyForMe = false;
                             $zip_stream->addFileFromPath($relativePath, $file_path);
+                            $course_material_access = new CourseMaterialAccess($course_material, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
+                            $course_material->addAccess($course_material_access);
                         }
                     }
                     else {
@@ -132,6 +153,8 @@ class CourseMaterialsController extends AbstractController {
                         $relativePath = substr($file_path, strlen($root_path) + 1);
                         $isFolderEmptyForMe = false;
                         $zip_stream->addFileFromPath($relativePath, $file_path);
+                        $course_material_access = new CourseMaterialAccess($course_material, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
+                        $course_material->addAccess($course_material_access);
                     }
                 }
             }
@@ -142,6 +165,7 @@ class CourseMaterialsController extends AbstractController {
             $this->core->getOutput()->showError("You do not have access to this folder");
             return false;
         }
+        $this->core->getCourseEntityManager()->flush();
         $zip_stream->finish();
     }
 
@@ -314,21 +338,23 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
         if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            $path = $course_material->getPath();
-            $dirs = explode("/", $path);
-            array_pop($dirs);
-            $path = implode("/", $dirs);
-            $path = FileUtils::joinPaths($path, urlencode("link-" . $_POST['link_title']));
-            $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                ->findOneBy(['path' => $path]);
-            if ($tmp_course_material !== null) {
-                return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
+            if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
+                $path = $course_material->getPath();
+                $dirs = explode("/", $path);
+                array_pop($dirs);
+                $path = implode("/", $dirs);
+                $path = FileUtils::joinPaths($path, urlencode("link-" . $_POST['link_title']));
+                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $path]);
+                if ($tmp_course_material !== null) {
+                    return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
+                }
+                FileUtils::writeFile($path, "");
+                unlink($course_material->getPath());
+                $course_material->setUrlTitle($_POST['link_title']);
+                $course_material->setPath($path);
             }
-            FileUtils::writeFile($path, "");
-            unlink($course_material->getPath());
             $course_material->setUrl($_POST['link_url']);
-            $course_material->setUrlTitle($_POST['link_title']);
-            $course_material->setPath($path);
         }
 
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {

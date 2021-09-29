@@ -25,7 +25,8 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 "closed",                                          // status
                 ["bitdiddle" => [0 => 1], "aphacker" => [0 => 1]], // user_responses
                 "2021-01-11",                                      // release_date
-                null                                               // image path
+                null,                                              // image path
+                "never"                                            // student histogram release setting
             ),
             1 => new PollModel(
                 $this->core,
@@ -38,7 +39,8 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 "open",
                 ["bitdiddle" => [0 => 2], "aphacker" => [0 => 0]],
                 "9999-12-31",
-                null
+                null,
+                "always"
             ),
             2 => new PollModel(
                 $this->core,
@@ -51,7 +53,8 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 "ended",
                 ["bitdiddle" => [0 => 0, 1 => 2, 2 => 3], "aphacker" => [0 => 1, 1 => 3]],
                 date("Y-m-d"),
-                "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
+                "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png",
+                "when_ended"
             )
         ];
     }
@@ -191,5 +194,11 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->my_polls[0]->getImagePath(), null);
         $this->assertEquals($this->my_polls[1]->getImagePath(), null);
         $this->assertEquals($this->my_polls[2]->getImagePath(), "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png");
+    }
+
+    public function testHistogramRelease(): void {
+        $this->assertEquals($this->my_polls[0]->getReleaseHistogram(), "never");
+        $this->assertEquals($this->my_polls[1]->getReleaseHistogram(), "always");
+        $this->assertEquals($this->my_polls[2]->getReleaseHistogram(), "when_ended");
     }
 }
