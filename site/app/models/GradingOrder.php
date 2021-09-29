@@ -520,7 +520,6 @@ class GradingOrder extends AbstractModel {
             $unsorted[] = $val;
         }
 
-        //Since the array's elements were not added in the same order as the indices, sort to fix it
         return array_merge($gg_idx, $unsorted);
     }
 
