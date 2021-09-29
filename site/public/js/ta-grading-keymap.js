@@ -73,7 +73,7 @@ window.onkeyup = function(e) {
 
 window.onkeydown = function(e) {
     if (remapping.active) {
-        //e.preventDefault();
+        e.preventDefault();
         return;
     }
 

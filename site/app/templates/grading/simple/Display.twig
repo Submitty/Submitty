@@ -256,7 +256,7 @@
         {% else %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
-            <td
+            <td onclick="cellGradeClick()"
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
@@ -276,7 +276,6 @@
                     <p class="simple-grade-grader">{{ component_grade is not null ? component_grade.getGrader().getId() }}</p>
                     <p class="simple-grade-date">{{ component_grade is not null and component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
                 {% endif %}
-
             </td>
         {% endif %}
     {% endfor %}
@@ -323,9 +322,11 @@
     <script>
         function adjustHeight(el){
             el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+            $(this).attr('focused', true);
         }
         function minimizeHeight(el) {
             el.style.height = '30px';
+            $(this).attr('focused', false);
         }
     </script>
 

@@ -667,6 +667,37 @@ function setupSimpleGrading(action) {
         }
     }
 
+    // default key movement
+    $(document).on("keydown", function(event) {
+        // if input cell selected, use this to check if cursor is in the right place
+        var selected = $(":focus");
+
+        if (!selected.hasClass("option-small-box") && selected.hasClass("option-small-input")) {
+            // if there is no selection OR there is a selection to the far left with 0 length
+            if(event.code === "ArrowLeft" && (!selected.length || (
+                    selected[0].selectionStart == 0 &&
+                    selected[0].selectionEnd - selected[0].selectionStart == 0))) {
+                event.preventDefault();
+                movement("left");
+            }
+            else if(event.code === "ArrowUp") {
+                event.preventDefault();
+                movement("up");
+            }
+            // if there is no selection OR there is a selection to the far right with 0 length
+            else if(event.code === "ArrowRight" && (!selected.length || (
+                    selected[0].selectionEnd == selected[0].value.length &&
+                    selected[0].selectionEnd - selected[0].selectionStart == 0))) {
+                event.preventDefault();
+                movement("right");
+            }
+            else if(event.code === "ArrowDown") {
+                event.preventDefault();
+                movement("down");
+            }
+        }
+    });
+
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
     // make arrow keys in lab section changeable now
@@ -868,4 +899,16 @@ function numericSocketHandler(elem_id, value, total) {
   }
   if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
     elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
+}
+
+function cellGradeClick(event) {
+    const clicked = event.target;
+    $(clicked).focus();
+    console.log("clicked");
+    if ($(this).attr('focused') == true) {
+        $(this).find('cell-grade').focus();
+    }
+    else {
+        $(this).attr('focused', true);
+    }
 }
