@@ -534,7 +534,7 @@ class NavigationView extends AbstractView {
                 }
                 $title = "VIEW GRADE OR RESUBMIT";
             }
-            elseif ($gradeable->isStudentSubmit() && $graded_gradeable->isTaGradingComplete() && $ta_graded_gradeable->getUserViewedDate() === null) {
+            elseif ($gradeable->isStudentSubmit() && $grade_ready_for_view && $ta_graded_gradeable->getUserViewedDate() === null) {
                 $title = "VIEW GRADE";
                 $class = "btn-success";
             }
