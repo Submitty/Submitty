@@ -499,8 +499,6 @@ class GradingOrder extends AbstractModel {
         foreach ($iter as $gg) {
             $items[$gg->getSubmitter()->getId()] = $gg;
         }
-        $count = 0;
-
         //Iterate through all sections and their submitters to find this one
         foreach ($this->section_submitters as $name => $section) {
             for ($i = 0; $i < count($section); $i++) {
@@ -508,11 +506,9 @@ class GradingOrder extends AbstractModel {
 
                 //Found them
                 if (isset($items[$testSub])) {
-                    $gg_idx[$count] = $items[$testSub];
+                    $gg_idx[] = $items[$testSub];
                     unset($items[$testSub]);
                 }
-
-                $count++;
             }
         }
 
