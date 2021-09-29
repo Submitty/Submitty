@@ -495,7 +495,6 @@ class GradingOrder extends AbstractModel {
             [$this->getSectionKey(), 'team_id', 'user_id']
         );
         $gg_idx = [];
-        $unsorted = [];
         $items = [];
         foreach ($iter as $gg) {
             $items[$gg->getSubmitter()->getId()] = $gg;
@@ -516,11 +515,8 @@ class GradingOrder extends AbstractModel {
                 $count++;
             }
         }
-        foreach ($items as $item => $val) {
-            $unsorted[] = $val;
-        }
 
-        return array_merge($gg_idx, $unsorted);
+        return array_merge($gg_idx, array_values($items));
     }
 
     /**
