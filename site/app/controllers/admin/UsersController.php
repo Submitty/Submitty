@@ -819,41 +819,6 @@ class UsersController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/users/upload", methods={"POST"})
      */
     public function uploadUserList($list_type = "classlist") {
-        // A few places have different behaviors depending on $list_type.
-        // These closure functions will help control those few times when
-        // $list_type dictates behavior.
-        /**
-         * Closure to validate $vals[4] depending on $list_type
-         *
-         * @return boolean true on successful validation, false otherwise.
-         */
-        $grader_group_validation_function = function () use ($list_type, &$vals) {
-            //case "graderlist":
-            //grader
-            if (isset($vals[4]) && is_numeric($vals[4])) {
-                $vals[4] = intval($vals[4]); //change float read from xlsx to int
-            }
-            //grader-level check is a digit between 1 - 4.
-            return User::validateUserData('user_group', $vals[4]);
-        };
-
-        /**
-         * Closure to get (as return) either user's registration_section or group_id, based on $list-type
-         *
-         * @return string
-         */
-        $get_grader_group = function ($user) use ($list_type) {
-            //case "graderlist":
-            return (string) $user->getGroup();
-        };
-
-        /**
-         * Closure to set a user's registration_section or group_id based on $list_type)
-         */
-        $set_grader_group = function (&$user) use ($list_type, &$row) {
-            // case "graderlist":
-            $user->setGroup($row[4]);
-        };
 
         /**
          * Closure to INSERT or UPDATE user data based on $action
@@ -983,6 +948,19 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'registration_section';
                 }
             }
+            /* Check grader group for appropriate format if graderlist upload. */
+            if ($list_type === 'graderlist') {
+                if (isset($vals[4]) && is_numeric($vals[4])) {
+                    $vals[4] = intval($vals[4]); //change float read from xlsx to int
+                }
+                //grader-level check is a digit between 1 - 4.
+                if (!User::validateUserData('user_group', $vals[4])) {
+                    $bad_row_details[$row_num + 1][] = 'Grader-group';
+                    if (!in_array('grader_group', $bad_columns)) {
+                        $bad_columns[] = 'grader_group';
+                    }
+                }
+            }
             /* Database password cannot be blank, no check on format.
                Automatically validate if NOT using database authentication (e.g. using PAM authentication) */
             if (!(!$use_database || User::validateUserData('user_password', $vals[5]))) {
@@ -1005,18 +983,6 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
-            //Check optional grader registration section for appropriate format. Allowed characters - A-Z,a-z,_,-
-            /* if ($list_type === 'classlist') {
-                if (isset($vals[$grader_registration_section]) && strtolower($vals[$grader_registration_section]) === "null") {
-                    $vals[$grader_registration_section] = null;
-                }
-                if (!(!isset($vals[$grader_registration_section]) || User::validateUserData('registration_section', $vals[$grader_registration_section]))) {
-                    $bad_row_details[$row_num + 1][] = 'Registration section';
-                    if (!in_array('registration_section', $bad_columns)) {
-                        $bad_columns[] = 'registration_section';
-                    }
-                }
-            }*/
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
@@ -1042,12 +1008,15 @@ class UsersController extends AbstractController {
             $exists = false;
             foreach ($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
+                    // Validate if this user has any data to update.
+                    // Did student registration section or grader group change?
                     if (count($row) === 1) {
                         $users_to_update[] = $row;
                     }
-                    elseif (isset($vals[$registration_section_idx]) && $row[$registration_section_idx] !== $user->getRegistrationSection()) {
-                        // Validate if this user has any data to update.
-                        // Did student registration section or grader group change?
+                    elseif (isset($row[$registration_section_idx]) && $row[$registration_section_idx] !== $user->getRegistrationSection()) {
+                        $users_to_update[] = $row;
+                    }
+                    elseif ($list_type === 'graderlist' && $row[4] !== $user->getGroup()) {
                         $users_to_update[] = $row;
                     }
                     $exists = true;
@@ -1097,7 +1066,7 @@ class UsersController extends AbstractController {
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
                 $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
                 $user->setRegistrationSection($row[$registration_section_idx]);
-                // TO DO: for students, set $user->setGroup( $list_type === 'classlist ? 4 : blah); while for graders ser smt else
+                $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
                 if (isset($row[$pref_firstname_idx]) && !empty($row[$pref_firstname_idx])) {
                     $user->setPreferredFirstName($row[$pref_firstname_idx]);
                 }
@@ -1121,10 +1090,11 @@ class UsersController extends AbstractController {
                 $user->setGroup($user_group);
             }
             else {
-                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+               // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
                 $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
                 $user->setRegistrationSection($row[$registration_section_idx]);
+                $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
             }
             $insert_or_update_user_function('update', $user);
         }
