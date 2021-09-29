@@ -14,7 +14,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DELETE FROM gradeable_data_overall_comment WHERE goc_overall_comment=''")
+    database.execute("ALTER TABLE gradeable_data DROP COLUMN IF EXISTS gd_overall_comment")
+
 
 
 def down(config, database, semester, course):
