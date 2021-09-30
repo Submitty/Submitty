@@ -3,8 +3,10 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\controllers\MiscController;
 use app\entities\course\CourseMaterialAccess;
 use app\entities\course\CourseMaterialSection;
+use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -14,6 +16,8 @@ use app\libraries\Utils;
 use app\entities\course\CourseMaterial;
 use app\repositories\course\CourseMaterialRepository;
 use app\views\course\CourseMaterialsView;
+use app\views\ErrorView;
+use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
@@ -30,6 +34,54 @@ class CourseMaterialsController extends AbstractController {
             'listCourseMaterials',
             $course_materials
         );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/course_material/{path}", requirements={"path"=".+"})
+     */
+    public function viewCourseMaterial(string $path) {
+        $full_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials/" . $path;
+        $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['path' => $full_path]);
+        if ($cm === null || !$this->core->getAccess()->canI("path.read", ["dir" => "course_materials", "path" => $full_path])) {
+            return new WebResponse(
+                ErrorView::class,
+                "errorPage",
+                MiscController::GENERIC_NO_ACCESS_MSG
+            );
+        }
+        if (!$this->core->getUser()->accessGrading()) {
+            $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+            if ($access_failure) {
+                return new WebResponse(
+                    ErrorView::class,
+                    "errorPage",
+                    $access_failure
+                );
+            }
+        }
+        CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $full_path);
+        $file_name = basename($full_path);
+        $corrected_name = pathinfo($full_path, PATHINFO_DIRNAME) . "/" .  $file_name;
+        $mime_type = mime_content_type($corrected_name);
+        $file_type = FileUtils::getContentType($file_name);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        if ($mime_type === "application/pdf" || (Utils::startsWith($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+            header("Content-type: " . $mime_type);
+            header('Content-Disposition: inline; filename="' . $file_name . '"');
+            readfile($corrected_name);
+            $this->core->getOutput()->renderString($full_path);
+        }
+        else {
+            $contents = file_get_contents($corrected_name);
+            return new WebResponse(
+                MiscView::class,
+                "displayFile",
+                $contents
+            );
+        }
     }
 
     /**
