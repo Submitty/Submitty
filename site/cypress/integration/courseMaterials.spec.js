@@ -1,8 +1,5 @@
-import {buildUrl, getCurrentSemester} from '../support/utils.js';
+import {buildUrl} from '../support/utils.js';
 import {skipOn} from '@cypress/skip-test';
-
-const coursePath = `${getCurrentSemester()}/sample/uploads/course_materials`;
-const defaultFilePath = `/var/local/submitty/courses/${coursePath}`;
 
 describe('Test cases revolving around course material uploading and access control', () => {
     before(() => {
@@ -26,7 +23,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.get('.file-viewer').contains('file1.txt');
 
-        const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
+        const fileTgt = buildUrl(['sample', 'course_material', 'file1.txt']);
 
         cy.visit(fileTgt);
         cy.get('pre').should('have.text', 'a\n');
@@ -48,7 +45,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#submit-materials').click();
 
         cy.get('.file-viewer').contains('file1.txt');
-        const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/option1/file1.txt`;
+        const fileTgt = buildUrl(['sample', 'course_material', 'option1', 'file1.txt']);
 
         cy.visit(fileTgt);
         cy.get('pre').should('have.text', 'a\n');
@@ -62,7 +59,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#submit-materials').click();
         cy.get('.file-viewer').should('have.length', 2);
 
-        const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/${encodeURIComponent(fpath)}/file1.txt`;
+        const fileTgt2 = buildUrl(['sample', 'course_material', 'option1', '1234', encodeURIComponent('!@#$%^&*()'), 'file1.txt']);
         cy.visit(fileTgt2);
         cy.get('pre').should('have.text', 'a\n');
         cy.visit(['sample', 'course_materials']);
@@ -117,13 +114,13 @@ describe('Test cases revolving around course material uploading and access contr
             cy.visit(['sample', 'course_materials']);
             cy.get('.file-viewer').should('have.length', 1);
 
-            const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file2.txt`;
+            const fileTgt = buildUrl(['sample', 'course_material', 'file2.txt']);
 
             cy.visit(fileTgt);
             cy.get('pre').should('have.text', 'b\n');
             cy.visit(['sample', 'course_materials']);
 
-            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
+            const fileTgt2 = buildUrl(['sample', 'course_material', 'file1.txt']);
             cy.visit(fileTgt2);
 
             cy.reload(true);
@@ -164,12 +161,12 @@ describe('Test cases revolving around course material uploading and access contr
             cy.visit(['sample', 'course_materials']);
 
             cy.get('.file-viewer').should('not.exist');
-            const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
+            const fileTgt = buildUrl(['sample', 'course_material', 'file1.txt']);
             cy.visit(fileTgt);
             cy.get('pre').should('have.text', 'a\n');
             cy.visit(['sample', 'course_materials']);
 
-            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/option1/file2.txt`;
+            const fileTgt2 = buildUrl(['sample', 'course_material', 'option1', 'file2.txt']);
             cy.visit(fileTgt2);
             cy.get('.content').contains('Reason: You may not access this file until it is released');
 
@@ -219,11 +216,11 @@ describe('Test cases revolving around course material uploading and access contr
 
             cy.get('.file-viewer').should('have.length', 3);
 
-            const fileTgt = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/2/3/7/9/10/10_1.txt`;
+            const fileTgt = buildUrl(['sample', 'course_material', 'zip', '2', '3', '7', '9', '10', '10_1.txt']);
             cy.visit(fileTgt);
             cy.get('body').should('have.text','');
 
-            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/1_1.txt`;
+            const fileTgt2 = buildUrl(['sample', 'course_material', 'zip', '1_1.txt']);
             cy.visit(fileTgt2);
             cy.get('.content').contains('Reason: You may not access this file until it is released');
 
@@ -263,7 +260,7 @@ describe('Test cases revolving around course material uploading and access contr
 
             cy.get('.file-viewer').should('have.length', 1);
 
-            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/file1.txt`;
+            const fileTgt2 = buildUrl(['sample', 'course_material', 'file1.txt']);
 
             cy.visit(fileTgt2);
             cy.wait(1000);
@@ -307,7 +304,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.visit(['sample', 'course_materials']);
 
             cy.get('.file-viewer').should('have.length', 1);
-            const fileTgt2 = `${buildUrl(['sample', 'display_file'])}?dir=course_materials&path=${encodeURIComponent(defaultFilePath)}/zip/1_1.txt`;
+            const fileTgt2 = buildUrl(['sample', 'course_material', 'zip', '1_1.txt']);
             cy.visit(fileTgt2);
 
             cy.wait(1000);
