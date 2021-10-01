@@ -640,7 +640,7 @@ class OfficeHoursQueueController extends AbstractController {
         $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
         try {
             $client = new Client($this->core);
-            $client->send($msg_array);
+            $client->json_send($msg_array);
         }
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");

@@ -219,7 +219,7 @@ class GradeableList extends AbstractModel {
             if (
                 $this->core->getUser()->accessAdmin()
                 || ($gradeable->getTaViewStartDate() <= $this->now && $this->core->getUser()->accessGrading())
-                || $gradeable->getSubmissionOpenDate() <= $this->now
+                || ($gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->isStudentSubmit())
             ) {
                 $return[$id] = $gradeable;
             }
