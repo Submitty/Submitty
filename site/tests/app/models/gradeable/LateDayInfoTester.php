@@ -45,7 +45,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
         $graded_gradeable->method('getLateDayException')->willReturn($late_day_exception);
 
-        return new LateDayInfo($core, $user, $graded_gradeable, $late_days_remaining);
+        return LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, $late_days_remaining);
     }
 
     public function testNegativeLateDaysRemaining() {
@@ -57,7 +57,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $graded_gradeable->method('getSubmitter')->willReturn($submitter);
 
         $this->expectException(\InvalidArgumentException::class);
-        $ldi = new LateDayInfo($core, $user, $graded_gradeable, -1);
+        $ldi = LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, -1);
     }
 
     public function testBadUserForSubmitter() {
@@ -69,7 +69,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $graded_gradeable->method('getSubmitter')->willReturn($submitter);
 
         $this->expectException(\InvalidArgumentException::class);
-        $ldi = new LateDayInfo($core, $user, $graded_gradeable, 0);
+        $ldi = LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, 0);
     }
 
     public function testGetLateDaysAllowed() {
