@@ -937,11 +937,12 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_email';
                 }
             }
-            /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,- . Registration section is optional for graders.*/
+            /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,- .
+            Registration section is optional for graders, so automatically validate if not set.*/
             if (isset($vals[$registration_section_idx]) && strtolower($vals[$registration_section_idx]) === "null") {
                 $vals[$registration_section_idx] = null;
             }
-            $unset_grader_registration_section = ($list_type === 'graderlist' && !isset($vals[$registration_section_idx]));
+            $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$registration_section_idx]));
             if (!($unset_grader_registration_section || User::validateUserData('registration_section', $vals[$registration_section_idx]))) {
                 $bad_row_details[$row_num + 1][] = 'Registration section';
                 if (!in_array('registration_section', $bad_columns)) {
@@ -971,13 +972,13 @@ class UsersController extends AbstractController {
             }
             /* Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                Automatically validate if not set (this field is optional) */
-            if (!(!isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]))) {
+            if (!(empty($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]))) {
                 $bad_row_details[$row_num + 1][] = 'preferred first name';
                 if (!in_array('user_preferred_firstname', $bad_columns)) {
                     $bad_columns[] = 'user_preferred_firstname';
                 }
             }
-            if (!(!isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]))) {
+            if (!(empty($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]))) {
                 $bad_row_details[$row_num + 1][] = 'preferred last name';
                 if (!in_array('user_preferred_lastname', $bad_columns)) {
                     $bad_columns[] = 'user_preferred_lastname';
@@ -1013,10 +1014,10 @@ class UsersController extends AbstractController {
                     if (count($row) === 1) {
                         $users_to_update[] = $row;
                     }
-                    elseif (isset($row[$registration_section_idx]) && $row[$registration_section_idx] !== $user->getRegistrationSection()) {
+                    elseif (isset($row[$registration_section_idx]) && $row[$registration_section_idx] !== $existing_user->getRegistrationSection()) {
                         $users_to_update[] = $row;
                     }
-                    elseif ($list_type === 'graderlist' && $row[4] !== $user->getGroup()) {
+                    elseif ($list_type === 'graderlist' && $row[4] !== $existing_user->getGroup()) {
                         $users_to_update[] = $row;
                     }
                     $exists = true;
@@ -1064,13 +1065,15 @@ class UsersController extends AbstractController {
                 $user->setEmail($row[3]);
                 // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
-                $user->setRegistrationSection($row[$registration_section_idx]);
+                if (!empty($row[$registration_section_idx])) {
+                    $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
+                    $user->setRegistrationSection($row[$registration_section_idx]);
+                }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
-                if (isset($row[$pref_firstname_idx]) && !empty($row[$pref_firstname_idx])) {
+                if (!empty($row[$pref_firstname_idx])) {
                     $user->setPreferredFirstName($row[$pref_firstname_idx]);
                 }
-                if (isset($row[$pref_lastname_idx]) && !empty($row[$pref_lastname_idx])) {
+                if (!empty($row[$pref_lastname_idx])) {
                     $user->setPreferredLastName($row[$pref_lastname_idx]);
                 }
                 if ($use_database) {
@@ -1092,8 +1095,10 @@ class UsersController extends AbstractController {
             else {
                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
-                $user->setRegistrationSection($row[$registration_section_idx]);
+                if (!empty($row[$registration_section_idx])) {
+                    $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
+                    $user->setRegistrationSection($row[$registration_section_idx]);
+                }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
             }
             $insert_or_update_user_function('update', $user);
