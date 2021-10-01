@@ -883,7 +883,7 @@ class UsersController extends AbstractController {
 
         // Mapping column with its validation formats
         $column_formats = [
-            'column_count' => 'Only 5 to 8 columns are allowed',
+            'column_count' => 'Only 5 to 9 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
             'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
@@ -903,7 +903,7 @@ class UsersController extends AbstractController {
                 continue;
             }
             // Bounds check to ensure minimum required number of rows is present.
-            if (!count($vals) >= 5) {
+            if (count($vals) < 5 || count($vals) > 9) {
                 $bad_row_details[$row_num + 1][] = 'column Count';
                 if (!in_array('column_count', $bad_columns)) {
                     $bad_columns[] = 'column_count';
@@ -1014,10 +1014,10 @@ class UsersController extends AbstractController {
                     if (count($row) === 1) {
                         $users_to_update[] = $row;
                     }
-                    elseif (isset($row[$registration_section_idx]) && $row[$registration_section_idx] !== $existing_user->getRegistrationSection()) {
+                    elseif (!empty($row[$registration_section_idx]) && $row[$registration_section_idx] !== $existing_user->getRegistrationSection()) {
                         $users_to_update[] = $row;
                     }
-                    elseif ($list_type === 'graderlist' && $row[4] !== $existing_user->getGroup()) {
+                    elseif ($list_type === 'graderlist' && $row[4] !== (string) $existing_user->getGroup()) {
                         $users_to_update[] = $row;
                     }
                     $exists = true;
