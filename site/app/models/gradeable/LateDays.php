@@ -33,7 +33,7 @@ class LateDays extends AbstractModel {
      * @param GradedGradeable[] $graded_gradeables An array of only GradedGradeables
      * @param array|null $late_day_updates
      */
-    public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null) {
+    public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null, $reCache = false) {
         parent::__construct($core);
         $this->user = $user;
 
@@ -42,44 +42,131 @@ class LateDays extends AbstractModel {
             return $gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE;
         });
 
-        // Sort by due date
-        usort($graded_gradeables, function (GradedGradeable $gg1, GradedGradeable $gg2) {
-            $time_diff = 0;
-            if ($gg1->getGradeable()->hasDueDate() && $gg2->getGradeable()->hasDueDate()) {
-                $time_diff = $gg1->getGradeable()->getSubmissionDueDate()->getTimestamp() - $gg2->getGradeable()->getSubmissionDueDate()->getTimestamp();
-            }
-            elseif ($gg2->getGradeable()->hasDueDate()) {
-                $time_diff = -1;
-            }
-            elseif ($gg1->getGradeable()->hasDueDate()) {
-                $time_diff = 1;
-            }
-            if ($time_diff === 0) {
-                return strcmp($gg1->getGradeableId(), $gg2->getGradeableId());
-            }
-            return $time_diff;
-        });
-
         // Get the late day updates that the instructor will enter
         $this->late_days_updates = $late_day_updates ?? $this->core->getQueries()->getLateDayUpdates($user->getId());
+        $this->late_day_cache = $this->core->getQueries()->getLateDayCacheForUser($user->getId());
+
+        // Get all late day events (late day updates and graded gradeable submission dates)
+        $late_day_events = $this->createLateDayEvents($graded_gradeables);
 
         $prev_late_days_available = $this->core->getConfig()->getDefaultStudentLateDays();
-        // Construct late days info for each gradeable
-        foreach ($graded_gradeables as $graded_gradeable) {
-            $late_days_remaining = $prev_late_days_available;
-            if ($graded_gradeable->getGradeable()->hasDueDate()) {
-                $late_days_remaining = $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate());
-            }
-            $prev_late_days_available = $late_days_remaining;
+        $prev_time_stamp = null;
+        $late_days_charged = 0;
+        $useCache = true;
 
-            $info = new LateDayInfo(
-                $core,
-                $user,
-                $graded_gradeable,
-                $late_days_remaining
-            );
-            $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
+        // var_dump($late_day_events);
+        // Construct late days info for each gradeable
+        $index = 1;
+        foreach ($late_day_events as $event) {
+            // Use index # for late day update
+            if (isset($event['update'])) {
+                $id = $index++;
+            }
+            else {
+                $id = $event['gg']->getGradeableId();
+            }
+            
+            // Grab cache if $useCache is true
+            $gradeable_cache = $this->late_day_cache[$id] ?? null;                
+
+            // Recalculate if cache not available
+            if (!$useCache || $gradeable_cache == null) {
+                // Set use cache to false since all future late day info is now stale
+                $useCache = false;
+                $info = $this->getLateDayInfoFromPrevious($prev_late_days_available, $event);
+            }
+            else {
+                $event_info = $gradeable_cache;
+                
+                // Set gg info for cache
+                if (isset($event['gg'])) {
+                    $graded_gradeable = $event['gg'];
+                    $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+                    $event_info['graded_gradeable'] = $graded_gradeable;
+                }
+                $info = new LateDayInfo($core, $user, $event_info);
+            }
+
+            // Set previous value
+            $prev_late_days_available = $event_info['late_days_remaining'];
+            // Set event id
+            $event_info['id'] = $id;
+    
+            $this->late_day_info[$id] = $info;
+
+            // If the cache wasnt used, the value has been updated
+            if (!$useCache && ($reCache)) {
+                $this->core->getQueries()->addLateDayCacheForUser($user, $info);
+            }
         }
+    }
+
+    /**
+     * Sort the graded gradeables and late day updates by due date
+     * @param arry $graded_gradeables Collection of GradedGradeable objects
+     */
+    private function createLateDayEvents($graded_gradeables) {
+        $late_day_events = array_merge(
+            array_map(function (GradedGradeable $gg) {
+                return [
+                    'timestamp' => $gg->getGradeable()->getSubmissionDueDate(),
+                    'gg' => $gg
+                ];
+            }, $graded_gradeables),
+            array_map(function ($update) {
+                return [
+                    'timestamp' => $update['since_timestamp'],
+                    'update' => $update
+                ];
+            },
+            $this->late_days_updates)
+        );
+
+        // Sort by 'timestamp'
+        usort($late_day_events, function ($e1, $e2) {
+            $diff = 0;
+            if ($e1['timestamp'] !== null && $e2['timestamp'] !== null) {
+                $diff = $e1['timestamp']->getTimestamp() - $e2['timestamp']->getTimestamp();
+
+                if ($diff === 0) {
+                    // $e1 is a late day update, higher priority
+                    if (isset($e1['update'])) {
+                        $diff = -1;
+                    }
+                    // $e2 is a late day update, higher priority
+                    else if (isset($e2['update'])) {
+                        $diff = 1;
+                    }
+                    // $e1 and $e2 are ggs, use g_id
+                    else {
+                        strcmp($e1['gg']->getGradeableId(), $e2['gg']->getGradeableId());
+                    }
+                }
+            }
+            elseif ($e2['timestamp'] !== null) {
+                $time_diff = 1;
+            }
+            elseif ($e1['timestamp'] !== null) {
+                $time_diff = -1;
+            }
+            return $diff;
+        });
+
+        return $late_day_events;
+    }
+
+    /**
+     * Get the contents of the late day info array into a cache array format
+     * @return array An array with g_id => (gradeable late day cache array)
+     */
+    public function getCacheArray() {
+        $cache = [];
+
+        foreach ($this->late_day_info as $g_id => $info) {
+            $cache[$g_id] = $this->getCacheArrayForGradeable($g_id);
+        }
+
+        return $cache;
     }
 
     /**
@@ -177,10 +264,10 @@ class LateDays extends AbstractModel {
         $total = 0;
         /** @var LateDayInfo $info */
         foreach ($this->late_day_info as $info) {
-            if ($info->getGradedGradeable()->getGradeable()->getSubmissionDueDate() > $context) {
+            if ($info->getLateDayEventTime() > $context) {
                 break;
             }
-            $total += $info->getLateDaysCharged();
+            $total += $info->isLateDayUpdate() ? 0 : $info->getLateDaysCharged();
         }
         return $total;
     }
@@ -203,77 +290,81 @@ class LateDays extends AbstractModel {
     }
 
     /**
+     * Create event information for a given late day event
+     * @return array Information needed in order to construct a LateDayInfo object 
+     */
+    private function createEventInfo($event, $late_days_remaining, $late_days_change) {
+        $event_info = [
+            'late_days_remaining' => $late_days_remaining,
+            'late_days_change' => $late_days_change,
+            'late_day_date' => $event['timestamp']
+        ];
+
+        if (isset($event['gg'])) {
+            $graded_gradeable = $event['gg'];
+            $late_days_allowed = $graded_gradeable->getGradeable()->getLateDays();
+            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+            $submission_days_late = $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0;
+            $exceptions = $graded_gradeable->getLateDayException($this->user);
+
+            $event_info['graded_gradeable'] = $graded_gradeable;
+            $event_info['late_days_allowed'] = $late_days_allowed;
+            $event_info['submission_days_late'] = $submission_days_late;
+            $event_info['late_day_exceptions'] = $exceptions;
+        }
+        
+        return $event_info;
+    }
+
+    /**
+     * Gets the number of late days remaining as of a certain date
+     * Note: This does not apply late day 'updates' retroactively
+     * @param \DateTime $context The date to calculate remaining late days for
+     * @param int $prev_late_days_available The number of late days availabe at the prev time stamp
+     * @param \DateTime|null $prev_time_stamp The date of the previous gradeable evaluated, or null if its the first
+     * @param int $late_days_charged The late days charged for this gradeable
+     * @return LateDayInfo
+     */
+    public function getLateDayInfoFromPrevious($prev_late_days_available, $event) {
+        $late_days_remaining = $prev_late_days_available;
+        $late_days_change = 0;
+
+        // Create Late Day Info for Gradeable
+        if (isset($event['gg'])) {
+            $info = LateDayInfo::fromGradeableLateDaysRemaining($this->core, $this->user, $event['gg'], $prev_late_days_available);
+        }
+        // Process Late Day Info for Late Day Update
+        else {
+            $new_late_days_available = $event['update']['allowed_late_days'];
+            $diff = $new_late_days_available - ($prev_late_days_available + $this->getLateDaysUsedByContext($event['timestamp']));
+            $late_days_change = $diff;
+            $late_days_remaining = max(0, $late_days_remaining + $diff);
+
+            // Create LateDayInfo from event info
+            $event_info = $this->createEventInfo($event, $late_days_remaining, $late_days_change);
+            $info = new LateDayInfo($this->core, $this->user, $event_info);
+        }
+
+        return $info;
+    }
+
+    /**
      * Gets the number of late days remaining as of a certain date
      * Note: This does not apply late day 'updates' retroactively
      * @param \DateTime $context The date to calculate remaining late days for
      * @return int
      */
     public function getLateDaysRemainingByContext(\DateTime $context) {
-        // make an array of 'due date events', which is an array of both the gradeables
-        //  and the late day updates in the `late_days` table
-        $late_day_events = array_merge(
-            array_map(function (LateDayInfo $info) {
-                return [
-                    'timestamp' => $info->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
-                    'info' => $info
-                ];
-            }, $this->late_day_info),
-            array_map(function ($update) {
-                return [
-                    'timestamp' => $update['since_timestamp'],
-                    'update' => $update
-                ];
-            },
-            $this->late_days_updates)
-        );
+        $remaining = $this->core->getConfig()->getDefaultStudentLateDays();
 
-        // Sort by 'timestamp'
-        usort($late_day_events, function ($e1, $e2) {
-            $diff = 0;
-            if ($e1['timestamp'] !== null && $e2['timestamp'] !== null) {
-                $diff = $e1['timestamp']->getTimestamp() - $e2['timestamp']->getTimestamp();
-            }
-            elseif ($e2['timestamp'] !== null) {
-                $time_diff = -1;
-            }
-            elseif ($e1['timestamp'] !== null) {
-                $time_diff = 1;
-            }
-            return $diff;
-        });
-
-        // step through each event and keep a running count of the late days
-        $prev_late_days_available = $this->core->getConfig()->getDefaultStudentLateDays();
-        $late_days_remaining = $prev_late_days_available;
-        foreach ($late_day_events as $event) {
-            if ($event['timestamp'] > $context) {
+        /** @var LateDayInfo $info */
+        foreach ($this->late_day_info as $info) {
+            if ($info->getLateDayEventTime() > $context) {
                 break;
             }
-            if (isset($event['info'])) {
-                // gradeable event, so subtract the number of late days charged from
-                //  the running count
-                /** @var LateDayInfo $info */
-                $info = $event['info'];
-
-                // Due to the way getLateDaysCharged works, this subtraction should never make the
-                //  count go below zero (if it does, fix getLateDaysCharged)
-                $late_days_remaining -= $info->getLateDaysCharged();
-            }
-            elseif (isset($event['update'])) {
-                // Late days update event, so add the difference between the new and old
-                //  available count and add that to the late days remaining.
-                //  Clamp to 0 to ensure that subtractions don't make us go below zero
-                $new_late_days_available = $event['update']['allowed_late_days'];
-                $diff = $new_late_days_available - $prev_late_days_available;
-                $late_days_remaining = max(0, $late_days_remaining + $diff);
-                $prev_late_days_available = $new_late_days_available;
-            }
-            if ($late_days_remaining < 0) {
-                throw new \Error('Late days calculation failed due to logic error (LateDaysInfo::getLateDaysCharged)!');
-            }
+            $remaining = $info->getLateDaysRemaining();
         }
-
-        return $late_days_remaining;
+        return $remaining;
     }
 
     /**
