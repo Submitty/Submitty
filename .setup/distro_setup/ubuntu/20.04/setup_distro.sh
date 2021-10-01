@@ -40,7 +40,8 @@ service ntp restart
 
 echo "Preparing to install packages.  This may take a while."
 
-apt-get install -qqy --force-yes libpam-passwdqc
+# WWU-TODO Commented out due to conflict with libpam-cracklib
+# apt-get install -qqy libpam-passwdqc
 
 # Set up apache to run with suphp in pre-fork mode since not all
 # modules are thread safe (do not combine the commands or you may get
