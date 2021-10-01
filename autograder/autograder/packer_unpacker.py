@@ -58,6 +58,7 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
         os.path.join(config.submitty['submitty_data_dir'], 'vcs')
     )
     vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
+    vcs_base_url = vcs_base_url.replace('{$user_id}', userid)
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
     vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)

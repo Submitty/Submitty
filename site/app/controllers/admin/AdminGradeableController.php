@@ -875,6 +875,13 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'private-github') {
                 $host_type = 3;
             }
+	    elseif ($host_button === 'self-hosted') {
+		$host_type = 4;
+		$subdir = $details['vcs_url'];
+		if($subdir[0] != '/') {
+		    $subdir = '/' . $subdir;
+		}
+	    }
 
             $vcs_property_values = [
                 'vcs' => true,

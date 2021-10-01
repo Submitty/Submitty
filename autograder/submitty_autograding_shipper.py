@@ -826,7 +826,13 @@ def checkout_vcs_repo(config, my_file):
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            vcs_path = vcs_subdirectory
+            if '.git' in vcs_base_url:
+                vcs_path = vcs_base_url
+                tmp_checkout = checkout_path
+                checkout_path = os.path.join(checkout_path,"tmp")
+                vcs_subdirectory = "test"
+            else:
+                vcs_path = vcs_subdirectory
         else:
             if '://' in vcs_base_url:
                 vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
@@ -834,7 +840,7 @@ def checkout_vcs_repo(config, my_file):
                 vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
 
         # warning: --depth is ignored in local clones; use file:// instead.
-        if '://' not in vcs_path:
+        if '://' not in vcs_path and not '@' in vcs_path:
             vcs_path = "file:///" + vcs_path
 
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
@@ -920,7 +926,21 @@ def checkout_vcs_repo(config, my_file):
                 # else:
                 #    # and check out the right version
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-
+                
+                # copy the subfolder we want to the old checkout path and remove the rest
+                if tmp_checkout != "":
+                    os.chdir(tmp_checkout)
+                    if vcs_subdirectory[0] == '/':
+                        vcs_subdirectory = vcs_subdirectory[1:]
+                    files = os.lastdir(os.path.join(checkout_path,vcs_subdirectory))
+                    if files:
+                        for f in files:
+                            shutil.move(os.path.join(checkout_path,vcs_subdirectory,f),tmp_checkout)
+                    else:
+                        subprocess.check_call('not_a_commadn')
+                    shutil.rmtree(checkout_path,ignore_errors=True)
+                    checkout_path = tmp_checkout
+                    
                 subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
                 print(
                     "\n====================================\n",
