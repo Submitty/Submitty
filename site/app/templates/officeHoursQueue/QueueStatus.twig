@@ -79,6 +79,26 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+      <form method="post" action="{{ base_url }}/switch">
+          <div class="form-group">
+              <br>
+              <p>NOTE: Switching queues will preserve your spot in line</p>
+              <label for="queue_code">Switch Queue:
+              </label>
+              <select id="queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
+                  <option value="">Queue Name</option>
+                  {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+                      <option value="{{queue['code']}}">{{queue['code']}}</option>
+                  {% endfor %}
+              </select>
+              <div id="switch_queue_form" class="form-group" style="display: none;">
+                  <label for="token-box">Queue Access Code:</label>
+                  <input type="text" name="token" id="token-box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on">
+                  <br>
+                  <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
+              </div>
+          </div>
+      </form>
     <br>
     <p>Use the pause button if you must step away from your computer for a few minutes.  This will preserve your position in the queue.</p>
     <form method="post" action="{{base_url}}/togglePause">
@@ -115,3 +135,8 @@
     </form>
   </div>
 {% endif %}
+<script>
+    function toggleSwitchQueueForm(){
+        $("#switch_queue_form").css('display', 'block');
+    }
+</script>
