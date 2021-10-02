@@ -32,9 +32,6 @@ class PlagiarismConfigTester extends BaseUnitTest {
         );
     }
 
-    public function tearDown(): void {
-    }
-
     public function testGetters(): void {
         $this->assertEquals($this->my_config->getGradeableID(), "homework_1");
         $this->assertEquals($this->my_config->getConfigID(), 1);
