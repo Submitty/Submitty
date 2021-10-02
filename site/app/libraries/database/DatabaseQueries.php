@@ -4591,11 +4591,10 @@ AND gc_id IN (
     }
 
     /* 
-     * This is used to convert one of the by component inquiries for a gradeable to a non-component inquiry.  
+     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.  
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
-        //SELECT DISTINCT user_id from (SELECT * from regrade_requests WHERE g_id='grades_released_homework') as a
         $this->course_db->query("SELECT DISTINCT user_id AS student_id from regrade_requests WHERE g_id=?;", [$gradeable->getId()]);
         foreach ($this->course_db->rows() as $distinct_student) {
             $this->course_db->query("SELECT id FROM regrade_requests WHERE g_id=? AND user_id=?;", [$gradeable->getId(), $distinct_student['student_id']]);
