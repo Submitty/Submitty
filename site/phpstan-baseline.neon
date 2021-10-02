@@ -61,11 +61,6 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: "#^Offset 4 does not exist on null\\.$#"
-			count: 5
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(integer\\(0/1/2\\) \\$modifyType \\- 0 \\=\\> delete, 1 \\=\\> edit content, 2 \\=\\> undelete\\)\\: Unexpected token \"\\(\", expected variable at offset 200$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
