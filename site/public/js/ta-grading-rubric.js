@@ -2508,14 +2508,6 @@ function open_overall_comment_tab(user) {
     $('#overall-comment-tab-' + user ).addClass('active-btn');
 }
 
-function previewOverallCommentMarkdown(user, mode){
-    const markdown_area = $(`#overall-comment-${user}`);
-    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
-    const markdown_content = markdown_area.val();
-
-    previewMarkdown(mode, markdown_area, preview_element, { content: markdown_content });
-}
-
 /**
  * Adds a new mark to the DOM and refreshes the display
  * @param {int} component_id

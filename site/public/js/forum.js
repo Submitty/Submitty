@@ -1615,18 +1615,6 @@ function toggleMarkdown(post_box_id, triggered) {
   document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
 }
 
-function previewForumMarkdown(mode){
-  let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
-  if (post_box_num === undefined) {
-    post_box_num = '';
-  }
-  const reply_box = $(`textarea#reply_box_${post_box_num}`);
-  const preview_box = $(`#preview_box_${post_box_num}`);
-  const post_content = reply_box.val();
-
-  previewMarkdown(mode, reply_box, preview_box, { content: post_content });
-}
-
 function checkInputMaxLength(obj){
     if($(obj).val().length == $(obj).attr('maxLength')){
         alert('Maximum input length reached!');

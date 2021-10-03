@@ -129,6 +129,8 @@
     padding-right: 16px;
     min-height: 35px;
     cursor:pointer;
+    display: flex;
+    align-items: center;
 }
 
 .markdown-mode-tab.active {
@@ -192,6 +194,44 @@
 .btn-markdown {
     margin-left: 5px;
 }
+
+.markdown-preview-load-spinner {
+    display: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+
+.markdown-preview-load-spinner div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: 2px 2px 2px 5px;
+    border: 2px solid var(--submitty-logo-blue);
+    border-radius: 50%;
+    animation: markdown-preview-load-spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: var(--submitty-logo-blue) transparent transparent transparent;
+}
+.markdown-preview-load-spinner div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+.markdown-preview-load-spinner div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+.markdown-preview-load-spinner div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+@keyframes markdown-preview-load-spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+  
 
 #peer-table th{
     border: 1px solid var(--standard-light-gray);

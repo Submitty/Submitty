@@ -4,11 +4,8 @@ namespace app\views;
 
 class MarkdownView extends AbstractView {
 
-    public function renderMarkdownPreview($enablePreview, $content) {
+    public function renderMarkdown($content) {
         $this->core->getOutput()->disableRender();
-        if (!$enablePreview) {
-            return;
-        }
         return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
                 "content" => $content
         ]);

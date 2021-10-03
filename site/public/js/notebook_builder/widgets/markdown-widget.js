@@ -27,7 +27,7 @@ class MarkdownWidget extends Widget {
         interactive_area.appendChild(label);
 
         $.ajax({
-            url: buildCourseUrl(['markdown', 'area']),
+            url: buildUrl(['markdown', 'area']),
             type: "POST",
             data: {
                 data: {
@@ -39,7 +39,6 @@ class MarkdownWidget extends Widget {
                     preview_div_id : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
-                    onclick : `previewNotebookBuilderMarkdown.bind(this, ${NUM_MARKDOWN})`,
                     render_header : true,
                     min_height : "100px",
                 },
@@ -73,12 +72,4 @@ class MarkdownWidget extends Widget {
     load(data) {
         this.state = data;
     }
-}
-
-function previewNotebookBuilderMarkdown(markdown_num, mode) {
-    const markdown_area = $(`#notebook-builder-markdown-${markdown_num}`);
-    const preview_element = $(`#notebook-builder-markdown-preview-${markdown_num}`);
-    const markdown_content = markdown_area.val();
-
-    previewMarkdown(mode, markdown_area, preview_element, { content: markdown_content });
 }

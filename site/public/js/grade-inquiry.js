@@ -222,11 +222,3 @@ function newDiscussionRender(discussion) {
         $('#regradeBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }
-
-function previewInquiryMarkdown(mode) {
-    const markdown_textarea = $(this).closest('.markdown-area').find('[name="replyTextArea"]');
-    const preview_element = $('#inquiry_preview');
-    const inquiry_content = markdown_textarea.val();
-
-    previewMarkdown(mode, markdown_textarea, preview_element, { content: inquiry_content });
-}

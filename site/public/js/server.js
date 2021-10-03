@@ -1565,16 +1565,17 @@ function getFocusableElements() {
  *                      - `'preview'` activates preview mode
  *                      - Anything else will activate write/edit mode
  */
-function previewMarkdown(mode, data = {}) {
-    const enablePreview = mode === 'preview';
+function previewMarkdown(mode) {
     const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
     const markdown_textarea = markdown_area.find('.markdown-textarea');
     const markdown_preview = markdown_area.find('.markdown-preview');
+    const markdown_preview_load_spinner = markdown_area.find('.markdown-preview-load-spinner');
     const accessibility_message = markdown_area.find('.accessibility-message');
 
-    //add content to data object
-    data = Object.assign(data, { content: markdown_textarea.val() });
+    const data = {
+        content: markdown_textarea.val()
+    }
 
     //basic sanity checking
     if (!(typeof mode === 'string'))   throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
@@ -1585,34 +1586,39 @@ function previewMarkdown(mode, data = {}) {
     if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
-    $.ajax({
-        url: buildCourseUrl(['markdown', 'preview']),
-        type: 'POST',
-        data: {
-            enablePreview: enablePreview,
-            ...data,
-            csrf_token: csrfToken
-        },
-        success: function(markdown_data){
-            if (enablePreview) {
-                markdown_preview.empty();
-                markdown_preview.append(markdown_data);
-                markdown_preview.show();
-                markdown_textarea.hide();
+    if (mode === 'preview') { 
+        accessibility_message.hide();
+        markdown_textarea.hide();
+        const long_load = setTimeout( function() {
+            markdown_preview.html('Loading...');
+        }, 300);
+        markdown_preview.show();
+        markdown_preview_load_spinner.show();
+        $.ajax({
+            url: buildUrl(['markdown']),
+            type: 'POST',
+            data: {
+                ...data,
+                csrf_token: csrfToken
+            },
+            success: function(markdown_data){
+                clearTimeout(long_load);
+                markdown_preview_load_spinner.hide();
+                markdown_preview.html(markdown_data);
                 markdown_header.attr('data-mode', 'preview');
-                accessibility_message.hide();
+            },
+            error: function() {
+                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             }
-            else {
-                markdown_preview.hide();
-                markdown_textarea.show();
-                markdown_header.attr('data-mode', 'edit');
-                accessibility_message.show();
-            }
-        },
-        error: function() {
-            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
-        }
-    });
+        });
+    }
+    else {
+        markdown_preview.empty();
+        markdown_preview.hide();
+        markdown_textarea.show();
+        markdown_header.attr('data-mode', 'edit');
+        accessibility_message.show();
+    }
 }
 
 /**
