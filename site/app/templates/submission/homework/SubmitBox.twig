@@ -356,9 +356,9 @@
                 Submit
             </button>
         {% if viewing_inactive_version %}
-            <button type="button" id="switch_to_most_recent" class="btn btn-success" onclick="switchToMostRecent('{{ recent_version_url }}')">
+            <a href="{{ recent_version_url }}" class="btn btn-success" id="switch-to-most-recent">
                 Switch to Most Recent Version
-            </button>
+            </a>
         {% endif %}
         {% endif %}
 

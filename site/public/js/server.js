@@ -615,10 +615,6 @@ function versionChange(url, sel){
     window.location.href = url;
 }
 
-function switchToMostRecent(url){
-    window.location.href = url;
-}
-
 function checkVersionChange(days_late, late_days_allowed){
     if(days_late > late_days_allowed){
         var message = "The max late days allowed for this assignment is " + late_days_allowed + " days. ";
