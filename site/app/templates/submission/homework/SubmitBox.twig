@@ -355,11 +355,11 @@
             <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
-        {% if viewing_inactive_version %}
-            <a href="{{ recent_version_url }}" class="btn btn-success" id="switch-to-most-recent">
-                Switch to Most Recent Version
-            </a>
-        {% endif %}
+            {% if viewing_inactive_version %}
+                <a href="{{ recent_version_url }}" class="btn btn-primary">
+                    Switch to Most Recent Version
+                </a>
+            {% endif %}
         {% endif %}
 
         {% if part_names is not empty %}
