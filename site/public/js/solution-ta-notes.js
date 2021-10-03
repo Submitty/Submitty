@@ -1,5 +1,5 @@
-/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken, previewMarkdown */
-/* exported updateSolutionTaNotes, previewSolutionNotesMarkdown */
+/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken */
+/* exported updateSolutionTaNotes, detectSolutionChange */
 function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     const data = {
         solution_text: $(`#textbox-solution-${component_id}`).val().trim(),

@@ -1,5 +1,5 @@
-/* global buildCourseUrl, WebSocketClient previewMarkdown */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp previewInquiryMarkdown */
+/* global buildCourseUrl, WebSocketClient */
+/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
 function onReady(){
     // open last opened grade inquiry or open first component with grade inquiry
