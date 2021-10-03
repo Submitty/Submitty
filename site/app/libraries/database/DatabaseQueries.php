@@ -4590,8 +4590,8 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
-    /* 
-     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.  
+    /*
+     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
