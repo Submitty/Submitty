@@ -26,7 +26,7 @@
     "league/commonmark": "1.6.6",
     "maennchen/zipstream-php": "2.1.0",
     "php-ds/php-ds": "1.3.0",
-    "ramsey/uuid": "4.2.1",
+    "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
     "symfony/cache": "4.4.31",
     "symfony/config": "4.4.30",
