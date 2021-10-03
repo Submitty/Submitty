@@ -2967,9 +2967,6 @@ class ElectronicGraderController extends AbstractController {
         if (!$gradeable) {
             $error = "Invalid Gradeable ID given!";
         }
-        elseif (empty($solution_text)) {
-            $error = "Please provide some non-empty solution";
-        }
         elseif ($componentItempoolInfo['is_linked'] && empty($itempool_item)) {
             //Itempool must be non-empty when component is linked with the itempool
             $error = 'This component expects only non-empty itempool-item!';
