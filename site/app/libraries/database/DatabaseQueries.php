@@ -4602,7 +4602,6 @@ AND gc_id IN (
                 $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id=?;", [$this->course_db->rows()[0]['id']]);
             }
         }
-        return;
     }
 
     public function getRegradeDiscussions(array $grade_inquiries) {
