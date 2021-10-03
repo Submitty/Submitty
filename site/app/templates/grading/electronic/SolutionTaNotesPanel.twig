@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="row divider"></div>
-        <div class="solution-cont" data-component_id="{{component_id}}">
+        <div class="solution-cont" data-component_id="{{component_id}}" data-original-solution="{{ solution_notes|default('') }}">
             <span class="solution-notes-text solution-notes-text-{{ component_id }} {% if not is_first_edit %} hide {% endif %}">
                 No Solutions or TA notes for  "{{ component_title}}" Component  {% if is_itempool_linked %} (student having {{ itempool_item }}) {% endif %}
             </span>
@@ -49,13 +49,14 @@
                     "max_height" : "400px",
                     "no_maxlength" : true,
                     "initialize_preview" : is_first_edit != true,
+                    "textarea_onkeyup" : "detectSolutionChange.call(this)"
                 } only %}
                 <div>
                     <button type="primary"
                             id="save-solution"
-                            class="btn btn-primary"
+                            class="btn btn-default solution-save-btn"
                             onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}', '{{ itempool_item }}');"
-                    >Update</button>
+                    >Save</button>
                 </div>
             </div>
         </div>

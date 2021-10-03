@@ -90,6 +90,9 @@
             {% if textarea_onkeydown is defined %}
                 onkeydown="{{ textarea_onkeydown }}"
             {% endif %}
+            {% if textarea_onkeyup is defined %}
+                onkeyup="{{ textarea_onkeyup }}"
+            {% endif %}
             {% if textarea_onpaste is defined %}
                 onpaste="{{ textarea_onpaste }}"
             {% endif %}
