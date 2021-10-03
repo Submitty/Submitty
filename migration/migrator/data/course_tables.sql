@@ -120,7 +120,6 @@ $_$;
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
 
 --
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
