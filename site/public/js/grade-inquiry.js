@@ -92,6 +92,14 @@ function onGradeInquirySubmitClicked(button) {
         }
     }
 
+    //switch off of preview mode after submission
+    const markdown_area = text_area.closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    if(markdown_header.attr('data-mode') === 'preview') {
+        markdown_header.find('.markdown-write-mode').trigger('click');
+    }
+
+
     // prevent double submission
     form.data('submitted',true);
     const gc_id = form.children('#gc_id').val();
