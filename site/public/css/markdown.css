@@ -183,8 +183,9 @@
     border-radius: 4px;
     padding: 4px 6px;
     height: auto !important;
-    overflow: scroll;
+    overflow: auto;
     resize: none;
+    min-height: 100px;
     max-height: 300px;
 }
 
