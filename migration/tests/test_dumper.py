@@ -24,6 +24,8 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+SET default_table_access_method = heap;
+
 --
 -- Name: courses; Type: TABLE; Schema: public; Owner: -
 --
@@ -52,6 +54,7 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
 
 --
 -- Name: courses; Type: TABLE; Schema: public; Owner: -

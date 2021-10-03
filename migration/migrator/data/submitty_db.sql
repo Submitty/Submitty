@@ -271,7 +271,6 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
 
 --
 -- Name: courses; Type: TABLE; Schema: public; Owner: -

@@ -12,6 +12,7 @@ def dump_database(db_name: str, out_file: str) -> bool:
     ], universal_newlines=True)
     out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
     out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
+    out = re.sub(r"SET default_table_access_method = ([a-z]+);\n", '', out, flags=re.IGNORECASE)
     out = re.sub(r"FOR EACH ROW EXECUTE FUNCTION", "FOR EACH ROW EXECUTE PROCEDURE", out)
     out_file.write_text(out)
     return True
