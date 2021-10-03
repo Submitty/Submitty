@@ -95,7 +95,7 @@ function onGradeInquirySubmitClicked(button) {
     //switch off of preview mode after submission
     const markdown_area = text_area.closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
-    if(markdown_header.attr('data-mode') === 'preview') {
+    if (markdown_header.attr('data-mode') === 'preview') {
         markdown_header.find('.markdown-write-mode').trigger('click');
     }
 
