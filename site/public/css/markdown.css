@@ -13,6 +13,7 @@
     font-family: 'Source Sans Pro', 'sans-serif';
     white-space: normal;
     position: relative;
+    word-wrap: break-word;
 }
 
 .markdown h1,
@@ -166,6 +167,7 @@
     padding: 16px;
     background: var(--default-white);
     border-radius: 0 0 6px 6px;
+    position: relative;
 }
 
 .markdown-area textarea {
@@ -178,8 +180,8 @@
 }
 
 .markdown-preview {
-    border: 1px solid var(--standard-light-gray);
-    background-color: var(--standard-input-background);
+    border: none;
+    background-color: var(--default-white);
     border-radius: 4px;
     padding: 4px 6px;
     height: auto !important;

@@ -1568,6 +1568,7 @@ function getFocusableElements() {
 function previewMarkdown(mode) {
     const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
+    const markdown_toolbar = markdown_area.find('.markdown-area-toolbar');
     const markdown_textarea = markdown_area.find('.markdown-textarea');
     const markdown_preview = markdown_area.find('.markdown-preview');
     const markdown_preview_load_spinner = markdown_area.find('.markdown-preview-load-spinner');
@@ -1589,11 +1590,9 @@ function previewMarkdown(mode) {
     if (mode === 'preview') { 
         accessibility_message.hide();
         markdown_textarea.hide();
-        const long_load = setTimeout( function() {
-            markdown_preview.html('Loading...');
-        }, 300);
         markdown_preview.show();
         markdown_preview_load_spinner.show();
+        markdown_toolbar.hide();
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1602,7 +1601,6 @@ function previewMarkdown(mode) {
                 csrf_token: csrfToken
             },
             success: function(markdown_data){
-                clearTimeout(long_load);
                 markdown_preview_load_spinner.hide();
                 markdown_preview.html(markdown_data);
                 markdown_header.attr('data-mode', 'preview');
@@ -1616,6 +1614,7 @@ function previewMarkdown(mode) {
         markdown_preview.empty();
         markdown_preview.hide();
         markdown_textarea.show();
+        markdown_toolbar.show();
         markdown_header.attr('data-mode', 'edit');
         accessibility_message.show();
     }
@@ -1681,4 +1680,5 @@ function addMarkdownCode(type){
     }
     $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
     $(this).focus();
+    $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }

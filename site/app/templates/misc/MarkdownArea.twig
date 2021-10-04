@@ -57,8 +57,6 @@
             <button title="Edit Markdown" type="button" onclick="previewMarkdown.call(this, 'edit')" class="markdown-mode-tab markdown-write-mode active key_to_click">Write</button>
             <button title="Preview Markdown" type="button" onclick="previewMarkdown.call(this, 'preview')" class="markdown-mode-tab markdown-preview-mode key_to_click" tabindex="0" data-initialize-preview="{{initialize_preview|default(false)}}">
                 Preview
-                {# visual indicator for loading preview, extra divs are necessary (see markdown.css) #}
-                <div class="markdown-preview-load-spinner"><div></div><div></div><div></div><div></div></div>
             </button>
         </div>
         <div class="markdown-area-toolbar">
@@ -72,6 +70,8 @@
         </div>
     </div>
     <div class="markdown-area-body">
+        {# visual indicator for loading preview, extra divs are necessary (see markdown.css) #}
+        <div class="markdown-preview-load-spinner"><div></div><div></div><div></div><div></div></div>
         <label for="{{ markdown_area_id }}" tabindex="-1" class="screen-reader">{{ markdown_area_id }}</label>
         {% include "misc/AccessibilityMessage.twig" %}
         <textarea
