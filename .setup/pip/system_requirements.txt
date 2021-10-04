@@ -24,7 +24,7 @@ cryptography==3.3.2
 opencv-python==3.4.9.33
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2021.1 # Submitty-util specific.
+pytz==2021.3 # Submitty-util specific.
 
 python-pam==1.8.4
 ruamel.yaml==0.17.16
