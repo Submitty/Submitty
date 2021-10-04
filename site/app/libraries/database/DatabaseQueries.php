@@ -4595,13 +4595,7 @@ AND gc_id IN (
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
-        $this->course_db->query("SELECT DISTINCT user_id AS student_id from regrade_requests WHERE g_id=?;", [$gradeable->getId()]);
-        foreach ($this->course_db->rows() as $distinct_student) {
-            $this->course_db->query("SELECT id FROM regrade_requests WHERE g_id=? AND user_id=?;", [$gradeable->getId(), $distinct_student['student_id']]);
-            if ($this->course_db->rows()[0] && $this->course_db->rows()[0]['id']) {
-                $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id=?;", [$this->course_db->rows()[0]['id']]);
-            }
-        }
+        $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM regrade_requests ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
     }
 
     public function getRegradeDiscussions(array $grade_inquiries) {
