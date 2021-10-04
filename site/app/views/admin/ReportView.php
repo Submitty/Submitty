@@ -5,13 +5,17 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class ReportView extends AbstractView {
-    public function showReportUpdates($grade_summaries_last_run) {
+    public function showReportUpdates($grade_summaries_last_run, $json) {
         $this->core->getOutput()->addBreadcrumb('Grade Reports');
         $this->core->getOutput()->addInternalCss('grade-report.css');
+        $this->core->getOutput()->addInternalJs('grade-report.js');
         return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig", [
             'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
             'csv_url' => $this->core->buildCourseUrl(['reports', 'csv']),
             'rainbow_grades_customization_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
+            'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization_upload']),
+            'csrfToken' => $this->core->getCsrfToken(),
+            'json' => $json,
             'grade_summaries_last_run' => $grade_summaries_last_run,
         ]);
     }
