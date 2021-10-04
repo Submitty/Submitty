@@ -14,8 +14,8 @@
                     <a href="http://www.submitty.org/instructor/rainbow_grades/automatic_setup">rainbow grades documentation</a>.</p>
             </div>
         {% endif %}
-        <form action="http://localhost:1511/courses/f21/sample/autograding_config/upload?g_id=future_no_tas_homework" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="0d157155fa3ae559875dc87182d7f624">
+        <form action="http://localhost:1511/courses/f21/sample/reports/rainbow_grades_customization/upload" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{csrfToken}}">
             <label>Upload customization.json: <input type="file" name="config_upload"><br></label>
             <input type="submit" value="Upload"><br>
             <button type="reset">Cancel Upload</button>
