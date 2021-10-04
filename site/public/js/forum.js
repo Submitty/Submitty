@@ -1324,7 +1324,6 @@ function deleteCategory(category_id, category_desc, csrf_token){
 }
 
 function editCategory(category_id, category_desc, category_color, changed, csrf_token) {
-    console.log(arguments);
     if(category_desc === null && category_color === null) {
         return;
     }
