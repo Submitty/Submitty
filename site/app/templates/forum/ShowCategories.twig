@@ -103,6 +103,7 @@
             const category_id = item.data('category_id');
             const category_desc_original = item.data('category_desc');
             const category_desc = item.find(".edit-category-desc-input").val().trim();
+            item.data('category_desc', category_desc);
             if(category_desc != category_desc_original) {
                 editCategory(category_id, category_desc, null, 'desc', '{{ csrf_token }}');
             }
