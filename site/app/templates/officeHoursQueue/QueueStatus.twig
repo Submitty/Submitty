@@ -79,7 +79,11 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
-      <form method="post" action="{{ base_url }}/switch">
+      <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" id="name_box" name="name" maxlength="20" placeholder="Queue Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}"/>
+          <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
           <div class="form-group">
               <br>
               <p>NOTE: Switching queues will preserve your spot in line</p>
@@ -88,7 +92,9 @@
               <select id="queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
                   <option value="">Queue Name</option>
                   {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
-                      <option value="{{queue['code']}}">{{queue['code']}}</option>
+                      {% if queue['code'] != viewer.getCurrentQueueCode() %}
+                        <option value="{{queue['code']}}">{{queue['code']}}</option>
+                      {% endif %}
                   {% endfor %}
               </select>
               <div id="switch_queue_form" class="form-group" style="display: none;">

@@ -199,6 +199,32 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/switch", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function switchQueue($queue_code){
+        //check if in queue
+        //remove them from that queue
+        $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], 'self', $queue_code);
+        //$this->sendSocketMessage(['type' => 'full_update']);
+        //dont't let people switch into the same queue
+        //check new queue's contact info and code
+        //add them to queue
+        //do something with the time so they don't lose their place in line
+        $time_in = $_POST['time_in'];
+        $token = $_POST['token'];
+        $new_queue_code = $_POST['code'];
+        $validated_code = $this->core->getQueries()->isValidCode($new_queue_code, $token);
+        $contact_info = null;
+        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info);
+        $this->sendSocketMessage(['type' => 'queue_update']);
+        $this->core->addSuccessMessage("Added to queue");
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/togglePause", methods={"POST"})
      * @return MultiResponse
      */
