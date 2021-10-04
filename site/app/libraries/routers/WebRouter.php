@@ -254,11 +254,6 @@ class WebRouter {
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
-
-            if ($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
-                /** @noinspection PhpUnhandledExceptionInspection */
-                $this->core->loadForum();
-            }
         }
     }
 
