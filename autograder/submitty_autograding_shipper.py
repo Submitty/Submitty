@@ -932,7 +932,7 @@ def checkout_vcs_repo(config, my_file):
                     os.chdir(tmp_checkout)
                     if vcs_subdirectory[0] == '/':
                         vcs_subdirectory = vcs_subdirectory[1:]
-                    files = os.lastdir(os.path.join(checkout_path,vcs_subdirectory))
+                    files = os.listdir(os.path.join(checkout_path,vcs_subdirectory))
                     if files:
                         for f in files:
                             shutil.move(os.path.join(checkout_path,vcs_subdirectory,f),tmp_checkout)
