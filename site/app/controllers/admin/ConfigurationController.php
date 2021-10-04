@@ -189,7 +189,7 @@ class ConfigurationController extends AbstractController {
             // Only create default categories when there is no existing categories (only happens when first enabled)
             if (empty($this->core->getQueries()->getCategories())) {
                 $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
-                foreach ($categories as $rank=>$category) {
+                foreach ($categories as $rank => $category) {
                     $this->core->getQueries()->addNewCategory($category, $rank);
                 }
             }
