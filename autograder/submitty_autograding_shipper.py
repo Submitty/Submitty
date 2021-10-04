@@ -830,7 +830,6 @@ def checkout_vcs_repo(config, my_file):
                 vcs_path = vcs_base_url
                 tmp_checkout = checkout_path
                 checkout_path = os.path.join(checkout_path,"tmp")
-                vcs_subdirectory = "test"
             else:
                 vcs_path = vcs_subdirectory
         else:
