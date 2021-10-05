@@ -88,7 +88,7 @@ class CourseMaterialsView extends AbstractView {
             if ($course_material->isDir()) {
                 continue;
             }
-            if ($this->core->getUser()->getGroup() > 3 && $course_material->getReleaseDate() > $date_now) {
+            if (!$this->core->getUser()->accessGrading() && $course_material->getReleaseDate() > $date_now) {
                 continue;
             }
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
