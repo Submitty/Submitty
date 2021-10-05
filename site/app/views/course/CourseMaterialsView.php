@@ -39,7 +39,7 @@ class CourseMaterialsView extends AbstractView {
                 $path_parts = explode("/", $rel_path);
                 $fin_path = "";
                 foreach ($path_parts as $path_part) {
-                    $fin_path .= urlencode($path_part) . '/';
+                    $fin_path .= rawurlencode($path_part) . '/';
                 }
                 $fin_path = substr($fin_path, 0, strlen($fin_path) - 1);
                 $links[$course_material->getId()] = $base_view_url . "/" . $fin_path;
