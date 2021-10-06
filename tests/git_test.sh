@@ -3,12 +3,12 @@ SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); 
 
 
 test_git() {
-    random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
-
     echo "TESTING GIT"
+
+    random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
     echo "arg 1 ${1}"
     echo "arg 2 ${2}"
-    
+
     GIT_TRACE=1 git ls-remote http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2
 
     git clone http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2 open_homework
@@ -43,6 +43,8 @@ set -ev
 
 mkdir /tmp/submitty_git
 pushd /tmp/submitty_git
+
+GIT_TRACE=1 git ls-remote http://instructor:instructor@localhost/git/${SEMESTER}/sample/open_homework/instructor
 
 test_git instructor instructor
 test_git instructor student
