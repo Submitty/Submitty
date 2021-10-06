@@ -63,6 +63,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
         $this->core->getOutput()->enableMobileViewport();
         $image_path = $poll->getImagePath();
         $file_data = null;
@@ -71,6 +72,7 @@ class PollView extends AbstractView {
             $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
         }
         $poll_type = PollUtils::isSingleResponse($poll->getQuestionType()) ? "single-response" : "multiple-response";
+        $results = $this->core->getQueries()->getResults($poll->getId());
         return $this->core->getOutput()->renderTwigTemplate("polls/ViewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
@@ -78,7 +80,8 @@ class PollView extends AbstractView {
             'poll_type' => $poll_type,
             'user_id' => $this->core->getUser()->getId(),
             'user_admin' => $this->core->getUser()->accessAdmin(),
-            'file_data' => $file_data
+            'file_data' => $file_data,
+            'results' => $results
           ]);
     }
 
@@ -99,20 +102,6 @@ class PollView extends AbstractView {
             'poll' => $poll,
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'poll_type' => $poll_type
-          ]);
-    }
-
-    public function viewResults($poll, $results) {
-        $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
-        $this->core->getOutput()->addBreadcrumb("View Results");
-        $this->core->getOutput()->addInternalCss('polls.css');
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
-        $this->core->getOutput()->enableMobileViewport();
-        return $this->core->getOutput()->renderTwigTemplate("polls/ViewPollResults.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'poll' => $poll,
-            'results' => $results
           ]);
     }
 }

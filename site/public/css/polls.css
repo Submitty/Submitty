@@ -62,3 +62,11 @@ input[type="radio"][disabled=""]:checked::before {
 form {
     display: inline;
 }
+
+.poll-info-table {
+    display: table;
+}
+
+.poll-view-wrapper {
+    display: table-cell;
+}
