@@ -6251,8 +6251,9 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['id'];
     }
 
-    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
+    public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        $entry_time = $time_in ?? $this->core->getDateTimeNow();
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -6286,7 +6287,7 @@ AND gc_id IN (
                 ?,
                 ?,
                 NULL
-            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue,0]);
+            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {

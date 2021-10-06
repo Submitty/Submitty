@@ -149,7 +149,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info);
+        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info, null);
         $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
         return MultiResponse::RedirectOnlyResponse(
@@ -211,12 +211,12 @@ class OfficeHoursQueueController extends AbstractController {
         //check new queue's contact info and code
         //add them to queue
         //do something with the time so they don't lose their place in line
-        $time_in = $_POST['time_in'];
+        $time_in = $_POST['time_in'] ?? null;
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
         $validated_code = $this->core->getQueries()->isValidCode($new_queue_code, $token);
         $contact_info = null;
-        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info);
+        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info, $time_in);
         $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
         return MultiResponse::RedirectOnlyResponse(
