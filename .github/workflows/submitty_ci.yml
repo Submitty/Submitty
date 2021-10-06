@@ -15,19 +15,6 @@ env:
   NODE_VERSION: 10
 
 jobs:
-    debug:
-        runs-on: ubuntu-18.04
-        steps:
-          - run: |
-              echo SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-              echo SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)') >> $GITHUB_ENV
-              test=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-              echo $test
-              echo "SEMESTER=${test}"
-              echo "SEMESTER=${test}" >> $GITHUB_ENV
-              echo "${{ env.SEMESTER }}"
-              env
-
     css-lint:
         runs-on: ubuntu-18.04
         defaults:
@@ -434,9 +421,8 @@ jobs:
             continue-on-error: true
             run: |
               cd $SUBMITTY_REPOSITORY
-              echo "SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = (\'s\' if today.month < 7 else \'f\') + str(today.year)[-2:]; print(semester)')" >> $GITHUB_ENV
-              echo $SEMESTER
-              sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+              sem=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+              sudo python3 /usr/local/submitty/bin/generate_repos.py "SEMESTER=${test}" sample open_homework
               bash tests/git_test.sh
 
           - uses: nanasess/setup-chromedriver@master
