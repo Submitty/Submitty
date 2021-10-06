@@ -1,0 +1,84 @@
+<div class="content">
+    <h1> {{ poll.getName() }} </h1>
+    
+
+    <div class="poll-view-wrapper">
+        <button class="btn btn-primary" onclick="toggle_section('poll-info')">Toggle Poll Info</button>
+        <div id="poll-info">
+            {% include "misc/Markdown.twig" with {
+                "content": poll.getQuestion(),
+            } only %}
+            <form method="post" action="{{ base_url }}/submitResponse">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                <fieldset>
+                    <legend>
+                        <h2> Possible responses: </h2>
+                    </legend>
+                        {% set button_type = (poll_type == "single-response" ? "radio": "checkbox") %}
+                        <label class="radio" for="answer-no-response">
+                            <input type={{button_type}} value="-1" name="answers[]" id="answer-no-response"
+                                {{ poll.getUserResponse(user_id) is same as(null) ? "checked" : "" }}
+                                {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                            >
+                            No response
+                        </label>
+                        <br/>
+                        <br/>
+                        {% set index = 0%}
+                        {% for response in poll.getResponses() %}
+                            <div class = "radio">
+                                <input type={{ button_type }} aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}"
+                                    {{ response in poll.getUserResponse(user_id) ? "checked" : "" }}
+                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                />
+                                {% include "misc/Markdown.twig" with {
+                                    "content" : poll.getResponseString(response),
+                                    "style": "display: inline-block"
+                                } only %}
+                                <br/>
+                                <br/>
+                            </div>
+                            {% set index = index + 1%}
+                        {% endfor %}
+                </fieldset>
+                {% if not user_admin and poll.isOpen() %}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    {% if user_admin or poll.isHistogramAvailable() %}
+        <div class="poll-view-wrapper">
+            <button class="btn btn-primary" onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
+            <div id="poll-histogram">
+
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggle_section(section_id) {
+        $(`#${section_id}`).toggle('slow');
+    }
+
+    window.onload = function() {
+        const data = [
+          {
+            type: "bar",
+            x: [],
+            y: [],
+          }
+        ];
+        {% for answer, number in results %}
+            data[0].x.push("{{ poll.getResponseString(answer) }}");
+            data[0].y.push({{ number }});
+        {% endfor %}
+        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
+        const layout = {
+          title: title_text.documentElement.textContent,
+        }
+        Plotly.newPlot("chartContainer", data, layout);
+    }
+</script>

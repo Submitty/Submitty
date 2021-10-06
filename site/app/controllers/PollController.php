@@ -62,7 +62,7 @@ class PollController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return MultiResponse
      */
-    public function showPoll($poll_id) {
+    public function viewPoll($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(
@@ -76,24 +76,13 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        if ($this->core->getUser()->accessAdmin()) {
-            return MultiResponse::webOnlyResponse(
-                new WebResponse(
-                    'Poll',
-                    'showPollInstructor',
-                    $poll
-                )
-            );
-        }
-        else {
-            return MultiResponse::webOnlyResponse(
-                new WebResponse(
-                    'Poll',
-                    'showPollStudent',
-                    $poll
-                )
-            );
-        }
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'Poll',
+                'viewPoll',
+                $poll
+            )
+        );
     }
 
     /**

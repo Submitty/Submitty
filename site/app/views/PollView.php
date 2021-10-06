@@ -59,7 +59,7 @@ class PollView extends AbstractView {
           ]);
     }
 
-    public function showPollStudent($poll) {
+    public function viewPoll($poll) {
         $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
@@ -71,12 +71,13 @@ class PollView extends AbstractView {
             $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
         }
         $poll_type = PollUtils::isSingleResponse($poll->getQuestionType()) ? "single-response" : "multiple-response";
-        return $this->core->getOutput()->renderTwigTemplate("polls/PollPageStudent.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("polls/ViewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
             'poll_type' => $poll_type,
             'user_id' => $this->core->getUser()->getId(),
+            'user_admin' => $this->core->getUser()->accessAdmin(),
             'file_data' => $file_data
           ]);
     }
