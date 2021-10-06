@@ -23,8 +23,8 @@ jobs:
               echo SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)') >> $GITHUB_ENV
               test=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
               echo $test
-              echo "semester=${test}"
-              echo "semester=${test}" >> $GITHUB_ENV
+              echo "SEMESTER=${test}"
+              echo "SEMESTER=${test}" >> $GITHUB_ENV
               echo "${{ env.SEMESTER }}"
               env
 
