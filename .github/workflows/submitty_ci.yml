@@ -19,8 +19,9 @@ jobs:
         runs-on: ubuntu-18.04
         steps:
           - run: |
-              echo "SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = (\'s\' if today.month < 7 else \'f\') + str(today.year)[-2:]; print(semester)')" >> $GITHUB_ENV
-              echo $SEMESTER
+              echo SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)') >> $GITHUB_ENV
+              echo "${{ env.SEMESTER }}"
+              env
 
     css-lint:
         runs-on: ubuntu-18.04
