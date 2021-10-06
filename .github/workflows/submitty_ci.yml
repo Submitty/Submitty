@@ -416,6 +416,13 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
 
+          - name: Run git tests
+            timeout-minutes: 5
+            continue-on-error: true
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              bash tests/git_test.sh
+
           - uses: nanasess/setup-chromedriver@master
           - name: Setup chromedriver
             run: |
