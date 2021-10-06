@@ -418,11 +418,10 @@ jobs:
 
           - name: Run git tests
             timeout-minutes: 5
-            continue-on-error: true
             run: |
               cd $SUBMITTY_REPOSITORY
-              sem=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-              sudo python3 /usr/local/submitty/bin/generate_repos.py "SEMESTER=${test}" sample open_homework
+              SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+              sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
               bash tests/git_test.sh
 
           - uses: nanasess/setup-chromedriver@master
