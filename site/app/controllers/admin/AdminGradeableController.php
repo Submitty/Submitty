@@ -1071,8 +1071,8 @@ class AdminGradeableController extends AbstractController {
             'depends_on_points'
         ];
         // Date properties all need to be set at once
-        //$dates = $gradeable->getDates();
-        $dates = [];
+        $dates = $gradeable->getDates();
+
         $date_set = false;
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {

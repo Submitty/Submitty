@@ -2309,7 +2309,17 @@ ORDER BY rotating_section"
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC"
+            "SELECT 
+                COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
+                COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
+                user_id,
+                user_group
+            FROM
+                users
+            WHERE
+                user_group < 4
+            ORDER BY
+                user_group, user_id ASC"
         );
         $users = [];
 
@@ -7136,7 +7146,8 @@ AND gc_id IN (
     private function getUser($user_id, bool $is_numeric = false): ?User {
         $result = $this->getUsers([$user_id], $is_numeric);
         if ($result !== null && count($result) === 1) {
-            return $result[$user_id];
+            //return first element
+            return array_pop($result);
         }
         else {
             return null;
@@ -7622,5 +7633,27 @@ SQL;
     private function getGradeableMinutesOverride(string $gradeable_id): array {
         $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
         return $this->course_db->rows();
+    }
+
+    /**
+     * Gets the number of students who have submitted to a given gradeable
+     *
+     * @param string $gradeable_id
+     * @return int
+     */
+    public function getTotalStudentsWithSubmissions(string $gradeable_id): int {
+        $this->course_db->query('SELECT DISTINCT COUNT(*) user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["user_id"];
+    }
+
+    /**
+     * Gets the total number of submissions made to a given gradeable
+     *
+     * @param string $gradeable_id
+     * @return int
+     */
+    public function getTotalSubmissionsToGradeable(string $gradeable_id): int {
+        $this->course_db->query('SELECT COUNT(*) FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["count"];
     }
 }

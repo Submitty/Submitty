@@ -153,7 +153,7 @@
                                 {% if b.getUrl() is not empty and not loop.last %}
                                     <a {% if loop.first %}id="desktop_home_link"{% endif %} href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                                 {% elseif b.useAsHeading() %}
-                                    <h1 class="breadcrumb_heading">{{ b.getTitle() }}</h1>
+                                    <h1 class="breadcrumb-heading">{{ b.getTitle() }}</h1>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
