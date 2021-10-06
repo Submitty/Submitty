@@ -998,8 +998,7 @@ class Course(object):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
                             print("Inserting {} for {}...".format(gradeable.id, user.id))
-                            # gd_overall_comment no longer does anything, and will be removed in a future update.
-                            values = {'g_id': gradeable.id, 'gd_overall_comment' : ''}
+                            values = {'g_id': gradeable.id}
                             overall_comment_values = {'g_id' : gradeable.id,  'goc_overall_comment': 'lorem ipsum lodar', 'goc_grader_id' : self.instructor.id}
 
                             if gradeable.team_assignment is True:
@@ -1046,7 +1045,7 @@ class Course(object):
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
-                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment='')
+                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id)
                         gd_id = res.inserted_primary_key[0]
                         skip_grading = random.random()
                         for component in gradeable.components:
