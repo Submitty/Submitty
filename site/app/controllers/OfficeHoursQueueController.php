@@ -205,12 +205,40 @@ class OfficeHoursQueueController extends AbstractController {
     public function switchQueue($queue_code){
         //check if in queue
         //remove them from that queue
+        if (empty($_POST['user_id'])) {
+            $this->core->addErrorMessage("Missing user ID");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (empty($queue_code)) {
+            $this->core->addErrorMessage("Not In Queue");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], 'self', $queue_code);
         //$this->sendSocketMessage(['type' => 'full_update']);
         //dont't let people switch into the same queue
         //check new queue's contact info and code
         //add them to queue
         //do something with the time so they don't lose their place in line
+        if (empty($_POST['name'])) {
+            $this->core->addErrorMessage("Missing user's name");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (empty($_POST['code'])) {
+            $this->core->addErrorMessage("Missing queue name");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+        //add check for switching to same queue
+
         $time_in = $_POST['time_in'] ?? null;
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
