@@ -441,6 +441,7 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
+        $recent_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         $numberUtils = new NumberUtils();
         // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -501,7 +502,8 @@ class HomeworkView extends AbstractView {
             'viewing_inactive_version' => $viewing_inactive_version,
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
-            'is_grader_view' => false
+            'is_grader_view' => false,
+            'recent_version_url' => $recent_version_url
         ]);
     }
 
