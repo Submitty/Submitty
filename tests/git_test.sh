@@ -1,6 +1,8 @@
 SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
 
-
+echo "Setting identity"
+git config --global user.email "instructor"
+git config --global user.name "instructor"
 
 test_git() {
     git clone http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2 open_homework
