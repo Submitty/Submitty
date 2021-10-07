@@ -87,7 +87,7 @@
           <div class="form-group">
               <br>
               <p>NOTE: Switching queues will preserve your spot in line</p>
-              <label for="queue_code">Switch Queue:
+              <label for="queue_code">Queue:
               </label>
               <select id="queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
                   <option value="">Queue Name</option>
@@ -100,9 +100,9 @@
               <div id="switch_queue_form" class="form-group" style="display: none;">
                   <label for="token-box">Queue Access Code:</label>
                   <input type="text" name="token" id="token-box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on">
-                  <br>
-                  <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
               </div>
+              <br>
+              <button id="join_queue_btn" type="submit" class="btn btn-primary">Switch Queue</button>
           </div>
       </form>
     <br>
