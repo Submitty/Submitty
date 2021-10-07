@@ -417,7 +417,6 @@ jobs:
               sudo service nginx restart
 
           - name: Run git tests
-            timeout-minutes: 15
             run: |
               cd $SUBMITTY_REPOSITORY
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
