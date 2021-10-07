@@ -6250,13 +6250,13 @@ AND gc_id IN (
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
     }
-    
+
     public function getQueueHasContactInformation(string $queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['contact_information'];
     }
 
-    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
+    public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $entry_time = $time_in ?? $this->core->getDateTimeNow();
         $this->course_db->query("INSERT INTO queue

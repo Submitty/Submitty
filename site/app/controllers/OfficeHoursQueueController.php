@@ -134,7 +134,7 @@ class OfficeHoursQueueController extends AbstractController {
             }
         }
         $queue_code = trim($queue_code);
-        $token = trim($_POST['token'] ?? '');
+        $token = trim($_POST['token']) ?? '';
 
         $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {
@@ -242,13 +242,37 @@ class OfficeHoursQueueController extends AbstractController {
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
         $validated_code = $this->core->getQueries()->isValidCode($new_queue_code, $token);
+
         if (!$validated_code) {
             $this->core->addErrorMessage("Invalid secret code");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
+
         $contact_info = null;
+        if ($this->core->getQueries()->getQueueHasContactInformation($validated_code)) {
+            if (!isset($_POST['contact_info'])) {
+                $this->core->addErrorMessage("Missing contact info");
+                return MultiResponse::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                );
+            }
+            else {
+                $contact_info = trim($_POST['contact_info']);
+                //make sure contact information matches instructors regex pattern
+                $regex_pattern = $this->core->getQueries()->getQueueRegex($queue_code)[0]['regex_pattern'];
+                if ($regex_pattern !== '') {
+                    $regex_pattern = '#' . $regex_pattern . '#';
+                    if (preg_match($regex_pattern, $contact_info) == 0) {
+                        $this->core->addErrorMessage("Invalid contact information format.  Please re-read the course-specific instructions about the necessary information you should provide when you join this office hours queue.");
+                        return MultiResponse::RedirectOnlyResponse(
+                            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                        );
+                    }
+                }
+            }
+        }
         $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info, $time_in);
         $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
