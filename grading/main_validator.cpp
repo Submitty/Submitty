@@ -392,7 +392,9 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
 
     std::ifstream metrics_json(my_testcase.getPrefix() + "submitty_metrics.json");
     nlohmann::json metrics;
-    metrics_json >> metrics;
+    if(metrics_json.is_open()) {
+      metrics = nlohmann::json::parse(metrics_json);
+    }
 
     // EXPORT TO results.json and grade.txt
     WriteToResultsJSON(
