@@ -122,6 +122,24 @@ SET default_tablespace = '';
 
 
 --
+-- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_metrics (
+    user_id character varying(255) NOT NULL,
+    team_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    testcase_id character varying(255) NOT NULL,
+    "time" real NOT NULL,
+    memory integer NOT NULL,
+    passed boolean NOT NULL,
+    CONSTRAINT memory_nonnegative CHECK ((memory >= 0)),
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
+    CONSTRAINT time_nonnegative CHECK (("time" >= (0)::double precision))
+);
+
+
+--
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1321,6 +1339,14 @@ ALTER TABLE ONLY public.student_favorites ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
+
+
+--
+-- Name: autograding_metrics autograding_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_metrics
+    ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id);
 
 
 --
