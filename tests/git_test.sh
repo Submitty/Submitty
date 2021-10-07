@@ -45,6 +45,7 @@ mkdir /tmp/submitty_git
 pushd /tmp/submitty_git
 
 GIT_TRACE=1 git ls-remote http://instructor:instructor@localhost/git/${SEMESTER}/sample/open_homework/instructor
+git clone http://instructor:instructor@localhost/git/${SEMESTER}/sample/open_homework/instructor open_homework
 
 test_git instructor instructor
 test_git instructor student
