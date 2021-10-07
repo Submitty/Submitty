@@ -50,6 +50,10 @@ th {
     color: white;
 }
 
+.filter-buttons {
+    color: var(--btn-text-black)!important;
+}
+
 .filter-buttons:hover,
 .filter-buttons:focus {
     opacity: 0.8;

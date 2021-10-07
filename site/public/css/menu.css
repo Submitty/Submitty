@@ -97,9 +97,9 @@
 }
 
 #mobile-menu .notification-badge {
-    background-color: #000000;
+    background-color: var(--danger-red);
     padding: 0 10px;
-    color: var(--text-white);
+    color: var(--always-default-white);
     font-weight: bold;
     border-radius: 4px;
     height: 40px;
