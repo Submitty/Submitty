@@ -90,12 +90,12 @@ while :; do
     shift
 done
 
+if [ ${VAGRANT} == 1 ]
+    echo "Non-interactive vagrant script..."
+    export DEBIAN_FRONTEND=noninteractive
+fi
 
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
-    echo "Non-interactive vagrant script..."
-
-    export DEBIAN_FRONTEND=noninteractive
-
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
