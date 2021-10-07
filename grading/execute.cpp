@@ -1352,6 +1352,7 @@ int execute(const std::string &cmd,
       float next_checkpoint = 0;
       std::string windowName;
       int rss_memory = 0;
+      int max_rss_memory = 0;
       int actions_taken = 0;
       do {
           //dispatcher actions
@@ -1425,7 +1426,8 @@ int execute(const std::string &cmd,
             initializeWindow(windowName, childPID, invalid_windows, elapsed); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
               delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
-                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                    rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,
+                                    time_kill, logfile);
               moveMouseToOrigin(windowName);
               centerMouse(windowName); //center our mouse on its screen
             }
@@ -1457,12 +1459,14 @@ int execute(const std::string &cmd,
               //if we are out of actions or there were none, delay 1/10th second.
               else{
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
-                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                    rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,
+                                    time_kill, logfile);
               }
             }
          }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions).
             delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
-                                rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,
+                                time_kill, logfile);
             //this wpid is necessary to make sure allowed_to_die is up to date.
          }
          wpid = waitpid(childPID, &status, WNOHANG);
@@ -1510,6 +1514,13 @@ int execute(const std::string &cmd,
        logfile << "Program Terminated" << std::endl;
        result=3;
       }
+
+      nlohmann::json metrics;
+      metrics["elapsed_time"] = elapsed;
+      metrics["max_rss_size"] = max_rss_memory;
+      std::ofstream json_file("submitty_metrics.json");
+      json_file << metrics.dump(4);
+
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");
       assert (parent_result == 0);
@@ -1561,8 +1572,8 @@ bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
 * Delays for a number of microseconds, checking the student's memory and time consumption at intervals.
 */
 bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint,
-                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
-                std::ostream &logfile){
+                float seconds_to_run, int& rss_memory, int& max_rss_memory, int allowed_rss_memory, int& memory_kill,
+                int& time_kill, std::ostream &logfile){
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
     if(time_left > 100000){ //while we have more than 1/10th second left.
@@ -1577,6 +1588,7 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
     }
     if (elapsed >= next_checkpoint){ //if it is time to update our knowledge of the student's memory usage, do so.
       rss_memory = resident_set_size(childPID);
+      max_rss_memory = std::max(max_rss_memory, rss_memory);
       std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
       next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
     }
