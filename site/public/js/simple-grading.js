@@ -242,7 +242,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem.attr("data-grader", elem.data("grader"));    // update new grader
                     elem.find('.simple-grade-grader').text(elem.data("grader"));
                 });
-                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id"), 'score':elems.data('score'), 'grader': elems.data('grader')});
+                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id").split("-")[2], 'user': user_id, 'score':elems.data('score'), 'grader': elems.data('grader')});
             } else {
                 console.log("Save error: returned data:", returned_vals, "does not match expected new data:", expected_vals);
                 elems.each(function(idx, elem) {
@@ -459,7 +459,8 @@ function setupNumericTextCells() {
               // Finds the element that stores the total and updates it to reflect increase
               if (row_el.find(".cell-total").text() != total)
                 row_el.find(".cell-total").text(total).hide().fadeIn("slow");
-              window.socketClient.send({'type': "update_numeric", 'elem': id, 'value': value, 'total': total});
+
+              window.socketClient.send({'type': "update_numeric", 'elem': id.split('-')[2], 'user': row_el.data("user"), 'value': value, 'total': total});
             },
             function() {
                 elem.css("background-color", "#ff7777");
@@ -846,10 +847,10 @@ function initSocketClient() {
   window.socketClient.onmessage = (msg) => {
     switch (msg.type) {
       case "update_checkpoint":
-        checkpointSocketHandler(msg.elem, msg.score, msg.grader);
+        checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader);
         break;
       case "update_numeric":
-        numericSocketHandler(msg.elem, msg.value, msg.total)
+        numericSocketHandler(msg.elem, msg.user, msg.value, msg.total)
         break;
       default:
         console.log('Undefined message received');
@@ -859,42 +860,50 @@ function initSocketClient() {
   window.socketClient.open(gradeable_id);
 }
 
-function checkpointSocketHandler(elem_id, score, grader) {
-  let elem = $('#' + elem_id);
-  elem.data('score', score);
-  elem.attr("data-score", score);
-  elem.data('grader', grader);
-  elem.attr("data-grader", grader);
-  elem.find('.simple-grade-grader').text(grader);
-  switch (score) {
-    case 1.0:
-        elem.addClass('simple-full-credit');
-        break;
-    case 0.5:
-        elem.removeClass('simple-full-credit');
-        elem.addClass('simple-half-credit');
-        break;
-    default:
-        elem.removeClass('simple-half-credit');
-        elem.css('background-color', '');
-        break;
+function checkpointSocketHandler(elem_id, user_id, score, grader) {
+  // search for the user within the table
+  var tr_elem = $('table tbody tr[data-user="' + user_id +'"]');
+  // if a match is found, then use it to find animate the correct cell
+  if(tr_elem.length > 0) {
+    let elem = $("#cell-" + tr_elem.attr("data-row") + '-' + elem_id);
+    elem.data('score', score);
+    elem.attr("data-score", score);
+    elem.data('grader', grader);
+    elem.attr("data-grader", grader);
+    elem.find('.simple-grade-grader').text(grader);
+    switch (score) {
+      case 1.0:
+          elem.addClass('simple-full-credit');
+          break;
+      case 0.5:
+          elem.removeClass('simple-full-credit');
+          elem.addClass('simple-half-credit');
+          break;
+      default:
+          elem.removeClass('simple-half-credit');
+          elem.css('background-color', '');
+          break;
+    }
+    elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+    elem.animate({"border-right-width": "0px"}, 400);
   }
-  elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-  elem.animate({"border-right-width": "0px"}, 400);
 }
 
-function numericSocketHandler(elem_id, value, total) {
-  let elem = $('#' + elem_id);
-  elem.data('origval', value);
-  elem.attr('data-origval', value);
-  elem.val(value);
-  elem.css("background-color", "white");
-  if(value == 0) {
-    elem.css("color", "#bbbbbb");
+function numericSocketHandler(elem_id, user_id, value, total) {
+  var tr_elem = $('table tbody tr[data-user="' + user_id +'"]');
+  if(tr_elem.length > 0) {
+    let elem = $("#cell-" + tr_elem.attr("data-row") + '-' + elem_id);
+    elem.data('origval', value);
+    elem.attr('data-origval', value);
+    elem.val(value);
+    elem.css("background-color", "white");
+    if(value == 0) {
+      elem.css("color", "#bbbbbb");
+    }
+    else{
+      elem.css("color", "");
+    }
+    if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
+      elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
   }
-  else{
-    elem.css("color", "");
-  }
-  if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
-    elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
 }
