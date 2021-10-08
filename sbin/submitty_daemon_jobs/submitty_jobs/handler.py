@@ -36,8 +36,8 @@ def logMessage(message):
     Write a message to the submitty system logs folder to aid in debugging.
     """
     now = dateutils.get_current_time()
-    filename = "/var/local/submitty/logs/daemon_job_queue/" +
-        f'{datetime.strftime(now, "%Y%m%d")}.txt'
+    now_filename = datetime.strftime(now, "%Y%m%d")
+    filename = f"/var/local/submitty/logs/daemon_job_queue/{now_filename}.txt"
     pid = os.getpid()
     now_format = datetime.strftime(now, "%Y-%m-%d %H:%M:%S")
     dated_message = f"{now_format} | {pid:>7} | {message}"
