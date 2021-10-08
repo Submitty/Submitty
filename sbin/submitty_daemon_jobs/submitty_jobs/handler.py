@@ -36,9 +36,10 @@ def logMessage(message):
     Write a message to the submitty system logs folder to aid in debugging.
     """
     now = dateutils.get_current_time()
-    filename = "/var/local/submitty/logs/daemon_job_queue/"+f'{datetime.strftime(now, "%Y%m%d")}.txt'
+    filename = "/var/local/submitty/logs/daemon_job_queue/" +
+        f'{datetime.strftime(now, "%Y%m%d")}.txt'
     pid = os.getpid()
-    now_format = datetime.strftime(now,"%Y-%m-%d %H:%M:%S")
+    now_format = datetime.strftime(now, "%Y-%m-%d %H:%M:%S")
     dated_message = f"{now_format} | {pid:>7} | {message}"
     with open(filename, "a") as logfile:
         logfile.write(dated_message+"\n")
@@ -99,6 +100,7 @@ def process_queue(queue):
                 processing_file.unlink()
                 logMessage(f"unlink job file {processing_file}")
 
+
 def process_job(job):
     """
 
@@ -150,7 +152,7 @@ def cleanup_job(job):
     old_name = job.split('PROCESSING_')[1]
     Path(QUEUE_DIR, job).rename(Path(QUEUE_DIR, old_name))
 
-    
+
 def killStaleDaemonJobs():
     """
     There should only be one instance of submitty_daemon_jobs running
@@ -159,13 +161,14 @@ def killStaleDaemonJobs():
     """
     logMessage("Checking for stale submitty_daemon_jobs.py processes")
     # all pids for python3 processes
-    python_pids = list(map(int,subprocess.check_output(["pidof", "-c", 'python3']).split()))
+    python_pids = list(map(int, subprocess.check_output(["pidof", "-c", 'python3']).split()))
     # all pids for processes with "submitty_daemon_jobs.py" argument
-    main_py_pids = list(map(int,subprocess.check_output(["pgrep", "-f", "submitty_daemon_jobs.py"]).split()))
+    main_py_pids = list(map(int, subprocess.check_output(["pgrep", "-f",
+                                                          "submitty_daemon_jobs.py"]).split()))
     python_main_py_pid = set(python_pids).intersection(main_py_pids)
     myself = os.getpid()
     for i in python_main_py_pid:
-        if i==myself:
+        if i == myself:
             # don't kill myself
             continue
         p = psutil.Process(i)
@@ -184,9 +187,9 @@ def main():
         raise SystemExit('ERROR! This script must be run by the submitty daemon user!')
 
     logMessage("")
-    logMessage(f"(RE-)STARTING DAEMON JOBS HANDLER")
+    logMessage("(RE-)STARTING DAEMON JOBS HANDLER")
     killStaleDaemonJobs()
-    
+
     os.chdir(str(QUEUE_DIR))
 
     queue = multiprocessing.Queue()
