@@ -126,16 +126,17 @@ SET default_tablespace = '';
 --
 
 CREATE TABLE public.autograding_metrics (
-    user_id character varying(255) NOT NULL,
-    team_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL,
-    testcase_id character varying(255) NOT NULL,
-    "time" real NOT NULL,
-    memory integer NOT NULL,
+    user_id text NOT NULL,
+    team_id text NOT NULL,
+    g_id text NOT NULL,
+    testcase_id text NOT NULL,
+    elapsed_time real,
+    max_rss_size integer,
     passed boolean NOT NULL,
-    CONSTRAINT memory_nonnegative CHECK ((memory >= 0)),
-    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
-    CONSTRAINT time_nonnegative CHECK (("time" >= (0)::double precision))
+    hidden boolean NOT NULL,
+    CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
+    CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
 

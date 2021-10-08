@@ -17,17 +17,18 @@ def up(config, database, semester, course):
     database.execute(
     """
         CREATE TABLE IF NOT EXISTS autograding_metrics (
-            user_id character varying(255),
-            team_id character varying(255),
-            g_id character varying(255) NOT NULL,
-            testcase_id character varying(255) NOT NULL,
-            time real NOT NULL,
-            memory integer NOT NULL,
+            user_id text,
+            team_id text,
+            g_id text NOT NULL,
+            testcase_id text NOT NULL,
+            elapsed_time real,
+            max_rss_size integer,
             passed boolean NOT NULL,
+            hidden boolean NOT NULL,
             primary key (user_id, team_id, g_id, testcase_id),
             CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
-            constraint time_nonnegative check (time >= 0),
-            constraint memory_nonnegative check (memory >= 0)
+            constraint elapsed_time_nonnegative check (elapsed_time >= 0),
+            constraint max_rss_size_nonnegative check (max_rss_size >= 0)
         );
     """
     )
