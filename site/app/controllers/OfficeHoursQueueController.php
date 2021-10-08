@@ -59,12 +59,12 @@ class OfficeHoursQueueController extends AbstractController {
 
         //Replace whitespace with "_"
         $queue_code = trim($_POST['code']);
-        $token = trim($_POST['token'] ?? '');
+        $token = $_POST['token'] != "" ? $_POST['token'] : null;
 
         $re = '/^[\sa-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
         $matches_token = 1;
-        if ($token !== "") {
+        if ($token !== null) {
             preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         }
         if (count($matches_code) !== 1 || count($matches_token) !== 1) {
@@ -132,7 +132,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $queue_code = trim($queue_code);
-        $token = trim($_POST['token'] ?? '');
+        $token = $_POST['token'] != "" ? $_POST['token'] : null;
 
         $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {
