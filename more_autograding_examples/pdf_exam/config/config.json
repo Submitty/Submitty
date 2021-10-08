@@ -5,7 +5,7 @@
     // 200 mb maximum submission size
     "max_submission_size" : 200000000,
 
-    "assignment_message" : "\nNo automatic grading for this assignment.  200mb maximum instructor bulk upload.",
+    "assignment_message" : "\nNo automatic grading for this assignment.  200 mb maximum instructor bulk upload.",
 
     // no autograding
     "testcases" : [ ],
