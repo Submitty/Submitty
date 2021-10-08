@@ -390,9 +390,9 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
       max_penalty_possible += possible_points;
     }
 
-    std::ifstream metrics_json(my_testcase.getPrefix() + "submitty_metrics.json");
     nlohmann::json metrics;
-    if(metrics_json.is_open()) {
+    std::ifstream metrics_json(my_testcase.getPrefix() + "submitty_metrics.json");
+    if (metrics_json.good()) {
       metrics = nlohmann::json::parse(metrics_json);
     }
 

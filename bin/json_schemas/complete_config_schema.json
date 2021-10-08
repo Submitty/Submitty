@@ -428,6 +428,36 @@
           ]
         }
       },
+      "leaderboards": {
+        "description" : "Configuration to enable a student leaderboard",
+        "type":"array",
+        "items":{
+            "description" : "Information about the specific leaderboard",
+            "type":"object",
+            "items":{
+              "required" : ["top_visible_students", "title", "tags"],
+              "items":{
+                "additionalProperties" : false,
+                "properties":{
+                  "top_visible_students":{
+                    "description" : "The number of top students to show on the leaderboard.  If 0, all students will be shown",
+                    "type" : "integer"
+                  },
+                  "title":{
+                    "description" : "A human readable title for the leaderboard",
+                    "type" : "string"
+                  },
+                  "tag":{
+                    "description" : "A unique tag for the leaderboard",
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "minItems" : 1
+        }
+      },
       "notebook" : {
         "description" : "The definition of a notebook consisting of messages and inputs.",
         "type" : "array",
@@ -587,6 +617,13 @@
         },
         "details" : {
           "type" : "string"
+        },
+        "leaderboard_tags": {
+          "type": "array",
+          "description": "Specifies which leaderboards this testcase applies to",
+          "items": {
+            "type": "string"
+          }
         },
         "containers" : {
           "type": "array",
