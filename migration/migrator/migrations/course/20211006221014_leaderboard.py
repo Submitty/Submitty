@@ -24,6 +24,7 @@ def up(config, database, semester, course):
             testcase_id text NOT NULL,
             elapsed_time real,
             max_rss_size integer,
+            points integer NOT NULL,
             passed boolean NOT NULL,
             hidden boolean NOT NULL,
             primary key (user_id, team_id, g_id, testcase_id, g_version),

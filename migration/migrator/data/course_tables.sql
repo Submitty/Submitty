@@ -133,6 +133,7 @@ CREATE TABLE public.autograding_metrics (
     testcase_id text NOT NULL,
     elapsed_time real,
     max_rss_size integer,
+    points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
     CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),

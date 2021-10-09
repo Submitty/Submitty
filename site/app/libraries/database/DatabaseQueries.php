@@ -7676,15 +7676,9 @@ SQL;
         metrics.g_id as gradeable_id,
         metrics.user_id as user_id,
         metrics.team_id as team_id,
-        COALESCE(Min(autograding_non_hidden_non_extra_credit) + Min(autograding_non_hidden_extra_credit), 0) AS points
+        sum(points) as points
      FROM
         autograding_metrics AS metrics
-        LEFT JOIN
-           electronic_gradeable_data AS gradeable
-           ON NULLIF(metrics.user_id, '') = NULLIF(gradeable.user_id, '')
-           -- AND NULLIF(metrics.team_id, '') = NULLIF(gradeable.team_id, '')
-           AND metrics.g_id = gradeable.g_id
-           AND metrics.g_version = gradeable.g_version
         INNER JOIN
            electronic_gradeable_version AS version
            ON NULLIF(metrics.user_id, '') = NULLIF(version.user_id, '')

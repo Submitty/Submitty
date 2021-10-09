@@ -96,7 +96,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             else:
                 non_hidden_non_ec += results['testcases'][i]['points']
 
-            if results['testcases'][i]['elapsed_time'] or results['testcases'][i]['max_rss_size']:
+            if results['testcases'][i]['elapsed_time'] is not None or results['testcases'][i]['max_rss_size'] is not None:
                 db.execute(insert(autograding_metrics).values(
                         user_id=user_id,
                         team_id=team_id,
@@ -105,6 +105,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                         testcase_id=testcases[i]['testcase_id'],
                         elapsed_time=results['testcases'][i]['elapsed_time'],
                         max_rss_size=results['testcases'][i]['max_rss_size'],
+                        points=results['testcases'][i]['points'],
                         passed=results['testcases'][i]['points']>=testcases[i]['total_points'],
                         hidden=testcases[i]['hidden']
                     )
