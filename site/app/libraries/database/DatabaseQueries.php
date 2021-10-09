@@ -7660,6 +7660,27 @@ SQL;
     }
 
     /**
+     * Gets a the autograding metrics for a testcase
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param string $testcase_id
+     * @param int $version the submission version that is currently being looked at
+     * @return array an array of metrics
+     */
+    public function getMetrics($user_id, $gradeable_id, $testcase_id, $version){
+        $this->course_db->query("
+            SELECT * FROM autograding_metrics
+                WHERE
+                    user_id = ?
+                    AND g_id = ?
+                    AND testcase_id = ?
+                    AND g_version = cast(? AS int)
+        ", [$user_id, $gradeable_id, $testcase_id, $version]);
+        return $this->course_db->row();
+    }
+
+    /**
      * Gets a gradeable leaderboard
      * TODO get this working for teams
      *

@@ -2,6 +2,20 @@
 
 {% set actions_id = "actions_" ~ index %}
 {% for check in checks %}
+    <p>
+      {% if check['metrics']['elapsed_time'] is not null %}
+        {% if check['metrics']['elapsed_time'] %}
+          Grading time: <span style="font-style: italic">{{check['metrics']['elapsed_time']|round(1)}}s</span>
+        {% else %}
+          Grading time: <span style="font-style: italic">&lt;.1s</span>
+        {% endif %}
+      {% endif %}
+
+      {# Dont show memory if it is 0 or null which both evaluate to false here #}
+      {% if check['metrics']['max_rss_size'] %}
+        Memory: <span style="font-style: italic">{{ (check['metrics']["max_rss_size"] / 1000) | round }}MB</span>
+      {% endif %}
+    </p>
     {% if loop.index0 != 0 %}
         <div class="clear"></div>
     {% endif %}
