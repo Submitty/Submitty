@@ -305,9 +305,11 @@ class Component extends AbstractModel {
         // Assert that the point values are valid
         $this->assertPoints($points);
 
+        $precision = $this->gradeable->getPrecision();
+
         // Round after validation because of potential floating point weirdness
         foreach (self::point_properties as $property) {
-            $this->$property = NumberUtils::roundPointValue($points[$property], $this->getGradeable()->getPrecision());
+            $this->$property = NumberUtils::roundPointValue($points[$property], $precision);
         }
         $this->modified = true;
     }
