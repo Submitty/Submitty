@@ -1,36 +1,25 @@
 <div id="leaderboard">
-  {% if rebuildingGradeable %}
-  <p>
-    Leaderboard is temporarily unavailable because the gradeable is being
-    rebuilt. Please try refreshing the page in a few minutes.
-  </p>
-  {% else %}
-  <h3>{{ title }}</h3>
-  <table class="table table-striped" style="width: 100%">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">User/Team</th>
-        <th scope="col">Points</th>
-        <th scope="col">Time</th>
-        <th scope="col">Memory</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in leaderboard %}
-      <tr>
-        <th scope="row" class="row_number">{{ loop.index }}</th>
-        <td>
-          {{ entry["name"] }} {% if accessFullGrading %}({{
-            entry["user_id"]
-          }}){% endif %}
-        </td>
-        <td>{{ entry["points"] }}</td>
-        <td>{{ entry["time"] }}s</td>
-        <td>{{ (entry["memory"] / 1000) | round }}MB</td>
+    {% if rebuildingGradeable %}
+    <p>
+        Leaderboard is temporarily unavailable because the gradeable is being
+        rebuilt. Please try refreshing the page in a few minutes.
+    </p>
+    {% else %}
+    <div class="tab-bar-wrapper">
+        {% for leaderboard in leaderboards %}
+        <a class="nav-bar key_to_click" id="{{leaderboard.tag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.tag}}');">{{leaderboard.title}}</a>
         {% endfor %}
-      </tr>
-    </tbody>
-  </table>
-  {% endif %}
+    </div>
+    <div id="leaderboard-table">
+    </div>
+    {% endif %}
 </div>
+<script>
+    function onChangeLeaderboard(leaderboard_tag) {
+        $("#leaderboard-table").load("{{leaderboard_data_url}}" + "/" + leaderboard_tag);
+    }
+
+    $(document).ready(function() {
+        onChangeLeaderboard('{{initial_leaderboard_tag}}');
+    });
+</script>

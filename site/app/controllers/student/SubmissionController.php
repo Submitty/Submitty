@@ -206,13 +206,46 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * This route is for generating leaderboards for a specific gradable
-     * users will not go to this route directly, instead this route should be dynamically requested
-     * and its content be inserted inside another html page
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
      * @return array
      */
     public function getLeaderboard($gradeable_id, $leaderboard_tag = null) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl([]))
+            );
+        }
+
+        $leaderboards = [];
+
+        $autogradingConfig = $gradeable->getAutogradingConfig();
+        if(!is_null($autogradingConfig)){
+            $leaderboards = $autogradingConfig->getLeaderboards();
+
+            if(is_null($leaderboard_tag)){
+                $leaderboard_tag = $leaderboards[0]->getTag();
+            }
+        }
+
+        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
+            "leaderboards" => $leaderboards,
+            "initial_leaderboard_tag" => $leaderboard_tag,
+            "leaderboard_data_url" => $this->core->buildCourseUrl([$gradeable, "leaderboard_data"]),
+            "rebuildingGradeable" => is_null($autogradingConfig)
+        ]);
+    }
+
+    /**
+     * This route is for generating leaderboards for a specific gradable
+     * users will not go to this route directly, instead this route should be dynamically requested
+     * and its content be inserted inside another html page
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")
+     * @return array
+     */
+    public function getLeaderboardData($gradeable_id, $leaderboard_tag) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->addErrorMessage("Invalid gradeable id");
@@ -239,11 +272,9 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
+        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/LeaderboardTable.twig', [
             "leaderboard" => $leaderboard_data,
-            "accessFullGrading" => $this->core->getUser()->accessFullGrading(),
-            "title" => $title,
-            "rebuildingGradeable" => is_null($autogradingConfig)
+            "accessFullGrading" => $this->core->getUser()->accessFullGrading()
         ]);
     }
 
