@@ -1,0 +1,24 @@
+<div id="leaderboard">
+    <table class="table table-striped" style="width:100%;">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">User/Team</th>
+          <th scope="col">Points</th>
+          <th scope="col">Time</th>
+          <th scope="col">Memory</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in leaderboard %}
+          <tr>
+            <th scope="row" class="row_number">{{loop.index }}</th>
+            <td>{{ entry['user_id'] }}{{ entry['team_id'] }}</td>
+            <td>{{ entry['points'] }}</td>
+            <td>{{ entry['time'] }}s</td>
+            <td>{{ entry['memory'] }}</td>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{# http://localhost:1511/courses/f21/sample/gradeable/leaderboard/leaderboard #}

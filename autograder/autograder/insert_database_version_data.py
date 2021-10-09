@@ -12,6 +12,9 @@ from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete
 from . import grade_item
 
+import traceback
+import sys
+
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
@@ -19,6 +22,7 @@ def str2bool(v):
 
 def insert_into_database(config, semester, course, gradeable_id, user_id, team_id, who_id, is_team,
                          version):
+    print(f"insert_into_database for {user_id} version:{version}")
     db_user = config.database['database_user']
     db_host = config.database['database_host']
     db_pass = config.database['database_password']
@@ -65,44 +69,49 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     db = engine.connect()
     metadata = MetaData(bind=db)
     autograding_metrics = Table('autograding_metrics', metadata, autoload=True)
+    print(f"inserting for {user_id} version:{version}", flush=True)
+    try:
+        db.execute(
+            delete(autograding_metrics)
+            .where(autograding_metrics.c.user_id==bindparam('u_id'))
+            .where(autograding_metrics.c.team_id==bindparam('t_id'))
+            .where(autograding_metrics.c.g_id==bindparam('g_id'))
+            .where(autograding_metrics.c.g_version==bindparam('g_v')),
+            u_id=user_id,  t_id=team_id, g_id=gradeable_id, g_v=version)
+        print(f"done inserting for {user_id}", flush=True)
 
-    db.execute(
-        delete(autograding_metrics)
-        .where(autograding_metrics.c.user_id==bindparam('u_id'))
-        .where(autograding_metrics.c.team_id==bindparam('t_id'))
-        .where(autograding_metrics.c.g_id==bindparam('g_id')),
-        u_id=user_id,  t_id=team_id, g_id=gradeable_id)
-
-
-    if len(testcases) != len(results['testcases']):
-        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
-        raise Exception(
-            f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}"
-        )
-    for i in range(len(testcases)):
-        print(f"testcase[{i}]= {json.dumps(results['testcases'][i])}")
-        if testcases[i]['hidden'] and testcases[i]['extra_credit']:
-            hidden_ec += results['testcases'][i]['points']
-        elif testcases[i]['hidden']:
-            hidden_non_ec += results['testcases'][i]['points']
-        elif testcases[i]['extra_credit']:
-            non_hidden_ec += results['testcases'][i]['points']
-        else:
-            non_hidden_non_ec += results['testcases'][i]['points']
-
-        if results['testcases'][i]['elapsed_time'] or results['testcases'][i]['max_rss_size']:
-            db.execute(insert(autograding_metrics).values(
-                    user_id=user_id,
-                    team_id=team_id,
-                    g_id=gradeable_id,
-                    testcase_id=testcases[i]['testcase_id'],
-                    elapsed_time=results['testcases'][i]['elapsed_time'],
-                    max_rss_size=results['testcases'][i]['max_rss_size'],
-                    passed=results['testcases'][i]['points']>=testcases[i]['total_points'],
-                    hidden=testcases[i]['hidden']
-                )
+        if len(testcases) != len(results['testcases']):
+            print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
+            raise Exception(
+                f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}"
             )
+        for i in range(len(testcases)):
+            print(f"testcase[{i}]= {json.dumps(results['testcases'][i])}")
+            if testcases[i]['hidden'] and testcases[i]['extra_credit']:
+                hidden_ec += results['testcases'][i]['points']
+            elif testcases[i]['hidden']:
+                hidden_non_ec += results['testcases'][i]['points']
+            elif testcases[i]['extra_credit']:
+                non_hidden_ec += results['testcases'][i]['points']
+            else:
+                non_hidden_non_ec += results['testcases'][i]['points']
 
+            if results['testcases'][i]['elapsed_time'] or results['testcases'][i]['max_rss_size']:
+                db.execute(insert(autograding_metrics).values(
+                        user_id=user_id,
+                        team_id=team_id,
+                        g_id=gradeable_id,
+                        g_version = version,
+                        testcase_id=testcases[i]['testcase_id'],
+                        elapsed_time=results['testcases'][i]['elapsed_time'],
+                        max_rss_size=results['testcases'][i]['max_rss_size'],
+                        passed=results['testcases'][i]['points']>=testcases[i]['total_points'],
+                        hidden=testcases[i]['hidden']
+                    )
+                )
+    except Exception:
+            print(traceback.format_exc(), flush=True)
+            print(sys.exc_info()[2], flush=True)
 
     submission_time = results['submission_time']
 

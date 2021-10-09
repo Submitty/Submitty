@@ -129,6 +129,7 @@ CREATE TABLE public.autograding_metrics (
     user_id text NOT NULL,
     team_id text NOT NULL,
     g_id text NOT NULL,
+    g_version integer NOT NULL,
     testcase_id text NOT NULL,
     elapsed_time real,
     max_rss_size integer,
@@ -1347,7 +1348,7 @@ ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.thre
 --
 
 ALTER TABLE ONLY public.autograding_metrics
-    ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id);
+    ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id, g_version);
 
 
 --

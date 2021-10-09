@@ -206,6 +206,23 @@ class SubmissionController extends AbstractController {
     }
 
     /**
+     * This route is for generating leaderboards for a specific gradable
+     * users will not go to this route directly, instead this route should be dynamically requested
+     * and its content be inserted inside another html page
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getleaderboard")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getleaderboard/{leaderboard_id}")
+     * @return array
+     */
+    public function getLeaderboard($gradeable_id, $leaderboard_id = null) {
+        // Remove the extra submitty html as this route is just for getting the html for the leaderboard
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
+            "leaderboard" => $this->core->getQueries()->getLeaderboard($gradeable_id, false)
+        ]);
+    }
+
+    /**
      * Function for showing a message to a user before the gradeable is loaded.
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")
      */

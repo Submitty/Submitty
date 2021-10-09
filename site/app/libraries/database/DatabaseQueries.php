@@ -2309,7 +2309,7 @@ ORDER BY rotating_section"
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT 
+            "SELECT
                 COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
                 COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
                 user_id,
@@ -5456,7 +5456,7 @@ AND gc_id IN (
                   eg_has_discussion,
                   eg_hidden_files,
                   eg_depends_on,
-                  eg_depends_on_points                               
+                  eg_depends_on_points
                   )
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
@@ -5600,7 +5600,7 @@ AND gc_id IN (
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
                       eg_has_due_date=?,
-                      eg_has_release_date=?,            
+                      eg_has_release_date=?,
                       eg_config_path=?,
                       eg_late_days=?,
                       eg_allow_late_submission=?,
@@ -5615,7 +5615,7 @@ AND gc_id IN (
                       eg_has_discussion=?,
                       eg_hidden_files=?,
                       eg_depends_on=?,
-                      eg_depends_on_points=?                              
+                      eg_depends_on_points=?
                     WHERE g_id=?",
                     $params
                 );
@@ -7585,7 +7585,7 @@ SQL;
 
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
-            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
                    c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
             [$user_id]
         );
@@ -7657,5 +7657,57 @@ SQL;
     public function getTotalSubmissionsToGradeable(string $gradeable_id): int {
         $this->course_db->query('SELECT COUNT(*) FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
         return $this->course_db->rows()[0]["count"];
+    }
+
+    /**
+     * Gets a gradeable leaderboard
+     *
+     * @param string $gradeable_id
+     * @param string $countHidden true when leaderboard should include hidden testcases
+     * @param string $leaderboard_id when left blank will return results for all testcases
+     * @param int $limit how many students to show, can be set to 0 to show all students
+     * @return TODO add me
+     */
+    public function getLeaderboard($gradeable_id, $countHidden, $leaderboard_id = NULL, $limit = 0) {
+        $this->course_db->query("
+        SELECT
+        Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
+        Sum(max_rss_size) AS memory,
+        metrics.g_id as gradeable_id,
+        metrics.user_id as user_id,
+        metrics.team_id as team_id,
+        COALESCE(Min(autograding_non_hidden_non_extra_credit) + Min(autograding_non_hidden_extra_credit), 0) AS points
+     FROM
+        autograding_metrics AS metrics
+        LEFT JOIN
+           electronic_gradeable_data AS gradeable
+           ON NULLIF(metrics.user_id, '') = NULLIF(gradeable.user_id, '')
+           -- AND NULLIF(metrics.team_id, '') = NULLIF(gradeable.team_id, '')
+           AND metrics.g_id = gradeable.g_id
+           AND metrics.g_version = gradeable.g_version
+        INNER JOIN
+           electronic_gradeable_version AS version
+           ON NULLIF(metrics.user_id, '') = NULLIF(version.user_id, '')
+           -- AND NULLIF(metrics.team_id, '') = NULLIF(version.team_id, '')
+           AND metrics.g_id = version.g_id
+           AND metrics.g_version = version.active_version
+     WHERE
+        metrics.g_id = ?
+        AND passed = true
+        -- When true, this statement is always true, and so the value in the hidden column is ignored
+        -- When false, hidden values are left out of the query
+        AND (hidden = false OR hidden = ?)
+     GROUP BY
+        metrics.user_id,
+        metrics.team_id,
+        metrics.g_id
+     ORDER BY
+        points DESC,
+        time,
+        memory
+    LIMIT CASE WHEN ? != '0' THEN CAST(? AS int) END
+           ", [$gradeable_id, $countHidden, $limit, $limit]);
+
+        return $this->course_db->rows();
     }
 }
