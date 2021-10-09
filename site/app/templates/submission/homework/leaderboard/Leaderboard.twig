@@ -13,7 +13,7 @@
         {% for entry in leaderboard %}
           <tr>
             <th scope="row" class="row_number">{{loop.index }}</th>
-            <td>{{ entry['user_id'] }}{{ entry['team_id'] }}</td>
+            <td>{{ entry['name'] }}{{ entry['team_id'] }}</td>
             <td>{{ entry['points'] }}</td>
             <td>{{ entry['time'] }}s</td>
             <td>{{ (entry['memory']/1000)|round }}MB</td>

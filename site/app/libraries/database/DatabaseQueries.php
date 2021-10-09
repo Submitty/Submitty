@@ -7661,46 +7661,55 @@ SQL;
 
     /**
      * Gets a gradeable leaderboard
+     * TODO get this working for teams
      *
      * @param string $gradeable_id
      * @param string $countHidden true when leaderboard should include hidden testcases
      * @param string $leaderboard_id when left blank will return results for all testcases
      * @param int $limit how many students to show, can be set to 0 to show all students
-     * @return TODO add me
+     * @return array an array of rows in order for the specific leaderboard
      */
     public function getLeaderboard($gradeable_id, $countHidden, $leaderboard_id = NULL, $limit = 0) {
         $this->course_db->query("
-        SELECT
-        Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
-        Sum(max_rss_size) AS memory,
-        metrics.g_id as gradeable_id,
-        metrics.user_id as user_id,
-        metrics.team_id as team_id,
-        sum(points) as points
-     FROM
-        autograding_metrics AS metrics
-        INNER JOIN
-           electronic_gradeable_version AS version
-           ON NULLIF(metrics.user_id, '') = NULLIF(version.user_id, '')
-           -- AND NULLIF(metrics.team_id, '') = NULLIF(version.team_id, '')
-           AND metrics.g_id = version.g_id
-           AND metrics.g_version = version.active_version
-     WHERE
-        metrics.g_id = ?
-        AND passed = true
-        -- When true, this statement is always true, and so the value in the hidden column is ignored
-        -- When false, hidden values are left out of the query
-        AND (hidden = false OR hidden = ?)
-     GROUP BY
-        metrics.user_id,
-        metrics.team_id,
-        metrics.g_id
-     ORDER BY
-        points DESC,
-        time,
-        memory
-    LIMIT CASE WHEN ? != '0' THEN CAST(? AS int) END
-           ", [$gradeable_id, $countHidden, $limit, $limit]);
+SELECT    leaderboard.*,
+        CASE
+                  WHEN anonymous_leaderboard = true THEN anon_id
+                  ELSE Concat(COALESCE (user_preferred_firstname, user_firstname ), ' ', COALESCE (user_preferred_lastname, user_lastname ))
+        END AS NAME
+FROM      (
+                   SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
+                              Sum(max_rss_size)                            AS memory,
+                              metrics.g_id                                 AS gradeable_id,
+                              metrics.user_id                              AS user_id,
+                              metrics.team_id                              AS team_id,
+                              Sum(points)                                  AS points
+                   FROM       autograding_metrics                          AS metrics
+                   INNER JOIN electronic_gradeable_version                 AS version
+                   ON         NULLIF(metrics.user_id, '') = NULLIF(version.user_id, '')
+                   AND        metrics.g_id = version.g_id
+                   AND        metrics.g_version = version.active_version
+                   WHERE      metrics.g_id = ?
+                   AND        passed = true
+                              -- When true, this statement is always true, and so the value in the hidden column is ignored
+                              -- When false, hidden values are left out of the query
+                   AND        (
+                                         hidden = false
+                              OR         hidden = ?)
+                   GROUP BY   metrics.user_id,
+                              metrics.team_id,
+                              metrics.g_id
+                   ORDER BY   points DESC,
+                              time,
+                              memory limit
+                              CASE
+                                         WHEN ? != '0' THEN cast(? AS int)
+                              END ) AS leaderboard
+LEFT JOIN users
+ON        leaderboard.user_id = users.user_id
+LEFT JOIN electronic_gradeable_version
+ON        leaderboard.gradeable_id = electronic_gradeable_version.g_id
+          AND leaderboard.user_id = electronic_gradeable_version.user_id
+        ", [$gradeable_id, $countHidden, $limit, $limit]);
 
         return $this->course_db->rows();
     }

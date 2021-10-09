@@ -325,6 +325,7 @@ CREATE TABLE public.electronic_gradeable_version (
     user_id character varying(255),
     team_id character varying(255),
     active_version integer,
+    anonymous_leaderboard boolean DEFAULT true NOT NULL,
     CONSTRAINT egv_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 

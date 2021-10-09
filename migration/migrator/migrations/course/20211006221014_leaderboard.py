@@ -35,6 +35,8 @@ def up(config, database, semester, course):
     """
     )
 
+    database.execute("ALTER TABLE electronic_gradeable_version ADD COLUMN IF NOT EXISTS anonymous_leaderboard boolean default true not null")
+
 
 def down(config, database, semester, course):
     """
@@ -50,3 +52,4 @@ def down(config, database, semester, course):
     :type course: str
     """
     database.execute("DROP TABLE IF EXISTS autograding_metrics;")
+    database.execute("ALTER TABLE electronic_gradeable_version DROP COLUMN IF EXISTS anonymous_leaderboard")
