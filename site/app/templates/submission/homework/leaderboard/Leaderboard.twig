@@ -26,7 +26,8 @@
           }}){% endif %}
         </td>
         <td>{{ entry["points"] }}</td>
-        <td>{{ entry["time"] }}s</td>
+        {# 1000000000 (1e9) for nanosecond to second conversion #}
+        <td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
         <td>{{ (entry["memory"] / 1000) | round }}MB</td>
         {% endfor %}
       </tr>
