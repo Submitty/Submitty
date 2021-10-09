@@ -1129,6 +1129,19 @@ CREATE TABLE public.teams (
 
 
 --
+-- Name: testcases; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.testcases (
+    g_id text NOT NULL,
+    testcase_id text NOT NULL,
+    leaderboard_tags text[] DEFAULT ARRAY[]::text[] NOT NULL,
+    title text NOT NULL,
+    points integer NOT NULL
+);
+
+
+--
 -- Name: thread_categories; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1719,6 +1732,14 @@ ALTER TABLE ONLY public.student_favorites
 
 ALTER TABLE ONLY public.teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (team_id, user_id);
+
+
+--
+-- Name: testcases testcases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.testcases
+    ADD CONSTRAINT testcases_pkey PRIMARY KEY (g_id, testcase_id);
 
 
 --

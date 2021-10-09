@@ -209,16 +209,41 @@ class SubmissionController extends AbstractController {
      * This route is for generating leaderboards for a specific gradable
      * users will not go to this route directly, instead this route should be dynamically requested
      * and its content be inserted inside another html page
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getleaderboard")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getleaderboard/{leaderboard_id}")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
      * @return array
      */
-    public function getLeaderboard($gradeable_id, $leaderboard_id = null) {
+    public function getLeaderboard($gradeable_id, $leaderboard_tag = null) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl([]))
+            );
+        }
+
+        $leaderboard_data = [];
+        $title = "";
+
+        $autogradingConfig = $gradeable->getAutogradingConfig();
+        if(!is_null($autogradingConfig)){
+            $leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
+            if(!is_null($leaderboard)){
+                $title = $leaderboard->getTitle();
+                $leaderboard_data = $this->core->getQueries()->getLeaderboard($gradeable_id, false, $leaderboard_tag, $leaderboard->getTopVisibleStudents());
+            }
+        }
+
+
+
         // Remove the extra submitty html as this route is just for getting the html for the leaderboard
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
+
         return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
-            "leaderboard" => $this->core->getQueries()->getLeaderboard($gradeable_id, false)
+            "leaderboard" => $leaderboard_data,
+            "accessFullGrading" => $this->core->getUser()->accessFullGrading(),
+            "title" => $title,
+            "rebuildingGradeable" => is_null($autogradingConfig)
         ]);
     }
 

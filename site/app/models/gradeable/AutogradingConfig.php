@@ -33,6 +33,7 @@ use app\models\notebook\Notebook;
  * @method int getTotalHiddenExtraCredit()
  * @method bool getOnePartyOnly()
  * @method bool isNotebookGradeable()
+ * @method LeaderboardConfig[] getLeaderboards()
  */
 class AutogradingConfig extends AbstractModel {
 
@@ -62,6 +63,9 @@ class AutogradingConfig extends AbstractModel {
     protected $notebook_config = [];
     /** @prop @var array Cut-down information about autograding test cases*/
     private $base_testcases = [];
+
+    /** @prop @var LeaderboardConfig[] General info about leaderboards*/
+    protected $leaderboards = [];
 
     /* Properties if early submission incentive enabled */
     /** @prop @var bool If there is an early submission incentive */
@@ -130,6 +134,11 @@ class AutogradingConfig extends AbstractModel {
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
+
+        $this->leaderboards = [];
+        foreach ($details['leaderboards'] ?? [] as $leaderboard) {
+            $this->leaderboards[] = new LeaderboardConfig($this->core, $leaderboard);
+        }
 
         $this->base_testcases = $details["testcases"] ?? [];
         $this->setTestCasePoints();
@@ -347,6 +356,20 @@ class AutogradingConfig extends AbstractModel {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a leaderboard for a specific tag
+     * @param string $tag the tag of the leaderboard to match against
+     * @return LeaderboardConfig
+     */
+    public function getLeaderboard($tag){
+        foreach ($this->getLeaderboards() as $leaderboard){
+            if($leaderboard->getTag() === $tag){
+                return $leaderboard;
+            }
+        }
+        return null;
     }
 
     /* Disabled setters */

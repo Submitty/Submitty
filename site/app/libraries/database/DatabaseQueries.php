@@ -7669,7 +7669,7 @@ SQL;
      * @param int $limit how many students to show, can be set to 0 to show all students
      * @return array an array of rows in order for the specific leaderboard
      */
-    public function getLeaderboard($gradeable_id, $countHidden, $leaderboard_id = NULL, $limit = 0) {
+    public function getLeaderboard($gradeable_id, $countHidden, $leaderboard_tag = NULL, $limit = 0) {
         $this->course_db->query("
 SELECT    leaderboard.*,
         CASE
@@ -7698,18 +7698,20 @@ FROM      (
                    GROUP BY   metrics.user_id,
                               metrics.team_id,
                               metrics.g_id
-                   ORDER BY   points DESC,
-                              time,
-                              memory limit
-                              CASE
-                                         WHEN ? != '0' THEN cast(? AS int)
-                              END ) AS leaderboard
+                   ) AS leaderboard
 LEFT JOIN users
 ON        leaderboard.user_id = users.user_id
 LEFT JOIN electronic_gradeable_version
 ON        leaderboard.gradeable_id = electronic_gradeable_version.g_id
           AND leaderboard.user_id = electronic_gradeable_version.user_id
-        ", [$gradeable_id, $countHidden, $limit, $limit]);
+ORDER BY
+    points DESC,
+    time,
+    memory limit
+CASE
+            WHEN ? != '0' THEN cast(? AS int)
+END
+        ", [$gradeable_id, $countHidden, $limit,$limit]);
 
         return $this->course_db->rows();
     }
