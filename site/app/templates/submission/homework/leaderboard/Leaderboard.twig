@@ -8,6 +8,38 @@
     <div class="tab-bar-wrapper">
         {% for leaderboard in leaderboards %}
         <a class="nav-bar key_to_click" id="{{leaderboard.tag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.tag}}');">{{leaderboard.title}}</a>
+=======
+  {% if rebuildingGradeable %}
+  <p>
+    Leaderboard is temporarily unavailable because the gradeable is being
+    rebuilt. Please try refreshing the page in a few minutes.
+  </p>
+  {% else %}
+  <h3>{{ title }}</h3>
+  <table class="table table-striped" style="width: 100%">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">User/Team</th>
+        <th scope="col">Points</th>
+        <th scope="col">Time</th>
+        <th scope="col">Memory</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in leaderboard %}
+      <tr>
+        <th scope="row" class="row_number">{{ loop.index }}</th>
+        <td>
+          {{ entry["name"] }} {% if accessFullGrading %}({{
+            entry["user_id"]
+          }}){% endif %}
+        </td>
+        <td>{{ entry["points"] }}</td>
+        {# 1000000000 (1e9) for nanosecond to second conversion #}
+        <td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
+        <td>{{ (entry["memory"] / 1000) | round }}MB</td>
+>>>>>>> b6f96e05d289a3f4245d1f214579b709d6037d37
         {% endfor %}
     </div>
     <div id="leaderboard-table">
