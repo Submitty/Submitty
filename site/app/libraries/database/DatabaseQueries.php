@@ -6224,7 +6224,11 @@ AND gc_id IN (
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
         if( $this->course_db->rows()[0]['token']== null){
             return $this->course_db->rows()[0]['code'];
-        }else{
+        }
+        if (is_null($token)) {
+            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+        }
+        else{
             $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", [$queue_code, $token]);
             if (0 < count($this->course_db->rows())) {
                 return $this->course_db->rows()[0]['code'];
