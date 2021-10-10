@@ -57,7 +57,15 @@
                         </td>
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">View Results</a>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">
+                                {% if poll.isHistogramAvailable() %}
+                                    <i class="fas fa-lock-open">
+                                {% else %}
+                                    <i class="fas fa-lock">
+                                {% endif %}
+                                </i>
+                                &nbsp;View Results
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -120,7 +128,15 @@
                         </td>
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">View Results</a>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">
+                                {% if poll.isHistogramAvailable() %}
+                                    <i class="fas fa-lock-open">
+                                {% else %}
+                                    <i class="fas fa-lock">
+                                {% endif %}
+                                </i>
+                                &nbsp;View Results
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -171,7 +187,17 @@
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
-                        <td><a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">View Results</a></td>
+                        <td>
+                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}" class="btn btn-primary">
+                                {% if poll.isHistogramAvailable() %}
+                                    <i class="fas fa-lock-open">
+                                {% else %}
+                                    <i class="fas fa-lock">
+                                {% endif %}
+                                </i>
+                                &nbsp;View Results
+                            </a>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

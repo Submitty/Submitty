@@ -15,6 +15,7 @@ if [ -z ${DAEMON_USER+x} ]; then
     CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
     DAEMON_USER=$(jq -r '.daemon_user' ${CONF_DIR}/submitty_users.json)
     DAEMON_GROUP=${DAEMON_USER}
+    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${CONF_DIR}/submitty_users.json)
 
 fi
 
@@ -82,7 +83,7 @@ chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/autograder
 chmod -R 750 ${SUBMITTY_INSTALL_DIR}/autograder
 
 if [ "${WORKER}" == 1 ]; then
-    chown -R root:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
+    chown -R ${SUPERVISOR_USER}:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
     chown -R root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 fi
@@ -99,3 +100,4 @@ if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
     chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 fi
+

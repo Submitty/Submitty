@@ -14,20 +14,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
 -- Name: notifications_component; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -134,7 +120,6 @@ $_$;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
 
 --
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
@@ -647,6 +632,50 @@ CREATE TABLE public.late_days (
 
 
 --
+-- Name: lichen; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lichen (
+    id integer NOT NULL,
+    gradeable_id character varying(255) NOT NULL,
+    config_id smallint NOT NULL,
+    version character varying(255) NOT NULL,
+    regex text,
+    regex_dir_submissions boolean NOT NULL,
+    regex_dir_results boolean NOT NULL,
+    regex_dir_checkout boolean NOT NULL,
+    language character varying(255) NOT NULL,
+    threshold smallint NOT NULL,
+    sequence_length smallint NOT NULL,
+    other_gradeables text,
+    ignore_submissions text,
+    CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
+    CONSTRAINT lichen_sequence_length_check CHECK ((sequence_length > 1)),
+    CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
+);
+
+
+--
+-- Name: lichen_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lichen_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lichen_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lichen_id_seq OWNED BY public.lichen.id;
+
+
+--
 -- Name: migrations_course; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -778,7 +807,8 @@ CREATE TABLE public.polls (
     status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
-    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
+    release_histogram character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -1224,6 +1254,13 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment ALTER COLUMN goc_id SET D
 
 
 --
+-- Name: lichen id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen ALTER COLUMN id SET DEFAULT nextval('public.lichen_id_seq'::regclass);
+
+
+--
 -- Name: notifications id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1500,6 +1537,22 @@ ALTER TABLE ONLY public.late_day_exceptions
 
 ALTER TABLE ONLY public.late_days
     ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id, since_timestamp);
+
+
+--
+-- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT lichen_gradeable_id_config_id_key UNIQUE (gradeable_id, config_id);
+
+
+--
+-- Name: lichen lichen_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
 
 
 --
@@ -1793,11 +1846,27 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
+-- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_access
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
 -- Name: electronic_gradeable fk_depends_on; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT fk_depends_on FOREIGN KEY (eg_depends_on) REFERENCES public.electronic_gradeable(g_id);
+
+
+--
+-- Name: lichen fk_gradeable_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen
+    ADD CONSTRAINT fk_gradeable_id FOREIGN KEY (gradeable_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
 
 
 --
