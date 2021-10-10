@@ -17,20 +17,20 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
     let peer_feedback_positive = ['no_response', 'thanks', 'helpful', 'detailed'];
     let peer_feedback_negative = ['inappropriate'];
     peer_feedback_positive.forEach(function(feedback, index) {
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_positive_selected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_positive_unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-positive-selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-positive-unselected");
     })
     peer_feedback_negative.forEach(function(feedback, index) {
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_negative_selected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-negative-selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-negative-unselected");
     })
     if(peer_feedback_positive.indexOf(feedback) !== -1){
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_positive_unselected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_positive_selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-positive-unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-positive-selected");
     }
     else{
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_negative_unselected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-negative-unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-negative-selected");
     }
     if (send) {
         peerFeedbackUpload(grader_id, user_id, g_id, feedback);
@@ -282,11 +282,11 @@ function switch_feedback_modes() {
             <b>Peer Feedback:</b>
             <div>
                 </br>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
-                <a class="btn peer_feedback_negative_unselected" data-color="#800000" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
+                <a class="btn peer-feedback-negative-unselected" data-color="#800000" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
             </div>
             <script>
                 var feedbackArray = {{peer_feedback|json_encode|raw}};

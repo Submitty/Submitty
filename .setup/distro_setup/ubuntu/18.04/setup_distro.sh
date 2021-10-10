@@ -150,12 +150,3 @@ if [ ${VAGRANT} == 1 ]; then
 
     dpkg-reconfigure -f noninteractive slapd
 fi
-
-# necessary to install these to support the older version of pip
-# that Ubuntu-18.04
-# cryptography>=3.4 includes rust which requires additional stuff
-# to work on ubuntu-18.04, easier to pin to older version
-pip3 install cryptography==3.3.2
-# newer versions of opencv require a very length compile step
-# or newer version of pip, easier to install this older version
-pip3 install opencv-python==3.4.9.33

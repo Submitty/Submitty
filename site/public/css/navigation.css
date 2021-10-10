@@ -79,6 +79,10 @@
     display: inline;
 }
 
+.seating-chart-table {
+    border:2px solid black;
+}
+
 @media (max-width: 401px) {
     .course-section-heading,
     .course-main .course-title {
