@@ -106,9 +106,9 @@ class PlagiarismConfig {
     protected $last_run_timestamp;
 
     /**
-     * @ORM\OneToMany(targetEntity="app\entities\plagiarism", mappedBy="lichen_run_id")
+     * @ORM\OneToMany(targetEntity="app\entities\plagiarism\PlagiarismRunAccess", mappedBy="lichen_run_id")
      */
-    protected $access_times
+    protected $access_times;
 
     /* FUNCTIONS */
 
@@ -285,7 +285,9 @@ class PlagiarismConfig {
         $this->last_run_timestamp = new DateTime();
     }
 
-    public function getLastAccessForUser() {
+    public function getLastAccessForUser(string $user_id):  {
 
     }
+
+    
 }

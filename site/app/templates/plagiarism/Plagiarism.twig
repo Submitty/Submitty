@@ -125,7 +125,7 @@
                 {{ row['timestamp'] }}
             </td>
             <td>
-                {{ row['matching_submission_count'] }}/{{ row['submissions'] }}
+                {{ row['matching_submission_count'] }} of {{ row['submissions'] }}
             </td>
             <td>
                 {{ row['top_match_percent'] }}
@@ -140,11 +140,6 @@
         #}
         <td>
             <button class="btn btn-secondary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
-        </td>
-        <td>
-            <a href="{{ row['download_config_file_link'] }}" aria-label="Download {{ row['title'] }} config.json" download="config.json">
-                <i class="fas fa-download"></i>
-            </a>
         </td>
         <td>
             <a href="{{ row['download_config_file_link'] }}" aria-label="Download {{ row['title'] }} config.json" download="config.json">
