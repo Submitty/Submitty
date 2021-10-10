@@ -448,7 +448,7 @@ class AutoGradedVersion extends AbstractModel {
             $this->getHiddenNonExtraCredit() + $this->getHiddenExtraCredit();
 
         // avoid divide-by-zero
-        if ((float)$divisor == (float)0) {
+        if ((float) $divisor == (float) 0) {
             return NAN;
         }
         $result = floatval($dividend) / $divisor;
