@@ -31,3 +31,7 @@
     color: var(--text-black);
     border: 1px solid gray;
 }
+
+#leaderboard-table .leaderboard_grader {
+    background: var(--alert-border-blue);
+}

@@ -1,3 +1,10 @@
+{% if studentIsAnonymous %}
+  {% set you_text = '(you, anonymous to others)' %}
+{% else %}
+  {% set you_text = '(you, visible to everyone)' %}
+{% endif %}
+
+
 <table class="table table-striped" style="width: 100%">
 	<thead>
 		<tr>
@@ -11,13 +18,13 @@
 	<tbody>
 		{% for entry in leaderboard %}
 			{% if loop.index0 < top_visible_students or top_visible_students == 0 or accessFullGrading %}
-				<tr>
+				<tr class="{% if entry["user_group"] < 4%}leaderboard_grader{% endif %}">
 					<th scope="row" class="row_number">{{ loop.index }}</th>
 					<td>
 						{% if user_id == entry['user_id'] %}
-							{{ user_name }} (you)
+							{{ user_name }} {{you_text}}
 						{% else %}
-							{{ entry["name"] }}
+							{{ entry["name"] }} {% if entry["user_group"] < 4%}(course staff){% endif %}
 						{% endif %}
 						{% if accessFullGrading %}
 							({{ entry["user_id"] }})
@@ -42,7 +49,7 @@
 						<td class="row_number"></td>
 						<td>
 							{% if user_id == entry['user_id'] %}
-								{{ user_name }} (you)
+								{{ user_name }} {{you_text}}
 							{% else %}
 								{{entry['anon_id']}} ({{user_index - loop.index0}} ahead of you)
 							{% endif %}

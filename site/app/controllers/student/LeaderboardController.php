@@ -74,6 +74,8 @@ class LeaderboardController extends AbstractController {
             );
         }
 
+        $user_id = $this->core->getUser()->getId();
+
         $leaderboard_data = [];
         $valid_testcases = [];
         $title = "";
@@ -93,10 +95,12 @@ class LeaderboardController extends AbstractController {
 
         $user_index = null;
         foreach ($leaderboard_data as $index => $row) {
-            if ($row['user_id'] == $this->core->getUser()->getId()) {
+            if ($row['user_id'] == $user_id) {
                 $user_index = $index;
             }
         }
+
+        $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
 
         // Remove the extra submitty html as this route is just for getting the html for the leaderboard
         $this->core->getOutput()->useHeader(false);
@@ -106,9 +110,10 @@ class LeaderboardController extends AbstractController {
             "leaderboard" => $leaderboard_data,
             "accessFullGrading" => $this->core->getUser()->accessFullGrading(),
             "top_visible_students" => $top_visible_students,
-            "user_id" => $this->core->getUser()->getId(),
+            "user_id" => $user_id,
             "user_index" => $user_index,
-            "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()
+            "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName(),
+            "studentIsAnonymous" => $user_is_anonymous
         ]);
     }
 

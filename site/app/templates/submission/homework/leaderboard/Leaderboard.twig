@@ -28,9 +28,10 @@
 	{% endif %}
 </div>
 <script>
-	// TODO add loading icon
+	let current_leaderboard_tag = '{{ initial_leaderboard_tag }}';
+
 	function onChangeLeaderboard(leaderboard_tag) {
-		$("#leaderboard-table").html("");
+		current_leaderboard_tag = leaderboard_tag;
 		$("#leaderboard-table").load("{{ base_url }}/leaderboard_data/" + leaderboard_tag);
 
 		$(".leaderboard-nav").removeClass("active-btn");
@@ -44,10 +45,12 @@
 		$.post('{{ base_url }}/set_self_anonymity', {
 			csrf_token: '{{ csrf_token }}',
 			anonymity_state: !$('#toggle-self-anonymity').is(':checked')
-		});
+		}).then(function() {
+			onChangeLeaderboard(current_leaderboard_tag);
+		})
 	}
 
 	$(document).ready(function() {
-		onChangeLeaderboard('{{ initial_leaderboard_tag }}');
+		onChangeLeaderboard(current_leaderboard_tag);
 	});
 </script>
