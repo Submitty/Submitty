@@ -1,44 +1,52 @@
 <div id="leaderboard" class="content">
-    {% if rebuildingGradeable %}
-    <p>
-        Leaderboard is temporarily unavailable because the gradeable is being
-        rebuilt. Please try refreshing the page in a few minutes.
-    </p>
-    {% else %}
-    <h1>Leaderboards for {{gradeable_name}}</h1>
-    <div style="margin-bottom: 1rem">
-        Show my name anonymously in the leaderboard: <input type="checkbox" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if studentIsAnonymous %} checked {% endif %} />
-    </div>
-    <div class="leaderboard-tab-bar-wrapper">
-        Leaderboards:
+	{% if rebuildingGradeable %}
+		<p>
+			Leaderboard is temporarily unavailable because the gradeable is being
+									        rebuilt. Please try refreshing the page in a few minutes.
+		</p>
+	{% else %}
+		<h1>Leaderboards for
+			{{gradeable_name}}</h1>
+		<p>
+			Ranking is based on the sum of points for testcases where a student got full credit.
+						Ties in overall score are broken based on the sum of the overall time it took to pass
+						all the full credit testcases followed by the sum of the memory used for those testcases.
+		</p>
+		<br><br>
+		<div style="margin-bottom: 1rem">
+			Show my name anonymously in the leaderboard:
+			<input type="checkbox" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if studentIsAnonymous %} checked {% endif %}/>
+		</div>
+		<div class="leaderboard-tab-bar-wrapper">
+			Leaderboards:
 
-        {% for leaderboard in leaderboards %}
-        <a class="leaderboard-nav key_to_click normal-btn" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</a>
-        {% endfor %}
-    </div>
-    <div id="leaderboard-table">
-    </div>
-    {% endif %}
+			{% for leaderboard in leaderboards %}
+				<a class="leaderboard-nav key_to_click normal-btn" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</a>
+			{% endfor %}
+		</div>
+		<div id="leaderboard-table"></div>
+	{% endif %}
 </div>
 <script>
-    function onChangeLeaderboard(leaderboard_tag) {
-        $("#leaderboard-table").html("");
-        $("#leaderboard-table").load("{{base_url}}/leaderboard_data/" + leaderboard_tag);
+	// TODO add loading icon
+	function onChangeLeaderboard(leaderboard_tag) {
+		$("#leaderboard-table").html("");
+		$("#leaderboard-table").load("{{ base_url }}/leaderboard_data/" + leaderboard_tag);
 
-        $(".leaderboard-nav").removeClass("active-btn");
-        $(".leaderboard-nav").addClass("unselected-btn");
+		$(".leaderboard-nav").removeClass("active-btn");
+		$(".leaderboard-nav").addClass("unselected-btn");
 
-        $("#" + leaderboard_tag + "_nav").addClass("active-btn");
-        $("#" + leaderboard_tag + "_nav").removeClass("unselected-btn");
-    }
+		$("#" + leaderboard_tag + "_nav").addClass("active-btn");
+		$("#" + leaderboard_tag + "_nav").removeClass("unselected-btn");
+	}
 
-  function toggleSelfAnonymity(){
-      $.post('{{base_url}}/set_self_anonymity', {
-          anonymity_state: $('#toggle-self-anonymity').is(':checked')
-      });
-  }
+	function toggleSelfAnonymity() {
+		$.post('{{ base_url }}/set_self_anonymity', {
+			anonymity_state: $('#toggle-self-anonymity').is(':checked')
+		});
+	}
 
-    $(document).ready(function() {
-        onChangeLeaderboard('{{initial_leaderboard_tag}}');
-    });
+	$(document).ready(function() {
+		onChangeLeaderboard('{{ initial_leaderboard_tag }}');
+	});
 </script>

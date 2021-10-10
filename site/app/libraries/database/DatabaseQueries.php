@@ -7668,7 +7668,7 @@ SQL;
      * @param int $version the submission version that is currently being looked at
      * @return array an array of metrics
      */
-    public function getMetrics($user_id, $gradeable_id, $testcase_id, $version){
+    public function getMetrics($user_id, $gradeable_id, $testcase_id, $version) {
         $this->course_db->query("
             SELECT * FROM autograding_metrics
                 WHERE
@@ -7686,11 +7686,28 @@ SQL;
      *
      * @param string $gradeable_id
      * @param string $countHidden true when leaderboard should include hidden testcases
-     * @param string $leaderboard_id when left blank will return results for all testcases
-     * @param int $limit how many students to show, can be set to 0 to show all students
+     * @param string $valid_testcases a list of testcases to use in leaderboard, or [] for all testcases
      * @return array an array of rows in order for the specific leaderboard
      */
-    public function getLeaderboard($gradeable_id, $countHidden, $leaderboard_tag = NULL, $limit = 0) {
+    public function getLeaderboard($gradeable_id, $countHidden, $valid_testcases = []) {
+        $testcase_id_questionmarks = str_repeat(" ?,", count($valid_testcases));
+        $testcase_id_questionmarks = substr($testcase_id_questionmarks, 0, -1); // Remove "," at the end
+
+        $params = [$gradeable_id, $valid_testcases, $countHidden];
+
+
+        $flattened_params = [];
+        foreach ($params as $param) {
+            if (is_array($param)) {
+                foreach ($param as $nested_param) {
+                    $flattened_params[] = $nested_param;
+                }
+            }else {
+                $flattened_params[] = $param;
+            }
+        }
+
+
         $this->course_db->query("
 SELECT    leaderboard.*,
         CASE
@@ -7711,6 +7728,7 @@ FROM      (
                    AND        metrics.g_version = version.active_version
                    WHERE      metrics.g_id = ?
                    AND        passed = true
+                   AND        testcase_id in ({$testcase_id_questionmarks})
                               -- When true, this statement is always true, and so the value in the hidden column is ignored
                               -- When false, hidden values are left out of the query
                    AND        (
@@ -7728,11 +7746,8 @@ ON        leaderboard.gradeable_id = electronic_gradeable_version.g_id
 ORDER BY
     points DESC,
     time,
-    memory limit
-CASE
-            WHEN ? != '0' THEN cast(? AS int)
-END
-        ", [$gradeable_id, $countHidden, $limit,$limit]);
+    memory
+        ", $flattened_params);
 
         return $this->course_db->rows();
     }

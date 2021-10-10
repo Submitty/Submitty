@@ -226,7 +226,7 @@ class AutoGradingView extends AbstractView {
                     ];
                 }
 
-                $metrics = $this->core->getQueries()->getMetrics($who, $gradeable->getId(), sprintf('test%02d', $testcase->getTestcase()->getIndex()+1), $version->getVersion());
+                $metrics = $this->core->getQueries()->getMetrics($who, $gradeable->getId(), sprintf('test%02d', $testcase->getTestcase()->getIndex() + 1), $version->getVersion());
                 $check["metrics"] = [
                     "elapsed_time" => $metrics['elapsed_time'] ?? null,
                     "max_rss_size" => $metrics['max_rss_size'] ?? null

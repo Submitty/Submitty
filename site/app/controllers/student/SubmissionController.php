@@ -42,21 +42,25 @@ class SubmissionController extends AbstractController {
      * @param string $gradeable_id
      * @return Gradeable|null
      */
-    public function tryGetElectronicGradeable($gradeable_id) {
+    public static function tryGetElectronicGradeable($gradeable_id, $core = null) {
         if ($gradeable_id === null || $gradeable_id === '') {
             return null;
         }
 
+        if (is_null($core)) {
+            $core = $this->core;
+        }
+
         try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            $now = $this->core->getDateTimeNow();
+            $gradeable = $core->getQueries()->getGradeableConfig($gradeable_id);
+            $now = $core->getDateTimeNow();
 
             if (
                 $gradeable->getType() === GradeableType::ELECTRONIC_FILE
                 && (
-                    $this->core->getUser()->accessAdmin()
+                    $core->getUser()->accessAdmin()
                     || $gradeable->getTaViewStartDate() <= $now
-                    && $this->core->getUser()->accessGrading()
+                    && $core->getUser()->accessGrading()
                     || $gradeable->getSubmissionOpenDate() <= $now
                 )
             ) {
@@ -205,104 +209,6 @@ class SubmissionController extends AbstractController {
         return ['id' => $gradeable_id, 'error' => $error];
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
-     * @return array
-     */
-    public function getLeaderboard($gradeable_id, $leaderboard_tag = null) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
-        if ($gradeable === null) {
-            $this->core->addErrorMessage("Invalid gradeable id");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl([]))
-            );
-        }
-
-        $leaderboards = [];
-
-        $autogradingConfig = $gradeable->getAutogradingConfig();
-        if(!is_null($autogradingConfig)){
-            $leaderboards = $autogradingConfig->getLeaderboards();
-
-            if(is_null($leaderboard_tag)){
-                $leaderboard_tag = $leaderboards[0]->getTag();
-            }
-        }
-
-        $user_id = $this->core->getAuthentication()->getUserId();
-        $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
-
-        $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
-        $this->core->getOutput()->addBreadcrumb("Leaderboard");
-        $this->core->getOutput()->addInternalCss('leaderboard.css');
-        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
-            "gradeable_name" => $gradeable->getTitle(),
-            "leaderboards" => $leaderboards,
-            "studentIsAnonymous" => $user_is_anonymous,
-            "initial_leaderboard_tag" => $leaderboard_tag,
-            "base_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id]),
-            "rebuildingGradeable" => is_null($autogradingConfig)
-        ]);
-    }
-
-    /**
-     * This route is for generating leaderboards for a specific gradable
-     * users will not go to this route directly, instead this route should be dynamically requested
-     * and its content be inserted inside another html page
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")
-     * @return array
-     */
-    public function getLeaderboardData($gradeable_id, $leaderboard_tag) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
-        if ($gradeable === null) {
-            $this->core->addErrorMessage("Invalid gradeable id");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl([]))
-            );
-        }
-
-        $leaderboard_data = [];
-        $title = "";
-
-        $autogradingConfig = $gradeable->getAutogradingConfig();
-        if(!is_null($autogradingConfig)){
-            $leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
-            if(!is_null($leaderboard)){
-                $title = $leaderboard->getTitle();
-                $leaderboard_data = $this->core->getQueries()->getLeaderboard($gradeable_id, false, $leaderboard_tag, $leaderboard->getTopVisibleStudents());
-            }
-        }
-
-
-
-        // Remove the extra submitty html as this route is just for getting the html for the leaderboard
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
-        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/LeaderboardTable.twig', [
-            "leaderboard" => $leaderboard_data,
-            "accessFullGrading" => $this->core->getUser()->accessFullGrading()
-        ]);
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/set_self_anonymity", methods={"POST"})
-     */
-    public function toggleSelfLeaderboardAnonymity($gradeable_id) {
-        if (empty($_POST['anonymity_state'])) {
-            $this->core->addErrorMessage("Missing anonymity state");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'leaderboard']))
-            );
-        }
-
-        $user_id = $this->core->getAuthentication()->getUserId();
-        $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $_POST['anonymity_state']);
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'leaderboard']))
-        );
-    }
 
     /**
      * Function for showing a message to a user before the gradeable is loaded.

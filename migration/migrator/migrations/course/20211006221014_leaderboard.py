@@ -35,19 +35,6 @@ def up(config, database, semester, course):
     """
     )
 
-    database.execute(
-    """
-        CREATE TABLE IF NOT EXISTS testcases (
-            g_id text NOT NULL,
-            testcase_id text NOT NULL,
-            leaderboard_tags text[] DEFAULT array[]::text[] NOT NULL,
-            title text NOT NULL,
-            points integer NOT NULL,
-            primary key (g_id, testcase_id)
-        );
-    """
-    )
-
     database.execute("ALTER TABLE electronic_gradeable_version ADD COLUMN IF NOT EXISTS anonymous_leaderboard boolean default true not null")
 
 
@@ -65,5 +52,4 @@ def down(config, database, semester, course):
     :type course: str
     """
     database.execute("DROP TABLE IF EXISTS autograding_metrics;")
-    database.execute("DROP TABLE IF EXISTS testcases;")
     database.execute("ALTER TABLE electronic_gradeable_version DROP COLUMN IF EXISTS anonymous_leaderboard")

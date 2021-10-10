@@ -1,27 +1,34 @@
 <table class="table table-striped" style="width: 100%">
-<thead>
-  <tr>
-    <th scope="col">#</th>
-    <th scope="col">User/Team</th>
-    <th scope="col">Points</th>
-    <th scope="col">Time</th>
-    <th scope="col">Memory</th>
-  </tr>
-</thead>
-<tbody>
-  {% for entry in leaderboard %}
-  <tr>
-    <th scope="row" class="row_number">{{ loop.index }}</th>
-    <td>
-      {{ entry["name"] }} {% if accessFullGrading %}({{
-        entry["user_id"]
-      }}){% endif %}
-    </td>
-    <td>{{ entry["points"] }}</td>
-    {# 1000000000 (1e9) for nanosecond to second conversion #}
-    <td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
-    <td>{{ (entry["memory"] / 1000) | round }}MB</td>
-    {% endfor %}
-  </tr>
-</tbody>
+	<thead>
+		<tr>
+			<th scope="col">#</th>
+			<th scope="col">User</th>
+			<th scope="col">Points</th>
+			<th scope="col">Time</th>
+			<th scope="col">Memory</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for entry in leaderboard %}
+			{% if loop.index0 < top_visible_students or top_visible_students == 0 or accessFullGrading %}
+				<tr>
+					<th scope="row" class="row_number">{{ loop.index }}</th>
+					<td>
+            {% if user_id == entry['user_id'] %}
+              {{ user_name }}
+            {% else %}
+						  {{ entry["name"] }}
+            {% endif %}
+						{% if accessFullGrading %}
+							({{ entry["user_id"] }})
+						{% endif %}
+					</td>
+					<td>{{ entry["points"] }}</td>
+					{# 1000000000 (1e9) for nanosecond to second conversion #}
+					<td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
+					<td>{{ (entry["memory"] / 1000) | round }}MB</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+	</tbody>
 </table>
