@@ -26,6 +26,6 @@ ou: users" > /tmp/base.ldif
 ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f /tmp/base.ldif
 rm -f /tmp/base.ldif
 
-sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' config/authentication.json
-sed -i -e 's/"uid": ""/"uid": "uid"/g' config/authentication.json
-sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' config/authentication.json
+sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' /usr/local/submitty/config/authentication.json
+sed -i -e 's/"uid": ""/"uid": "uid"/g' /usr/local/submitty/config/authentication.json
+sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' /usr/local/submitty/config/authentication.json
