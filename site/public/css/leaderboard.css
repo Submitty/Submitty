@@ -10,7 +10,7 @@
     background-color: var(--default-white);
     color: var(--text-black);
     border-radius: 6px;
-    margin: 0rem 0.5rem 0.5rem;
+    margin: 0rem 0.2rem 0.5rem;
     word-wrap: break-word;
 }
 

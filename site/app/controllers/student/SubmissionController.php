@@ -230,14 +230,18 @@ class SubmissionController extends AbstractController {
             }
         }
 
+        $user_id = $this->core->getAuthentication()->getUserId();
+        $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
+
         $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
         $this->core->getOutput()->addBreadcrumb("Leaderboard");
         $this->core->getOutput()->addInternalCss('leaderboard.css');
         return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
             "gradeable_name" => $gradeable->getTitle(),
             "leaderboards" => $leaderboards,
+            "studentIsAnonymous" => $user_is_anonymous,
             "initial_leaderboard_tag" => $leaderboard_tag,
-            "leaderboard_data_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id, "leaderboard_data"]),
+            "base_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id]),
             "rebuildingGradeable" => is_null($autogradingConfig)
         ]);
     }
@@ -280,6 +284,24 @@ class SubmissionController extends AbstractController {
             "leaderboard" => $leaderboard_data,
             "accessFullGrading" => $this->core->getUser()->accessFullGrading()
         ]);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/set_self_anonymity", methods={"POST"})
+     */
+    public function toggleSelfLeaderboardAnonymity($gradeable_id) {
+        if (empty($_POST['anonymity_state'])) {
+            $this->core->addErrorMessage("Missing anonymity state");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'leaderboard']))
+            );
+        }
+
+        $user_id = $this->core->getAuthentication()->getUserId();
+        $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $_POST['anonymity_state']);
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'leaderboard']))
+        );
     }
 
     /**

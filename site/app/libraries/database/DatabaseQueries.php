@@ -7736,4 +7736,24 @@ END
 
         return $this->course_db->rows();
     }
+
+    public function getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id) {
+        $this->course_db->query("
+            SELECT anonymous_leaderboard FROM electronic_gradeable_version
+                WHERE
+                    user_id = ?
+                    AND g_id = ?
+        ", [$user_id, $gradeable_id]);
+        return $this->course_db->rows()[0] ?? false;
+    }
+
+    public function setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state) {
+        $this->course_db->query("
+            UPDATE electronic_gradeable_version
+            SET anonymous_leaderboard = ?
+                WHERE
+                    user_id = ?
+                    AND g_id = ?
+        ", [$state, $user_id, $gradeable_id]);
+    }
 }
