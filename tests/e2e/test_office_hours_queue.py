@@ -109,7 +109,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.switchToUser('student')
         # Students should not be able to see any of theses elements
         self.assertEqual(True, self.verifyElementMissing('class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
-        self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new_queue_token', 'new_queue_rand_token', 'open_new_queue_btn']))
+        self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new-queue-token', 'new_queue_rand_token', 'open_new_queue_btn']))
 
         # Turn the queue off
         disableQueue(self)
@@ -168,7 +168,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.openNewQueueSettings()
         self.driver.find_element(By.ID, 'new_queue_code').send_keys(name)
         if(code):
-            self.driver.find_element(By.ID, 'new_queue_token').send_keys(code)
+            self.driver.find_element(By.ID, 'new-queue-token').send_keys(code)
         else:
             self.driver.find_element(By.ID, 'new_queue_rand_token').click()
         self.driver.find_element(By.ID, 'open_new_queue_btn').click()
@@ -192,9 +192,9 @@ class TestOfficeHoursQueue(BaseTestCase):
             self.driver.find_element(By.ID, 'name_box').send_keys(studentName)
         select = Select(self.driver.find_element(By.ID, 'queue_code'))
         select.select_by_visible_text(queueName)
-        self.driver.find_element(By.ID, 'token_box').send_keys(queueCode)
+        self.driver.find_element(By.ID, 'token-box').send_keys(queueCode)
         self.assertIn(urllib.parse.quote(queueName), self.driver.find_element(By.ID, 'add_to_queue').get_attribute('action'))
-        self.assertEqual(queueCode, self.driver.find_element(By.ID, 'token_box').get_attribute('value'))
+        self.assertEqual(queueCode, self.driver.find_element(By.ID, 'token-box').get_attribute('value'))
         self.driver.find_element(By.ID, 'join_queue_btn').click()
         self.check_socket_message('queue_update')
 

@@ -18,17 +18,10 @@ try:
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-        DATABASE_CONFIG = json.load(open_file)
-
 except Exception as config_fail_error:
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
     sys.exit(1)
-
-DB_HOST = DATABASE_CONFIG['database_host']
-DB_USER = DATABASE_CONFIG['database_user']
-DB_PASSWORD = DATABASE_CONFIG['database_password']
 
 CONFIG_FILE_PATH = sys.argv[1]
 SEMESTER = sys.argv[2]
@@ -38,14 +31,24 @@ GRADEABLE = sys.argv[4]
 
 def setup_db():
     """Set up a connection with the course database."""
+    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+        db_config = json.load(open_file)
     db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
     # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(DB_HOST):
+    if os.path.isdir(db_config['database_host']):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            DB_USER, DB_PASSWORD, db_name, DB_HOST)
+            db_config['database_user'],
+            db_config['database_password'],
+            db_name,
+            db_config['database_host']
+        )
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(
-            DB_USER, DB_PASSWORD, DB_HOST, db_name)
+            db_config['database_user'],
+            db_config['database_password'],
+            db_config['database_host'],
+            db_name
+        )
 
     engine = create_engine(conn_string)
     db = engine.connect()
@@ -68,7 +71,6 @@ def send_data(db, allowed_minutes, override):
 
 
 def main():
-    db, metadata = setup_db()
     with open(CONFIG_FILE_PATH) as config_file:
         json_string = config_file.read()
     CONFIG_FILE = json.loads(json_string)
@@ -86,9 +88,14 @@ def main():
         if 'override' in timelimit_case['validation'][0]:
             override = timelimit_case['validation'][0]['override']
         try:
+            db, metadata = setup_db()
             send_data(db, allowed_minutes, override)
         except exc.IntegrityError:
             sys.exit(1)
+        except IOError:
+            print("WARNING: You do not have access to set allowed minutes from CLI." +
+                  " Please use website to set that.")
+            exit()
 
 
 if __name__ == "__main__":

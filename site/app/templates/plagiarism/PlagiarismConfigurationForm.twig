@@ -61,7 +61,7 @@
                     </div>
                     <div class="plag-data radio-label-pair" style="margin-left: 0;">
                         <input type="radio" id="import-config-id" value="import_config" name="config_option">
-                        <label for="import-config-id">Use existing configuration</label>
+                        <label for="import-config-id">Use parameters from existing configuration</label>
                     </div>
                 </div>
                 <div id="upload-config-container" class="plag-data-group">
@@ -134,7 +134,7 @@
                         <select name="language">
                             <option value="plaintext" {{ config["language"]["plaintext"] }}>Plain Text</option>
                             <option value="python" {{ config["language"]["python"] }}>Python</option>
-                            <option value="cpp" {{ config["language"]["cpp"] }}>C++</option>
+                            <option value="cpp" {{ config["language"]["cpp"] }}>C/C++</option>
                             <option value="java" {{ config["language"]["java"] }}>Java</option>
                             <option value="mips" {{ config["language"]["mips"] }}>MIPS Assembly</option>
                         </select>
@@ -265,7 +265,7 @@
     // UPLOAD CONFIG ///////////////////////////////////////////////////////////
     function reloadConfigs(gradeable_id) {
         $("#import-config-config-id").empty();
-        $.each(gradeables_with_plag_configs[gradeable_id], function(indeex, item) {
+        $.each(gradeables_with_plag_configs[gradeable_id], function(index, item) {
             $("#import-config-config-id").append(`<option value="${item}">Config: ${item}</option>`);
         });
     }

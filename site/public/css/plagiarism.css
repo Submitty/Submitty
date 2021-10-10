@@ -125,7 +125,9 @@ input[type=text]:invalid {
     margin-right: 0;
 }
 
-#current-code-file, #provided-code-file, #prev-gradeable-div {
+#current-code-file,
+#provided-code-file,
+#prev-gradeable-div {
     display: none;
 }
 
@@ -253,7 +255,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 .loading-animation {
     border: 5px solid var(--standard-dark-gray);
-    border-top: 5px solid rgba(0,0,0,0);
+    border-top: 5px solid rgba(0, 0, 0, 0);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     width: 3em;
@@ -316,11 +318,8 @@ main#main.full-screen-mode .plagiarism-result-cont {
     float: right;
 }
 
-#popup_to_show_matches_id {
+#popup-to-show-matches-id {
     display: none;
-    top: 0;
-    left: 0;
-    width: auto;
     position: fixed;
 }
 
@@ -335,7 +334,6 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 [data-theme="dark"] .plag-legend {
     text-shadow: 0 0 3px transparent;
-
 }
 
 @media (max-width: 660px) {
@@ -343,8 +341,8 @@ main#main.full-screen-mode .plagiarism-result-cont {
         width: 100%;
     }
 
-    #users_with_plagiarism.plag-flex a,
-    #users_with_plagiarism.plag-flex span {
+    #users-with-plagiarism.plag-flex a,
+    #users-with-plagiarism.plag-flex span {
         flex-grow: 1;
         display: flex;
         flex-direction: column;

@@ -9,7 +9,6 @@ use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
 use app\models\Config;
-use app\models\forum\Forum;
 use app\models\User;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
@@ -65,9 +64,6 @@ class Core {
 
     /** @var Access $access */
     private $access = null;
-
-    /** @var Forum $forum */
-    private $forum  = null;
 
     /** @var NotificationFactory */
     private $notification_factory;
@@ -239,14 +235,6 @@ class Core {
         return $this->course_entity_manager;
     }
 
-    public function loadForum() {
-        if ($this->config === null) {
-            throw new \Exception("Need to load the config before we can create a forum instance.");
-        }
-
-        //$this->forum = new Forum($this);
-    }
-
     /**
      * Loads the shell of the grading queue
      *
@@ -333,13 +321,6 @@ class Core {
      */
     public function getQueries() {
         return $this->database_queries;
-    }
-
-    /**
-     * @return Forum
-     */
-    public function getForum() {
-        return $this->forum;
     }
 
     public function loadUser(string $user_id) {

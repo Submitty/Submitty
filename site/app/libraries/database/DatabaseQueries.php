@@ -2309,7 +2309,17 @@ ORDER BY rotating_section"
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC"
+            "SELECT 
+                COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
+                COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
+                user_id,
+                user_group
+            FROM
+                users
+            WHERE
+                user_group < 4
+            ORDER BY
+                user_group, user_id ASC"
         );
         $users = [];
 
@@ -7138,7 +7148,8 @@ AND gc_id IN (
     private function getUser($user_id, bool $is_numeric = false): ?User {
         $result = $this->getUsers([$user_id], $is_numeric);
         if ($result !== null && count($result) === 1) {
-            return $result[$user_id];
+            //return first element
+            return array_pop($result);
         }
         else {
             return null;
@@ -7325,8 +7336,8 @@ AND gc_id IN (
     }
     //// BEGIN ONLINE POLLING QUERIES ////
 
-    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders) {
-        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path) VALUES (?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null]);
+    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $release_histogram) {
+        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path, release_histogram) VALUES (?, ?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null, $release_histogram]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $option_id => $response) {
@@ -7411,7 +7422,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"], $row["release_histogram"]);
     }
 
     public function getResponses($poll_id) {
@@ -7457,9 +7468,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path) {
+    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path, $release_histogram) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ?, release_histogram = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $release_histogram, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }
@@ -7504,6 +7515,11 @@ SQL;
 
     public function setPollImage($poll_id, $image_path) {
         $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
+    }
+
+    public function getHistogramSetting($poll_id) {
+        $this->course_db->query("SELECT release_histogram FROM polls WHERE poll_id = ?", [$poll_id]);
+        return $this->course_db->rows()[0]["release_histogram"];
     }
 
     //// END ONLINE POLLING QUERIES ////

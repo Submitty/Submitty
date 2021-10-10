@@ -120,7 +120,6 @@ $_$;
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
 
 --
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
@@ -808,7 +807,8 @@ CREATE TABLE public.polls (
     status text NOT NULL,
     release_date date NOT NULL,
     image_path text,
-    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying
+    question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
+    release_histogram character varying(10) NOT NULL
 );
 
 
@@ -2472,4 +2472,3 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
-

@@ -780,14 +780,14 @@ class Gradeable extends AbstractModel {
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
-                // Don't coerce a date on the skip list
-                if (in_array($property, $skip_coercion_dates)) {
-                    $prev_date = $date_values[$property];
+                if ($date === null) {
+                    $date_values[$property] = $prev_date;
                     continue;
                 }
 
-                if ($date === null) {
-                    $date_values[$property] = $prev_date;
+                // Don't coerce a date on the skip list
+                if (in_array($property, $skip_coercion_dates)) {
+                    $prev_date = $date_values[$property];
                     continue;
                 }
 
@@ -798,7 +798,7 @@ class Gradeable extends AbstractModel {
 
                 // Get a value for the date to compare against next
                 if ($date !== null) {
-                    $prev_date = $date;
+                    $prev_date = $date_values[$property];
                 }
             }
             return $date_values;
@@ -2207,5 +2207,19 @@ class Gradeable extends AbstractModel {
             return false;
         }
         return true;
+    }
+    /**
+     * Returns prerequisite for a gradeable
+     *
+     * @return string
+     */
+    public function getPrerequisite(): string {
+        if ($this->depends_on !== null && $this->depends_on_points !== null) {
+            $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
+            return $dependent_gradeable->getTitle();
+        }
+        else {
+            return '';
+        }
     }
 }

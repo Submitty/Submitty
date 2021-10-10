@@ -146,6 +146,11 @@
                 <i class="fas fa-download"></i>
             </a>
         </td>
+        <td>
+            <a href="{{ row['download_config_file_link'] }}" aria-label="Download {{ row['title'] }} config.json" download="config.json">
+                <i class="fas fa-download"></i>
+            </a>
+        </td>
     </tr>
 {% endmacro %}
 

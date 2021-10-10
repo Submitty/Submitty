@@ -286,6 +286,131 @@ class PlagiarismController extends AbstractController {
         }
     }
 
+
+    /**
+     * @param string $job
+     * @param string $gradeable_id
+     * @param int $config_id
+     */
+    private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
+        $em = $this->core->getCourseEntityManager();
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        $config = $em->getRepository(PlagiarismConfig::class)
+                     ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+
+        if ($config === null) {
+            throw new DatabaseException("Error: Unable to find plagiarism configuration");
+        }
+
+        $json_file = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "config.json");
+        if (file_exists($json_file)) {
+            unlink($json_file);
+        }
+
+        $regex_dirs = [];
+        if ($config->isRegexDirSubmissionsSelected()) {
+            $regex_dirs[] = "submissions";
+        }
+        if ($config->isRegexDirResultsSelected()) {
+            $regex_dirs[] = "results";
+        }
+        if ($config->isRegexDirCheckoutSelected()) {
+            $regex_dirs[] = "checkout";
+        }
+
+        if ($job === "RunLichen") {
+            $json_data = [
+                "semester" => $semester,
+                "course" => $course,
+                "gradeable" => $gradeable_id,
+                "config_id" => $config_id,
+                "version" => $config->getVersionStatus(),
+                "regex" => $config->getRegexArray(),
+                "regex_dirs" => $regex_dirs,
+                "language" => $config->getLanguage(),
+                "threshold" => $config->getThreshold(),
+                "sequence_length" => $config->getSequenceLength(),
+                "prior_term_gradeables" => $config->getOtherGradeables(),
+                "ignore_submissions" => $config->getIgnoredSubmissions()
+            ];
+
+            $lichen_job_data = [
+                "job" => $job,
+                "semester" => $semester,
+                "course" => $course,
+                "gradeable" => $gradeable_id,
+                "config_id" => $config_id,
+                "config_data" => $json_data
+            ];
+        }
+        else {
+            $lichen_job_data = [
+                "job" => $job,
+                "semester" => $semester,
+                "course" => $course,
+                "gradeable" => $gradeable_id,
+                "config_id" => $config_id
+            ];
+        }
+
+        $lichen_job_file = $this->getQueuePath($gradeable_id, $config_id);
+
+        if (!FileUtils::writeJsonFile($lichen_job_file, $lichen_job_data)) {
+            throw new FileWriteException("Error: Failed to write lichen job file. Try again");
+        }
+    }
+
+
+    /**
+     * Returns a data structure containing the contents of a config.json file
+     *
+     * @param string $gradeable_id
+     * @param int $config_id
+     * @return array
+     * @throws Exception
+     */
+    private function getJsonForConfig(string $gradeable_id, int $config_id): array {
+        $em = $this->core->getCourseEntityManager();
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        $config = $em->getRepository(PlagiarismConfig::class)
+            ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+
+        if ($config === null) {
+            throw new DatabaseException("Error: Unable to find plagiarism configuration");
+        }
+
+        $regex_dirs = [];
+        if ($config->isRegexDirSubmissionsSelected()) {
+            $regex_dirs[] = "submissions";
+        }
+        if ($config->isRegexDirResultsSelected()) {
+            $regex_dirs[] = "results";
+        }
+        if ($config->isRegexDirCheckoutSelected()) {
+            $regex_dirs[] = "checkout";
+        }
+
+        return [
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable_id,
+            "config_id" => $config_id,
+            "version" => $config->getVersionStatus(),
+            "regex" => $config->getRegexArray(),
+            "regex_dirs" => $regex_dirs,
+            "language" => $config->getLanguage(),
+            "threshold" => $config->getThreshold(),
+            "sequence_length" => $config->getSequenceLength(),
+            "prior_term_gradeables" => $config->getOtherGradeables(),
+            "ignore_submissions" => $config->getIgnoredSubmissions()
+        ];
+    }
+
+
     /**
      * Returns a data structure containing the contents of a config.json file
      *
@@ -631,13 +756,11 @@ class PlagiarismController extends AbstractController {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . "?gradeable_id={$gradeable_id}&config_id={$config_id}";
         }
 
-        try {
-            $config_id = intval($config_id);
-        }
-        catch (Exception $e) {
+        if (!is_numeric($config_id) && $new_or_edit !== "new") {
             $this->core->addErrorMessage("Error: Config ID must be a valid integer configuration ID");
             return new RedirectResponse($return_url);
         }
+        $config_id = intval($config_id);
 
         // Check if Lichen job is already running
         if (file_exists($this->getQueuePath($gradeable_id, $config_id)) || file_exists($this->getProcessingQueuePath($gradeable_id, $config_id))) {
@@ -676,36 +799,19 @@ class PlagiarismController extends AbstractController {
 
                 // This is a little ugly/repetitive but it can be frustrating for users to get nondescriptive errors
                 // so we try to make potential error cases a little more helpful
+                $keys = ["version", "regex", "regex_dirs", "language", "threshold", "sequence_length", "prior_term_gradeables", "ignore_submissions"];
                 $error_message = "";
-                if (!isset($data["version"])) {
-                    $error_message = "Error: Invalid or missing version field";
-                }
-                elseif (!isset($data["regex"])) {
-                    $error_message = "Error: Invalid or missing regex field";
-                }
-                elseif (!isset($data["regex_dirs"])) {
-                    $error_message = "Error: Invalid or missing regex_dirs field";
-                }
-                elseif (!isset($data["language"])) {
-                    $error_message = "Error: Invalid or missing language field";
-                }
-                elseif (!isset($data["threshold"])) {
-                    $error_message = "Error: Invalid or missing threshold field";
-                }
-                elseif (!isset($data["sequence_length"])) {
-                    $error_message = "Error: Invalid or missing sequence_length field";
-                }
-                elseif (!isset($data["prior_term_gradeables"])) {
-                    $error_message = "Error: Invalid or missing prior_term_gradeables field";
-                }
-                elseif (!isset($data["ignore_submissions"])) {
-                    $error_message = "Error: Invalid or missing ignore_submissions field";
+                foreach ($keys as $key) {
+                    if (!isset($data[$key])) {
+                        $error_message .= "Error: Invalid or missing field: {$key}\n";
+                    }
                 }
 
                 if ($error_message !== "") {
                     throw new ValidationException($error_message, []);
                 }
 
+                // Input validation to check for invalid inputs occurs here
                 $new_config = new PlagiarismConfig(
                     $gradeable_id,
                     $config_id,
@@ -934,8 +1040,7 @@ class PlagiarismController extends AbstractController {
         try {
             $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         }
-        catch (Exception $e) {
-            $this->core->addErrorMessage($e->getMessage());
+        catch (DatabaseException | FileWriteException $e) {
             $this->core->addErrorMessage("Failed to add configuration to Lichen queue. Create the configuration again.");
             return new RedirectResponse($return_url);
         }
@@ -1165,10 +1270,12 @@ class PlagiarismController extends AbstractController {
             $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id, $config_id);
             $em->flush();
         }
-        catch (Exception $e) {
+        catch (FileWriteException | DatabaseException $e) {
             $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($return_url);
         }
+
+        $em->flush();
 
         $this->core->addSuccessMessage("Lichen results and saved configuration will be deleted.");
         return new RedirectResponse($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page' => 'REFRESH_ME']));
