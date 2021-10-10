@@ -14,11 +14,11 @@
 				<tr>
 					<th scope="row" class="row_number">{{ loop.index }}</th>
 					<td>
-            {% if user_id == entry['user_id'] %}
-              {{ user_name }}
-            {% else %}
-						  {{ entry["name"] }}
-            {% endif %}
+						{% if user_id == entry['user_id'] %}
+							{{ user_name }}
+						{% else %}
+							{{ entry["name"] }}
+						{% endif %}
 						{% if accessFullGrading %}
 							({{ entry["user_id"] }})
 						{% endif %}
@@ -30,5 +30,34 @@
 				</tr>
 			{% endif %}
 		{% endfor %}
+
+    {# Show the student #}
+		{% if user_index >= top_visible_students and top_visible_students != 0 and not accessFullGrading %}
+			<tr class="blank_row">
+				<td colspan="5">...</td>
+			</tr>
+      <tr class="blank_row">
+				<td colspan="5">...</td>
+			</tr>
+			{% for entry in leaderboard %}
+				{% if loop.index0 > user_index - 4 and loop.index0 <= user_index %}
+					<tr>
+						<td class="row_number"></td>
+						<td>
+							{% if user_id == entry['user_id'] %}
+								{{ user_name }}
+							{% else %}
+								Student {{user_index - loop.index0}} ahead of you
+							{% endif %}
+						</td>
+						<td>{{ entry["points"] }}</td>
+						{# 1000000000 (1e9) for nanosecond to second conversion #}
+						<td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
+						<td>{{ (entry["memory"] / 1000) | round }}MB</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
 	</tbody>
 </table>

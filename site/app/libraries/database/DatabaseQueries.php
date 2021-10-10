@@ -7759,7 +7759,7 @@ ORDER BY
                     user_id = ?
                     AND g_id = ?
         ", [$user_id, $gradeable_id]);
-        return $this->course_db->rows()[0] ?? false;
+        return $this->course_db->rows()[0]['anonymous_leaderboard'] ?? true;
     }
 
     public function setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state) {

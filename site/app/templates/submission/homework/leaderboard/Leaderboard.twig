@@ -14,8 +14,8 @@
 		</p>
 		<br><br>
 		<div style="margin-bottom: 1rem">
-			Show my name anonymously in the leaderboard:
-			<input type="checkbox" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if studentIsAnonymous %} checked {% endif %}/>
+			Show my name to other students in the leaderboard:
+			<input type="checkbox" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
 		</div>
 		<div class="leaderboard-tab-bar-wrapper">
 			Leaderboards:
@@ -42,7 +42,8 @@
 
 	function toggleSelfAnonymity() {
 		$.post('{{ base_url }}/set_self_anonymity', {
-			anonymity_state: $('#toggle-self-anonymity').is(':checked')
+			csrf_token: '{{ csrf_token }}',
+			anonymity_state: !$('#toggle-self-anonymity').is(':checked')
 		});
 	}
 

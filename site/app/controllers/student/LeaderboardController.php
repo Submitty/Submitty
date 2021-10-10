@@ -48,6 +48,7 @@ class LeaderboardController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Leaderboard");
         $this->core->getOutput()->addInternalCss('leaderboard.css');
         return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
+            "csrf_token" => $this->core->getCsrfToken(),
             "gradeable_name" => $gradeable->getTitle(),
             "leaderboards" => $leaderboards,
             "studentIsAnonymous" => $user_is_anonymous,
@@ -106,7 +107,7 @@ class LeaderboardController extends AbstractController {
             "accessFullGrading" => $this->core->getUser()->accessFullGrading(),
             "top_visible_students" => $top_visible_students,
             "user_id" => $this->core->getUser()->getId(),
-            "user_index" => $user_index, //TODO use this to show your current score
+            "user_index" => $user_index,
             "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()
         ]);
     }
@@ -116,14 +117,15 @@ class LeaderboardController extends AbstractController {
      * @return MultiResponse
      */
     public function toggleSelfLeaderboardAnonymity($gradeable_id) {
-        $this->core->addErrorMessage($gradeable_id);
         if (empty($_POST['anonymity_state'])) {
             $this->core->addErrorMessage("Missing anonymity state");
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse("missing anonymity_state"));
         }
 
+        $state = $_POST['anonymity_state'] === 'true';
+
         $user_id = $this->core->getUser()->getId();
-        $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $_POST['anonymity_state']);
-        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse("Sucess, state changed"));
+        $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state);
+        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse($state));
     }
 }
