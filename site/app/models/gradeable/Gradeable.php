@@ -2230,6 +2230,10 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function hasLeaderboard(): bool {
-        return !empty($this->loadAutogradingConfig()->getLeaderboards());
+        $autograding_config = $this->loadAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return false;
+        }
+        return !empty($autograding_config->getLeaderboards());
     }
 }
