@@ -98,6 +98,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
+ * @method bool hasLeaderboard()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -2221,5 +2222,14 @@ class Gradeable extends AbstractModel {
         else {
             return '';
         }
+    }
+
+    /**
+     * Returns if a gradeable has a leaderboard associated with it
+     *
+     * @return bool
+     */
+    public function hasLeaderboard(): bool {
+        return !empty($this->loadAutogradingConfig()->getLeaderboards());
     }
 }

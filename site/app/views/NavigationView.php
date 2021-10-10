@@ -232,6 +232,8 @@ class NavigationView extends AbstractView {
         $buttons[] = $this->hasTeamButton($gradeable) ? NavigationView::getTeamButton($this->core, $gradeable, $graded_gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? NavigationView::getSubmitButton($this->core, $gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
 
+        $buttons[] = $this->hasLeaderboardButton($gradeable) ? NavigationView::getLeaderboardButton($this->core, $gradeable) : null;
+
         if ($this->hasGradeButton($gradeable)) {
             $buttons[] = $this->getGradeButton($gradeable, $list_section);
         }
@@ -282,6 +284,14 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @return bool
      */
+    private function hasLeaderboardButton(Gradeable $gradeable): bool {
+        return $gradeable->hasLeaderboard();
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @return bool
+     */
     private function hasTeamButton(Gradeable $gradeable): bool {
         return $gradeable->isTeamAssignment();
     }
@@ -327,6 +337,19 @@ class NavigationView extends AbstractView {
      */
     private function hasQuickLinkButton(): bool {
         return $this->core->getUser()->accessAdmin();
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @return Button|null
+     */
+    public static function getLeaderboardButton(Core $core, Gradeable $gradeable) {
+        return new Button($core, [
+            "title" => "View Leaderboard",
+            "href" => $core->buildCourseUrl(['gradeable', $gradeable->getId(), 'leaderboard']),
+            "class" => "btn btn-default btn-nav",
+            "name" => "leaderboard-btn"
+        ]);
     }
 
     /**
