@@ -21,7 +21,7 @@
     "jquery": "3.6.0",
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
-    "jspdf": "^2.3.1",
+    "jspdf": "^2.4.0",
     "mermaid": "8.13.2",
     "pdfjs-dist": "2.10.377",
     "plotly.js-dist": "2.5.1",
