@@ -15,7 +15,7 @@
 					<th scope="row" class="row_number">{{ loop.index }}</th>
 					<td>
 						{% if user_id == entry['user_id'] %}
-							{{ user_name }}
+							{{ user_name }} (you)
 						{% else %}
 							{{ entry["name"] }}
 						{% endif %}
@@ -36,18 +36,15 @@
 			<tr class="blank_row">
 				<td colspan="5">...</td>
 			</tr>
-      <tr class="blank_row">
-				<td colspan="5">...</td>
-			</tr>
 			{% for entry in leaderboard %}
 				{% if loop.index0 > user_index - 4 and loop.index0 <= user_index %}
 					<tr>
 						<td class="row_number"></td>
 						<td>
 							{% if user_id == entry['user_id'] %}
-								{{ user_name }}
+								{{ user_name }} (you)
 							{% else %}
-								Student {{user_index - loop.index0}} ahead of you
+								{{entry['anon_id']}} ({{user_index - loop.index0}} ahead of you)
 							{% endif %}
 						</td>
 						<td>{{ entry["points"] }}</td>
@@ -57,6 +54,9 @@
 					</tr>
 				{% endif %}
 			{% endfor %}
+      <tr class="blank_row">
+				<td colspan="5">...</td>
+			</tr>
 		{% endif %}
 
 	</tbody>

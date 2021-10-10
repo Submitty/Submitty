@@ -7710,6 +7710,7 @@ SQL;
 
         $this->course_db->query("
 SELECT    leaderboard.*,
+          anon_id,
         CASE
                   WHEN anonymous_leaderboard = true THEN anon_id
                   ELSE Concat(COALESCE (user_preferred_firstname, user_firstname ), ' ', COALESCE (user_preferred_lastname, user_lastname ))
