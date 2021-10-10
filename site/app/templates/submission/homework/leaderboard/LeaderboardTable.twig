@@ -18,7 +18,7 @@
 	<tbody>
 		{% for entry in leaderboard %}
 			{% if loop.index0 < top_visible_students or top_visible_students == 0 or accessFullGrading %}
-				<tr class="{% if entry["user_group"] < 4%}leaderboard_grader{% endif %}">
+				<tr class="{% if entry["user_group"] < 4%}leaderboard-grader{% endif %}">
 					<th scope="row" class="row_number">{{ loop.index }}</th>
 					<td>
 						{% if user_id == entry['user_id'] %}

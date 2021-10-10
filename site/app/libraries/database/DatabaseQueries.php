@@ -7702,7 +7702,8 @@ SQL;
                 foreach ($param as $nested_param) {
                     $flattened_params[] = $nested_param;
                 }
-            }else {
+            }
+            else {
                 $flattened_params[] = $param;
             }
         }

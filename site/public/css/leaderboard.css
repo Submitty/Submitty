@@ -5,12 +5,12 @@
 }
 
 .leaderboard-nav {
-    padding: 0.1rem 0.5rem 0.0rem;
+    padding: 0.1rem 0.5rem 0;
     text-decoration: none;
     background-color: var(--default-white);
     color: var(--text-black);
     border-radius: 6px;
-    margin: 0rem 0.2rem 0.5rem;
+    margin: 0 0.2rem 0.5rem;
     word-wrap: break-word;
 }
 
@@ -32,6 +32,6 @@
     border: 1px solid gray;
 }
 
-#leaderboard-table .leaderboard_grader {
+#leaderboard-table .leaderboard-grader {
     background: var(--alert-border-blue);
 }

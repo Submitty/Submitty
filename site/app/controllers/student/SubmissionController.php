@@ -42,13 +42,9 @@ class SubmissionController extends AbstractController {
      * @param string $gradeable_id
      * @return Gradeable|null
      */
-    public static function tryGetElectronicGradeable($gradeable_id, $core = null) {
+    public static function tryGetElectronicGradeable($gradeable_id, $core) {
         if ($gradeable_id === null || $gradeable_id === '') {
             return null;
-        }
-
-        if (is_null($core)) {
-            $core = $this->core;
         }
 
         try {
@@ -108,7 +104,7 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return ['error' => true, 'message' => 'No gradeable with that id.'];
@@ -215,7 +211,7 @@ class SubmissionController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")
      */
     public function loadGradeableMessage($gradeable_id) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return ['error' => true, 'message' => 'No gradeable with that id.'];
@@ -256,7 +252,7 @@ class SubmissionController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -355,7 +351,7 @@ class SubmissionController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -512,7 +508,7 @@ class SubmissionController extends AbstractController {
         $merge_previous = isset($merge) && $merge === 'true';
         $clobber = isset($clobber) && $clobber === 'true';
 
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -816,7 +812,7 @@ class SubmissionController extends AbstractController {
      * @return boolean
      */
     public function ajaxDeleteSplitItem($gradeable_id) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -902,7 +898,7 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function ajaxRegrade($gradeable_id): array {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -1049,7 +1045,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid pages.", false);
         }
 
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -1686,7 +1682,7 @@ class SubmissionController extends AbstractController {
             $ta = true;
         }
 
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
@@ -1827,7 +1823,7 @@ class SubmissionController extends AbstractController {
     public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
@@ -1918,7 +1914,7 @@ class SubmissionController extends AbstractController {
      * @return JsonResponse
      */
     public function getTimeRemainingData($gradeable_id) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id, $this->core);
         if ($gradeable !== null) {
             if ($gradeable->hasAllowedTime()) {
                 $allowed_time = $gradeable->getUserAllowedTime($this->core->getUser());

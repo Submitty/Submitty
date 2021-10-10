@@ -67,10 +67,10 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     autograding_metrics = Table('autograding_metrics', metadata, autoload=True)
     db.execute(
         delete(autograding_metrics)
-        .where(autograding_metrics.c.user_id==bindparam('u_id'))
-        .where(autograding_metrics.c.team_id==bindparam('t_id'))
-        .where(autograding_metrics.c.g_id==bindparam('g_id'))
-        .where(autograding_metrics.c.g_version==bindparam('g_v')),
+        .where(autograding_metrics.c.user_id == bindparam('u_id'))
+        .where(autograding_metrics.c.team_id == bindparam('t_id'))
+        .where(autograding_metrics.c.g_id == bindparam('g_id'))
+        .where(autograding_metrics.c.g_version == bindparam('g_v')),
         u_id=user_id,  t_id=team_id, g_id=gradeable_id, g_v=version)
 
     if len(testcases) != len(results['testcases']):
@@ -89,18 +89,22 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         else:
             non_hidden_non_ec += results['testcases'][i]['points']
 
-        if results['testcases'][i]['elapsed_time'] is not None or results['testcases'][i]['max_rss_size'] is not None:
-            db.execute(insert(autograding_metrics).values(
+        if (
+            results["testcases"][i]["elapsed_time"] is not None
+            or results["testcases"][i]["max_rss_size"] is not None
+        ):
+            db.execute(
+                insert(autograding_metrics).values(
                     user_id=user_id,
                     team_id=team_id,
                     g_id=gradeable_id,
-                    g_version = version,
-                    testcase_id=testcases[i]['testcase_id'],
-                    elapsed_time=results['testcases'][i]['elapsed_time'],
-                    max_rss_size=results['testcases'][i]['max_rss_size'],
-                    points=results['testcases'][i]['points'],
-                    passed=results['testcases'][i]['points']>=testcases[i]['total_points'],
-                    hidden=testcases[i]['hidden']
+                    g_version=version,
+                    testcase_id=testcases[i]["testcase_id"],
+                    elapsed_time=results["testcases"][i]["elapsed_time"],
+                    max_rss_size=results["testcases"][i]["max_rss_size"],
+                    points=results["testcases"][i]["points"],
+                    passed=results["testcases"][i]["points"] >= testcases[i]["total_points"],
+                    hidden=testcases[i]["hidden"],
                 )
             )
 
@@ -280,8 +284,12 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
                     metrics_exist = 'metrics' in testcase and testcase['metrics'] is not None
 
                     testcase_data = {'points': testcase['points_awarded']}
-                    testcase_data['elapsed_time'] = testcase['metrics']['elapsed_time'] if metrics_exist else None
-                    testcase_data['max_rss_size'] = testcase['metrics']['max_rss_size'] if metrics_exist else None
+                    testcase_data["elapsed_time"] = (
+                        testcase["metrics"]["elapsed_time"] if metrics_exist else None
+                    )
+                    testcase_data["max_rss_size"] = (
+                        testcase["metrics"]["max_rss_size"] if metrics_exist else None
+                    )
                     result_details['testcases'].append(testcase_data)
             if 'automatic_grading_total' in result_json:
                 result_details['automatic_grading_total'] = result_json['automatic_grading_total']
