@@ -1,0 +1,33 @@
+.leaderboard-tab-bar-wrapper {
+    border-bottom: 1px solid gray;
+    display: flex;
+    height: 35px;
+}
+
+.leaderboard-nav {
+    padding: 0.1rem 0.5rem 0.0rem;
+    text-decoration: none;
+    background-color: var(--default-white);
+    color: var(--text-black);
+    border-radius: 6px;
+    margin: 0rem 0.5rem 0.5rem;
+    word-wrap: break-word;
+}
+
+.leaderboard-nav.normal-btn {
+    background-color: var(--default-white);
+    color: var(--text-black);
+    border: 1px solid gray;
+}
+
+.leaderboard-nav.active-btn {
+    background-color: var(--submitty-logo-blue);
+    color: var(--btn-text-white);
+    font-weight: bold;
+}
+
+.leaderboard-nav.unselected-btn:hover {
+    background-color: var(--standard-pastel-blue);
+    color: var(--text-black);
+    border: 1px solid gray;
+}

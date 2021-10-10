@@ -1,54 +1,32 @@
-<div id="leaderboard">
+<div id="leaderboard" class="content">
     {% if rebuildingGradeable %}
     <p>
         Leaderboard is temporarily unavailable because the gradeable is being
         rebuilt. Please try refreshing the page in a few minutes.
     </p>
     {% else %}
-    <div class="tab-bar-wrapper">
+    <h1>Leaderboards for {{gradeable_name}}</h1>
+    <p class="leaderboard-tab-bar-wrapper">
+        Leaderboards:
+
         {% for leaderboard in leaderboards %}
-        <a class="nav-bar key_to_click" id="{{leaderboard.tag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.tag}}');">{{leaderboard.title}}</a>
-=======
-  {% if rebuildingGradeable %}
-  <p>
-    Leaderboard is temporarily unavailable because the gradeable is being
-    rebuilt. Please try refreshing the page in a few minutes.
-  </p>
-  {% else %}
-  <h3>{{ title }}</h3>
-  <table class="table table-striped" style="width: 100%">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">User/Team</th>
-        <th scope="col">Points</th>
-        <th scope="col">Time</th>
-        <th scope="col">Memory</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in leaderboard %}
-      <tr>
-        <th scope="row" class="row_number">{{ loop.index }}</th>
-        <td>
-          {{ entry["name"] }} {% if accessFullGrading %}({{
-            entry["user_id"]
-          }}){% endif %}
-        </td>
-        <td>{{ entry["points"] }}</td>
-        {# 1000000000 (1e9) for nanosecond to second conversion #}
-        <td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
-        <td>{{ (entry["memory"] / 1000) | round }}MB</td>
->>>>>>> b6f96e05d289a3f4245d1f214579b709d6037d37
+        <a class="leaderboard-nav key_to_click normal-btn" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</a>
         {% endfor %}
-    </div>
+    </p>
     <div id="leaderboard-table">
     </div>
     {% endif %}
 </div>
 <script>
     function onChangeLeaderboard(leaderboard_tag) {
-        $("#leaderboard-table").load("{{leaderboard_data_url}}" + "/" + leaderboard_tag);
+        $("#leaderboard-table").html("");
+        $("#leaderboard-table").load("{{leaderboard_data_url}}/" + leaderboard_tag);
+
+        $(".leaderboard-nav").removeClass("active-btn");
+        $(".leaderboard-nav").addClass("unselected-btn");
+
+        $("#" + leaderboard_tag + "_nav").addClass("active-btn");
+        $("#" + leaderboard_tag + "_nav").removeClass("unselected-btn");
     }
 
     $(document).ready(function() {

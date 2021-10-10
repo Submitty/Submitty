@@ -230,10 +230,14 @@ class SubmissionController extends AbstractController {
             }
         }
 
+        $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
+        $this->core->getOutput()->addBreadcrumb("Leaderboard");
+        $this->core->getOutput()->addInternalCss('leaderboard.css');
         return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
+            "gradeable_name" => $gradeable->getTitle(),
             "leaderboards" => $leaderboards,
             "initial_leaderboard_tag" => $leaderboard_tag,
-            "leaderboard_data_url" => $this->core->buildCourseUrl([$gradeable, "leaderboard_data"]),
+            "leaderboard_data_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id, "leaderboard_data"]),
             "rebuildingGradeable" => is_null($autogradingConfig)
         ]);
     }
