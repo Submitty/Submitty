@@ -100,7 +100,7 @@ class Database:
         """
         try:
             return self.inspector.has_table(table_name)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             # To support sqlalchemy < 1.4
             return self.engine.has_table(table_name)
 
