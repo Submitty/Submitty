@@ -10,6 +10,7 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\Enabled;
 use app\libraries\socket\Client;
 use app\libraries\Logger;
 use WebSocket;
@@ -17,6 +18,7 @@ use WebSocket;
 /**
  * Class OfficeHoursQueueController
  *
+ * @Enabled("queue")
  */
 class OfficeHoursQueueController extends AbstractController {
 
@@ -29,12 +31,6 @@ class OfficeHoursQueueController extends AbstractController {
      * @return MultiResponse
      */
     public function showQueue($full_history = false) {
-        if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
-        }
-
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',
