@@ -84,7 +84,7 @@
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 
 {% macro renderPlagiarismRow(row) %}
-    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
+    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row" class="unread">
         <td>
             {% if row['ranking_available'] %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>

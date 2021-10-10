@@ -14,7 +14,24 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    # Move the last run timestamp to the database
     database.execute("ALTER TABLE lichen ADD COLUMN IF NOT EXISTS last_run_timestamp TIMESTAMP DEFAULT NOW();")
+
+    # create table to hold view timestamps
+    database.execute(
+        """
+        CREATE TABLE IF NOT EXISTS lichen_run_access (
+            id SERIAL PRIMARY KEY,
+            lichen_run_id INT NOT NULL,
+            user_id VARCHAR(255) NOT NULL,
+            timestamp TIMESTAMP NOT NULL,
+            CONSTRAINT fk_lichen_run_id
+                FOREIGN KEY(lichen_run_id)
+                    REFERENCES lichen(id)
+                    ON DELETE CASCADE
+        );
+        """
+    )
 
 def down(config, database, semester, course):
     """
