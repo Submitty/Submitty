@@ -480,7 +480,7 @@ jobs:
               browser: chrome
               headless: true
               env: autograding_shipper_off=True
-          
+
           - name: Restart autograding shipper
             run: |
               sudo systemctl restart submitty_autograding_shipper

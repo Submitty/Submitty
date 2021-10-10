@@ -10,7 +10,7 @@ class LdapAuthentication extends AbstractAuthentication {
             return false;
         }
 
-        $settings = $this->core->getConfig()->getAuthenticationSettings()['ldap_options'];
+        $settings = $this->core->getConfig()->getLdapOptions();
 
         $ldap = ldap_connect($settings['url']);
         ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);

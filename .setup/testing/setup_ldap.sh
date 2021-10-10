@@ -10,7 +10,7 @@ echo "slapd slapd/domain string vagrant.local" | debconf-set-selections
 echo "slapd shared/organization string 'Vagrant LDAP'" | debconf-set-selections
 echo "slapd slapd/password1 password root_password" | debconf-set-selections
 echo "slapd slapd/password2 password root_password" | debconf-set-selections
-echo "jslapd slapd/backend select HDB" | debconf-set-selections
+echo "slapd slapd/backend select HDB" | debconf-set-selections
 echo "slapd slapd/purge_database boolean true" | debconf-set-selections
 echo "slapd slapd/allow_ldap_v2 boolean false" | debconf-set-selections
 echo "slapd slapd/move_old_database boolean true" | debconf-set-selections
@@ -25,3 +25,7 @@ objectClass: top
 ou: users" > /tmp/base.ldif
 ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f /tmp/base.ldif
 rm -f /tmp/base.ldif
+
+sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' config/authentication.json
+sed -i -e 's/"uid": ""/"uid": "uid"/g' config/authentication.json
+sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' config/authentication.json

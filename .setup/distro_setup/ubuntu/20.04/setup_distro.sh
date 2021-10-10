@@ -117,7 +117,7 @@ if [ ${VAGRANT} == 1 ]; then
     echo "slapd shared/organization string 'Vagrant LDAP'" | debconf-set-selections
     echo "slapd slapd/password1 password root_password" | debconf-set-selections
     echo "slapd slapd/password2 password root_password" | debconf-set-selections
-    echo "jslapd slapd/backend select HDB" | debconf-set-selections
+    echo "slapd slapd/backend select HDB" | debconf-set-selections
     echo "slapd slapd/purge_database boolean true" | debconf-set-selections
     echo "slapd slapd/allow_ldap_v2 boolean false" | debconf-set-selections
     echo "slapd slapd/move_old_database boolean true" | debconf-set-selections

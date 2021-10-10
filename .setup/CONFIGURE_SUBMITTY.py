@@ -228,7 +228,7 @@ print()
 
 if args.worker:
     SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
-    print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER)) 
+    print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER))
 else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
@@ -287,7 +287,7 @@ else:
         try:
             auth = int(get_input('Enter number?', defaults['authentication_method'])) - 1
         except ValueError:
-            auth = 0
+            auth = -1
         if auth in range(len(authentication_methods)):
             break
         print(f'Number must in between 1 - {len(authentication_methods)} (inclusive)!')
