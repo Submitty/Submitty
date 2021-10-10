@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Config;
+use Exception;
 
 class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $core;
@@ -646,5 +647,31 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->isDebug());
         $this->assertFalse($config->checkFeatureFlagEnabled('non_existing_name'));
         $this->assertFalse($config->checkFeatureFlagEnabled('feature_1'));
+    }
+
+    public function ldapOptionsDataProvider() {
+        return [['url'], ['uid'], ['bind_dn']];
+    }
+
+    /**
+     * @dataProvider ldapOptionsDataProvider
+     */
+    public function testExceptionMissingLdapOptionUrl(string $option): void {
+        $extra = [
+            'authentication_method' => 'LdapAuthentication',
+            'ldap_options' => [
+                'url' => 'ldap://localhost',
+                'uid' => 'uid',
+                'bind_dn' => 'ou=users',
+            ],
+        ];
+
+        unset($extra['ldap_options'][$option]);
+
+        $this->createConfigFile($extra);
+        $config = new Config($this->core);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage("Missing config value for ldap options: ${option}");
+        $config->loadMasterConfigs($this->config_path);
     }
 }

@@ -34,6 +34,7 @@ use app\libraries\FileUtils;
  * @method string getConfigPath()
  * @method string getAuthentication()
  * @method array getLdapOptions()
+ * @method void setLdapOptions(array $options)
  * @method \DateTimeZone getTimezone()
  * @method setTimezone(\DateTimeZone $timezone)
  * @method string getUploadMessage()
@@ -123,7 +124,10 @@ class Config extends AbstractModel {
     protected $websocket_port = 8443;
     /** @prop @var string */
     protected $authentication;
-    /** @prop-read */
+    /**
+     * @prop
+     * @var array
+     **/
     protected $ldap_options = [];
     /** @prop @var DateTimeZone */
     protected $timezone;
