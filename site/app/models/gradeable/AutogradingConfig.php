@@ -361,7 +361,7 @@ class AutogradingConfig extends AbstractModel {
     /**
      * Gets a leaderboard for a specific tag
      * @param string $tag the tag of the leaderboard to match against
-     * @return LeaderboardConfig
+     * @return LeaderboardConfig|null
      */
     public function getLeaderboard($tag) {
         foreach ($this->getLeaderboards() as $leaderboard) {

@@ -14,7 +14,6 @@ class LeaderboardController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
-     * @return array
      */
     public function getLeaderboard($gradeable_id, $leaderboard_tag = null) {
         $gradeable = SubmissionController::tryGetElectronicGradeable($gradeable_id, $this->core);
@@ -47,7 +46,7 @@ class LeaderboardController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
         $this->core->getOutput()->addBreadcrumb("Leaderboard");
         $this->core->getOutput()->addInternalCss('leaderboard.css');
-        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
+        $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
             "csrf_token" => $this->core->getCsrfToken(),
             "gradeable_name" => $gradeable->getTitle(),
             "leaderboards" => $leaderboards,
@@ -63,7 +62,6 @@ class LeaderboardController extends AbstractController {
      * users will not go to this route directly, instead this route should be dynamically requested
      * and its content be inserted inside another html page
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")
-     * @return array
      */
     public function getLeaderboardData($gradeable_id, $leaderboard_tag) {
         $gradeable = SubmissionController::tryGetElectronicGradeable($gradeable_id, $this->core);
@@ -106,7 +104,7 @@ class LeaderboardController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        return $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/LeaderboardTable.twig', [
+        $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/LeaderboardTable.twig', [
             "leaderboard" => $leaderboard_data,
             "accessFullGrading" => $this->core->getUser()->accessFullGrading(),
             "top_visible_students" => $top_visible_students,

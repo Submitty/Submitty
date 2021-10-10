@@ -7686,10 +7686,10 @@ SQL;
      *
      * @param string $gradeable_id
      * @param string $countHidden true when leaderboard should include hidden testcases
-     * @param string $valid_testcases a list of testcases to use in leaderboard, or [] for all testcases
+     * @param array $valid_testcases a list of testcases to use in leaderboard
      * @return array an array of rows in order for the specific leaderboard
      */
-    public function getLeaderboard($gradeable_id, $countHidden, $valid_testcases = []) {
+    public function getLeaderboard($gradeable_id, $countHidden, $valid_testcases) {
         $testcase_id_questionmarks = str_repeat(" ?,", count($valid_testcases));
         $testcase_id_questionmarks = substr($testcase_id_questionmarks, 0, -1); // Remove "," at the end
 

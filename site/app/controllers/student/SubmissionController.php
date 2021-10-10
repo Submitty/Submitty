@@ -868,7 +868,7 @@ class SubmissionController extends AbstractController {
      * @return JsonResponse
      */
     public function ajaxCountRegrade(): JsonResponse {
-        $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
+        $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id'], $this->core);
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
         $regrade_all = $_POST['regrade_all'];
         $order->sort("id", "ASC");
