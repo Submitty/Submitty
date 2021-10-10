@@ -15,6 +15,7 @@ CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 DAEMON_USER=$(jq -r '.daemon_user' ${CONF_DIR}/submitty_users.json)
 DAEMON_GROUP=${DAEMON_USER}
 SUPERVISOR_USER=$(jq -r '.supervisor_user' ${CONF_DIR}/submitty_users.json)
+WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
