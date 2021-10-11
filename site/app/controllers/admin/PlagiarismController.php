@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace app\controllers\admin;
 
 use app\entities\plagiarism\PlagiarismRunAccess;
+use app\exceptions\DatabaseException;
+use app\exceptions\FileWriteException;
 use app\exceptions\ValidationException;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
