@@ -1,5 +1,6 @@
 """Migration for a given Submitty course database."""
-
+from pathlib import Path
+import json
 
 def up(config, database, semester, course):
     """
@@ -16,6 +17,15 @@ def up(config, database, semester, course):
     """
     sql = "ALTER TABLE queue_settings ADD COLUMN IF NOT EXISTS contact_information BOOLEAN NOT NULL DEFAULT TRUE;"
     database.execute(sql)
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+        # add boolean to course config
+    config_file = Path(course_dir, 'config', 'config.json')
+    if config_file.is_file():
+        with open(config_file, 'r') as in_file:
+            j = json.load(in_file)
+        contact_information = j['course_details']['queue_contact_info']
+        sql = "UPDATE queue_settings SET contact_information = ?", [contact_information]
+        database.execute(sql)
 
 
 def down(config, database, semester, course):
