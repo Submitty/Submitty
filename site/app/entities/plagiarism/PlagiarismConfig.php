@@ -303,7 +303,7 @@ class PlagiarismConfig {
         $this->last_run_timestamp = new DateTime();
     }
 
-    public function userHasAccessed(string $user_id): bool  {
+    public function userHasAccessed(string $user_id): bool {
         return $this->access_times->filter(function (PlagiarismRunAccess $access) use ($user_id) {
             return $access->getUserId() === $user_id;
         })->count() > 0;

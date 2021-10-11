@@ -3,6 +3,10 @@
     white-space: normal;
 }
 
+th {
+    padding: 0 0.25em;
+}
+
 .plag-table-cont {
     margin-top: 24px;
     width: 100%;
@@ -25,10 +29,6 @@
     text-align: left;
     width: inherit;
     background-color: var(--table-info);
-}
-
-th {
-    padding: 0 0.25em;
 }
 
 td {

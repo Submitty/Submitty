@@ -50,7 +50,7 @@ class PlagiarismRunAccess {
         $this->timestamp = new DateTime();
     }
 
-    public function getUserID(): string  {
+    public function getUserID(): string {
         return $this->user_id;
     }
 
