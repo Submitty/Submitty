@@ -536,49 +536,49 @@ ALTER TABLE ONLY public.users
 -- Name: courses_users after_delete_sync_delete_user_cleanup; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON public.courses_users FOR EACH ROW EXECUTE FUNCTION public.sync_delete_user_cleanup();
+CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user_cleanup();
 
 
 --
 -- Name: courses_users before_delete_sync_delete_user; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_users FOR EACH ROW EXECUTE FUNCTION public.sync_delete_user();
+CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user();
 
 
 --
 -- Name: courses_registration_sections delete_sync_registration_id; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON public.courses_registration_sections FOR EACH ROW EXECUTE FUNCTION public.sync_delete_registration_section();
+CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON public.courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_registration_section();
 
 
 --
 -- Name: users generate_api_key; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON public.users FOR EACH ROW EXECUTE FUNCTION public.generate_api_key();
+CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON public.users FOR EACH ROW EXECUTE PROCEDURE public.generate_api_key();
 
 
 --
 -- Name: courses_registration_sections insert_sync_registration_id; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON public.courses_registration_sections FOR EACH ROW EXECUTE FUNCTION public.sync_insert_registration_section();
+CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON public.courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE public.sync_insert_registration_section();
 
 
 --
 -- Name: courses_users user_sync_courses_users; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON public.courses_users FOR EACH ROW EXECUTE FUNCTION public.sync_courses_user();
+CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_courses_user();
 
 
 --
 -- Name: users user_sync_users; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER user_sync_users AFTER UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.sync_user();
+CREATE TRIGGER user_sync_users AFTER UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.sync_user();
 
 
 --
@@ -640,3 +640,4 @@ ALTER TABLE ONLY public.sessions
 --
 -- PostgreSQL database dump complete
 --
+

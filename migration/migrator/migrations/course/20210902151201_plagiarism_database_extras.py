@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
 
     # Move the last run timestamp to the database
-    database.execute("ALTER TABLE lichen ADD COLUMN IF NOT EXISTS last_run_timestamp TIMESTAMP DEFAULT NOW();")
+    database.execute("ALTER TABLE lichen ADD COLUMN IF NOT EXISTS last_run_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW();")
 
     # Move the provided code data to the database
     database.execute("ALTER TABLE lichen ADD COLUMN IF NOT EXISTS has_provided_code BOOLEAN NOT NULL DEFAULT FALSE;")
