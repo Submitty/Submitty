@@ -411,6 +411,10 @@
           "type" : "string"
         }
       },
+      "display_testcase_runtime_memory": {
+        "type": "boolean",
+        "description": "Specifies whether the amount of time to run/memory used by each testcase should be displayed to students"
+      },
       "testcases" : {
         "description" : "The array of testcases which will be run against the student code",
         "type" : "array",
@@ -450,6 +454,10 @@
                 "tag":{
                   "description" : "A unique tag for the leaderboard",
                   "type" : "string"
+                },
+                "description":{
+                  "description": "A short description of what testcases the leaderboard covers, displayed to students",
+                  "type": "string"
                 }
               }
             }

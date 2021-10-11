@@ -7,6 +7,8 @@
         "EXTRA_CREDIT_POINTS" : 0
   },
 
+  "display_testcase_runtime_memory" : true,
+
   "testcases" : [
       {
           "type" : "Compilation",
