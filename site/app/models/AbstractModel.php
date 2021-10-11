@@ -55,8 +55,8 @@ abstract class AbstractModel {
      * object that is found, while calling itself for any arrays that are within the object. Any other type that
      * is passed to this function is returned as is (such as primitive types).
      *
-     * @param $object
-     * @param $check_property
+     * @param mixed $object
+     * @param bool $check_property
      * @return mixed
      */
     protected function parseObject($object, $check_property = true) {
@@ -122,8 +122,8 @@ abstract class AbstractModel {
      *
      * @link http://php.net/manual/en/language.oop5.overloading.php#object.call
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param mixed[] $arguments
      *
      * @return mixed
      *
