@@ -926,7 +926,7 @@ CREATE TABLE public.queue_settings (
     open boolean NOT NULL,
     code text NOT NULL,
     token text,
-    regex_pattern character varying,
+    regex_pattern character varying
 );
 
 
@@ -1843,6 +1843,7 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
+
 
 --
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
