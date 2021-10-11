@@ -2,7 +2,7 @@
     <h1>
         {{ gradeable.getTitle() }}
         {% if gradeable_url|trim != "" %}
-            <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
+            <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable.getTitle() }}">
                 <i class="fas fa-external-link-alt"></i>
             </a>
         {% endif %}

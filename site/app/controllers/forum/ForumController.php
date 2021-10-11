@@ -178,7 +178,7 @@ class ForumController extends AbstractController {
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"]);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             }
@@ -187,7 +187,7 @@ class ForumController extends AbstractController {
             $result["new_ids"] = [];
             foreach ($category as $categoryName) {
                 if (!$this->isValidCategories(-1, [$categoryName])) {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName, $_POST["rank"]);
                     $result["new_ids"][] = $newCategoryId;
                 }
             }
@@ -556,7 +556,7 @@ class ForumController extends AbstractController {
      *
      * If applied on the first post of a thread, same action will be reflected on the corresponding thread
      *
-     * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => undelete
      *
      * @Route("/courses/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
      */
@@ -675,6 +675,10 @@ class ForumController extends AbstractController {
                     $post_content = $_POST["thread_post_content"];
                     $subject = "Thread Edited: " . Notification::textShortner($thread_title);
                     $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
+                }
+                else {
+                    $subject = "Thread Edited: " . Notification::textShortner($thread_title);
+                    $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title;
                 }
 
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -838,9 +842,7 @@ class ForumController extends AbstractController {
 
             $post_id = $_POST["edit_post_id"];
             $original_post = $this->core->getQueries()->getPost($post_id);
-            if (!empty($original_post)) {
-                $original_creator = $original_post['author_user_id'];
-            }
+            $original_creator = !empty($original_post) ? $original_post['author_user_id'] : null;
             $anon = (!empty($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
             if (!$this->modifyAnonymous($original_creator)) {

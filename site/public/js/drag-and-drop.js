@@ -704,12 +704,18 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
 }
 
 /**
- * @param gradeable_id
- * @param num_pages
- * @param use_qr_codes
- * @param qr_prefix
+ * Handle sending a bulk pdf to be split by the server 
+ * 
+ * @param {String} gradeable_id
+ * @param {Number} max_file_size
+ * @param {Number} max_post_size
+ * @param {Number} num_pages
+ * @param {Boolean} use_qr_codes
+ * @param {Boolean} use_ocr,
+ * @param {String} qr_prefix
+ * @param {String} qr_suffix
  */
-function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
+function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes, use_ocr, qr_prefix, qr_suffix) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();

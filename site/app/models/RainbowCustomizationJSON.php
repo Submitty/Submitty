@@ -161,7 +161,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add an item to the 'display' array
      *
-     * @param $display The item to add
+     * @param string $display The item to add
      * @throws BadArgumentException The passed in argument is not allowed.
      */
     public function addDisplay($display) {
@@ -177,8 +177,8 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add a section label
      *
-     * @param $sectionID The sectionID
-     * @param $label The label you would like to assign to the sectionID
+     * @param string $sectionID The sectionID
+     * @param string $label The label you would like to assign to the sectionID
      * @throws BadArgumentException The passed in section label is empty
      */
     public function addSection($sectionID, $label) {
@@ -271,6 +271,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         $json = (object) [];
 
         // Copy each property from $this over to $json
+        // @phpstan-ignore-next-line phpstan devs do not like object iteration
         foreach ($this as $key => $value) {
             // Dont include $core or $modified
             if ($key != 'core' && $key != 'modified') {
