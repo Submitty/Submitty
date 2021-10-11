@@ -8,7 +8,6 @@
 #include <queue>
 #include <mutex>
 #include <thread>
-#include <atomic>
 
 
 // implemented in execute.cpp
@@ -24,8 +23,7 @@ int execute(const std::string &cmd,
       const bool timestamped_stdout);
 
 int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config, std::string program_name,
-                      const nlohmann::json &test_case_limits, const nlohmann::json &assignment_limits, const bool timestamped_stdout,
-                      std::atomic<unsigned long> *exec_time_ctr);
+                      const nlohmann::json &test_case_limits, const nlohmann::json &assignment_limits, const bool timestamped_stdout);
 
 int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &logfile, const nlohmann::json &whole_config);
 
