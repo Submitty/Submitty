@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace app\entities\plagiarism;
 
 use app\exceptions\ValidationException;
-use Doctrine\Common\Collections\Criteria;
-use Exception;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use app\libraries\plagiarism\PlagiarismUtils;
