@@ -649,6 +649,8 @@ CREATE TABLE public.lichen (
     sequence_length smallint NOT NULL,
     other_gradeables text,
     ignore_submissions text,
+    last_run_timestamp timestamp without time zone DEFAULT now(),
+    has_provided_code boolean DEFAULT false NOT NULL,
     CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
     CONSTRAINT lichen_sequence_length_check CHECK ((sequence_length > 1)),
     CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
@@ -673,6 +675,70 @@ CREATE SEQUENCE public.lichen_id_seq
 --
 
 ALTER SEQUENCE public.lichen_id_seq OWNED BY public.lichen.id;
+
+
+--
+-- Name: lichen_run_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lichen_run_access (
+    id integer NOT NULL,
+    lichen_run_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lichen_run_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lichen_run_access_id_seq OWNED BY public.lichen_run_access.id;
+
+
+--
+-- Name: lichen_run_viewers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lichen_run_viewers (
+    id integer NOT NULL,
+    lichen_run_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: lichen_run_viewers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lichen_run_viewers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lichen_run_viewers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lichen_run_viewers_id_seq OWNED BY public.lichen_run_viewers.id;
 
 
 --
@@ -808,7 +874,7 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    release_histogram character varying(10) NOT NULL
+    release_histogram character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -1261,6 +1327,20 @@ ALTER TABLE ONLY public.lichen ALTER COLUMN id SET DEFAULT nextval('public.liche
 
 
 --
+-- Name: lichen_run_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access ALTER COLUMN id SET DEFAULT nextval('public.lichen_run_access_id_seq'::regclass);
+
+
+--
+-- Name: lichen_run_viewers id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_viewers ALTER COLUMN id SET DEFAULT nextval('public.lichen_run_viewers_id_seq'::regclass);
+
+
+--
 -- Name: notifications id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1553,6 +1633,22 @@ ALTER TABLE ONLY public.lichen
 
 ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lichen_run_access lichen_run_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT lichen_run_access_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lichen_run_viewers lichen_run_viewers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_viewers
+    ADD CONSTRAINT lichen_run_viewers_pkey PRIMARY KEY (id);
 
 
 --
@@ -1867,6 +1963,22 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT fk_gradeable_id FOREIGN KEY (gradeable_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: lichen_run_viewers fk_lichen_run_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_viewers
+    ADD CONSTRAINT fk_lichen_run_id FOREIGN KEY (lichen_run_id) REFERENCES public.lichen(id) ON DELETE CASCADE;
+
+
+--
+-- Name: lichen_run_access fk_lichen_run_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT fk_lichen_run_id FOREIGN KEY (lichen_run_id) REFERENCES public.lichen(id) ON DELETE CASCADE;
 
 
 --
@@ -2472,3 +2584,4 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
