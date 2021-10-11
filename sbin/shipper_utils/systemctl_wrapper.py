@@ -32,7 +32,8 @@ EXIT_CODES = {
   'inactive'  : 0,
   'active'    : 1,
   'failure'   : 2,
-  'bad_arguments' : 3
+  'bad_arguments' : 3,
+  'timed out': 4
 }
 
 # valid commands that can be passed to this script. If you add more, update
@@ -50,6 +51,8 @@ def print_status_message(status_code, mode, daemon, machine):
     print("{0}Failure performing the {1} operation".format(prefix, mode))
   elif status_code == 3:
     print("{0}Received an argument error. This could be an issue with this script.".format(prefix))
+  elif status_code == 4:
+    print("Connection to machine {0} timed out. Skipping this machine...".format(machine))
   else:
     print("{0}Received unknown status code {1} when attempting to {2} the \
       {3} daemon".format(prefix, status_code, mode, daemon))
@@ -69,6 +72,8 @@ def perform_systemctl_command_on_all_workers(daemon, mode):
     print (f"perform {daemon} {mode} on worker machine {target}")
     status = perform_systemctl_command_on_worker(daemon, mode, target)
     print_status_message(status, mode, daemon, target)
+    if status == 4:
+      continue
     verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=True)
     greatest_status = max(greatest_status, status)
   return greatest_status
@@ -98,6 +103,8 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
        intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
+      if str(e) == 'timed out':
+        return EXIT_CODES['timed out']
       return EXIT_CODES['failure']
   try:
       (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=5)
