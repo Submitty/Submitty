@@ -909,7 +909,7 @@ function cellGradeOnclick(e) {
     else {
         $(e).attr('clicked', 1);
     }
-    $('.edit-zone').attr('target', e);
+    $('.edit-zone').data('target', e);
     $('.edit-zone').css('display', 'block');
     $('.edit-zone').val($(e).val());
     console.log($(e).attr('clicked'));

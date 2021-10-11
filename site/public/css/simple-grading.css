@@ -24,8 +24,9 @@
     display: none !important;
 }
 
+
 .edit-zone {
-    width: 76vw;
+    width: 76vw !important;
     resize: none;
 }
 

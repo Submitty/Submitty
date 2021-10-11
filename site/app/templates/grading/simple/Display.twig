@@ -15,7 +15,11 @@
 
     <div class="column-wrapper" style="margin: 1em 0;">
         <div id="checkpoint-sticky" class="column-wrapper">
-            {% include "grading/simple/StudentSearch.twig" %}
+            <div>
+                <input style="display: none;" class="edit-zone custom-scrollbar" data-target="" type="text"/>
+                {% include "grading/simple/StudentSearch.twig" %}
+            </div>
+            
             {% if action == 'lab' %}
                 <div>
                     <p class="not-sticky">Undo/Redo Changes</p>
@@ -301,7 +305,7 @@
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_score }}"
                     value="{{ component_score }}"
-                    onclick="cellGradeOnclick()"
+                    onclick="cellGradeOnclick(this)"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
@@ -322,12 +326,11 @@
 
     <script>
         function adjustHeight(el){
-            el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+            //el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
         }
         function minimizeHeight(el) {
-            el.style.height = '30px';
+            //el.style.height = '30px';
             $(el).attr('clicked', 0);
-            $('.edit-zone').hide();
         }
     </script>
 

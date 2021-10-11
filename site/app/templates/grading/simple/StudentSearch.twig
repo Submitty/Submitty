@@ -1,19 +1,24 @@
 <div id="student-search">
 	<label style="display:block;" for="student-search-input">Search for a student: </label>
-	<input 
+	<input
 		type="text"
 		class="ui-autocomplete-input" 
 		autocomplete="off" 
 		placeholder="Student search"
 		id="student-search-input" 
 	>
-    
-    <textarea style="display: none;" class="edit-zone custom-scrollbar" data-target=""> </textarea>
 </div>
 <script>
 	var student_full = {{ student_full|raw }};
 	$("#student-search-input").autocomplete({
         source: student_full,
         appendTo: "#student-search"
+    });
+    $('.edit-zone').on('keyup', () => {
+        $($('.edit-zone').data('target')).val($('.edit-zone').val());
+    })
+
+    $('.edit-zone').on('click', () => {
+        $(this).show();
     });
 </script>
