@@ -134,7 +134,7 @@ class OfficeHoursQueueController extends AbstractController {
         $queue_code = trim($queue_code);
         $token = trim($_POST['token'] ?? '');
 
-        $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
+        $validated_code = $this->core->getQueries()->getValidatedCode($queue_code, $token);
         if (!$validated_code) {
             $this->core->addErrorMessage("Invalid secret code");
             return MultiResponse::RedirectOnlyResponse(
