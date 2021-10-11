@@ -40,11 +40,11 @@ td {
     padding: 0 0.5em !important;
 }
 
-.unread {
+.unviewed {
     background-color: var(--viewed-content);
 }
 
-.unread td:first-child {
+.unviewed td:first-child {
     border-left-color: var(--actionable-blue);
     border-left-width: 3px;
     border-left-style: solid;

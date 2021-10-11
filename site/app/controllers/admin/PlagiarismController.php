@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\controllers\admin;
 
+use app\entities\plagiarism\PlagiarismRunAccess;
 use app\exceptions\ValidationException;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
@@ -420,6 +421,7 @@ class PlagiarismController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
         $all_configurations = [];
 
+        /** @var array<PlagiarismConfig> $configs */
         $configs = $em->getRepository(PlagiarismConfig::class)->findAll();
         $all_gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         $tmp = [];
@@ -428,13 +430,15 @@ class PlagiarismController extends AbstractController {
         }
         $all_gradeables = $tmp;
 
+        $user_id = $this->core->getUser()->getId();
         foreach ($configs as $config) {
             $configuration = [
                 "g_id" => $config->getGradeableID(),
                 "g_title" => $all_gradeables[$config->getGradeableID()],
                 "g_grade_due_date" => $this->core->getQueries()->getDateForGradeableById($config->getGradeableID()),
                 "g_config_version" => $config->getConfigID(),
-                "last_run_timestamp" => $config->getLastRunTimestamp()
+                "last_run_timestamp" => $config->getLastRunTimestamp(),
+                "has_been_viewed" => $config->userHasAccessed($user_id)
             ];
             $all_configurations[] = $configuration;
         }
@@ -508,11 +512,13 @@ class PlagiarismController extends AbstractController {
                 // lichen job in processing stage for this gradeable but not completed
                 $in_queue = true;
                 $processing = true;
+                $gradeable['has_been_viewed'] = true; // Needed to remove the "unviewed" background styling while running
             }
             elseif (file_exists($this->getQueuePath($gradeable['g_id'], $gradeable['g_config_version']))) {
                 // lichen job in queue for this gradeable but processing not started
                 $in_queue = true;
                 $processing = false;
+                $gradeable['has_been_viewed'] = true; // Needed to remove the "unviewed" background styling while running
             }
             else {
                 // no lichen job
@@ -554,7 +560,8 @@ class PlagiarismController extends AbstractController {
                 'delete_form_action' => $delete_form_action,
                 'nightly_rerun_link' => $nightly_rerun_link,
                 'night_rerun_status' => $night_rerun_status,
-                'download_config_file_link' => $download_config_file_link
+                'download_config_file_link' => $download_config_file_link,
+                'has_been_viewed' => $gradeable['has_been_viewed']
             ];
         }
 
@@ -573,6 +580,10 @@ class PlagiarismController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult(string $gradeable_id, string $config_id): ResponseInterface {
+        $em = $this->core->getCourseEntityManager();
+        /** @var PlagiarismConfig $plagiarism_config */
+        $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+
         $error_return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $gradeable_config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -631,6 +642,10 @@ class PlagiarismController extends AbstractController {
             array_push($rankings, $temp);
         }
 
+        $access_timestamp = new PlagiarismRunAccess($plagiarism_config, $this->core->getUser()->getId());
+        $em->persist($access_timestamp);
+        $plagiarism_config->addAccess($access_timestamp);
+        $em->flush();
 
         return new WebResponse(
             ['admin', 'Plagiarism'],
@@ -719,7 +734,7 @@ class PlagiarismController extends AbstractController {
                 }
 
                 // Input validation to check for invalid inputs occurs here
-                $new_config = new PlagiarismConfig(
+                $plagiarism_config = new PlagiarismConfig(
                     $gradeable_id,
                     $config_id,
                     $data["version"],
@@ -733,7 +748,7 @@ class PlagiarismController extends AbstractController {
                     $data["prior_term_gradeables"],
                     $data["ignore_submissions"]
                 );
-                $em->persist($new_config);
+                $em->persist($plagiarism_config);
             }
             catch (ValidationException $e) {
                 $this->core->addErrorMessage($e->getMessage());
@@ -744,7 +759,7 @@ class PlagiarismController extends AbstractController {
             try {
                 /** @var PlagiarismConfig $source_config */
                 $source_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $_POST["import-config-gradeable"], "config_id" => $_POST["import-config-config-id"]]);
-                $new_config = new PlagiarismConfig(
+                $plagiarism_config = new PlagiarismConfig(
                     $gradeable_id,
                     $config_id,
                     $source_config->getVersionStatus(),
@@ -758,7 +773,7 @@ class PlagiarismController extends AbstractController {
                     $source_config->getOtherGradeables(),
                     $source_config->getIgnoredSubmissions()
                 );
-                $em->persist($new_config);
+                $em->persist($plagiarism_config);
             }
             catch (ValidationException $e) {
                 $this->core->addErrorMessage("Error: Unable to load source configuration");
@@ -906,7 +921,6 @@ class PlagiarismController extends AbstractController {
                     $plagiarism_config->setOtherGradeables($prev_term_gradeables);
                     $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
                 }
-                $em->persist($plagiarism_config);
             }
             catch (ValidationException $e) {
                 $this->core->addErrorMessage($e->getMessage());
@@ -925,6 +939,8 @@ class PlagiarismController extends AbstractController {
             $this->deleteExistingProvidedCode($gradeable_id, $config_id);
         }
         if ($_POST['provided_code_option'] === "code_provided" && $_FILES['provided_code_file']['tmp_name'] !== "") {
+            $plagiarism_config->setHasProvidedCode(true);
+
             // error checking
             if (empty($_FILES) || !isset($_FILES['provided_code_file']) || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] === "") {
                 $this->core->addErrorMessage("Upload failed: Instructor code not provided");
@@ -939,8 +955,11 @@ class PlagiarismController extends AbstractController {
                 return new RedirectResponse($return_url);
             }
         }
+        else {
+            $plagiarism_config->setHasProvidedCode(false);
+        }
 
-        // We don't want to catch any errors here because if something goes wrong, we want to know about it as developers/sysadmins
+        $em->persist($plagiarism_config);
         $em->flush();
 
         // Create the Lichen job ///////////////////////////////////////////////
@@ -1041,14 +1060,14 @@ class PlagiarismController extends AbstractController {
 
         // get the config
         $em = $this->core->getCourseEntityManager();
+        /** @var PlagiarismConfig $plagiarism_config */
         $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
 
         // check to see if there are any provided code files
-        $has_provided_code = false;
+        $has_provided_code = $plagiarism_config->hasProvidedCode();
         $provided_code_filenames = [];
-        if (is_dir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files"))) {
+        if ($has_provided_code) {
             $provided_code_filename_array = array_diff(scandir(FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files")), [".", ".."]);
-            $has_provided_code = count($provided_code_filename_array) > 0;
             foreach ($provided_code_filename_array as $filename) {
                 $provided_code_filenames[] = $filename;
             }

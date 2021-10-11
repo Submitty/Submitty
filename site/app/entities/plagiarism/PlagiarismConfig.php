@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace app\entities\plagiarism;
 
 use app\exceptions\ValidationException;
+use Doctrine\Common\Collections\Criteria;
 use Exception;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 use app\libraries\plagiarism\PlagiarismUtils;
 use DateTime;
 
@@ -38,6 +40,12 @@ class PlagiarismConfig {
      * @var int
      */
     protected $config_id;
+
+    /**
+     * @ORM\Column(type="boolean")
+     * @var bool
+     */
+    protected $has_provided_code;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -106,7 +114,9 @@ class PlagiarismConfig {
     protected $last_run_timestamp;
 
     /**
-     * @ORM\OneToMany(targetEntity="app\entities\plagiarism\PlagiarismRunAccess", mappedBy="lichen_run_id")
+     * @ORM\OneToMany(targetEntity="app\entities\plagiarism\PlagiarismRunAccess", mappedBy="lichen_run")
+     * @ORM\OrderBy({"timestamp" = "DESC"})
+     * @var Collection<PlagiarismRunAccess>
      */
     protected $access_times;
 
@@ -155,6 +165,14 @@ class PlagiarismConfig {
 
     public function getConfigID(): int {
         return $this->config_id;
+    }
+
+    public function hasProvidedCode(): bool {
+        return $this->has_provided_code;
+    }
+
+    public function setHasProvidedCode(bool $provided_code_status): void {
+        $this->has_provided_code = $provided_code_status;
     }
 
     public function getVersionStatus(): string {
@@ -285,9 +303,13 @@ class PlagiarismConfig {
         $this->last_run_timestamp = new DateTime();
     }
 
-    public function getLastAccessForUser(string $user_id):  {
-
+    public function userHasAccessed(string $user_id): bool  {
+        return $this->access_times->filter(function (PlagiarismRunAccess $access) use ($user_id) {
+            return $access->getUserId() === $user_id;
+        })->count() > 0;
     }
 
-    
+    public function addAccess(PlagiarismRunAccess $timestamp): void {
+        $this->access_times[] = $timestamp;
+    }
 }

@@ -24,11 +24,10 @@ class PlagiarismRunAccess {
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
-     * @ORM\ManyToOne(targetEntity="app\entities\plagiarism\PlagiarismConfig", inversedBy="id")
-     * @var int
+     * @ORM\ManyToOne(targetEntity="app\entities\plagiarism\PlagiarismConfig", inversedBy="access_times")
+     * @var PlagiarismConfig
      */
-    protected $lichen_run_id;
+    protected $lichen_run;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -45,8 +44,8 @@ class PlagiarismRunAccess {
     /**
      * PlagiarismRunAccess constructor.
      */
-    public function __construct(string $lichen_run_id, string $user_id) {
-        $this->lichen_run_id = $lichen_run_id;
+    public function __construct(PlagiarismConfig $lichen_run_id, string $user_id) {
+        $this->lichen_run = $lichen_run_id;
         $this->user_id = $user_id;
         $this->timestamp = new DateTime();
     }

@@ -14,8 +14,12 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+
     # Move the last run timestamp to the database
     database.execute("ALTER TABLE lichen ADD COLUMN IF NOT EXISTS last_run_timestamp TIMESTAMP DEFAULT NOW();")
+
+    # Move the provided code data to the database
+    database.execute("ALTER TABLE lichen ADD COLUMN IF NOT EXISTS has_provided_code BOOLEAN NOT NULL DEFAULT FALSE;")
 
     # create table to hold view timestamps
     database.execute(
