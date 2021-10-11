@@ -84,7 +84,7 @@ class PlagiarismConfig {
      * @ORM\Column(type="smallint")
      * @var int
      */
-    protected $sequence_length;
+    protected $hash_size;
 
     /**
      * @ORM\Column(type="json")
@@ -114,7 +114,7 @@ class PlagiarismConfig {
         bool $regex_dir_checkout,
         string $language,
         int $threshold,
-        int $sequence_length,
+        int $hash_size,
         array $other_gradeables,
         array $ignored_submissions
     ) {
@@ -127,7 +127,7 @@ class PlagiarismConfig {
         $this->setRegexDirCheckout($regex_dir_checkout);
         $this->setLanguage($language);
         $this->setThreshold($threshold);
-        $this->setSequenceLength($sequence_length);
+        $this->setHashSize($hash_size);
         $this->setOtherGradeables($other_gradeables);
         $this->setIgnoredSubmissions($ignored_submissions);
     }
@@ -232,19 +232,19 @@ class PlagiarismConfig {
         }
     }
 
-    public function getSequenceLength(): int {
-        return $this->sequence_length;
+    public function getHashSize(): int {
+        return $this->hash_size;
     }
 
     /**
      * @throws ValidationException
      */
-    public function setSequenceLength(int $sequence_length): void {
-        if ($sequence_length > 1) {
-            $this->sequence_length = $sequence_length;
+    public function setHashSize(int $hash_size): void {
+        if ($hash_size > 1) {
+            $this->hash_size = $hash_size;
         }
         else {
-            throw new ValidationException("Error: Invalid sequence length", []);
+            throw new ValidationException("Error: Invalid hash size", []);
         }
     }
 
