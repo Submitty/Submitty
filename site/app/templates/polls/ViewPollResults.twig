@@ -11,8 +11,9 @@
             data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
             data[0].y.push({{ number }});
         {% endfor %}
+        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
         const layout = {
-          title: "{{ poll.getName() }}",
+          title: title_text.documentElement.textContent,
         }
         Plotly.newPlot("chartContainer", data, layout);
     }

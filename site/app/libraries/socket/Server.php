@@ -47,6 +47,7 @@ class Server implements MessageComponentInterface {
      * @return bool
      */
     private function checkAuth(ConnectionInterface $conn): bool {
+        // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
         $user_agent = $request->getHeader('User-Agent')[0] ?? '';
 
