@@ -48,7 +48,6 @@ class Server implements MessageComponentInterface {
      */
     private function checkAuth(ConnectionInterface $conn): bool {
         // The httpRequest property does exist on connections...
-        // @phpstan-ignore-next-line
         $request = $conn->httpRequest;
         $user_agent = $request->getHeader('User-Agent')[0] ?? '';
 
