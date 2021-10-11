@@ -71,10 +71,7 @@ def status(args):
             loop_args.config.database['dbname'] = 'submitty'
             try:
                 database = db.Database(loop_args.config.database, environment)
-                exists = database.engine.dialect.has_table(
-                    database.engine,
-                    database.migration_table.__tablename__
-                )
+                exists = database.has_table(database.migration_table.__tablename__)
                 if not exists:
                     print('Could not find migration table for {}'.format(environment))
                     database.close()
@@ -109,10 +106,7 @@ def status(args):
                     )
                     try:
                         database = db.Database(loop_args.config.database, environment)
-                        exists = database.engine.dialect.has_table(
-                            database.engine,
-                            database.migration_table.__tablename__
-                        )
+                        exists = database.has_table(database.migration_table.__tablename__)
                         if not exists:
                             print(
                                 'Could not find migration table for {}.{}'.format(

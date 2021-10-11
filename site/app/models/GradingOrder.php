@@ -211,7 +211,7 @@ class GradingOrder extends AbstractModel {
     /**
      * Queries the database to populate $this->not_fully_graded
      *
-     * @param $component_id
+     * @param int $component_id
      */
     private function initUsersNotFullyGraded($component_id) {
         if (is_null($this->not_fully_graded)) {
@@ -297,7 +297,7 @@ class GradingOrder extends AbstractModel {
      * Will only include students that cause $fn to return true
      * @param Submitter $submitter Current grading submitter
      * @param callable $fn Args: (Submitter) Returns: bool, true if the submitter should be included
-     * @return Submitter Previous submitter to grade
+     * @return null|Submitter Previous submitter to grade
      */
     public function getPrevSubmitterMatching(Submitter $submitter, callable $fn) {
 
@@ -337,7 +337,7 @@ class GradingOrder extends AbstractModel {
      * Will only include students that cause $fn to return true
      * @param Submitter $submitter Current grading submitter
      * @param callable $fn Args: (Submitter) Returns: bool, true if the submitter should be included
-     * @return Submitter Next submitter to grade
+     * @return null|Submitter Next submitter to grade
      */
     public function getNextSubmitterMatching(Submitter $submitter, callable $fn) {
 
@@ -581,8 +581,8 @@ class GradingOrder extends AbstractModel {
      * Returns an string describing the ordering based on its sort type and direction, or an empty string
      * if an unknown sort / direction combination is passed in.
      *
-     * @param $sort Sort type
-     * @param $direction Direction of sort (ASC or DESC)
+     * @param string $sort Sort type
+     * @param string $direction Direction of sort (ASC or DESC)
      * @return string
      */
     public static function getGradingOrderMessage($sort, $direction) {

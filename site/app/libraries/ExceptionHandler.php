@@ -104,7 +104,7 @@ class ExceptionHandler {
         $message .= "{$trace_string}\n";
 
         if ($is_base_exception) {
-            /** @type BaseException $exception */
+            /** @var BaseException $exception */
             $extra = $exception->getDetails();
             if (count($extra) > 0) {
                 $message .= "Extra Details:\n";
