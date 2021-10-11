@@ -6231,7 +6231,7 @@ AND gc_id IN (
         }
         else {
             $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", [$queue_code, $token]);
-            if ($this->course_db->rowCount() > 0) {
+            if ($this->course_db->getRowCount() > 0) {
                 return $this->course_db->rows()[0]['code'];
             }
         }
