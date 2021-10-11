@@ -179,8 +179,8 @@ class ReportController extends AbstractController {
         $team_graded_gradeables = [];
 
         // Get the team gradeables first and, unfortunately, fully cache them
+        /** @var GradedGradeable $gg */
         foreach ($this->core->getQueries()->getGradedGradeables($team_gradeables) as $gg) {
-            /** @var GradedGradeable $gg */
             foreach ($gg->getSubmitter()->getTeam()->getMemberUserIds() as $user_id) {
                 $team_graded_gradeables[$gg->getGradeableId()][$user_id] = $gg;
             }
@@ -319,7 +319,7 @@ class ReportController extends AbstractController {
     /**
      * Generates a CSV row for a user
      * @param User $user The user the grades are for
-     * @param GradedGradeable[] The list of graded gradeables, indexed by gradeable id
+     * @param GradedGradeable[] $ggs The list of graded gradeables, indexed by gradeable id
      * @param LateDays $late_days The late day info for these graded gradeables
      * @return array
      */
@@ -357,7 +357,7 @@ class ReportController extends AbstractController {
      * Saves all user data to a file
      * @param string $base_path the base path to store the reports
      * @param User $user The user the report is for
-     * @param GradedGradeable[] The list of graded gradeables, indexed by gradeable id
+     * @param GradedGradeable[] $ggs The list of graded gradeables, indexed by gradeable id
      * @param LateDays $late_days The late day info for these graded gradeables
      */
     private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days, array $polls) {
