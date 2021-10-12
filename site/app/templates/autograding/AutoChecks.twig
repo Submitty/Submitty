@@ -5,8 +5,7 @@
     <p>
       {% if check['metrics']['elapsed_time'] is not null %}
         {% if check['metrics']['elapsed_time'] %}
-          {# 1000000000 (1e9) for nanosecond to second conversion #}
-          Grading time: <span style="font-style: italic">{{(check['metrics']['elapsed_time']/1000000000)|round(3)}}s</span>
+          Grading time: <span style="font-style: italic">{{check['metrics']['elapsed_time'] | round(1)}}s</span>
         {% else %}
           Grading time: <span style="font-style: italic">&lt;.1s</span>
         {% endif %}
