@@ -23,13 +23,14 @@ def up(config, database, semester, course):
     if config_file.is_file():
         with open(config_file, 'r') as in_file:
             j = json.load(in_file)
-        contact_information_enabled = j['course_details']['queue_contact_info']
-        query = """
-            UPDATE queue_settings
-            SET contact_information = :contact_information_enabled;
-        """
-        params = {'contact_information_enabled' : contact_information_enabled}
-        database.session.execute(query, params)
+        if 'queue_contact_info' in j['course_details']:
+            contact_information_enabled = j['course_details']['queue_contact_info']
+            query = """
+                UPDATE queue_settings
+                SET contact_information = :contact_information_enabled;
+            """
+            params = {'contact_information_enabled' : contact_information_enabled}
+            database.session.execute(query, params)
 
 
 def down(config, database, semester, course):
