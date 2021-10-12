@@ -75,6 +75,7 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
+\app\libraries\DateUtils::setTimezone($core->getConfig()->getTimezone());
 $core->initializeTokenManager();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\entities\plagiarism;
 
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use app\libraries\plagiarism\PlagiarismUtils;
@@ -298,7 +299,7 @@ class PlagiarismConfig {
     }
 
     public function setLastRunToCurrentTime(): void {
-        $this->last_run_timestamp = new DateTime();
+        $this->last_run_timestamp = DateUtils::getDateTimeNow();
     }
 
     public function userHasAccessed(string $user_id): bool {

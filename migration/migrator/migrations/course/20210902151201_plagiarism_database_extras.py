@@ -28,7 +28,7 @@ def up(config, database, semester, course):
             id SERIAL PRIMARY KEY,
             lichen_run_id INT NOT NULL,
             user_id VARCHAR(255) NOT NULL,
-            timestamp TIMESTAMP NOT NULL,
+            timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
             CONSTRAINT fk_lichen_run_id
                 FOREIGN KEY(lichen_run_id)
                     REFERENCES lichen(id)

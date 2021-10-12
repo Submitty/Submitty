@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\entities\plagiarism;
 
+use app\libraries\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use DateTime;
@@ -47,7 +48,7 @@ class PlagiarismRunAccess {
     public function __construct(PlagiarismConfig $lichen_run_id, string $user_id) {
         $this->lichen_run = $lichen_run_id;
         $this->user_id = $user_id;
-        $this->timestamp = new DateTime();
+        $this->timestamp = DateUtils::getDateTimeNow();
     }
 
     public function getUserID(): string {
