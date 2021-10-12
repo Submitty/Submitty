@@ -21,7 +21,7 @@ def up(config, database, semester, course):
         # add boolean to course config
     config_file = Path(course_dir, 'config', 'config.json')
     if config_file.is_file():
-        with open(config_file, 'r') as in_file:
+        with config_file.open() as in_file:
             j = json.load(in_file)
         if 'queue_contact_info' in j['course_details']:
             contact_information_enabled = j['course_details']['queue_contact_info']
