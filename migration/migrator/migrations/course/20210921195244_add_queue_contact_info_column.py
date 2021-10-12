@@ -1,10 +1,6 @@
 """Migration for a given Submitty course database."""
-<<<<<<< HEAD
-
-=======
 from pathlib import Path
 import json
->>>>>>> master
 
 def up(config, database, semester, course):
     """
