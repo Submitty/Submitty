@@ -205,33 +205,10 @@ class OfficeHoursQueueController extends AbstractController {
      * @return MultiResponse
      */
     public function switchQueue($queue_code){
-        //first remove them from current queue
-        if (empty($_POST['user_id'])) {
-            $this->core->addErrorMessage("Missing user ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-
+        //do all error checking before leaving previous queue
+        //make sure they're in a queue already
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Not In Queue");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-
-        $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], 'self', $queue_code);
-
-        //add to new queue
-        if (empty($_POST['name'])) {
-            $this->core->addErrorMessage("Missing user's name");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-
-        if (empty($_POST['code'])) {
-            $this->core->addErrorMessage("Missing queue name");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -241,10 +218,18 @@ class OfficeHoursQueueController extends AbstractController {
         $time_in = $_POST['time_in'] ?? null;
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
-        $validated_code = $this->core->getQueries()->isValidCode($new_queue_code, $token);
 
+        //check that the new token entered is correct
+        $validated_code = $this->core->getQueries()->isValidCode($new_queue_code, $token);
         if (!$validated_code) {
             $this->core->addErrorMessage("Invalid secret code");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (empty($_POST['code'])) {
+            $this->core->addErrorMessage("Missing queue name");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -273,6 +258,19 @@ class OfficeHoursQueueController extends AbstractController {
                 }
             }
         }
+
+        if (empty($_POST['name'])) {
+            $this->core->addErrorMessage("Missing user's name");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+
+        //remove them from current queue
+        $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], 'self', $queue_code);
+
+        //add to new queue
         $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info, $time_in);
         $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");

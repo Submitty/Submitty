@@ -97,12 +97,12 @@
     </form>
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-          <input type="hidden" id="name_box" name="name" maxlength="20" placeholder="Queue Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+          <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
           <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}"/>
           <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
           <div class="form-group">
               <br>
-              <p>NOTE: Switching queues will preserve your spot in line</p>
+              <h4>NOTE: Switching queues will preserve your spot in line</h4>
               <label for="queue_code">Queue:
               </label>
               <select id="switch_queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
@@ -128,9 +128,7 @@
     <br>
       <script>
           $('#switch_queue_code').change(function(){
-
               const selected_queue =  $('#switch_queue_code').val();
-
               let queue='temp';
               let found = false;
               {% for queue in viewer.getAllQueues()|filter(queue => queue['contact_information'] == 'true') %}
