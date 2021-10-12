@@ -925,8 +925,9 @@ CREATE TABLE public.queue_settings (
     id integer NOT NULL,
     open boolean NOT NULL,
     code text NOT NULL,
-    token text,
-    regex_pattern character varying
+    token text NOT NULL,
+    regex_pattern character varying,
+    contact_information boolean DEFAULT true NOT NULL
 );
 
 
