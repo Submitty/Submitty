@@ -22,7 +22,7 @@ class LateDayInfo extends AbstractModel {
     const STATUS_LATE = 2;
     const STATUS_BAD = 3;
 
-    public static function isValidStatus($status) {
+    public static function isValidStatus(int $status): bool {
         return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
     }
 

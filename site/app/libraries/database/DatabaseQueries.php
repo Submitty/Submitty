@@ -4052,9 +4052,9 @@ AND gc_id IN (
         return str_replace("|", " ", $category_desc);
     }
 
-    public function addNewCategory($category) {
+    public function addNewCategory($category, $rank) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", [$this->filterCategoryDesc($category)]);
+        $this->course_db->query("INSERT INTO categories_list (category_desc, rank) VALUES (?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank]);
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }
@@ -6255,6 +6255,7 @@ AND gc_id IN (
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['contact_information'];
     }
+
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
