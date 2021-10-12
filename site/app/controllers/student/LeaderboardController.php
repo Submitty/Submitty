@@ -77,7 +77,7 @@ class LeaderboardController extends AbstractController {
 
         $leaderboard_data = [];
         $valid_testcases = [];
-        $title = "";
+        $description = "";
         $top_visible_students = 10;
 
         $autogradingConfig = $gradeable->getAutogradingConfig();
@@ -86,7 +86,7 @@ class LeaderboardController extends AbstractController {
 
             $leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
             if (!is_null($leaderboard)) {
-                $title = $leaderboard->getTitle();
+                $description = $leaderboard->getDescription();
                 $top_visible_students = $leaderboard->getTopVisibleStudents();
                 $leaderboard_data = $this->core->getQueries()->getLeaderboard($gradeable_id, true, $valid_testcases);
             }
@@ -111,6 +111,7 @@ class LeaderboardController extends AbstractController {
             "top_visible_students" => $top_visible_students,
             "user_id" => $user_id,
             "user_index" => $user_index,
+            "description" => $description,
             "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName(),
             "studentIsAnonymous" => $user_is_anonymous,
             "grader_value" => User::GROUP_LIMITED_ACCESS_GRADER

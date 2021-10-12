@@ -54,7 +54,8 @@
       {
         "top_visible_students": 10,
         "title": "Compilation",
-        "tag": "compilation"
+        "tag": "compilation",
+        "description":"A leaderboard that tests which program compiles the fastest. This is mostly useless."
       },
       {
         "top_visible_students": 10,
@@ -64,7 +65,8 @@
       {
         "top_visible_students": 0,
         "title": "Intensive Sorting",
-        "tag": "long_sort"
+        "tag": "long_sort",
+        "description":"A leaderboard that shows all students that were able to complete the harder sorting question."
       }
     ]
 }

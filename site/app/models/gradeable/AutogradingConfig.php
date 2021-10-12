@@ -34,6 +34,8 @@ use app\models\notebook\Notebook;
  * @method bool getOnePartyOnly()
  * @method bool isNotebookGradeable()
  * @method LeaderboardConfig[] getLeaderboards()
+ * @method bool getDisplayTestcaseRuntimeMemory()
+ * @method void setDisplayTestcaseRuntimeMemory()
  */
 class AutogradingConfig extends AbstractModel {
 
@@ -66,6 +68,8 @@ class AutogradingConfig extends AbstractModel {
 
     /** @prop @var LeaderboardConfig[] General info about leaderboards*/
     protected $leaderboards = [];
+    /** @prop @var bool Show the memory and runtime of the autograding for testcases */
+    protected $display_testcase_runtime_memory = false;
 
     /* Properties if early submission incentive enabled */
     /** @prop @var bool If there is an early submission incentive */
@@ -139,6 +143,7 @@ class AutogradingConfig extends AbstractModel {
         foreach ($details['leaderboards'] ?? [] as $leaderboard) {
             $this->leaderboards[] = new LeaderboardConfig($this->core, $leaderboard);
         }
+        $this->display_testcase_runtime_memory = $details['display_testcase_runtime_memory'] ?? false;
 
         $this->base_testcases = $details["testcases"] ?? [];
         $this->setTestCasePoints();

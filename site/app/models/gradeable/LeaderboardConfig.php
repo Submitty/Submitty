@@ -12,6 +12,7 @@ use app\models\AbstractModel;
  *
  * @method int getTopVisibleStudents()
  * @method string getTitle()
+ * @method string getDescription()
  * @method string getTag()
  */
 class LeaderboardConfig extends AbstractModel {
@@ -20,6 +21,8 @@ class LeaderboardConfig extends AbstractModel {
     protected $top_visible_students;
     /** @prop @var string The human readable title */
     protected $title;
+    /** @prop @var string The human readable description */
+    protected $description;
     /** @prop @var string A unique tag for the leaderboard */
     protected $tag;
 
@@ -34,6 +37,7 @@ class LeaderboardConfig extends AbstractModel {
 
         $this->top_visible_students = $details["top_visible_students"];
         $this->title = $details["title"];
+        $this->description = $details["description"] ?? "";
         $this->tag = $details["tag"];
     }
 }
