@@ -8,6 +8,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\controllers\student\SubmissionController;
+use app\models\User;
 
 class LeaderboardController extends AbstractController {
 
@@ -87,11 +88,11 @@ class LeaderboardController extends AbstractController {
             if (!is_null($leaderboard)) {
                 $title = $leaderboard->getTitle();
                 $top_visible_students = $leaderboard->getTopVisibleStudents();
-                $leaderboard_data = $this->core->getQueries()->getLeaderboard($gradeable_id, false, $valid_testcases);
+                $leaderboard_data = $this->core->getQueries()->getLeaderboard($gradeable_id, true, $valid_testcases);
             }
         }
 
-        $user_index = null;
+        $user_index = -1;
         foreach ($leaderboard_data as $index => $row) {
             if ($row['user_id'] == $user_id) {
                 $user_index = $index;
@@ -111,7 +112,8 @@ class LeaderboardController extends AbstractController {
             "user_id" => $user_id,
             "user_index" => $user_index,
             "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName(),
-            "studentIsAnonymous" => $user_is_anonymous
+            "studentIsAnonymous" => $user_is_anonymous,
+            "grader_value" => User::GROUP_LIMITED_ACCESS_GRADER
         ]);
     }
 

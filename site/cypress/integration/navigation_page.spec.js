@@ -27,7 +27,7 @@ describe('navigation page', () => {
         const sections = {
             future: 4,
             beta: 3,
-            open: 5,
+            open: 4,
             closed: 3,
             items_being_graded: 9,
             graded: 10,
@@ -35,7 +35,7 @@ describe('navigation page', () => {
         const gradeable_id = 'future_no_tas_homework';
 
         cy.get('.gradeable-row').each(($el) => {
-            cy.wrap($el).find('.course-button').should('have.length', 5);
+            cy.wrap($el).find('.course-button').should('have.length', 4);
         });
         validate_navigation_page_sections(sections);
 

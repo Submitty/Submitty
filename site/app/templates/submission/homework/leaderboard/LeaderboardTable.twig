@@ -1,10 +1,3 @@
-{% if studentIsAnonymous %}
-  {% set you_text = '(you, anonymous to others)' %}
-{% else %}
-  {% set you_text = '(you, visible to everyone)' %}
-{% endif %}
-
-
 <table class="table table-striped" style="width: 100%">
 	<thead>
 		<tr>
@@ -16,16 +9,35 @@
 		</tr>
 	</thead>
 	<tbody>
+		{% set rank = 1 %}
+		{% set starting_dots_set = false %}
 		{% for entry in leaderboard %}
-			{% if loop.index0 < top_visible_students or top_visible_students == 0 or accessFullGrading %}
-				<tr class="{% if entry["user_group"] < 4%}leaderboard-grader{% endif %}">
-					<th scope="row" class="row_number">{{ loop.index }}</th>
+			{% set normal_leaderboard_section = rank <= top_visible_students or top_visible_students == 0 or accessFullGrading %}
+			{% set student_rank_section = loop.index0 > user_index - 4 and loop.index0 <= user_index %}
+			{% if normal_leaderboard_section or student_rank_section %}
+				<tr class="{% if entry["user_group"] < grader_value%}leaderboard-grader{% endif %}">
+					<th scope="row" class="row_number">
+						{# Only show and increase the rank if it is a student and in the normal section #}
+						{% if normal_leaderboard_section and not (entry["user_group"] <= grader_value) %}
+							{{ rank }}
+							{% set rank = rank + 1 %}
+						{% endif %}
+					</th>
 					<td>
 						{% if user_id == entry['user_id'] %}
-							{{ user_name }} {{you_text}}
+							{{ entry["name"] }}
+							(you,
+							{% if studentIsAnonymous %}
+								anonymous to others)
+							{% else %}
+								visible to everyone)
+							{% endif %}
+						{% elseif not accessFullGrading and (not normal_leaderboard_section or entry["anonymous_leaderboard"]) %}
+							Anonymous
 						{% else %}
-							{{ entry["name"] }} {% if entry["user_group"] < 4%}(course staff){% endif %}
+							{{ entry["name"] }}
 						{% endif %}
+						{% if entry["user_group"] < 4%}(course staff){% endif %}
 						{% if accessFullGrading %}
 							({{ entry["user_id"] }})
 						{% endif %}
@@ -36,35 +48,23 @@
 					<td>{{ (entry["memory"] / 1000) | round }}MB</td>
 				</tr>
 			{% endif %}
+			{# If no longer in the normal_leaderboard_section and the dots have not been set yet #}
+			{% if not starting_dots_set and not normal_leaderboard_section %}
+				{# Set the indicator so it knows that the dots have been set #}
+				{% set starting_dots_set = true %}
+				{# Except only add the dots if this row is not in the few students ahead of the current student
+				and make sure not to add it if the user_index is less than the current position #}
+				{% if not student_rank_section and user_index > loop.index0 %}
+					<tr class="blank_row">
+						<td colspan="5">...</td>
+					</tr>
+				{% endif %}
+			{% endif %}
 		{% endfor %}
-
-    {# Show the student #}
-		{% if user_index >= top_visible_students and top_visible_students != 0 and not accessFullGrading %}
+		{% if rank > top_visible_students and top_visible_students != 0 and not accessFullGrading %}
 			<tr class="blank_row">
 				<td colspan="5">...</td>
 			</tr>
-			{% for entry in leaderboard %}
-				{% if loop.index0 > user_index - 4 and loop.index0 <= user_index %}
-					<tr>
-						<td class="row_number"></td>
-						<td>
-							{% if user_id == entry['user_id'] %}
-								{{ user_name }} {{you_text}}
-							{% else %}
-								{{entry['anon_id']}} ({{user_index - loop.index0}} ahead of you)
-							{% endif %}
-						</td>
-						<td>{{ entry["points"] }}</td>
-						{# 1000000000 (1e9) for nanosecond to second conversion #}
-						<td>{{ (entry["time"] / 1000000000)|round(3) }}s</td>
-						<td>{{ (entry["memory"] / 1000) | round }}MB</td>
-					</tr>
-				{% endif %}
-			{% endfor %}
-      <tr class="blank_row">
-				<td colspan="5">...</td>
-			</tr>
 		{% endif %}
-
 	</tbody>
 </table>

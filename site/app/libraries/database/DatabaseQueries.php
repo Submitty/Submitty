@@ -7713,10 +7713,8 @@ SQL;
 SELECT    leaderboard.*,
           anon_id,
           user_group,
-        CASE
-                  WHEN anonymous_leaderboard = true THEN anon_id
-                  ELSE Concat(COALESCE (user_preferred_firstname, user_firstname ), ' ', COALESCE (user_preferred_lastname, user_lastname ))
-        END AS NAME
+          anonymous_leaderboard,
+          Concat(COALESCE (user_preferred_firstname, user_firstname ), ' ', COALESCE (user_preferred_lastname, user_lastname )) as name
 FROM      (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
                               Sum(max_rss_size)                            AS memory,
