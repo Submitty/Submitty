@@ -120,7 +120,7 @@ if (empty($_COOKIE['submitty_token'])) {
 
 $is_api = explode('/', $request->getPathInfo())[1] === 'api';
 if ($is_api) {
-    if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
+    if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
         $_POST = json_decode(file_get_contents('php://input'), true);
     }
     $response = WebRouter::getApiResponse($request, $core);

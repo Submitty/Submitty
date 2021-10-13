@@ -59,6 +59,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "compare",                 "/usr/bin/compare" }, //image magick!
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
     { "convert",                 "/usr/bin/convert" }, //image magick!
+    { "wkhtmltoimage",           "/usr/bin/wkhtmltoimage" },
+    { "wkhtmltopdf",             "/usr/bin/wkhtmltopdf" },
+    { "xvfb-run",                "/xvfb-run" },   // allow htmltoimage and htmltopdf to run headless
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
