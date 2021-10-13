@@ -218,7 +218,7 @@ class OfficeHoursQueueController extends AbstractController {
         $new_queue_code = $_POST['code'];
 
         //check that the new token entered is correct
-        $validated_code = $this->core->getQueries()->isValidCode($new_queue_code, $token);
+        $validated_code = $this->core->getQueries()->getValidatedCode($new_queue_code, $token);
         if (!$validated_code) {
             $this->core->addErrorMessage("Invalid secret code");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
