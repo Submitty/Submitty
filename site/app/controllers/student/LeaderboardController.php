@@ -30,7 +30,7 @@ class LeaderboardController extends AbstractController {
         $autogradingConfig = $gradeable->getAutogradingConfig();
         if (is_null($autogradingConfig)) {
             // This means the gradeable is being rebuilt
-            $this->core->addErrorMessage("Leaderboard currently unavalable, please try again in a few min");
+            $this->core->addErrorMessage("This leaderboard is currently unavailable, please try again in a few minutes.");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl([]))
             );
