@@ -90,7 +90,7 @@ while :; do
     shift
 done
 
-if [ ${VAGRANT} == 1 ]
+if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
     export DEBIAN_FRONTEND=noninteractive
 fi
