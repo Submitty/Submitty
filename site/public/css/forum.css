@@ -160,10 +160,18 @@
     color: orange;
 }
 
-.active-thread-announcement {
+.active-thread-announcement-expiring {
     position: relative;
     display: inline-block;
     color: gold;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.active-thread-announcement {
+    position: relative;
+    display: inline-block;
+    color: var(--submitty-logo-blue);
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
 }
@@ -199,7 +207,7 @@
 }
 
 .reverse_golden_hover {
-    color: gold !important;
+    color: gold;
 }
 
 .reverse_golden_hover:hover {
@@ -244,12 +252,21 @@
 }
 
 .current-favorite i.fas,
-.active-thread-remove-announcement i.fas {
+.active-thread-remove-announcement i.fas
+.active-thread-remove-expiring-announcement i.fas {
     position: relative;
     display: inline-block;
-    color: gold;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
+}
+
+.current-favorite i.fas,
+.active-thread-remove-expiring-announcement i.fas {
+  color: gold;
+}
+
+.active-thread-remove-announcement i.fas {
+    color: var(--submitty-logo-blue);
 }
 
 #thread_form {
@@ -270,6 +287,7 @@
 }
 
 .thread-announcement,
+.thread-announcement-expiring,
 .thread-favorite,
 .thread-merged,
 .thread-locked {
@@ -281,9 +299,12 @@
     -webkit-text-stroke-color: black;
 }
 
-.thread-announcement,
+.thread-announcement-expiring,
 .thread-favorite {
     color: gold;
+}
+.thread-announcement {
+    color: var(--submitty-logo-blue);
 }
 
 .thread-merged,
