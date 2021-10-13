@@ -134,7 +134,7 @@ class OfficeHoursQueueController extends AbstractController {
             }
         }
         $queue_code = trim($queue_code);
-        $token = trim($_POST['token']) ?? '';
+        $token = trim($_POST['token'] ?? '');
 
         $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {
@@ -204,7 +204,7 @@ class OfficeHoursQueueController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/switch", methods={"POST"})
      * @return MultiResponse
      */
-    public function switchQueue($queue_code){
+    public function switchQueue($queue_code) {
         //do all error checking before leaving previous queue
         //make sure they're in a queue already
         if (empty($queue_code)) {
