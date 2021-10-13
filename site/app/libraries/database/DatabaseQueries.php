@@ -6220,15 +6220,20 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
     }
 
-    public function isValidCode($queue_code, $token = null) {
-        if (is_null($token)) {
-            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+    public function getValidatedCode($queue_code, $token = null) {
+        //first check if the queue has an access code
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+        if ($this->course_db->getRowCount() > 0 && $this->course_db->rows()[0]['token'] == null) {
+            return $this->course_db->rows()[0]['code'];
+        }
+        elseif ($token === null) {
+            return false;
         }
         else {
             $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", [$queue_code, $token]);
-        }
-        if (0 < count($this->course_db->rows())) {
-            return $this->course_db->rows()[0]['code'];
+            if ($this->course_db->getRowCount() > 0) {
+                return $this->course_db->rows()[0]['code'];
+            }
         }
         return false;
     }
