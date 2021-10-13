@@ -2,6 +2,7 @@
 
 use app\exceptions\BaseException;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
@@ -75,7 +76,7 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
-\app\libraries\DateUtils::setTimezone($core->getConfig()->getTimezone());
+DateUtils::setTimezone($core->getConfig()->getTimezone());
 $core->initializeTokenManager();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
