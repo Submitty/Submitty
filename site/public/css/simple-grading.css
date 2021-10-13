@@ -32,7 +32,7 @@
 }
 
 .sticky-top .sticky-box {
-    width:78vw;
+    width: 78vw;
     border: 3px solid var(--background-blue);
     padding: 1em;
     margin: 0 1em 0 0;
