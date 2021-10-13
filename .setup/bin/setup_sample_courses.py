@@ -1260,7 +1260,8 @@ class Course(object):
                               status=poll["status"],
                               release_date=poll["release_date"],
                               image_path=poll["image_path"],
-                              question_type=poll["question_type"])
+                              question_type=poll["question_type"],
+                              release_histogram=poll["release_histogram"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
                                   option_id=i,
@@ -1308,7 +1309,6 @@ class Course(object):
         with open(course_json_file, 'r+') as open_file:
             course_json = json.load(open_file)
             course_json['course_details']['queue_enabled'] = True
-            course_json['course_details']['queue_contact_info'] = True
             course_json['course_details']['queue_message'] = queue_data["queue_message"]
             course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
             open_file.seek(0)

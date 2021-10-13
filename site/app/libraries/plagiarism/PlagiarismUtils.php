@@ -6,6 +6,35 @@ use Ds\Stack;
 
 class PlagiarismUtils {
     /**
+     * This constant represents the default configuration for each language supported.  Currently, only the sequence
+     * length and language name are listed but more parameters can be added in the future.
+     * @var int
+     */
+    const SUPPORTED_LANGUAGES = [
+        "plaintext" => [
+            "sequence_length" => 14
+        ],
+        "python" => [
+            "sequence_length" => 14
+        ],
+        "java" => [
+            "sequence_length" => 14
+        ],
+        "cpp" => [
+            "sequence_length" => 14
+        ],
+        "mips" => [
+            "sequence_length" => 5
+        ]
+    ];
+
+    /**
+     * This constant represents the default common code threshold listed on the plagiarism configuration form
+     * @var int
+     */
+    const DEFAULT_THRESHOLD = 10;
+
+    /**
      * @param string $filename
      * @param string $user_id_2
      * @param int $version_user_2
@@ -54,12 +83,5 @@ class PlagiarismUtils {
         }
 
         return $resultArray;
-    }
-
-    /**
-     * @return string[]
-     */
-    public static function getSupportedLanguages(): array {
-        return ["plaintext", "python", "java", "cpp", "mips"];
     }
 }

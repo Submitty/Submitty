@@ -416,6 +416,13 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
 
+          - name: Run git tests
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+              sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+              bash tests/git_test.sh
+
           - uses: nanasess/setup-chromedriver@master
           - name: Setup chromedriver
             run: |
@@ -453,6 +460,39 @@ jobs:
               browser: chrome
               headless: true
               env: run_area=CI
+
+          - name: Stop autograding services
+            run: |
+              sudo systemctl stop submitty_autograding_worker
+              sudo systemctl stop submitty_autograding_shipper
+
+          - name: Run autograding status test
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/integration/autograding_status_1.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              headless: true
+              env: autograding_shipper_off=True
+          
+          - name: Restart autograding shipper
+            run: |
+              sudo systemctl restart submitty_autograding_shipper
+
+          - name: Run autograding status test
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/integration/autograding_status_2.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              headless: true
+              env: autograding_shipper_off=True
+
+          - name: Restart autograding worker
+            run: |
+              sudo systemctl restart submitty_autograding_worker
 
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json

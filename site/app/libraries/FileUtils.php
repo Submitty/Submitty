@@ -209,8 +209,8 @@ class FileUtils {
     }
 
     /**
-     * @param $path
-     * @param $mode
+     * @param string $path
+     * @param int $mode
      *
      * @return bool
      */
@@ -329,7 +329,7 @@ class FileUtils {
     }
 
     /**
-     * @param $zipname
+     * @param string $zipname
      * @return bool
      */
     public static function checkFileInZipName($zipname) {

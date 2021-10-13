@@ -9,7 +9,7 @@
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden_message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
+    <div class='content overridden-message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
 {% endif %}
 
 <div class="content" id="gradeable-submission-cont">
@@ -290,7 +290,8 @@
             "old_files" : old_files,
             "viewing_inactive_version" : viewing_inactive_version,
             "is_timed" : is_timed,
-            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0
+            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
+            "is_grader_view" : false
         } %}
     {% endif %}
 
@@ -306,7 +307,7 @@
                      role="text"
                      aria-label="Press enter to upload your {{ part }} file"
                 >
-                    <h2 class="label" id="label{{ loop.index }}">
+                    <h2 class="label" id="label{{ loop.index }}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} file(s) here or click to open file browser
                         {% else %}
@@ -323,7 +324,11 @@
                         <th>Size:</th>
                       </tr>
                     </table>
-                    <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                    {% if viewing_inactive_version %}
+                        <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
+                    {% else %}
+                        <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -347,11 +352,16 @@
                     "content" : upload_message
                 } only %}
             </div>
-            <button type="button" id="submit" class="submit-gradeable btn btn-success">
-                {{ viewing_inactive_version ? 'Switch To Most Recent Version To Make New Submission' : 'Submit' }}
+            <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
+                Submit
             </button>
+            {% if viewing_inactive_version %}
+                <a href="{{ recent_version_url }}" class="btn btn-primary">
+                    Switch to Most Recent Version
+                </a>
+            {% endif %}
         {% endif %}
-        
+
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
@@ -371,7 +381,7 @@
 
         <script>
             $(function() {
-                setButtonStatus();
+                setButtonStatus({{ viewing_inactive_version }});
                 initMaxNoFiles({{ max_file_uploads }});
             });
 
@@ -382,9 +392,11 @@
             createArray(num_parts);
             var assignment_version = {{ display_version }};
             var highest_version = {{ highest_version }};
-            for (var i = 1; i <= num_parts; i++ ){
-                initializeDropZone("upload" + String(i));
-            }
+            {% if not viewing_inactive_version %}
+                for (var i = 1; i <= num_parts; i++ ){
+                    initializeDropZone("upload" + String(i));
+                }
+            {% endif %}
 
 
             $("#startnew").click(function(e){ // Clear all the selected files in the buckets
@@ -498,8 +510,8 @@
             // bulk upload
             if ($("#radio-bulk").is(":checked")) {
                 handleBulk("{{ gradeable_id }}",
-                            {{ max_post_size }},
                             {{ max_file_size }},
+                            {{ max_post_size }},
                             num_pages, use_qr,
                             use_ocr, qr_prefix, qr_suffix
                           );

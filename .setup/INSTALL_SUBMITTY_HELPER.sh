@@ -248,6 +248,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/docker
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 fi
 # ------------------------------------------------------------------------
 

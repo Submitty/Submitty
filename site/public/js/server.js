@@ -1587,6 +1587,7 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, dat
 
                 preview_button.empty();
                 preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+                preview_button.attr('data-mode', 'preview');
 
             }
             else {
@@ -1595,6 +1596,7 @@ function previewMarkdown(markdown_textarea, preview_element, preview_button, dat
 
                 preview_button.empty();
                 preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
+                preview_button.attr('data-mode', 'edit');
             }
         },
         error: function() {

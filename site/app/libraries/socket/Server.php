@@ -12,26 +12,32 @@ use app\libraries\TokenManager;
 class Server implements MessageComponentInterface {
 
     // Holds the mapping between pages that have open socket clients and those clients
-    private $clients;
+    /** @var array */
+    private $clients = [];
 
     // Holds the mapping between Connection Objects IDs (key) and user current course&page (value)
-    private $pages;
+    /** @var array */
+    private $pages = [];
 
     // Holds the mapping between Connection Objects IDs (key) and User_ID (value)
-    private $sessions;
+    /** @var array */
+    private $sessions = [];
 
     // Holds the mapping between User_ID (key) and Connection objects (value)
-    private $users;
+    /** @var array  */
+    private $users = [];
 
     /** @var Core */
     private $core;
 
     public function __construct(Core $core) {
-        $this->clients = [];
-        $this->pages = [];
-        $this->sessions = [];
-        $this->users = [];
         $this->core = $core;
+    }
+
+    private function log(string $message) {
+        if ($this->core->getConfig()->isDebug()) {
+            echo $message . "\n";
+        }
     }
 
     /**
@@ -41,47 +47,39 @@ class Server implements MessageComponentInterface {
      * @return bool
      */
     private function checkAuth(ConnectionInterface $conn): bool {
+        // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
-        $user_agent = $request->getHeader('User-Agent')[0];
+        $user_agent = $request->getHeader('User-Agent')[0] ?? '';
 
         if ($user_agent === 'websocket-client-php') {
-            $session_secret = $request->getHeader('Session-Secret')[0];
-            if ($session_secret  === $this->core->getConfig()->getSecretSession()) {
-                return true;
-            }
-            return false;
+            $this->log("New connection {$conn->resourceId} --> websocket-client-php");
+            return $request->getHeader('Session-Secret')[0] === $this->core->getConfig()->getSecretSession();
         }
 
-        $cookieString = $request->getHeader("cookie")[0];
+        $cookieString = $request->getHeader("cookie")[0] ?? '';
         parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
+        if (empty($cookies['submitty_session'])) {
+            return false;
+        }
         $sessid = $cookies['submitty_session'];
 
         try {
-            $token = TokenManager::parseSessionToken(
-                $sessid
-            );
+            $token = TokenManager::parseSessionToken($sessid);
             $session_id = $token->claims()->get('session_id');
             $user_id = $token->claims()->get('sub');
             $logged_in = $this->core->getSession($session_id, $user_id);
-            if (!$logged_in) {
-                return false;
-            }
-            else {
+            if ($logged_in) {
                 $this->setSocketClient($user_id, $conn);
-                return true;
             }
+            return $logged_in;
         }
         catch (\InvalidArgumentException $exc) {
-            die($exc);
+            return false;
         }
     }
 
     /**
-     * Push a given message to all-but-sender connections on the same course&page
-     * @param ConnectionInterface $from
-     * @param string $content
-     * @param string $page_name
-     * @return void
+     * Push a given message to all-but-sender connections on the same course and page
      */
     private function broadcast(ConnectionInterface $from, string $content, string $page_name): void {
         foreach ($this->clients[$page_name] as $client) {
@@ -92,82 +90,25 @@ class Server implements MessageComponentInterface {
     }
 
     /**
-     * Connection object is the object stored against $this->clients for a given connection
-     * Connection object contains all details of the connection and can be used to push messages to client
-     *
-     * User_ID refers to the user_id of the user who is making a connection to the socket from a web page
-     * For example: if instructor has opened a socket connection from Forum threads page, user_id is instructor
-     */
-
-    /**
-     * Fetches Connection object/s of a given User_ID
-     * @param string $user_id
-     * @return bool|ConnectionInterface
-     */
-    private function getSocketClients(string $user_id) {
-        if (isset($this->users[$user_id])) {
-            return $this->users[$user_id];
-        }
-        else {
-            return false;
-        }
-    }
-
-    /**
      * Fetches User_ID of a given socket Connection object
-     * @param ConnectionInterface $conn
-     * @return string|false
      */
-    private function getSocketUserID(ConnectionInterface $conn) {
-        if (isset($this->sessions[$conn->resourceId])) {
-            return $this->sessions[$conn->resourceId];
-        }
-        else {
-            return false;
-        }
+    private function getSocketUserID(ConnectionInterface $conn): ?string {
+        return $this->sessions[$conn->resourceId] ?? null;
     }
 
     /**
      * Sets Connection object associativity with User_ID
-     * @param string $user_id
-     * @param ConnectionInterface $conn
-     * @return void
      */
     private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
         $this->sessions[$conn->resourceId] = $user_id;
-        if (array_key_exists($user_id, $this->users)) {
-            $this->users[$user_id][] = $conn;
+        if (!isset($this->users[$user_id])) {
+            $this->users[$user_id] = [];
         }
-        else {
-            $this->users[$user_id] = [$conn];
-        }
-    }
-
-    /**
-     * Deletes Connection object associativity with User_ID
-     * @param ConnectionInterface $conn
-     * @return void
-     */
-    private function removeSocketClient(ConnectionInterface $conn): void {
-        $user_id = $this->getSocketUserID($conn);
-        if ($user_id) {
-            unset($this->sessions[$conn->resourceId]);
-            foreach ($this->users[$user_id] as $client) {
-                if ($client === $conn) {
-                    unset($client);
-                    break;
-                }
-            }
-            unset($this->users[$user_id]);
-            unset($this->pages[$conn->resourceId]);
-        }
+        $this->users[$user_id][] = $conn;
     }
 
     /**
      * Sets Connection object associativity with user course
-     * @param string $page_name
-     * @param ConnectionInterface $conn
-     * @return void
      */
     private function setSocketClientPage(string $page_name, ConnectionInterface $conn): void {
         $this->pages[$conn->resourceId] = $page_name;
@@ -175,24 +116,15 @@ class Server implements MessageComponentInterface {
 
     /**
      * Fetches User_ID of a given socket Connection object
-     * @param ConnectionInterface $conn
-     * @return string|false
      */
-    private function getSocketClientPage(ConnectionInterface $conn) {
-        if (isset($this->pages[$conn->resourceId])) {
-            return $this->pages[$conn->resourceId];
-        }
-        else {
-            return false;
-        }
+    private function getSocketClientPage(ConnectionInterface $conn): ?string {
+        return $this->pages[$conn->resourceId] ?? null;
     }
 
     /**
-     * On connection, add socket to tracked clients, but we do not need
-     * to check auth here as that is done on every message.
-     * @param ConnectionInterface $conn
+     * Check the authentication status of the connection when it gets opened
      */
-    public function onOpen(ConnectionInterface $conn) {
+    public function onOpen(ConnectionInterface $conn): void {
         if (!$this->checkAuth($conn)) {
             $conn->close();
         }
@@ -203,7 +135,7 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $from
      * @param string $msgString
      */
-    public function onMessage(ConnectionInterface $from, $msgString) {
+    public function onMessage(ConnectionInterface $from, $msgString): void {
         if ($msgString === 'ping') {
             $from->send('pong');
             return;
@@ -219,10 +151,8 @@ class Server implements MessageComponentInterface {
                 $this->clients[$msg['page']]->attach($from);
                 $this->setSocketClientPage($msg['page'], $from);
 
-                if ($this->core->getConfig()->isDebug()) {
-                    $course_page = explode('-', $this->getSocketClientPage($from));
-                    echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2] . "'\n";
-                }
+                $course_page = explode('-', $this->getSocketClientPage($from));
+                $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
             }
             else {
                 $from->close();
@@ -242,19 +172,28 @@ class Server implements MessageComponentInterface {
 
     /**
      * When any client closes the connection, remove information about them
-     * @param ConnectionInterface $conn
      */
     public function onClose(ConnectionInterface $conn): void {
+        $this->log("Closing connection {$conn->resourceId}");
         $user_current_page = $this->getSocketClientPage($conn);
         if ($user_current_page) {
             $this->clients[$user_current_page]->detach($conn);
+            unset($this->pages[$conn->resourceId]);
         }
-        $this->removeSocketClient($conn);
+        $user_id = $this->getSocketUserID($conn);
+        if ($user_id) {
+            unset($this->sessions[$conn->resourceId]);
+            $this->users[$user_id] = array_filter($this->users[$user_id], function ($client) use ($conn) {
+                return $client !== $conn;
+            });
+            if (empty($this->users[$user_id])) {
+                unset($this->users[$user_id]);
+            }
+        }
     }
 
     /**
      * When any error occurs within the socket server script
-     * @param ConnectionInterface $conn
      */
     public function onError(ConnectionInterface $conn, \Exception $e): void {
         $conn->close();

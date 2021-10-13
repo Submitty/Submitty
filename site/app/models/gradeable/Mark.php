@@ -40,7 +40,7 @@ class Mark extends AbstractModel {
      * Mark constructor.
      * @param Core $core
      * @param Component $component
-     * @param $details
+     * @param array $details
      * @throws \InvalidArgumentException if any of the details were not found or invalid, or if the component is null
      */
     public function __construct(Core $core, Component $component, $details) {
