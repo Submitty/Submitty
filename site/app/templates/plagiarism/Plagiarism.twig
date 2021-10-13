@@ -24,6 +24,7 @@
                         <th>Students Matched</th>
                         {# <th>Nightly<br/>Re-run</th> #}
                         <th>Run Log</th>
+                        <th>Download<br>Config</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -135,6 +136,11 @@
         #}
         <td>
             <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
+        </td>
+        <td>
+            <a href="{{ row['download_config_file_link'] }}" aria-label="Download {{ row['title'] }} config.json" download="config.json">
+                <i class="fas fa-download"></i>
+            </a>
         </td>
     </tr>
 {% endmacro %}

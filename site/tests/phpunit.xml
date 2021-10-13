@@ -1,9 +1,11 @@
 <phpunit
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.5/phpunit.xsd"
-        bootstrap="bootstrap.php"
-        colors="true"
-        verbose="true">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.5/phpunit.xsd"
+    convertDeprecationsToExceptions="true"
+    bootstrap="bootstrap.php"
+    colors="true"
+    verbose="true"
+>
     <testsuites>
         <testsuite name="Unit Tests">
             <directory suffix="Tester.php">app</directory>

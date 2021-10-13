@@ -2309,7 +2309,17 @@ ORDER BY rotating_section"
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC"
+            "SELECT 
+                COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
+                COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
+                user_id,
+                user_group
+            FROM
+                users
+            WHERE
+                user_group < 4
+            ORDER BY
+                user_group, user_id ASC"
         );
         $users = [];
 
@@ -4042,9 +4052,9 @@ AND gc_id IN (
         return str_replace("|", " ", $category_desc);
     }
 
-    public function addNewCategory($category) {
+    public function addNewCategory($category, $rank) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", [$this->filterCategoryDesc($category)]);
+        $this->course_db->query("INSERT INTO categories_list (category_desc, rank) VALUES (?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank]);
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }
@@ -6178,7 +6188,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token, $regex_pattern) {
+    public function openQueue($queue_code, $token, $regex_pattern, $require_contact_info) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6186,7 +6196,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern) VALUES (TRUE, TRIM(?), TRIM(?), ?)", [$queue_code,$token,$regex_pattern]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info]);
         return true;
     }
 
@@ -6210,15 +6220,20 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
     }
 
-    public function isValidCode($queue_code, $token = null) {
-        if (is_null($token)) {
-            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+    public function getValidatedCode($queue_code, $token = null) {
+        //first check if the queue has an access code
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+        if ($this->course_db->getRowCount() > 0 && $this->course_db->rows()[0]['token'] == null) {
+            return $this->course_db->rows()[0]['code'];
+        }
+        elseif ($token === null) {
+            return false;
         }
         else {
             $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", [$queue_code, $token]);
-        }
-        if (0 < count($this->course_db->rows())) {
-            return $this->course_db->rows()[0]['code'];
+            if ($this->course_db->getRowCount() > 0) {
+                return $this->course_db->rows()[0]['code'];
+            }
         }
         return false;
     }
@@ -6239,6 +6254,11 @@ AND gc_id IN (
     public function getQueueId($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
+    }
+
+    public function getQueueHasContactInformation(string $queue_code) {
+        $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
+        return $this->course_db->rows()[0]['contact_information'];
     }
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info) {
@@ -6423,6 +6443,9 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
+    public function changeQueueContactInformation(bool $contact_information, string $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET contact_information = ? WHERE code = ?", [$contact_information, $queue_code]);
+    }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
@@ -7138,7 +7161,8 @@ AND gc_id IN (
     private function getUser($user_id, bool $is_numeric = false): ?User {
         $result = $this->getUsers([$user_id], $is_numeric);
         if ($result !== null && count($result) === 1) {
-            return $result[$user_id];
+            //return first element
+            return array_pop($result);
         }
         else {
             return null;
@@ -7624,5 +7648,27 @@ SQL;
     private function getGradeableMinutesOverride(string $gradeable_id): array {
         $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
         return $this->course_db->rows();
+    }
+
+    /**
+     * Gets the number of students who have submitted to a given gradeable
+     *
+     * @param string $gradeable_id
+     * @return int
+     */
+    public function getTotalStudentsWithSubmissions(string $gradeable_id): int {
+        $this->course_db->query('SELECT DISTINCT COUNT(*) user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["user_id"];
+    }
+
+    /**
+     * Gets the total number of submissions made to a given gradeable
+     *
+     * @param string $gradeable_id
+     * @return int
+     */
+    public function getTotalSubmissionsToGradeable(string $gradeable_id): int {
+        $this->course_db->query('SELECT COUNT(*) FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
+        return $this->course_db->rows()[0]["count"];
     }
 }

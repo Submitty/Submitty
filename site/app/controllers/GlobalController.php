@@ -215,7 +215,7 @@ class GlobalController extends AbstractController {
                         if (empty($link['icon'])) {
                             $link['icon'] = "fa-question";
                         }
-                        if (!Utils::startsWith($link['icon'], "fa-")) {
+                        if (!str_starts_with($link['icon'], "fa-")) {
                             $link['icon'] = "fa-" . $link['icon'];
                         }
                         $sidebar_buttons[] = new NavButton($this->core, [
@@ -558,7 +558,7 @@ class GlobalController extends AbstractController {
                             continue 2;
                         default:
                             //Validation OK.  Include $row.
-                            if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                            if (isset($row['icon']) && !str_starts_with($row['icon'], "fa-")) {
                                 $row['icon'] = "fa-" . $row['icon'];
                             }
                             $footer_links[] = $row;
