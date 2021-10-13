@@ -901,16 +901,25 @@ function numericSocketHandler(elem_id, value, total) {
     elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
 }
 
+function cellGradeOnfocus(e) {
+    $('.edit-zone').data('target', e);
+    $('.edit-zone').val($(e).val());
+    $('.edit-zone').show();
+}
+
 function cellGradeOnclick(e) {
-    $(e).focus();
     if ($(e).attr('clicked') >= 1) {
         $(e).attr('clicked', 2);
     }
     else {
         $(e).attr('clicked', 1);
     }
-    $('.edit-zone').data('target', e);
-    $('.edit-zone').css('display', 'block');
-    $('.edit-zone').val($(e).val());
-    console.log($(e).attr('clicked'));
+}
+
+function editZoneOnclick(e) {
+    $(e).focus();
+}
+
+function editTargetVal(e) {
+    $($(e).data('target')).val($(e).val());
 }

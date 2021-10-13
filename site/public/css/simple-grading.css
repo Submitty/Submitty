@@ -24,10 +24,19 @@
     display: none !important;
 }
 
-
 .edit-zone {
-    width: 76vw !important;
+    width: 75vw !important;
+    margin: 0 0 1em 0;
     resize: none;
+    display: none;
+}
+
+.sticky-top .sticky-box {
+    width:78vw;
+    border: 3px solid var(--background-blue);
+    padding: 1em;
+    margin: 0 1em 0 0;
+    background-color: var(--default-white);
 }
 
 .simple-full-credit {
