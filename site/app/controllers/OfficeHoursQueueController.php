@@ -207,7 +207,7 @@ class OfficeHoursQueueController extends AbstractController {
     public function switchQueue($queue_code) {
         //do all error checking before leaving previous queue
         //make sure they are already in a queue first
-        if (!$this->core->getQueries()->alreadyInAQueue($_POST['user_id'])){
+        if (!$this->core->getQueries()->alreadyInAQueue($_POST['user_id'])) {
             $this->core->addErrorMessage("You aren't in a queue");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
         }
