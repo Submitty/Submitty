@@ -7627,12 +7627,13 @@ SQL;
 
       COUNT(*) AS queue_interactions,
       COUNT(DISTINCT user_id) AS number_distinct_students,
-      DATE_TRUNC('second', AVG(time_out - time_help_start)) AS avg_help_time,
-      MIN(time_out - time_help_start) AS min_help_time,
-      MAX(time_out - time_help_start) AS max_help_time,
-      DATE_TRUNC('second', AVG(time_help_start - time_in)) AS avg_wait_time,
-      MIN(time_help_start - time_in) AS min_wait_time,
-      MAX(time_help_start - time_in) AS max_wait_time,
+      DATE_TRUNC('second', percentile_cont(0.50) within group (order by (time_out - time_help_start))) AS median_help_time,
+      DATE_TRUNC('second', percentile_cont(0.05) within group (order by (time_out - time_help_start))) AS low_help_time,
+      DATE_TRUNC('second', percentile_cont(0.95) within group (order by (time_out - time_help_start))) AS high_help_time,
+      DATE_TRUNC('second', percentile_cont(0.50) within group (order by (time_help_start - time_in))) AS median_wait_time,
+      DATE_TRUNC('second', percentile_cont(0.05) within group (order by (time_help_start - time_in))) AS low_wait_time,
+      DATE_TRUNC('second', percentile_cont(0.95) within group (order by (time_help_start - time_in))) AS high_wait_time,
+      DATE_TRUNC('second', MAX(time_help_start - time_in)) AS max_wait_time,
       SUM(CASE
         WHEN removal_type IN ('helped', 'self_helped') THEN 1
         ELSE 0
