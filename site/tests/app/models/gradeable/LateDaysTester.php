@@ -52,7 +52,7 @@ class LateDaysTester extends BaseUnitTest {
         return $graded_gradeable;
     }
 
-    private function mockCore(int $default_late_days, array $updates) {
+    private function mockCore(int $default_late_days, array $updates, array $cache = []) {
         $core = $this->createMockModel(Core::class);
         $core->method('getDateTimeNow')->willReturn(new \DateTime());
 
@@ -62,7 +62,7 @@ class LateDaysTester extends BaseUnitTest {
 
         $queries = $this->createMock(\app\libraries\database\DatabaseQueries::class);
         $queries->method('getLateDayUpdates')->willReturn($updates);
-        $queries->method('getLateDayCacheForUser')->willReturn([]);
+        $queries->method('getLateDayCacheForUser')->willReturn($cache);
         $core->method('getQueries')->willReturn($queries);
         return $core;
     }
@@ -138,6 +138,83 @@ class LateDaysTester extends BaseUnitTest {
 
         // Since we got an extra late day as of due date, we should not be late status
         $this->assertEquals(LateDayInfo::STATUS_LATE, $late_days->getLateDayInfoByGradeable($this->mockGradeable('late1'))->getStatus(), 'Late day updates not applied correctly');
+    }
+
+    private function generateCache($gg, $late_days_remaining, $late_days_charged) {
+        return [
+            "g_id" => $gg->getGradeableId(),
+            "user_id" => null,
+            "late_days_allowed" => $gg->getGradeable()->getLateDays(),
+            "late_day_date" => $gg->getGradeable()->getSubmissionDueDate(),
+            "submission_days_late" => $gg->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate(),
+            "late_day_exceptions" => $gg->getLateDayException(),
+            "late_days_remaining" => $late_days_remaining,
+            "late_days_change" => -$late_days_charged
+        ];
+    }
+
+    private function grabGradedGradeable($ggs, $g_id) {
+        $gg = array_filter($ggs, function ($gg) use ($g_id) {
+            return $gg->getGradeableId() == $g_id;
+        });
+        return reset($gg);
+    }
+
+    private function testReCache($ggs, $updates, $cache) {
+        $core = $this->mockCore(5, $updates, $cache);
+        $queries = $core->getQueries();
+
+        $recaches = count($ggs) + count($updates) - count($cache);
+        $queries->expects($this->exactly($recaches))->method('addLateDayCacheForUser');
+        // reCache = true
+        $ld = new LateDays($core, $this->mockUser('testuser'), $this->mockGradedGradeables(), null, true);
+    }
+
+    public function testFullCache() {
+        $updates = [];
+        $cache = [];
+        $late_days_remaining = 10;
+        $late_days_charged = 2;
+
+        $ggs = $this->mockGradedGradeables();
+        foreach ($ggs as $gg) {
+            $cache[$gg->getGradeableId()] = $this->generateCache($gg, $late_days_remaining, $late_days_charged);
+        }
+
+        $core = $this->mockCore(5, $updates, $cache);
+        $queries = $core->getQueries();
+        $ld = new LateDays($core, $this->mockUser('testuser'), $this->mockGradedGradeables(), null);
+        $this->assertEquals($ld->getLateDaysRemaining(), $late_days_remaining); //Last cache entry
+        $this->assertEquals($ld->getLateDaysUsed(), $late_days_charged * count($ggs));
+
+        // Recreate late days with recaching enabled
+        $this->testReCache($ggs, $updates, $cache);
+    }
+
+    public function testStaleCache() {
+        $updates = [];
+        $ggs = $this->mockGradedGradeables();
+
+        $cache = [];
+
+        // late_exception
+        $gg = $this->grabGradedGradeable($ggs, 'late_exception');
+        $cache[$gg->getGradeableId()] = $this->generateCache($gg, 4, 1);
+        // on_time
+        $gg = $this->grabGradedGradeable($ggs, 'on_time');
+        $cache[$gg->getGradeableId()] = $this->generateCache($gg, 4, 0);
+        // on_time_exception
+        $gg = $this->grabGradedGradeable($ggs, 'on_time_exception');
+        $cache[$gg->getGradeableId()] = $this->generateCache($gg, 4, 0);
+
+        $core = $this->mockCore(5, $updates, $cache);
+        $queries = $core->getQueries();
+        $ld = new LateDays($core, $this->mockUser('testuser'), $this->mockGradedGradeables(), null);
+        $this->assertEquals($ld->getLateDaysRemaining(), 2); //Last cache entry
+        $this->assertEquals($ld->getLateDaysUsed(), 3);
+
+        // Recreate late days with recaching enabled
+        $this->testReCache($ggs, $updates, $cache);
     }
 
     public function testFilterCanView() {

@@ -100,6 +100,19 @@ class LateDays extends AbstractModel {
 
     /**
      * Sort the graded gradeables and late day updates by due date
+     * @return array Cache collection of late day info
+     */
+    public function toCacheArray() {
+        $cache = [];
+
+        foreach ($this->late_day_info as $id => $ldi) {
+            $cache[$id] = $ldi->generateEventInfo();
+        }
+        return $cache;
+    }
+
+    /**
+     * Sort the graded gradeables and late day updates by due date
      * @param array $graded_gradeables Collection of GradedGradeable objects
      * @return array The information for each late day update/graded gradeable
      */
