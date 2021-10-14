@@ -212,7 +212,7 @@ class LateDayInfo extends AbstractModel {
 
         $days = $days_late !== null ? $days_late : $this->getDaysLate();
 
-        // if the student submitted after the deadline (plus extensions), 
+        // if the student submitted after the deadline (plus extensions),
         // and there were no late days charged, then its bad
         if ($days > $this->getLateDayException() && $this->getLateDaysCharged() <= 0) {
             return self::STATUS_BAD;
