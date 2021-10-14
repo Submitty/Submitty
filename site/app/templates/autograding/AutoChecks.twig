@@ -5,7 +5,7 @@
     <p>
       {% if check.metrics is defined %}
         {% if check['metrics']['elapsed_time'] is not null %}
-          {% if check['metrics']['elapsed_time'] %}
+          {% if check['metrics']['elapsed_time'] >= 0.1 %}
             Grading time: <span style="font-style: italic">{{check['metrics']['elapsed_time'] | round(1)}}s</span>
           {% else %}
           {# Grading times of 0 really mean it ran in under .1 second #}

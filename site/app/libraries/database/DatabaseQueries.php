@@ -7666,11 +7666,10 @@ SQL;
      * @param string $gradeable_id
      * @param string $testcase_id
      * @param int $version the submission version that is currently being looked at
-     * @return array an array of metrics
      */
-    public function getMetrics($user_id, $gradeable_id, $testcase_id, $version) {
+    public function getMetrics(string $user_id, string $gradeable_id, string $testcase_id, int $version): array {
         $this->course_db->query("
-            SELECT * FROM autograding_metrics
+            SELECT elapsed_time, max_rss_size FROM autograding_metrics
                 WHERE
                     user_id = ?
                     AND g_id = ?
@@ -7685,11 +7684,10 @@ SQL;
      * TODO get this working for teams
      *
      * @param string $gradeable_id
-     * @param string $countHidden true when leaderboard should include hidden testcases
+     * @param bool $countHidden true when leaderboard should include hidden testcases
      * @param array $valid_testcases a list of testcases to use in leaderboard
-     * @return array an array of rows in order for the specific leaderboard
      */
-    public function getLeaderboard($gradeable_id, $countHidden, $valid_testcases) {
+    public function getLeaderboard(string $gradeable_id, bool $countHidden, array $valid_testcases): array {
         $testcase_id_questionmarks = str_repeat(" ?,", count($valid_testcases));
         $testcase_id_questionmarks = substr($testcase_id_questionmarks, 0, -1); // Remove "," at the end
 
@@ -7753,7 +7751,7 @@ ORDER BY
         return $this->course_db->rows();
     }
 
-    public function getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id) {
+    public function getUserAnonymousForGradeableLeaderboard(string $user_id, string $gradeable_id): bool {
         $this->course_db->query("
             SELECT anonymous_leaderboard FROM electronic_gradeable_version
                 WHERE
@@ -7763,7 +7761,7 @@ ORDER BY
         return $this->course_db->rows()[0]['anonymous_leaderboard'] ?? true;
     }
 
-    public function setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state) {
+    public function setUserAnonymousForGradeableLeaderboard(string $user_id, string $gradeable_id, bool $state): void {
         $this->course_db->query("
             UPDATE electronic_gradeable_version
             SET anonymous_leaderboard = ?

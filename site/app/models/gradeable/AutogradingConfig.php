@@ -366,9 +366,8 @@ class AutogradingConfig extends AbstractModel {
     /**
      * Gets a leaderboard for a specific tag
      * @param string $tag the tag of the leaderboard to match against
-     * @return LeaderboardConfig|null
      */
-    public function getLeaderboard($tag) {
+    public function getLeaderboard(string $tag): ?LeaderboardConfig {
         foreach ($this->getLeaderboards() as $leaderboard) {
             if ($leaderboard->getTag() === $tag) {
                 return $leaderboard;
@@ -380,9 +379,8 @@ class AutogradingConfig extends AbstractModel {
     /**
      * Gets an array of testcases that match a tag
      * @param string $tag the tag of to match against
-     * @return string[]
      */
-    public function getTestcasesWithTag($tag) {
+    public function getTestcasesWithTag(string $tag): array {
         $testcases = [];
         foreach ($this->base_testcases as $testcase) {
             if (array_key_exists('leaderboard_tags', $testcase)) {

@@ -5,6 +5,7 @@ namespace app\controllers\student;
 use app\controllers\AbstractController;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
+use app\libraries\response\WebResponse;
 use app\libraries\response\MultiResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\controllers\student\SubmissionController;
@@ -16,7 +17,7 @@ class LeaderboardController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
      */
-    public function getLeaderboard($gradeable_id, $leaderboard_tag = null) {
+    public function getLeaderboard(string $gradeable_id, string $leaderboard_tag = null): MultiResponse {
         $gradeable = SubmissionController::tryGetElectronicGradeable($gradeable_id, $this->core);
         if ($gradeable === null) {
             $this->core->addErrorMessage("Invalid gradeable id");
@@ -44,18 +45,18 @@ class LeaderboardController extends AbstractController {
         $user_id = $this->core->getUser()->getId();
         $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
 
-        $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
-        $this->core->getOutput()->addBreadcrumb("Leaderboard");
-        $this->core->getOutput()->addInternalCss('leaderboard.css');
-        $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/Leaderboard.twig', [
-            "csrf_token" => $this->core->getCsrfToken(),
-            "gradeable_name" => $gradeable->getTitle(),
-            "leaderboards" => $leaderboards,
-            "studentIsAnonymous" => $user_is_anonymous,
-            "initial_leaderboard_tag" => $leaderboard_tag,
-            "base_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id]),
-            "rebuildingGradeable" => is_null($autogradingConfig)
-        ]);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'Leaderboard',
+                'showLeaderboardPage',
+                $gradeable,
+                $leaderboards,
+                $user_is_anonymous,
+                $leaderboard_tag,
+                $gradeable_id,
+                is_null($autogradingConfig)
+            )
+        );
     }
 
     /**
@@ -64,7 +65,7 @@ class LeaderboardController extends AbstractController {
      * and its content be inserted inside another html page
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")
      */
-    public function getLeaderboardData($gradeable_id, $leaderboard_tag) {
+    public function getLeaderboardData(string $gradeable_id, string $leaderboard_tag): MultiResponse {
         $gradeable = SubmissionController::tryGetElectronicGradeable($gradeable_id, $this->core);
         if ($gradeable === null) {
             $this->core->addErrorMessage("Invalid gradeable id");
@@ -101,37 +102,33 @@ class LeaderboardController extends AbstractController {
 
         $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
 
-        // Remove the extra submitty html as this route is just for getting the html for the leaderboard
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
-        $this->core->getOutput()->renderTwigOutput('submission/homework/leaderboard/LeaderboardTable.twig', [
-            "leaderboard" => $leaderboard_data,
-            "accessFullGrading" => $this->core->getUser()->accessFullGrading(),
-            "top_visible_students" => $top_visible_students,
-            "user_id" => $user_id,
-            "user_index" => $user_index,
-            "description" => $description,
-            "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName(),
-            "studentIsAnonymous" => $user_is_anonymous,
-            "grader_value" => User::GROUP_LIMITED_ACCESS_GRADER
-        ]);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'Leaderboard',
+                'showLeaderboardTable',
+                $leaderboard_data,
+                $top_visible_students,
+                $user_id,
+                $user_index,
+                $description,
+                $user_is_anonymous
+            )
+        );
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/set_self_anonymity", methods={"POST"})
-     * @return MultiResponse
      */
-    public function toggleSelfLeaderboardAnonymity($gradeable_id) {
+    public function toggleSelfLeaderboardAnonymity(string $gradeable_id): JsonResponse {
         if (empty($_POST['anonymity_state'])) {
             $this->core->addErrorMessage("Missing anonymity state");
-            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse("missing anonymity_state"));
+            return JsonResponse::getFailResponse("missing anonymity_state");
         }
 
         $state = $_POST['anonymity_state'] === 'true';
 
         $user_id = $this->core->getUser()->getId();
         $this->core->getQueries()->setUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id, $state);
-        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse($state));
+        return JsonResponse::getSuccessResponse($state);
     }
 }
