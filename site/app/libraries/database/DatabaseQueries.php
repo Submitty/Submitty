@@ -1418,12 +1418,10 @@ WHERE semester=? AND course=? AND user_id=?",
         $index = 1;
         $late_day_events = [];
         foreach ($this->course_db->rows() as $row) {
-            // Gradeable late day event
-            if (isset($row['g_id'])) {
+            if (isset($row['g_id'])) { // Gradeable late day event
                 $late_day_events[$row['g_id']] = $row;
             }
-            // Late day update event
-            else {
+            else { // Late day update event
                 $late_day_events[$index++] = $row;
             }
         }
@@ -1462,7 +1460,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
-    public function addLateDayCacheForUser(User $user, LateDayInfo $late_day_info) {        
+    public function addLateDayCacheForUser(User $user, LateDayInfo $late_day_info) {
         if ($late_day_info->isLateDayUpdate()) {
             $this->addLateDayCacheForLateDayUpdate($user->getId(), $late_day_info);
         }
@@ -1471,21 +1469,21 @@ WHERE semester=? AND course=? AND user_id=?",
         }
     }
 
-    public function flushLateDayCacheForUserFromContext(User $user, \DateTime $context) {        
+    public function flushLateDayCacheForUserFromContext(User $user, \DateTime $context) {
         $params = [$user->getId(), $context];
         $query = "DELETE FROM late_day_cache
                     WHERE user_id=? AND late_day_date>=?";
         $this->course_db->query($query, $params);
     }
 
-    public function flushLateDayCacheForUser(User $user) {        
+    public function flushLateDayCacheForUser(User $user) {
         $params = [$user->getId()];
         $query = "DELETE FROM late_day_cache
                     WHERE user_id=?";
         $this->course_db->query($query, $params);
     }
 
-    public function flushAllLateDayCache() {        
+    public function flushAllLateDayCache() {
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);
     }
