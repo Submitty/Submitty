@@ -6,9 +6,8 @@ use app\controllers\AbstractController;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\response\MultiResponse;
+use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use app\controllers\student\SubmissionController;
 use app\models\User;
 
 class LeaderboardController extends AbstractController {
@@ -17,13 +16,11 @@ class LeaderboardController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
      */
-    public function getLeaderboard(string $gradeable_id, string $leaderboard_tag = null): MultiResponse {
-        $gradeable = SubmissionController::tryGetElectronicGradeable($gradeable_id, $this->core);
+    public function getLeaderboard(string $gradeable_id, string $leaderboard_tag = null): ResponseInterface {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->addErrorMessage("Invalid gradeable id");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl([]))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl([]));
         }
 
         $leaderboards = [];
@@ -32,9 +29,7 @@ class LeaderboardController extends AbstractController {
         if (is_null($autogradingConfig)) {
             // This means the gradeable is being rebuilt
             $this->core->addErrorMessage("This leaderboard is currently unavailable, please try again in a few minutes.");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl([]))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl([]));
         }
 
         $leaderboards = $autogradingConfig->getLeaderboards();
@@ -43,19 +38,17 @@ class LeaderboardController extends AbstractController {
         }
 
         $user_id = $this->core->getUser()->getId();
-        $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
+        $user_is_anonymous = $this->core->getQueries()->isUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
 
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                'Leaderboard',
-                'showLeaderboardPage',
-                $gradeable,
-                $leaderboards,
-                $user_is_anonymous,
-                $leaderboard_tag,
-                $gradeable_id,
-                is_null($autogradingConfig)
-            )
+        return new WebResponse(
+            'Leaderboard',
+            'showLeaderboardPage',
+            $gradeable,
+            $leaderboards,
+            $user_is_anonymous,
+            $leaderboard_tag,
+            $gradeable_id,
+            is_null($autogradingConfig)
         );
     }
 
@@ -65,13 +58,11 @@ class LeaderboardController extends AbstractController {
      * and its content be inserted inside another html page
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")
      */
-    public function getLeaderboardData(string $gradeable_id, string $leaderboard_tag): MultiResponse {
-        $gradeable = SubmissionController::tryGetElectronicGradeable($gradeable_id, $this->core);
+    public function getLeaderboardData(string $gradeable_id, string $leaderboard_tag): ResponseInterface {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->addErrorMessage("Invalid gradeable id");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl([]))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl([]));
         }
 
         $user_id = $this->core->getUser()->getId();
@@ -100,19 +91,17 @@ class LeaderboardController extends AbstractController {
             }
         }
 
-        $user_is_anonymous = $this->core->getQueries()->getUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
+        $user_is_anonymous = $this->core->getQueries()->isUserAnonymousForGradeableLeaderboard($user_id, $gradeable_id);
 
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                'Leaderboard',
-                'showLeaderboardTable',
-                $leaderboard_data,
-                $top_visible_students,
-                $user_id,
-                $user_index,
-                $description,
-                $user_is_anonymous
-            )
+        return new WebResponse(
+            'Leaderboard',
+            'showLeaderboardTable',
+            $leaderboard_data,
+            $top_visible_students,
+            $user_id,
+            $user_index,
+            $description,
+            $user_is_anonymous
         );
     }
 

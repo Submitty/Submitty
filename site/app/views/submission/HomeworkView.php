@@ -716,7 +716,8 @@ class HomeworkView extends AbstractView {
         $leaderboards = $autograding_config->getLeaderboards();
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LeaderboardBox.twig', [
-          'leaderboard_count' => count($leaderboards)
+          'leaderboard_count' => count($leaderboards),
+          'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'leaderboard'])
         ]);
     }
 
