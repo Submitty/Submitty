@@ -172,7 +172,7 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Gets the grade inquiry assigned to the gradeable's component supplied
-     * @param $gc_id int Gradeable Component id
+     * @param int $gc_id Gradeable Component id
      */
     public function getGradeInquiryByGcId($gc_id) {
         foreach ($this->regrade_requests as $grade_inquiry) {

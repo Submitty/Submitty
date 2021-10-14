@@ -238,10 +238,6 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->colors[$this->getIndexFromCode($code)];
     }
 
-    public function isContactInfoEnabled() {
-        return $this->core->getConfig()->getQueueContactInfo();
-    }
-
     public function getQueueMessage() {
         return $this->core->getConfig()->getQueueMessage();
     }

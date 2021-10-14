@@ -704,7 +704,7 @@ class UsersController extends AbstractController {
         register_shutdown_function(
             function () use (&$csv_file, &$xlsx_file) {
                 foreach ([$csv_file, $xlsx_file] as $file) {
-                    if (isset($file) && file_exists($file)) {
+                    if (!empty($file) && file_exists($file)) {
                         unlink($file);
                     }
                 }
