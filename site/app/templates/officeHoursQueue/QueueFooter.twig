@@ -224,7 +224,7 @@
                 updateAnnouncement();
                 break;
             case "queue_message":
-                alert(msg.message)
+                queueMessage(msg.message);
                 break;
             default:
                 console.log("Unknown message received.");
@@ -312,6 +312,10 @@
           queue_code: code,
           queue_state: $(`#toggle-queue-${index}`)[0].checked ? 0:1
       });
+  }
+
+  function queueMessage(message) {
+    $('#queue-message-block').html(message);
   }
 
 </script>

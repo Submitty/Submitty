@@ -47,6 +47,7 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+    <h4 id="queue-message-block"></h4>
   <div id="queue_status">
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
