@@ -2,9 +2,9 @@
 {% block popup_id %}queue-socket-message{% endblock %}
 {% block title %}Send Message To Queue{% endblock %}
 {% block body %}
-    <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token" style="height:auto;">
+    <form method="post" id="change_queue_token" action="{{base_url}}/send_queue_message" style="height:auto;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
+        <select id="queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
             <option value="">Queue Name</option>
             {% for queue in viewer.getAllQueues() %}
                 <option value="{{queue['code']}}">{{queue['code']}}</option>
@@ -18,12 +18,6 @@
         <button id="change_code_btn" type="submit" class="btn btn-primary">Send Message</button>
     </form>
 {% endblock %}
-{% block form %}
-    <form method="post" id="announcement_form" action="{{base_url}}/update_announcement">
-        {{ parent() }}
-    </form>
-{% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <button id="save_announcement" type="submit" class="btn btn-primary">Save</button>
 {% endblock %}

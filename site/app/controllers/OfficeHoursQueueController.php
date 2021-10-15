@@ -461,7 +461,26 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->addSuccessMessage("Queue Contact Information Changed");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/send_queue_message", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     * @return RedirectResponse
+     */
+    public function sendQueueMessage(): RedirectResponse{
+        if (empty($_POST['socket-message'])) {
+            $this->core->addErrorMessage("Missing message");
+            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+        }
 
+        if (empty($_POST['code'])) {
+            $this->core->addErrorMessage("Missing queue name");
+            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+        }
+
+        $message = trim($_POST['socket-message']);
+        $this->sendSocketMessage(['type' => 'queue_message', 'message' =>$message]);
+        return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+    }
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse

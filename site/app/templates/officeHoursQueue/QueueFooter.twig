@@ -223,6 +223,9 @@
             case "announcement_update":
                 updateAnnouncement();
                 break;
+            case "queue_message":
+                alert(msg.message)
+                break;
             default:
                 console.log("Unknown message received.");
                 break;
