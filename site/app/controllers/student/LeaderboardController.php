@@ -86,8 +86,9 @@ class LeaderboardController extends AbstractController {
 
         $user_index = -1;
         foreach ($leaderboard_data as $index => $row) {
-            if ($row['user_id'] == $user_id) {
+            if ($row['user_id'] === $user_id) {
                 $user_index = $index;
+                break;
             }
         }
 

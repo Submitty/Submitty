@@ -41,7 +41,7 @@
 
     function toggleSelfAnonymity() {
         $.post('{{ base_url }}/set_self_anonymity', {
-            csrf_token: '{{ csrf_token }}',
+            csrf_token: window.csrfToken,
             anonymity_state: !$('#toggle-self-anonymity').is(':checked')
         }).then(function() {
             onChangeLeaderboard(current_leaderboard_tag);

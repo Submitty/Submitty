@@ -11,7 +11,6 @@ class LeaderboardView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Leaderboard");
         $this->core->getOutput()->addInternalCss('leaderboard.css');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/leaderboard/Leaderboard.twig', [
-            "csrf_token" => $this->core->getCsrfToken(),
             "gradeable_name" => $gradeable->getTitle(),
             "leaderboards" => $leaderboards,
             "studentIsAnonymous" => $user_is_anonymous,

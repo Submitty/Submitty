@@ -7701,23 +7701,11 @@ SQL;
      * @param array $valid_testcases a list of testcases to use in leaderboard
      */
     public function getLeaderboard(string $gradeable_id, bool $countHidden, array $valid_testcases): array {
-        $testcase_id_questionmarks = str_repeat(" ?,", count($valid_testcases));
-        $testcase_id_questionmarks = substr($testcase_id_questionmarks, 0, -1); // Remove "," at the end
+        $param_list = $this->createParamaterList(count($valid_testcases));
 
-        $params = [$gradeable_id, $valid_testcases, $countHidden];
+        array_unshift($valid_testcases , $gradeable_id);
+        $valid_testcases[] = $countHidden;
 
-
-        $flattened_params = [];
-        foreach ($params as $param) {
-            if (is_array($param)) {
-                foreach ($param as $nested_param) {
-                    $flattened_params[] = $nested_param;
-                }
-            }
-            else {
-                $flattened_params[] = $param;
-            }
-        }
 
 
         $this->course_db->query("
@@ -7740,7 +7728,7 @@ FROM      (
                    AND        metrics.g_version = version.active_version
                    WHERE      metrics.g_id = ?
                    AND        passed = true
-                   AND        testcase_id in ({$testcase_id_questionmarks})
+                   AND        testcase_id in {$param_list}
                               -- When true, this statement is always true, and so the value in the hidden column is ignored
                               -- When false, hidden values are left out of the query
                    AND        (
@@ -7759,7 +7747,7 @@ ORDER BY
     points DESC,
     time,
     memory
-        ", $flattened_params);
+        ", $valid_testcases);
 
         return $this->course_db->rows();
     }
