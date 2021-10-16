@@ -18,7 +18,7 @@ class LeaderboardController extends AbstractController {
      */
     public function getLeaderboard(string $gradeable_id, string $leaderboard_tag = null): ResponseInterface {
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === null) {
+        if ($gradeable === false) {
             $this->core->addErrorMessage("Invalid gradeable id");
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }
@@ -60,7 +60,7 @@ class LeaderboardController extends AbstractController {
      */
     public function getLeaderboardData(string $gradeable_id, string $leaderboard_tag): ResponseInterface {
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === null) {
+        if ($gradeable === false) {
             $this->core->addErrorMessage("Invalid gradeable id");
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }

@@ -7701,9 +7701,13 @@ SQL;
      * @param array $valid_testcases a list of testcases to use in leaderboard
      */
     public function getLeaderboard(string $gradeable_id, bool $countHidden, array $valid_testcases): array {
+        if ($this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
+            throw new NotImplementedException();
+        }
+
         $param_list = $this->createParamaterList(count($valid_testcases));
 
-        array_unshift($valid_testcases , $gradeable_id);
+        array_unshift($valid_testcases, $gradeable_id);
         $valid_testcases[] = $countHidden;
 
 
