@@ -43,15 +43,18 @@
         const current_state = $('#toggle-self-anonymity').is(':checked');
         $.post('{{ base_url }}/set_self_anonymity', {
             csrf_token: window.csrfToken,
+            anonymity_state: !$('#toggle-self-anonymity').is(':checked')
         }).done(function(res) {
             const res_json = JSON.parse(res);
-            if(res_json.status === "fail"){
+            if(res_json.status !== "success"){
                 // Revert checkbox because request failed
                 $('#toggle-self-anonymity').prop('checked', !current_state);
                 alert(`Error updating anonymity: ${res_json.message}`);
             }
             onChangeLeaderboard(current_leaderboard_tag);
         }).fail(function() {
+            // Revert checkbox because request failed
+            $('#toggle-self-anonymity').prop('checked', !current_state);
             alert("Error updating anonymity");
         })
     }
