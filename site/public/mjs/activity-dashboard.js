@@ -26,6 +26,7 @@ export function sortTable(n, dir) {
             res.push(arr2[j]);
             j++;
         }
+        console.log("res", res);
         return res;
     };
 
@@ -69,8 +70,14 @@ export function comparator (row1, row2, n, dir) {
 }
 
 // if n == 0 or n == 8
-// returns true if x < y, digits < strings < empty strings
+// returns true if x < y, empty strings < digits < strings
 export function helper (x, y, i) {
+    if (x != '' && y == '') {
+        return false;
+    }
+    else if (x == '' && y != '') {
+        return true;
+    }
     if (i == 0 || i == 8) {
         const xIsDigit = /^\d+$/.test(x);
         const yIsDigit = /^\d+$/.test(y);
@@ -81,12 +88,6 @@ export function helper (x, y, i) {
             return xIsDigit;
         }
         else {
-            if (x != '' && y == '') {
-                return true;
-            }
-            else if (x == '' && y != '') {
-                return false;
-            }
             return x < y;
         }
     }
