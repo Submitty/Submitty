@@ -53,7 +53,6 @@ class ConfigurationController extends AbstractController {
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
-            'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
             'seek_message_enabled'           => $this->core->getConfig()->isSeekMessageEnabled(),
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
@@ -148,7 +147,6 @@ class ConfigurationController extends AbstractController {
                     'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
-                    'queue_contact_info',
                     'seek_message_enabled',
                     'polls_enabled'
                 ]

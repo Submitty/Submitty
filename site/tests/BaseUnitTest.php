@@ -200,7 +200,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                 }
             }
             foreach ($reflection->getMethods() as $method) {
-                if (!Utils::startsWith($method->getName(), "__")) {
+                if (!str_starts_with($method->getName(), "__")) {
                     $methods[] = $method->getName();
                 }
             }
