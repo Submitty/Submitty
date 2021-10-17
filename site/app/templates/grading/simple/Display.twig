@@ -1,5 +1,6 @@
 <div class="content">
-    <h1>
+    <div>
+    <h1 style="float: left;">
         {{ gradeable.getTitle() }}
         {% if gradeable_url|trim != "" %}
             <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable.getTitle() }}">
@@ -7,19 +8,22 @@
             </a>
         {% endif %}
     </h1>
+    <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()' style="float: right;">Settings/Hotkeys</button>
+    </div>
     {% if gradeable.getTaInstructions()|trim != "" %}
         <p>
             Overall TA Instructions: <a class="external" href="{{  gradeable.getTaInstructions() }}" target="_blank" aria-label="Overall TA Instructions for {{ gradeable.getTitle() }}"><i>{{  gradeable.getTaInstructions()  }}</i></a>
         </p>
     {% endif %}
 
-    <div class="column-wrapper" style="margin: 1em 0;">
+    <div class="column-wrapper" style="margin: 1em 0; display: inline-block;">
         <div id="checkpoint-sticky" class="column-wrapper">
             <div class="sticky-box">
                 <input class="edit-zone custom-scrollbar"
                     data-target=""
                     type="text"
                     onkeyup="editTargetVal(this);"
+                    disabled
                 />
                 {% include "grading/simple/StudentSearch.twig" %}
             </div>
@@ -31,11 +35,6 @@
                     <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>
                 </div>
             {% endif %}
-        </div>
-
-        <div>
-            <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
-            <button class="btn btn-primary key_to_click" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>
     </div>
 
@@ -73,6 +72,9 @@
                 Limited grader does not have "View All" option
                 If nothing to grade, Instructor will see all sections
             #}
+            <div>
+            <button class="btn btn-primary key_to_click" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+
             {% if show_all_sections_button %}
                 <a
                     class="btn btn-default"
@@ -82,7 +84,7 @@
                 </a>
                 <br />
             {% endif %}
-
+            </div>
             {% if action == 'lab' and core.getUser().accessFullGrading() %}
                 <label for="show-graders" class="column-wrapper">Show Graders
                     <input type="checkbox" id="show-graders">
@@ -333,7 +335,6 @@
 
     <script>
         function editEditzone(el){
-            //el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
             $('.edit-zone').val($( $('.edit-zone').data('target')).val());
         }
         function cellGradeOnBlur(el) {

@@ -17,6 +17,7 @@
 .sticky-top {
     position: fixed;
     top: 0;
+    right: 30px;
 }
 
 .sticky-top label,
@@ -28,14 +29,12 @@
     width: 75vw !important;
     margin: 0 0 1em 0;
     resize: none;
-    display: none;
 }
 
 .sticky-top .sticky-box {
-    width: 78vw;
+    width: 81vw;
     border: 3px solid var(--background-blue);
     padding: 1em;
-    margin: 0 1em 0 0;
     background-color: var(--default-white);
 }
 
@@ -49,6 +48,10 @@
 
 .simple-save-error {
     color: var(--simple-save-error-red);
+}
+
+#simple-stats-btn {
+    margin-right: 1em;
 }
 
 /* styling for fields that aren't icons */

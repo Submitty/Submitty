@@ -904,7 +904,7 @@ function numericSocketHandler(elem_id, value, total) {
 function cellGradeOnfocus(e) {
     $('.edit-zone').data('target', e);
     $('.edit-zone').val($(e).val());
-    $('.edit-zone').show();
+    $('.edit-zone').prop('disabled', false);
 }
 
 function cellGradeOnclick(e) {
