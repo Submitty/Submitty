@@ -26,7 +26,6 @@ export function sortTable(n, dir) {
             res.push(arr2[j]);
             j++;
         }
-        console.log("res", res);
         return res;
     };
 
