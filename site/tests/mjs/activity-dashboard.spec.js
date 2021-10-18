@@ -111,14 +111,14 @@ test('comparator', () => {
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
-    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
-    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
-    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
-    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
+    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
+    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
+    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
+    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
 
     // testing second column
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 1, 'asc')).toEqual(true);
