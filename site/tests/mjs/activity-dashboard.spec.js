@@ -254,6 +254,8 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+        
+        <tbody id="tbody">
             <tr id="zoezoe">
                 <td></td>
                 <td class="align-left">zoezoe</td>
