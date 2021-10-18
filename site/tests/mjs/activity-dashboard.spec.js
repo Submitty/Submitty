@@ -160,7 +160,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="azhacker">
                 <td>1</td>
@@ -254,7 +253,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-        
         <tbody id="tbody">
             <tr id="zoezoe">
                 <td></td>
@@ -349,7 +347,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="bechta">
                 <td>Audit</td>
@@ -445,7 +442,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="aphacker">
                 <td>1</td>
@@ -541,7 +537,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="zoezoe">
                 <td></td>
@@ -638,7 +633,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="zoezoe">
                 <td></td>
@@ -735,7 +729,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="batdiddle">
                 <td>4</td>
@@ -832,7 +825,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="aphacker">
                 <td>1</td>
@@ -929,7 +921,6 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
         <tbody id="tbody">
             <tr id="bechta">
                 <td>Audit</td>
