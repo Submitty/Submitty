@@ -714,29 +714,6 @@ function checkColorActivated() {
             ((b==3)+'_')[d];
         f = f[f][f];
 
-
-        const m = {
-            '\\': 'g.h',
-            '0': 'c',
-            '1': 'd',
-            '2': '(d + d)',
-            '3': 'b',
-            '4': '(b + d)',
-            '5': '(b + d + d)',
-            '6': '(b + b)',
-            '7': '(b + b + d)',
-            '8': '(b + b + b - d)',
-            '9': '(b + b + b)'
-        }
-
-        function convert(str) {
-            let res = []
-            for(let i = 0; i < str.length; i++) {
-                res.push(m[str[i]]);
-            }
-            return res.join(' + ');
-        }
-
         //check current status of secret mode
         const magic0 = function() {
             return f('return \"return ' +  g.h + d + d + (d + d) + g.h + d + (d + d) + b + g.h + d + d + (b + b + d) +
