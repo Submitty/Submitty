@@ -7,8 +7,8 @@ test('helper', () => {
     expect(helper('0', '1', 0)).toEqual(true);
     expect(helper('1', '0', 0)).toEqual(false);
     expect(helper('0', '0', 0)).toEqual(false);
-    expect(helper('', 'apple', 0)).toEqual(false);
-    expect(helper('apple', '', 0)).toEqual(true);
+    expect(helper('', 'apple', 0)).toEqual(true);
+    expect(helper('apple', '', 0)).toEqual(false);
     expect(helper('1', 'apple', 0)).toEqual(true);
     expect(helper('apple', '1', 0)).toEqual(false);
     expect(helper('cat', 'apple', 1)).toEqual(false);
