@@ -1127,30 +1127,38 @@ div.full_height {
     cursor: move;
 }
 
+#rainbow-mode {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 999999999;
+    pointer-events: none;
+}
+
 .rainbow {
     background:
         -moz-linear-gradient(
             left,
-            rgba(255, 0, 0, 1) 0%,
-            rgba(255, 255, 0, 1) 15%,
-            rgba(0, 255, 0, 1) 30%,
-            rgba(0, 255, 255, 1) 50%,
-            rgba(0, 0, 255, 1) 65%,
-            rgba(255, 0, 255, 1) 80%,
-            rgba(255, 0, 0, 1) 100%
+            rgba(255, 0, 0, 0.3) 0%,
+            rgba(255, 255, 0, 0.3) 15%,
+            rgba(0, 255, 0, 0.3) 30%,
+            rgba(0, 255, 255, 0.3) 50%,
+            rgba(0, 0, 255, 0.3) 65%,
+            rgba(255, 0, 255, 0.3) 80%,
+            rgba(255, 0, 0, 0.3) 100%
         );
     background:
-        #337ab7 -webkit-gradient(
+        #ffffff01 -webkit-gradient(
             linear,
             left top,
             right bottom,
-            color-stop(0%, rgba(255, 0, 0, 0.4)),
-            color-stop(15%, rgba(255, 255, 0, 0.4)),
-            color-stop(30%, rgba(0, 255, 0, 0.4)),
-            color-stop(50%, rgba(0, 255, 155, 0.4)),
-            color-stop(65%, rgba(0, 0, 255, 0.4)),
-            color-stop(80%, rgba(255, 0, 255, 0.4)),
-            color-stop(100%, rgba(255, 0, 0, 0.4))
+            color-stop(0%, rgba(255, 0, 0, 0.3)),
+            color-stop(15%, rgba(255, 255, 0, 0.3)),
+            color-stop(30%, rgba(0, 255, 0, 0.3)),
+            color-stop(50%, rgba(0, 255, 155, 0.3)),
+            color-stop(65%, rgba(0, 0, 255, 0.3)),
+            color-stop(80%, rgba(255, 0, 255, 0.3)),
+            color-stop(100%, rgba(255, 0, 0, 0.3))
         );
 }
 

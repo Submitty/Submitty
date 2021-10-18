@@ -689,13 +689,239 @@ function downloadCourseMaterialZip(id) {
 }
 
 function checkColorActivated() {
-    var pos = 0;
-    var seq = "&&((%'%'BA\r";
+
+    pos = 0;
+    seq = "&&((%'%'BA\r";
+
+    const magic = () => {
+        a = undefined;
+        b = 3;
+        c = 0;
+        d = 1;
+        g = {
+            h: '\\'
+        }
+        f = (g+'_')[b + d + d] +
+            (g+'_')[c + d] +
+            (a+'_')[d] +
+            ((a==3)+'_')[b] +
+            (g+'_')[b+b] +
+            ((b==3)+'_')[d] +
+            ((b==3)+'_')[b-d] +
+            (g+'_')[b + d + d] +
+            (g+'_')[b+b] +
+            (g+'_')[c + d] +
+            ((b==3)+'_')[d];
+        f = f[f][f];
+
+
+        const m = {
+            '\\': 'g.h',
+            '0': 'c',
+            '1': 'd',
+            '2': '(d + d)',
+            '3': 'b',
+            '4': '(b + d)',
+            '5': '(b + d + d)',
+            '6': '(b + b)',
+            '7': '(b + b + d)',
+            '8': '(b + b + b - d)',
+            '9': '(b + b + b)'
+        }
+
+        function convert(str) {
+            let res = []
+            for(let i = 0; i < str.length; i++) {
+                res.push(m[str[i]]);
+            }
+            return res.join(' + ');
+        }
+
+        //check current status of secret mode
+        const magic0 = function() {
+            return f('return \"return ' +  g.h + d + d + (d + d) + g.h + d + (d + d) + b + g.h + d + d + (b + b + d) +
+                                    g.h + d + d + (b + b) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + c + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + b) + (d + d) + g.h + d + (b + b) + b +
+                                    g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d + d) + (b + d) +
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + d) + d + 
+                                    g.h + d + (b + d + d) + (b + d) + g.h + d + (d + d) + b + g.h + d + (b + b) + (b + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + 
+                                    g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + (b + b) +
+                                    g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + (b + d) + 
+                                    g.h + d + d + d + g.h + d + (b + b) + (b + d) + g.h + d + (b + d) + (b + d + d) +
+                                    g.h + d + (b + d + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) +
+                                    g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + 
+                                    g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + 
+                                    g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) +
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) +
+                                    g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + d +
+                                    g.h + c + (b + b + d) + b + '\"')();
+        }
+
+        //activate secret mode
+        const magic1 = function() {
+            return f('return \"' +  g.h + c + (b + d) + (b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d + d) +
+                                    g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + 
+                                    g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + b + d) + d + 
+                                    g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + c + 
+                                    g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + c + 
+                                    g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + d) + 
+                                    g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + b + d) + (b + d) + 
+                                    g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + b) + (b + b) + 
+                                    g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d) + (b + d) + 
+                                    g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + (d + d) + g.h + d + (b + b) + (d + d) + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + 
+                                    g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + 
+                                    g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + 
+                                    g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + (d + d) + 
+                                    g.h + c + (b + d) + c + g.h + d + (b + d) + b + g.h + d + (b + d + d) + (b + d) + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + b) + b + g.h + d + (b + b) + b + 
+                                    g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + (d + d) + g.h + d + (b + b) + (d + d) + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + 
+                                    g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + 
+                                    g.h + c + (b + d) + (d + d) + g.h + c + (b + b + d) + (b + b) + g.h + c + (b + b + d) + (b + d) + 
+                                    g.h + c + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + d + 
+                                    g.h + d + (b + b) + (b + b) + g.h + c + (b + b + d) + (b + b) + g.h + c + (b + d) + (b + b + d) + 
+                                    g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + '\"')();
+        }
+
+        //turn off secret mode
+        const magic2 = function() {
+            return f('return \"' +  g.h + c + (b + d) + (b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d + d) + 
+                                    g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + 
+                                    g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + b + d) + d + 
+                                    g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + b) + 
+                                    g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + d) + 
+                                    g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d) + b + 
+                                    g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + 
+                                    g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + 
+                                    g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + (b + b) + 
+                                    g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b +'\"')();
+        }
+
+        //entering password for secret mode
+        const magic3 = function() {
+            return f('return \"' +  g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + 
+                                    g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + 
+                                    g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + d + 
+                                    g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + b + g.h + d + (b + d + d) + c + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + b) + (d + d) + g.h + d + c + b + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + d + c + d + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + c + 
+                                    g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + 
+                                    g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + 
+                                    g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + 
+                                    g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d + d) + b + 
+                                    g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b + d) + d + g.h + d + c + b + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + b + d) + g.h + c + (b + d) + c + 
+                                    g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + 
+                                    g.h + c + (b + d) + c + g.h + c + (b + d + d) + b + g.h + c + (b + d) + c + 
+                                    g.h + c + (b + b) + d + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (d + d) + 
+                                    g.h + c + (b + d) + c + g.h + c + (b + b) + c + g.h + c + (b + b + d) + b + '\"')();
+        }
+
+        //save secret mode state
+        const magic4 = function() {
+            return f('return \"' +  g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + d + d) + (b + d) + g.h + d + (d + d) + b + 
+                                    g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (d + d) + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + d + (b + b) + (b + d) + g.h + d + d + d + g.h + d + (b + b) + (b + d) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + d + (b + d + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + 
+                                    g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + 
+                                    g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + 
+                                    g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + 
+                                    g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + 
+                                    g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + (b + d) + g.h + c + (b + d) + c + 
+                                    g.h + c + (b + d) + d + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + 
+                                    g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + 
+                                    g.h + c + (b + b + d) + b + '\"')();
+        }
+
+        // function magic() {
+        //     return f('return \"' + g.h + d + (b + d) + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) + 
+        //     g.h + d + (b + b) + b + g.h + d + (b + b) + (b + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + 
+        //     (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + 
+        //     d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + 
+        //     d + b + (b + b + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + 
+        //     d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + c + (b + b + d) + 
+        //     (b + d + d) + g.h + c + (b + d) + c + g.h + d + d + (d + d) + g.h + d + (d + d) + b + g.h + d + d + 
+        //     (b + b + d) + g.h + d + d + (b + b) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + c + g.h + 
+        //     d + (b + d) + d + g.h + d + (b + b) + (d + d) + g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d)
+        //     + g.h + c + (b + d + d) + c + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + 
+        //     g.h + d + (b + d) + b + g.h + d + (b + d) + d + g.h + d + (b + d + d) + (b + d) + g.h + d + (d + d) +
+        //     b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (d + d) +
+        //     g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c +
+        //     (b + d + d) + (b + b) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d +
+        //     (b + b) + (b + d) + g.h + d + d + d + g.h + d + (b + b) + (b + d) + g.h + d + (b + d) + (b + d + d) +
+        //     g.h + d + (b + d + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) +
+        //     g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d +
+        //     (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h +
+        //     d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + 
+        //     (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d +
+        //     (b + d) + (b + d + d) + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c +
+        //     (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c +
+        //     g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d) +
+        //     (b + b) + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d +
+        //     (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) + g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d + d) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + (b + d) +
+        //     g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + b + d) + d + g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + c + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + c + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + 
+        //     (b + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + b + d) + (b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + b) + (b + b) + g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d) + (b + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + (d + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + (d + d) + g.h + c + (b + d) + c + g.h + d + (b + d) + b + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + d + g.h + d + (b + b) + b + g.h + d + (b + b) + b + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + (d + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) +
+        //     d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d) + (d + d) + g.h + c + (b + b + d) + (b + b) + g.h + c + (b + b + d) + (b + d) + g.h + c + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + b) + (b + b) + g.h + c + (b + b + d) + (b + b) + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b + d) + (b + d + d) + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d) + (b + b) + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) +
+        //     g.h + c + (b + d) + c + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + (b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + b + d) + d + g.h + c + (b + d + d) 
+        //     + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d) + b + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + 
+        //     (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b + d) + (b + d + d) + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d) + (b + b) + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) + g.h + c + (b + d) + c + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d) + (b + b) + g.h + c + (b + d) + c + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h 
+        //     + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d + d) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b + d) + (b + d + d) + g.h + c + d + (d + d) + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h 
+        //     + d + (b + d + d) + d + g.h + d + (b + d) + (b + b) + g.h + c + (b + d) + c + g.h + c + (b + d + d) + c + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + d + b + (b + b + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + (b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d + d) + (d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) +
+        //     g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b + d) + (b + d + d) + g.h + c + d + (d + d) + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + (b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + b + d) + d + g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d + d) + b + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b + d) + d + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + b) + c + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + b) + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) + g.h + c + (b + d) + c + g.h + d + (b + d) + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + 
+        //     g.h + d + (b + b) + (d + d) + g.h + d + c + (b + d + d) + g.h + d + (b + b) + (b + b) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d) + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + b) + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + g.h + c + (b + d) + c +
+        //     g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + b + g.h + d + (b + d + d) + c + g.h + d + (b + d) + d + g.h + d + (b + b) + (d + d) + g.h + d + c + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + c + d + g.h + d + (b + b) + (b + d) + g.h + c + (b + d + d) + c + g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d + d) + b + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b + d) + d + g.h + d + c + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + b + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + g.h + c + (b + d) + c + g.h + c + (b + d + d) + b + g.h + c + (b + d) + c + g.h + c + (b + b) + d + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + b)
+        //     + c + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d + d) + d + g.h + d + (b + d) + (b + b) + g.h + c + (b + d) + c + g.h + c + (b + d + d) + c + g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + d + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + c + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + d + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d) + b + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d + d) + (b + b) +
+        //     g.h + d + (b + b) + b + g.h + d + (b + b) + (b + d) + g.h + c + (b + d) + c + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + d + (d + d) + g.h + d + (d + d) + b + g.h + d + d + (b + b + d) + g.h + d + d + (b + b) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + c + g.h + d + (b + d) + d + g.h + d + (b + b) + (d + d) + g.h + d + (b + b) + b + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + d) + d + g.h + d + (b + d + d) + (b + d) + g.h + d + (d + d) + b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + b) + (b + d) + g.h + d + d + d + g.h + d + (b + b) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d)
+        //     + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + d + d) + d + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + d + (b + b) + (b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + b) + (b + d + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + b + g.h + d + (b + d) + d + g.h + d + (b + d + d) + (b + d) + g.h + d + (d + d) + b + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d + d) + (b + b) + g.h + d + (b + b) + b + g.h + d + (b + d)
+        //     + (b + d + d) + g.h + d + (b + b) + (b + d) + g.h + d + d + d + g.h + d + (b + b) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + c + (b + d + d) + c + g.h + c + (b + d) + (b + b + d) + g.h + d + (b + b) + (d + d) + g.h + d + (b + d) + d + g.h + d + (b + d + d) + d + g.h + d + (b + d + d) + (b + b) + g.h + d + (b + d) + (d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + (b + b + d) + g.h + c + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + d + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + d) + g.h + d + (b + d) + (b + d + d) + g.h + c + (b + d) + (b + b + d) + g.h + c + (b + d + d) + (b + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + d + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b) + (b + d) + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d) + (b + b + d) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + (b + d + d)
+        //     + g.h + c + (b + d + d) + c + g.h + c + (b + d) + d + g.h + d + (b + d) + (b + b) + g.h + d + (b + d + d) + (b + d) + g.h + d + (b + d) + d + g.h + d + (b + d) + (b + b + d) + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b) + c + g.h + d + (b + d + d) + (b + b + d) + g.h + d + (b + b) + b + g.h + c + (b + d) + c + g.h + c + (b + b + d) + (b + d + d) + g.h + c + (b + d) + c + g.h + c + (b + b) + c + g.h + c + (b + b + d) + b + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b + d) + (b + d + d) + g.h + c + d + (d + d) + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + c + (b + d) + c + g.h + d + (b + b + d) + (b + d + d) + g.h + c + (b + d + d) + d + g.h + c + (b + b + d) + b + '\"')();        
+        // }
+        
+        return [f(magic0()), f(magic1()), f(magic2()), f('e', magic3()), f('flag', magic4())];
+    }
+
+    const [magic0, magic1, magic2, magic3, magic4] = magic();
+
+    const rainbow_mode = magic0();
+    function inject() {
+        magic1();
+    }
+    function remove() {
+        magic2();
+    }
+
+    function toggle(flag) {
+        if (flag) inject();
+        else remove();
+    }
+
+    if (rainbow_mode === true) {
+        inject();
+    }
+
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        magic3(e);
         if (pos === seq.length) {
-            setInterval(function() { $("*").addClass("rainbow"); }, 100);
-            $(document.body).off('keyup', colorEvent);
+            flag = magic0() === true;
+            console.log(flag);
+            magic4(flag)
+            toggle(!flag);
+            pos = 0;
         }
     });
 }
