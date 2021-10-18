@@ -254,9 +254,19 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
-
-        <tbody id="tbody">
-            <tr id="aphacker">
+            <tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="aphacker">
                 <td>1</td>
                 <td class="align-left">aphacker</td>
                 <td class="align-left">Alyssa P</td>
@@ -316,18 +326,6 @@ test('sort', () => {
                 <td>21</td>
                 <td></td>
                 <td style="display: none;">False</td>
-            </tr><tr id="zoezoe">
-                <td></td>
-                <td class="align-left">zoezoe</td>
-                <td class="align-left">Zoe</td>
-                <td class="align-left">Zoe</td>
-                <td></td>
-                <td></td>
-                <td>2018-04-03 18:47:02</td>
-                <td></td>
-                <td>10</td>
-                <td></td>
-                <td style="display: none;">False</td>
             </tr>
         </tbody>
     </table>`;
@@ -351,19 +349,7 @@ test('sort', () => {
         </thead>
 
         <tbody id="tbody">
-            <tr id="zoezoe">
-                <td></td>
-                <td class="align-left">zoezoe</td>
-                <td class="align-left">Zoe</td>
-                <td class="align-left">Zoe</td>
-                <td></td>
-                <td></td>
-                <td>2018-04-03 18:47:02</td>
-                <td></td>
-                <td>10</td>
-                <td></td>
-                <td style="display: none;">False</td>
-            </tr><tr id="bechta">
+            <tr id="bechta">
                 <td>Audit</td>
                 <td class="align-left">bechta</td>
                 <td class="align-left">Abigale</td>
@@ -421,6 +407,18 @@ test('sort', () => {
                 <td>2018-05-23 11:55:27</td>
                 <td></td>
                 <td>0</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
                 <td></td>
                 <td style="display: none;">False</td>
             </tr>
