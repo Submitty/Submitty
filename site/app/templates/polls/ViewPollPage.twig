@@ -60,19 +60,25 @@
 
 <script>
 	function toggle_section(section_id) {
-$(`#${section_id}`).toggle('slow');
-}
-
-window.onload = function () {
-const data = [{
-	type: "bar",
-		x: [],
-		y: []
-	}];{% for answer, number in results %}data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-	data[0].y.push({{ number }});{% endfor %}const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
-		const layout = {
-		title: title_text.documentElement.textContent
+		$(`#${section_id}`).toggle('slow');
 	}
-	Plotly.newPlot("chartContainer", data, layout);
-}
+
+	{% if user_admin or poll.isHistogramAvailable() %}
+		window.onload = function () {
+			const data = [{
+				type: "bar",
+					x: [],
+					y: []
+				}];
+			{% for answer, number in results %}
+				data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+				data[0].y.push({{ number }});
+			{% endfor %}
+			const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
+				const layout = {
+				title: title_text.documentElement.textContent
+			}
+			Plotly.newPlot("chartContainer", data, layout);
+		}
+	{% endif %}
 </script>
