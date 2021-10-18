@@ -851,7 +851,6 @@ function checkColorActivated() {
         magic3(e);
         if (pos === seq.length) {
             flag = magic0() === true;
-            console.log(flag);
             magic4(flag)
             toggle(!flag);
             pos = 0;
