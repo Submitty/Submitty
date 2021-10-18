@@ -131,7 +131,7 @@ class PlagiarismController extends AbstractController {
      * @return array
      * @throws Exception
      */
-    private function getOtherotherGradeables(string $term, string $course, string $this_gradeable): array {
+    private function getOtherGradeables(string $term, string $course, string $this_gradeable): array {
         // check for backwards crawling
         if (str_contains($term, '..') || str_contains($course, '..')) {
             throw new Exception('Error: path contains invalid component ".."');
@@ -1065,7 +1065,7 @@ class PlagiarismController extends AbstractController {
         $other_gradeables_array = $plagiarism_config->getOtherGradeables();
         foreach ($other_gradeables_array as &$gradeable) {
             try {
-                $gradeable["other_gradeables"] = $this->getOtherotherGradeables($gradeable["other_semester"], $gradeable["other_course"], $gradeable_id);
+                $gradeable["other_gradeables"] = $this->getOtherGradeables($gradeable["other_semester"], $gradeable["other_course"], $gradeable_id);
             }
             catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
@@ -1250,7 +1250,7 @@ class PlagiarismController extends AbstractController {
         $course = $tokens[1];
 
         try {
-            $return = $this->getOtherotherGradeables($semester, $course, $_POST['this_gradeable']);
+            $return = $this->getOtherGradeables($semester, $course, $_POST['this_gradeable']);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
