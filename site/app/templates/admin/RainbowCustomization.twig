@@ -14,12 +14,6 @@
                     <a href="http://www.submitty.org/instructor/rainbow_grades/automatic_setup">rainbow grades documentation</a>.</p>
             </div>
         {% endif %}
-        <form action="http://localhost:1511/courses/f21/sample/reports/rainbow_grades_customization/upload" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{csrfToken}}">
-            <label>Upload customization.json: <input type="file" name="config_upload"><br></label>
-            <input type="submit" value="Upload"><br>
-            <button type="reset">Cancel Upload</button>
-        </form>
 
         <div id="save_status_container" class="customization_item">
             <span id="status_label">Status: </span>
