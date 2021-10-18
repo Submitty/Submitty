@@ -48,7 +48,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
+     * @param string|null $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
      * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse

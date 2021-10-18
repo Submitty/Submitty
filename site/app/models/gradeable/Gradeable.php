@@ -780,14 +780,14 @@ class Gradeable extends AbstractModel {
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
-                // Don't coerce a date on the skip list
-                if (in_array($property, $skip_coercion_dates)) {
-                    $prev_date = $date_values[$property];
+                if ($date === null) {
+                    $date_values[$property] = $prev_date;
                     continue;
                 }
 
-                if ($date === null) {
-                    $date_values[$property] = $prev_date;
+                // Don't coerce a date on the skip list
+                if (in_array($property, $skip_coercion_dates)) {
+                    $prev_date = $date_values[$property];
                     continue;
                 }
 
@@ -798,7 +798,7 @@ class Gradeable extends AbstractModel {
 
                 // Get a value for the date to compare against next
                 if ($date !== null) {
-                    $prev_date = $date;
+                    $prev_date = $date_values[$property];
                 }
             }
             return $date_values;
@@ -2116,7 +2116,7 @@ class Gradeable extends AbstractModel {
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
             ['PROVIDED: upload_only (100 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
-            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+            ['PROVIDED: bulk scanned pdf exam (200 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
             ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
