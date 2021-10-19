@@ -1,3 +1,12 @@
+<div class = "queue-message" style="display: none; background-color: var(--alert-info-blue); padding: 1rem;">
+    <h3 id="queue-message-prompt">
+        Message From Queue Admins:<br>
+    </h3>
+    <p id="queue-message-msg">
+
+    </p>
+</div>
+<div id="queue_status">
 {% if viewer.inQueue() == 0 %}
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -47,15 +56,6 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
-    <div class = "queue-message" style="display: none; background-color: var(--alert-info-blue); padding: 1rem;">
-        <h3 id="queue-message-prompt">
-            Message From Queue Admins:<br>
-        </h3>
-        <p id="queue-message-msg">
-
-        </p>
-    </div>
-  <div id="queue_status">
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
       There
@@ -139,4 +139,51 @@
     </form>
   </div>
 {% endif %}
+<script>
+    if(localStorage.getItem('QueueMessage')){
+        let current_time = new Date();
+        const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
+        const queue = sent.queue;
+        const sent_time = sent.time;
+        //get rid of message after 80 minutes
+        if(current_time.getTime() - 5000000 < sent_time && queue === '{{viewer.getCurrentQueueCode()}}') {
+            $('.queue-message').css('display', 'block');
+            $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
+        } else {
+            localStorage.removeItem('QueueMessageExpire');
+            localStorage.removeItem('QueueMessage');
+        }
+
+    }
+    initSocketClient();
+
+    function initSocketClient() {
+        window.socketClient = new WebSocketClient();
+        window.socketClient.onmessage = (msg) => {
+            switch (msg.type) {
+                case "queue_message":
+                    queueMessage(msg.message, msg.queue);
+                    break;
+                default:
+                    console.log("Unknown message received.");
+                    break;
+            }
+        };
+        window.socketClient.open('office_hours_queue');
+    }
+
+    function queueMessage(message, queue) {
+        if (queue === "{{viewer.getCurrentQueueCode()}}"){
+            let now = new Date();
+            const item = {
+                queue: queue,
+                time: now.getTime()
+            }
+            localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
+            localStorage.setItem('QueueMessage', message);
+            $('.queue-message').css('display', 'block');
+            $('#queue-message-msg').html(message);
+        }
+    }
+</script>
 

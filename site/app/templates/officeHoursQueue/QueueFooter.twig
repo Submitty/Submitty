@@ -10,22 +10,6 @@
     localStorage.setItem('office_hour_queue_filters', "{}");
   }
 
-  if(localStorage.getItem('QueueMessage')){
-      let current_time = new Date();
-      const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
-      const queue = sent.queue;
-      const sent_time = sent.time;
-      //get rid of message after 80 minutes
-      if(current_time.getTime() - 5000000 < sent_time && queue === "{{viewer.getCurrentQueueCode()}}") {
-          $('.queue-message').css('display', 'block');
-          $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
-      } else {
-          localStorage.removeItem('QueueMessageExpire');
-          localStorage.removeItem('QueueMessage');
-      }
-
-  }
-
   var timers = []; //keep track of the current running timers on the page
   var timerInterval = null; //keep track of the interval that updates the timers
 
@@ -330,19 +314,6 @@
       });
   }
 
-  function queueMessage(message, queue) {
-      if (queue === "{{viewer.getCurrentQueueCode()}}"){
-          let now = new Date();
-          const item = {
-              queue: queue,
-              time: now.getTime()
-          }
-          localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
-          localStorage.setItem('QueueMessage', message);
-          $('.queue-message').css('display', 'block');
-          $('#queue-message-msg').html(message);
-      }
-  }
 
 </script>
 </div>
