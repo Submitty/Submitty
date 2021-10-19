@@ -47,7 +47,14 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
-    <h4 id="queue-message-block"></h4>
+    <div class = "queue-message" style="display: none; background-color: var(--alert-info-blue); padding: 1rem;">
+        <h3 id="queue-message-prompt">
+            Message From Queue Admins:<br>
+        </h3>
+        <p id="queue-message-msg">
+
+        </p>
+    </div>
   <div id="queue_status">
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
@@ -85,9 +92,9 @@
       {% endif %}
       There {{plurality_picker(num_ahead_week, 'is', 'are')}} currently
       {{num_ahead_week}} {{plurality_picker(num_ahead_week, 'person', 'people')}}
-      {{ queue_text }} {{plurality_picker(num_ahead_week, 'has', 'have')}}F
+      {{ queue_text }} {{plurality_picker(num_ahead_week, 'has', 'have')}}
       {{ position_text }} {{num_ahead_today}} additional
-      {{plurality_picker(num_ahead_today, 'person', 'people')}} {{ end_text }}
+      {{plurality_picker(num_ahead_today, 'person', 'people')}} {{ end_text }}.
     </p>
 
     <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() | url_encode }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
