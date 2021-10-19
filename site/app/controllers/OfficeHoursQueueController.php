@@ -478,7 +478,9 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $message = trim($_POST['socket-message']);
-        $this->sendSocketMessage(['type' => 'queue_message', 'message' =>$message]);
+        $code = trim($_POST['code']);
+        $this->sendSocketMessage(['type' => 'queue_message', 'message' =>$message, 'queue' => $code]);
+        $this->core->addSuccessMessage("Message Sent To Queue");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
     /**
