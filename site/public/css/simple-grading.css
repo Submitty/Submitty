@@ -17,7 +17,7 @@
 .sticky-top {
     position: fixed;
     top: 0;
-    right: 30px;
+    width:100%;
 }
 
 .sticky-top label,
@@ -25,17 +25,16 @@
     display: none !important;
 }
 
-.edit-zone {
-    width: 75vw !important;
-    margin: 0 0 1em 0;
-    resize: none;
-}
-
 .sticky-top .sticky-box {
-    width: 81vw;
     border: 3px solid var(--background-blue);
     padding: 1em;
     background-color: var(--default-white);
+}
+
+.edit-zone {
+    width: 70vw !important;
+    margin: 0 0 1em 0;
+    resize: none;
 }
 
 .simple-full-credit {

@@ -1,5 +1,5 @@
 <div class="content">
-    <div>
+    <div style="display: inline-block; width: 100%;">
     <h1 style="float: left;">
         {{ gradeable.getTitle() }}
         {% if gradeable_url|trim != "" %}
@@ -15,28 +15,6 @@
             Overall TA Instructions: <a class="external" href="{{  gradeable.getTaInstructions() }}" target="_blank" aria-label="Overall TA Instructions for {{ gradeable.getTitle() }}"><i>{{  gradeable.getTaInstructions()  }}</i></a>
         </p>
     {% endif %}
-
-    <div class="column-wrapper" style="margin: 1em 0; display: inline-block;">
-        <div id="checkpoint-sticky" class="column-wrapper">
-            <div class="sticky-box">
-                <input class="edit-zone custom-scrollbar"
-                    data-target=""
-                    type="text"
-                    onkeyup="editTargetVal(this);"
-                    disabled
-                />
-                {% include "grading/simple/StudentSearch.twig" %}
-            </div>
-            
-            {% if action == 'lab' %}
-                <div>
-                    <p class="not-sticky">Undo/Redo Changes</p>
-                    <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled>Undo <i class="fas fa-undo"></i></button>
-                    <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>
-                </div>
-            {% endif %}
-        </div>
-    </div>
 
     <div class="column-wrapper" style="margin: 1em 0;">
             {% if action == 'lab' %}
@@ -96,6 +74,19 @@
         </div>
     </div>
 
+    {% if action == 'numeric' and core.getUser().accessAdmin() %}
+        <div class="column-wrapper">
+            <label for="csvUpload">Upload CSV
+                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
+            </label>
+            <p>
+                The CSV file should be formatted as such:
+                <br />
+                user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
+            </p>
+        </div>
+    {% endif %}
+
     <p>Sort By:</p>
     <div style="margin: 1em 0;"> {# This is a drop down menu containing sorting options #}
         <select
@@ -118,19 +109,28 @@
             </option>
         </select>
     </div>
-    {% if action == 'numeric' and core.getUser().accessAdmin() %}
-        <div class="column-wrapper">
-            <label for="csvUpload">Upload CSV
-                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
-            </label>
-            <p>
-                The CSV file should be formatted as such:
-                <br />
-                user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
-            </p>
+    
+    <div class="column-wrapper" style="margin: 1em 0; display: inline-block;">
+        <div id="checkpoint-sticky" class="column-wrapper">
+            <div class="sticky-box">
+                <input class="edit-zone custom-scrollbar"
+                    data-target=""
+                    type="text"
+                    onkeyup="editTargetVal(this);"
+                    disabled
+                />
+                {% include "grading/simple/StudentSearch.twig" %}
+            </div>
+            
+            {% if action == 'lab' %}
+                <div>
+                    <p class="not-sticky">Undo/Redo Changes</p>
+                    <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled>Undo <i class="fas fa-undo"></i></button>
+                    <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
-
+    </div>
     {# This is a data table #}
     <table id="data-table" data-current-grader="{{ user_id }}" class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
         <caption />
