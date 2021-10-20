@@ -1179,7 +1179,7 @@ class Gradeable extends AbstractModel {
             'max_value' => $max_value,
             'upper_clamp' => $upper_clamp,
             'text' => $text,
-            'peer' => $peer,
+            'peer_component' => $peer,
             'page' => $pdf_page,
             'id' => 0,
             'order' => count($this->components)
