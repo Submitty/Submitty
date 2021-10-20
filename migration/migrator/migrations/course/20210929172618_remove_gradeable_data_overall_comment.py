@@ -96,7 +96,7 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE gradeable_data ADD COLUMN IF NOT EXISTS gd_overall_comment")
+    database.execute("ALTER TABLE gradeable_data ADD COLUMN IF NOT EXISTS gd_overall_comment character varying NOT NULL DEFAULT ''")
     database.execute("""CREATE OR REPLACE FUNCTION public.csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader_id text) RETURNS boolean
         LANGUAGE plpgsql
         AS $$
