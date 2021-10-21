@@ -31,7 +31,7 @@
       <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
       <br>
     </div>
-    <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
+    <button id="join_queue_btn" type="submit" class="btn btn-primary" onclick="clearQueueSocketMsg()">Join</button>
   </form>
     <script>
         $('#queue_code').change(function(){
@@ -140,13 +140,14 @@
   </div>
 {% endif %}
 <script>
+
     if(localStorage.getItem('QueueMessage')){
         let current_time = new Date();
         const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
         const queue = sent.queue;
         const sent_time = sent.time;
         //get rid of message after 80 minutes
-        if(current_time.getTime() - 5000000 < sent_time && queue === '{{viewer.getCurrentQueueCode()}}') {
+        if(current_time.getTime() - 5000000 < sent_time) {
             $('.queue-message').css('display', 'block');
             $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
         } else {
@@ -172,18 +173,28 @@
         window.socketClient.open('office_hours_queue');
     }
 
-    function queueMessage(message, queue) {
-        if (queue === "{{viewer.getCurrentQueueCode()}}"){
-            let now = new Date();
-            const item = {
-                queue: queue,
-                time: now.getTime()
+     {% if not viewer.inQueue() == 0 %}
+        function queueMessage(message, queue) {
+            if (queue === "{{viewer.getCurrentQueueCode()}}"){
+                let now = new Date();
+                const item = {
+                    queue: queue,
+                    time: now.getTime()
+                }
+                localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
+                localStorage.setItem('QueueMessage', message);
+                $('.queue-message').css('display', 'block');
+                $('#queue-message-msg').html(message);
             }
-            localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
-            localStorage.setItem('QueueMessage', message);
-            $('.queue-message').css('display', 'block');
-            $('#queue-message-msg').html(message);
+        }
+    {% endif %}
+
+    function clearQueueSocketMsg(){
+        if(localStorage.getItem('QueueMessage')){
+            localStorage.removeItem('QueueMessageExpire');
+            localStorage.removeItem('QueueMessage');
         }
     }
+
 </script>
 
