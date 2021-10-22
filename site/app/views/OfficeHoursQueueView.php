@@ -17,7 +17,7 @@ class OfficeHoursQueueView extends AbstractView {
         $this->core->getOutput()->addInternalJs('notification-sound.js');
         $this->core->getOutput()->enableMobileViewport();
 
-        return $this->renderPart($viewer,"officeHoursQueue/QueueHeader.twig");
+        return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
     }
 
     public function renderCurrentQueue($viewer) {

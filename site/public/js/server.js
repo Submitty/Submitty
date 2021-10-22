@@ -1660,6 +1660,3 @@ function addMarkdownCode(type, divTitle){
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
-
-
-
