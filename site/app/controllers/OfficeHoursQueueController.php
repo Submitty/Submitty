@@ -466,7 +466,7 @@ class OfficeHoursQueueController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return RedirectResponse
      */
-    public function sendQueueMessage(): RedirectResponse{
+    public function sendQueueMessage(): RedirectResponse {
         if (empty($_POST['socket-message'])) {
             $this->core->addErrorMessage("Missing message");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
@@ -479,7 +479,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         $message = trim($_POST['socket-message']);
         $code = trim($_POST['code']);
-        $this->sendSocketMessage(['type' => 'queue_message', 'message' =>$message, 'queue' => $code, 'course' => $this->core->getFullCourseName()]);
+        $this->sendSocketMessage(['type' => 'queue_message', 'message' => $message, 'queue' => $code, 'course' => $this->core->getFullCourseName()]);
         $this->core->addSuccessMessage("Message Sent To Queue");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
