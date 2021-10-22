@@ -146,40 +146,29 @@
         const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
         const queue = sent.queue;
         const sent_time = sent.time;
+        const course = sent.course;
+        console.log(course);
         //get rid of message after 80 minutes
         if(current_time.getTime() - 5000000 < sent_time) {
-            $('.queue-message').css('display', 'block');
-            $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
+            if(course === '{{ viewer.getCourse() }}'){
+                $('.queue-message').css('display', 'block');
+                $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
+            }
         } else {
             localStorage.removeItem('QueueMessageExpire');
             localStorage.removeItem('QueueMessage');
         }
 
     }
-    initSocketClient();
-
-    function initSocketClient() {
-        window.socketClient = new WebSocketClient();
-        window.socketClient.onmessage = (msg) => {
-            switch (msg.type) {
-                case "queue_message":
-                    queueMessage(msg.message, msg.queue);
-                    break;
-                default:
-                    console.log("Unknown message received.");
-                    break;
-            }
-        };
-        window.socketClient.open('office_hours_queue');
-    }
 
      {% if not viewer.inQueue() == 0 %}
-        function queueMessage(message, queue) {
+        function queueMessage(message, queue, course) {
             if (queue === "{{viewer.getCurrentQueueCode()}}"){
                 let now = new Date();
                 const item = {
                     queue: queue,
-                    time: now.getTime()
+                    time: now.getTime(),
+                    course: course
                 }
                 localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
                 localStorage.setItem('QueueMessage', message);
@@ -188,6 +177,23 @@
             }
         }
     {% endif %}
+
+    initSocketClientMsg();
+
+    function initSocketClientMsg() {
+        window.socketClient = new WebSocketClient();
+        window.socketClient.onmessage = (msg) => {
+            switch (msg.type) {
+                case "queue_message":
+                    queueMessage(msg.message, msg.queue, msg.course);
+                    break;
+                default:
+                    console.log("Unknown message received.");
+                    break;
+            }
+        };
+        window.socketClient.open('office_hours_queue');
+    }
 
     function clearQueueSocketMsg(){
         if(localStorage.getItem('QueueMessage')){

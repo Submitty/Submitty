@@ -315,4 +315,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     public function statNiceName($name): string {
         return $this->niceNames[$name] ?? $name;
     }
+
+    public function getCourse(): string {
+        return $this->core->getFullCourseName();
+    }
 }
