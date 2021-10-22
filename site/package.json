@@ -40,8 +40,8 @@
     "eslint-plugin-jest": "^25.0.6",
     "jest": "^27.2.5",
     "regenerator-runtime": "^0.13.9",
-    "stylelint": "^13.13.1",
-    "stylelint-config-standard": "^22.0.0"
+    "stylelint": "^14.0.0",
+    "stylelint-config-standard": "^23.0.0"
   },
   "scripts": {
     "css-stylelint": "stylelint \"**/*.css\"",
