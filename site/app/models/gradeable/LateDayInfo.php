@@ -130,15 +130,17 @@ class LateDayInfo extends AbstractModel {
 
     public function generateEventInfo() {
         return [
-            'id' => $this->getId(),
-            'graded_gradeable' => $this->getGradedGradeable(),
+            'g_id' => $this->isLateDayUpdate() ? null : $this->getId(),
+            'user_id' => $this->user->getId(),
+            'team_id' => null,
+            'g_title' => $this->isLateDayUpdate() ? null : $this->getEventTitle(),
+            'late_day_date' => $this->getLateDayEventTime()->format('Y-m-d H:i:s'),
+            'late_days_remaining' => $this->getLateDaysRemaining(),
             'late_days_allowed' => $this->getAssignmentAllowedLateDays(),
-            'late_day_date' => $this->getLateDayEventTime(),
             'submission_days_late' => $this->getDaysLate(),
             'late_day_exceptions' => $this->getLateDayException(),
-            'late_days_remaining' => $this->getLateDaysRemaining(),
-            'late_days_change' => $this->getLateDaysChange(),
-            'late_day_status' => $this->getStatus()
+            'late_day_status' => $this->getStatus(),
+            'late_days_change' => $this->getLateDaysChange()
         ];
     }
 

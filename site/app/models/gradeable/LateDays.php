@@ -134,15 +134,15 @@ class LateDays extends AbstractModel {
                         $diff = 1;
                     }
                     else { // $e1 and $e2 are ggs, use g_id
-                        strcmp($e1['gg']->getGradeableId(), $e2['gg']->getGradeableId());
+                        $diff = strcmp($e1['gg']->getGradeableId(), $e2['gg']->getGradeableId());
                     }
                 }
             }
             elseif ($e2['timestamp'] !== null) {
-                $time_diff = 1;
+                $diff = 1;
             }
             elseif ($e1['timestamp'] !== null) {
-                $time_diff = -1;
+                $diff = -1;
             }
             return $diff;
         });

@@ -1418,6 +1418,9 @@ WHERE semester=? AND course=? AND user_id=?",
         $index = 1;
         $late_day_events = [];
         foreach ($this->course_db->rows() as $row) {
+            // Change string date to DateTime object
+            $row['late_day_date'] = new \DateTime($row['late_day_date']);
+
             if (isset($row['g_id'])) { // Gradeable late day event
                 $late_day_events[$row['g_id']] = $row;
             }
