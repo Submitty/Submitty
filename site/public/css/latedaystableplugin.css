@@ -26,7 +26,6 @@ fieldset > * {
 #late-day-table td:nth-of-type(7)::before { content: "Late Days Used Here"; }
 #late-day-table td:nth-of-type(8)::before { content: "Remaining Late Days"; }
 
-
 @media (min-width: 831px) {
     #late-day-table {
         margin: 1em 0 0;
