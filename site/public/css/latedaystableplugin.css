@@ -1,12 +1,3 @@
-fieldset {
-    display: flex;
-    margin: 1em 0;
-}
-
-fieldset > * {
-    padding-right: 2em;
-}
-
 #late-day-history li {
     margin-left: 30px;
 }
@@ -17,14 +8,7 @@ fieldset > * {
     padding: 5px 10px;
 }
 
-#late-day-table td:nth-of-type(1)::before { content: "Assignment/Event Name"; }
-#late-day-table td:nth-of-type(2)::before { content: "Assignment/Event Date"; }
-#late-day-table td:nth-of-type(3)::before { content: "Max Late Days"; }
-#late-day-table td:nth-of-type(4)::before { content: "Days Submitted Late"; }
-#late-day-table td:nth-of-type(5)::before { content: "Days From Extensions"; }
-#late-day-table td:nth-of-type(6)::before { content: "Status"; }
-#late-day-table td:nth-of-type(7)::before { content: "Late Days Used Here"; }
-#late-day-table td:nth-of-type(8)::before { content: "Remaining Late Days"; }
+#late-day-table td::before { content: attr(data-before-content) }
 
 @media (min-width: 831px) {
     #late-day-table {

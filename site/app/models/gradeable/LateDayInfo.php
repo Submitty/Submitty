@@ -273,6 +273,19 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
+     * Gets the status messages for this gradeable
+     * @return array
+     */
+    public static function getSimpleMessageFromSatus() {
+        return [
+            self::STATUS_NO_ACTIVE_VERSION => 'No Submission',
+            self::STATUS_GOOD => 'Good',
+            self::STATUS_LATE => 'Late',
+            self::STATUS_BAD => 'Bad'
+        ];
+    }
+
+    /**
      * Gets if this user has late days info available (if they have an active version)
      * @return bool
      */

@@ -311,6 +311,11 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-calendar-plus"
             ]);
             $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['late_day_cache']),
+                "title" => "Late Day Cache",
+                "icon" => "fa-calendar-alt"
+            ]);
+            $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['grade_override']),
                 "title" => "Grade Override",
                 "icon" => "fa-eraser"

@@ -1,0 +1,93 @@
+<div id="message"></div>
+<div class="content">
+    <h1>Late Day Cache</h1>
+
+    <div class="column-wrapper" style="margin: 1em 0;">
+        <div id="checkpoint-sticky" class="column-wrapper">
+            {% include "grading/simple/StudentSearch.twig" %}
+        </div>
+
+        <div class="column-wrapper">
+            <form method="post" action="{{calculate_cache_url}}" onsubmit="return confirm('Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <button class="btn btn-default key_to_click" tabindex="0" id="calculate-btn">Calculate Cache</button>
+            </form>
+            <form method="post" action="{{flush_cache_url}}" onsubmit="return confirm('Are you sure you want to flush the cache? This will remove the late day cache for every user.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <button class="btn btn-danger key_to_click" tabindex="0" id="flush-btn">Flush Cache</button>
+            </form>
+        </div>
+    </div>
+
+    <br/>
+    <div class="tab-bar-wrapper">
+        <a class="nav-bar key_to_click normal-btn" id="page_0_nav" onclick="onChangeNavTab(0);">Late Day Change</a>
+        <a class="nav-bar key_to_click normal-btn" id="page_1_nav" onclick="onChangeNavTab(1);">Gradeable Status</a>
+    </div>
+    <br/>
+
+    <div class="modal-body" type="hidden">
+        <div class="page-content" id="page_0_content">{{ include('admin/late_day_cache/LateDayCacheChange.twig') }}</div>
+        <div class="page-content" id="page_1_content">{{ include('admin/late_day_cache/LateDayCacheStatus.twig') }}</div>
+    </div>
+</div>
+<script>
+    $("#user_id").autocomplete({
+        source: {{ student_full|raw }}
+    });
+
+    flatpickr("#datestamp", {
+        plugins: [ShortcutButtonsPlugin(
+            {
+                button: [
+                    {
+                        label: "Now"
+                    }
+                ],
+                onClick: (index, fp) => {
+                    let date;
+                    switch (index) {
+                        case 0:
+                            date = new Date();
+                            break;
+                    }
+                    fp.setDate(date);
+                }
+            }
+        )],
+        allowInput: true,
+        enableTime: false,
+        enableSeconds: false,
+        time_24hr: true,
+        dateFormat: "Y-m-d",
+        onReady: (a, b, fp) => {
+            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+        }
+    });
+
+    let lateDayCacheNavTab = 0;
+    function onChangeNavTab(tab) {
+        if (tab > 1 || tab < 0) {
+            alert('Invalid Navigation');
+            return;
+        }
+
+        window.history.replaceState("", "", buildCourseUrl(['late_day_cache']) + `?nav_tab=${tab}`);
+        lateDayCacheNavTab = tab;
+
+        $('.page-content').hide();
+        $('#page_' + tab + '_content').show();
+        $('#page_' + Math.abs(tab-1) + '_nav').removeClass('active-btn');
+        $('#page_' + tab + '_nav').addClass('active-btn');
+    }
+
+    function onChangeSortCol(sortBy) {
+        console.log(sortBy)
+        window.location.assign(buildCourseUrl(['late_day_cache']) + `?nav_tab=${tab}&sort=${sortBy}`);
+    }
+
+    $(document).ready(function() {
+        onChangeNavTab(lateDayCacheNavTab);
+    })
+</script>

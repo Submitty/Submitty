@@ -1,0 +1,85 @@
+{# This is a data table #}
+<table id="late-day-table" class="mobile-table">
+    <caption />
+    {# Table header #}
+    <thead>
+        <tr>
+            <th>
+                <a onclick="onChangeSortCol('id')" aria-label="sort by ID">
+                    <span class="tooltiptext" title="sort by User ID">User ID </span><i class="fas fa-sort"></i>
+                </a>
+            </th>
+            <th>
+                <a onclick="onChangeSortCol('first')" aria-label="sort by First Name">
+                    <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
+                </a>
+            </th>
+            <th>
+                <a onclick="onChangeSortCol('last')" aria-label="sort by Last Name">
+                    <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
+                </a>
+            </th>
+            <th>
+                Initial
+            </th>
+
+            {% for title in late_day_cache_header %}
+                <th>
+                    {% if title.timestamp is defined %}
+                        {{ title|date('m/d/Y') }}
+                    {% else %}
+                        {{ title }}
+                    {% endif %}
+                </th>
+            {% endfor %}
+
+            <th>
+                Remaining
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% set index = 0 %}
+        {% for student in students %}
+            <tr id="row-{{ index }}" data-user="{{ student.getId() }}" data-row="{{ index }}">
+                <td data-before-content="Student ID">
+                    {{ student.getId() }}
+                </td>
+                <td data-before-content="First Name">
+                    {{ student.getDisplayedFirstName() }}
+                </td>
+                <td data-before-content="Last Name">
+                    {{ student.getDisplayedLastName() }}
+                </td>
+                <td data-before-content="Initial Late Days">
+                    {{ initial_late_days }}
+                </td>
+
+                {% set user_cache = late_day_cache[student.getId()] ?? null %}   
+
+                {# Late day change for updates and gradeables #}
+                {% for title in late_day_cache_header %}
+                    {% set title = title.timestamp is defined ? title|date('Y-m-d') : title %}
+
+                    <td data-before-content="{{ title }}">
+                        {% if user_cache is defined and user_cache[title] is defined %}
+                            {% set curr_cache = user_cache[title] %}
+                            {{ ((curr_cache.late_days_change > 0) ? '+' : '') ~ curr_cache.late_days_change }}
+                        {% endif %}
+                    </td>                    
+                {% endfor %}
+
+                {% set last_title = late_day_cache_header|last %}
+                {% set last_title = last_title.timestamp is defined ? last_title|date('Y-m-d') : last_title %}
+
+                {# If we have cache data for the last event, we have cache data for all events #}
+                {% if user_cache[last_title] is defined %}
+                    <td data-before-content="Late Days Remaining"> {{ user_cache[last_title].late_days_remaining }} </td>
+                {% else %}
+                    <td data-before-content="Late Days Remaining"> </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
