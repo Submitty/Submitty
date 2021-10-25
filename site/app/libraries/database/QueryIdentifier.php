@@ -15,7 +15,7 @@ class QueryIdentifier {
 
     public static function identify(string $query): string {
         $query = strtolower(trim($query));
-        if (Utils::startsWith($query, 'with')) {
+        if (str_starts_with($query, 'with')) {
             $tokens = str_split($query);
             $pos = 4;
             $tokenCount = count($tokens);
@@ -66,16 +66,16 @@ class QueryIdentifier {
             $query = implode("", array_slice($tokens, $pos));
         }
 
-        if (Utils::startsWith($query, QueryIdentifier::SELECT)) {
+        if (str_starts_with($query, QueryIdentifier::SELECT)) {
             return QueryIdentifier::SELECT;
         }
-        elseif (Utils::startsWith($query, QueryIdentifier::UPDATE)) {
+        elseif (str_starts_with($query, QueryIdentifier::UPDATE)) {
             return QueryIdentifier::UPDATE;
         }
-        elseif (Utils::startsWith($query, QueryIdentifier::INSERT)) {
+        elseif (str_starts_with($query, QueryIdentifier::INSERT)) {
             return QueryIdentifier::INSERT;
         }
-        elseif (Utils::startsWith($query, QueryIdentifier::DELETE)) {
+        elseif (str_starts_with($query, QueryIdentifier::DELETE)) {
             return QueryIdentifier::DELETE;
         }
         return QueryIdentifier::UNKNOWN;

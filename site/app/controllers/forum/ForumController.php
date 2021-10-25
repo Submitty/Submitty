@@ -178,7 +178,7 @@ class ForumController extends AbstractController {
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"]);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             }
@@ -187,7 +187,7 @@ class ForumController extends AbstractController {
             $result["new_ids"] = [];
             foreach ($category as $categoryName) {
                 if (!$this->isValidCategories(-1, [$categoryName])) {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName, $_POST["rank"]);
                     $result["new_ids"][] = $newCategoryId;
                 }
             }
