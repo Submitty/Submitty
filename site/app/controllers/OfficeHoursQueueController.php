@@ -206,6 +206,11 @@ class OfficeHoursQueueController extends AbstractController {
      */
     public function switchQueue($queue_code) {
         //do all error checking before leaving previous queue
+        if (empty($_POST['user_id'])) {
+            $this->core->addErrorMessage("Missing user id");
+            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+        }
+
         //make sure they are already in a queue first
         if (!$this->core->getQueries()->alreadyInAQueue($_POST['user_id'])) {
             $this->core->addErrorMessage("You aren't in a queue");
@@ -213,7 +218,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         //get the time they joined the previous queue
-        $time_in = $_POST['time_in'] ?? null;
+        $time_in = $this->core->getQueries()->getTimeJoinedQueue($_POST['user_id'], $queue_code);
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
 

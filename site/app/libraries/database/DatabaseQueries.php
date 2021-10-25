@@ -6251,6 +6251,12 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    //Gets the time a student joined the queue they are currently in
+    public function getTimeJoinedQueue($user_id, $queue_code) {
+        $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
+        return $this->course_db->rows()[0]['max'];
+    }
+
     public function getQueueId($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
