@@ -32,22 +32,26 @@
     "@babel/core": "^7.15.8",
     "@babel/preset-env": "^7.15.8",
     "@cypress/skip-test": "^2.6.1",
+    "@types/jquery": "^3.5.8",
     "babel-jest": "^27.2.5",
     "cypress": "^8.6.0",
     "cypress-file-upload": "^5.0.8",
+    "esbuild": "^0.13.9",
     "eslint": "^7.32.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jest": "^25.0.6",
     "jest": "^27.2.5",
     "regenerator-runtime": "^0.13.9",
     "stylelint": "^13.13.1",
-    "stylelint-config-standard": "^22.0.0"
+    "stylelint-config-standard": "^22.0.0",
+    "typescript": "^4.4.4"
   },
   "scripts": {
     "css-stylelint": "stylelint \"**/*.css\"",
     "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
     "eslint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\"",
     "eslint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\" --fix",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc -noEmit -p . && node .build.js"
   }
 }
