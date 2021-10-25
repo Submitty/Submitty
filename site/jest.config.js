@@ -12,6 +12,6 @@ module.exports = {
         '<rootDir>/tests/mjs/**/*.spec.js',
     ],
     transform: {
-        '\\.js$': 'babel-jest',
+        '\\.[jt]s$': 'babel-jest',
     },
 };

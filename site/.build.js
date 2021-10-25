@@ -1,19 +1,16 @@
 const fs = require('fs');
-const { exec } = require("child_process");
-
 const module_path = './public/ts/';
 
 let files = [];
-let ts_files = "";
 
 function getAllFiles(path){
     fs.readdirSync(path, {withFileTypes:true}).forEach((file) => {
-        if(file.isDirectory()){
-            return getAllFiles(path + file['name'] + '/');
+        if (file.isDirectory()){
+            return getAllFiles(`${path}${file['name']}/`);
         }
 
-        filename = file['name'];
-        if(!filename.includes('.js') && !filename.includes('.ts')){
+        const filename = file['name'];
+        if (!filename.includes('.js') && !filename.includes('.ts')){
             return;
         }
 
@@ -28,5 +25,5 @@ require('esbuild').build({
     bundle: true,
     minify: true,
     sourcemap: true,
-    outdir: './public/mjs'
+    outdir: './public/mjs',
 });

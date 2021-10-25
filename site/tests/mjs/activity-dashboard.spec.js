@@ -1,6 +1,6 @@
-import '../../public/mjs/activity-dashboard';
+import '../../public/ts/activity-dashboard';
 import { test } from '@jest/globals';
-import { comparator, helper, sortTable } from '../../public/mjs/activity-dashboard';
+import { comparator, helper, sortTable } from '../../public/ts/activity-dashboard';
 
 test('helper', () => {
     expect(helper('cat', 'apple', 0)).toEqual(false);

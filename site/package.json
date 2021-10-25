@@ -49,8 +49,8 @@
   "scripts": {
     "css-stylelint": "stylelint \"**/*.css\"",
     "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
-    "eslint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\"",
-    "eslint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/mjs/**/*.js\" \"tests/mjs/**/*.js\" --fix",
+    "eslint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/ts/**/*.js\" \"tests/mjs/**/*.js\"",
+    "eslint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"public/ts/**/*.js\" \"tests/mjs/**/*.js\" --fix",
     "test": "jest",
     "build": "tsc -noEmit -p . && node .build.js"
   }
