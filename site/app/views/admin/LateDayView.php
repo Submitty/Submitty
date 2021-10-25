@@ -9,7 +9,6 @@ use app\libraries\FileUtils;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\LateDayInfo;
 
-
 class LateDayView extends AbstractView {
     public function displayLateDays($users, $students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
@@ -54,10 +53,12 @@ class LateDayView extends AbstractView {
         $late_day_cache = $this->core->getQueries()->getLateDayCache();
         $late_day_update_dates = $this->core->getQueries()->getLateDayUpdateTimestamps();
         $gradeables_iterator = $this->core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date', 'g_id']);
-        
+
         $gradeables = [];
         foreach ($gradeables_iterator as $g) {
-            if (!LateDays::filterCanView($this->core, $g)) continue;
+            if (!LateDays::filterCanView($this->core, $g)) {
+                continue;
+            }
             $gradeables[] = $g;
         }
 
