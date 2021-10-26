@@ -7758,12 +7758,12 @@ ORDER BY
 
     public function isUserAnonymousForGradeableLeaderboard(string $user_id, string $gradeable_id): bool {
         $this->course_db->query("
-            SELECT anonymous_leaderboard FROM electronic_gradeable_version
-                WHERE
-                    user_id = ?
-                    AND g_id = ?
+            SELECT COALESCE((SELECT anonymous_leaderboard
+            FROM   electronic_gradeable_version
+            WHERE  user_id = ?
+                AND g_id = ?), false) AS anonymous_leaderboard
         ", [$user_id, $gradeable_id]);
-        return $this->course_db->rows()[0]['anonymous_leaderboard'] ?? true;
+        return $this->course_db->row()['anonymous_leaderboard'];
     }
 
     public function setUserAnonymousForGradeableLeaderboard(string $user_id, string $gradeable_id, bool $state): void {
