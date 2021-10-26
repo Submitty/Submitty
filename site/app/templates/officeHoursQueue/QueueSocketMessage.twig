@@ -2,7 +2,7 @@
 {% block popup_id %}queue-socket-message{% endblock %}
 {% block title %}Send Message To Queue{% endblock %}
 {% block body %}
-    <form method="post" id="change_queue_token" action="{{base_url}}/send_queue_message" style="height:auto;">
+    <form method="post" id="send_socket_message_form" action="{{base_url}}/send_queue_message" style="height:auto;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <select id="queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
             <option value="">Queue Name</option>
@@ -15,7 +15,8 @@
         <textarea name="socket-message" id="socket-msg" rows="15" cols="50" placeholder="Message"></textarea>
         <br>
         <br>
-        <button id="change_code_btn" type="submit" class="btn btn-primary">Send Message</button>
+        Note: This message will only be delivered if the student has the queue page open <br>
+        <button type="submit" class="btn btn-primary">Send Message</button>
     </form>
 {% endblock %}
 {% block buttons %}
