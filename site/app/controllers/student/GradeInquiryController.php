@@ -399,7 +399,7 @@ class GradeInquiryController extends AbstractController {
                     $emails[] = new Email($this->core, $details);
                 }
             }
-            
+
             // make students' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
             $notifications = [];
