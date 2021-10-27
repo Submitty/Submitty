@@ -16,7 +16,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <span  style="float: right;">
                 <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
-                <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}'); window.location.reload();" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
+                <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
                     <i class="fas fa-plus-circle fa-1x"></i> Add category
                 </button>
             </span>
@@ -30,16 +30,21 @@
         <ul id="ui-category-list" style="padding-left: 0em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
-                <li id="categorylistitem-{{ category.category_id }}" class="category-sortable catergory-item-box" style="color: {{ category.color }};">
+                <li id="categorylistitem-{{ category.category_id }}" 
+                    class="category-sortable category-item-box" 
+                    style="color: {{ category.color }};"
+                    data-category_desc="{{ category.category_desc }}"
+                    data-category_id="{{ category.category_id }}"
+                >
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
-                            <span style="word-wrap: break-word;">{{ category.category_desc }}</span>
-                            <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit edit-category-button"></i></a>
+                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }}</span>
+                            <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit category-button edit-category-desc-button"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
-                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" class="edit-catergoty-name" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
-                            <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check edit-category-button"></i></a>
-                            <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times edit-category-button"></i></a>
+                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" class="edit-category-desc-input" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
+                            <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check category-button save-desc-button"></i></a>
+                            <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times category-button cancel-desc-button"></i></a>
                         </span>
                     <div style="float: right;width: auto;">
                         <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
@@ -48,7 +53,7 @@
                             {% endfor %}
                         </select>
                         &nbsp;
-                        <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash edit-category-button"></i></a>
+                        <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash category-button delete-category-button"></i></a>
                     </div>
                 </li>
             {% endfor %}
@@ -67,33 +72,40 @@
                 reorderCategories('{{ csrf_token }}');
             }
         });
-        $("#ui-category-list").find(".fa-trash").click(function() {
-            var item = $(this).parent().parent().parent();
-            var category_id = parseInt(item.attr('id').split("-")[1]);
-            var category_desc = item.find(".categorylistitem-desc span").text().trim();
+
+        function getItem(input) {
+            return $(input).closest('.category-item-box');
+        }
+        
+        $(".delete-category-button").click(function() {
+            const item = getItem(this);
+            const category_id = item.data('category_id');
+            const category_desc = item.data('category_desc');
             deleteCategory(category_id, category_desc, '{{ csrf_token }}');
         });
-        $("#ui-category-list").find(".fa-edit").click(function() {
-            var item = $(this).parent().parent().parent();
-            var category_desc = item.find(".categorylistitem-desc span").text().trim();
+
+        $(".edit-category-desc-button").click(function() {
+            const item = getItem(this);
+            const category_desc = item.data('category_desc');
             item.find(".categorylistitem-editdesc input").val(category_desc);
             item.find(".categorylistitem-desc").hide();
             item.find(".categorylistitem-editdesc").show();
 
         });
-        $("#ui-category-list").find(".fa-times").click(function() {
-            var item = $(this).parent().parent().parent();
+        $(".cancel-desc-button").click(function() {
+            const item = getItem(this);
             item.find(".categorylistitem-editdesc").hide();
             item.find(".categorylistitem-desc").show();
         });
 
-        $("#ui-category-list").find(".fa-check").click(function() {
-            var item = $(this).parent().parent().parent();
-            var category_id = parseInt(item.attr('id').split("-")[1]);
-            var category_desc_original = item.find(".categorylistitem-desc span").text().trim();
-            var category_desc = item.find("input").val().trim();
+        $(".save-desc-button").click(function() {
+            const item = getItem(this);
+            const category_id = item.data('category_id');
+            const category_desc_original = item.data('category_desc');
+            const category_desc = item.find(".edit-category-desc-input").val().trim();
+            item.data('category_desc', category_desc);
             if(category_desc != category_desc_original) {
-                editCategory(category_id, category_desc, null, '{{ csrf_token }}');
+                editCategory(category_id, category_desc, null, 'desc', '{{ csrf_token }}');
             }
             item.find(".categorylistitem-editdesc").hide();
             item.find(".categorylistitem-desc").show();
@@ -102,9 +114,11 @@
             $(element).css("background-color",$(element).val());
         }
         $(".category-color-picker").change(function(color) {
-            var category_id = parseInt($(this).parent().parent().attr('id').split("-")[1]);
-            var category_color = $(this).val();
-            editCategory(category_id, null, category_color, '{{ csrf_token }}');
+            const item = getItem(this);
+            const category_id = item.data('category_id');
+            const category_desc = item.data('category_desc');
+            const category_color = $(this).val();
+            editCategory(category_id, category_desc, category_color, 'color', '{{ csrf_token }}');
             refresh_color_select($(this));
         });
         $(".category-color-picker").each(function(){

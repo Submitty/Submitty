@@ -852,7 +852,7 @@ class Access {
         $path = implode(DIRECTORY_SEPARATOR, $parts);
 
         //Make sure it starts with the dir base
-        if (!Utils::startsWith($path, $info["base"])) {
+        if (!str_starts_with($path, $info["base"])) {
             //This both prevents people from accessing files outside the base dir
             // and lets us have relative paths. Convenient!
             if ($path[0] === "/") {

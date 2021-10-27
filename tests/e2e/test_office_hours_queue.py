@@ -311,11 +311,8 @@ def enableQueue(self):
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
         self.driver.find_element(By.ID, 'queue-enabled').click()
-    if(self.driver.find_element(By.ID, 'queue-contact-info').is_selected()):
-        self.driver.find_element(By.ID, 'queue-contact-info').click()
-
+#     TODO add tests for contact information
     self.assertEqual(True, self.driver.find_element(By.ID, 'queue-enabled').is_selected())
-    self.assertEqual(False, self.driver.find_element(By.ID, 'queue-contact-info').is_selected())
 
 
 def disableQueue(self):
