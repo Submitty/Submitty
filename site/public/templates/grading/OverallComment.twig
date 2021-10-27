@@ -6,7 +6,8 @@ Required Parameters:
   - overall_comment["logged_in_user"]["user_id"],
   - overall_comment["logged_in_user"]["comment"]
   - overall_comment["other_graders"][<user_id>] = <comment>
-
+-attachments: array with the following keys/values:
+  - attachments[<user_id>]
 #}
 <div class="box general-comment container key_to_click" tabindex="0">
     <div class="row overall-comment-top-row">
@@ -52,6 +53,43 @@ Required Parameters:
               {{comment|escape }}
             </div>
         {% endfor %}
+    </div>
+    <div class="row box" id="overall-comments-attachments">
+        <div class="col">
+        <h4>Attachments</h4>
+        <form id="attachment-upload-form" name="attachment-upload-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <label for="attachment-upload">Choose attachment to upload</label>
+            </br>
+            <input type="file" id="attachment-upload" name="attachment-upload" onchange="uploadAttachment();">
+        </form>
+        <h4>Current Attachments</h4>
+        <div id="attachments-list" data-user="{{ attachments["logged_in_user"]["user_id"]}}" data-active-user="{{ attachments["logged_in_user"]["user_id"]}}">
+            <div id="attachments-list-{{ attachments["logged_in_user"]["user_id"] | escape }}">
+            {% for file in attachments["logged_in_user"]["attachments"] %}
+                {% include "Attachments.twig" with {
+                    grader: attachments["logged_in_user"]["user_id"],
+                    file: file,
+                    id: "a-0-" ~ loop.index,
+                    is_grader_view: true
+                } only %}
+            {% endfor %}
+            </div> 
+            
+            {% for grader, attachment_list in attachments["other_graders"] %}
+            <div id="attachments-list-{{ grader | escape }}" style="display: none;">
+                {% for file in attachment_list %}
+                    {% include "Attachments.twig" with {
+                        grader: grader,
+                        file: file,
+                        id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
+                        is_grader_view: true
+                    } only %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
     <script>
         $(document).ready(function(){

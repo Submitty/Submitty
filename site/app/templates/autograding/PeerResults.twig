@@ -99,16 +99,29 @@ function switch_feedback_modes() {
 
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
-            {% for user in ordered_graders|filter(user => overall_comments[user] is defined) %}
+            {% for user in grader_info | keys | sort %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
-                        Overall note from {{peer_aliases[user]}}:
+                        Overall note from {{grader_info[user].display_name}}:
                     </p>
+                    {% if grader_info[user].comment is not empty %}
                     <p class="overall-comment">
-                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                        <span class='gradeable_comment'>{{ grader_info[user].comment | nl2br }}</span>
                     </p>
+                    {% endif %}
+                    {% if grader_info[user].attachments is not empty %}
+                    <div id="attachments-{{ user | escape }}">
+                        {% for file in grader_info[user].attachments %}
+                            {% include "autograding/Attachments.twig" with {
+                                grader: user,
+                                file: file,
+                                id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
+                                is_grader_view: false
+                            } only %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-
             {% endfor %}
         </div>
     {# /Total auto + manual #}

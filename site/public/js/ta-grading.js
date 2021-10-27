@@ -1517,6 +1517,9 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
     else if (url_file.includes("checkout")) {
       directory = "checkout";
     }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
     // handle pdf
     if (pdf_full_panel && url_file.substring(url_file.length - 3) === "pdf") {
       viewFileFullPanel(html_file, url_file, 0, panel).then(function(){
@@ -1653,4 +1656,67 @@ function collapseFile(panel = "submission"){
     $(fileFullPanelOptions[panel]["fileView"]).css('left', "");
     $(fileFullPanelOptions[panel]["fileView"]).hide();
   });
+}
+
+Twig.twig({
+  id: "Attachments",
+  href: "/templates/grading/Attachments.twig",
+  async: true
+});
+
+var uploadedAttachmentIndex = 1;
+
+function uploadAttachment() {
+  let fileInput = $("#attachment-upload");
+  if (fileInput[0].files.length === 1) {
+    let formData = new FormData();
+    formData.append('attachment', fileInput[0].files[0]);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    let callAjax = true;
+    let origAttachment = $("#attachments-list").children().first().find("[data-file_name='" + CSS.escape(fileInput[0].files[0].name) + "']");
+    if (origAttachment.length !== 0) {
+      callAjax = confirm("The file " + fileInput[0].files[0].name + " already exists; do you want to overwrite it?");
+    }
+    if (callAjax) {
+      fileInput.prop("disabled", true);
+      $.ajax({
+        url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "upload"]),
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function(data) {
+          if (!("status" in data) || data["status"] !== "success") {
+            alert("An error has occured trying to upload the attachment: " + data["message"]);
+          } else {
+            let renderedData = Twig.twig({
+              ref: "Attachments"
+            }).render({
+                grader: $("#attachments-list").attr("data-user"),
+                file: data["data"],
+                id: "a-up-" + uploadedAttachmentIndex,
+                is_grader_view: true
+            });
+            uploadedAttachmentIndex++;
+            if (origAttachment.length === 0) {
+              $("#attachments-list").children().first().append(renderedData);
+            } else {
+              origAttachment.first().parent().replaceWith(renderedData);
+            }
+          }
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          alert("An error has occured trying to upload the attachment: " + errorThrown);
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        }
+      });
+    } else {
+      fileInput[0].value = "";
+    }
+  }
 }

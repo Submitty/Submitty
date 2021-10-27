@@ -832,6 +832,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             else if (url.includes("checkout")) {
                 directory = "checkout";
             }
+            else if (url.includes("attachments")) {
+                directory = "attachments";
+            }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
         // handle pdf
@@ -1460,6 +1463,9 @@ function popOutSubmittedFile(html_file, url_file) {
     }
     else if (url_file.includes("split_pdf")) {
       directory = "split_pdf";
+    }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
     }
     window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
