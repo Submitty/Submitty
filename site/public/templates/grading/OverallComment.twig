@@ -7,7 +7,9 @@ Required Parameters:
   - overall_comment["logged_in_user"]["comment"]
   - overall_comment["other_graders"][<user_id>] = <comment>
 -attachments: array with the following keys/values:
-  - attachments[<user_id>]
+  - attachments["logged_in_user"]["user_id"],
+  - attachments["logged_in_user"]["attachments"] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
+  - attachments["other_graders"][<user_id>] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
 #}
 <div class="box general-comment container key_to_click" tabindex="0">
     <div class="row overall-comment-top-row">

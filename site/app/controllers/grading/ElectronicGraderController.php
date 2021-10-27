@@ -959,7 +959,7 @@ class ElectronicGraderController extends AbstractController {
      */
     public function ajaxGetAttachments($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
-        $grader_id = $_POST['grader_id'] ?? ''; 
+        $grader_id = $_POST['grader_id'] ?? '';
 
         $grader = $this->core->getQueries()->getUserById($grader_id);
         if ($grader === null) {
@@ -992,7 +992,8 @@ class ElectronicGraderController extends AbstractController {
 
         if ($ta_graded_gradeable !== null) {
             $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getAttachments($grader));
-        } else {
+        }
+        else {
             $this->core->getOutput()->renderJsonSuccess([]);
         }
     }
@@ -1048,7 +1049,8 @@ class ElectronicGraderController extends AbstractController {
         $attachment_path = FileUtils::joinPaths($attachment_path_folder, $attachment['name']);
         if (!move_uploaded_file($attachment["tmp_name"], $attachment_path)) {
             $this->core->getOutput()->renderJsonFail('Failed to upload file.');
-        } else {
+        }
+        else {
             $this->core->getOutput()->renderJsonSuccess(
                 [
                     "name" => $attachment['name'],
@@ -1097,18 +1099,20 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Missing attachment to delete.');
             return;
         }
-        
+
         $attachment_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $grader->getId(), $_POST["attachment"]);
         if (is_file($attachment_path)) {
             if (@unlink($attachment_path)) {
                 $this->core->getOutput()->renderJsonSuccess();
-            } else {
+            }
+            else {
                 $this->core->getOutput()->renderJsonFail('Failed to remove file.');
             }
-        } else {
+        }
+        else {
             $this->core->getOutput()->renderJsonFail('File not found.');
         }
-    }   
+    }
 
     /**
      * Imports teams from a csv file upload

@@ -32,7 +32,7 @@ class TaGradedGradeable extends AbstractModel {
     private $graded_component_containers = [];
     /** @prop @var GradedComponent[] The components that have been marked for deletion */
     private $deleted_graded_components = [];
-    /** @prop @var array list */
+    /** @prop @var array[] The list of attachments indexed by user_id, ["name" => name, "path" => path] for each */
     private $attachments = [];
 
 
@@ -526,8 +526,8 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Loads a list of attachments into the $attachments variable
-     * @param User $grader 
-     * @return void 
+     * @param User $grader
+     * @return void
      */
     private function loadAttachments(User $grader) {
         $grader_id = $grader->getId();
@@ -550,8 +550,7 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets the attachments that a specified grader uploaded for a specified version.
-     * @param User $grader 
-     * @param int $version
+     * @param User $grader
      * @return array
      */
     public function getAttachments(User $grader = null) {
@@ -571,7 +570,8 @@ class TaGradedGradeable extends AbstractModel {
                 $this->loadAttachments($user);
             }
             return $this->attachments;
-        } else {
+        }
+        else {
             $grader_id = $grader->getId();
             if (!isset($this->attachments[$grader_id])) {
                 $this->loadAttachments($grader);
