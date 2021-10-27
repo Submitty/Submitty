@@ -130,7 +130,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
     if (graded_gradeable.itempool_items !== undefined) {
         itempool_items = {...itempool_items, ...graded_gradeable.itempool_items};
     }
-    console.log(graded_gradeable);
+
     // TODO: i don't think this is async
     return Twig.twig({ref: "GradingGradeable"}).render({
         'gradeable': gradeable,
