@@ -200,7 +200,7 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 #install DLL for zbar
 apt-get install libzbar0 --yes
 #headers required for installing pillow on ubuntu 18
-apt-get install libjpeg-dev
+apt-get install libjpeg-dev --yes
 
 pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
