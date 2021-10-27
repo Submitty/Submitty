@@ -209,7 +209,7 @@ abstract class AbstractDatabase {
      */
     public function queryIterator(string $query, array $parameters = [], $callback = null) {
         $lower = trim(strtolower($query));
-        if (!Utils::startsWith($lower, "select")) {
+        if (!str_starts_with($lower, "select")) {
             return $this->query($query, $parameters);
         }
         try {

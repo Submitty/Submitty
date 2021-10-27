@@ -461,6 +461,9 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             else {
+                if (!isset($graded_component)) {
+                    throw new \RuntimeException('Graded component should not be null if $verify_all === false');
+                }
                 $graded_component->setVerifier($grader);
                 $graded_component->setVerifyTime($this->core->getDateTimeNow());
             }
@@ -528,6 +531,7 @@ class ElectronicGraderController extends AbstractController {
          * we need number of students per section
          */
 
+        $team_users = [];
         $no_team_users = [];
         $my_grading = 0;
         $num_components = 0;
@@ -878,6 +882,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");
+        $all_teams = [];
         $empty_teams = [];
         if ($gradeable->isTeamAssignment()) {
             // Only give getGradeables one User ID per team
@@ -997,6 +1002,7 @@ class ElectronicGraderController extends AbstractController {
 
         $row_num = 1;
         $error_message = "";
+        /** @var string[][] */
         $new_teams_members = [];
         $team_names = [];
         foreach ($contents as $content) {
@@ -1025,7 +1031,7 @@ class ElectronicGraderController extends AbstractController {
             if (!array_key_exists($team_id, $new_teams_members)) {
                 $new_teams_members[$team_id] = [];
             }
-            array_push($new_teams_members[$team_id], $user_id);
+            $new_teams_members[$team_id][] = $user_id;
             $team_names[$team_id] = $team_name;
         }
 
@@ -1281,12 +1287,11 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Display the electronic grading page
      *
-     * @param $who_id This is the user we wish to view, this field will only be passed on when the request originates
+     * @param string $who_id This is the user we wish to view, this field will only be passed on when the request originates
      *                  on the grading index page
-     * @param $from This is the user that was being viewed when a navigation button was clicked on the TA grading
+     * @param string $from This is the user that was being viewed when a navigation button was clicked on the TA grading
      *                  interface.  Knowing who we were viewing allows us to decide who to view next.
-     * @param $to Used to determine the direction to move in, either 'prev' or 'next'
-     * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
+     * @param null|string $to Used to determine the direction to move in, either 'prev' or 'next'
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
@@ -1355,6 +1360,7 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
+            $goToStudent = null;
             if ($to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
                 $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
@@ -1368,13 +1374,13 @@ class ElectronicGraderController extends AbstractController {
                 $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             // Reassign who_id
-            if (!is_null($goToStudent)) {
+            if ($goToStudent !== null) {
                 $who_id = $goToStudent->getId();
                 if ($blind_grading || $anon_mode) {
                     $who_id = $goToStudent->getAnonId();
                 }
             }
-            if (is_null($who_id) || $who_id == '') {
+            if (empty($who_id)) {
                 $message = "You've reached the ";
                 $message .= $to === 'prev' ? " start" : " end";
                 $message .= " of";
@@ -2833,6 +2839,8 @@ class ElectronicGraderController extends AbstractController {
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
 
+        $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getAnonId($submitter_ids);
+
         $section_graded_component_count = 0;
         $section_total_component_count  = 0;
         $total_graded_component_count   = 0;
@@ -2848,7 +2856,8 @@ class ElectronicGraderController extends AbstractController {
             'total_graded_component_count'   => $total_graded_component_count,
             'section_total_component_count' => $section_total_component_count,
             'total_total_component_count'   => $total_total_component_count,
-            'submitter_ids' => $submitter_ids
+            'submitter_ids' => $submitter_ids,
+            'submitter_anon_ids' => $submitter_anon_ids
         ];
     }
 
@@ -2856,7 +2865,7 @@ class ElectronicGraderController extends AbstractController {
      * Gets... stats
      * @param Gradeable $gradeable
      * @param User      $grader
-     * @param bool      $full_sets
+     * @param bool      $full_stats
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
@@ -2964,9 +2973,6 @@ class ElectronicGraderController extends AbstractController {
         if (!$gradeable) {
             $error = "Invalid Gradeable ID given!";
         }
-        elseif (empty($solution_text)) {
-            $error = "Please provide some non-empty solution";
-        }
         elseif ($componentItempoolInfo['is_linked'] && empty($itempool_item)) {
             //Itempool must be non-empty when component is linked with the itempool
             $error = 'This component expects only non-empty itempool-item!';
@@ -3014,8 +3020,12 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        $gradeable->setPeerFeedback($this->core->getQueries()->getAnonId($grader_id), $user_id, $feedback);
-        $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        if ($gradeable->setPeerFeedback($this->core->getQueries()->getUserFromAnon($grader_id)[$grader_id], $user_id, $feedback)) {
+            $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        }
+        else {
+            $this->core->getOutput()->renderJsonError("Failed to save feedback");
+        }
         return true;
     }
 

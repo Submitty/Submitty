@@ -219,7 +219,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @param $config_path
+     * @param string|null $config_path
      * @Route("/courses/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
      * @return MultiResponse
      */

@@ -8,6 +8,7 @@ use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
+use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\Block\Element\FencedCode;
 use League\CommonMark\Block\Element\IndentedCode;
 use League\CommonMark\Inline\Element\Code;
@@ -141,6 +142,7 @@ HTML;
 
         $environment = Environment::createCommonMarkEnvironment();
         $environment->addExtension(new AutolinkExtension());
+        $environment->addExtension(new TableExtension());
         $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
         $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
         $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
@@ -389,7 +391,7 @@ HTML;
      * @return string
      */
     private function getView($class) {
-        if (!Utils::startsWith($class, "app\\views")) {
+        if (!str_starts_with($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
         if (!isset($this->loaded_views[$class])) {

@@ -615,10 +615,12 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
+            return false;
         }
         else {
             $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
+        return true;
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
@@ -765,7 +767,7 @@ class Gradeable extends AbstractModel {
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
         //  into the second parameter.
-        $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
+        $coerce_dates = function (array $date_properties, array $skip_coercion_dates, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             $prev_date = null;
             foreach ($date_properties as $i => $property) {
@@ -778,14 +780,14 @@ class Gradeable extends AbstractModel {
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
-                // Don't coerce a date on the black list
-                if (in_array($property, $black_list)) {
-                    $prev_date = $date_values[$property];
+                if ($date === null) {
+                    $date_values[$property] = $prev_date;
                     continue;
                 }
 
-                if ($date === null) {
-                    $date_values[$property] = $prev_date;
+                // Don't coerce a date on the skip list
+                if (in_array($property, $skip_coercion_dates)) {
+                    $prev_date = $date_values[$property];
                     continue;
                 }
 
@@ -796,22 +798,25 @@ class Gradeable extends AbstractModel {
 
                 // Get a value for the date to compare against next
                 if ($date !== null) {
-                    $prev_date = $date;
+                    $prev_date = $date_values[$property];
                 }
             }
             return $date_values;
         };
 
-        // Blacklist the dates checked by validation
-        $black_list = $this->getDateValidationSet($regrade_modified);
+        // Don't coerce the dates checked by validation
+        $skip_coercion_dates = $this->getDateValidationSet($regrade_modified);
+        if ($this->isTeamAssignment()) {
+            $skip_coercion_dates[] = "team_lock_date";
+        }
 
         // First coerce in the forward direction, then in the reverse direction
         return $coerce_dates(
             array_reverse(self::date_validated_properties),
-            $black_list,
+            $skip_coercion_dates,
             $coerce_dates(
                 self::date_validated_properties,
-                $black_list,
+                $skip_coercion_dates,
                 $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
@@ -2111,7 +2116,7 @@ class Gradeable extends AbstractModel {
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
             ['PROVIDED: upload_only (100 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
-            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+            ['PROVIDED: bulk scanned pdf exam (200 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
             ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
@@ -2202,5 +2207,19 @@ class Gradeable extends AbstractModel {
             return false;
         }
         return true;
+    }
+    /**
+     * Returns prerequisite for a gradeable
+     *
+     * @return string
+     */
+    public function getPrerequisite(): string {
+        if ($this->depends_on !== null && $this->depends_on_points !== null) {
+            $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
+            return $dependent_gradeable->getTitle();
+        }
+        else {
+            return '';
+        }
     }
 }

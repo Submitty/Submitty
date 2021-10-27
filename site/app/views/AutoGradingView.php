@@ -11,9 +11,6 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
-use app\libraries\DateUtils;
-use app\libraries\NumberUtils;
 
 class AutoGradingView extends AbstractView {
 
@@ -120,7 +117,7 @@ class AutoGradingView extends AbstractView {
      * @param \app\models\gradeable\GradedGradeable $graded_gradeable
      * @param AutoGradedVersion $version version to display
      * @param AutoGradedTestcase $testcase testcase to display
-     * @param $popup_css_file
+     * @param string $popup_css_file
      * @param string $who
      * @param bool $show_hidden
      * @return string
@@ -249,9 +246,9 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param string $display
-     * @return string
+     * @return bool
      */
-    private function autoShouldDisplayPopup(string $display): string {
+    private function autoShouldDisplayPopup(string $display): bool {
         $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
         $less_than_30 = true;
         $arr_count = count($tmp_array_string);
@@ -734,7 +731,7 @@ class AutoGradingView extends AbstractView {
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
             "annotated_file_names" =>  $annotated_file_names,
-            "peer_feedback" => $this->core->getQueries()->getAllPeerFeedback($gradeable_id),
+            "peer_feedback" => $this->core->getQueries()->getPeerFeedbackForUser($gradeable_id, $id, true),
             'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
         ]);
     }

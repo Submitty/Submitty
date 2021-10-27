@@ -80,7 +80,7 @@ nav a > i.f {
     padding-left: 7px;
 }
 
-.breadcrumb_heading {
+.breadcrumb-heading {
     font-size: 24px;
 }
 
@@ -118,7 +118,6 @@ main {
     width: 100%;
     min-width: 0;
     position: relative;
-    min-width: 0;
 }
 
 footer {
@@ -127,6 +126,7 @@ footer {
     padding: 10px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 footer a {
     text-decoration: none !important;
 }
