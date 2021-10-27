@@ -403,7 +403,6 @@ class GradeInquiryController extends AbstractController {
             // make students' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
             $notifications = [];
-            $emails = [];
             if ($submitter->isTeam()) {
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {
