@@ -467,12 +467,12 @@ function setupNumericTextCells() {
         );
     });
 
-    $("input[class=csvButtonUpload]").change(function() {
+    $("input[class=csv-button-upload]").change(function() {
         var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
         "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
         "student id and one column for each field. Columns and field types must match.");
         if (confirmation) {
-            var f = $('#csvUpload').get(0).files[0];
+            var f = $('#csv-upload').get(0).files[0];
             if(f) {
                 var reader = new FileReader();
                 reader.readAsText(f);
@@ -597,7 +597,7 @@ function setupNumericTextCells() {
             }
         }
         else {
-            var f = $('#csvUpload');
+            var f = $('#csv-upload');
             f.replaceWith(f = f.clone(true));
         }
     });

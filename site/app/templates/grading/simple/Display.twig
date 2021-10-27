@@ -1,14 +1,14 @@
 <div class="content">
-    <div style="display: inline-block; width: 100%;">
-    <h1 style="float: left;">
-        {{ gradeable.getTitle() }}
-        {% if gradeable_url|trim != "" %}
-            <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable.getTitle() }}">
-                <i class="fas fa-external-link-alt"></i>
-            </a>
-        {% endif %}
-    </h1>
-    <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()' style="float: right;">Settings/Hotkeys</button>
+    <div id="button-group">
+        <h1>
+            {{ gradeable.getTitle() }}
+            {% if gradeable_url|trim != "" %}
+                <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable.getTitle() }}">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            {% endif %}
+        </h1>
+        <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
     </div>
     {% if gradeable.getTaInstructions()|trim != "" %}
         <p>
@@ -16,7 +16,7 @@
         </p>
     {% endif %}
 
-    <div class="column-wrapper" style="margin: 1em 0;">
+    <div class="column-wrapper">
             {% if action == 'lab' %}
                 <ul id="details-legend" class="table-bordered">
                     <li>
@@ -76,8 +76,8 @@
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
         <div class="column-wrapper">
-            <label for="csvUpload">Upload CSV
-                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
+            <label for="csv-upload">Upload CSV
+                <input class="csv-button-upload" type="file" id="csv-upload" accept=".csv, .txt">
             </label>
             <p>
                 The CSV file should be formatted as such:
@@ -110,7 +110,7 @@
         </select>
     </div>
     
-    <div class="column-wrapper" style="margin: 1em 0; display: inline-block;">
+    <div class="column-wrapper" style="display: inline-block;">
         <div id="checkpoint-sticky" class="column-wrapper">
             <div class="sticky-box">
                 <input class="edit-zone custom-scrollbar"

@@ -2,6 +2,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    margin: 1em 0;
 }
 
 .row-wrapper {
@@ -74,4 +75,17 @@
 #details-legend li {
     margin-right: 6px;
     font-size: 0.9em;
+}
+
+#button-group {
+    display: inline-block;
+    width: 100%;
+}
+
+#button-group h1 {
+    float: left;
+}
+
+#settings-btn {
+    float: right;
 }
