@@ -1,3 +1,4 @@
+{# ALSO UPDATE /site/app/templates/autograding/Attachments.twig #}
 <div>
     <div class="file-viewer">
         <a class='openAllFileattachments openable-element-attachments key_to_click' file-url="{{ file.path|url_encode }}" onclick='openFrame({% if is_grader_view %}"{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", "{{ id }}", false{% else %}"{{ file.path|url_encode|e('js') }}", "{{ id }}", "{{ file.name|url_encode|e('js') }}", true{% endif %});'>
@@ -6,7 +7,7 @@
         <a id = 'open_file_{{ file.name|url_encode }}' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
         <a onclick='downloadFile("{{ file.path|url_encode }}", "attachments")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         {% if is_grader_view %}
-        <a onclick='deleteAttachment("{{ file.name|url_encode }}")' aria-label="Delete the file" class="key_to_click" tabindex="0"><i class="fas fa-trash" title="Delete the file"></i></a>
+        <a onclick='deleteAttachment(this, "{{ file.name|url_encode }}")' aria-label="Delete the file" class="key_to_click" tabindex="0"><i class="fas fa-trash" title="Delete the file"></i></a>
         {% endif %}
     </div>
     <div id="file_viewer_{{ id }}" data-file_name="{{ file.name }}" data-file_url="{{ file.path }}"></div>

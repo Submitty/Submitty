@@ -1100,7 +1100,7 @@ class ElectronicGraderController extends AbstractController {
         
         $attachment_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $grader->getId(), $_POST["attachment"]);
         if (is_file($attachment_path)) {
-            if (!@unlink($attachment_path)) {
+            if (@unlink($attachment_path)) {
                 $this->core->getOutput()->renderJsonSuccess();
             } else {
                 $this->core->getOutput()->renderJsonFail('Failed to remove file.');

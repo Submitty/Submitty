@@ -1674,9 +1674,10 @@ function uploadAttachment() {
     formData.append('anon_id', getAnonId());
     formData.append('csrf_token', csrfToken);
     let callAjax = true;
-    let origAttachment = $("#attachments-list").children().first().find("[data-file_name='" + CSS.escape(fileInput[0].files[0].name) + "']");
+    let userAttachmentList = $("#attachments-list").children().first();
+    let origAttachment = userAttachmentList.find("[data-file_name='" + CSS.escape(fileInput[0].files[0].name) + "']");
     if (origAttachment.length !== 0) {
-      callAjax = confirm("The file " + fileInput[0].files[0].name + " already exists; do you want to overwrite it?");
+      callAjax = confirm("The file '" + fileInput[0].files[0].name + "' already exists; do you want to overwrite it?");
     }
     if (callAjax) {
       fileInput.prop("disabled", true);
@@ -1701,9 +1702,16 @@ function uploadAttachment() {
             });
             uploadedAttachmentIndex++;
             if (origAttachment.length === 0) {
-              $("#attachments-list").children().first().append(renderedData);
+              userAttachmentList.append(renderedData);
             } else {
               origAttachment.first().parent().replaceWith(renderedData);
+            }
+            if (userAttachmentList.children().length === 0) {
+              userAttachmentList.css("display", "none")
+              $("#attachments-empty").css("display", "");
+            } else {
+              userAttachmentList.css("display", "")
+              $("#attachments-empty").css("display", "none");
             }
           }
           fileInput[0].value = "";
@@ -1718,5 +1726,41 @@ function uploadAttachment() {
     } else {
       fileInput[0].value = "";
     }
+  }
+}
+
+function deleteAttachment(target, file_name) {
+  let confirmation = confirm("Are you sure you want to delete attachment '" + decodeURIComponent(file_name) +"'?");
+  if (confirmation) {
+    let formData = new FormData();
+    formData.append('attachment', file_name);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    $.ajax({
+      url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "delete"]),
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function(data) {
+        if (!("status" in data) || data["status"] !== "success") {
+          alert("An error has occured trying to delete the attachment: " + data["message"]);
+        } else {
+          $(target).parent().parent().remove();
+          let userAttachmentList = $("#attachments-list").children().first();
+          if (userAttachmentList.children().length === 0) {
+            userAttachmentList.css("display", "none")
+            $("#attachments-empty").css("display", "");
+          } else {
+            userAttachmentList.css("display", "")
+            $("#attachments-empty").css("display", "none");
+          }
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert("An error has occured trying to upload the attachment: " + errorThrown);
+      }
+    });
   }
 }

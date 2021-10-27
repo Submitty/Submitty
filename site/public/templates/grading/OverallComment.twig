@@ -56,8 +56,8 @@ Required Parameters:
     </div>
     <div class="row box" id="overall-comments-attachments">
         <div class="col">
-        <h4>Attachments</h4>
         <form id="attachment-upload-form" name="attachment-upload-form" method="post">
+            <h4>Attachments</h4>
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <label for="attachment-upload">Choose attachment to upload</label>
             </br>
@@ -88,6 +88,10 @@ Required Parameters:
                 {% endfor %}
             </div>
             {% endfor %}
+            </div>
+
+            <div id="attachments-empty" {% if attachments["logged_in_user"]["attachments"]|length != 0 %}style="display: none;"{% endif %}>
+                There are no attached files.
             </div>
         </div>
     </div>

@@ -546,7 +546,9 @@ class TaGradedGradeable extends AbstractModel {
                 ];
             }
         }
-        $this->attachments[$grader_id] = $attachment_list;
+        if (!empty($attachment_list)) {
+            $this->attachments[$grader_id] = $attachment_list;
+        }
     }
 
     /**
@@ -577,7 +579,7 @@ class TaGradedGradeable extends AbstractModel {
             if (!isset($this->attachments[$grader_id])) {
                 $this->loadAttachments($grader);
             }
-            return $this->attachments[$grader_id];
+            return $this->attachments[$grader_id] ?? [];
         }
     }
 

@@ -2516,16 +2516,23 @@ function open_overall_comment_tab(user) {
     }
 
     let attachmentsListUser = $(`#attachments-list-${user}`);
-    console.log(attachmentsListUser);
     if (attachmentsListUser.length !== 0) {
         let attachmentsList = $("#attachments-list");
         $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
+        
         if (attachmentsList.attr("data-user") === user) {
             $("#attachment-upload-form").css("display", "");
         } else {
             $("#attachment-upload-form").css("display", "none");
         }
-        attachmentsListUser.css("display", "");
+        if (attachmentsListUser.children().length === 0) {
+            attachmentsListUser.css("display", "none")
+            $("#attachments-empty").css("display", "");
+        } else {
+            attachmentsListUser.css("display", "")
+            $("#attachments-empty").css("display", "none");
+        }
+        
         attachmentsList.attr("data-active-user", user);
     }
 
