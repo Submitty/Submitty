@@ -531,9 +531,6 @@ class TaGradedGradeable extends AbstractModel {
      */
     private function loadAttachments(User $grader) {
         $grader_id = $grader->getId();
-        if (!isset($this->attachments[$grader_id])) {
-            $this->attachments[$grader_id] = [];
-        }
         $attachment_list = [];
 
         $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "attachments", $this->getGradedGradeable()->getGradeableId(), $this->getGradedGradeable()->getSubmitter()->getId(), $grader->getId());
