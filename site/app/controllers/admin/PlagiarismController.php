@@ -210,9 +210,13 @@ class PlagiarismController extends AbstractController {
 
         $content = file_get_contents($file_path);
         $content = trim($content);
-        $rankings = preg_split('/\s+/', $content);
-        $rankings = array_chunk($rankings, 3);
-        return $rankings;
+        $ranking = preg_split('/\R/', $content);
+        $ranking_array = [];
+        foreach ($ranking as $row) {
+            $ranking_array[] = preg_split('/\s+/', $row);
+        }
+
+        return $ranking_array;
     }
 
     /**
@@ -232,9 +236,12 @@ class PlagiarismController extends AbstractController {
 
         $content = file_get_contents($file_path);
         $content = trim($content);
-        $rankings = preg_split('/\s+/', $content);
-        $rankings = array_chunk($rankings, 4);
-        return $rankings;
+        $ranking = preg_split('/\R/', $content);
+        $ranking_array = [];
+        foreach ($ranking as $row) {
+            $ranking_array[] = preg_split('/\s+/', $row);
+        }
+        return $ranking_array;
     }
 
 
@@ -529,7 +536,7 @@ class PlagiarismController extends AbstractController {
                 if ($has_results) {
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
-                        $top_match_percent = $rankings[0][0];
+                        $top_match_percent = $rankings[0][2];
                         $matching_submission_count = count($rankings);
                         $ranking_available = true;
                     }
@@ -618,7 +625,7 @@ class PlagiarismController extends AbstractController {
         if (!$is_team_assignment) {
             $user_ids = [];
             foreach ($rankings_data as $item) {
-                $user_ids[$item[1]] = null;
+                $user_ids[$item[0]] = null;
             }
             $user_ids = array_keys($user_ids);
 
@@ -633,13 +640,14 @@ class PlagiarismController extends AbstractController {
         foreach ($rankings_data as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[1]]->getDisplayedFirstName()} {$user_ids_and_names[$item[1]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
             }
             $temp = [
-                "percent" => $item[0],
-                "user_id" => $item[1],
+                "percent" => $item[2],
+                "match_count" => $item[3],
+                "user_id" => $item[0],
                 "display_name" => $display_name,
-                "version" => $item[2],
+                "version" => $item[1],
             ];
             array_push($rankings, $temp);
         }
@@ -1342,8 +1350,8 @@ class PlagiarismController extends AbstractController {
 
         $max_matching_version = 0;
         foreach ($rankings as $ranking) {
-            if ($ranking[1] == $user_id_1) {
-                $max_matching_version = $ranking[2];
+            if ($ranking[0] == $user_id_1) {
+                $max_matching_version = $ranking[1];
                 break;
             }
         }
@@ -1549,7 +1557,7 @@ class PlagiarismController extends AbstractController {
         if (!$is_team_assignment) {
             $user_ids = [];
             foreach ($ranking as $item) {
-                $user_ids[$item[1]] = null;
+                $user_ids[$item[0]] = null;
             }
             $user_ids = array_keys($user_ids);
 
@@ -1563,14 +1571,14 @@ class PlagiarismController extends AbstractController {
         foreach ($ranking as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[1]]->getDisplayedFirstName()} {$user_ids_and_names[$item[1]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
             }
             $temp = [
-                "percent" => $item[0],
-                "user_id" => $item[1],
+                "percent" => $item[3],
+                "user_id" => $item[0],
                 "display_name" => $display_name,
-                "version" => $item[2],
-                "source_gradeable" => $item[3]
+                "version" => $item[1],
+                "source_gradeable" => $item[2]
             ];
             array_push($return, $temp);
         }
