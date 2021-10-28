@@ -104,7 +104,7 @@ input[type=text]:invalid {
     color: var(--alert-invalid-entry-pink);
 }
 
-#prev-gradeable-div {
+#other-gradeable-div {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -112,22 +112,22 @@ input[type=text]:invalid {
     padding-bottom: 30px;
 }
 
-#prev-gradeable-div select {
+#other-gradeable-div select {
     width: calc(100% / 3 - 10px);
     margin: 5px;
 }
 
-#prev-gradeable-div select:nth-child(3n+2) {
+#other-gradeable-div select:nth-child(3n+2) {
     margin-left: 0;
 }
 
-#prev-gradeable-div select:nth-child(3n+1) {
+#other-gradeable-div select:nth-child(3n+1) {
     margin-right: 0;
 }
 
 #current-code-file,
 #provided-code-file,
-#prev-gradeable-div {
+#other-gradeable-div {
     display: none;
 }
 
@@ -156,16 +156,6 @@ input[type=text]:invalid {
 
 .low-margin-top {
     margin-top: 5px;
-}
-
-.add-more {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-}
-
-.plag-data-group .fa-plus-square {
-    margin-right: 10px;
 }
 
 /* ==== Results Page ======================================================== */
