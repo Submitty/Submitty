@@ -56,7 +56,7 @@ class LateDayView extends AbstractView {
 
         $gradeables = [];
         foreach ($gradeables_iterator as $g) {
-            if (!LateDays::filterCanView($this->core, $g)) {
+            if (!LateDays::filterCanView($this->core, $g) || $g->isTeamAssignment()) {
                 continue;
             }
             $gradeables[] = $g;
@@ -86,7 +86,7 @@ class LateDayView extends AbstractView {
         $update = 0;
         $g = 0;
 
-        while ($update < count($late_day_update_dates) && $g < count($gradeables)) {
+        while ($update < count($late_day_update_dates) || $g < count($gradeables)) {
             if ($update >= count($late_day_update_dates)) {
                 $late_day_cache_header[] = $gradeables[$g]->getTitle();
                 $g++;
