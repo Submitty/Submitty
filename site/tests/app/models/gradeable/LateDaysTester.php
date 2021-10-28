@@ -200,11 +200,11 @@ class LateDaysTester extends BaseUnitTest {
         // late_exception
         $gg = $this->grabGradedGradeable($ggs, 'late_exception');
         $cache[$gg->getGradeableId()] = $this->generateCache($gg, 4, 1);
-        // on_time
-        $gg = $this->grabGradedGradeable($ggs, 'on_time');
+        // bad_for_gradeable
+        $gg = $this->grabGradedGradeable($ggs, 'bad_for_gradeable');
         $cache[$gg->getGradeableId()] = $this->generateCache($gg, 4, 0);
-        // on_time_exception
-        $gg = $this->grabGradedGradeable($ggs, 'on_time_exception');
+        // bad_for_term
+        $gg = $this->grabGradedGradeable($ggs, 'bad_for_term');
         $cache[$gg->getGradeableId()] = $this->generateCache($gg, 4, 0);
 
         $core = $this->mockCore(5, $updates, $cache);
