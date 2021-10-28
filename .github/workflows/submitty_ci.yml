@@ -11,9 +11,9 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.4
-  NODE_VERSION: 12
-  PYTHON_VERSION: 3.8
+  PHP_VER: 7.2
+  NODE_VERSION: 10
+  PYTHON_VERSION: 3.6
 
 jobs:
     css-lint:
