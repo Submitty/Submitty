@@ -27,7 +27,7 @@
         <td data-before-content="Days From Extensions"> {{ empty_late_day }} </td>
         <td data-before-content="Status"> {{ empty_late_day }} </td>
         {% if grade_inquiry_enabled %}
-            <td data-before-content="Regrade Inquery Count"> {{ empty_late_day }} </td>
+            <td data-before-content="Regrade Inquiry Count"> {{ empty_late_day }} </td>
         {% endif %}
         <td data-before-content="Late Days Used Here"> {{ ((late_days.getDefaultLateDays() > 0) ? '+' : '') ~ late_days.getDefaultLateDays() }} </td>
         <td data-before-content="Late Days Remaining"> {{ late_days.getDefaultLateDays() }} </td>
@@ -52,7 +52,7 @@
             <td data-before-content="Days From Extensions" {{ full_class }}>{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : placeholder }}</td>
             <td data-before-content="Status" {{ full_class }} {{ id }}>{{ late_day_info.isLateDayUpdate() ? placeholder : late_day_info.getStatusMessage() }}</td>
             {% if grade_inquiry_enabled %}
-                <td data-before-content="Regrade Inquery Count" {{ full_class }} {{ id }}>{{ late_day_info.isRegradeAllowed() ? late_day_info.getGradeInquiryCount() : placeholder }}</td>
+                <td data-before-content="Regrade Inquiry Count" {{ full_class }} {{ id }}>{{ late_day_info.isRegradeAllowed() ? late_day_info.getGradeInquiryCount() : placeholder }}</td>
             {% endif %}
             <td data-before-content="Late Days Used Here" {{ full_class }}>{{ ((late_day_info.getLateDaysChange() > 0) ? '+' : '') ~ late_day_info.getLateDaysChange() }}</td>
             <td data-before-content="Late Days Remaining" {{ full_class }}>{{ late_day_info.getLateDaysRemaining() }}</td>
