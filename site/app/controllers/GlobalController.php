@@ -310,11 +310,13 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-extensions",
                 "icon" => "fa-calendar-plus"
             ]);
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['late_day_cache']),
-                "title" => "Late Day Cache",
-                "icon" => "fa-calendar-alt"
-            ]);
+            if ($this->core->getConfig()->checkFeatureFlagEnabled('late_day_cache_display')) {
+                $sidebar_buttons[] = new NavButton($this->core, [
+                    "href" => $this->core->buildCourseUrl(['bulk_late_days']),
+                    "title" => "Bulk Late Days",
+                    "icon" => "fa-calendar-alt"
+                ]);
+            }
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['grade_override']),
                 "title" => "Grade Override",
