@@ -86,6 +86,14 @@ class LateDayInfo extends AbstractModel {
         }
     }
 
+    /**
+     * Create a new LateDay instance for a given user
+     * @param Core $core
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @param int $late_days_remaining the late days remaining before this gradeable was submitted
+     * @return LateDayInfo
+     */
     public static function fromGradeableLateDaysRemaining(Core $core, User $user, GradedGradeable $graded_gradeable, int $late_days_remaining) {
         $late_days_allowed = $graded_gradeable->getGradeable()->getLateDays();
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
@@ -128,6 +136,10 @@ class LateDayInfo extends AbstractModel {
         ];
     }
 
+    /**
+     * Gets information about this late day event in the format for the cache table
+     * @return array
+     */
     public function generateEventInfo() {
         return [
             'g_id' => $this->isLateDayUpdate() ? null : $this->getId(),

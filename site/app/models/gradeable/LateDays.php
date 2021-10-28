@@ -54,7 +54,6 @@ class LateDays extends AbstractModel {
         $late_days_charged = 0;
         $useCache = true;
 
-        // var_dump($late_day_events);
         // Construct late days info for each gradeable
         $index = 1;
         foreach ($late_day_events as $event) {
@@ -102,6 +101,7 @@ class LateDays extends AbstractModel {
     /**
      * Sort the graded gradeables and late day updates by due date
      * @param array $graded_gradeables Collection of GradedGradeable objects
+     * @return array The information for each late day update/graded gradeable
      */
     private function createLateDayEvents($graded_gradeables) {
         $late_day_events = array_merge(
@@ -272,6 +272,9 @@ class LateDays extends AbstractModel {
 
     /**
      * Create event information for a given late day event
+     * @param array $event The information about this late day update/graded gradeable
+     * @param int $late_days_remaining late days remaining after this event took place
+     * @param int $late_days_change the increase or decrease of late days from this event
      * @return array Information needed in order to construct a LateDayInfo object
      */
     private function createEventInfo($event, $late_days_remaining, $late_days_change) {
