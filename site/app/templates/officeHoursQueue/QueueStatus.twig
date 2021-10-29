@@ -132,7 +132,9 @@
   </div>
 {% endif %}
 <br>
-<a onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a><br><br>
+<a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a>
+<a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button class="btn btn-secondary">Close Table</button></a>
+<br><br>
 <div class="container queue_occupancy" style="display: none">
     <table class="table">
         <thead>
@@ -154,5 +156,7 @@
 <script>
     function toggleQueueOccupancy(){
         $('.queue_occupancy').toggle();
+        $('#close_queue_occupancy').toggle();
+        $('#view_queue_occupancy').toggle();
     }
 </script>
