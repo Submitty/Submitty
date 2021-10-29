@@ -25,7 +25,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     */
 
     private $code_to_index = [];//an array maps queue codes to their index (this is used to give each queue a color)
-    private $queue_occupancy = [];
+    private $queue_occupancy = []; //an array where keys are open queues and values are the number of people in that queue
     private $current_queue;
     private $full_history;
     private $current_queue_state;
