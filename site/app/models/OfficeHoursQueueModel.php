@@ -68,7 +68,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         $index = 0;
         foreach ($this->core->getQueries()->getAllQueues() as $queue) {
             $this->code_to_index[$queue['code']] = $index;
-            if($queue['open']){
+            if ($queue['open']) {
                 $this->queue_occupancy[$queue['code']] = $this->core->getQueries()->getCurrentNumberInQueue($queue['code']);
             }
             $index += 1;
