@@ -6460,6 +6460,11 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
+    public function getCurrentNumberInQueue($queue_code) {
+        $this->course_db->query("SELECT count(*) from queue where UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$queue_code]);
+        return $this->course_db->rows()[0]['count'];
+    }
+
     public function getAllQueuesEver() {
         $this->course_db->query("SELECT DISTINCT queue_code FROM queue
                                 UNION

@@ -131,4 +131,8 @@
     </form>
   </div>
 {% endif %}
+Current Queue Occupancy<br>
+{% for name, number in viewer.getQueueOccupancy() %}
+{{ name }} {{ number }}<br>
+{% endfor %}
 
