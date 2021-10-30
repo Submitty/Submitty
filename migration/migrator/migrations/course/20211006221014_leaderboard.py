@@ -51,5 +51,7 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE IF EXISTS autograding_metrics;")
-    database.execute("ALTER TABLE electronic_gradeable_version DROP COLUMN IF EXISTS anonymous_leaderboard")
+    pass
+    # If in the future you need to down migrate the database, these are the commands needed to do that
+    # database.execute("DROP TABLE IF EXISTS autograding_metrics;")
+    # database.execute("ALTER TABLE electronic_gradeable_version DROP COLUMN IF EXISTS anonymous_leaderboard")
