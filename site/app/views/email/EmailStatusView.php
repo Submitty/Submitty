@@ -3,8 +3,6 @@
 namespace app\views\email;
 
 use app\views\AbstractView;
-use app\models\User;
-use app\libraries\FileUtils;
 
 class EmailStatusView extends AbstractView {
     public function showEmailStatusPage(int $num_page, string $load_page_url) {

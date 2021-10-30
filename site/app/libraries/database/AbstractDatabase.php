@@ -3,7 +3,6 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-use app\libraries\Utils;
 
 abstract class AbstractDatabase {
 

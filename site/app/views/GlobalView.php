@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\models\Breadcrumb;
-
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name) {
         $messages = [];

@@ -3,7 +3,6 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\exceptions\DatabaseException;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
