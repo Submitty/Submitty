@@ -467,7 +467,7 @@ fi
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
+bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -528,7 +528,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
 fi
 
 ################################################################################################################
