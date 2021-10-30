@@ -32,7 +32,7 @@
     "@babel/core": "^7.15.8",
     "@babel/preset-env": "^7.15.8",
     "@cypress/skip-test": "^2.6.1",
-    "babel-jest": "^27.2.5",
+    "babel-jest": "^27.3.1",
     "cypress": "^8.7.0",
     "cypress-file-upload": "^5.0.8",
     "eslint": "^7.32.0",
