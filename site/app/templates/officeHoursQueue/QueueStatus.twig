@@ -96,6 +96,8 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+      {% set open_queues = viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+      {% if open_queues|length > 1  %}
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
           <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
@@ -128,6 +130,7 @@
           </div>
       </form>
     <br>
+      {% endif %}
       <script>
           $('#switch_queue_code').change(function(){
               const selected_queue =  $('#switch_queue_code').val();
