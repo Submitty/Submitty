@@ -3,9 +3,6 @@
 namespace app\libraries;
 
 use app\libraries\Utils;
-use app\libraries\FileUtils;
-use app\models\forum\Thread;
-use app\models\forum\Post;
 
 /**
  * Class ForumUtils

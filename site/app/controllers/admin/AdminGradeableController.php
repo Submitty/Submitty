@@ -8,7 +8,6 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
-use app\models\gradeable\GradeableList;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -54,7 +53,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
-     * @param Gradeable $gradeable
+     * @param string|null $template_id
      * @Route("/courses/{_semester}/{_course}/gradeable", methods={"GET"})
      */
     public function newPage($template_id = null) {
@@ -147,7 +146,7 @@ class AdminGradeableController extends AbstractController {
             }
             $directory_queue = [$config_repo_name];
             $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue, $repository_error_messages, $repo_id_number);
-            if (isset($repo_paths)) {
+            if (!empty($repo_paths)) {
                 $all_repository_config_paths = array_merge($all_repository_config_paths, $repo_paths);
             }
             $repo_id_number++;
@@ -1213,11 +1212,11 @@ class AdminGradeableController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable == false) {
             $this->core->addErrorMessage("Invalid gradeable id");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
         if (!$gradeable->canDelete()) {
             $this->core->addErrorMessage("Gradeable " . $gradeable_id . " cannot be deleted.");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $this->core->getQueries()->deleteGradeable($gradeable_id);

@@ -1317,7 +1317,6 @@ class Course(object):
         with open(course_json_file, 'r+') as open_file:
             course_json = json.load(open_file)
             course_json['course_details']['queue_enabled'] = True
-            course_json['course_details']['queue_contact_info'] = True
             course_json['course_details']['queue_message'] = queue_data["queue_message"]
             course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
             open_file.seek(0)

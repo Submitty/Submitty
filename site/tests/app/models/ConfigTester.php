@@ -125,7 +125,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'room_seating_gradeable_id' => "",
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
-                'queue_contact_info' => true,
                 'queue_message' => '',
                 'queue_announcement_message' => '',
                 'seek_message_enabled'           => false,
@@ -292,7 +291,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
-                    'queue_contact_info' => true,
                     'queue_message' => '',
                     'queue_announcement_message' => '',
                     'seek_message_enabled'           => false,
@@ -325,7 +323,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'verified_submitty_admin_user' => null,
             'php_user' => null,
             'queue_enabled' => true,
-            'queue_contact_info' => true,
             'queue_message' => '',
             'queue_announcement_message' => '',
             'seek_message_enabled'           => false,
@@ -507,8 +504,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-                'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_contact_info',
-                'queue_message', 'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
+                'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
+                'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
             ],
         ];
         $return = [];
