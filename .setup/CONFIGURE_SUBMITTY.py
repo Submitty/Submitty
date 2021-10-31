@@ -570,7 +570,7 @@ if not args.worker:
     config['ldap_options'] = LDAP_OPTIONS
 
     with open(AUTHENTICATION_JSON, 'w') as json_file:
-        json.dump(config, json_file, indent=2)
+        json.dump(config, json_file, indent=4)
     shutil.chown(AUTHENTICATION_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(AUTHENTICATION_JSON, 0o440)
 
