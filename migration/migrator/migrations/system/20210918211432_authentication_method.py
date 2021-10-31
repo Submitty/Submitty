@@ -41,7 +41,11 @@ def down(config):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    auth_method = config.authentication['authentication_method']
+
+    # Assume rollback may run as a "missing migration" and so config does not yet load authentication file
+    with (config.config_path / 'authentication.json').open() as auth_file:
+        authentication = json.load(auth_file)
+    auth_method = authentication['authentication_method']
     if auth_method == 'LdapAuthentication':
         auth_method = 'PamAuthentication'
     with (config.config_path / 'database.json').open('r+') as db_file:
