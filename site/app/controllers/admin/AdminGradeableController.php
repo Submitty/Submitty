@@ -394,7 +394,7 @@ class AdminGradeableController extends AbstractController {
             'max_value' => 0,
             'upper_clamp' => 0,
             'text' => false,
-            'peer' => false,
+            'peer_component' => false,
             'order' => -1,
             'page' => Component::PDF_PAGE_NONE,
             'is_itempool_linked' => false,
