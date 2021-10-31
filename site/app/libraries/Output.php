@@ -14,9 +14,6 @@ use League\CommonMark\Block\Element\IndentedCode;
 use League\CommonMark\Inline\Element\Code;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment;
-use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
-use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
-use app\libraries\CustomCodeBlockRenderer;
 use app\libraries\CustomCodeInlineRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -391,7 +388,7 @@ HTML;
      * @return string
      */
     private function getView($class) {
-        if (!Utils::startsWith($class, "app\\views")) {
+        if (!str_starts_with($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
         if (!isset($this->loaded_views[$class])) {

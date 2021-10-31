@@ -89,7 +89,7 @@ class Component extends AbstractModel {
      * Component constructor.
      * @param Core $core
      * @param Gradeable $gradeable
-     * @param $details
+     * @param array $details
      * @throws \InvalidArgumentException if any of the details were not found or invalid, or the gradeable was null
      * @throws ValidationException If the provided point details are incompatible
      */
@@ -372,7 +372,7 @@ class Component extends AbstractModel {
 
     /**
      * Imports a mark into the component via array
-     * @param $details
+     * @param array $details
      * @return Mark
      */
     public function importMark($details) {

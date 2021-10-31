@@ -1340,6 +1340,7 @@
               "enum" : ["fileExists"]
             },
             "one_of" : {
+              "description": "Whether or not submitted file can be one of any of the files listed in actual_files",
               "type" : "boolean"
             },
             "sequence_diagram" : {
