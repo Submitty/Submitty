@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
+use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
@@ -7706,7 +7707,7 @@ SQL;
      */
     public function getLeaderboard(string $gradeable_id, bool $countHidden, array $valid_testcases): array {
         if ($this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Leaderboards do not work for teams");
         }
 
         $param_list = $this->createParamaterList(count($valid_testcases));
