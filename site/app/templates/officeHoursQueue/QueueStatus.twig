@@ -96,8 +96,15 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+      {% set my_queue = 'code' %}
       {% set open_queues = viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
-      {% if open_queues|length > 1  %}
+      {% if open_queues|length == 1 %}
+          {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+            {% set my_queue = queue['code'] %}
+          {% endfor %}
+      {% endif %}
+
+      {% if open_queues|length > 1  or my_queue != viewer.getCurrentQueueCode() %}
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
           <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
