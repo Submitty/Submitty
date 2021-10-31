@@ -1,4 +1,5 @@
-<div class = "queue-message" style="display: none; background-color: var(--alert-info-blue); padding: 1rem;">
+<div class = "queue-message">
+    <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
     <h3 id="queue-message-prompt">
         Message From Queue Admins:<br>
     </h3>
@@ -6,6 +7,7 @@
 
     </p>
 </div>
+<br>
 <div id="queue_status">
 {% if viewer.inQueue() == 0 %}
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
@@ -206,12 +208,12 @@
         const queue = sent.queue;
         const sent_time = sent.time;
         const course = sent.course;
-        console.log(course);
         //get rid of message after 80 minutes
         if(current_time.getTime() - 5000000 < sent_time) {
             if(course === '{{ viewer.getCourse() }}'){
                 $('.queue-message').css('display', 'block');
                 $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
+                $('#queue-message-msg-time').html(sent.formatted_time);
             }
         } else {
             localStorage.removeItem('QueueMessageExpire');
@@ -220,19 +222,21 @@
 
     }
 
-     {% if not viewer.inQueue() == 0 %}
+     {% if viewer.inQueue() %}
         function queueMessage(message, queue, course) {
             if (queue === "{{viewer.getCurrentQueueCode()}}"){
                 let now = new Date();
                 const item = {
                     queue: queue,
                     time: now.getTime(),
+                    formatted_time: now.toLocaleString(),
                     course: course
                 }
                 localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
                 localStorage.setItem('QueueMessage', message);
                 $('.queue-message').css('display', 'block');
                 $('#queue-message-msg').html(message);
+                $('#queue-message-msg-time').html(now.toLocaleString());
             }
         }
     {% endif %}
@@ -245,9 +249,6 @@
             switch (msg.type) {
                 case "queue_message":
                     queueMessage(msg.message, msg.queue, msg.course);
-                    break;
-                default:
-                    console.log("Unknown message received.");
                     break;
             }
         };
