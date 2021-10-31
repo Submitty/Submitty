@@ -16,8 +16,6 @@
             <input type="checkbox" aria-label="Toggle Anonymity" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
         </div>
         <div class="leaderboard-tab-bar-wrapper">
-            Leaderboards:
-
             <div class="btn-group" role="group" aria-label="Switch leaderboards">
                 {% for leaderboard in leaderboards %}
                     <button type="button" class="leaderboard-nav key_to_click btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>

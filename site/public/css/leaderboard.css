@@ -1,11 +1,6 @@
 .leaderboard-tab-bar-wrapper {
-    border-bottom: 1px solid gray;
     display: flex;
     height: 35px;
-}
-
-.leaderboard-tab-bar-wrapper .btn-group {
-    padding-left: 1rem;
 }
 
 .leaderboard-nav {
@@ -36,6 +31,11 @@
     background-color: var(--standard-pastel-blue);
     color: var(--text-black);
     border: 1px solid gray;
+}
+
+#leaderboard-table {
+    border-top: 1px solid gray;
+    margin-top: 0.5rem;
 }
 
 #leaderboard-table .leaderboard-grader {
