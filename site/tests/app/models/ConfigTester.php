@@ -7,7 +7,6 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Config;
-use Exception;
 
 class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $core;
@@ -412,7 +411,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     public function testInvalidMasterConfigPath() {
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Could not find config directory: /invalid/path');
         $config->loadMasterConfigs('/invalid/path');
     }
@@ -420,7 +419,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     public function testConfigPathFile() {
         $this->createConfigFile();
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find config directory: .*\/config\/database.json/');
         $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
     }
@@ -429,7 +428,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find database config: .*\/config\/database.json/');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -438,14 +437,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find submitty config: .*\/config\/submitty.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
     public function testInvalidCourseConfigPath() {
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Could not find course config file: /invalid/path');
         $config->loadCourseJson("s17", "csci0000", "/invalid/path");
     }
@@ -454,7 +453,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         $config = new Config($this->core);
         file_put_contents(FileUtils::joinPaths($this->temp_dir, "test.txt"), "afds{}fasdf");
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Error parsing the config file: Syntax error');
         $config->loadCourseJson("s17", "csci1000", FileUtils::joinPaths($this->temp_dir, "test.txt"));
     }
@@ -463,7 +462,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find email config: .*\/config\/email.json/');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -548,7 +547,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Invalid Timezone identifier: invalid');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -558,7 +557,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Invalid path for setting submitty_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -568,7 +567,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Invalid path for setting submitty_log_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
     }
