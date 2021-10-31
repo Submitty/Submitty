@@ -15,21 +15,21 @@ def up(config):
     authentication_file = config.config_path / 'authentication.json'
     if not authentication_file.exists():
         with authentication_file.open('w') as auth_file:
-            json.dump({'authentication_method': config.database['authentication_method'], 'ldap_options': []}, auth_file, indent=2)
+            json.dump({'authentication_method': config.database['authentication_method'], 'ldap_options': []}, auth_file, indent=4)
     else:
         with authentication_file.open('r+') as auth_file:
             auth_info = json.load(auth_file, object_pairs_hook=OrderedDict)
             auth_info['authentication_method'] = config.database['authentication_method']
             auth_file.seek(0)
             auth_file.truncate()
-            auth_file.write(json.dumps(auth_info, indent=2))
+            auth_file.write(json.dumps(auth_info, indent=4))
 
     with (config.config_path / 'database.json').open('r+') as db_file:
         db_info = json.load(db_file, object_pairs_hook=OrderedDict)
         db_file.seek(0)
         db_file.truncate()
         del db_info['authentication_method']
-        json.dump(db_info, db_file, indent=2)
+        json.dump(db_info, db_file, indent=4)
 
 
 def down(config):
@@ -54,4 +54,4 @@ def down(config):
         db_file.truncate()
 
         db_info['authentication_method'] = auth_method
-        json.dump(db_info, db_file, indent=2)
+        json.dump(db_info, db_file, indent=4)
