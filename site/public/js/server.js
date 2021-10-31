@@ -1666,7 +1666,13 @@ function addMarkdownCode(type){
     let insert = '';
     switch (type) {
         case 'code':
-            insert = '```\ncode\n```';
+            const current = text[cursor];
+            const last_newline_pos = text.substring(0, cursor).split('').lastIndexOf('\n');
+            if (text.substring(last_newline_pos, cursor).length !== 1) {
+                insert = '\n';
+            }
+            console.log('current', current);
+            insert += '```\ncode\n```';
             break;
         case 'link':
             insert = '[display text](url)';
