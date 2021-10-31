@@ -320,7 +320,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->niceNames[$name] ?? $name;
     }
 
-    public function getQueueOccupancy(){
+    public function getQueueOccupancy() {
         return $this->queue_occupancy;
     }
 }
