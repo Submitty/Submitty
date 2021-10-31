@@ -10,9 +10,9 @@ site/.rsyncignore
 site/.stylelintrc.json
 site/cypress.json
 site/jest.config.js
+site/phpcs.xml
 site/phpstan-baseline.neon
 site/phpstan.neon
 site/phpunit.xml
-site/ruleset.xml
 
 .DS_Store
