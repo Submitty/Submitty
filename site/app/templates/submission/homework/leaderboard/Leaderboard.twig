@@ -13,14 +13,16 @@
         <br><br>
         <div style="margin-bottom: 1rem">
             Show my name to other students in the leaderboard:
-            <input type="checkbox" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
+            <input type="checkbox" aria-label="Toggle Anonymity" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
         </div>
         <div class="leaderboard-tab-bar-wrapper">
             Leaderboards:
 
-            {% for leaderboard in leaderboards %}
-                <a class="leaderboard-nav key_to_click normal-btn" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</a>
-            {% endfor %}
+            <div class="btn-group" role="group" aria-label="Switch leaderboards">
+                {% for leaderboard in leaderboards %}
+                    <button type="button" class="leaderboard-nav key_to_click btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>
+                {% endfor %}
+            </div>
         </div>
         <div id="leaderboard-table"></div>
     {% endif %}

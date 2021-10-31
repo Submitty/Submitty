@@ -29,13 +29,13 @@ class LeaderboardController extends AbstractController {
         if (is_null($autogradingConfig)) {
             // This means the gradeable is being rebuilt
             $this->core->addErrorMessage("This leaderboard is currently unavailable, please try again in a few minutes.");
-            return new RedirectResponse($this->core->buildCourseUrl([]));
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }
 
         $leaderboards = $autogradingConfig->getLeaderboards();
         if (!$leaderboards) {
             $this->core->addErrorMessage("No leaderboards exist for this gradeable");
-            return new RedirectResponse($this->core->buildCourseUrl([]));
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }
         if (is_null($leaderboard_tag)) {
             $leaderboard_tag = $leaderboards[0]->getTag();

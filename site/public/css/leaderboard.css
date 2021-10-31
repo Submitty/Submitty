@@ -4,13 +4,19 @@
     height: 35px;
 }
 
+.leaderboard-tab-bar-wrapper .btn-group{
+    padding-left: 1rem;
+}
+
 .leaderboard-nav {
     padding: 0.1rem 0.5rem 0;
     text-decoration: none;
     background-color: var(--default-white);
     color: var(--text-black);
     border-radius: 6px;
-    margin: 0 0.2rem 0.5rem;
+    border: 1px solid gray;
+    margin: 0 0.2rem 0.1rem;
+    margin-right: 0px;
     word-wrap: break-word;
 }
 
@@ -34,4 +40,8 @@
 
 #leaderboard-table .leaderboard-grader {
     background: var(--alert-border-blue);
+}
+
+#leaderboard-table .leaderboard-you {
+    background: var(--alert-border-bronze);
 }
