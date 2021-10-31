@@ -2,11 +2,9 @@
 
 namespace app\models\gradeable;
 
-use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
-use app\libraries\FileUtils;
 use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\Notebook;
 
