@@ -4,7 +4,7 @@ function promptCustomizationUpload() {
     $('#config-upload').trigger('click');
 }
 
-$(() =>{
+$(() => {
     $('#config-upload').on('change', function(){
         $(this).closest('form').submit();
     });
