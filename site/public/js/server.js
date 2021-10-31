@@ -1588,6 +1588,7 @@ function previewMarkdown(mode) {
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
     if (mode === 'preview') { 
+        if (markdown_header.attr('data-mode') === 'preview') return;
         accessibility_message.hide();
         markdown_textarea.hide();
         markdown_preview.show();
@@ -1666,12 +1667,10 @@ function addMarkdownCode(type){
     let insert = '';
     switch (type) {
         case 'code':
-            const current = text[cursor];
             const last_newline_pos = text.substring(0, cursor).split('').lastIndexOf('\n');
             if (text.substring(last_newline_pos, cursor).length !== 1) {
                 insert = '\n';
             }
-            console.log('current', current);
             insert += '```\ncode\n```';
             break;
         case 'link':
