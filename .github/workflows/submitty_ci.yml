@@ -114,7 +114,7 @@ jobs:
             - name: Lint PHP code
               run: |
                   php vendor/bin/phpcs --version
-                  php vendor/bin/phpcs --standard=tests/ruleset.xml
+                  php vendor/bin/phpcs
             - name: Static analysis
               run: |
                   php vendor/bin/phpstan  --version
@@ -146,7 +146,7 @@ jobs:
           - name: Install dependencies
             run: composer install --prefer-dist --dev
           - name: Run php unit tests
-            run : php vendor/bin/phpunit --configuration tests/phpunit.xml
+            run : php vendor/bin/phpunit
           - name: Upload Coverage
             uses: codecov/codecov-action@v1
             with:
@@ -237,7 +237,7 @@ jobs:
     e2e:
         needs:
           - js-lint
-          - js-unit          
+          - js-unit
           - php-lint
           - php-unit
           - python-lint
@@ -476,7 +476,7 @@ jobs:
               browser: chrome
               headless: true
               env: autograding_shipper_off=True
-          
+
           - name: Restart autograding shipper
             run: |
               sudo systemctl restart submitty_autograding_shipper
