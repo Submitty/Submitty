@@ -4,7 +4,7 @@
     height: 35px;
 }
 
-.leaderboard-tab-bar-wrapper .btn-group{
+.leaderboard-tab-bar-wrapper .btn-group {
     padding-left: 1rem;
 }
 
@@ -16,7 +16,7 @@
     border-radius: 6px;
     border: 1px solid gray;
     margin: 0 0.2rem 0.1rem;
-    margin-right: 0px;
+    margin-right: 0;
     word-wrap: break-word;
 }
 

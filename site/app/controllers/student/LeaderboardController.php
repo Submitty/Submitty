@@ -8,7 +8,6 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\User;
 
 class LeaderboardController extends AbstractController {
 
