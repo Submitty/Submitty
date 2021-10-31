@@ -237,9 +237,10 @@
 
     function onStudentSubmitChange() {
         let cont = $('#due_date_options_container');
+        let exam = {{ is_exam ? "true": "false" }};
 
         let no_due_date = $('#has_due_date_no');
-        if($('#yes_student_submit').is(':checked') || {{ is_exam }}) {
+        if($('#yes_student_submit').is(':checked') || exam) {
             cont.show();
         }
         else {
