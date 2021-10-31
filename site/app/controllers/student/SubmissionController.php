@@ -18,7 +18,6 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 

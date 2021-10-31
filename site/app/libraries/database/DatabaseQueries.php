@@ -3,13 +3,11 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-use app\exceptions\NotImplementedException;
 use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
-use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -26,8 +24,6 @@ use app\models\Team;
 use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueueModel;
-use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;

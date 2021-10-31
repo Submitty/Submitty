@@ -3,7 +3,6 @@
 namespace app\libraries;
 
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\Component;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\GradingSection;
