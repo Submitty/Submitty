@@ -2,7 +2,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.5/phpunit.xsd"
     convertDeprecationsToExceptions="true"
-    bootstrap="bootstrap.php"
+    bootstrap="tests/bootstrap.php"
     colors="true"
     verbose="true"
 >
