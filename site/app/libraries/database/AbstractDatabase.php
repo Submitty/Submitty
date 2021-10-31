@@ -351,10 +351,7 @@ abstract class AbstractDatabase {
     public function getPrintQueries(): array {
         $print = [];
         foreach ($this->all_queries as $query) {
-            foreach ($query[1] as $parameter) {
-                $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
-            }
-            $print[] = $query[0];
+            $print[] = DatabaseUtils::formatQuery($query[0], $query[1]);
         }
         return $print;
     }
