@@ -5,7 +5,6 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use DateTime;
-use DateInterval;
 
 class OfficeHoursQueueModel extends AbstractModel {
 

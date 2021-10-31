@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
-use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
 use app\entities\db\Table;

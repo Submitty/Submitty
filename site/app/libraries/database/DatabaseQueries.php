@@ -3,13 +3,11 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-use app\exceptions\NotImplementedException;
 use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
-use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -26,8 +24,6 @@ use app\models\Team;
 use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueueModel;
-use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -6251,6 +6247,12 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    //Gets the time a student joined the queue they are currently in
+    public function getTimeJoinedQueue($user_id, $queue_code) {
+        $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
+        return $this->course_db->rows()[0]['max'];
+    }
+
     public function getQueueId($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
@@ -6261,8 +6263,10 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['contact_information'];
     }
 
-    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
+
+    public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        $entry_time = $time_in == 0 ? $this->core->getDateTimeNow() : $time_in;
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -6296,7 +6300,7 @@ AND gc_id IN (
                 ?,
                 ?,
                 NULL
-            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue,0]);
+            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
