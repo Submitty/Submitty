@@ -615,7 +615,7 @@ class ReportController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
      */
-    public function uploadRainbowConfig(){
+    public function uploadRainbowConfig() {
         $redirect_url =  $this->core->buildCourseUrl((['reports']));
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';
