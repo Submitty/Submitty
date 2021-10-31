@@ -18,7 +18,6 @@ use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
-use app\models\PollModel;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\RainbowCustomization;
 use app\exceptions\ValidationException;

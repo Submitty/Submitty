@@ -1,0 +1,16 @@
+site/cache
+site/cypress
+site/node_modules
+site/tests
+site/vendor
+site/.babelrc.json
+site/.eslintignore
+site/.eslintrc.json
+site/.rsyncignore
+site/.stylelintrc.json
+site/cypress.json
+site/jest.config.js
+site/phpstan-baseline.neon
+site/phpstan.neon
+
+.DS_Store

@@ -6,21 +6,16 @@ use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
-use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
-use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 /* Notebook */
 use app\models\notebook\AbstractNotebookInput;
-use app\models\notebook\UserSpecificNotebook;
-use app\models\notebook\SubmissionMultipleChoice;
 
 class HomeworkView extends AbstractView {
 
@@ -441,7 +436,7 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
-        $recent_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
