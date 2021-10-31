@@ -17,11 +17,11 @@
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">../app</directory>
+            <directory suffix=".php">./app</directory>
             <exclude>
-                <directory suffix=".php">../app/views</directory>
+                <directory suffix=".php">./app/views</directory>
             </exclude>
-            <directory suffix=".php">phpstan</directory>
+            <directory suffix=".php">./tests/phpstan</directory>
         </whitelist>
     </filter>
 
