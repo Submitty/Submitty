@@ -8,7 +8,6 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
-use app\models\gradeable\GradeableList;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -395,7 +394,7 @@ class AdminGradeableController extends AbstractController {
             'max_value' => 0,
             'upper_clamp' => 0,
             'text' => false,
-            'peer' => false,
+            'peer_component' => false,
             'order' => -1,
             'page' => Component::PDF_PAGE_NONE,
             'is_itempool_linked' => false,

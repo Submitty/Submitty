@@ -56,6 +56,8 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+  <div id="queue_status">
+  <h2>My Queue Status</h2>
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
       There
@@ -65,7 +67,7 @@
       ahead of you in the queue
     </p>
 
-    <p>You are currently in:
+    <p>You are currently in queue:
       <b>{{viewer.getCurrentQueueCode()}}</b>
     </p>
 
@@ -103,8 +105,62 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+      <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}"/>
+          <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+          <div class="form-group">
+              <br>
+              <h2>Switch My Queue</h2>
+              NOTE: Your queue entry time will be preserved<br>
+              <label for="queue_code">Queue:
+              </label>
+              <select id="switch_queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
+                  <option value="">Queue Name</option>
+                  {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+                      {% if queue['code'] != viewer.getCurrentQueueCode() %}
+                        <option value="{{queue['code']}}">{{queue['code']}}</option>
+                      {% endif %}
+                  {% endfor %}
+              </select>
+              <div id="switch_queue_form" class="form-group" style="display: none;">
+                  <label for="token-box">Queue Access Code:</label>
+                  <input type="text" name="token" id="token-box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on">
+                  <div class="enter-contact-info" style="display: none">
+                      <label for="contact_info">My Contact Information (follow instructor directions):</label>
+                      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
+                      <br>
+                  </div>
+              </div>
+              <button id="join_queue_btn" type="submit" class="btn btn-primary">Switch Queue</button>
+          </div>
+      </form>
     <br>
-    <p>Use the pause button if you must step away from your computer for a few minutes.  This will preserve your position in the queue.</p>
+      <script>
+          $('#switch_queue_code').change(function(){
+              const selected_queue =  $('#switch_queue_code').val();
+              let queue='temp';
+              let found = false;
+              {% for queue in viewer.getAllQueues()|filter(queue => queue['contact_information'] == 'true') %}
+              queue = "{{ queue['code'] }}";
+              if (queue === selected_queue){
+                  $('.enter-contact-info').css('display', 'block');
+                  $('#contact_info').prop('required', true);
+                  found = true;
+              }
+              {% endfor %}
+              if (found === false){
+                  $('.enter-contact-info').css('display', 'none');
+                  $('#contact_info').prop('required', false);
+              }
+          });
+      </script>
+    <h2>Pause My Queue Position</h2>
+    <p>
+    Use the pause button if you must step away from your computer for a few minutes.<br>
+    This will preserve your position in the queue.
+    </p>
     <form method="post" action="{{base_url}}/togglePause">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="hidden" name="pause_state" value="{{ viewer.isCurrentlyPaused()?'false':'true' }}"/>
@@ -121,7 +177,10 @@
       {% else %}
         <p id="student_timer" help_time="{{ viewer.timeToISO(viewer.getCurrentTimePausedStart()) }}"></p>
       {% endif %}
-      <p>WARNING: If you remain paused for more than a few minutes, you may be removed by the teaching staff. Please refer to the course syllabus for office hour queue usage policies.</p>
+      <p>
+      WARNING: If you remain paused for more than a few minutes, you may be removed by the teaching staff.<br>
+      Please refer to the course syllabus for office hour queue usage policies.
+      </p>
     </form>
   </div>
 {% else %}
@@ -200,6 +259,10 @@
             localStorage.removeItem('QueueMessageExpire');
             localStorage.removeItem('QueueMessage');
         }
+    }
+
+    function toggleSwitchQueueForm(){
+        $("#switch_queue_form").css('display', 'block');
     }
 
 </script>

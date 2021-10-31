@@ -5,7 +5,6 @@ namespace tests;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\Access;
 use app\models\Config;
 use app\models\User;

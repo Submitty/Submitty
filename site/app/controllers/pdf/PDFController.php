@@ -5,7 +5,6 @@ namespace app\controllers\pdf;
 use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
