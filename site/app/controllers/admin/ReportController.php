@@ -628,7 +628,7 @@ class ReportController extends AbstractController {
         }
 
         $upload = $_FILES['config_upload'];
-        if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
+        if (empty($upload['tmp_name'])) {
             $msg = 'Upload failed: Empty tmp name for file';
             $this->core->addErrorMessage($msg);
             return new MultiResponse(

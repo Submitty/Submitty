@@ -71,14 +71,15 @@
                     Upload a Rainbow Grades customization.json directly to Submitty
                 </div>
                 <div class="card-btn-cont">
-                    <form action="http://localhost:1511/courses/f21/sample/reports/rainbow_grades_customization/upload" method="POST" enctype="multipart/form-data">
+                    <form action="{{ customization_upload_url }}" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{csrfToken}}">
                         <input type="file" id="config-upload" name="config_upload" style="display:none">
                     
-                            <button onclick="promptCustomizationUpload.call(this)"
-                                    class="btn btn-primary key_to_click"
-                                    tabindex="0"
-                                    type="button"
+                            <button
+                                onclick="promptCustomizationUpload.call(this)"
+                                class="btn btn-primary key_to_click"
+                                tabindex="0"
+                                type="button"
                             >
                                 Upload Customization
                             </button>
@@ -88,7 +89,7 @@
             <button id="toggle-json">Show JSON</button>
             <div id="customization-json" style="display:none;">
                 {% include 'misc/Markdown.twig' with {
-                    content: '```\n' ~ json ~ '\n```\n'
+                    content: '```json\n' ~ json ~ '\n```\n'
                 } only %}
             </div>
         </div>
