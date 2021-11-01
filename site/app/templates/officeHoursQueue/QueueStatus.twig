@@ -103,7 +103,6 @@
             {% set my_queue = queue['code'] %}
           {% endfor %}
       {% endif %}
-
       {% if open_queues|length > 1  or my_queue != viewer.getCurrentQueueCode() %}
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
