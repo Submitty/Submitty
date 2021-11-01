@@ -8,7 +8,7 @@ class ReportView extends AbstractView {
     public function showReportUpdates($grade_summaries_last_run, $json) {
         $this->core->getOutput()->addBreadcrumb('Grade Reports');
         $this->core->getOutput()->addInternalCss('grade-report.css');
-        $this->core->getOutput()->addInternalJs('grade-report.js');
+        $this->core->getOutput()->addInternalModuleJs('grade-report.js');
         return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig", [
             'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
             'csv_url' => $this->core->buildCourseUrl(['reports', 'csv']),

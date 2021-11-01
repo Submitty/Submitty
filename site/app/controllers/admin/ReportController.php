@@ -640,7 +640,7 @@ class ReportController extends AbstractController {
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
 
-        if (!@copy($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'customization.json'))) {
+        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'customization.json'))) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
             return new MultiResponse(

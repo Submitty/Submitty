@@ -1,10 +1,9 @@
-/*exported promptCustomizationUpload */
 
-function promptCustomizationUpload() {
+export function promptCustomizationUpload() {
     $('#config-upload').trigger('click');
 }
 
-$(() => {
+export function init() {
     $('#config-upload').on('change', function(){
         $(this).closest('form').submit();
     });
@@ -18,4 +17,7 @@ $(() => {
             $(this).html('Show JSON');
         }
     });
-});
+};
+
+
+document.addEventListener('DOMContentLoaded', () => init());
