@@ -9,6 +9,8 @@ class ReportView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Grade Reports');
         $this->core->getOutput()->addInternalCss('grade-report.css');
         $this->core->getOutput()->addInternalModuleJs('grade-report.js');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
         return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig", [
             'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
             'csv_url' => $this->core->buildCourseUrl(['reports', 'csv']),
