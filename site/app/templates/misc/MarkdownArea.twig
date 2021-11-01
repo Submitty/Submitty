@@ -52,7 +52,7 @@
     textarea_onpaste: event handler for onpaste event of the markdown textarea
 #}
 <div class="markdown-area fill-available {{ root_class|default('') ? root_class : '' }}">
-    <div id="{{ markdown_header_id|default('') }}" class="markdown-area-header" style="display: {{ render_header|default(false) ? "flex" : "none" }}" data-mode="edit">
+    <div {{ markdown_header_id is defined ? 'id=' ~ markdown_header_id: ''}}  class="markdown-area-header" style="display: {{ render_header|default(false) ? "flex" : "none" }}" data-mode="edit">
         <div class="markdown-mode-buttons">
             <button title="Edit Markdown" type="button" onclick="previewMarkdown.call(this, 'edit')" class="markdown-mode-tab markdown-write-mode active key_to_click">Write</button>
             <button title="Preview Markdown" type="button" onclick="previewMarkdown.call(this, 'preview')" class="markdown-mode-tab markdown-preview-mode key_to_click" tabindex="0" data-initialize-preview="{{initialize_preview|default(false)}}">
