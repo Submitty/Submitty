@@ -21,8 +21,8 @@ class CustomCodeBlockRenderer implements BlockRendererInterface {
     public function render(AbstractBlock $block, ElementRendererInterface $htmlRenderer, bool $inTightList = false) {
         $element = $this->baseRenderer->render($block, $htmlRenderer, $inTightList);
         $num_lines = substr_count($element->getContents(), "\n");
-        $element->setContents($this->addLineNumbers($element, $num_lines));
-        return $element;
+        $wrapper = new HtmlElement('div', [], $this->addLineNumbers($element, $num_lines));
+        return $wrapper;
     }
 
     private function addLineNumbers(HtmlElement $element, int $num_lines) {
