@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\exceptions\PropertyAccessException;
 use app\libraries\Core;
-use app\libraries\Utils;
 
 /**
  * Class AbstractModel

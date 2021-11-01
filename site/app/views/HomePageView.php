@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\libraries\DateUtils;
-use app\models\Course;
 use app\models\User;
 
 class HomePageView extends AbstractView {
