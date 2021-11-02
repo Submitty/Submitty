@@ -30,7 +30,7 @@ class LeaderboardConfig extends AbstractModel {
         parent::__construct($core);
 
         // Was there actually a config file to read from
-        if ($details === null || $details === []) {
+        if ($details === []) {
             throw new \InvalidArgumentException('Provided details were blank or null');
         }
 

@@ -50,8 +50,7 @@ class LeaderboardController extends AbstractController {
             $leaderboards,
             $user_is_anonymous,
             $leaderboard_tag,
-            $gradeable_id,
-            is_null($autogradingConfig)
+            $gradeable_id
         );
     }
 

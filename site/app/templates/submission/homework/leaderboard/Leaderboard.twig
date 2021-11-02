@@ -1,29 +1,23 @@
 <div id="leaderboard" class="content">
-    {% if rebuildingGradeable %}
-        <p>
-            Leaderboard is temporarily unavailable because the gradeable is being rebuilt. Please try refreshing the page in a few minutes.
-        </p>
-    {% else %}
-        <h1>Leaderboards for {{gradeable_name}}</h1>
-        <p>
-            Ranking is based on the sum of points for testcases where a student got full credit.
-            Ties in overall score are broken based on the sum of the overall time it took to pass
-            all the full credit testcases followed by the sum of the memory used for those testcases.
-        </p>
-        <br><br>
-        <div style="margin-bottom: 1rem">
-            Show my name to other students in the leaderboard:
-            <input type="checkbox" aria-label="Toggle Anonymity" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
+    <h1>Leaderboards for {{gradeable_name}}</h1>
+    <p>
+        Ranking is based on the sum of points for testcases where a student got full credit.
+        Ties in overall score are broken based on the sum of the overall time it took to pass
+        all the full credit testcases followed by the sum of the memory used for those testcases.
+    </p>
+    <br><br>
+    <div style="margin-bottom: 1rem">
+        Show my name to other students in the leaderboard:
+        <input type="checkbox" aria-label="Toggle Anonymity" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
+    </div>
+    <div class="leaderboard-tab-bar-wrapper">
+        <div class="btn-group" role="group" aria-label="Switch leaderboards">
+            {% for leaderboard in leaderboards %}
+                <button type="button" class="leaderboard-nav key_to_click btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>
+            {% endfor %}
         </div>
-        <div class="leaderboard-tab-bar-wrapper">
-            <div class="btn-group" role="group" aria-label="Switch leaderboards">
-                {% for leaderboard in leaderboards %}
-                    <button type="button" class="leaderboard-nav key_to_click btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>
-                {% endfor %}
-            </div>
-        </div>
-        <div id="leaderboard-table"></div>
-    {% endif %}
+    </div>
+    <div id="leaderboard-table"></div>
 </div>
 <script>
     let current_leaderboard_tag = '{{ initial_leaderboard_tag }}';

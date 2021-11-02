@@ -6,7 +6,7 @@ use app\models\User;
 use app\models\gradeable\Gradeable;
 
 class LeaderboardView extends AbstractView {
-    public function showLeaderboardPage(Gradeable $gradeable, array $leaderboards, bool $user_is_anonymous, string $leaderboard_tag, string $gradeable_id, bool $rebuildingGradeable): string {
+    public function showLeaderboardPage(Gradeable $gradeable, array $leaderboards, bool $user_is_anonymous, string $leaderboard_tag, string $gradeable_id): string {
         $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
         $this->core->getOutput()->addBreadcrumb("Leaderboard");
         $this->core->getOutput()->addInternalCss('leaderboard.css');
@@ -15,8 +15,7 @@ class LeaderboardView extends AbstractView {
             "leaderboards" => $leaderboards,
             "studentIsAnonymous" => $user_is_anonymous,
             "initial_leaderboard_tag" => $leaderboard_tag,
-            "base_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id]),
-            "rebuildingGradeable" => $rebuildingGradeable
+            "base_url" => $this->core->buildCourseUrl(["gradeable", $gradeable_id])
         ]);
     }
 
