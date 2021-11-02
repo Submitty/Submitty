@@ -3,13 +3,11 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-use app\exceptions\NotImplementedException;
 use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
-use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -26,8 +24,6 @@ use app\models\Team;
 use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueueModel;
-use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -6188,7 +6184,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token, $regex_pattern) {
+    public function openQueue($queue_code, $token, $regex_pattern, $require_contact_info) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6196,7 +6192,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern) VALUES (TRUE, TRIM(?), TRIM(?), ?)", [$queue_code,$token,$regex_pattern]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info]);
         return true;
     }
 
@@ -6220,15 +6216,20 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
     }
 
-    public function isValidCode($queue_code, $token = null) {
-        if (is_null($token)) {
-            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+    public function getValidatedCode($queue_code, $token = null) {
+        //first check if the queue has an access code
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
+        if ($this->course_db->getRowCount() > 0 && $this->course_db->rows()[0]['token'] == null) {
+            return $this->course_db->rows()[0]['code'];
+        }
+        elseif ($token === null) {
+            return false;
         }
         else {
             $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", [$queue_code, $token]);
-        }
-        if (0 < count($this->course_db->rows())) {
-            return $this->course_db->rows()[0]['code'];
+            if ($this->course_db->getRowCount() > 0) {
+                return $this->course_db->rows()[0]['code'];
+            }
         }
         return false;
     }
@@ -6246,13 +6247,26 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    //Gets the time a student joined the queue they are currently in
+    public function getTimeJoinedQueue($user_id, $queue_code) {
+        $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
+        return $this->course_db->rows()[0]['max'];
+    }
+
     public function getQueueId($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
     }
 
-    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
+    public function getQueueHasContactInformation(string $queue_code) {
+        $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
+        return $this->course_db->rows()[0]['contact_information'];
+    }
+
+
+    public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        $entry_time = $time_in == 0 ? $this->core->getDateTimeNow() : $time_in;
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -6286,7 +6300,7 @@ AND gc_id IN (
                 ?,
                 ?,
                 NULL
-            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue,0]);
+            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -6433,6 +6447,9 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
     }
 
+    public function changeQueueContactInformation(bool $contact_information, string $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET contact_information = ? WHERE code = ?", [$contact_information, $queue_code]);
+    }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');

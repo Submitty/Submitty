@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\exceptions\PropertyAccessException;
 use app\libraries\Core;
-use app\libraries\Utils;
 
 /**
  * Class AbstractModel
@@ -132,19 +131,19 @@ abstract class AbstractModel {
     public function __call($name, $arguments) {
         $class_name = get_class($this);
         if (!isset(static::$cache[$class_name][$name])) {
-            if (Utils::startsWith($name, "set")) {
+            if (str_starts_with($name, "set")) {
                 static::$cache[$class_name][$name] = [
                     "function_type" => AbstractModel::CALL_SET,
                     "property_name" => $this->convertName($name)
                 ];
             }
-            elseif (Utils::startsWith($name, "get")) {
+            elseif (str_starts_with($name, "get")) {
                 static::$cache[$class_name][$name] = [
                     "function_type" => AbstractModel::CALL_GET,
                     "property_name" => $this->convertName($name)
                 ];
             }
-            elseif (Utils::startsWith($name, "is")) {
+            elseif (str_starts_with($name, "is")) {
                 static::$cache[$class_name][$name] = [
                     "function_type" => AbstractModel::CALL_IS,
                     "property_name" => $this->convertName($name, 2)

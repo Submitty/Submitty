@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\Access;
 use app\models\Config;
 use app\models\User;
@@ -202,7 +201,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                 }
             }
             foreach ($reflection->getMethods() as $method) {
-                if (!Utils::startsWith($method->getName(), "__")) {
+                if (!str_starts_with($method->getName(), "__")) {
                     $methods[] = $method->getName();
                 }
             }

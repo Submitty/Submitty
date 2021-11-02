@@ -150,7 +150,7 @@ class PlagiarismController extends AbstractController {
         // actually do the collection of gradeables here
         $gradeables = [];
         foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course, "submissions")) as $gradeable) {
-            if ($gradeable !== '.' && $gradeable !== '..' && $gradeable !== $this_gradeable) {
+            if ($gradeable !== '.' && $gradeable !== '..' && ($term !== $this->core->getConfig()->getSemester() || $course !== $this->core->getConfig()->getCourse() || $gradeable !== $this_gradeable)) {
                 $gradeables[] = $gradeable;
             }
         }

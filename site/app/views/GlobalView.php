@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\models\Breadcrumb;
-
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name) {
         $messages = [];
@@ -66,8 +64,8 @@ class GlobalView extends AbstractView {
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
-            "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
-            "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
+            "submitty_queries" => $this->core->getSubmittyQueries(),
+            "course_queries" => $this->core->getCourseQueries(),
             "wrapper_urls" => $wrapper_urls,
             "latest_tag" => $this->core->getConfig()->getLatestTag(),
             "latest_commit" => $this->core->getConfig()->getLatestCommit(),
