@@ -7678,7 +7678,7 @@ SQL;
     }
 
     /**
-     * Gets a the autograding metrics for a testcase
+     * Gets the autograding metrics for a testcase
      *
      * @param string $user_id
      * @param string $gradeable_id
