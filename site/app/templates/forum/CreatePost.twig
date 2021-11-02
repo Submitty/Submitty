@@ -5,12 +5,12 @@
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
                 {% set expiringVisual = (expiring) ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement' %}
-                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Unpin Thread" aria-label="Unpin Thread"><i class="fas fa-thumbtack reverse_golden_hover"></i></a>
+                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Pinned announcement -- will expire soon" aria-label="Pinned announcement -- will expire soon"><i class="fas fa-thumbtack"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
                 {% set expiringVisual = (expiring) ? 'active-thread-announcement-expiring' : 'active-thread-announcement' %}
-                <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned Thread" aria-label="Pinned Thread"></i>
+                <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned Announcement" aria-label="Pinned Announcement"></i>
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
@@ -20,7 +20,7 @@
 
             {% if isCurrentFavorite %}
 
-                <a class="current-favorite key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark reverse_golden_hover"></i></a>
+                <a class="current-favorite key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark"></i></a>
 
             {% else %}
 

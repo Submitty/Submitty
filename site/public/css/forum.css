@@ -202,16 +202,8 @@
     color: #e0e0e0 !important;
 }
 
-.golden_hover:hover {
-    color: gold !important;
-}
-
 .reverse_golden_hover {
     color: gold;
-}
-
-.reverse_golden_hover:hover {
-    color: #e0e0e0 !important;
 }
 
 .text-decoration-none {
@@ -252,7 +244,7 @@
 }
 
 .current-favorite i.fas,
-.active-thread-remove-announcement i.fas
+.active-thread-remove-announcement i.fas,
 .active-thread-remove-expiring-announcement i.fas {
     position: relative;
     display: inline-block;
@@ -260,13 +252,16 @@
     -webkit-text-stroke-color: black;
 }
 
-.current-favorite i.fas,
+.current-favorite i.fas{
+    color: var(--standard-medium-red) !important;
+}
+
 .active-thread-remove-expiring-announcement i.fas {
-  color: gold;
+  color: gold !important;
 }
 
 .active-thread-remove-announcement i.fas {
-    color: var(--submitty-logo-blue);
+    color: var(--submitty-logo-blue) !important;
 }
 
 #thread_form {
@@ -299,9 +294,11 @@
     -webkit-text-stroke-color: black;
 }
 
-.thread-announcement-expiring,
-.thread-favorite {
+.thread-announcement-expiring{
     color: gold;
+}
+.thread-favorite {
+    color: var(--standard-medium-red);
 }
 .thread-announcement {
     color: var(--submitty-logo-blue);
