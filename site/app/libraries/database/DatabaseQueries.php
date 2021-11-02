@@ -1517,6 +1517,17 @@ WHERE semester=? AND course=? AND user_id=?",
         return $return;
     }
 
+    public function getLastLateDayUpdatesFOrUsers() {
+        $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
+        $this->course_db->query($query);
+        $return = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['user_id']] = new \DateTime($row['max']);
+        }
+        return $return;
+    }
+
     public function bulkUploadLateDayCache(array $late_day_cache) {
         $query = "INSERT INTO late_day_cache 
                     (SELECT 

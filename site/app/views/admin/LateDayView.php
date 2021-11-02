@@ -52,6 +52,7 @@ class LateDayView extends AbstractView {
 
         $late_day_cache = $this->core->getQueries()->getLateDayCache();
         $late_day_update_dates = $this->core->getQueries()->getLateDayUpdateTimestamps();
+        $last_late_day_events = $this->core->getQueries()->getLastLateDayUpdatesFOrUsers();
         $gradeables_iterator = $this->core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date', 'g_id']);
 
         $gradeables = [];
@@ -80,6 +81,17 @@ class LateDayView extends AbstractView {
             }
             return $diff;
         });
+
+        $lastest_gradeable = end($gradeables);
+        if (end($gradeables) && end($gradeables)->getSubmissionDueDate() !== null) {
+            $lastest_gradeable_date = end($gradeables)->getSubmissionDueDate();
+            // if the last gradeable assigned is after the lastest late day update for the user, replace it
+            foreach ($students as $s) {
+                if (!isset($last_late_day_events[$s->getId()]) || $last_late_day_events[$s->getId()] <= $lastest_gradeable_date) {
+                    $last_late_day_events[$s->getId()] = end($gradeables)->getTitle();
+                }
+            }
+        }
 
         // Create the late day header in order of event date
         $late_day_cache_header = [];
@@ -115,6 +127,7 @@ class LateDayView extends AbstractView {
             "view_all" => $view_all,
             "status_to_simple_message" => LateDayInfo::getSimpleMessageFromSatus(),
             "late_day_cache_header" => $late_day_cache_header,
+            "last_late_day_events" => $last_late_day_events,
             "late_day_cache" => $late_day_cache,
             "csrf_token" => $this->core->getCsrfToken()
         ]);

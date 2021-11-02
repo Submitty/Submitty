@@ -5,19 +5,13 @@
     <thead>
         <tr>
             <th>
-                <a onclick="onChangeSortCol('id')" aria-label="sort by ID">
-                    <span class="tooltiptext" title="sort by User ID">User ID </span><i class="fas fa-sort"></i>
-                </a>
+                User ID
             </th>
             <th>
-                <a onclick="onChangeSortCol('first')" aria-label="sort by First Name">
-                    <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
-                </a>
+                First Name
             </th>
             <th>
-                <a onclick="onChangeSortCol('last')" aria-label="sort by Last Name">
-                    <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
-                </a>
+                Last Name
             </th>
             <th>
                 Initial
@@ -70,13 +64,17 @@
                     </td>                    
                 {% endfor %}
 
-                {% set last_title = late_day_cache_header|last %}
+                {% set last_title = last_late_day_events[student.getId()] ?? null %}
                 {% set last_title = last_title.timestamp is defined ? last_title|date('Y-m-d') : last_title %}
-
-                {# If we have cache data for the last event, we have cache data for all events #}
-                {% if user_cache[last_title] is defined %}
+                
+                {% if last_title is null %}
+                    {# If there are no late day events yet #}
+                    <td data-before-content="Late Days Remaining"> {{ initial_late_days }} </td>
+                {% elseif user_cache[last_title] is defined %}
+                    {# If we have cache data for the last event, we have cache data for all events #}
                     <td data-before-content="Late Days Remaining"> {{ user_cache[last_title].late_days_remaining }} </td>
                 {% else %}
+                    {# Else put cache is incomplete, leave value blank #}
                     <td data-before-content="Late Days Remaining"> </td>
                 {% endif %}
             </tr>

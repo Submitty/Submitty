@@ -3,14 +3,14 @@
     <div class="column-wrapper" style="margin: 1em 0;">
         <h1 style="margin:0px;">Bulk Late Day Usage</h1>
 
-        <div class="column-wrapper" style="float:right;">
-            <form method="post" action="{{calculate_cache_url}}" onsubmit="return confirm('Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                <button class="btn btn-default key_to_click" tabindex="0" id="calculate-btn">Calculate Cache</button>
-            </form>
-            <form method="post" action="{{flush_cache_url}}" onsubmit="return confirm('Are you sure you want to flush the cache? This will remove the late day cache for every user.');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                <button class="btn btn-danger key_to_click" tabindex="0" id="flush-btn">Flush Cache</button>
+        <div id="rebuild-status-panel" style="left:0px;display:none">
+            <span id="rebuild-status-label">Build Status: </span>
+            <div id="rebuild-status"></div>
+        </div>
+
+        <div class="column-wrapper">
+            <button class="btn btn-default key_to_click" tabindex="0" id="calculate-btn" onclick="calculateLateDayCache()">Calculate Cache</button>
+            <button class="btn btn-danger key_to_click" tabindex="0" id="flush-btn" onclick="flushLateDayCache()">Flush Cache</button>
             </form>
         </div>
     </div>
