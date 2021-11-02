@@ -97,9 +97,9 @@
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
       {% set my_queue = 'code' %}
-      {% set open_queues = viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+      {% set open_queues = viewer.getAllOpenQueues()%}
       {% if open_queues|length == 1 %}
-          {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+          {% for queue in viewer.getAllOpenQueues() %}
             {% set my_queue = queue['code'] %}
           {% endfor %}
       {% endif %}
