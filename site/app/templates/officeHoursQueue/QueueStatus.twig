@@ -237,6 +237,22 @@
                 $('.queue-message').css('display', 'block');
                 $('#queue-message-msg').html(message);
                 $('#queue-message-msg-time').html(now.toLocaleString());
+                if (Notification.permission === "granted") {
+                    // If it's okay let's create a notification
+                    let notification = new Notification("New Message From Office Hours Queue Staff");
+                }
+                // Otherwise, we need to ask the user for permission
+                else if (Notification.permission !== 'denied' || Notification.permission === "default") {
+                    Notification.requestPermission(function (permission) {
+                        if (permission === "granted") {
+                            let notification = new Notification("New Message From Office Hours Queue Staff");
+                        }
+                    });
+                //if notification permissions are denied
+                }else{
+                    alert('New Message From Office Hours Queue Staff');
+                }
+
             }
         }
     {% endif %}
