@@ -6,7 +6,6 @@ namespace app\entities\plagiarism;
 
 use app\libraries\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
 use DateTime;
 
 /**
