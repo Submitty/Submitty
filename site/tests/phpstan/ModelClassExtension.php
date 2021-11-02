@@ -2,7 +2,6 @@
 
 namespace tests\phpstan;
 
-use app\libraries\Utils;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\Dummy\DummyMethodReflection;
 use PHPStan\Reflection\MethodReflection;

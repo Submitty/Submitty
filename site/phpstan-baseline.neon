@@ -1,3 +1,377 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between non\\-empty\\-string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
+			count: 2
+			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
+			count: 4
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between mixed and '' will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
+			count: 2
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and false will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Elseif condition is always true\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 2
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Call to function is_subclass_of\\(\\) with non\\-empty\\-string and 'app\\\\\\\\authentication…' will always evaluate to false\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 2
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with DateTime will always evaluate to false\\.$#"
+			count: 2
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between array\\<int\\> and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/libraries/database/QueryIdentifier.php
+
+		-
+			message: "#^Right side of && is always true\\.$#"
+			count: 1
+			path: app/libraries/database/QueryIdentifier.php
+
+		-
+			message: "#^Instanceof between bool and app\\\\libraries\\\\response\\\\WebResponse will always evaluate to false\\.$#"
+			count: 2
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Call to function is_subclass_of\\(\\) with object and 'app\\\\\\\\Models…' will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with array\\<string\\> will always evaluate to false\\.$#"
+			count: 2
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with array will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/RainbowCustomization.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
+			count: 6
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutogradingTestcase and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between array and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Result of && is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between DateTime\\|string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Component and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\TaGradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Submitter and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Component and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/Submitter.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\Team\\|app\\\\models\\\\User and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Submitter.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between DateTime\\|string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/GlobalView.php
+
+		-
+			message: "#^Ternary operator condition is always true\\.$#"
+			count: 1
+			path: app/views/GlobalView.php
+
+		-
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getDeleteButton\\(\\) never returns null so it can be removed from the return typehint\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getEditButton\\(\\) never returns null so it can be removed from the return typehint\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getGradeButton\\(\\) never returns null so it can be removed from the return typehint\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between float and 0 will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between float and 1 will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Call to function is_array\\(\\) with app\\\\entities\\\\course\\\\CourseMaterial will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
+			count: 2
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'false' will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
+			count: 2
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
 

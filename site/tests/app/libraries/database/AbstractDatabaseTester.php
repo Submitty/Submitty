@@ -186,7 +186,7 @@ SELECT * FROM test");
         $database->query("INSERT INTO test VALUES (?, ?)", [1, 'a']);
         $this->assertEquals([
             "CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)",
-            "INSERT INTO test VALUES ('1', 'a')"
+            "INSERT INTO test VALUES (1, 'a')"
         ], $database->getPrintQueries());
         $database->disconnect();
     }
