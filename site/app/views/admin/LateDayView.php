@@ -3,7 +3,6 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
-use app\libraries\GradeableType;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\gradeable\LateDays;
