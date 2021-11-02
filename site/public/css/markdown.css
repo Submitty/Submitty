@@ -10,7 +10,7 @@
 
 .markdown {
     /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: 'Source Sans Pro', 'sans-serif';
+    font-family: "Source Sans Pro", sans-serif;
     white-space: normal;
     position: relative;
 }
@@ -107,7 +107,7 @@
     resize: vertical;
     min-height: 100px;
     max-height: 300px;
-    width: -webkit-fill-available;
+    width: fill-available;
 }
 
 .btn-markdown {
