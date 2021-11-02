@@ -277,6 +277,8 @@ class LateController extends AbstractController {
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if ($team != null && $team->getSize() > 1) {
+                $return = null;
+
                 if ($option == 0) {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
@@ -288,7 +290,7 @@ class LateController extends AbstractController {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
-                    return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                    $return = MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 else {
                     $team_member_ids = explode(", ", $team->getMemberList());
@@ -301,10 +303,15 @@ class LateController extends AbstractController {
                         "admin/users/MoreExtensions.twig",
                         ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
                     );
-                    return MultiResponse::JsonOnlyResponse(
+                    $return = MultiResponse::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );
                 }
+
+                // TO DO: Update late day cache for late day extension (team)
+                $late_day_status = null;
+
+                return $return;
             }
             else {
                 // TO DO: Update late day cache for late day extension (user)
