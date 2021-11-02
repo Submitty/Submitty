@@ -2,7 +2,6 @@
 
 namespace app\libraries;
 
-use app\controllers\MiscController;
 use app\entities\course\CourseMaterial;
 use app\entities\course\CourseMaterialAccess;
 use app\exceptions\MalformedDataException;
