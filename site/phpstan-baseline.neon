@@ -1,5 +1,4 @@
 parameters:
-
 	ignoreErrors:
 		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
