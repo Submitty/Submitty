@@ -86,14 +86,14 @@
 }
 
 #page-num {
-    -moz-appearance: textfield;
+    appearance: textfield;
     margin: 0;
     width: 5vw;
 }
 
 #page-num::-webkit-outer-spin-button,
 #page-num::-webkit-inner-spin-button {
-    -webkit-appearance: none;
+    appearance: none;
 }
 
 .loading-animation {
@@ -103,10 +103,7 @@
     animation: spin 2s linear infinite;
     width: 130px;
     height: 130px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 2em;
-    margin-top: 2em;
+    margin: 2em auto;
 }
 
 @keyframes spin {

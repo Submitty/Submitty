@@ -84,7 +84,7 @@
 .filter-buttons:hover,
 .filter-buttons:focus {
     color: var(--text-black);
-    opacity: 0.8;
+    opacity: 80%;
     filter: alpha(opacity=80);
 }
 
