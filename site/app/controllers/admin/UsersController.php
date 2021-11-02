@@ -941,6 +941,7 @@ class UsersController extends AbstractController {
             Registration section is optional for graders, so automatically validate if not set.*/
             if (isset($vals[$registration_section_idx]) && strtolower($vals[$registration_section_idx]) === "null") {
                 $vals[$registration_section_idx] = null;
+                $uploaded_data[$row_num][$registration_section_idx] = null;
             }
             $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$registration_section_idx]));
             if (!($unset_grader_registration_section || User::validateUserData('registration_section', $vals[$registration_section_idx]))) {
