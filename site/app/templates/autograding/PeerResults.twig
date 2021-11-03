@@ -93,16 +93,16 @@ function switch_feedback_modes() {
                     {% endif %}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
             {# /Peer Component boxes #}
         {% endif %}
 
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
-            {% for user in grader_info | keys | sort %}
+            {% for user in ordered_graders | filter(user => grader_info[user] is defined) | sort %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
-                        Overall note from {{grader_info[user].display_name}}:
+                        Overall note from {{peer_aliases[user]}}:
                     </p>
                     {% if grader_info[user].comment is not empty %}
                     <p class="overall-comment">
@@ -113,10 +113,10 @@ function switch_feedback_modes() {
                     <div id="attachments-{{ user | escape }}">
                         {% for file in grader_info[user].attachments %}
                             {% include "autograding/Attachments.twig" with {
-                                grader: user,
                                 file: file,
                                 id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
-                                is_grader_view: false
+                                is_grader_view: false,
+                                can_modify: false
                             } only %}
                         {% endfor %}
                     </div>
@@ -234,7 +234,7 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% for grader in ordered_graders %}
@@ -267,13 +267,30 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if overall_comments[anon_grader_id_mapping[grader]] is defined %}
+                {% if grader_info[anon_grader_id_mapping[grader]]["comment"] is defined %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">
                             Overall note from grader:
                         </p>
+                        {% if grader_info[anon_grader_id_mapping[grader]].comment is not empty %}
                         <p class="overall-comment">
-                            <span class='gradeable_comment'>{{ overall_comments[anon_grader_id_mapping[grader]] | nl2br }}</span>
+                            <span class='gradeable_comment'>{{ grader_info[anon_grader_id_mapping[grader]].comment | nl2br }}</span>
+                        </p>
+                        {% endif %}
+                        {% if grader_info[anon_grader_id_mapping[grader]].attachments is not empty %}
+                        <div id="attachments-{{ anon_grader_id_mapping[grader] | escape }}">
+                            {% for file in grader_info[anon_grader_id_mapping[grader]].attachments %}
+                                {% include "autograding/Attachments.twig" with {
+                                    file: file,
+                                    id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
+                                    is_grader_view: false,
+                                    can_modify: false
+                                } only %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <p class="overall-comment">
+                            <span class='gradeable_comment'>{{ grader_info[anon_grader_id_mapping[grader]]["comment"] | nl2br }}</span>
                         </p>
                     </div>
                 {% endif %}

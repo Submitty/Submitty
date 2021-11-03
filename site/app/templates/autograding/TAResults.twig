@@ -53,10 +53,10 @@ $( document ).ready(function() {
                     <div id="attachments-{{ user | escape }}">
                         {% for file in grader_info[user].attachments %}
                             {% include "autograding/Attachments.twig" with {
-                                grader: user,
                                 file: file,
                                 id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
-                                is_grader_view: false
+                                is_grader_view: false,
+                                can_modify: false
                             } only %}
                         {% endfor %}
                     </div>

@@ -2527,10 +2527,10 @@ function open_overall_comment_tab(user) {
         }
         if (attachmentsListUser.children().length === 0) {
             attachmentsListUser.css("display", "none")
-            $("#attachments-empty").css("display", "");
+            $("#attachments-header").css("display", "none");
         } else {
             attachmentsListUser.css("display", "")
-            $("#attachments-empty").css("display", "none");
+            $("#attachments-header").css("display", "");
         }
         
         attachmentsList.attr("data-active-user", user);

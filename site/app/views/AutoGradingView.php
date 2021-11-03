@@ -459,6 +459,7 @@ class AutoGradingView extends AbstractView {
                 continue;
             }
 
+            $grader_info[$user_name] = [];
             $grader_info[$user_name]["attachments"] = $attachments;
             $grader_info[$user_name]["display_name"] = $user->getDisplayedFirstName();
             $grader_info[$user_name]["comment"] = "";
@@ -475,6 +476,7 @@ class AutoGradingView extends AbstractView {
             // Skip empty comments
             if (strlen(trim($comment)) > 0) {
                 if (!isset($grader_info[$user_name])) {
+                    $grader_info[$user_name] = [];
                     $grader_info[$user_name]["attachments"] = [];
                     $grader_info[$user_name]["display_name"] = $comment_user->getDisplayedFirstName();
                 }
@@ -718,6 +720,7 @@ class AutoGradingView extends AbstractView {
                 continue;
             }
 
+            $grader_info[$user_name] = [];
             $grader_info[$user_name]["attachments"] = $attachments;
             $grader_info[$user_name]["display_name"] = $user_name;
             $grader_info[$user_name]["comment"] = "";
@@ -734,6 +737,7 @@ class AutoGradingView extends AbstractView {
             // Skip empty comments
             if (strlen(trim($comment)) > 0) {
                 if (!isset($grader_info[$user_name])) {
+                    $grader_info[$user_name] = [];
                     $grader_info[$user_name]["attachments"] = [];
                     $grader_info[$user_name]["display_name"] = $user_name;
                 }

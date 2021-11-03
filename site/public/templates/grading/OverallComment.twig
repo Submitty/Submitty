@@ -59,21 +59,21 @@ Required Parameters:
     <div class="row box" id="overall-comments-attachments">
         <div class="col">
         <form id="attachment-upload-form" name="attachment-upload-form" method="post">
-            <h4>Attachments</h4>
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <label for="attachment-upload">Choose attachment to upload</label>
-            </br>
+            <label for="attachment-upload">Upload an attachment: </label>
             <input type="file" id="attachment-upload" name="attachment-upload" onchange="uploadAttachment();">
         </form>
-        <h4>Current Attachments</h4>
+        <h4 id="attachments-header" {% if attachments["logged_in_user"]["attachments"]|length == 0 %}style="display: none;"{% endif %}>
+            Current Attachments
+        </h4>
         <div id="attachments-list" data-user="{{ attachments["logged_in_user"]["user_id"]}}" data-active-user="{{ attachments["logged_in_user"]["user_id"]}}">
-            <div id="attachments-list-{{ attachments["logged_in_user"]["user_id"] | escape }}">
+            <div id="attachments-list-{{ attachments["logged_in_user"]["user_id"] | escape }}" {% if attachments["logged_in_user"]["attachments"]|length == 0 %}style="display: none;"{% endif %}>
             {% for file in attachments["logged_in_user"]["attachments"] %}
                 {% include "Attachments.twig" with {
-                    grader: attachments["logged_in_user"]["user_id"],
                     file: file,
                     id: "a-0-" ~ loop.index,
-                    is_grader_view: true
+                    is_grader_view: true,
+                    can_modify: true
                 } only %}
             {% endfor %}
             </div> 
@@ -82,19 +82,15 @@ Required Parameters:
             <div id="attachments-list-{{ grader | escape }}" style="display: none;">
                 {% for file in attachment_list %}
                     {% include "Attachments.twig" with {
-                        grader: grader,
                         file: file,
                         id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
-                        is_grader_view: true
+                        is_grader_view: true,
+                        can_modify: false
                     } only %}
                 {% endfor %}
             </div>
             {% endfor %}
-            </div>
-
-            <div id="attachments-empty" {% if attachments["logged_in_user"]["attachments"]|length != 0 %}style="display: none;"{% endif %}>
-                There are no attached files.
-            </div>
+        </div>
         </div>
     </div>
     <script>

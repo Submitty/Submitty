@@ -1695,10 +1695,10 @@ function uploadAttachment() {
             let renderedData = Twig.twig({
               ref: "Attachments"
             }).render({
-                grader: $("#attachments-list").attr("data-user"),
                 file: data["data"],
                 id: "a-up-" + uploadedAttachmentIndex,
-                is_grader_view: true
+                is_grader_view: true,
+                can_modify: true
             });
             uploadedAttachmentIndex++;
             if (origAttachment.length === 0) {
@@ -1708,10 +1708,10 @@ function uploadAttachment() {
             }
             if (userAttachmentList.children().length === 0) {
               userAttachmentList.css("display", "none")
-              $("#attachments-empty").css("display", "");
+              $("#attachments-header").css("display", "none");
             } else {
               userAttachmentList.css("display", "")
-              $("#attachments-empty").css("display", "none");
+              $("#attachments-header").css("display", "");
             }
           }
           fileInput[0].value = "";
@@ -1751,10 +1751,10 @@ function deleteAttachment(target, file_name) {
           let userAttachmentList = $("#attachments-list").children().first();
           if (userAttachmentList.children().length === 0) {
             userAttachmentList.css("display", "none")
-            $("#attachments-empty").css("display", "");
+            $("#attachments-header").css("display", "none");
           } else {
             userAttachmentList.css("display", "")
-            $("#attachments-empty").css("display", "none");
+            $("#attachments-header").css("display", "");
           }
         }
       },
