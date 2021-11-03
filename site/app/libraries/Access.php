@@ -3,7 +3,6 @@
 namespace app\libraries;
 
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\Component;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\GradingSection;
@@ -864,7 +863,7 @@ class Access {
         $path = implode(DIRECTORY_SEPARATOR, $parts);
 
         //Make sure it starts with the dir base
-        if (!Utils::startsWith($path, $info["base"])) {
+        if (!str_starts_with($path, $info["base"])) {
             //This both prevents people from accessing files outside the base dir
             // and lets us have relative paths. Convenient!
             if ($path[0] === "/") {

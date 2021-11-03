@@ -10,7 +10,6 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
-use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
@@ -98,6 +97,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
+ * @method bool hasLeaderboard()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -1179,7 +1179,7 @@ class Gradeable extends AbstractModel {
             'max_value' => $max_value,
             'upper_clamp' => $upper_clamp,
             'text' => $text,
-            'peer' => $peer,
+            'peer_component' => $peer,
             'page' => $pdf_page,
             'id' => 0,
             'order' => count($this->components)
@@ -2116,7 +2116,7 @@ class Gradeable extends AbstractModel {
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
             ['PROVIDED: upload_only (100 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
-            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+            ['PROVIDED: bulk scanned pdf exam (200 mb maximum total student file submission)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
             ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
                 FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
@@ -2221,5 +2221,18 @@ class Gradeable extends AbstractModel {
         else {
             return '';
         }
+    }
+
+    /**
+     * Returns if a gradeable has a leaderboard associated with it
+     *
+     * @return bool
+     */
+    public function hasLeaderboard(): bool {
+        $autograding_config = $this->loadAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return false;
+        }
+        return !empty($autograding_config->getLeaderboards());
     }
 }

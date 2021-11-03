@@ -50,6 +50,8 @@ parser.add_argument('--setup-for-sample-courses', action='store_true', default=F
                     help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
                          "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
+parser.add_argument('--worker-pair', default=False, help='Configure Submitty alongside a worker VM. This should only'
+                                                         'be used during development using Vagrant.')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
@@ -137,7 +139,7 @@ NUM_GRADING_SCHEDULER_WORKERS = 5
 SETUP_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 SETUP_REPOSITORY_DIR = os.path.join(SUBMITTY_REPOSITORY, '.setup')
 
-CONFIGURATION_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
+INSTALL_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
@@ -213,6 +215,7 @@ print()
 
 if args.worker:
     SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
+    print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER))
 else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
@@ -386,30 +389,14 @@ else:
     config['worker'] = 0
 
 
-with open(CONFIGURATION_FILE, 'w') as open_file:
+with open(INSTALL_FILE, 'w') as open_file:
     def write(x=''):
         print(x, file=open_file)
     write('#!/bin/bash')
     write()
+    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
-    write('# Variables prepared by CONFIGURE_SUBMITTY.py')
-    write('# Manual editing is allowed (but will be clobbered if CONFIGURE_SUBMITTY.py is re-run)')
-    write()
-
-    for key, value in config.items():
-        key = str(key).upper()
-        if isinstance(value, str):
-            # To escape a single quote in bash, use '\'' because bash is awful
-            write("{}='{}'".format(key, value.replace("'", "'\''")))
-        elif isinstance(value, bool):
-            write('{}={}'.format(key, 'true' if value is True else 'false'))
-        else:
-            write('{}={}'.format(key, value))
-    write()
-    write('# Now actually run the installation script')
-    write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  "$@"')
-
-os.chmod(CONFIGURATION_FILE, 0o700)
+os.chmod(INSTALL_FILE, 0o700)
 
 with open(CONFIGURATION_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
@@ -468,6 +455,22 @@ if not args.worker:
                 "enabled" : True
             }
         }
+
+        if args.worker_pair:
+            worker_dict["submitty-worker"] = {
+                "capabilities": ['default'],
+                "address": "172.18.2.8",
+                "username": "submitty",
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+                "enabled": True
+            }
+            if args.setup_for_sample_courses:
+                worker_dict['submitty-worker']['capabilities'].extend([
+                    'cpp',
+                    'python',
+                    'et-cetera',
+                    'notebook',
+                ])
 
         if args.setup_for_sample_courses:
             worker_dict['primary']['capabilities'].extend([
@@ -624,7 +627,7 @@ if not args.worker:
 ##############################################################################
 
 print('Configuration completed. Now you may run the installation script')
-print('    sudo ' + CONFIGURATION_FILE)
+print(f'    sudo {INSTALL_FILE}')
 print('          or')
-print('    sudo {} clean'.format(CONFIGURATION_FILE))
+print(f'    sudo {INSTALL_FILE} clean')
 print("\n")

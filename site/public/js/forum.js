@@ -1265,6 +1265,7 @@ function addNewCategory(csrf_token){
         type: "POST",
         data: {
             newCategory: newCategory,
+            rank: $('[id^="categorylistitem-').length,
             csrf_token: csrf_token
         },
         success: function(data){
@@ -1296,6 +1297,7 @@ function addNewCategory(csrf_token){
             $('#ui-category-list').append(newelement);
             $(".category-list-no-element").hide();
             refreshCategories();
+            window.location.reload();
         },
         error: function(){
             window.alert("Something went wrong while trying to add a new category. Please try again.");
@@ -1333,15 +1335,15 @@ function deleteCategory(category_id, category_desc, csrf_token){
     })
 }
 
-function editCategory(category_id, category_desc, category_color, csrf_token) {
+function editCategory(category_id, category_desc, category_color, changed, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
     var data = {category_id: category_id, csrf_token: csrf_token};
-    if(category_desc !== null) {
+    if(category_desc !== null && changed === 'desc') {
         data['category_desc'] = category_desc;
     }
-    if(category_color !== null) {
+    if(category_color !== null && changed === 'color') {
         data['category_color'] = category_color;
     }
     var url = buildCourseUrl(['forum', 'categories', 'edit']);

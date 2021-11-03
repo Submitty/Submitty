@@ -1,7 +1,10 @@
 SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
 
+echo "Setting identity"
+git config --global user.email "instructor"
+git config --global user.name "instructor"
+
 test_git() {
-    random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
     git clone http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2 open_homework
     cd open_homework
     echo "foo" >> test.txt
