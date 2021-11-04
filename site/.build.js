@@ -1,5 +1,5 @@
 const fs = require('fs');
-const module_path = './public/ts/';
+const module_path = './ts/';
 
 let files = [];
 
