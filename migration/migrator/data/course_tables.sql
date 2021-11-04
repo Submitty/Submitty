@@ -927,7 +927,8 @@ CREATE TABLE public.queue_settings (
     code text NOT NULL,
     token text,
     regex_pattern character varying,
-    contact_information boolean DEFAULT true NOT NULL
+    contact_information boolean DEFAULT true NOT NULL,
+    message character varying(400) DEFAULT NULL::character varying
 );
 
 
