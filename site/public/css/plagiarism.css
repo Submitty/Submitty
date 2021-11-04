@@ -80,16 +80,12 @@ input[type="radio"] {
     flex: 1;
 }
 
-input[type="text"] {
+input[type="text"], textarea {
     width: 100%;
 }
 
-.deletable-text {
-    width: calc(100% - 2em) !important;
-}
-
 .delete-btn {
-    padding-left: 5px;
+    padding-left: 0.5em;
 }
 
 input[type=text]:invalid {
@@ -114,15 +110,12 @@ input[type=text]:invalid {
 
 #other-gradeable-div select {
     width: calc(100% / 3 - 10px);
-    margin: 5px;
+    margin-right: 0.2em;
+    margin-top: 0.5em;
 }
 
-#other-gradeable-div select:nth-child(3n+2) {
-    margin-left: 0;
-}
-
-#other-gradeable-div select:nth-child(3n+1) {
-    margin-right: 0;
+#other-gradeable-paths {
+    height: 4em;
 }
 
 #current-code-file,

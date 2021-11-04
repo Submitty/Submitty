@@ -104,6 +104,12 @@ class PlagiarismConfig {
      * @ORM\Column(type="simple_array")
      * @var array
      */
+    protected $other_gradeable_paths;
+
+    /**
+     * @ORM\Column(type="simple_array")
+     * @var array
+     */
     protected $ignore_submissions;
 
     /**
@@ -137,6 +143,8 @@ class PlagiarismConfig {
         int $threshold,
         int $hash_size,
         array $other_gradeables,
+        array $other_gradeable_paths,
+        int $user_group,
         array $ignored_submissions
     ) {
         $this->gradeable_id = $gradeable_id;
@@ -150,6 +158,7 @@ class PlagiarismConfig {
         $this->setThreshold($threshold);
         $this->setHashSize($hash_size);
         $this->setOtherGradeables($other_gradeables);
+        $this->setOtherGradeablePaths($other_gradeable_paths, $user_group);
         $this->setIgnoredSubmissions($ignored_submissions);
         $this->setLastRunToCurrentTime();
     }
@@ -284,6 +293,36 @@ class PlagiarismConfig {
 
     public function setOtherGradeables(array $other_gradeables): void {
         $this->other_gradeables = $other_gradeables;
+    }
+
+    public function hasOtherGradeablePaths(): bool {
+        return is_null($this->other_gradeable_paths);
+    }
+
+    public function getOtherGradeablePaths(): array {
+        if (is_null($this->other_gradeable_paths)) {
+            return [];
+        }
+        return $this->other_gradeable_paths;
+    }
+
+    /**
+     * This function is passed an array of paths.  We assume that any string splitting has already occurred prior to
+     * passing the array to this function.  This function also performs some basic error checking for each path to
+     * ensure that each path has the same group as the current signed in user.
+     */
+    public function setOtherGradeablePaths(array $paths, int $user_group): void {
+        if ($this->hasOtherGradeablePaths()) {
+            $this->other_gradeable_paths = null;
+            return;
+        }
+
+        foreach ($paths as $path) {
+            if (filegroup($path) !== $user_group) {
+                throw new ValidationException("Error: Path {$path} does not share group '{$user_group}' with current user", []);
+            }
+        }
+        $this->other_gradeable_paths = $paths;
     }
 
     public function getIgnoredSubmissions(): array {

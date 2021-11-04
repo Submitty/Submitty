@@ -6,6 +6,7 @@ namespace app\controllers\admin;
 
 use app\entities\plagiarism\PlagiarismRunAccess;
 use app\exceptions\DatabaseException;
+use app\exceptions\FileNotFoundException;
 use app\exceptions\FileWriteException;
 use app\exceptions\ValidationException;
 use app\libraries\response\ResponseInterface;
@@ -105,6 +106,21 @@ class PlagiarismController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+    }
+
+    /**
+     * Returns the user group associated with the current signed-in user
+     *
+     * @return int
+     */
+    private function getCurrentUserGroup(): int {
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $semester, $course));
+        if (!$group) {
+            throw new FileNotFoundException("Error: Unable to find course directory for current user");
+        }
+        return $group;
     }
 
     /**
@@ -331,28 +347,13 @@ class PlagiarismController extends AbstractController {
         }
 
         if ($job === "RunLichen") {
-            $json_data = [
-                "semester" => $semester,
-                "course" => $course,
-                "gradeable" => $gradeable_id,
-                "config_id" => $config_id,
-                "version" => $config->getVersionStatus(),
-                "regex" => $config->getRegexArray(),
-                "regex_dirs" => $regex_dirs,
-                "language" => $config->getLanguage(),
-                "threshold" => $config->getThreshold(),
-                "hash_size" => $config->getHashSize(),
-                "other_gradeables" => $config->getOtherGradeables(),
-                "ignore_submissions" => $config->getIgnoredSubmissions()
-            ];
-
             $lichen_job_data = [
                 "job" => $job,
                 "semester" => $semester,
                 "course" => $course,
                 "gradeable" => $gradeable_id,
                 "config_id" => $config_id,
-                "config_data" => $json_data
+                "config_data" => $this->getJsonForConfig($gradeable_id, $config_id)
             ];
         }
         else {
@@ -386,6 +387,7 @@ class PlagiarismController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
+        /** @var PlagiarismConfig $config */
         $config = $em->getRepository(PlagiarismConfig::class)
             ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
 
@@ -404,7 +406,7 @@ class PlagiarismController extends AbstractController {
             $regex_dirs[] = "checkout";
         }
 
-        return [
+        $json = [
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $gradeable_id,
@@ -418,6 +420,11 @@ class PlagiarismController extends AbstractController {
             "other_gradeables" => $config->getOtherGradeables(),
             "ignore_submissions" => $config->getIgnoredSubmissions()
         ];
+        if ($config->hasOtherGradeablePaths()) {
+            $json["other_gradeable_paths"] = $config->getOtherGradeablePaths();
+        }
+
+        return $json;
     }
 
 
@@ -756,6 +763,8 @@ class PlagiarismController extends AbstractController {
                     $data["threshold"],
                     $data["hash_size"],
                     $data["other_gradeables"],
+                    $data["other_gradeable_paths"] ?? [],
+                    $this->getCurrentUserGroup(),
                     $data["ignore_submissions"]
                 );
                 $em->persist($plagiarism_config);
@@ -781,6 +790,8 @@ class PlagiarismController extends AbstractController {
                     $source_config->getThreshold(),
                     $source_config->getHashSize(),
                     $source_config->getOtherGradeables(),
+                    $source_config->getOtherGradeablePaths(),
+                    $this->getCurrentUserGroup(),
                     $source_config->getIgnoredSubmissions()
                 );
                 $em->persist($plagiarism_config);
@@ -824,7 +835,7 @@ class PlagiarismController extends AbstractController {
                     $this->core->addErrorMessage("Invalid input provided for other gradeables");
                     $this->core->redirect($return_url);
                 }
-                foreach ($_POST["other_semester_course"] as $index => $sem_course) {
+                foreach ($_POST["other_semester_course"] ?? [] as $index => $sem_course) {
                     if (!isset($_POST["other_gradeable"][$index])) {
                         $this->core->addErrorMessage("Invalid input provided for other term gradeables");
                         $this->core->redirect($return_url);
@@ -862,6 +873,14 @@ class PlagiarismController extends AbstractController {
                             return new RedirectResponse($return_url);
                         }
                         $other_gradeables[] = $to_append;
+                    }
+                }
+
+                if (isset($_POST["other-gradeable-paths"])) {
+                    $paths = explode(",", $_POST["other-gradeable-paths"]);
+                    $other_gradeable_paths = [];
+                    foreach ($paths as $path) {
+                        $other_gradeable_paths[] = trim($path);
                     }
                 }
             }
@@ -914,6 +933,8 @@ class PlagiarismController extends AbstractController {
                         $threshold,
                         $hash_size,
                         $other_gradeables,
+                        $other_gradeable_paths ?? [],
+                        $this->getCurrentUserGroup(),
                         $ignore_submission_option
                     );
                 }
@@ -929,6 +950,7 @@ class PlagiarismController extends AbstractController {
                     $plagiarism_config->setThreshold($threshold);
                     $plagiarism_config->setHashSize($hash_size);
                     $plagiarism_config->setOtherGradeables($other_gradeables);
+                    $plagiarism_config->setOtherGradeablePaths($other_gradeable_paths ?? [], $this->getCurrentUserGroup());
                     $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
                 }
             }
@@ -1036,6 +1058,7 @@ class PlagiarismController extends AbstractController {
         $config["has_other_gradeables"] = false;
         $config["other_semester_courses"] = $this->getOtherSemesterCourses();
         $config["other_gradeables"] = [];
+        $config["other_gradeable_paths"] = "";
         $config["ignore_submissions"] = [];
         $config["ignore_submissions_list"] = "";
 
@@ -1120,9 +1143,10 @@ class PlagiarismController extends AbstractController {
         $config["language"][$plagiarism_config->getLanguage()] = "selected";
         $config["threshold"] = $plagiarism_config->getThreshold();
         $config["hash_size"] = $plagiarism_config->getHashSize();
-        $config["has_other_gradeables"] = count($plagiarism_config->getOtherGradeables()) > 0;
+        $config["has_other_gradeables"] = count($plagiarism_config->getOtherGradeables()) > 0 || count($plagiarism_config->getOtherGradeablePaths()) > 0;
         $config["other_semester_courses"] = $this->getOtherSemesterCourses();
         $config["other_gradeables"] = $other_gradeables_array;
+        $config["other_gradeable_paths"] = implode(",\n", $plagiarism_config->getOtherGradeablePaths());
         $config["ignore_submissions"] = $ignore[0];
         $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
 
