@@ -7723,11 +7723,11 @@ SELECT    leaderboard.*,
           user_group,
           anonymous_leaderboard,
           Concat(
-                COALESCE (NULLIF(user_preferred_firstname, ''), user_firstname ),
-                ' ',
-                COALESCE (NULLIF(user_preferred_lastname, ''), user_lastname )
-            ) as name
-FROM      (
+              COALESCE (NULLIF(user_preferred_firstname, ''), user_firstname),
+              ' ',
+              COALESCE (NULLIF(user_preferred_lastname, ''), user_lastname)
+          ) as name
+FROM (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
                               Sum(max_rss_size)                            AS memory,
                               metrics.g_id                                 AS gradeable_id,
@@ -7750,7 +7750,7 @@ FROM      (
                    GROUP BY   metrics.user_id,
                               metrics.team_id,
                               metrics.g_id
-                   ) AS leaderboard
+) AS leaderboard
 LEFT JOIN users
 ON        leaderboard.user_id = users.user_id
 LEFT JOIN electronic_gradeable_version
