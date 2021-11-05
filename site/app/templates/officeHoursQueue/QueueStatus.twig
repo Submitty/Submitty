@@ -99,7 +99,7 @@
       {% set my_queue = 'code' %}
       {% set open_queues = viewer.getAllOpenQueues()%}
       {% if open_queues|length == 1 %}
-          {% for queue in viewer.getAllOpenQueues() %}
+          {% for queue in open_queues %}
             {% set my_queue = queue['code'] %}
           {% endfor %}
       {% endif %}
@@ -117,7 +117,7 @@
               </label>
               <select id="switch_queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
                   <option value="">Queue Name</option>
-                  {% for queue in viewer.getAllOpenQueues()%}
+                  {% for queue in open_queues %}
                       {% if queue['code'] != viewer.getCurrentQueueCode() %}
                         <option value="{{queue['code']}}">{{queue['code']}}</option>
                       {% endif %}
