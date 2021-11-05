@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.15.8",
-    "@babel/preset-env": "^7.15.8",
+    "@babel/preset-env": "^7.16.0",
     "@cypress/skip-test": "^2.6.1",
     "babel-jest": "^27.2.5",
     "cypress": "^8.7.0",
