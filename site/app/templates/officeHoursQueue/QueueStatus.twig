@@ -96,6 +96,10 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+
+      {# Display the switch queue form if there is more than 1 open queue or the queue code we got does not match the 1 open queue 
+      e.g if an instructor closes the queue we are in and opens are new one#}
+
       {% set my_queue = 'code' %}
       {% set open_queues = viewer.getAllOpenQueues()%}
       {% if open_queues|length == 1 %}
