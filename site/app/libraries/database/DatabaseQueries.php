@@ -6405,6 +6405,11 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function getAllOpenQueues() {
+        $this->course_db->query("SELECT * FROM queue_settings where open = true ORDER BY id");
+        return $this->course_db->rows();
+    }
+
     public function getQueueNumberAheadOfYou($queue_code = null) {
         if ($queue_code) {
             $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
