@@ -225,20 +225,7 @@
     }
 
      {% if viewer.inQueue() %}
-        function queueMessage(message, queue, course) {
-            if (queue === "{{viewer.getCurrentQueueCode()}}"){
-                let now = new Date();
-                const item = {
-                    queue: queue,
-                    time: now.getTime(),
-                    formatted_time: now.toLocaleString(),
-                    course: course
-                }
-                localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
-                localStorage.setItem('QueueMessage', message);
-                $('.queue-message').css('display', 'block');
-                $('#queue-message-msg').html(message);
-                $('#queue-message-msg-time').html(now.toLocaleString());
+        function queueMessage() {
                 if (Notification.permission === "granted") {
                     // If it's okay let's create a notification
                     let notification = new Notification("New Message From Office Hours Queue Staff");
@@ -254,17 +241,9 @@
                 }else{
                     alert('New Message From Office Hours Queue Staff');
                 }
-
-            }
         }
     {% endif %}
 
-    function clearQueueSocketMsg(){
-        if(localStorage.getItem('QueueMessage')){
-            localStorage.removeItem('QueueMessageExpire');
-            localStorage.removeItem('QueueMessage');
-        }
-    }
 
     function toggleSwitchQueueForm(){
         $("#switch_queue_form").css('display', 'block');
