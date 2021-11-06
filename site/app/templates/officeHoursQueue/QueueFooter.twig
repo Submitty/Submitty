@@ -223,6 +223,8 @@
             case "announcement_update":
                 updateAnnouncement();
                 break;
+            case "update_message":
+                updateMessage();
             default:
                 console.log("Unknown message received.");
                 break;
@@ -310,6 +312,15 @@
           queue_state: $(`#toggle-queue-${index}`)[0].checked ? 0:1
       });
   }
+
+  function updateMessage() {
+      $.get("{{ base_url }}/queue_message", function (newMessage) {
+          if ($('#queue_status').length > 0) {
+              $('#queue_status').replaceWith(newMessage);
+          }
+      });
+  }
+
   
 </script>
 </div>

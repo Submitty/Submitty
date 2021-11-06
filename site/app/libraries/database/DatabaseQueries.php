@@ -6577,6 +6577,16 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function setQueueMessage($queue_code, $message) {
+        $this->course_db->query("UPDATE queue_settings SET message = ? WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$message, $queue_code]);
+    }
+
+    public function getQueueMessage($queue_code) {
+        $this->course_db->query("SELECT message from queue_settings where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
+        return $this->course_db->rows();
+    }
+
+
 
 /////////////////END Office Hours Queue queries//////////////////////////////////
 

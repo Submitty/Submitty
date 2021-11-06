@@ -318,4 +318,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     public function getCourse(): string {
         return $this->core->getFullCourseName();
     }
+
+    public function getQueueSocketMessage(): string{
+        return $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code'])[0]['message'];
+    }
 }

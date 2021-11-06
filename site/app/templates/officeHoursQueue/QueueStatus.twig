@@ -8,6 +8,7 @@
     </p>
 </div>
 <br>
+
 <div id="queue_status">
 {% if viewer.inQueue() == 0 %}
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
@@ -60,6 +61,7 @@
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
   <div id="queue_status">
   <h2>My Queue Status</h2>
+      {{ viewer.getQueueSocketMessage() }}
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
       There
@@ -256,20 +258,6 @@
             }
         }
     {% endif %}
-
-    initSocketClientMsg();
-
-    function initSocketClientMsg() {
-        window.socketClient = new WebSocketClient();
-        window.socketClient.onmessage = (msg) => {
-            switch (msg.type) {
-                case "queue_message":
-                    queueMessage(msg.message, msg.queue, msg.course);
-                    break;
-            }
-        };
-        window.socketClient.open('office_hours_queue');
-    }
 
     function clearQueueSocketMsg(){
         if(localStorage.getItem('QueueMessage')){
