@@ -5,16 +5,16 @@
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
                 {% set expiringVisual = (expiring) ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement' %}
-                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Pinned announcement -- will expire soon" aria-label="Pinned announcement -- will expire soon"><i class="fas fa-thumbtack"></i></a>
+                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Pinned thread -- will expire soon" aria-label="Pinned thread -- will expire soon"><i class="fas fa-thumbtack"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
                 {% set expiringVisual = (expiring) ? 'active-thread-announcement-expiring' : 'active-thread-announcement' %}
-                <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned Announcement" aria-label="Pinned Announcement"></i>
+                <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned Thread" aria-label="Pinned Thread"></i>
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
-                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top for seven days?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Make Announcement"></i></a>
+                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top for seven days?', 1, '{{ csrf_token }}')" title="Pin thread to the top" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Pin Thread"></i></a>
 
             {% endif %}
 
