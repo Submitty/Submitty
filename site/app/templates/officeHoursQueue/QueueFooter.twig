@@ -314,11 +314,7 @@
   }
 
   function updateMessage() {
-      $.get("{{ base_url }}/queue_message", function (newMessage) {
-          if ($('#queue_status').length > 0) {
-              $('#queue_status').replaceWith(newMessage);
-          }
-      });
+      location.reload();
       queueMessage();
   }
 

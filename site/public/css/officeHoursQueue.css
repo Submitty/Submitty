@@ -57,7 +57,7 @@ th {
 }
 
 .queue-message {
-    display: none;
+    /*display: none;*/
     background-color: var(--alert-info-blue);
     padding: 1rem;
 }

@@ -1,16 +1,16 @@
-<div class = "queue-message">
-    <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
-    <h3 id="queue-message-prompt">
-        Message From Queue Admins:<br>
-    </h3>
-    <p id="queue-message-msg">
-
-    </p>
-</div>
-<br>
 
 <div id="queue_status">
 {% if viewer.inQueue() == 0 %}
+    <div class = "queue-message">
+        <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
+        <h3 id="queue-message-prompt">
+            Message From Queue Admins:<br>
+        </h3>
+        <p id="queue-message-msg">
+            {{ viewer.getQueueSocketMessage() }}
+        </p>
+    </div>
+    <br>
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <label for="name_box">Your Name:</label>
@@ -59,9 +59,18 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+    <div class = "queue-message">
+        <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
+        <h3 id="queue-message-prompt">
+            Message From Queue Admins:<br>
+        </h3>
+        <p id="queue-message-msg">
+            {{ viewer.getQueueSocketMessage() }}
+        </p>
+    </div>
+<br>
   <div id="queue_status">
   <h2>My Queue Status</h2>
-      {{ viewer.getQueueSocketMessage() }}
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
       There
@@ -204,25 +213,25 @@
 {% endif %}
 <script>
 
-    if(localStorage.getItem('QueueMessage')){
-        let current_time = new Date();
-        const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
-        const queue = sent.queue;
-        const sent_time = sent.time;
-        const course = sent.course;
-        //get rid of message after 80 minutes
-        if(current_time.getTime() - 5000000 < sent_time) {
-            if(course === '{{ viewer.getCourse() }}'){
-                $('.queue-message').css('display', 'block');
-                $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));
-                $('#queue-message-msg-time').html(sent.formatted_time);
-            }
-        } else {
-            localStorage.removeItem('QueueMessageExpire');
-            localStorage.removeItem('QueueMessage');
-        }
+    {#if(localStorage.getItem('QueueMessage')){#}
+    {#    let current_time = new Date();#}
+    {#    const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));#}
+    {#    const queue = sent.queue;#}
+    {#    const sent_time = sent.time;#}
+    {#    const course = sent.course;#}
+    {#    //get rid of message after 80 minutes#}
+    {#    if(current_time.getTime() - 5000000 < sent_time) {#}
+    {#        if(course === '{{ viewer.getCourse() }}'){#}
+    {#            $('.queue-message').css('display', 'block');#}
+    {#            $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));#}
+    {#            $('#queue-message-msg-time').html(sent.formatted_time);#}
+    {#        }#}
+    {#    } else {#}
+    {#        localStorage.removeItem('QueueMessageExpire');#}
+    {#        localStorage.removeItem('QueueMessage');#}
+    {#    }#}
 
-    }
+    {#}#}
 
      {% if viewer.inQueue() %}
         function queueMessage() {
@@ -247,6 +256,20 @@
 
     function toggleSwitchQueueForm(){
         $("#switch_queue_form").css('display', 'block');
+    }
+
+    function removeQueueMessage(){
+        return $.ajax({
+            type: 'POST',
+            url: buildCourseUrl(['office_hours_queue', 'send_queue_message']),
+            data: {
+                'message' : null,
+                'csrf_token': csrfToken
+            },
+            success: function(data){
+                $('#file-content').append(data);
+            }
+        });
     }
 
 </script>
