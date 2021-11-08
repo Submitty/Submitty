@@ -19,5 +19,5 @@ require('esbuild').build({
     bundle: true,
     minify: true,
     sourcemap: true,
-    outdir: './public/mjs',
+    outdir: path.join(__dirname, 'public', 'mjs'),
 });
