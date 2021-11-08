@@ -1466,7 +1466,7 @@ WHERE semester=? AND course=? AND user_id=?",
             $row = $this->course_db->row();
         }
 
-        // If cache still doesnt exist, the gradeable is not associated with 
+        // If cache still doesnt exist, the gradeable is not associated with
         // LateDays OR there has been a computation error
         if (empty($row)) {
             var_dump('error');
@@ -1474,7 +1474,7 @@ WHERE semester=? AND course=? AND user_id=?",
         }
 
         var_dump($row);
-        
+
         return $row;
     }
 
