@@ -1,24 +1,17 @@
-const fs = require('fs');
-const module_path = './ts/';
+const path = require('path');
+const module_path = path.join(__dirname, 'ts');
 
-let files = [];
-
-function getAllFiles(path){
-    fs.readdirSync(path, {withFileTypes:true}).forEach((file) => {
-        if (file.isDirectory()){
-            return getAllFiles(`${path}${file['name']}/`);
+function getAllFiles(dir) {
+    return fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
+        if (!entry.isDirectory() && entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
+            acc.push(path.join(dir, entry.name));
         }
-
-        const filename = file['name'];
-        if (!filename.includes('.js') && !filename.includes('.ts')){
-            return;
-        }
-
-        files.push(path + filename);
-    });
+        
+        return acc;
+    }, []);
 }
 
-getAllFiles(module_path);
+const files = getAllFiles(module_path);
 
 require('esbuild').build({
     entryPoints: files,
