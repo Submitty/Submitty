@@ -224,7 +224,7 @@
                 updateAnnouncement();
                 break;
             case "update_message":
-                updateMessage();
+                updateMessage(msg.remove);
             default:
                 console.log("Unknown message received.");
                 break;
@@ -313,9 +313,21 @@
       });
   }
 
-  function updateMessage() {
+  function updateMessage(remove) {
       location.reload();
-      queueMessage();
+      if (remove === 'false') {
+          queueMessage();
+      }
+  }
+
+  function setQueueMessageExpire(code) {
+      let now = new Date();
+      const item = {
+          queue: code,
+          time: now.getTime(),
+          formatted_time: now.toLocaleString()
+      }
+      localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
   }
 
   

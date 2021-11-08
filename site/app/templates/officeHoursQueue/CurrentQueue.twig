@@ -100,3 +100,32 @@
     Your queue is currently empty. Make sure you have the correct filter settings set.
   </div>
 </div>
+<script>
+
+    if(localStorage.getItem('QueueMessageExpire')){
+        let current_time = new Date();
+        const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
+        const queue_code = sent.queue;
+        const sent_time = sent.time;
+        //get rid of message after 80 minutes
+        if(current_time.getTime() - 5000 > sent_time) {
+            removeQueueMessage(queue_code);
+            localStorage.removeItem('QueueMessageExpire');
+        }
+    }
+
+    function removeQueueMessage(queue_code){
+        return $.ajax({
+            type: 'POST',
+            url: buildCourseUrl(['office_hours_queue', 'send_queue_message']),
+            data: {
+                'code' : queue_code,
+                'socket-message' : 'null',
+                'csrf_token': csrfToken
+            },
+            success: function(){
+                location.reload();
+            }
+        });
+    }
+</script>

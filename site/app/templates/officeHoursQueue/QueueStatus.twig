@@ -59,15 +59,17 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
-    <div class = "queue-message">
-        <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
-        <h3 id="queue-message-prompt">
-            Message From Queue Admins:<br>
-        </h3>
-        <p id="queue-message-msg">
-            {{ viewer.getQueueSocketMessage() }}
-        </p>
-    </div>
+    {% if viewer.getQueueSocketMessage() %}
+        <div class = "queue-message">
+            <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
+            <h3 id="queue-message-prompt">
+                Message From Queue Admins:<br>
+            </h3>
+            <p id="queue-message-msg">
+                {{ viewer.getQueueSocketMessage() }}
+            </p>
+        </div>
+    {% endif %}
 <br>
   <div id="queue_status">
   <h2>My Queue Status</h2>
@@ -212,27 +214,6 @@
   </div>
 {% endif %}
 <script>
-
-    {#if(localStorage.getItem('QueueMessage')){#}
-    {#    let current_time = new Date();#}
-    {#    const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));#}
-    {#    const queue = sent.queue;#}
-    {#    const sent_time = sent.time;#}
-    {#    const course = sent.course;#}
-    {#    //get rid of message after 80 minutes#}
-    {#    if(current_time.getTime() - 5000000 < sent_time) {#}
-    {#        if(course === '{{ viewer.getCourse() }}'){#}
-    {#            $('.queue-message').css('display', 'block');#}
-    {#            $('#queue-message-msg').html(localStorage.getItem('QueueMessage'));#}
-    {#            $('#queue-message-msg-time').html(sent.formatted_time);#}
-    {#        }#}
-    {#    } else {#}
-    {#        localStorage.removeItem('QueueMessageExpire');#}
-    {#        localStorage.removeItem('QueueMessage');#}
-    {#    }#}
-
-    {#}#}
-
      {% if viewer.inQueue() %}
         function queueMessage() {
                 if (Notification.permission === "granted") {
@@ -256,20 +237,6 @@
 
     function toggleSwitchQueueForm(){
         $("#switch_queue_form").css('display', 'block');
-    }
-
-    function removeQueueMessage(){
-        return $.ajax({
-            type: 'POST',
-            url: buildCourseUrl(['office_hours_queue', 'send_queue_message']),
-            data: {
-                'message' : null,
-                'csrf_token': csrfToken
-            },
-            success: function(data){
-                $('#file-content').append(data);
-            }
-        });
     }
 
 </script>

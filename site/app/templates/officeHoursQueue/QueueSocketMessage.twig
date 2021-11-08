@@ -18,7 +18,7 @@
         <textarea name="socket-message" id="socket-msg" rows="15" cols="50" placeholder="Message"></textarea>
         <br>
         <br>
-        <button type="submit" class="btn btn-primary">Send Message</button>
+        <button type="submit" class="btn btn-primary" onclick="setQueueMessageExpire($('#queue_code').val())">Send Message</button>
     </form>
 {% endblock %}
 {% block buttons %}
