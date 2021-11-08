@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const module_path = path.join(__dirname, 'ts');
 

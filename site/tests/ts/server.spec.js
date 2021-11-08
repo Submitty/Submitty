@@ -1,4 +1,4 @@
-import { buildCourseUrl, getCsrfToken } from '../../ts/server';
+import { buildCourseUrl, getCsrfToken } from '../../ts/utils/server';
 import { describe, test } from '@jest/globals';
 
 describe('buildCourseUrl', () => {
