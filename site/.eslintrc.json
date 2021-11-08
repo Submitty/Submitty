@@ -37,13 +37,13 @@
     },
     "overrides": [
         {
-            "files": ["./ts/*.js"],
+            "files": ["./ts/**/*.js"],
             "parserOptions": {
                 "sourceType": "module"
             }
         },
         {
-            "files": ["./ts/*.ts"],
+            "files": ["./ts/**/*.ts"],
             "extends" : [
                 "eslint:recommended",
                 "plugin:@typescript-eslint/eslint-recommended",
