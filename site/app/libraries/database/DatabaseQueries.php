@@ -1449,6 +1449,45 @@ WHERE semester=? AND course=? AND user_id=?",
         return $late_day_events;
     }
 
+    public function getLateDayCacheForUserGradeable($user_id, $g_id) {
+        $params = [$user_id, $g_id];
+        $query = "SELECT * FROM late_day_cache
+                    WHERE user_id=?
+                    AND g_id=?";
+        $this->course_db->query($query, $params);
+
+        $row = $this->course_db->row();
+
+        // If cache doesnt exist, generate it and query again
+        if (empty($row)) {
+            var_dump('recalculating');
+            $this->generateLateDayCacheForUser($user_id);
+            $this->course_db->query($query, $params);
+            $row = $this->course_db->row();
+        }
+
+        // If cache still doesnt exist, the gradeable is not associated with 
+        // LateDays OR there has been a computation error
+        if (empty($row)) {
+            var_dump('error');
+            return null;
+        }
+
+        var_dump($row);
+        
+        return $row;
+    }
+
+    public function generateLateDayCacheForUser($user_id) {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$user_id, $default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
+
+        $this->course_db->query($query, $params);
+    }
+
     public function addLateDayCacheForGradeable(string $user_id, LateDayInfo $late_day_info) {
         $params = [$user_id];
         $params[] = $late_day_info->getId();

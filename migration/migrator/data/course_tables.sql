@@ -250,10 +250,10 @@ $$;
 
 
 --
--- Name: calculate_remaining_cache_for_user(text); Type: FUNCTION; Schema: public; Owner: -
+-- Name: calculate_remaining_cache_for_user(text, int); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION calculateRemainingCacheForUser(user_id text) RETURNS SETOF late_day_cache
+CREATE FUNCTION calculate_remaining_cache_for_user(user_id text, default_late_days int) RETURNS SETOF late_day_cache
 	LANGUAGE plpgsql
 	AS $$
 #variable_conflict use_variable
@@ -280,7 +280,7 @@ BEGIN
 	END LOOP;
 	
 	-- Get the number of late days charged up to this point
-	late_days_used = (SELECT SUM(ldc.late_days_change)
+    late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
 		FROM late_day_cache ldc
 		WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
 			AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
@@ -289,7 +289,7 @@ BEGIN
 	-- if there is no cache in the table, the starting point
 	-- should be the course default late days
 	IF late_days_remaining IS NULL THEN
-		late_days_remaining = 0; -- TO DO: grab default late days from config
+		late_days_remaining = default_late_days;
 		late_days_used = 0;
 	END IF;
 	
