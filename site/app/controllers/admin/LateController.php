@@ -249,9 +249,6 @@ class LateController extends AbstractController {
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );
                 }
-
-                // TO DO: Update late day cache for late day extension (team)
-                $late_day_status = null;
             }
             else {
                 // TO DO: Update late day cache for late day extension (user)
