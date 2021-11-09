@@ -1650,7 +1650,7 @@ end of styles used in the admin gradeable page
 
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .custom-focus:focus {
-    outline: var(--standard-focus-cornflowe-blue);
+    outline: var(--standard-focus-cornflower-blue);
 }
 
 .invisible-btn {
