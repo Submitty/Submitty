@@ -103,7 +103,7 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       (target_connection,
        intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
   except (socket.timeout, paramiko.ssh_exception.NoValidConnectionsError) as ioe:
-      print("ERROR: could not ssh to {0}@{1} due to a network error: {2}".format(user, host,str(e)))
+      print("ERROR: could not ssh to {0}@{1} due to a network error: {2}".format(user, host,str(ioe)))
       return EXIT_CODES['io_error']
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
