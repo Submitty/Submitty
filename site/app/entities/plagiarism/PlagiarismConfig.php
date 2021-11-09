@@ -296,13 +296,10 @@ class PlagiarismConfig {
     }
 
     public function hasOtherGradeablePaths(): bool {
-        return !is_null($this->other_gradeable_paths);
+        return count($this->other_gradeable_paths) > 0;
     }
 
     public function getOtherGradeablePaths(): array {
-        if (is_null($this->other_gradeable_paths)) {
-            return [];
-        }
         return $this->other_gradeable_paths;
     }
 
@@ -312,11 +309,6 @@ class PlagiarismConfig {
      * ensure that each path has the same group as the current signed in user.
      */
     public function setOtherGradeablePaths(array $paths, int $user_group): void {
-        if ($this->hasOtherGradeablePaths()) {
-            $this->other_gradeable_paths = null;
-            return;
-        }
-
         foreach ($paths as $path) {
             if (filegroup($path) !== $user_group) {
                 throw new ValidationException("Error: Path {$path} does not share group '{$user_group}' with current user", []);
