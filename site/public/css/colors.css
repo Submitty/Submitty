@@ -218,7 +218,6 @@
 [data-theme="dark"] {
 
     /* might wanna change blue borders/hover text/sidebar text to submitty blue */
-
     /* buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
     --standard-lightskyblue: #0975b9;
