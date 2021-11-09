@@ -7,6 +7,7 @@ import sys
 import json
 import paramiko
 from submitty_utils import ssh_proxy_jump
+import socket
 
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
@@ -33,7 +34,7 @@ EXIT_CODES = {
   'active'    : 1,
   'failure'   : 2,
   'bad_arguments' : 3,
-  'timed out': 4
+  'io_error': 4
 }
 
 # valid commands that can be passed to this script. If you add more, update
@@ -101,10 +102,11 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
   try:
       (target_connection,
        intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
+  except (socket.timeout, paramiko.ssh_exception.NoValidConnectionsError) as ioe:
+      print("ERROR: could not ssh to {0}@{1} due to a network error: {2}".format(user, host,str(e)))
+      return EXIT_CODES['io_error']
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
-      if str(e) == 'timed out':
-        return EXIT_CODES['timed out']
       return EXIT_CODES['failure']
   try:
       (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=5)
