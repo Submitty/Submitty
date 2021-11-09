@@ -296,7 +296,7 @@ class PlagiarismConfig {
     }
 
     public function hasOtherGradeablePaths(): bool {
-        return is_null($this->other_gradeable_paths);
+        return !is_null($this->other_gradeable_paths);
     }
 
     public function getOtherGradeablePaths(): array {
