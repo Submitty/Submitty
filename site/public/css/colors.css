@@ -1,11 +1,6 @@
 :root {
     /* master color */
     --submitty-logo-blue: #316498;
-
-    /* might wanna change blue borders/hover text/sidebar text to submitty blue */
-
-    /* buttons, primarily but also can be used for notifications/anything
-    that requires this color scheme */
     --danger-red: #dc3545;
     --focus-danger-red: #ff5555;
     --hover-active-danger-red: #ff6661;
