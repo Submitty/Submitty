@@ -1671,7 +1671,7 @@ function addMarkdownCode(type){
             if (text.substring(last_newline_pos, cursor).length !== 1) {
                 insert = '\n';
             }
-            insert += '```\ncode\n```';
+            insert += '```\ncode\n```\n';
             break;
         case 'link':
             insert = '[display text](url)';
