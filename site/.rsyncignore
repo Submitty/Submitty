@@ -14,5 +14,6 @@ site/phpcs.xml
 site/phpstan-baseline.neon
 site/phpstan.neon
 site/phpunit.xml
+site/public/mjs
 
 .DS_Store

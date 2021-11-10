@@ -2500,10 +2500,11 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
 
 function open_overall_comment_tab(user) {
     const textarea = $(`#overall-comment-${user}`);
+    const comment_root = textarea.closest('.general-comment-entry');
 
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    textarea.parent().show();
+    comment_root.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
 
     //if the tab is for the main user of the page
@@ -2543,15 +2544,6 @@ function open_overall_comment_tab(user) {
         attachmentsList.attr("data-active-user", user);
     }
 
-}
-
-function previewOverallCommentMarkdown(user){
-    const markdown_area = $(`#overall-comment-${user}`);
-    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
-    const preview_button = $(this);
-    const markdown_content = markdown_area.val();
-
-    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**

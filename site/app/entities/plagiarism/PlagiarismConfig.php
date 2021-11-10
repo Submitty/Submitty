@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace app\entities\plagiarism;
 
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 use app\libraries\plagiarism\PlagiarismUtils;
+use DateTime;
 
 /**
  * Class PlagiarismConfig
@@ -36,6 +39,12 @@ class PlagiarismConfig {
      * @var int
      */
     protected $config_id;
+
+    /**
+     * @ORM\Column(type="boolean")
+     * @var bool
+     */
+    protected $has_provided_code;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -83,7 +92,7 @@ class PlagiarismConfig {
      * @ORM\Column(type="smallint")
      * @var int
      */
-    protected $sequence_length;
+    protected $hash_size;
 
     /**
      * @ORM\Column(type="json")
@@ -96,6 +105,19 @@ class PlagiarismConfig {
      * @var array
      */
     protected $ignore_submissions;
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @var DateTime
+     */
+    protected $last_run_timestamp;
+
+    /**
+     * @ORM\OneToMany(targetEntity="app\entities\plagiarism\PlagiarismRunAccess", mappedBy="lichen_run")
+     * @ORM\OrderBy({"timestamp" = "DESC"})
+     * @var Collection<PlagiarismRunAccess>
+     */
+    protected $access_times;
 
     /* FUNCTIONS */
 
@@ -113,7 +135,7 @@ class PlagiarismConfig {
         bool $regex_dir_checkout,
         string $language,
         int $threshold,
-        int $sequence_length,
+        int $hash_size,
         array $other_gradeables,
         array $ignored_submissions
     ) {
@@ -126,9 +148,10 @@ class PlagiarismConfig {
         $this->setRegexDirCheckout($regex_dir_checkout);
         $this->setLanguage($language);
         $this->setThreshold($threshold);
-        $this->setSequenceLength($sequence_length);
+        $this->setHashSize($hash_size);
         $this->setOtherGradeables($other_gradeables);
         $this->setIgnoredSubmissions($ignored_submissions);
+        $this->setLastRunToCurrentTime();
     }
 
     public function getUniqueID(): int {
@@ -141,6 +164,14 @@ class PlagiarismConfig {
 
     public function getConfigID(): int {
         return $this->config_id;
+    }
+
+    public function hasProvidedCode(): bool {
+        return $this->has_provided_code;
+    }
+
+    public function setHasProvidedCode(bool $provided_code_status): void {
+        $this->has_provided_code = $provided_code_status;
     }
 
     public function getVersionStatus(): string {
@@ -231,19 +262,19 @@ class PlagiarismConfig {
         }
     }
 
-    public function getSequenceLength(): int {
-        return $this->sequence_length;
+    public function getHashSize(): int {
+        return $this->hash_size;
     }
 
     /**
      * @throws ValidationException
      */
-    public function setSequenceLength(int $sequence_length): void {
-        if ($sequence_length > 1) {
-            $this->sequence_length = $sequence_length;
+    public function setHashSize(int $hash_size): void {
+        if ($hash_size > 1) {
+            $this->hash_size = $hash_size;
         }
         else {
-            throw new ValidationException("Error: Invalid sequence length", []);
+            throw new ValidationException("Error: Invalid hash size", []);
         }
     }
 
@@ -261,5 +292,23 @@ class PlagiarismConfig {
 
     public function setIgnoredSubmissions(array $ignored_submissions): void {
         $this->ignore_submissions = $ignored_submissions;
+    }
+
+    public function getLastRunTimestamp(): DateTime {
+        return $this->last_run_timestamp;
+    }
+
+    public function setLastRunToCurrentTime(): void {
+        $this->last_run_timestamp = DateUtils::getDateTimeNow();
+    }
+
+    public function userHasAccessed(string $user_id): bool {
+        return $this->access_times->filter(function (PlagiarismRunAccess $access) use ($user_id) {
+            return $access->getUserId() === $user_id;
+        })->count() > 0;
+    }
+
+    public function addAccess(PlagiarismRunAccess $timestamp): void {
+        $this->access_times[] = $timestamp;
     }
 }

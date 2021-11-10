@@ -285,9 +285,9 @@ CREATE TABLE public.electronic_gradeable (
     eg_peer_blind integer DEFAULT 3,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
     eg_hidden_files character varying(1024),
+    eg_has_release_date boolean DEFAULT true NOT NULL,
     eg_depends_on character varying(255) DEFAULT NULL::character varying,
     eg_depends_on_points integer,
-    eg_has_release_date boolean DEFAULT true NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -668,11 +668,13 @@ CREATE TABLE public.lichen (
     regex_dir_checkout boolean NOT NULL,
     language character varying(255) NOT NULL,
     threshold smallint NOT NULL,
-    sequence_length smallint NOT NULL,
+    hash_size smallint NOT NULL,
     other_gradeables text,
     ignore_submissions text,
+    last_run_timestamp timestamp without time zone DEFAULT now(),
+    has_provided_code boolean DEFAULT false NOT NULL,
     CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
-    CONSTRAINT lichen_sequence_length_check CHECK ((sequence_length > 1)),
+    CONSTRAINT lichen_hash_size_check CHECK ((hash_size > 1)),
     CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
 );
 
@@ -695,6 +697,38 @@ CREATE SEQUENCE public.lichen_id_seq
 --
 
 ALTER SEQUENCE public.lichen_id_seq OWNED BY public.lichen.id;
+
+
+--
+-- Name: lichen_run_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lichen_run_access (
+    id integer NOT NULL,
+    lichen_run_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lichen_run_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lichen_run_access_id_seq OWNED BY public.lichen_run_access.id;
 
 
 --
@@ -1284,6 +1318,13 @@ ALTER TABLE ONLY public.lichen ALTER COLUMN id SET DEFAULT nextval('public.liche
 
 
 --
+-- Name: lichen_run_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access ALTER COLUMN id SET DEFAULT nextval('public.lichen_run_access_id_seq'::regclass);
+
+
+--
 -- Name: notifications id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1584,6 +1625,14 @@ ALTER TABLE ONLY public.lichen
 
 ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lichen_run_access lichen_run_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT lichen_run_access_pkey PRIMARY KEY (id);
 
 
 --
@@ -1901,6 +1950,14 @@ ALTER TABLE ONLY public.lichen
 
 
 --
+-- Name: lichen_run_access fk_lichen_run_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT fk_lichen_run_id FOREIGN KEY (lichen_run_id) REFERENCES public.lichen(id) ON DELETE CASCADE;
+
+
+--
 -- Name: course_materials_sections fk_section_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1909,18 +1966,18 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
--- Name: course_materials_access fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_access
-    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
 -- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.gradeable_allowed_minutes_override
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials_access fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 

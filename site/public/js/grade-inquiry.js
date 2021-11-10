@@ -1,5 +1,5 @@
-/* global buildCourseUrl, WebSocketClient previewMarkdown */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp previewInquiryMarkdown */
+/* global buildCourseUrl, WebSocketClient */
+/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
 function onReady(){
     // open last opened grade inquiry or open first component with grade inquiry
@@ -91,6 +91,14 @@ function onGradeInquirySubmitClicked(button) {
             }
         }
     }
+
+    //switch off of preview mode after submission
+    const markdown_area = text_area.closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    if (markdown_header.attr('data-mode') === 'preview') {
+        markdown_header.find('.markdown-write-mode').trigger('click');
+    }
+
 
     // prevent double submission
     form.data('submitted',true);
@@ -224,13 +232,4 @@ function newDiscussionRender(discussion) {
     else {
         $('#regradeBoxSection').html(discussion).hide().fadeIn('slow');
     }
-}
-
-function previewInquiryMarkdown() {
-    const markdown_textarea = $(this).closest('.markdown-area').find('[name="replyTextArea"]');
-    const preview_element = $('#inquiry_preview');
-    const preview_button = $(this);
-    const inquiry_content = markdown_textarea.val();
-
-    previewMarkdown(markdown_textarea, preview_element, preview_button, { content: inquiry_content });
 }

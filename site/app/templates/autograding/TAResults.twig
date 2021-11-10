@@ -46,7 +46,11 @@ $( document ).ready(function() {
                     </p>
                     {% if grader_info[user].comment is not empty %}
                     <p class="overall-comment">
-                        <span class='gradeable_comment'>{{ grader_info[user].comment | nl2br }}</span>
+                        <span class='gradeable_comment'>
+                            {% include 'misc/Markdown.twig' with {
+                                content: grader_info[user].comment
+                            } only %}
+                        </span>
                     </p>
                     {% endif %}
                     {% if grader_info[user].attachments is not empty %}
