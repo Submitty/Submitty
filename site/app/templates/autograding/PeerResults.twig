@@ -243,7 +243,6 @@ function switch_feedback_modes() {
         </div>
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
-
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
                 <table class="mobile-table" id="peer-feedback-table-{{grader}}">
                     <tbody>
@@ -267,7 +266,7 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if grader_info[anon_grader_id_mapping[grader]]["comment"] is defined %}
+                {% if grader_info[anon_grader_id_mapping[grader]] is defined %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">
                             Overall note from grader:
@@ -289,9 +288,6 @@ function switch_feedback_modes() {
                             {% endfor %}
                         </div>
                         {% endif %}
-                        <p class="overall-comment">
-                            <span class='gradeable_comment'>{{ grader_info[anon_grader_id_mapping[grader]]["comment"] | nl2br }}</span>
-                        </p>
                     </div>
                 {% endif %}
 

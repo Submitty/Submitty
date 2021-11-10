@@ -712,11 +712,11 @@ class AutoGradingView extends AbstractView {
             }
         }
 
+        $peer_graders = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $id);
         $grader_info = [];
 
         foreach ($ta_graded_gradeable->getAttachments() as $user_name => $attachments) {
-            $user = $this->core->getQueries()->getUserById($user_name);
-            if ($gradeable->hasPeerComponent() && $user->accessGrading()) {
+            if (!in_array($user_name, $unique_graders, true)) {
                 continue;
             }
 
@@ -727,10 +727,7 @@ class AutoGradingView extends AbstractView {
         }
 
         foreach ($ta_graded_gradeable->getOverallComments() as $user_name => $comment) {
-            $comment_user = $this->core->getQueries()->getUserById($user_name);
-
-            // Skip non peers.
-            if ($gradeable->hasPeerComponent() && $comment_user->accessGrading()) {
+            if (!in_array($user_name, $unique_graders, true)) {
                 continue;
             }
 

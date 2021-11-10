@@ -2520,17 +2520,24 @@ function open_overall_comment_tab(user) {
         let attachmentsList = $("#attachments-list");
         $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
         
+        let isUser = false;
         if (attachmentsList.attr("data-user") === user) {
             $("#attachment-upload-form").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+            isUser = true;
         } else {
             $("#attachment-upload-form").css("display", "none");
         }
         if (attachmentsListUser.children().length === 0) {
             attachmentsListUser.css("display", "none")
             $("#attachments-header").css("display", "none");
+            if (!isUser) {
+                $("#overall-comments-attachments").css("display", "none");
+            }
         } else {
             attachmentsListUser.css("display", "")
             $("#attachments-header").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
         }
         
         attachmentsList.attr("data-active-user", user);
