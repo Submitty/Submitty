@@ -4,25 +4,25 @@ namespace app\libraries\plagiarism;
 
 class PlagiarismUtils {
     /**
-     * This constant represents the default configuration for each language supported.  Currently, only the sequence
-     * length and language name are listed but more parameters can be added in the future.
+     * This constant represents the default configuration for each language supported.  Currently, only the
+     * hash size and language name are listed but more parameters can be added in the future.
      * @var int
      */
     const SUPPORTED_LANGUAGES = [
         "plaintext" => [
-            "sequence_length" => 14
+            "hash_size" => 14
         ],
         "python" => [
-            "sequence_length" => 14
+            "hash_size" => 14
         ],
         "java" => [
-            "sequence_length" => 14
+            "hash_size" => 14
         ],
         "cpp" => [
-            "sequence_length" => 14
+            "hash_size" => 14
         ],
         "mips" => [
-            "sequence_length" => 5
+            "hash_size" => 5
         ]
     ];
 

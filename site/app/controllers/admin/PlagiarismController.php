@@ -107,11 +107,11 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * Gets a list of courses which have the same group as the current course and are thus eligible prior terms
+     * Gets a list of courses which have the same group as the current course and are thus eligible other terms
      * @return array
      * @throws Exception
      */
-    private function getPriorSemesterCourses(): array {
+    private function getOtherSemesterCourses(): array {
         $this_semester = $this->core->getConfig()->getSemester();
         $this_course = $this->core->getConfig()->getCourse();
         $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
@@ -131,7 +131,7 @@ class PlagiarismController extends AbstractController {
      * @return array
      * @throws Exception
      */
-    private function getOtherPriorGradeables(string $term, string $course, string $this_gradeable): array {
+    private function getOtherOtherGradeables(string $term, string $course, string $this_gradeable): array {
         // check for backwards crawling
         if (str_contains($term, '..') || str_contains($course, '..')) {
             throw new Exception('Error: path contains invalid component ".."');
@@ -333,8 +333,8 @@ class PlagiarismController extends AbstractController {
                 "regex_dirs" => $regex_dirs,
                 "language" => $config->getLanguage(),
                 "threshold" => $config->getThreshold(),
-                "sequence_length" => $config->getSequenceLength(),
-                "prior_term_gradeables" => $config->getOtherGradeables(),
+                "hash_size" => $config->getHashSize(),
+                "other_gradeables" => $config->getOtherGradeables(),
                 "ignore_submissions" => $config->getIgnoredSubmissions()
             ];
 
@@ -406,8 +406,8 @@ class PlagiarismController extends AbstractController {
             "regex_dirs" => $regex_dirs,
             "language" => $config->getLanguage(),
             "threshold" => $config->getThreshold(),
-            "sequence_length" => $config->getSequenceLength(),
-            "prior_term_gradeables" => $config->getOtherGradeables(),
+            "hash_size" => $config->getHashSize(),
+            "other_gradeables" => $config->getOtherGradeables(),
             "ignore_submissions" => $config->getIgnoredSubmissions()
         ];
     }
@@ -710,7 +710,7 @@ class PlagiarismController extends AbstractController {
 
                 // This is a little ugly/repetitive but it can be frustrating for users to get nondescriptive errors
                 // so we try to make potential error cases a little more helpful
-                $keys = ["version", "regex", "regex_dirs", "language", "threshold", "sequence_length", "prior_term_gradeables", "ignore_submissions"];
+                $keys = ["version", "regex", "regex_dirs", "language", "threshold", "hash_size", "other_gradeables", "ignore_submissions"];
                 $error_message = "";
                 foreach ($keys as $key) {
                     if (!isset($data[$key])) {
@@ -733,8 +733,8 @@ class PlagiarismController extends AbstractController {
                     in_array("checkout", $data["regex_dirs"]),
                     $data["language"],
                     $data["threshold"],
-                    $data["sequence_length"],
-                    $data["prior_term_gradeables"],
+                    $data["hash_size"],
+                    $data["other_gradeables"],
                     $data["ignore_submissions"]
                 );
                 $em->persist($new_config);
@@ -758,7 +758,7 @@ class PlagiarismController extends AbstractController {
                     $source_config->isRegexDirCheckoutSelected(),
                     $source_config->getLanguage(),
                     $source_config->getThreshold(),
-                    $source_config->getSequenceLength(),
+                    $source_config->getHashSize(),
                     $source_config->getOtherGradeables(),
                     $source_config->getIgnoredSubmissions()
                 );
@@ -792,55 +792,55 @@ class PlagiarismController extends AbstractController {
             $threshold = (int) $_POST['threshold'] ?? 0;
 
 
-            // Sequence length /////////////////////////////////////////////////////
-            $sequence_length = (int) $_POST['sequence_length'] ?? 0;
+            // Hash Size ///////////////////////////////////////////////////////////
+            $hash_size = (int) $_POST['hash_size'] ?? 0;
 
 
-            // Prior terms /////////////////////////////////////////////////////////
-            $prev_term_gradeables = [];
-            if ($_POST["past_terms_option"] === "past_terms") {
-                if (isset($_POST["prior_semester_course"]) !== isset($_POST["prior_gradeable"])) {
-                    $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+            // other gradeables ////////////////////////////////////////////////////
+            $other_gradeables = [];
+            if ($_POST["other_gradeables_option"] === "has_other_gradeables") {
+                if (isset($_POST["other_semester_course"]) !== isset($_POST["other_gradeable"])) {
+                    $this->core->addErrorMessage("Invalid input provided for other gradeables");
                     $this->core->redirect($return_url);
                 }
-                foreach ($_POST["prior_semester_course"] as $index => $sem_course) {
-                    if (!isset($_POST["prior_gradeable"][$index])) {
-                        $this->core->addErrorMessage("Invalid input provided for prior term gradeables");
+                foreach ($_POST["other_semester_course"] as $index => $sem_course) {
+                    if (!isset($_POST["other_gradeable"][$index])) {
+                        $this->core->addErrorMessage("Invalid input provided for other term gradeables");
                         $this->core->redirect($return_url);
                     }
                     else {
                         $tokens = explode(" ", $sem_course);
                         if (count($tokens) !== 2) {
-                            $this->core->addErrorMessage("Invalid input provided for prior semester and course");
+                            $this->core->addErrorMessage("Invalid input provided for other semester and course");
                             $this->core->redirect($return_url);
                         }
-                        $prior_semester = $tokens[0];
-                        $prior_course = $tokens[1];
-                        $prior_gradeable = $_POST["prior_gradeable"][$index];
+                        $other_semester = $tokens[0];
+                        $other_course = $tokens[1];
+                        $other_gradeable = $_POST["other_gradeable"][$index];
                         // Error checking
-                        if (str_contains($prior_semester, '..') || str_contains($prior_course, '..') || str_contains($prior_gradeable, '..')) {
-                            $this->core->addErrorMessage("Error: prior term gradeables string contains invalid component '..'");
+                        if (str_contains($other_semester, '..') || str_contains($other_course, '..') || str_contains($other_gradeable, '..')) {
+                            $this->core->addErrorMessage("Error: other gradeables string contains invalid component '..'");
                             return new RedirectResponse($return_url);
                         }
-                        $prior_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $prior_semester, $prior_course, "submissions", $prior_gradeable);
-                        if (!is_dir($prior_g_submissions_path) || count(scandir($prior_g_submissions_path)) === 2) {
-                            $this->core->addErrorMessage("Error: submssions to prior term gradeable provided not found");
+                        $other_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $other_semester, $other_course, "submissions", $other_gradeable);
+                        if (!is_dir($other_g_submissions_path) || count(scandir($other_g_submissions_path)) === 2) {
+                            $this->core->addErrorMessage("Error: submssions to other gradeable provided not found");
                             return new RedirectResponse($return_url);
                         }
                         $to_append = [
-                            "prior_semester" => $prior_semester,
-                            "prior_course" => $prior_course,
-                            "prior_gradeable" => $prior_gradeable
+                            "other_semester" => $other_semester,
+                            "other_course" => $other_course,
+                            "other_gradeable" => $other_gradeable
                         ];
-                        if ($prior_semester === $semester && $prior_course === $course && $prior_gradeable === $gradeable_id) {
+                        if ($other_semester === $semester && $other_course === $course && $other_gradeable === $gradeable_id) {
                             $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
                             return new RedirectResponse($return_url);
                         }
-                        if (in_array($to_append, $prev_term_gradeables)) {
-                            $this->core->addErrorMessage("Error: duplicate other gradeable found: {$prior_semester} {$prior_course} {$prior_gradeable}");
+                        if (in_array($to_append, $other_gradeables)) {
+                            $this->core->addErrorMessage("Error: duplicate other gradeable found: {$other_semester} {$other_course} {$other_gradeable}");
                             return new RedirectResponse($return_url);
                         }
-                        $prev_term_gradeables[] = $to_append;
+                        $other_gradeables[] = $to_append;
                     }
                 }
             }
@@ -891,8 +891,8 @@ class PlagiarismController extends AbstractController {
                         in_array("checkout", $regex_directories),
                         $language,
                         $threshold,
-                        $sequence_length,
-                        $prev_term_gradeables,
+                        $hash_size,
+                        $other_gradeables,
                         $ignore_submission_option
                     );
                 }
@@ -906,8 +906,8 @@ class PlagiarismController extends AbstractController {
                     $plagiarism_config->setRegexDirCheckout(in_array("checkout", $regex_directories));
                     $plagiarism_config->setLanguage($language);
                     $plagiarism_config->setThreshold($threshold);
-                    $plagiarism_config->setSequenceLength($sequence_length);
-                    $plagiarism_config->setOtherGradeables($prev_term_gradeables);
+                    $plagiarism_config->setHashSize($hash_size);
+                    $plagiarism_config->setOtherGradeables($other_gradeables);
                     $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
                 }
                 $em->persist($plagiarism_config);
@@ -1011,10 +1011,10 @@ class PlagiarismController extends AbstractController {
         $config["language"] = array_fill_keys(array_keys(PlagiarismUtils::SUPPORTED_LANGUAGES), "");
         $config["language"]["plaintext"] = "selected";
         $config["threshold"] = PlagiarismUtils::DEFAULT_THRESHOLD;
-        $config["sequence_length"] = PlagiarismUtils::SUPPORTED_LANGUAGES["plaintext"]["sequence_length"];
-        $config["prior_terms"] = false;
-        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
-        $config["prior_term_gradeables"] = [];
+        $config["hash_size"] = PlagiarismUtils::SUPPORTED_LANGUAGES["plaintext"]["hash_size"];
+        $config["has_other_gradeables"] = false;
+        $config["other_semester_courses"] = $this->getOtherSemesterCourses();
+        $config["other_gradeables"] = [];
         $config["ignore_submissions"] = [];
         $config["ignore_submissions_list"] = "";
 
@@ -1062,10 +1062,10 @@ class PlagiarismController extends AbstractController {
             }
         }
         $ignore = $this->getIgnoreSubmissionType($plagiarism_config->getIgnoredSubmissions());
-        $prior_term_gradeables_array = $plagiarism_config->getOtherGradeables();
-        foreach ($prior_term_gradeables_array as &$gradeable) {
+        $other_gradeables_array = $plagiarism_config->getOtherGradeables();
+        foreach ($other_gradeables_array as &$gradeable) {
             try {
-                $gradeable["other_gradeables"] = $this->getOtherPriorGradeables($gradeable["prior_semester"], $gradeable["prior_course"], $gradeable_id);
+                $gradeable["other_gradeables"] = $this->getOtherOtherGradeables($gradeable["other_semester"], $gradeable["other_course"], $gradeable_id);
             }
             catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
@@ -1098,10 +1098,10 @@ class PlagiarismController extends AbstractController {
         $config["language"] = array_fill_keys(array_keys(PlagiarismUtils::SUPPORTED_LANGUAGES), "");
         $config["language"][$plagiarism_config->getLanguage()] = "selected";
         $config["threshold"] = $plagiarism_config->getThreshold();
-        $config["sequence_length"] = $plagiarism_config->getSequenceLength();
-        $config["prior_terms"] = count($plagiarism_config->getOtherGradeables()) > 0;
-        $config["prior_semester_courses"] = $this->getPriorSemesterCourses();
-        $config["prior_term_gradeables"] = $prior_term_gradeables_array;
+        $config["hash_size"] = $plagiarism_config->getHashSize();
+        $config["has_other_gradeables"] = count($plagiarism_config->getOtherGradeables()) > 0;
+        $config["other_semester_courses"] = $this->getOtherSemesterCourses();
+        $config["other_gradeables"] = $other_gradeables_array;
         $config["ignore_submissions"] = $ignore[0];
         $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
 
@@ -1238,11 +1238,11 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getPriorGradeables", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getOtherGradeables", methods={"POST"})
      */
-    public function getPriorGradeables(): JsonResponse {
+    public function getOtherGradeables(): JsonResponse {
         if (!isset($_POST['semester_course']) || !isset($_POST['this_gradeable'])) {
-            return JsonResponse::getErrorResponse("Error: Unable to get prior gradeables");
+            return JsonResponse::getErrorResponse("Error: Unable to get other gradeables");
         }
 
         $tokens = explode(' ', $_POST['semester_course']);
@@ -1250,7 +1250,7 @@ class PlagiarismController extends AbstractController {
         $course = $tokens[1];
 
         try {
-            $return = $this->getOtherPriorGradeables($semester, $course, $_POST['this_gradeable']);
+            $return = $this->getOtherOtherGradeables($semester, $course, $_POST['this_gradeable']);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());

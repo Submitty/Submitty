@@ -668,11 +668,11 @@ CREATE TABLE public.lichen (
     regex_dir_checkout boolean NOT NULL,
     language character varying(255) NOT NULL,
     threshold smallint NOT NULL,
-    sequence_length smallint NOT NULL,
+    hash_size smallint NOT NULL,
     other_gradeables text,
     ignore_submissions text,
     CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
-    CONSTRAINT lichen_sequence_length_check CHECK ((sequence_length > 1)),
+    CONSTRAINT lichen_hash_size_check CHECK ((hash_size > 1)),
     CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
 );
 
