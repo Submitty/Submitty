@@ -1055,6 +1055,18 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Failed to upload file.');
         }
         else {
+            // Get the TA graded gradeable
+            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+            // New info, so reset the user viewed date
+            $ta_graded_gradeable->resetUserViewedDate();
+
+            // Finally, save the changes to the database
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+            $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+            if ($submitter->isTeam()) {
+                $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+            }
             $this->core->getOutput()->renderJsonSuccess(
                 [
                     "name" => $attachment['name'],
