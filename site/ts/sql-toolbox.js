@@ -1,4 +1,4 @@
-import { buildCourseUrl, getCsrfToken } from './server.js';
+import { buildCourseUrl, getCsrfToken } from './utils/server';
 
 export async function runSqlQuery() {
     document.getElementById('query-results').style.display = 'block';
