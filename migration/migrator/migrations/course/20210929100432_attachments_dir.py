@@ -49,7 +49,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    attachments_dir = Path(course_dir, 'attachments')
-    # remove the directory
-    os.removedirs(str(attachments_dir), exist_ok=True)
+    pass
