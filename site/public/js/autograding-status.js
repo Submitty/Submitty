@@ -41,8 +41,14 @@ function updateTable() {
                         new_row.insertCell().innerHTML = course_name[0];
                         new_row.insertCell().innerHTML = course_name[1];
                         new_row.insertCell().innerHTML = key2;
-                        new_row.insertCell().innerHTML = info.interactive;
-                        new_row.insertCell().innerHTML = info.regrade;
+						const int_box = new_row.insertCell();
+						if (info.interactive != 0) {
+                        	int_box.innerHTML = info.interactive;
+						}
+						const regrade_box = new_row.insertCell();
+						if (info.regrade != 0) {
+                        	regrade_box.innerHTML = info.regrade;
+						}
                     });
                 });
 
@@ -69,26 +75,48 @@ function updateTable() {
                 let new_cell = new_row.insertCell();
                 new_cell.innerHTML = json.time;
                 new_cell.className = 'right-boarder';
-                new_row.insertCell().innerHTML = json.queue_counts.interactive_ongoing;
+
+				new_cell = new_row.insertCell();
+				if (json.queue_counts.interactive_ongoing != 0) {
+                	new_cell.innerHTML = json.queue_counts.interactive_ongoing;
+				}
+
                 new_cell = new_row.insertCell();
-                new_cell.innerHTML = json.queue_counts.interactive;
+				if (json.queue_counts.interactive != 0) {
+                	new_cell.innerHTML = json.queue_counts.interactive;
+				}
                 new_cell.className = 'right-boarder';
-                new_row.insertCell().innerHTML = json.queue_counts.regrade_ongoing;
+
+				new_cell = new_row.insertCell();
+				if (json.queue_counts.regrade_ongoing != 0) {
+                	new_cell.innerHTML = json.queue_counts.regrade_ongoing;
+				}
                 new_cell = new_row.insertCell();
-                new_cell.innerHTML = json.queue_counts.regrade;
+
+				if (json.queue_counts.regrade != 0) {
+                	new_cell.innerHTML = json.queue_counts.regrade;
+				}
                 new_cell.className = 'right-boarder';
                 Object.keys(json.machine_grading_counts).forEach((key, i) => {
                     if (i === Object.keys(json.machine_grading_counts).length - 1) {
                         new_cell = new_row.insertCell();
-                        new_cell.innerHTML = json.machine_grading_counts[key];
+						if (json.machine_grading_counts[key] != 0) {
+	                        new_cell.innerHTML = json.machine_grading_counts[key];
+						}
                         new_cell.className = 'right-boarder';
                     }
                     else {
-                        new_row.insertCell().innerHTML = json.machine_grading_counts[key];
-                    }
+						new_cell = new_row.insertCell();
+						if (json.machine_grading_counts[key] != 0) {
+                        	new_cell.innerHTML = json.machine_grading_counts[key];
+						}
+					}
                 });
                 Object.keys(json.capability_queue_counts).forEach(key => {
-                    new_row.insertCell().innerHTML = json.capability_queue_counts[key];
+					const new_cell = new_row.insertCell()
+					if (json.capability_queue_counts[key] != 0) {
+                    	new_cell.innerHTML = json.capability_queue_counts[key];
+					}
                 });
                 // Check if old logs should be removed to make room for new logs
                 if ($('#autograding-status-table tbody tr').length > max_log) {
