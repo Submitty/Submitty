@@ -3,6 +3,10 @@
     white-space: normal;
 }
 
+th {
+    padding: 0 0.25em;
+}
+
 .plag-table-cont {
     margin-top: 24px;
     width: 100%;
@@ -10,14 +14,6 @@
 
 .plag-table-cont th {
     white-space: nowrap;
-}
-
-td .plag-action-btn-cont {
-    display: flex;
-}
-
-td .plag-action-btn-cont a:not(:last-child) {
-    margin-right: 40px;
 }
 
 .config-id-title {
@@ -33,6 +29,25 @@ td .plag-action-btn-cont a:not(:last-child) {
     text-align: left;
     width: inherit;
     background-color: var(--table-info);
+}
+
+td {
+    border-left-style: none;
+    border-right-style: none;
+}
+
+.padded-icon-column {
+    padding: 0 0.5em !important;
+}
+
+.unviewed {
+    background-color: var(--viewed-content);
+}
+
+.unviewed td:first-child {
+    border-left-color: var(--actionable-blue);
+    border-left-width: 3px;
+    border-left-style: solid;
 }
 
 .run-log-data pre {

@@ -4,6 +4,7 @@ namespace tests;
 
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\DateUtils;
 use app\libraries\Output;
 use app\libraries\Access;
 use app\models\Config;
@@ -67,6 +68,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         $config->method('isDebug')->willReturn($config_values['debug'] ?? true);
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
+        DateUtils::setTimezone($config->getTimezone());
 
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true) {
             $core->method('getDateTimeNow')->willReturn(new \DateTime('2001-01-01', $config->getTimezone()));
