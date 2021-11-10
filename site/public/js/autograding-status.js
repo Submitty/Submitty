@@ -78,7 +78,7 @@ function updateTable() {
 
                 new_cell = new_row.insertCell();
                 if (json.queue_counts.interactive_ongoing != 0) {
-                 new_cell.innerHTML = json.queue_counts.interactive_ongoing;
+                    new_cell.innerHTML = json.queue_counts.interactive_ongoing;
                 }
 
                 new_cell = new_row.insertCell();
@@ -108,13 +108,13 @@ function updateTable() {
                     else {
                         new_cell = new_row.insertCell();
                         if (json.machine_grading_counts[key] != 0) {
-                                            new_cell.innerHTML = json.machine_grading_counts[key];
+                            new_cell.innerHTML = json.machine_grading_counts[key];
                         }
                     }
                 });
 
                 Object.keys(json.capability_queue_counts).forEach(key => {
-                    const new_cell = new_row.insertCell()
+                    const new_cell = new_row.insertCell();
                     if (json.capability_queue_counts[key] != 0) {
                         new_cell.innerHTML = json.capability_queue_counts[key];
                     }
