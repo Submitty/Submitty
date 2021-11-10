@@ -176,7 +176,6 @@
     resize: vertical;
     min-height: 100px;
     max-height: 300px;
-    width: fill-available;
     -moz-tab-size: 4;
     -o-tab-size: 4;
     tab-size: 4;
