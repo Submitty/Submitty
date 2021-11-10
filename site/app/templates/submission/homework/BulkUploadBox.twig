@@ -25,6 +25,9 @@
         </thead>
         <tbody>
             {% for file in files %}
+                {% if file.cover_image is not empty %}
+                {# Display files uploaded only on bulk upload mode #}
+
                 {% if file["valid"] == false %}
                     <tr class="tr tr-vertically-centered" style="background-color:pink;" id="row-{{ loop.index}}">
                 {% else %}
@@ -99,6 +102,7 @@
                         <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-default key_to_click" tabindex="0" onclick="deleteSplit({{ loop.index }})">Delete</button>
                     </td>
                 </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
