@@ -452,10 +452,6 @@ class WebRouter {
     }
 
     private function checkEnabled(Enabled $enabled): bool {
-        if ($enabled === null) {
-            return true;
-        }
-
         $method = "is" . ucFirst($enabled->getFeature()) . "Enabled";
         return $this->core->getConfig()->$method();
     }
