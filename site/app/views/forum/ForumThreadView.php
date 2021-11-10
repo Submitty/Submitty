@@ -272,6 +272,7 @@ class ForumThreadView extends AbstractView {
                 "userGroup" => $generatePostContent["userGroup"],
                 "activeThread" => $generatePostContent["activeThread"],
                 "activeThreadAnnouncement" => $generatePostContent["activeThreadAnnouncement"],
+                "expiring" => $generatePostContent["expiring"],
                 "isCurrentFavorite" => $generatePostContent["isCurrentFavorite"],
                 "display_option" => $generatePostContent["display_option"],
                 "post_data" => $generatePostContent["post_data"],
@@ -413,6 +414,7 @@ class ForumThreadView extends AbstractView {
 
         $activeThreadTitle = "({$activeThread['id']}) " . $activeThread['title'];
         $activeThreadAnnouncement = $activeThread['pinned_expiration'] > date("Y-m-d H:i:s");
+        $expiring = $activeThread['pinned_expiration'] <= date("Y-m-d H:i:s", strtotime("+7 day"));
 
         $thread_id = $activeThread['id'];
 
@@ -541,6 +543,7 @@ class ForumThreadView extends AbstractView {
                 "userGroup" => $this->core->getUser()->getGroup(),
                 "activeThread" => $activeThread,
                 "activeThreadAnnouncement" => $activeThreadAnnouncement,
+                "expiring" => $expiring,
                 "isCurrentFavorite" => $isCurrentFavorite,
                 "display_option" => $display_option,
                 "post_data" => $post_data,
@@ -564,6 +567,7 @@ class ForumThreadView extends AbstractView {
                 "userGroup" => $this->core->getUser()->getGroup(),
                 "activeThread" => $activeThread,
                 "activeThreadAnnouncement" => $activeThreadAnnouncement,
+                "expiring" => $expiring,
                 "isCurrentFavorite" => $isCurrentFavorite,
                 "display_option" => $display_option,
                 "post_data" => $post_data,
@@ -814,6 +818,7 @@ class ForumThreadView extends AbstractView {
                 "link" => $link,
                 "class" => $class,
                 "pinned" => $thread["pinned_expiration"] > date("Y-m-d H:i:s"),
+                "expiring" => $thread["pinned_expiration"] <= date("Y-m-d H:i:s", strtotime("+7 day")),
                 "favorite" => $favorite,
                 "merged_thread_id" => $thread['merged_thread_id'],
                 "status" => $thread["status"],

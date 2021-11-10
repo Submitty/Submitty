@@ -122,6 +122,27 @@ SET default_tablespace = '';
 
 
 --
+-- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_metrics (
+    user_id text NOT NULL,
+    team_id text NOT NULL,
+    g_id text NOT NULL,
+    g_version integer NOT NULL,
+    testcase_id text NOT NULL,
+    elapsed_time real,
+    max_rss_size integer,
+    points integer NOT NULL,
+    passed boolean NOT NULL,
+    hidden boolean NOT NULL,
+    CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
+    CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -304,6 +325,7 @@ CREATE TABLE public.electronic_gradeable_version (
     user_id character varying(255),
     team_id character varying(255),
     active_version integer,
+    anonymous_leaderboard boolean DEFAULT true NOT NULL,
     CONSTRAINT egv_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -925,8 +947,9 @@ CREATE TABLE public.queue_settings (
     id integer NOT NULL,
     open boolean NOT NULL,
     code text NOT NULL,
-    token text NOT NULL,
-    regex_pattern character varying
+    token text,
+    regex_pattern character varying,
+    contact_information boolean DEFAULT true NOT NULL
 );
 
 
@@ -1321,6 +1344,14 @@ ALTER TABLE ONLY public.student_favorites ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
+
+
+--
+-- Name: autograding_metrics autograding_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_metrics
+    ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id, g_version);
 
 
 --

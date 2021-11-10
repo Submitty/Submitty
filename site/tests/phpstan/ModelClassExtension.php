@@ -2,7 +2,6 @@
 
 namespace tests\phpstan;
 
-use app\libraries\Utils;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\Dummy\DummyMethodReflection;
 use PHPStan\Reflection\MethodReflection;
@@ -10,7 +9,7 @@ use PHPStan\Reflection\MethodsClassReflectionExtension;
 
 class ModelClassExtension implements MethodsClassReflectionExtension {
     public function hasMethod(ClassReflection $reflection, string $method_name): bool {
-        if (!Utils::startsWith($reflection->getName(), 'app\\models')) {
+        if (!str_starts_with($reflection->getName(), 'app\\models')) {
             return false;
         }
 

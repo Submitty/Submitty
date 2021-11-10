@@ -9,11 +9,12 @@ use app\models\Email;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
+use RuntimeException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GradeInquiryController extends AbstractController {
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      */
     public function requestGradeInquiry($gradeable_id) {
@@ -73,7 +74,7 @@ class GradeInquiryController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
@@ -146,7 +147,7 @@ class GradeInquiryController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
      */
     public function getSingleGradeInquiryPost($gradeable_id) {
@@ -208,7 +209,7 @@ class GradeInquiryController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
@@ -281,7 +282,7 @@ class GradeInquiryController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
      * @return MultiResponse
      */
@@ -306,7 +307,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * Helper function to create notification/email content and aggregate recipients
      * @param GradedGradeable $graded_gradeable
-     * @param int $gradeable_id
+     * @param string $gradeable_id
      * @param string $content
      * @param string $type
      * @param int|null $gc_id
@@ -382,7 +383,11 @@ class GradeInquiryController extends AbstractController {
                     $body = "A student has reopened a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$included_post_content";
                 }
             }
+            else {
+                throw new RuntimeException("Invalid grade inquiry event type: {$type}");
+            }
 
+            $emails = [];
             // make graders' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?' . http_build_query(['who_id' => $submitter->getId()])])]);
             if (empty($graders)) {
@@ -398,6 +403,7 @@ class GradeInquiryController extends AbstractController {
 
             // make students' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
+            $notifications = [];
             if ($submitter->isTeam()) {
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {

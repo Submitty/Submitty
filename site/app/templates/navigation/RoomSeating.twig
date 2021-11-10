@@ -13,7 +13,7 @@
             <tr class="seating-chart-table"><td>Your seat assignment: </td><td align=center>{{ user_seating_details.seat }}</td></tr>
         </table>
     </td></tr>
-    <tr><td style="background-color:var( --standard-focus-cornflowe-blue);">
+    <tr><td style="background-color:var(--always-default-white);">
         {% if seating_config != null %}
             {% include '@room_templates/'~user_seating_details.building~'/'~user_seating_details.room~'.twig' %}
         {% else %}

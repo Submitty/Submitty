@@ -5,7 +5,6 @@ namespace app\models\notebook;
 use app\exceptions\NotebookException;
 use app\models\notebook\Notebook;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 
 /**
