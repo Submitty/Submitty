@@ -42,7 +42,14 @@
             <br>
             <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
-        <textarea class="config-row" name="forum_create_thread_message" id="create-thread-message" rows="4"/>{{ fields['forum_create_thread_message'] }}</textarea>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "create-thread-message",
+            "class" : "config-row",
+            "markdown_area_name" : "forum_create_thread_message",
+            "markdown_area_value" : fields['forum_create_thread_message'],
+            "preview_div_id" : "create-thread-message-preview",
+            "render_header" : true
+        } only %}
 
         <h2>Office Hours Queue</h2>
         <hr>
@@ -63,7 +70,14 @@
                 If the queue is used for remote or online instruction and tutoring, you may explain the connection requirements and establish student expectations with this message.
             </span>
         </label>
-        <textarea class="config-row" name="queue_message" id="queue-message">{{ fields['queue_message'] }}</textarea>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "queue-message",
+            "class" : "config-row",
+            "markdown_area_name" : "queue_message",
+            "markdown_area_value" : fields['queue_message'],
+            "preview_div_id" : "queue-message-preview",
+            "render_header" : true
+        } only %}
 
 
         <h2>Online Polls</h2>
@@ -87,7 +101,14 @@
                 What is the message that should be shown to students above the upload area on the submission page?
             </span>
         </label>
-        <textarea class="config-row" name="upload_message" id="upload-message">{{ fields['upload_message'] }}</textarea>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "upload-message",
+            "class" : "config-row",
+            "markdown_area_name" : "upload_message",
+            "markdown_area_value" : fields['upload_message'],
+            "preview_div_id" : "upload-message-preview",
+            "render_header" : true
+        } only %}
 
         <label for="private-repository" class="config-row">
             <span class="option-title">Course Autograding Config Directory</span>

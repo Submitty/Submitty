@@ -536,7 +536,7 @@ class PlagiarismController extends AbstractController {
                 if ($has_results) {
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
-                        $top_match_percent = $rankings[0][2];
+                        $top_match_percent = $rankings[0][0];
                         $matching_submission_count = count($rankings);
                         $ranking_available = true;
                     }
