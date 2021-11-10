@@ -5,7 +5,6 @@ namespace app\controllers\grading;
 use app\libraries\DateUtils;
 use app\libraries\DiffViewer;
 use app\libraries\routers\AccessControl;
-use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;

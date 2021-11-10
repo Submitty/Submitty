@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace app\libraries\database;
 
-use app\libraries\Utils;
-
 class QueryIdentifier {
     const SELECT = 'select';
     const INSERT = 'insert';

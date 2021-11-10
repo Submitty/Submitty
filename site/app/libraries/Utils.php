@@ -2,7 +2,6 @@
 
 namespace app\libraries;
 
-use app\models\User;
 use Ds\Set;
 
 /**
