@@ -240,13 +240,15 @@
                     alert('New Message From Office Hours Queue Staff');
                 }
         }
+     //if they aren't in a queue, but there is a message, either show the message or remove it
      {% elseif viewer.inQueue() == 0 %}
         if(localStorage.getItem('QueueMessage')) {
             let current_time = new Date();
             const sent = JSON.parse(localStorage.getItem('QueueMessage'));
             const sent_time = sent.time;
             const message = sent.message;
-            if(current_time.getTime() - 50000 > sent_time) {
+            //remove after 80 minutes
+            if(current_time.getTime() - 5000000 > sent_time) {
                 localStorage.removeItem('QueueMessage');
             }
             else {
@@ -264,6 +266,7 @@
         $("#switch_queue_form").css('display', 'block');
     }
 
+    //clear the message if they join a new queue
     function clearQueueSocketMsg() {
         if(localStorage.getItem('QueueMessage')){
             localStorage.removeItem('QueueMessage');
