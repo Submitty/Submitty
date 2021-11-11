@@ -2,11 +2,9 @@
 
 namespace app\models\gradeable;
 
-use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
-use app\libraries\FileUtils;
 use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\Notebook;
 
@@ -33,6 +31,9 @@ use app\models\notebook\Notebook;
  * @method int getTotalHiddenExtraCredit()
  * @method bool getOnePartyOnly()
  * @method bool isNotebookGradeable()
+ * @method LeaderboardConfig[] getLeaderboards()
+ * @method bool getDisplayTestcaseRuntimeMemory()
+ * @method void setDisplayTestcaseRuntimeMemory()
  */
 class AutogradingConfig extends AbstractModel {
 
@@ -62,6 +63,11 @@ class AutogradingConfig extends AbstractModel {
     protected $notebook_config = [];
     /** @prop @var array Cut-down information about autograding test cases*/
     private $base_testcases = [];
+
+    /** @prop @var LeaderboardConfig[] General info about leaderboards*/
+    protected $leaderboards = [];
+    /** @prop @var bool Show the memory and runtime of the autograding for testcases */
+    protected $display_testcase_runtime_memory = false;
 
     /* Properties if early submission incentive enabled */
     /** @prop @var bool If there is an early submission incentive */
@@ -130,6 +136,12 @@ class AutogradingConfig extends AbstractModel {
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
+
+        $this->leaderboards = [];
+        foreach ($details['leaderboards'] ?? [] as $leaderboard) {
+            $this->leaderboards[] = new LeaderboardConfig($this->core, $leaderboard);
+        }
+        $this->display_testcase_runtime_memory = $details['display_testcase_runtime_memory'] ?? false;
 
         $this->base_testcases = $details["testcases"] ?? [];
         $this->setTestCasePoints();
@@ -347,6 +359,37 @@ class AutogradingConfig extends AbstractModel {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a leaderboard for a specific tag
+     * @param string $tag the tag of the leaderboard to match against
+     */
+    public function getLeaderboard(string $tag): ?LeaderboardConfig {
+        foreach ($this->getLeaderboards() as $leaderboard) {
+            if ($leaderboard->getTag() === $tag) {
+                return $leaderboard;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets an array of testcases that match a tag
+     * @param string $tag the tag of to match against
+     */
+    public function getTestcasesWithTag(string $tag): array {
+        $testcases = [];
+        foreach ($this->base_testcases as $testcase) {
+            if (array_key_exists('leaderboard_tags', $testcase)) {
+                foreach ($testcase['leaderboard_tags'] as $leaderboard_tag) {
+                    if ($tag === $leaderboard_tag) {
+                        $testcases[] = $testcase['testcase_id'];
+                    }
+                }
+            }
+        }
+        return $testcases;
     }
 
     /* Disabled setters */

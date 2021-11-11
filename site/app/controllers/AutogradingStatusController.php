@@ -2,12 +2,10 @@
 
 namespace app\controllers;
 
-use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
-use app\libraries\routers\AccessControl;
 use app\libraries\GradingQueue;
 use app\views\AutogradingStatusView;
 use app\views\ErrorView;

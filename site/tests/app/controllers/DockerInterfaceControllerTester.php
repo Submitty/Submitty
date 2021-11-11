@@ -4,9 +4,6 @@ namespace tests\app\controllers;
 
 use tests\BaseUnitTest;
 use app\controllers\DockerInterfaceController;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
-use app\models\Config;
 
 class DockerInterfaceControllerTester extends BaseUnitTest {
     private $config;

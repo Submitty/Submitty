@@ -3,13 +3,12 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-use app\exceptions\NotImplementedException;
 use app\exceptions\ValidationException;
+use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
-use app\models\CourseMaterial;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -26,8 +25,6 @@ use app\models\Team;
 use app\models\Course;
 use app\models\PollModel;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueueModel;
-use app\models\EmailStatusModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -2309,7 +2306,7 @@ ORDER BY rotating_section"
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT 
+            "SELECT
                 COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
                 COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
                 user_id,
@@ -5456,7 +5453,7 @@ AND gc_id IN (
                   eg_has_discussion,
                   eg_hidden_files,
                   eg_depends_on,
-                  eg_depends_on_points                               
+                  eg_depends_on_points
                   )
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
@@ -5600,7 +5597,7 @@ AND gc_id IN (
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
                       eg_has_due_date=?,
-                      eg_has_release_date=?,            
+                      eg_has_release_date=?,
                       eg_config_path=?,
                       eg_late_days=?,
                       eg_allow_late_submission=?,
@@ -5615,7 +5612,7 @@ AND gc_id IN (
                       eg_has_discussion=?,
                       eg_hidden_files=?,
                       eg_depends_on=?,
-                      eg_depends_on_points=?                              
+                      eg_depends_on_points=?
                     WHERE g_id=?",
                     $params
                 );
@@ -6251,6 +6248,12 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    //Gets the time a student joined the queue they are currently in
+    public function getTimeJoinedQueue($user_id, $queue_code) {
+        $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
+        return $this->course_db->rows()[0]['max'];
+    }
+
     public function getQueueId($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
@@ -6261,8 +6264,10 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['contact_information'];
     }
 
-    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
+
+    public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        $entry_time = $time_in == 0 ? $this->core->getDateTimeNow() : $time_in;
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -6296,7 +6301,7 @@ AND gc_id IN (
                 ?,
                 ?,
                 NULL
-            )", [$queue_code,$user_id,$name,$this->core->getDateTimeNow(),$user_id,$contact_info,$last_time_in_queue,0]);
+            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -6397,6 +6402,11 @@ AND gc_id IN (
 
     public function getAllQueues() {
         $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
+        return $this->course_db->rows();
+    }
+
+    public function getAllOpenQueues() {
+        $this->course_db->query("SELECT * FROM queue_settings where open = true ORDER BY id");
         return $this->course_db->rows();
     }
 
@@ -7598,7 +7608,7 @@ SQL;
 
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
-            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND 
+            'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
                    c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
             [$user_id]
         );
@@ -7670,5 +7680,113 @@ SQL;
     public function getTotalSubmissionsToGradeable(string $gradeable_id): int {
         $this->course_db->query('SELECT COUNT(*) FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
         return $this->course_db->rows()[0]["count"];
+    }
+
+    /**
+     * Gets the autograding metrics for a testcase
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     * @param string $testcase_id
+     * @param int $version the submission version that is currently being looked at
+     */
+    public function getMetrics(string $user_id, string $gradeable_id, string $testcase_id, int $version): array {
+        $this->course_db->query("
+            SELECT elapsed_time, max_rss_size FROM autograding_metrics
+                WHERE
+                    user_id = ?
+                    AND g_id = ?
+                    AND testcase_id = ?
+                    AND g_version = cast(? AS int)
+        ", [$user_id, $gradeable_id, $testcase_id, $version]);
+        return $this->course_db->row();
+    }
+
+    /**
+     * Gets a gradeable leaderboard
+     * TODO get this working for teams
+     *
+     * @param string $gradeable_id
+     * @param bool $countHidden true when leaderboard should include hidden testcases
+     * @param array $valid_testcases a list of testcases to use in leaderboard
+     */
+    public function getLeaderboard(string $gradeable_id, bool $countHidden, array $valid_testcases): array {
+        if ($this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment()) {
+            throw new NotImplementedException("Leaderboards do not work for teams");
+        }
+
+        $param_list = $this->createParamaterList(count($valid_testcases));
+
+        array_unshift($valid_testcases, $gradeable_id);
+        $valid_testcases[] = $countHidden;
+
+
+
+        $this->course_db->query("
+SELECT    leaderboard.*,
+          anon_id,
+          user_group,
+          anonymous_leaderboard,
+          Concat(
+              COALESCE (NULLIF(user_preferred_firstname, ''), user_firstname),
+              ' ',
+              COALESCE (NULLIF(user_preferred_lastname, ''), user_lastname)
+          ) as name
+FROM (
+                   SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
+                              Sum(max_rss_size)                            AS memory,
+                              metrics.g_id                                 AS gradeable_id,
+                              metrics.user_id                              AS user_id,
+                              metrics.team_id                              AS team_id,
+                              Sum(points)                                  AS points
+                   FROM       autograding_metrics                          AS metrics
+                   INNER JOIN electronic_gradeable_version                 AS version
+                   ON         NULLIF(metrics.user_id, '') = NULLIF(version.user_id, '')
+                   AND        metrics.g_id = version.g_id
+                   AND        metrics.g_version = version.active_version
+                   WHERE      metrics.g_id = ?
+                   AND        passed = true
+                   AND        testcase_id in {$param_list}
+                              -- When true, this statement is always true, and so the value in the hidden column is ignored
+                              -- When false, hidden values are left out of the query
+                   AND        (
+                                         hidden = false
+                              OR         hidden = ?)
+                   GROUP BY   metrics.user_id,
+                              metrics.team_id,
+                              metrics.g_id
+) AS leaderboard
+LEFT JOIN users
+ON        leaderboard.user_id = users.user_id
+LEFT JOIN electronic_gradeable_version
+ON        leaderboard.gradeable_id = electronic_gradeable_version.g_id
+          AND leaderboard.user_id = electronic_gradeable_version.user_id
+ORDER BY
+    points DESC,
+    time,
+    memory
+        ", $valid_testcases);
+
+        return $this->course_db->rows();
+    }
+
+    public function isUserAnonymousForGradeableLeaderboard(string $user_id, string $gradeable_id): bool {
+        $this->course_db->query("
+            SELECT COALESCE((SELECT anonymous_leaderboard
+            FROM   electronic_gradeable_version
+            WHERE  user_id = ?
+                AND g_id = ?), false) AS anonymous_leaderboard
+        ", [$user_id, $gradeable_id]);
+        return $this->course_db->row()['anonymous_leaderboard'];
+    }
+
+    public function setUserAnonymousForGradeableLeaderboard(string $user_id, string $gradeable_id, bool $state): void {
+        $this->course_db->query("
+            UPDATE electronic_gradeable_version
+            SET anonymous_leaderboard = ?
+                WHERE
+                    user_id = ?
+                    AND g_id = ?
+        ", [$state, $user_id, $gradeable_id]);
     }
 }
