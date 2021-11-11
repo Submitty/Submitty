@@ -583,7 +583,7 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/queue_message", methods={"GET"})
-     * @return String
+     * @return MultiResponse
      */
     public function showQueueMessage() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
