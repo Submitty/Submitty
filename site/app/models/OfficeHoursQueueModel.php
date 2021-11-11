@@ -320,6 +320,6 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getQueueSocketMessage() {
-        return $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) != 'null' ? $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) :null;
+        return $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) != 'null' ? $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) : null;
     }
 }

@@ -6578,7 +6578,7 @@ AND gc_id IN (
     }
 
     public function setQueueMessage($queue_code, $message) {
-        if ($message === 'null'){
+        if ($message === 'null') {
             $this->course_db->query("UPDATE queue_settings SET message = NULL WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$queue_code]);
         }
         else {
@@ -6588,7 +6588,7 @@ AND gc_id IN (
 
     public function getQueueMessage($queue_code) {
         $this->course_db->query("SELECT message from queue_settings where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
-        if (count($this->course_db->rows()) > 0){
+        if (count($this->course_db->rows()) > 0) {
             return $this->course_db->rows()[0]['message'];
         }
         else {
