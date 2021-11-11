@@ -1,13 +1,12 @@
 
 <div id="queue_status">
 {% if viewer.inQueue() == 0 %}
-    <div class = "queue-message">
+    <div class = "queue-message" style="display: none;">
         <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
         <h3 id="queue-message-prompt">
             Message From Queue Admins:<br>
         </h3>
         <p id="queue-message-msg">
-            {{ viewer.getQueueSocketMessage() }}
         </p>
     </div>
     <br>
@@ -69,6 +68,15 @@
                 {{ viewer.getQueueSocketMessage() }}
             </p>
         </div>
+        <script>
+            let now = new Date();
+            const item = {
+                time: now.getTime(),
+                formatted_time: now.toLocaleString(),
+                message: '{{ viewer.getQueueSocketMessage() }}'
+            }
+            localStorage.setItem('QueueMessage', JSON.stringify(item));
+        </script>
     {% endif %}
 <br>
   <div id="queue_status">
@@ -232,11 +240,34 @@
                     alert('New Message From Office Hours Queue Staff');
                 }
         }
-    {% endif %}
+     {% elseif viewer.inQueue() == 0 %}
+        if(localStorage.getItem('QueueMessage')) {
+            let current_time = new Date();
+            const sent = JSON.parse(localStorage.getItem('QueueMessage'));
+            const sent_time = sent.time;
+            const message = sent.message;
+            if(current_time.getTime() - 50000 > sent_time) {
+                localStorage.removeItem('QueueMessage');
+            }
+            else {
+                $('.queue-message').css('display', 'block');
+                let div = document.getElementById('queue-message-msg');
+                div.textContent = message;
+            }
+
+        }
+     {% endif %}
 
 
-    function toggleSwitchQueueForm(){
+
+    function toggleSwitchQueueForm() {
         $("#switch_queue_form").css('display', 'block');
+    }
+
+    function clearQueueSocketMsg() {
+        if(localStorage.getItem('QueueMessage')){
+            localStorage.removeItem('QueueMessage');
+        }
     }
 
 </script>
