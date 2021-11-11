@@ -2,8 +2,6 @@
 
 namespace app\libraries\plagiarism;
 
-use Ds\Stack;
-
 class PlagiarismUtils {
     /**
      * This constant represents the default configuration for each language supported.  Currently, only the

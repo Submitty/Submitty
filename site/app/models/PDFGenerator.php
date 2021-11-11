@@ -3,9 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\FileUtils;
-use TCPDF;
-use setasign\Fpdi\Fpdi;
 
 class PDFGenerator extends AbstractModel {
     public function __construct(Core $core) {

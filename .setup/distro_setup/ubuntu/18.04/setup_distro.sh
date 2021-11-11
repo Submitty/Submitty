@@ -20,7 +20,7 @@ fi
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
-apt-get install -qqy python python-dev python3 python3-dev libpython3.6 python3-pip
+apt-get install -qqy python python-dev python3 python3-dev libpython3.6 python3-pip libjpeg-dev
 
 ############################
 # NTP: Network Time Protocol
@@ -73,7 +73,7 @@ poppler-utils
 apt-get install -qqy ninja-build
 
 # NodeJS
-curl -sL https://deb.nodesource.com/setup_10.x | bash -
+curl -sL https://deb.nodesource.com/setup_16.x | bash -
 apt-get install -y nodejs
 
 #CMAKE
