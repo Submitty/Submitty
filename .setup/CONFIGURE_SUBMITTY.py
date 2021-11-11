@@ -36,6 +36,21 @@ def get_input(question, default=""):
     return user
 
 
+class StrToBoolAction(argparse.Action):
+    """
+    Custom action that parses strings to boolean values. All values that come
+    from bash are strings, and so need to parse that into the appropriate
+    bool value.
+    """
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values != '0' and values.lower() != 'false')
+
+
 ##############################################################################
 # this script must be run by root or sudo
 if os.getuid() != 0:
@@ -50,8 +65,12 @@ parser.add_argument('--setup-for-sample-courses', action='store_true', default=F
                     help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
                          "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
-parser.add_argument('--worker-pair', default=False, help='Configure Submitty alongside a worker VM. This should only'
-                                                         'be used during development using Vagrant.')
+parser.add_argument(
+    '--worker-pair',
+    default=False,
+    action=StrToBoolAction,
+    help='Configure Submitty alongside a worker VM. This should only be used during development using Vagrant.'
+)
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
