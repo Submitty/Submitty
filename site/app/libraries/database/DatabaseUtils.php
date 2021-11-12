@@ -11,7 +11,7 @@ class DatabaseUtils {
         if (is_null($params)) {
             return '';
         }
-        
+
         foreach ($params as $param) {
             if (gettype($param) == 'object' && get_class($param) == get_class(new \DateTime())) {
                 $param = DateUtils::dateTimeToString($param);
