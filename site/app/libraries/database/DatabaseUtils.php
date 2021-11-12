@@ -13,7 +13,7 @@ class DatabaseUtils {
         }
 
         foreach ($params as $param) {
-            if (gettype($param) == 'object' && get_class($param) == get_class(new \DateTime())) {
+            if ($param instanceof \DateTime) {
                 $param = DateUtils::dateTimeToString($param);
             }
             $sql = preg_replace('/\?/', is_numeric($param) ? $param : "'{$param}'", $sql, 1);
