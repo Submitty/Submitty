@@ -51,6 +51,16 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
+			message: "#^Offset 4 does not exist on null\\.$#"
+			count: 5
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
+			count: 2
+			path: app/controllers/admin/UsersController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
