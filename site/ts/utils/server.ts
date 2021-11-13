@@ -4,7 +4,7 @@
  * @param {string[]} parts
  * @returns string
  */
-export function buildCourseUrl(parts = []) {
+export function buildCourseUrl(parts: string[] = []) : string{
     return `${document.body.dataset.courseUrl}${parts.length > 0 ? `/${parts.join('/')}` : ''}`;
 }
 
@@ -13,17 +13,17 @@ export function buildCourseUrl(parts = []) {
  *
  * @returns string
  */
-export function getCsrfToken() {
+export function getCsrfToken() : string{
     return document.body.dataset.csrfToken;
 }
 
 let messages = 0;
 
-export function displayErrorMessage(message){
+export function displayErrorMessage(message: string){
     displayMessage(message, 'error');
 }
 
-export function displaySuccessMessage(message) {
+export function displaySuccessMessage(message: string) {
     displayMessage(message, 'success');
 }
 
@@ -35,7 +35,7 @@ export function displaySuccessMessage(message) {
  * @param {string} message
  * @param {string} type either 'error' or 'success'
  */
-export function displayMessage(message, type) {
+export function displayMessage(message: string, type: string) {
     const id = `${type}-js-${messages}`;
     message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
