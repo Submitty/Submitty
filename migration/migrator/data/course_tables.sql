@@ -293,8 +293,6 @@ BEGIN
 		late_days_used = 0;
 	END IF;
 	
-	raise notice 'rem: %', late_days_remaining;
-	
 	-- For every event after the cache's latest entry, calculate the 
 	-- late days remaining and the late day change (increase or decrease)
 	FOR var_row IN (
@@ -310,7 +308,6 @@ BEGIN
 		IF var_row.g_id IS NULL THEN
             late_days_change = var_row.late_days_allowed - (late_days_remaining + late_days_used);
             late_days_remaining = GREATEST(0, late_days_remaining + late_days_change);
-			raise notice 'rem: %, used: %, change: %, new: %', late_days_remaining, late_days_used, late_days_change, var_row.late_days_allowed;
 			return_cache = var_row;
 			return_cache.late_days_change = late_days_change;
 			return_cache.late_days_remaining = late_days_remaining;
@@ -318,14 +315,12 @@ BEGIN
 		ELSE
 			late_days_change = 0;
 			assignment_budget = LEAST(var_row.late_days_allowed, late_days_remaining) + var_row.late_day_exceptions;
-			raise notice 'rem: %, budget: %', late_days_remaining, assignment_budget;
 			IF var_row.submission_days_late <= assignment_budget THEN
 				-- clamp the days charged to be the days late minus exceptions above zero.
 				late_days_change = -GREATEST(0, LEAST(var_row.submission_days_late, assignment_budget) - var_row.late_day_exceptions);
 			END IF;
 			late_days_remaining = late_days_remaining + late_days_change;
 			late_days_used = late_days_used - late_days_change;
-			raise notice 'rem: %, used: %', late_days_remaining, late_days_used;
 			return_cache = var_row;
 			return_cache.late_days_change = late_days_change;
 			return_cache.late_days_remaining = late_days_remaining;
@@ -452,11 +447,12 @@ $$ LANGUAGE plpgsql;
 --
 -- Name: gradeable_delete(); Type: FUNCTION; Schema: public; Owner: -
 --
+
 CREATE FUNCTION gradeable_delete() RETURNS trigger AS $$
 	BEGIN
 		DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-														   		FROM electronic_gradeable 
-														   		WHERE g_id = OLD.g_id);
+														   	FROM electronic_gradeable 
+														   	WHERE g_id = OLD.g_id);
 		RETURN OLD;
     END;
 $$ LANGUAGE plpgsql;

@@ -1460,7 +1460,6 @@ WHERE semester=? AND course=? AND user_id=?",
 
         // If cache doesnt exist, generate it and query again
         if (empty($row)) {
-            var_dump('recalculating');
             $this->generateLateDayCacheForUser($user_id);
             $this->course_db->query($query, $params);
             $row = $this->course_db->row();
@@ -1469,11 +1468,8 @@ WHERE semester=? AND course=? AND user_id=?",
         // If cache still doesnt exist, the gradeable is not associated with
         // LateDays OR there has been a computation error
         if (empty($row)) {
-            var_dump('error');
             return null;
         }
-
-        var_dump($row);
 
         return $row;
     }
