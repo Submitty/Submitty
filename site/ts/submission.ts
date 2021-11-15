@@ -1,9 +1,12 @@
-interface Window{
-    file_array: File[][];
-    num_submission_boxes: number;
-    deleteFiles(Number): void;
-    addFile(File, Number, Boolean):void;
-    loadPreviousFilesOnDropBoxes():void;
+
+declare global {
+    interface Window{
+        file_array: File[][];
+        num_submission_boxes: number;
+        deleteFiles(Number): void;
+        addFile(File, Number, Boolean):void;
+        loadPreviousFilesOnDropBoxes():void;
+    }
 }
 
 const warning_banner = document.getElementById('submission-mode-warning');
@@ -49,3 +52,9 @@ function changeSubmissionMode(event: Event){
 
 
 document.addEventListener('DOMContentLoaded', () => init());
+
+// export or import statement required to modify Window interface to global scope
+// otherwise TypeScript will assume everything in the file is in the global scope
+export {
+
+};
