@@ -108,8 +108,8 @@
 		</label>
     {% endif %}
 	<div class="column-wrapper" style="display: inline-block; width: 100%;">
-		<div id="checkpoint-sticky" class="column-wrapper">
-            <div class="sticky-box">
+		<div id="checkpoint-sticky" style="width: 100%; margin: 0;" class="column-wrapper">
+            <div class="sticky-box" style="width: 90%;">
                 <input class="edit-zone custom-scrollbar"
                     data-target=""
                     type="text"
@@ -117,15 +117,14 @@
                     disabled
                 />
                 {% include "grading/simple/StudentSearch.twig" %}
-            </div>
-            
-            {% if action == 'lab' %}
-                <div>
+				{% if action == 'lab' %}
+                <div style="margin-top: 1vh;">
                     <p class="not-sticky">Undo/Redo Changes</p>
                     <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled>Undo <i class="fas fa-undo"></i></button>
                     <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>
                 </div>
             {% endif %}
+            </div>
         </div>
 	</div>
     {# This is a data table #}
