@@ -374,6 +374,7 @@ function checkpointRollTo(g_id, diff) {
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
     $("td.cell-grade").click(function() {
+		cellGradeOnclick(this);
         updateCheckpointCells(this);
     });
 
@@ -730,7 +731,8 @@ function setupSimpleGrading(action) {
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
         var cell = $(".cell-grade:focus");
-        if (cell.length) {
+		var edit_zone = $(".edit-zone:focus");
+        if (cell.length + edit_zone.length) {
             updateCheckpointCells(cell, options.score);
         }
     }
