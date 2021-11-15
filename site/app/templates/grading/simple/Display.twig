@@ -98,13 +98,13 @@
         </select>
     </div>
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
-		<p style="margin-bottom: 1vh">
+		<p style="margin-bottom: 1em">
 			The CSV file should be formatted as such:
 			<br />
 			user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
 		</p>
-		<label for="csvUpload">Upload CSV
-			<input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
+		<label for="csv-upload">Upload CSV
+			<input class="csv-button-upload" type="file" id="csv-upload" accept=".csv, .txt">
 		</label>
     {% endif %}
 	<div class="column-wrapper" style="display: inline-block; width: 100%;">
@@ -118,7 +118,7 @@
                 />
                 {% include "grading/simple/StudentSearch.twig" %}
 				{% if action == 'lab' %}
-                <div style="margin-top: 1vh;">
+                <div style="margin-top: 1em;">
                     <p class="not-sticky">Undo/Redo Changes</p>
                     <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled>Undo <i class="fas fa-undo"></i></button>
                     <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>

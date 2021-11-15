@@ -673,10 +673,10 @@ function setupSimpleGrading(action) {
         var input_cell = $("cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
-        if ($(event.target).attr('clicked') == null || $(event.target).attr('clicked') < 2) {
+        if ($(event.target).attr('clicked') === null || $(event.target).attr('clicked') < 2) {
             if(event.code === "ArrowLeft" && (!input_cell.length || (
-                    input_cell[0].selectionStart == 0 &&
-                    input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+                    input_cell[0].selectionStart === 0 &&
+                    input_cell[0].selectionEnd - input_cell[0].selectionStart === 0))) {
                 event.preventDefault();
                 movement("left");
             }
@@ -686,8 +686,8 @@ function setupSimpleGrading(action) {
             }
             // if there is no selection OR there is a selection to the far right with 0 length
             else if(event.code === "ArrowRight" && (!input_cell.length || (
-                    input_cell[0].selectionEnd == input_cell[0].value.length &&
-                    input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+                    input_cell[0].selectionEnd === input_cell[0].value.length &&
+                    input_cell[0].selectionEnd - input_cell[0].selectionStart === 0))) {
                 event.preventDefault();
                 movement("right");
             }
