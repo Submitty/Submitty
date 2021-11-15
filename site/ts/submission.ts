@@ -36,18 +36,26 @@ function changeSubmissionMode(event: Event){
         window.deleteFiles(idx);
     }
 
+    let message = '';
     switch (element.id){
         case 'radio-normal':
             window.loadPreviousFilesOnDropBoxes();
-            warning_banner.textContent = '';
+            message = '';
             break;
         case 'radio-student':
-            warning_banner.textContent = 'Warning: Submitting files for a student!';
+            message = 'Warning: Submitting files for a student!';
             break;
         case 'radio-bulk':
-            warning_banner.textContent = 'Warning: Submitting files for bulk upload!';
+            message = 'Warning: Submitting files for bulk upload!';
 
     }
+
+    if (!warning_banner.hasChildNodes()){
+        const child = warning_banner.appendChild( document.createElement('h2') );
+        child.classList.add('warning');
+    }
+
+    warning_banner.firstChild.textContent = message;
 }
 
 

@@ -126,8 +126,7 @@
             </div>
         </form>
 
-        <div class="text-center">
-            <h2 id="submission-mode-warning" class="warning"></h2>
+        <div id="submission-mode-warning" class="text-center">
         </div>
 
         <script>
@@ -381,10 +380,22 @@
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
-                        if(document.querySelector('input[name="submission-type"]:checked').id !== 'radio-normal'){
+                        const selected_radio_id = document.querySelector('input[name="submission-type"]:checked').id;
+                        if(selected_radio_id !== 'radio-normal'){
                             for(let idx = 1; idx <= window.num_submission_boxes; idx++){
                                 window.deleteFiles(idx);
                             }
+
+                            const warning_banner = document.getElementById('submission-mode-warning');
+                            if (!warning_banner.hasChildNodes()){
+                                warning_banner.appendChild( document.createElement('h2') );
+                                warning_banner.firstChild.classList.add('warning');
+                            }
+
+                            message = selected_radio_id === 'radio-bulk' ? 'Warning: Submitting files for bulk upload!' :
+                                'Warning: Submitting files for a student!';
+                            warning_banner.firstChild.textContent = message;
+
                         }
 
                     });
