@@ -312,9 +312,10 @@
                     data-origval="{{ component_score }}"
                     value="{{ component_score }}"
                     onfocus="cellGradeOnfocus(this)"
+                    onclick="cellGradeOnclick(this)"
                     onblur="cellGradeOnBlur(this)"
                     onkeyup="editEditzone(this)"
-                   	{# onchange=" this.style.backgroundColor = 'var(--default-white)';" #}
+                    onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
@@ -351,6 +352,7 @@
                   contenteditable
                   onfocus="cellGradeOnfocus(this)"
                   onblur="cellGradeOnBlur(this);"
+                  onclick="cellGradeOnclick(this);"
                   onkeyup="editEditzone(this);"
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
