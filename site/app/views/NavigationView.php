@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\models\Button;
 use app\libraries\GradeableType;
 use app\models\User;
@@ -336,7 +337,7 @@ class NavigationView extends AbstractView {
      */
     public static function getTeamButton(Core $core, Gradeable $gradeable, ?GradedGradeable $graded_gradeable) {
         // Team management button, only visible on team assignments
-        $date = $core->getDateTimeNow();
+        $date = DateUtils::getDateTimeNow();
         $past_lock_date = $date < $gradeable->getTeamLockDate();
         $date_time = null;
 
