@@ -31,10 +31,10 @@ class MultiResponseTester extends TestCase {
     private function validateWebResponse(): void {
         $expected = <<<'EOD'
 <div class="content">
-    You don't have access to this page. <br />
-    Reason: <b>You&nbsp;don't&nbsp;have&nbsp;access&nbsp;to&nbsp;this&nbsp;page.</b><br />
+    You don't have access to this page. <br /><br />
+    Reason: <b>You&nbsp;don't&nbsp;have&nbsp;access&nbsp;to&nbsp;this&nbsp;page.</b><br /><br />
     Please contact system administrators if you believe this is a mistake.<br />
-    Click <a href = "http://example.com"> here </a> to back to homepage and see your courses list.
+    Click <a href="http://example.com">here</a> to back to homepage and see your courses list.
 </div>
 
 EOD;

@@ -3,8 +3,6 @@
 namespace app\views;
 
 use app\views\AbstractView;
-use app\models\User;
-use app\models\AutogradingStatusController;
 
 class AutogradingStatusView extends AbstractView {
     public function displayPage(array $progress) {

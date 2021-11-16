@@ -3,7 +3,7 @@
 # This script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
-    exit
+    exit 3
 fi
 
 # Configuration
@@ -23,7 +23,7 @@ fi
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Submitty master database doesn't exist."
-    exit 1
+    exit 4
 fi
 
 # Ensure that terms table exists within Submitty Master DB.
@@ -31,15 +31,22 @@ sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN (
 table_count=`PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -tAc "${sql}"`
 if [[ $table_count -ne "1" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
-    exit 1
+    exit 4
+fi
+
+amend=0
+if [ "${1}" = "-a" ] || [ "${1}" = "--amend" ]; then
+    shift
+    amend=1
 fi
 
 # Check that there are exactly 4 command line arguments.
 if [[ $# -ne "4" ]] ; then
-    echo "Usage: create_term.sh  <term>  '<name of term>'  <start date>  <end date>"
+    echo "Usage: create_term.sh  [-a|--amend] <term>  '<name of term>'  <start date>  <end date>"
     echo "  <name of term> must be properly escaped."
     echo "  <start date> and <end date> must be in 'MM/DD/YYYY' format."
-    exit 1
+    echo "  use --amend to also allow amending an existing term"
+    exit 5
 fi
 
 semester=$1
@@ -52,36 +59,44 @@ regex='^(0[0-9]|1[0-2])/(0[0-9]|[1-2][0-9]|3[0-1])/20[0-9]{2}$'
 
 if ! [[ $start =~ $regex ]] ; then
     echo "ERROR: Start date '${start}' invalid.  Use format 'MM/DD/YYYY'."
-    exit 1
+    exit 5
 fi
 
 if ! [[ $end =~ $regex ]] ; then
     echo "ERROR: End date '${end}' invalid.  Use format 'MM/DD/YYYY'."
-    exit 1
+    exit 5
 fi
 
 # Validate that start and end dates are actual calendar dates.
 date -d $start > /dev/null 2>&1
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Start date '${start}' invalid.  Not a calendar date."
-    exit 1
+    exit 5
 fi
 
 date -d $end > /dev/null 2>&1
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: End date '${end}' invalid.  Not a calendar date."
-    exit 1
+    exit 5
 fi
 
 # INSERT new term into master DB
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -qc "
+insert_string="
 INSERT INTO terms (term_id, name, start_date, end_date)
-VALUES ('${semester}', '${name}', '${start}', '${end}');"
+VALUES ('${semester}', '${name}', '${start}', '${end}')"
 
-if [[ $? -ne "0" ]] ; then
-    echo "ERROR: Failed to INSERT new term into master DB."
-    exit 1
+if [ ${amend} -eq 1 ]; then
+    insert_string+="
+ON CONFLICT (term_id)
+DO UPDATE SET name=EXCLUDED.name, start_date=EXCLUDED.start_date, end_date=EXCLUDED.end_date"
 fi
 
-echo "'${semester}' term has been INSERTed into the master DB."
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -qc "${insert_string};"
+
+if [[ $? -ne "0" ]] ; then
+    echo "ERROR: Failed to INSERT $([ ${amend} -eq 1 ] && echo 'or AMEND ')new term into master DB."
+    exit 6
+fi
+
+echo "'${semester}' term has been INSERTed $([ ${amend} -eq 1 ] && echo 'or AMENDed ')into the master DB."
 echo "You may now create courses for the '${semester}' term."
