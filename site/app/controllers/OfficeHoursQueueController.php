@@ -531,6 +531,7 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->addSuccessMessage("Queue Contact Information Changed");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/send_queue_message", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
@@ -553,6 +554,7 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->addSuccessMessage("Message Sent To Queue");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse
@@ -574,7 +576,6 @@ class OfficeHoursQueueController extends AbstractController {
             )
         );
     }
-
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
