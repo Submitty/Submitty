@@ -583,23 +583,20 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/queue_message", methods={"GET"})
-     * @return MultiResponse
+     * @return RedirectResponse|WebResponse
      */
     public function showQueueMessage() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
         }
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return MultiResponse::webOnlyResponse(
+        return
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewStatus',
                 new OfficeHoursQueueModel($this->core)
-            )
         );
     }
 

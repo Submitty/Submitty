@@ -315,10 +315,6 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->niceNames[$name] ?? $name;
     }
 
-    public function getCourse(): string {
-        return $this->core->getFullCourseName();
-    }
-
     public function getQueueSocketMessage() {
         return $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) != 'null' ? $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) : null;
     }

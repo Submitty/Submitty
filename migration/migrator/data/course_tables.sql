@@ -928,7 +928,8 @@ CREATE TABLE public.queue_settings (
     token text,
     regex_pattern character varying,
     contact_information boolean DEFAULT true NOT NULL,
-    message character varying(400) DEFAULT NULL::character varying
+    message character varying(400) DEFAULT NULL::character varying,
+    message_sent_time timestamp with time zone
 );
 
 
