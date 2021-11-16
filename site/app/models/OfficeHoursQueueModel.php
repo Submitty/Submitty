@@ -316,6 +316,25 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getQueueSocketMessage() {
-        return $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) != 'null' ? $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']) : null;
+        $row = $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']);
+        if ($row['message'] != null) {
+            $current_time = $this->core->getDateTimeNow();
+            $sent_time = new DateTime($row['message_sent_time']);
+            $elapsed_time = $current_time->diff($sent_time);
+            //see if message was sent today
+            if ($elapsed_time->days == 0) {
+                //if less than 80 minutes have passed
+                if ($elapsed_time->i < 80) {
+                    return $row['message'];
+                }
+                else {
+                    return null;
+                }
+            }
+            else {
+                return null;
+            }
+        }
+        return null;
     }
 }

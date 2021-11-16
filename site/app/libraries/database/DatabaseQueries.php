@@ -6582,14 +6582,15 @@ AND gc_id IN (
             $this->course_db->query("UPDATE queue_settings SET message = NULL WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$queue_code]);
         }
         else {
-            $this->course_db->query("UPDATE queue_settings SET message = ? WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$message, $queue_code]);
+            $current_date = $this->core->getDateTimeNow();
+            $this->course_db->query("UPDATE queue_settings SET message = ?, message_sent_time = ? WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$message, $current_date, $queue_code]);
         }
     }
 
     public function getQueueMessage($queue_code) {
-        $this->course_db->query("SELECT message from queue_settings where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
+        $this->course_db->query("SELECT message, message_sent_time from queue_settings where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
         if (count($this->course_db->rows()) > 0) {
-            return $this->course_db->rows()[0]['message'];
+            return $this->course_db->rows()[0];
         }
         else {
             return null;
