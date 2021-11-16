@@ -51,7 +51,7 @@
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
     {% if viewer.getQueueSocketMessage() %}
         <div class = "queue-message">
-            <p id="queue-message-msg-time" style="position: relative; float: right;"> Today at {{ viewer.getQueueSocketMessageSentTime() }}</p>
+            <p id="queue-message-msg-time" style="position: relative; float: right;"> </p>
             <h3 id="queue-message-prompt">
                 Message From Queue Admins:<br>
             </h3>
