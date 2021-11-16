@@ -337,4 +337,13 @@ class OfficeHoursQueueModel extends AbstractModel {
         }
         return null;
     }
+
+    public function getQueueSocketMessageSentTime() {
+        $row = $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']);
+        if ($row['message'] != null) {
+            $sent_time = new DateTime($row['message_sent_time']);
+            return $sent_time->format("h:i");
+        }
+        return null;
+    }
 }
