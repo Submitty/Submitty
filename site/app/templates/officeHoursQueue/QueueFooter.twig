@@ -318,7 +318,7 @@
         let current_code = '{{ viewer.getCurrentQueueCode() }}'
         if (current_code === queue_code) {
             queueMessage();
-            location.reload();
+            updateQueueStatus();
         }
     {% endif %}
   }
