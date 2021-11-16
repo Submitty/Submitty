@@ -323,8 +323,8 @@ class OfficeHoursQueueModel extends AbstractModel {
             $elapsed_time = $current_time->diff($sent_time);
             //see if message was sent today
             if ($elapsed_time->days == 0) {
-                //if less than 80 minutes have passed
-                if ($elapsed_time->i < 80) {
+                //if less than 2 hours have passed, show the message
+                if ($elapsed_time->h < 2) {
                     return $row['message'];
                 }
                 else {

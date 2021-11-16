@@ -546,17 +546,11 @@ class OfficeHoursQueueController extends AbstractController {
             $this->core->addErrorMessage("Missing queue name");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
         }
-
-        $message = trim($_POST['socket-message']) != 'null' ? trim($_POST['socket-message']) : null;
+        $message = trim($_POST['socket-message']);
         $code = trim($_POST['code']);
         $this->core->getQueries()->setQueueMessage($code, $message);
-        if ($message) {
-            $this->sendSocketMessage(['type' => 'update_message', 'remove' => 'false']);
-            $this->core->addSuccessMessage("Message Sent To Queue");
-        }
-        else {
-            $this->sendSocketMessage(['type' => 'update_message', 'remove' => 'true']);
-        }
+        $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code]);
+        $this->core->addSuccessMessage("Message Sent To Queue");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
     /**

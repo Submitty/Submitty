@@ -224,7 +224,7 @@
                 updateAnnouncement();
                 break;
             case "update_message":
-                updateMessage(msg.remove);
+                updateMessage(msg.queue_code);
             default:
                 console.log("Unknown message received.");
                 break;
@@ -313,36 +313,16 @@
       });
   }
 
-  function updateMessage(remove) {
-      location.reload();
-      if (remove === 'false') {
-          queueMessage();
-      }
+  function updateMessage(queue_code) {
+    {% if viewer.inQueue() %}
+        let current_code = '{{ viewer.getCurrentQueueCode() }}'
+        if (current_code === queue_code) {
+            queueMessage();
+            location.reload();
+        }
+    {% endif %}
   }
 
-  //set removal time on TA side
-  function setQueueMessageExpire(code) {
-      let now = new Date();
-      const item = {
-          queue: code,
-          time: now.getTime(),
-          formatted_time: now.toLocaleString()
-      }
-      localStorage.setItem('QueueMessageExpire', JSON.stringify(item));
-  }
-
-  //if there is a message and it's time to remove it, call the ajax method
-  if (localStorage.getItem('QueueMessageExpire')) {
-      let current_time = new Date();
-      const sent = JSON.parse(localStorage.getItem('QueueMessageExpire'));
-      const queue_code = sent.queue;
-      const sent_time = sent.time;
-      //get rid of message after 80 minutes
-      if(current_time.getTime() - 5000000 > sent_time) {
-          removeQueueMessage(queue_code);
-          localStorage.removeItem('QueueMessageExpire');
-      }
-  }
 
   
 </script>
