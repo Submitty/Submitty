@@ -50,7 +50,7 @@
     <div id="release_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
         <div {% if not electronic %}hidden{% endif %} id="release_toggle_container">
             <fieldset>
-                <legend>Will this assignment have a grades released date?</legend>
+                <legend>Will this assignment have a grades released date? (Not having a release date will let students see their grade immediately)</legend>
                 <input id="has_release_date_yes" class="date-radio" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
                 <input id="has_release_date_no" class="date-radio" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
             </fieldset>
