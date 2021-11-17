@@ -122,6 +122,27 @@ SET default_tablespace = '';
 
 
 --
+-- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_metrics (
+    user_id text NOT NULL,
+    team_id text NOT NULL,
+    g_id text NOT NULL,
+    g_version integer NOT NULL,
+    testcase_id text NOT NULL,
+    elapsed_time real,
+    max_rss_size integer,
+    points integer NOT NULL,
+    passed boolean NOT NULL,
+    hidden boolean NOT NULL,
+    CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
+    CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
 --
 
