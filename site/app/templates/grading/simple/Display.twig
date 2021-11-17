@@ -179,7 +179,6 @@
                 </tr>
             </tbody>
         {% else %}
-            {% set row_index_start = 0 %}
             {% for section_id, section in sections %}
                 {# Section header #}
                 <tbody>
@@ -207,10 +206,9 @@
                 {# /Section header #}
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
                     {% for grade in section.rows %}
-                        {{ _self.render_row(action, gradeable, section, grade, loop.index0 + row_index_start, components_numeric) }}
+                        {{ _self.render_row(action, gradeable, section_id, grade, loop.index0, components_numeric) }}
                     {% endfor %}
                 </tbody>
-                {% set row_index_start = row_index_start + section.rows|length %}
             {% endfor %}
         {% endif %}
     </table>
@@ -222,8 +220,8 @@
 </div>
 
 {# Render one student's row in the table #}
-{% macro render_row(action, gradeable, section, grade, index, components_numeric) %}
-    <tr id="row-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
+{% macro render_row(action, gradeable, section_id, grade, index, components_numeric) %}
+    <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ grade.getSubmitter().getAnonId() }}" data-row="{{ index }}"
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -239,15 +237,15 @@
         <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedLastName() }}</td>
 
         {% if action == 'lab' %}
-            {{ _self.render_lab_cols(gradeable, section, grade, index) }}
+            {{ _self.render_lab_cols(gradeable, section_id, grade, index) }}
         {% else %}
-            {{ _self.render_numeric_cols(gradeable, section, grade, index, components_numeric) }}
+            {{ _self.render_numeric_cols(gradeable, section_id, grade, index, components_numeric) }}
         {% endif %}
     </tr>
 {% endmacro %}
 
 {# Render the grading columns for a lab #}
-{% macro render_lab_cols(gradeable, section, grade, index) %}
+{% macro render_lab_cols(gradeable, section_id, grade, index) %}
     {% for component in grade.getGradeable().getComponents() %}
         {% if component.isText() %}
             <td>
@@ -258,7 +256,7 @@
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
                 class="cell-grade"
-                id="cell-{{ index }}-{{ loop.index0 }}"
+                id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component_grade.getScore() | default('0') }}"
@@ -283,7 +281,7 @@
 {% endmacro %}
 
 {# Render the grading columns for a test #}
-{% macro render_numeric_cols(gradeable, section, grade, index, components_numeric) %}
+{% macro render_numeric_cols(gradeable, section_id, grade, index, components_numeric) %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
         {% for component in grade.getGradeable().getComponents()|filter((component) => not component.isText()) %}
@@ -297,7 +295,7 @@
                     style="text-align: center; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
                         {{ component_score == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
-                    id="cell-{{ index }}-{{ loop.index0 }}"
+                    id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_score }}"
                     value="{{ component_score }}"
@@ -335,7 +333,7 @@
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
             <textarea class="option-small-box cell-grade"
-                  tabindex="0" id="cell-{{ index }}-{{ text_start + loop.index0 }}"
+                  tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
                   onclick="this.select()"
                   onfocus="adjustHeight(this);"
