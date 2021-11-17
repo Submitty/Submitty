@@ -2,7 +2,6 @@
 
 namespace app\libraries;
 
-use app\models\User;
 use Ds\Set;
 
 /**
@@ -96,28 +95,6 @@ class Utils {
             return $value;
         }
         return null;
-    }
-
-    /**
-     * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
-     */
-    public static function startsWith(string $haystack, string $needle): bool {
-        return substr($haystack, 0, strlen($needle)) === $needle;
-    }
-
-    /**
-     * Checks if string $haystack ends with the string $needle, returning TRUE if it does or FALSE otherwise.
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
-     */
-    public static function endsWith(string $haystack, string $needle): bool {
-        return substr($haystack, (-1 * strlen($needle)), strlen($needle)) === $needle;
     }
 
     /**

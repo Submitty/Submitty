@@ -20,10 +20,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SimpleGraderController extends AbstractController {
     /**
-     * @param $gradeable_id
-     * @param $section
-     * @param $section_type
-     * @param $sort
+     * @param string $gradeable_id
+     * @param int|string|null $section
+     * @param string|null $section_type
+     * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return MultiResponse
      */
@@ -93,9 +93,9 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
-     * @param $view
-     * @param $sort
+     * @param string $gradeable_id
+     * @param null|string $view
+     * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return MultiResponse
      */
@@ -192,7 +192,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return MultiResponse
      */
@@ -279,7 +279,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
      * @return MultiResponse
      */

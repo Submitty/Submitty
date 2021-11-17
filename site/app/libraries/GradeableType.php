@@ -7,11 +7,6 @@ abstract class GradeableType {
     const CHECKPOINTS     = 1;
     const NUMERIC_TEXT    = 2;
 
-    /**
-     * @param int|\app\libraries\GradeableType $type
-     *
-     * @return string
-     */
     public static function typeToString(int $type): string {
         switch ($type) {
             case static::ELECTRONIC_FILE:
@@ -25,11 +20,6 @@ abstract class GradeableType {
         }
     }
 
-    /**
-     * @param $string
-     *
-     * @return int
-     */
     public static function stringToType(string $string): int {
         switch ($string) {
             case "Electronic File":

@@ -30,6 +30,7 @@ coverage.xml
 /site/cypress/downloads/
 /site/cypress/screenshots/
 /site/cypress/videos/
+/site/public/mjs/
 
 db_update.php
 .setup/data/random_users.txt
