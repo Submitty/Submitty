@@ -1,0 +1,18 @@
+#grading-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    padding: 5px 10px;
+}
+
+.rubric-popup-panel {
+    flex: 1;
+    position: relative;
+}
+
+.rubric-popup-panel .rubric_panel {
+    position: absolute;
+    display: inherit;
+    width: 100%;
+}

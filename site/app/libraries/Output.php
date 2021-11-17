@@ -46,6 +46,14 @@ class Output {
     /** @var Set */
     private $module_js;
 
+    private $header_override_view = null;
+    private $header_override_function = null;
+    private $header_override_params = null;
+
+    private $footer_override_view = null;
+    private $footer_override_function = null;
+    private $footer_override_params = null;
+
     private $use_header = true;
     private $use_footer = true;
     private $use_mobile_viewport = false;
@@ -398,6 +406,32 @@ HTML;
         return $this->loaded_views[$class];
     }
 
+    public function overrideHeader($view, string $function, ...$args) {
+        if ($view === null) {
+            $this->header_override_view = null;
+            $this->header_override_function = null;
+            $this->header_override_params = null;
+        }
+        else {
+            $this->header_override_view = $view;
+            $this->header_override_function = $function;
+            $this->header_override_params = $args;
+        }
+    }
+
+    public function overrideFooter($view, string $function, ...$args) {
+        if ($view === null) {
+            $this->footer_override_view = null;
+            $this->footer_override_function = null;
+            $this->footer_override_params = null;
+        }
+        else {
+            $this->footer_override_view = $view;
+            $this->footer_override_function = $function;
+            $this->footer_override_params = $args;
+        }
+    }
+
     public function getOutput() {
         $return = "";
         $return .= $this->renderHeader();
@@ -408,7 +442,12 @@ HTML;
 
     protected function renderHeader() {
         if ($this->use_header) {
-            return $this->controller->header();
+            if ($this->header_override_view === null) {
+                return $this->controller->header();
+            }
+            else {
+                return $this->renderTemplate($this->header_override_view, $this->header_override_function, ...$this->header_override_params);
+            }
         }
         else {
             return '';
@@ -417,7 +456,12 @@ HTML;
 
     protected function renderFooter() {
         if ($this->use_footer) {
-            return $this->controller->footer();
+            if ($this->footer_override_view === null) {
+                return $this->controller->footer();
+            }
+            else {
+                return $this->renderTemplate($this->footer_override_view, $this->footer_override_function, ...$this->footer_override_params);
+            }
         }
         else {
             return '';

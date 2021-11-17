@@ -1284,6 +1284,145 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Display a single panel from the electronic grading page
+     *
+     * @param $who_id This is the user we wish to view, this field will only be passed on when the request originates
+     *                  on the grading index page
+     * @param $from This is the user that was being viewed when a navigation button was clicked on the TA grading
+     *                  interface.  Knowing who we were viewing allows us to decide who to view next.
+     * @param $to Used to determine the direction to move in, either 'prev' or 'next'
+     * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
+     *
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/popup")
+     */
+    public function showGradingPopup($gradeable_id, $who_id = '', $gradeable_version = null, $anon_mode = false, $panel = "", $window_id = -1) {
+        if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
+            $anon_mode = true;
+        }
+        /** @var Gradeable $gradeable */
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid Gradeable!');
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $team = $gradeable->isTeamAssignment();
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            $peer = true;
+        }
+        $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
+
+        // Get the graded gradeable for the submitter we are requesting
+        $graded_gradeable = false;
+        if ($blind_grading !== "unblind" || $anon_mode) {
+            $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
+        }
+        else {
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
+        }
+        if ($graded_gradeable === false) {
+            //TODO: redirect error page
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            $peer = false;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
+        }
+
+        $show_verify_all = false;
+        //check if verify all button should be shown or not
+        foreach ($gradeable->getComponents() as $component) {
+            $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
+            if ($graded_component === null) {
+                continue;
+            }
+            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId() && $graded_component->getVerifierId() === '') {
+                $show_verify_all = true;
+                break;
+            }
+        }
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
+        $show_verify_all = $show_verify_all && $can_verify;
+
+        $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
+
+        $display_version = intval($gradeable_version ?? '0');
+        if ($display_version <= 0) {
+            $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        }
+
+        $late_days_user = null;
+        if ($gradeable->isTeamAssignment()) {
+            // If its a team assignment, use the leader for late days...
+            $late_days_user = $this->core->getQueries()->getUserById($graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+        }
+        else {
+            $late_days_user = $graded_gradeable->getSubmitter()->getUser();
+        }
+
+        $ldi = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+        if ($ldi === null) {
+            $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
+        }
+        else {
+            $late_status = $ldi->getStatus();
+        }
+        $rollbackSubmission = -1;
+        $previousVersion =  $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() - 1;
+        // check for rollback submission only if the Active version is greater than 1 and that too is late.
+        if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
+            while ($previousVersion) {
+                $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
+                if ($prevVersionInstance == null) {
+                    $rollbackSubmission = -1;
+                    break;
+                }
+                $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+                $daysLate = $prevVersionInstance->getDaysLate();
+
+                // If this version is a good submission then it the rollback Submision
+                if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
+                    $rollbackSubmission = $previousVersion;
+                    break;
+                }
+                // applying same condition for previous version. i.e going back one version
+                $previousVersion -= 1;
+            }
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "submitter_id" => $who_id,
+            "action" => "VIEW_PAGE",
+        ];
+        Logger::logTAGrading($logger_params);
+        $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
+        $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $graded_gradeable->getSubmitter()->getId());
+        $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
+
+        $this->core->getOutput()->addInternalCss('forum.css');
+        $this->core->getOutput()->addInternalCss('electronic.css');
+
+        $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('grade-inquiry.css');
+        $this->core->getOutput()->addInternalJs('grade-inquiry.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
+        $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPopup', $gradeable, $graded_gradeable, $panel, $display_version, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $rollbackSubmission, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $window_id);
+        // $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPopup', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
+    }
+
+    /**
      * Display the electronic grading page
      *
      * @param string $who_id This is the user we wish to view, this field will only be passed on when the request originates

@@ -155,9 +155,13 @@ $(function () {
     let position = $(this).val();
     if (panelSpanId) {
       const panelId = panelSpanId.split(/(_|-)btn/)[0];
-      setPanelsVisibilities(panelId, null, position);
+      if (position === "popup") {
+        openPopup(panelId);
+      } else {
+        setPanelsVisibilities(panelId, null, position);
+        checkNotebookScroll();
+      }
       $('select#' + panelId + '_select').hide();
-      checkNotebookScroll();
     }
   });
   notebookScrollLoad();
@@ -188,6 +192,13 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  panelElements.forEach((panel) => {
+    if (sessionStorage.getItem("ta-grading-popup-open-" + panel.str) !== null) {
+      openPopup(panel.str);
+    }
+  });
+
 });
 
 function changeStudentArrowTooltips(data) {
@@ -427,8 +438,8 @@ function updatePanelOptions() {
   if (taLayoutDet.numOfPanelsEnabled === 1) {
     return;
   }
-  $(".grade-panel .panel-position-cont").attr("size", taLayoutDet.numOfPanelsEnabled);
   const panelOptions = $(".grade-panel .panel-position-cont option");
+  let optionCount = 3;
   panelOptions.each(idx => {
     if (panelOptions[idx].value === "leftTop") {
       if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName === "RIGHT")) {
@@ -443,6 +454,7 @@ function updatePanelOptions() {
         panelOptions[idx].classList.add("hide");
       }
       else {
+        optionCount++;
         panelOptions[idx].classList.remove("hide");
       }
     }
@@ -459,10 +471,12 @@ function updatePanelOptions() {
         panelOptions[idx].classList.add("hide");
       }
       else {
+        optionCount++;
         panelOptions[idx].classList.remove("hide");
       }
     }
   });
+  $(".grade-panel .panel-position-cont").attr("size", optionCount);
 }
 
 /*
@@ -1653,4 +1667,54 @@ function collapseFile(panel = "submission"){
     $(fileFullPanelOptions[panel]["fileView"]).css('left', "");
     $(fileFullPanelOptions[panel]["fileView"]).hide();
   });
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#testing_for_availability
+function storageAvailable(type) {
+  var storage;
+  try {
+      storage = window[type];
+      var x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+  }
+  catch(e) {
+      return e instanceof DOMException && (
+          // everything except Firefox
+          e.code === 22 ||
+          // Firefox
+          e.code === 1014 ||
+          // test name field too, because code might not be present
+          // everything except Firefox
+          e.name === 'QuotaExceededError' ||
+          // Firefox
+          e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+          // acknowledge QuotaExceededError only if there's something already stored
+          (storage && storage.length !== 0);
+  }
+}
+
+function openPopup(panel) {
+  if (storageAvailable("localStorage") && storageAvailable("sessionStorage")) {
+    let windowId = sessionStorage.getItem("ta-grading-popup-window-id");
+    if (windowId === null) {
+      windowId = localStorage.getItem("ta-grading-popup-next-window-id");
+      if (windowId === null) {
+        windowId = 1;
+      } else {
+        windowId = parseInt(windowId);
+      }
+      localStorage.setItem("ta-grading-popup-next-window-id", windowId + 1);
+    }
+    
+    let url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'grade', 'popup']) + "?";
+    let gradingPanelHeader = $("#grading-panel-header");
+    let urlParamData = {"who_id": gradingPanelHeader.attr("data-who-id"), "gradeable_version": gradingPanelHeader.attr("data-version"), "window_id": windowId, "panel": panel};
+
+    console.log(url + new URLSearchParams(urlParamData));
+
+    window.open(url + new URLSearchParams(urlParamData), "ta-grading-popup-" + panel + "-" + windowId, "popup");
+    sessionStorage.setItem("ta-grading-popup-open" + panel, true);
+  }
 }

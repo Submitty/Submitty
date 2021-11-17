@@ -891,6 +891,66 @@ HTML;
         ]);
     }
 
+    public function hwGradingPopup(Gradeable $gradeable, GradedGradeable $graded_gradeable, string $type, int $display_version, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, $rollbackSubmission, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, $window_id) {
+        $this->core->getOutput()->overrideHeader(['grading', 'ElectronicGrader'], "renderGradingPopupHeader", $graded_gradeable, $anon_mode, $blind_grading, $window_id);
+        $this->core->getOutput()->overrideFooter(['grading', 'ElectronicGrader'], "renderGradingPopupFooter");        
+        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        $ta_grading = $this->core->getUser()->getGroup() !== User::GROUP_STUDENT;
+        $return = "";
+        // See ta-grading.js - panelElements
+        if ($type === "autograding_results") {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
+        }
+        elseif ($type === "submission_browser") {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
+        }
+        elseif ($type === "grading_rubric") {
+            $is_peer_grader = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === 4;
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
+        }
+        elseif ($type === "solution_ta_notes") {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
+        }
+        elseif ($type === "student_info") {
+
+        } else {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $ta_grading, $graded_gradeable);
+        }
+        return $return;
+        /*
+        peer
+        peerEditMarks
+        discussion
+        notebook
+        regrade
+        */
+    }
+
+    public function renderGradingPopupHeader(GradedGradeable $graded_gradeable, bool $anon_mode, string $blind_grading, $window_id) {
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+        $this->core->getOutput()->addInternalCss("grading-popup.css");
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPopupHeader.twig", [
+            "base_url" => $this->core->getConfig()->getBaseUrl(),
+            "course_url" => $this->core->buildCourseUrl(),
+            "csrf_token" => $this->core->getCsrfToken(),
+            "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
+            "css" => $this->core->getOutput()->getCss(),
+            "js" => $this->core->getOutput()->getJs(),
+            "window_id" => $window_id,
+            "page_title" => "temp",
+            "anon_mode" => $anon_mode,
+            "peer_blind_grading" => $blind_grading,
+            "team_assignment" => $graded_gradeable->getGradeable()->isTeamAssignment(),
+            "submitter" => $graded_gradeable->getSubmitter(),
+            "isBlind" => $graded_gradeable->getGradeable()->getLimitedAccessBlind() == 2
+        ]);
+    }
+
+    public function renderGradingPopupFooter() {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPopupFooter.twig", []);
+    }
+
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
@@ -1013,7 +1073,10 @@ HTML;
                 $isRegradePanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
                 $error_message['color'],
-                $error_message['message']
+                $error_message['message'],
+                $display_version,
+                $anon_mode,
+                $graded_gradeable->getSubmitter()->getAnonId()
             );
 
             $return .= <<<HTML
@@ -1170,7 +1233,7 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message, $version, $anon_mode, $submitter_id): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
@@ -1179,7 +1242,10 @@ HTML;
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
             "error_color" => $error_color,
-            "error_message" => $error_message
+            "error_message" => $error_message,
+            "version" => $version,
+            "anon_mode" => $anon_mode,
+            "who_id" => $submitter_id
         ]);
     }
 

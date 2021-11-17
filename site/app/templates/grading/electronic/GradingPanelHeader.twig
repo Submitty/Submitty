@@ -19,7 +19,7 @@
     });
 </script>
 
-<div id="grading-panel-header">
+<div id="grading-panel-header" data-version="{{ version }}" data-who-id="{{ who_id }}">
     <div class="panel-header-box">
         <span class="grade-panel" id="autograding_results_btn">
             <button title="Show/Hide Autograding Testcases (Press A)"
@@ -137,6 +137,9 @@
         </option>
         <option class="panel-position-right" value="rightBottom">
             Open as bottom right panel
+        </option>
+        <option value="popup">
+            Open as popup
         </option>
     </select>
 {% endmacro %}
