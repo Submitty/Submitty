@@ -123,8 +123,23 @@ function toggleUpdate() {
     }
 }
 
+function updateStackTrace() {
+	$.ajax({
+		url: buildUrl(['autograding_status', 'get_stack']),
+		type: 'GET',
+		success: function (response) {
+			console.log(response);
+			const json = JSON.parse(response);
+			console.log(json);
+			const error_log = $('.stack-trace');
+			error_log.append(json.message);
+		}
+	});
+}
+
 $(document).ready(() => {
     $('#toggle-btn').text('Pause Update');
     $('#toggle-btn').on('click', toggleUpdate);
     time_id = setTimeout(updateTable, refresh_freq);
+	updateStackTrace();
 });

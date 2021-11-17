@@ -20,3 +20,11 @@
 #course-table td:nth-of-type(3)::before { content: "Gradeable Id"; }
 #course-table td:nth-of-type(4)::before { content: "Interactive"; }
 #course-table td:nth-of-type(5)::before { content: "Regrade"; }
+
+.stack-trace {
+	width: 100%;
+    height: fit-content;
+    white-space: normal;
+    padding: 1em;
+    background: var(--standard-light-gray);
+}
