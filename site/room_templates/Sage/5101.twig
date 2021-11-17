@@ -1,5 +1,5 @@
 <script>
-  var title = "Amos Eaton 214"
+  var title = "Sage 5101"
   note_left = ""
   note_right = "seat 1 is on the right, when facing the screen"
 
@@ -21,9 +21,9 @@
 
   <script>
     var seats = {
-      "left" :  [5,6,6,5,5,5,6,6,6,5,5,5],
-      "middle" : [4,4,6,7,7,6,0,0,0,0,0,0],
-      "right" : [5,6,6,5,5,5,6,6,6,5,5,5],
+      "left" :  [2,0,4,4,4,4],
+      "middle" : [2,4,5,5,5,6],
+      "right" : [2,4,4,3,3,2]
     }
     var used = {};
 
@@ -116,7 +116,7 @@
     }
 
     function render_section_row(section, row) {
-      var radius = BASE_ROW_RADIUS + row * 20
+      var radius = BASE_ROW_RADIUS + row * 33
       var width = BASE_ROW_WIDTH
 
       if(section == "middle" && row >= 14) {
@@ -312,11 +312,11 @@
     ctx.textAlign = "center";
 
     var EXPANDED = expand_config(config);
-    var BASE_NUM_ROWS = 12
+    var BASE_NUM_ROWS = 6
     var BASE_ROW_HEIGHT = -2000
     var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
-    var BASE_ROW_RADIUS = 2150
-    var BASE_ROW_WIDTH = 6
+    var BASE_ROW_RADIUS = 2200
+    var BASE_ROW_WIDTH = 9
     var BASE_ROW_COLOR = "grey"
     var BASE_POINT_RADIUS = 7
 
