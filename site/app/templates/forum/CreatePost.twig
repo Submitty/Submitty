@@ -5,7 +5,7 @@
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
                 {% set expiringVisual = (expiring) ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement' %}
-                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Pinned thread -- will expire soon" aria-label="Pinned thread -- will expire soon"><i class="fas fa-thumbtack"></i></a>
+                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Thread is expiring soon click to unpin" aria-label="Thread is expiring soon click to unpin"><i class="fas fa-thumbtack"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
