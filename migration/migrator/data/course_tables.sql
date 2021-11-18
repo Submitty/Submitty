@@ -641,12 +641,13 @@ CREATE TABLE public.late_day_cache (
     team_id character varying(255),
     g_title character varying(255),
     late_day_date timestamp without time zone NOT NULL,
-    late_days_remaining integer,
+    late_days_remaining integer NOT NULL,
     late_days_allowed integer,
     submission_days_late integer,
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((g_title IS NOT NULL) AND (submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
     CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -2213,7 +2214,7 @@ ALTER TABLE ONLY public.grading_rotating
 --
 
 ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
+    ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
 
 
 --
@@ -2221,7 +2222,7 @@ ALTER TABLE ONLY public.late_day_cache
 --
 
 ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT late_day_cache_team FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
+    ADD CONSTRAINT late_day_cache_team FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -2229,7 +2230,7 @@ ALTER TABLE ONLY public.late_day_cache
 --
 
 ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+    ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
