@@ -398,6 +398,13 @@
     }
 
     $(document).ready(function() {
+        {% if not poll is defined %}
+            const today = new Date();
+            const date_string = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+            $("#poll-date").flatpickr({
+                defaultDate:date_string
+            })
+        {% endif %}
         setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);
