@@ -26,11 +26,7 @@ def up(config, database, semester, course):
             late_day_exceptions INTEGER, 
             late_day_status INTEGER,
             late_days_change INTEGER NOT NULL,
-            CONSTRAINT ldc_user_team_id_check CHECK (
-                ((user_id IS NOT NULL) OR (team_id IS NOT NULL))
-                AND
-                NOT ((user_id IS NOT NULL) AND (team_id IS NOT NULL))
-            )
+            CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
         );
     ''')
 
