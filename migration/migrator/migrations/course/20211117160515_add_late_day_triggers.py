@@ -344,6 +344,13 @@ def down(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
+    # Drop triggers
+    database.execute("DROP TRIGGER IF EXISTS gradeable_version_change ON electronic_gradeable_version;")
+    database.execute("DROP TRIGGER IF EXISTS late_days_allowed_change ON late_days;")
+    database.execute("DROP TRIGGER IF EXISTS late_day_extension_change ON late_day_exceptions;")
+    database.execute("DROP TRIGGER IF EXISTS electronic_gradeable_change ON electronic_gradeable;")
+    database.execute("DROP TRIGGER IF EXISTS gradeable_delete ON gradeable;")
+
     # Drop functions
     database.execute("DROP FUNCTION IF EXISTS grab_late_day_gradeables_for_user(text);")
     database.execute("DROP FUNCTION IF EXISTS grab_late_day_updates_for_user(text);")
@@ -353,12 +360,3 @@ def down(config):
     database.execute("DROP FUNCTION IF EXISTS late_day_extension_change();")
     database.execute("DROP FUNCTION IF EXISTS electronic_gradeable_change();")
     database.execute("DROP FUNCTION IF EXISTS gradeable_delete();")
-
-    # Drop triggers
-    database.execute("DROP TRIGGER IF EXISTS gradeable_version_change ON electronic_gradeable_version;")
-    database.execute("DROP TRIGGER IF EXISTS late_days_allowed_change ON late_days;")
-    database.execute("DROP TRIGGER IF EXISTS late_day_extension_change ON late_day_exceptions;")
-    database.execute("DROP TRIGGER IF EXISTS electronic_gradeable_change ON electronic_gradeable;")
-    database.execute("DROP TRIGGER IF EXISTS gradeable_delete ON gradeable;")
-    
-    pass
