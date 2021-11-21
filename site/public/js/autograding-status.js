@@ -124,22 +124,58 @@ function toggleUpdate() {
 }
 
 function updateStackTrace() {
-	$.ajax({
-		url: buildUrl(['autograding_status', 'get_stack']),
-		type: 'GET',
-		success: function (response) {
-			console.log(response);
-			const json = JSON.parse(response);
-			console.log(json);
-			const error_log = $('.stack-trace');
-			error_log.append(json.message);
-		}
-	});
+    $.ajax({
+        url: buildUrl(['autograding_status', 'get_stack']),
+        type: 'GET',
+        success: function (response) {
+            const json = JSON.parse(response);
+            const error_log = $('.stack-trace');
+            if (json.status === "success") {
+                error_log.append('<div class="stack-trace-wrapper"></div>');
+                error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>')
+                const wrapper = $('.stack-trace-wrapper');
+                const info = $('.stack-trace-info');
+                try {
+                    // Empty "Exception" object used to break out of foreach
+                    var BreakException = {};
+                    Object.keys(json.data).forEach((key, i) => {
+                        // Work around to break not working in foreach, throw and catch the error to exit the foreach
+                        if (i === 7) {
+                            throw BreakException;
+                        }
+                        let new_tab = null;
+                        if (i === 0) {
+                            new_tab = $('<a class="tab active-tab"></a>').text(key);
+                            info.text(json.data[key]);
+                        }
+                        else {
+                            new_tab = $('<a class="tab"></a>').text(key);
+                        }
+                        wrapper.append(new_tab);
+                        new_tab.attr('data', json.data[key]);
+                        new_tab.on('click', () => {
+                            $(".active-tab").removeClass("active-tab");
+                            new_tab.addClass("active-tab");
+                            $('.stack-trace-info').text(new_tab.attr('data'));
+                        });
+                    });
+                }
+                catch (e) {
+                    if (e !== BreakException) {
+                        throw e;
+                    }
+                }
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        }
+    });
 }
 
 $(document).ready(() => {
     $('#toggle-btn').text('Pause Update');
     $('#toggle-btn').on('click', toggleUpdate);
     time_id = setTimeout(updateTable, refresh_freq);
-	updateStackTrace();
+    updateStackTrace();
 });

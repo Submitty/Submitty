@@ -1997,6 +1997,10 @@ header > * {
     height: 10%;
 }
 
+.custom-scrollbar::-webkit-scrollbar-corner {
+    background: var(--default-white);
+}
+
 .badge-1 {
     background-color: var(--category-color-1);
     color: var(--text-black);
