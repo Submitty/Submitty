@@ -670,10 +670,10 @@ function setupSimpleGrading(action) {
     // default key movement
     $(document).on("keydown", function(event) {
         // if input cell selected, use this to check if cursor is in the right place
-        var input_cell = $("cell-grade:focus");
+        const input_cell = $("cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
-        if ($(event.target).attr('clicked') === null || $(event.target).attr('clicked') < 2) {
+        if ($(event.target).attr('clicked') === undefined || $(event.target).attr('clicked') < 2) {
             if(event.code === "ArrowLeft" && (!input_cell.length || (
                     input_cell[0].selectionStart === 0 &&
                     input_cell[0].selectionEnd - input_cell[0].selectionStart === 0))) {

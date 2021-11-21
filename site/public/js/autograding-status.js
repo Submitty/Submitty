@@ -38,7 +38,7 @@ function updateTable() {
                     Object.keys(json.course_info[key1]).forEach(key2 => {
                         const info = json.course_info[key1][key2];
                         const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
-                        new_row.insertCell().innerHTML = course_name[0];
+                        new_row.insert().innerHTML = course_name[0];
                         new_row.insertCell().innerHTML = course_name[1];
                         new_row.insertCell().innerHTML = key2;
                         new_row.insertCell().innerHTML = info.interactive;
