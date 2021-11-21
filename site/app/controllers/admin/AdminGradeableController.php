@@ -282,7 +282,8 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
-            'has_custom_marks' => $hasCustomMarks
+            'has_custom_marks' => $hasCustomMarks,
+            'is_exam' => $gradeable->isScannedExam()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -982,7 +983,6 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setAutogradingConfigPath(
                 FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
             );
-            $gradeable->setHasDueDate(false);
         }
 
         // Generate a blank component to make the rubric UI work properly
