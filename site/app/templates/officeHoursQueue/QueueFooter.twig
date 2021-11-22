@@ -224,7 +224,7 @@
                 updateAnnouncement();
                 break;
             case "update_message":
-                updateMessage(msg.queue_code);
+                updateMessage(msg.queue_code, msg.alert);
             default:
                 console.log("Unknown message received.");
                 break;
@@ -313,11 +313,13 @@
       });
   }
 
-  function updateMessage(queue_code) {
+  function updateMessage(queue_code, alert) {
     {% if viewer.inQueue() %}
         let current_code = '{{ viewer.getCurrentQueueCode() }}'
         if (current_code === queue_code) {
-            queueMessage();
+            if (alert) {
+                queueMessage();
+            }
             updateQueueStatus();
         }
     {% endif %}

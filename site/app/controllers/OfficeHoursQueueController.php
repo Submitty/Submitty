@@ -537,20 +537,28 @@ class OfficeHoursQueueController extends AbstractController {
      * @return RedirectResponse
      */
     public function sendQueueMessage(): RedirectResponse {
-        if (empty($_POST['socket-message'])) {
-            $this->core->addErrorMessage("Missing message");
-            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
-        }
-
         if (empty($_POST['code'])) {
             $this->core->addErrorMessage("Missing queue name");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
         }
-        $message = trim($_POST['socket-message']);
         $code = trim($_POST['code']);
-        $this->core->getQueries()->setQueueMessage($code, $message);
-        $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code]);
-        $this->core->addSuccessMessage("Message Sent To Queue");
+
+        if (!empty($_POST['clear_message'])) {
+            $this->core->getQueries()->setQueueMessage($code, 'null');
+            $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => false]);
+            $this->core->addSuccessMessage("Message cleared");
+        }
+        else {
+            if (empty($_POST['socket-message'])) {
+                $this->core->addErrorMessage("Missing message");
+                return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+            }
+            $message = trim($_POST['socket-message']);
+            $this->core->getQueries()->setQueueMessage($code, $message);
+            $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => true]);
+            $this->core->addSuccessMessage("Message Sent To Queue");
+        }
+
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
     /**
