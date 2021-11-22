@@ -18,7 +18,7 @@ export function init() {
         }
     });
 
-    $('#btn-upload-customization').on('click', function() {
+    $('#btn-upload-customization').on('click', () => {
         promptCustomizationUpload();
     });
 }
