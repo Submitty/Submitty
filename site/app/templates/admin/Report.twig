@@ -76,7 +76,7 @@
                         <input type="file" id="config-upload" name="config_upload" style="display:none">
                     
                             <button
-                                onclick="promptCustomizationUpload.call(this)"
+                                id="btn-upload-customization"
                                 class="btn btn-primary key_to_click"
                                 tabindex="0"
                                 type="button"
@@ -86,12 +86,14 @@
                     </form>
                 </div>
             </div>
-            <button id="toggle-json">Show JSON</button>
-            <div id="customization-json" style="display:none;">
-                {% include 'misc/Markdown.twig' with {
-                    content: '```json\n' ~ json ~ '\n```\n'
-                } only %}
-            </div>
+            {% if json is not null %}
+                <button id="toggle-json">Show JSON</button>
+                <div id="customization-json" style="display:none;">
+                    {% include 'misc/Markdown.twig' with {
+                        content: '```json\n' ~ json ~ '\n```\n'
+                    } only %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

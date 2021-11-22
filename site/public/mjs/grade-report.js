@@ -17,6 +17,10 @@ export function init() {
             $(this).html('Show JSON');
         }
     });
+
+    $('#btn-upload-customization').on('click', function() {
+        promptCustomizationUpload();
+    });
 }
 
 

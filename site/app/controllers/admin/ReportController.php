@@ -47,8 +47,11 @@ class ReportController extends AbstractController {
 
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
-        $json = file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "customization.json"));
-
+        $json = null;
+        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "customization.json");
+        if (file_exists($customization_path)) {
+            $json = file_get_contents($customization_path);
+        }
         $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run, $json);
     }
 
