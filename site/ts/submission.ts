@@ -1,4 +1,4 @@
-
+// TODO: this should be removed as the file upload logic is moved into a module
 declare global {
     interface Window{
         file_array: File[][];
