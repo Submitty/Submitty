@@ -1,7 +1,7 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}queue-socket-message{% endblock %}
 {% block title_tag %}<h1>Send Message To Queue</h1>
-    Note: This message will appear on the student's queue page and will no longer be visible when they leave or are removed.
+    Note: This message will appear on the student's queue page for 2 hours. The message will no longer be visible when they leave or are removed.
 {% endblock %}
 
 {% block body %}
@@ -44,14 +44,18 @@
             <tr>
                 <th scope="col">Queue</th>
                 <th scope="col">Message</th>
+                <th scope="col">Sent Time</th>
             </tr>
             </thead>
             <tbody>
             {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
-                <tr>
-                    <td>{{queue['code']}}</td>
-                    <td>{{queue['message']}}</td>
-                </tr>
+                {% if queue['message'] %}
+                    <tr>
+                        <td>{{queue['code']}}</td>
+                        <td>{{queue['message']}}</td>
+                        <td>{{ queue['message_sent_time'] }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
         </table>
