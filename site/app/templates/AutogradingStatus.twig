@@ -13,7 +13,7 @@
     <h2>
         Course Statistics
     </h2>
-    {# css was added to enable the column names to show up when the windows become to small causing the table to become "mobile-fied"#}
+    {# css was added to enable the column names to show up when the windows become to small causing the table to become "mobile-fied"#}    
     <table class="table table-striped mobile-table" id="course-table">
         <thead>
             <tr>
@@ -42,8 +42,17 @@
                     <td>{{ course_name[0] }}</td>
                     <td>{{ course_name[1] }}</td>
                     <td>{{ gradeable }}</td>
-                    <td>{{ types["interactive"] }}</td>
-                    <td>{{ types["regrade"] }}</td>
+
+                    <td>
+                        {% if types["interactive"] != 0 %}
+                            {{ types["interactive"] }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if types["regrade"] != 0 %}
+                            {{ types["regrade"] }}
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         {% endfor %}
@@ -66,7 +75,7 @@
         </thead>
         <tbody>
             {% for machine, worker_info in progress["ongoing_job_info"] %}
-                    {% for info in worker_info %}
+                {% for info in worker_info %}
                     <tr>
                         <td> {{machine}} </td>
                         <td> {{info["semester"]}} </td>
@@ -76,7 +85,7 @@
                         <td> {{info["elapsed_time"]}} </td>
                         <td> {{info["error"]}} </td>
                     </tr>
-                    {% endfor %}
+                {% endfor %}
             {% endfor %}
         </tbody>
     </table>
@@ -122,32 +131,32 @@
                 </th>
                 {% for machines in progress["machine_grading_counts"]|keys %}
                     {% if machines == progress["machine_grading_counts"]|keys|last %}
-                    <th class="col-md-2 right-boarder">
-                        {{ machines|upper }}
-                    </th>
+                        <th class="col-md-2 right-boarder">
+                            {{ machines|upper }}
+                        </th>
                     {% else %}
-                    <th class="col-md-2">
-                        {{ machines|upper }}
-                    </th>
+                        <th class="col-md-2">
+                            {{ machines|upper }}
+                        </th>
                     {% endif %}
                 {% endfor %}
                 {% for capability in progress["capability_queue_counts"]|keys %}
-                <th class="col-md-2" rowspan="2">
-                    {{ capability|upper }}
-                </th>
+                    <th class="col-md-2" rowspan="2">
+                        {{ capability|upper }}
+                    </th>
                 {% endfor %}
             </tr>
             <tr>
                 {# Should display number of shippers instead for each machine #}
                 {% for machine in progress["machine_grading_counts"]|keys %}
                     {% if machine == progress["machine_grading_counts"]|keys|last %}
-                    <th class="right-boarder">
-                        {{ progress["num_autograding_workers"][machine] }}
-                    </th>
+                        <th class="right-boarder">
+                            {{ progress["num_autograding_workers"][machine] }}
+                        </th>
                     {% else %}
-                    <th>
-                        {{ progress["num_autograding_workers"][machine] }}
-                    </th>
+                        <th>
+                            {{ progress["num_autograding_workers"][machine] }}
+                        </th>
                     {% endif %}
                 {% endfor %}
                 <th colspan="{{ progress["capability_queue_counts"]|keys|length }}">
@@ -160,32 +169,46 @@
                     {{ progress["time"] }}
                 </td>
                 <td>
-                    {{ progress["queue_counts"]["interactive_ongoing"] }}
+                    {% if progress["queue_counts"]["interactive_ongoing"] != 0 %}
+                        {{ progress["queue_counts"]["interactive_ongoing"] }}
+                    {% endif %}
                 </td>
                 <td class="right-boarder">
-                    {{ progress["queue_counts"]["interactive"] }}
+                    {% if progress["queue_counts"]["interactive"] != 0 %}
+                        {{ progress["queue_counts"]["interactive"] }}
+                    {% endif %}
                 </td>
                 <td>
-                    {{ progress["queue_counts"]["regrade_ongoing"] }}
+                    {% if progress["queue_counts"]["regrade_ongoing"] != 0 %}
+                        {{ progress["queue_counts"]["regrade_ongoing"] }}
+                    {% endif %}
                 </td>
                 <td class="right-boarder">
-                    {{ progress["queue_counts"]["regrade"] }}
+                    {% if progress["queue_counts"]["regrade"] != 0 %}
+                        {{ progress["queue_counts"]["regrade"] }}
+                    {% endif %}
                 </td>
                 {% for machine, count in progress["machine_grading_counts"] %}
                     {% if machine == progress["machine_grading_counts"]|keys|last %}
-                    <td class="right-boarder">
-                        {{ count }}
-                    </td>
+                        <td class="right-boarder">
+                            {% if count != 0 %}
+                                {{ count }}
+                            {% endif %}
+                        </td>
                     {% else %}
                     <td>
-                        {{ count }}
+                        {% if count != 0 %}
+                            {{ count }}
+                        {% endif %}
                     </td>
                     {% endif %}
                 {% endfor %}
                 {% for count in progress["capability_queue_counts"]%}
-                <td>
-                    {{ count }}
-                </td>
+                    <td>
+                        {% if count != 0 %}
+                            {{ count }}
+                        {% endif %}
+                    </td>
                 {% endfor %}
             </tr>
         </tbody>
