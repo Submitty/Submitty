@@ -64,9 +64,10 @@ form {
 }
 
 .poll-info-table {
-    display: table;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .poll-view-wrapper {
-    display: table-cell;
+    width: max-content;
 }
