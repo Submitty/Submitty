@@ -17,7 +17,7 @@ export function init() {
             $(this).html('Show JSON');
         }
     });
-};
+}
 
 
 document.addEventListener('DOMContentLoaded', () => init());
