@@ -118,6 +118,11 @@ class WebRouter {
                 );
             }
 
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
+            }
+
             if (!$router->checkFeatureFlag()) {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Feature is not yet available.')
@@ -178,6 +183,15 @@ class WebRouter {
                 return new MultiResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                $errorString = "The {$enabled->getFeature()} feature is not enabled.";
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($errorString),
+                    new WebResponse("Error", "courseErrorPage", $errorString)
                 );
             }
 
@@ -428,5 +442,17 @@ class WebRouter {
         }
 
         return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag->getFlag());
+    }
+
+    private function getEnabled(): ?Enabled {
+        return $this->reader->getClassAnnotation(
+            new \ReflectionClass($this->parameters['_controller']),
+            Enabled::class
+        );
+    }
+
+    private function checkEnabled(Enabled $enabled): bool {
+        $method = "is" . ucFirst($enabled->getFeature()) . "Enabled";
+        return $this->core->getConfig()->$method();
     }
 }
