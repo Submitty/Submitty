@@ -26,82 +26,82 @@
         <tbody>
             {% for file in files %}
                 {% if file.cover_image is not empty %}
-                {# Display files uploaded only on bulk upload mode #}
+                    {# Display files uploaded only on bulk upload mode #}
 
-                {% if file["valid"] == false %}
-                    <tr class="tr tr-vertically-centered" style="background-color:pink;" id="row-{{ loop.index}}">
-                {% else %}
-                    <tr class="tr tr-vertically-centered" id="row-{{ loop.index }}" >
-                {% endif %}
-                    <td>{{ loop.index }}</td>
-                    <td>{{ file.clean_timestamp }}</td>
-                    <td>
-                        {{ file.filename_full }}
-                        <br>
-                        <div class="scrollable-image" >
-                            <img src="{{ file.cover_image.url }}" width="100%" alt = "{{ file.filename_full }} preview"/>
-                        </div>
-                    </td>
-                    <td>
-                        <a href="javascript:openFile('{{ file.url_full }}');" aria-label="View full PDF in a new window">
-                            <i class="fas fa-window-restore"></i>
-			            </a>
-                    </td>
-                    <td id="input_area">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                        <div id="users_{{ loop.index }}">
-                            <input type="text" id="bulk_user_id_{{ loop.index }}" aria-label = "Enter User ID to assign"
-                                value ="{{ file["id"] }}"
-                                {# we should only submit on enter for normal bulk uploads or on the last team upload box #}
-                                {% if not team_assignment %}
-                                    onkeydown="uploadOnEnter( {{ loop.index }}, event );"
-                                {% else %}
-                                    onkeydown="focusNextOnEnter({{ loop.index }}, 0)"
-                                {% endif %}
-                            />
-
-
-                            {# Display any similar matches if using OCR #}
-                            {% if use_ocr %}
-                                {% if file["matches"] | length  > 1 %}
-                                <br>
-                                <p> Similar Matches </p>
-                                </br>
-                                {% endif %}
-                                {% for match in file["matches"] %}
-                                    {% if match != file["id"] %}
-                                    <p> {{ match }} </p> 
+                    {% if file["valid"] == false %}
+                        <tr class="tr tr-vertically-centered" style="background-color:pink;" id="row-{{ loop.index}}">
+                    {% else %}
+                        <tr class="tr tr-vertically-centered" id="row-{{ loop.index }}" >
+                    {% endif %}
+                        <td>{{ loop.index }}</td>
+                        <td>{{ file.clean_timestamp }}</td>
+                        <td>
+                            {{ file.filename_full }}
+                            <br>
+                            <div class="scrollable-image" >
+                                <img src="{{ file.cover_image.url }}" width="100%" alt = "{{ file.filename_full }} preview"/>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="javascript:openFile('{{ file.url_full }}');" aria-label="View full PDF in a new window">
+                                <i class="fas fa-window-restore"></i>
+                            </a>
+                        </td>
+                        <td id="input_area">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <div id="users_{{ loop.index }}">
+                                <input type="text" id="bulk_user_id_{{ loop.index }}" aria-label = "Enter User ID to assign"
+                                    value ="{{ file["id"] }}"
+                                    {# we should only submit on enter for normal bulk uploads or on the last team upload box #}
+                                    {% if not team_assignment %}
+                                        onkeydown="uploadOnEnter( {{ loop.index }}, event );"
+                                    {% else %}
+                                        onkeydown="focusNextOnEnter({{ loop.index }}, 0)"
                                     {% endif %}
-                                {% endfor %}
-                            {% endif %}
+                                />
 
-                            {% if team_assignment %}
-                                {# (size - 1) because twig loops are range inclusive #}
-                                {% set outer_loop = loop %}
-                                {% for i in 1..(max_team_size - 1) %}
-                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""
-                                        {# if this is the last input box submit on enter, otherwise move to next box#}
-                                        {% if i == (max_team_size - 1) %}
-                                            onkeydown="uploadOnEnter({{ outer_loop.index }}, event);"
-                                        {% else %}
-                                            onkeydown="focusNextOnEnter({{ outer_loop.index}}, {{ i }} )"
+
+                                {# Display any similar matches if using OCR #}
+                                {% if use_ocr %}
+                                    {% if file["matches"] | length  > 1 %}
+                                    <br>
+                                    <p> Similar Matches </p>
+                                    </br>
+                                    {% endif %}
+                                    {% for match in file["matches"] %}
+                                        {% if match != file["id"] %}
+                                        <p> {{ match }} </p> 
                                         {% endif %}
-                                    />
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td class="pdf_page_count" id="page_count_{{ loop.index }}">
-                        {{ file["page_count"] }}
-                    </td>
-                    <td>
-                        <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-primary key_to_click" tabindex="0"
-                        onclick="uploadSplit( {{ loop.index }} )">Submit</button>
-                    </td>
-                    <td>
-                        <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-default key_to_click" tabindex="0" onclick="deleteSplit({{ loop.index }})">Delete</button>
-                    </td>
-                </tr>
+                                    {% endfor %}
+                                {% endif %}
+
+                                {% if team_assignment %}
+                                    {# (size - 1) because twig loops are range inclusive #}
+                                    {% set outer_loop = loop %}
+                                    {% for i in 1..(max_team_size - 1) %}
+                                        <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""
+                                            {# if this is the last input box submit on enter, otherwise move to next box#}
+                                            {% if i == (max_team_size - 1) %}
+                                                onkeydown="uploadOnEnter({{ outer_loop.index }}, event);"
+                                            {% else %}
+                                                onkeydown="focusNextOnEnter({{ outer_loop.index}}, {{ i }} )"
+                                            {% endif %}
+                                        />
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="pdf_page_count" id="page_count_{{ loop.index }}">
+                            {{ file["page_count"] }}
+                        </td>
+                        <td>
+                            <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-primary key_to_click" tabindex="0"
+                            onclick="uploadSplit( {{ loop.index }} )">Submit</button>
+                        </td>
+                        <td>
+                            <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-default key_to_click" tabindex="0" onclick="deleteSplit({{ loop.index }})">Delete</button>
+                        </td>
+                    </tr>
                 {% endif %}
             {% endfor %}
         </tbody>
