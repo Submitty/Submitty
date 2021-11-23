@@ -32,6 +32,7 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalModuleJs('submission.js');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_days_use = 0;

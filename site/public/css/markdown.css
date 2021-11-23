@@ -11,7 +11,7 @@
 /* Actual rendered markdown styling (Markdown.twig) */
 .markdown {
     /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: 'Source Sans Pro', 'sans-serif';
+    font-family: "Source Sans Pro", sans-serif;
     white-space: normal;
     position: relative;
     word-wrap: break-word;
@@ -176,8 +176,6 @@
     resize: vertical;
     min-height: 100px;
     max-height: 300px;
-    -moz-tab-size: 4;
-    -o-tab-size: 4;
     tab-size: 4;
 }
 
@@ -191,6 +189,7 @@
     resize: none;
     min-height: 100px;
     max-height: 300px;
+    width: fill-available;
 }
 
 .btn-markdown {

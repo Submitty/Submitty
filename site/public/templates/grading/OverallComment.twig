@@ -57,7 +57,7 @@ Required Parameters:
         $(document).ready(function(){
             $('.overall-comment-other').each(function() {
                 const content = $(this).html().trim();
-                const url = buildCourseUrl(['markdown', 'preview']);
+                const url = buildURL(["markdown"]);
                 renderMarkdown($(this), url, content);
             });
         });
