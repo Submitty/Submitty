@@ -45,9 +45,7 @@ td {
 }
 
 .unviewed td:first-child {
-    border-left-color: var(--actionable-blue);
-    border-left-width: 3px;
-    border-left-style: solid;
+    border-left: 3px solid var(--actionable-blue);
 }
 
 .run-log-data pre {
@@ -92,15 +90,15 @@ input[type="text"] {
     padding-left: 5px;
 }
 
-input[type=text]:invalid {
+input[type="text"]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
 
-[data-theme="dark"] input[type=text]:invalid {
+[data-theme="dark"] input[type="text"]:invalid {
     background-color: var(--alert-danger-red);
 }
 
-[data-theme="dark"] input[type=text]:invalid::placeholder {
+[data-theme="dark"] input[type="text"]:invalid::placeholder {
     color: var(--alert-invalid-entry-pink);
 }
 
@@ -245,7 +243,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 .loading-animation {
     border: 5px solid var(--standard-dark-gray);
-    border-top: 5px solid rgba(0, 0, 0, 0);
+    border-top: 5px solid rgb(0 0 0 / 0%);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     width: 3em;
