@@ -1036,7 +1036,7 @@ div.full-height {
 
 .cat-buttons:hover,
 .cat-buttons:focus {
-    opacity: .8;
+    opacity: 0.8;
     filter: alpha(opacity=80);
 }
 
@@ -1081,7 +1081,7 @@ div.full-height {
 }
 
 #ui-category-list .handle {
-    opacity: .8;
+    opacity: 0.8;
     filter: alpha(opacity=80);
 }
 
