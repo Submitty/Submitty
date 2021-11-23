@@ -9,6 +9,13 @@ class ErrorView extends AbstractView {
         ]);
     }
 
+    public function courseErrorPage($error_message) {
+        return $this->core->getOutput()->renderTwigTemplate("error/CourseErrorPage.twig", [
+            "error_message" => $error_message,
+            "course_url" => $this->core->buildCourseUrl(),
+        ]);
+    }
+
     public function errorPage($error_message) {
         return $this->core->getOutput()->renderTwigTemplate("error/ErrorPage.twig", [
             "error_message" => $error_message,

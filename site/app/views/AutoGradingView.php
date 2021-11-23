@@ -11,9 +11,6 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
-use app\libraries\DateUtils;
-use app\libraries\NumberUtils;
 
 class AutoGradingView extends AbstractView {
 
@@ -120,7 +117,7 @@ class AutoGradingView extends AbstractView {
      * @param \app\models\gradeable\GradedGradeable $graded_gradeable
      * @param AutoGradedVersion $version version to display
      * @param AutoGradedTestcase $testcase testcase to display
-     * @param $popup_css_file
+     * @param string $popup_css_file
      * @param string $who
      * @param bool $show_hidden
      * @return string
@@ -226,6 +223,15 @@ class AutoGradingView extends AbstractView {
                     ];
                 }
 
+                $autogradingConfig = $gradeable->getAutogradingConfig();
+                if (!is_null($autogradingConfig) && $autogradingConfig->getDisplayTestcaseRuntimeMemory()) {
+                    $metrics = $this->core->getQueries()->getMetrics($who, $gradeable->getId(), sprintf('test%02d', $testcase->getTestcase()->getIndex() + 1), $version->getVersion());
+                    $check["metrics"] = [
+                        "elapsed_time" => $metrics['elapsed_time'] ?? null,
+                        "max_rss_size" => $metrics['max_rss_size'] ?? null
+                    ];
+                }
+
                 $checks[] = $check;
             }
 
@@ -249,9 +255,9 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param string $display
-     * @return string
+     * @return bool
      */
-    private function autoShouldDisplayPopup(string $display): string {
+    private function autoShouldDisplayPopup(string $display): bool {
         $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
         $less_than_30 = true;
         $arr_count = count($tmp_array_string);
