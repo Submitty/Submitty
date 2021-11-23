@@ -36,7 +36,7 @@ class PlagiarismRunAccess {
     protected $user_id;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $timestamp;
