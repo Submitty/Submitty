@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6287f9120cf6446a9b40beaee4ad8a04",
+    "content-hash": "53d25c7708d639ffa2e570051bb926dd",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3035,16 +3035,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v4.4.33",
+            "version": "v4.4.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "25c11934bf20c1633f3f125fed0bd7e29f5d8f24"
+                "reference": "e99b65a18faa34fde57078095c39a1bc91a22492"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/25c11934bf20c1633f3f125fed0bd7e29f5d8f24",
-                "reference": "25c11934bf20c1633f3f125fed0bd7e29f5d8f24",
+                "url": "https://api.github.com/repos/symfony/config/zipball/e99b65a18faa34fde57078095c39a1bc91a22492",
+                "reference": "e99b65a18faa34fde57078095c39a1bc91a22492",
                 "shasum": ""
             },
             "require": {
@@ -3093,7 +3093,7 @@
             "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/config/tree/v4.4.33"
+                "source": "https://github.com/symfony/config/tree/v4.4.34"
             },
             "funding": [
                 {
@@ -3109,7 +3109,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-10-19T15:09:42+00:00"
+            "time": "2021-10-29T15:43:26+00:00"
         },
         {
             "name": "symfony/console",

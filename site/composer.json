@@ -29,7 +29,7 @@
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
     "symfony/cache": "4.4.34",
-    "symfony/config": "4.4.33",
+    "symfony/config": "4.4.34",
     "symfony/http-foundation": "4.4.33",
     "symfony/polyfill-php80": "1.23.1",
     "symfony/routing": "4.4.34",
