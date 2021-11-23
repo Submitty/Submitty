@@ -543,6 +543,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
         $code = trim($_POST['code']);
 
+        //if we should clear the message instead of sending a new one
         if (!empty($_POST['clear_message'])) {
             $this->core->getQueries()->setQueueMessage($code, 'null');
             $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => false]);
@@ -555,7 +556,7 @@ class OfficeHoursQueueController extends AbstractController {
             }
             $message = trim($_POST['socket-message']);
             $this->core->getQueries()->setQueueMessage($code, $message);
-            $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => true, 'message' => $message, 'course' =>$this->core->getDisplayedCourseName()]);
+            $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => true, 'message' => $message, 'course' => $this->core->getDisplayedCourseName()]);
             $this->core->addSuccessMessage("Message Sent To Queue");
         }
 
