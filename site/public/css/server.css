@@ -788,12 +788,12 @@ td > a.active-sort {
 }
 
 .fade {
-    opacity: 0%;
+    opacity: 0;
     transition: opacity 0.15s linear;
 }
 
 .fade.in {
-    opacity: 100%;
+    opacity: 1;
 }
 
 .collapse {
@@ -1036,7 +1036,7 @@ div.full-height {
 
 .cat-buttons:hover,
 .cat-buttons:focus {
-    opacity: 80%;
+    opacity: .8;
     filter: alpha(opacity=80);
 }
 
@@ -1081,7 +1081,7 @@ div.full-height {
 }
 
 #ui-category-list .handle {
-    opacity: 80%;
+    opacity: .8;
     filter: alpha(opacity=80);
 }
 
@@ -1257,7 +1257,7 @@ div.full-height {
     z-index: 1;
     margin-left: -240px;
     margin-top: -35px;
-    opacity: 0%;
+    opacity: 0;
     transition: opacity 0.3s;
     font-size: 12px;
 }
@@ -1273,7 +1273,7 @@ div.full-height {
 
 .tooltip:hover .tooltiptext {
     visibility: visible;
-    opacity: 100%;
+    opacity: 1;
 }
 
 /* from https://css-tricks.com/css3-progress-bars/ */
@@ -1435,10 +1435,8 @@ end of styles used in the admin gradeable page
     color: var(--badge-backgroud-red);
 }
 
-.required::input-placeholder { color: var(--error-alert-dark-red); }
 .required:placeholder { color: var(--error-alert-dark-red); }
 .required::placeholder { color: var(--error-alert-dark-red); }
-.required:input-placeholder { color: var(--error-alert-dark-red); }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .required_type {

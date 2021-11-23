@@ -45,9 +45,7 @@ td {
 }
 
 .unviewed td:first-child {
-    border-left-color: var(--actionable-blue);
-    border-left-width: 3px;
-    border-left-style: solid;
+    border-left: 3px solid var(--actionable-blue);
 }
 
 .run-log-data pre {
