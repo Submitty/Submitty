@@ -205,16 +205,16 @@
 {% endif %}
 <script>
 
-    function queueMessage() {
+    function queueMessage(message, course) {
         if (Notification.permission === "granted") {
             // If it's okay let's create a notification
-            let notification = new Notification("New Message From Office Hours Queue Staff");
+            let notification = new Notification("SUBMITTY(" + course + ") - New Message From Office Hours Queue Staff: " + message);
         }
         // Otherwise, we need to ask the user for permission
         else if (Notification.permission !== 'denied' || Notification.permission === "default") {
             Notification.requestPermission(function (permission) {
                 if (permission === "granted") {
-                    let notification = new Notification("New Message From Office Hours Queue Staff");
+                    let notification = new Notification("SUBMITTY(" + course + ") - New Message From Office Hours Queue Staff: " + message);
                 }
             });
         //if notification permissions are denied
