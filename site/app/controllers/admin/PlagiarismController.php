@@ -391,10 +391,6 @@ class PlagiarismController extends AbstractController {
         $config = $em->getRepository(PlagiarismConfig::class)
             ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
 
-        if ($config === null) {
-            throw new DatabaseException("Error: Unable to find plagiarism configuration");
-        }
-
         $regex_dirs = [];
         if ($config->isRegexDirSubmissionsSelected()) {
             $regex_dirs[] = "submissions";
