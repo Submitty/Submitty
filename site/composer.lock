@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53d25c7708d639ffa2e570051bb926dd",
+    "content-hash": "b4faff743e24997041b6eb226cc0ef70",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2861,16 +2861,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v4.4.34",
+            "version": "v4.4.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "589395fefd9b11cefb2be37288b94f0939a62645"
+                "reference": "8518b6a06183ef41e5d5b4a7e9a61ec4ab308398"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/589395fefd9b11cefb2be37288b94f0939a62645",
-                "reference": "589395fefd9b11cefb2be37288b94f0939a62645",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/8518b6a06183ef41e5d5b4a7e9a61ec4ab308398",
+                "reference": "8518b6a06183ef41e5d5b4a7e9a61ec4ab308398",
                 "shasum": ""
             },
             "require": {
@@ -2936,7 +2936,7 @@
                 "psr6"
             ],
             "support": {
-                "source": "https://github.com/symfony/cache/tree/v4.4.34"
+                "source": "https://github.com/symfony/cache/tree/v4.4.35"
             },
             "funding": [
                 {
@@ -2952,7 +2952,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-11-16T07:28:29+00:00"
+            "time": "2021-11-23T16:29:43+00:00"
         },
         {
             "name": "symfony/cache-contracts",
