@@ -1218,7 +1218,7 @@ div.full-height {
 }
 
 .fill-available {
-    width: available;
+    width: 100%;
 }
 
 /* Makes the cursor change to a hand on the checkpoints so that it is clear they can be clicked on */
