@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b4faff743e24997041b6eb226cc0ef70",
+    "content-hash": "7f40a437f610050cf81d81bc6171ac2a",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3266,16 +3266,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.4.33",
+            "version": "v4.4.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "b9a91102f548e0111f4996e8c622fb1d1d479850"
+                "reference": "f4cbbb6fc428588ce8373802461e7fe84e6809ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/b9a91102f548e0111f4996e8c622fb1d1d479850",
-                "reference": "b9a91102f548e0111f4996e8c622fb1d1d479850",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/f4cbbb6fc428588ce8373802461e7fe84e6809ab",
+                "reference": "f4cbbb6fc428588ce8373802461e7fe84e6809ab",
                 "shasum": ""
             },
             "require": {
@@ -3314,7 +3314,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v4.4.33"
+                "source": "https://github.com/symfony/http-foundation/tree/v4.4.34"
             },
             "funding": [
                 {
@@ -3330,20 +3330,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-10-07T15:31:35+00:00"
+            "time": "2021-11-04T12:23:33+00:00"
         },
         {
             "name": "symfony/mime",
-            "version": "v4.4.31",
+            "version": "v4.4.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
-                "reference": "c4fd68f54f608c639ddebecfc61746a86134bf4a"
+                "reference": "dd269a4da0b7c227b8fa910940588fd1bae08493"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mime/zipball/c4fd68f54f608c639ddebecfc61746a86134bf4a",
-                "reference": "c4fd68f54f608c639ddebecfc61746a86134bf4a",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/dd269a4da0b7c227b8fa910940588fd1bae08493",
+                "reference": "dd269a4da0b7c227b8fa910940588fd1bae08493",
                 "shasum": ""
             },
             "require": {
@@ -3390,7 +3390,7 @@
                 "mime-type"
             ],
             "support": {
-                "source": "https://github.com/symfony/mime/tree/v4.4.31"
+                "source": "https://github.com/symfony/mime/tree/v4.4.34"
             },
             "funding": [
                 {
@@ -3406,7 +3406,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-09-10T10:18:20+00:00"
+            "time": "2021-11-19T11:24:24+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
