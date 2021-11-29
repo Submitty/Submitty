@@ -30,6 +30,9 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll_2_view_results').should('not.be.checked');
         cy.get('#poll_2_responses').invoke('text').then(parseInt).should('be.gt', 0);
 
+        // poll 3 release date is initially set to today but we
+        // can't rely on the test being run on the same day as
+        // when the vagrant environment was created
         cy.get('#poll_3_visible').should('be.checked');
         cy.get('#poll_3_view_results').should('be.checked');
         cy.get('#poll_3_responses').invoke('text').then(parseInt).should('be.eq', 0);
@@ -151,6 +154,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll Cypress Test');
         cy.get('#poll-question').type('# Question goes here...?');
+        cy.get('#poll-date').clear();
+        cy.get('#poll-date').type('1970-01-01');
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('+ Add Response').click();
         cy.contains('+ Add Response').click();
@@ -178,6 +183,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
+        cy.get('#old-table-dropdown').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(5)').children().click();
         cy.wait(1000);
 
@@ -253,12 +259,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-type-multiple-response-exact').should('not.be.checked');
         cy.get('#poll-type-multiple-response-flexible').should('not.be.checked');
         cy.get('#poll-type-multiple-response-survey').should('not.be.checked');
-        const today = new Date();
-        const year = today.getFullYear().toString().padStart(4, '0');
-        const month = (today.getMonth() + 1).toString().padStart(2, '0');
-        const day =  today.getDate().toString().padStart(2, '0');
-        const date_string = `${year}-${month}-${day}`;
-        cy.get('#poll-date').invoke('val').should('eq', date_string);
+        cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
         cy.get('.poll_response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
         cy.get('.poll_response').should('contain', 'Answer 2');
