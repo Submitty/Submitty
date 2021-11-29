@@ -343,15 +343,9 @@
                   'code' : queue_code
               },
               success: function (response) {
-                  if (response.status !== 'success') {
-                      reject(new Error(response.message));
-                  }
-                  else {
-                      resolve(response.data)
-                  }
+                  resolve(response.data);
               },
               error: function (err) {
-                  console.log(err);
                   reject(err);
               }
           });

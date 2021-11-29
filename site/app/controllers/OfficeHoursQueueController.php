@@ -567,10 +567,7 @@ class OfficeHoursQueueController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/get_queue_message", methods={"POST"})
      */
     public function getQueueMessage() {
-        if (empty($_POST['code'])) {
-           return;
-        }
-        else {
+        if (!empty($_POST['code'])) {
             $row = $this->core->getQueries()->getQueueMessage(trim($_POST['code']));
             if ($row['message'] != null) {
                 $results = $row['message'];
@@ -580,9 +577,8 @@ class OfficeHoursQueueController extends AbstractController {
                 return;
             }
         }
-
-
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse
