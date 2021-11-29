@@ -154,7 +154,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll Cypress Test');
         cy.get('#poll-question').type('# Question goes here...?');
-        cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('+ Add Response').click();
         cy.contains('+ Add Response').click();
@@ -258,7 +257,12 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-type-multiple-response-exact').should('not.be.checked');
         cy.get('#poll-type-multiple-response-flexible').should('not.be.checked');
         cy.get('#poll-type-multiple-response-survey').should('not.be.checked');
-        cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
+        const today = new Date();
+        const year = today.getFullYear().toString().padStart(4, '0')
+        const month = (today.getMonth() + 1).toString().padStart(2, '0')
+        const day =  today.getDate().toString().padStart(2, '0')
+        const date_string = year + "-" + month + "-" + day
+        cy.get('#poll-date').invoke('val').should('eq', date_string);
         cy.get('.poll_response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
         cy.get('.poll_response').should('contain', 'Answer 2');
