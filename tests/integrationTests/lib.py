@@ -29,7 +29,7 @@ COMPILE_CONFIGURE_BIN_PATH = os.path.join(
 )
 
 CONFIGURE_BIN_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER, 
+    INTEGRATION_TEST_ROOT_FOLDER,
     "configure.bin"
 )
 
@@ -152,9 +152,9 @@ def run_tests(names):
 
 def __setup():
     subprocess.check_output([
-            "/bin/bash", 
+            "/bin/bash",
             COMPILE_CONFIGURE_BIN_PATH,
-            SUBMITTY_INSTALL_DIR, 
+            SUBMITTY_INSTALL_DIR,
             CONFIGURE_BIN_PATH
         ],
         stderr=subprocess.STDOUT
@@ -610,10 +610,26 @@ class TestcaseWrapper:
         else:
             return obj
 
+
+    ###################################################################################
+    # Helper function for json_diff. Recursivly removes keys from input_dict.
+    # Credit: Olivier Melançon.
+    # https://stackoverflow.com/a/49103013
+    def dict_sweep(self, input_dict, keys):
+        if isinstance(input_dict, dict):
+            return {k: self.dict_sweep(v, keys) for k, v in input_dict.items() if k not in keys}
+
+        elif isinstance(input_dict, list):
+            return [self.dict_sweep(element, keys) for element in input_dict]
+
+        else:
+            return input_dict
+
     # Compares two json files allowing differences in file whitespace
     # (indentation, newlines, etc) and also alternate ordering of data
     # inside dictionary/key-value pairs
-    def json_diff(self, f1, f2=""):
+    # By default ignore metric values if they exist because they are different for every run
+    def json_diff(self, f1, f2="", ignore_keys=['metrics']):
         # if only 1 filename provided...
         if not f2:
             f2 = f1
@@ -635,8 +651,8 @@ class TestcaseWrapper:
             contents1 = json.load(file1)
         with open(filename2) as file2:
             contents2 = json.load(file2)
-        ordered1 = self.json_ordered(contents1)
-        ordered2 = self.json_ordered(contents2)
+        ordered1 = self.json_ordered(self.dict_sweep(contents1, ignore_keys))
+        ordered2 = self.json_ordered(self.dict_sweep(contents2, ignore_keys))
         if ordered1 != ordered2:
             # NOTE: The ordered json has extra syntax....
             # so instead, print the original contents to a file and diff that
