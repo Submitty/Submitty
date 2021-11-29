@@ -30,9 +30,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll_2_view_results').should('not.be.checked');
         cy.get('#poll_2_responses').invoke('text').then(parseInt).should('be.gt', 0);
 
-        // poll 3 release date is initially set to today but we
-        // can't rely on the test being run on the same day as
-        // when the vagrant environment was created
         cy.get('#poll_3_visible').should('be.checked');
         cy.get('#poll_3_view_results').should('be.checked');
         cy.get('#poll_3_responses').invoke('text').then(parseInt).should('be.eq', 0);
