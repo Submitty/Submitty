@@ -261,7 +261,7 @@ describe('Test cases revolving around polls functionality', () => {
         const year = today.getFullYear().toString().padStart(4, '0');
         const month = (today.getMonth() + 1).toString().padStart(2, '0');
         const day =  today.getDate().toString().padStart(2, '0');
-        const date_string = year + "-" + month + "-" + day;
+        const date_string = year + '-' + month + '-' + day;
         cy.get('#poll-date').invoke('val').should('eq', date_string);
         cy.get('.poll_response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
