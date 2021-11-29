@@ -4,7 +4,7 @@
 	</h1>
 
 	<button class="btn btn-primary" onclick="toggle_section('poll-info')">Toggle Poll Info</button>
-	{% if poll.isHistogramAvailable() %}
+	{% if user_admin or poll.isHistogramAvailable() %}
 		<button class="btn btn-primary" onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
 	{% endif %}
 	<div class="poll-info-table">
