@@ -110,6 +110,10 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        if ($gradeable->hasLeaderboard()) {
+            $return .= $this->renderLeaderboardBox($graded_gradeable);
+        }
+
         if ($submission_count > 0 && $num_parts > 1) {
             $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
@@ -691,6 +695,24 @@ class HomeworkView extends AbstractView {
             'team_assignment' => $team_assignment,
             'member_list' => $member_list,
             'team_name' => $team_name
+        ]);
+    }
+
+     /**
+      * @param GradedGradeable $graded_gradeable
+      * @return string
+      */
+    private function renderLeaderboardBox(GradedGradeable $graded_gradeable): string {
+        $autograding_config = $graded_gradeable->getGradeable()->getAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return "";
+        }
+
+        $leaderboards = $autograding_config->getLeaderboards();
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/LeaderboardBox.twig', [
+          'leaderboard_count' => count($leaderboards),
+          'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'leaderboard'])
         ]);
     }
 

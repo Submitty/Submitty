@@ -1,4 +1,4 @@
-import {init} from '../../public/mjs/team';
+import {init} from '../../ts/team';
 
 beforeEach(() => {
     document.body.innerHTML = `

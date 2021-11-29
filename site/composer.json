@@ -44,8 +44,8 @@
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {
-    "test": "phpunit -c tests/phpunit.xml",
-    "lint": "phpcs --standard=tests/ruleset.xml",
+    "test": "phpunit",
+    "lint": "phpcs",
     "static-analysis": "phpstan analyze app"
   }
 }

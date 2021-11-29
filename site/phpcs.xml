@@ -4,9 +4,9 @@
     <arg name="extensions" value="php" />
     <arg value="p" />
 
-    <file>../app</file>
-    <file>../public/index.php</file>
-    <file>../tests</file>
+    <file>./app</file>
+    <file>./public/index.php</file>
+    <file>./tests</file>
 
     <exclude-pattern>../app/models/Gradeable.php</exclude-pattern>
 

@@ -45,7 +45,11 @@ $( document ).ready(function() {
                         Overall note from {{user}}:
                     </p>
                     <p class="overall-comment">
-                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                        <span class='gradeable_comment'>
+                            {% include 'misc/Markdown.twig' with {
+                                content:  overall_comments[user]
+                            } only %}
+                        </span>
                     </p>
                 </div>
             {% endfor %}
