@@ -1038,7 +1038,7 @@ def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
     scheduler/shipper/worker and refactoring this design should be
     part of the project.
     ----------------------------------------------------------------
-    '''
+    '''  # noqa: B018
 
     # Grab all the VCS files currently in the folder...
     vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
