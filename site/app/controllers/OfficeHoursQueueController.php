@@ -562,6 +562,27 @@ class OfficeHoursQueueController extends AbstractController {
 
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/get_queue_message", methods={"POST"})
+     */
+    public function getQueueMessage() {
+        if (empty($_POST['code'])) {
+           return;
+        }
+        else {
+            $row = $this->core->getQueries()->getQueueMessage(trim($_POST['code']));
+            if ($row['message'] != null) {
+                $results = $row['message'];
+                $this->core->getOutput()->renderJsonSuccess($results);
+            }
+            else {
+                return;
+            }
+        }
+
+
+    }
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse

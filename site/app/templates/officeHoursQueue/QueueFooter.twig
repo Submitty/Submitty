@@ -224,7 +224,7 @@
                 updateAnnouncement();
                 break;
             case "update_message":
-                updateMessage(msg.queue_code, msg.alert, msg.message, msg.course);
+                updateMessage(msg.queue_code, msg.alert);
             default:
                 console.log("Unknown message received.");
                 break;
@@ -313,16 +313,49 @@
       });
   }
 
-  function updateMessage(queue_code, alert, message, course) {
+  function updateMessage(queue_code, alert) {
     {% if viewer.inQueue() %}
         let current_code = '{{ viewer.getCurrentQueueCode() }}'
         if (current_code === queue_code) {
             if (alert) {
-                queueMessage(message, course);
+                ajaxGetQueueMessage(queue_code).then(function(message){
+                    queueMessage(message);
+                });
             }
             updateQueueStatus();
         }
     {% endif %}
+  }
+
+  /**
+   * ajax call to fetch the queue's message
+   * @param {string} queue_code
+   * @return {Promise} Rejects except when the response returns status 'success'
+   */
+  function ajaxGetQueueMessage(queue_code) {
+      return new Promise(function (resolve, reject) {
+          $.getJSON({
+              type: "POST",
+              async: false,
+              url: buildCourseUrl(['office_hours_queue', 'get_queue_message']),
+              data: {
+                  'csrf_token': csrfToken,
+                  'code' : queue_code
+              },
+              success: function (response) {
+                  if (response.status !== 'success') {
+                      reject(new Error(response.message));
+                  }
+                  else {
+                      resolve(response.data)
+                  }
+              },
+              error: function (err) {
+                  console.log(err);
+                  reject(err);
+              }
+          });
+      });
   }
 
 
