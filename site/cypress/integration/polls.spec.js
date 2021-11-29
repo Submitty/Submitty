@@ -181,7 +181,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.get('#old-table-dropdown').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(5)').children().click();
         cy.wait(1000);
 
