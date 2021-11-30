@@ -11,6 +11,11 @@ parameters:
 			path: app/controllers/AbstractController.php
 
 		-
+			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
+			count: 2
+			path: app/controllers/AuthenticationController.php
+
+		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
 			count: 2
 			path: app/controllers/DockerInterfaceController.php
@@ -46,14 +51,34 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 2
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between mixed and '' will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
+			message: "#^Variable \\$file in empty\\(\\) always exists and is always falsy\\.$#"
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: "#^Elseif condition is always true\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and false will always evaluate to false\\.$#"
@@ -81,9 +106,64 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$body is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$course is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$created is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$email_address is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$error is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$id is unused\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$semester is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$sent is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$subject is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"
@@ -111,9 +191,69 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
+			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$authentication is never written, only read\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 1
 			path: app/libraries/Core.php
+
+		-
+			message: "#^Unsafe access to private property app\\\\libraries\\\\DateUtils\\:\\:\\$timezone through static\\:\\:\\.$#"
+			count: 3
+			path: app/libraries/DateUtils.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$has_difference is never read, only written\\.$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Unsafe access to private property app\\\\libraries\\\\ExceptionHandler\\:\\:\\$display_exceptions through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^Unsafe access to private property app\\\\libraries\\\\ExceptionHandler\\:\\:\\$log_exceptions through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^Unsafe call to private method app\\\\libraries\\\\ExceptionHandler\\:\\:parseArgs\\(\\) through static\\:\\:\\.$#"
+			count: 1
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\GradingQueue\\:\\:\\$grading_remaining is never read, only written\\.$#"
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: "#^Unsafe access to private property app\\\\libraries\\\\Logger\\:\\:\\$log_path through static\\:\\:\\.$#"
+			count: 5
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^Unsafe call to private method app\\\\libraries\\\\Logger\\:\\:getFilename\\(\\) through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^Unsafe call to private method app\\\\libraries\\\\Logger\\:\\:getTimestamp\\(\\) through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^Unsafe call to private method app\\\\libraries\\\\Logger\\:\\:logMessage\\(\\) through static\\:\\:\\.$#"
+			count: 3
+			path: app/libraries/Logger.php
 
 		-
 			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
@@ -146,6 +286,11 @@ parameters:
 			path: app/libraries/database/QueryIdentifier.php
 
 		-
+			message: "#^PHPDoc tag @var for constant app\\\\libraries\\\\plagiarism\\\\PlagiarismUtils\\:\\:SUPPORTED_LANGUAGES with type int is incompatible with value array\\{plaintext\\: array\\{hash_size\\: 14\\}, python\\: array\\{hash_size\\: 14\\}, java\\: array\\{hash_size\\: 14\\}, cpp\\: array\\{hash_size\\: 14\\}, mips\\: array\\{hash_size\\: 5\\}\\}\\.$#"
+			count: 1
+			path: app/libraries/plagiarism/PlagiarismUtils.php
+
+		-
 			message: "#^Instanceof between bool and app\\\\libraries\\\\response\\\\WebResponse will always evaluate to false\\.$#"
 			count: 2
 			path: app/libraries/routers/WebRouter.php
@@ -161,6 +306,11 @@ parameters:
 			path: app/models/AbstractModel.php
 
 		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/Config.php
@@ -172,6 +322,11 @@ parameters:
 
 		-
 			message: "#^Call to function is_null\\(\\) with array will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/RainbowCustomization.php
+
+		-
+			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$sections is never read, only written\\.$#"
 			count: 1
 			path: app/models/RainbowCustomization.php
 
@@ -209,6 +364,41 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setBatchRegrade\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setGradeTime\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setGradingBegan\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setGradingFinished\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setQueueTime\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setVcsRevision\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setWaitTime\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between array and null will always evaluate to false\\.$#"
@@ -301,6 +491,11 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 2
+			path: app/views/AutoGradingView.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/views/GlobalView.php
@@ -311,17 +506,17 @@ parameters:
 			path: app/views/GlobalView.php
 
 		-
-			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getDeleteButton\\(\\) never returns null so it can be removed from the return typehint\\.$#"
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getDeleteButton\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
 			path: app/views/NavigationView.php
 
 		-
-			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getEditButton\\(\\) never returns null so it can be removed from the return typehint\\.$#"
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getEditButton\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
 			path: app/views/NavigationView.php
 
 		-
-			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getGradeButton\\(\\) never returns null so it can be removed from the return typehint\\.$#"
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getGradeButton\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
 			path: app/views/NavigationView.php
 
@@ -357,6 +552,11 @@ parameters:
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Offset string on array\\{\\} in isset\\(\\) does not exist\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
