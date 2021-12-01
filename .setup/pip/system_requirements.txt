@@ -45,7 +45,7 @@ jsonref==0.2
 docker==5.0.3
 
 # For Lichen / Plagiarism Detection
-parso==0.8.2
+parso==0.8.3
 
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 clang==11.0
