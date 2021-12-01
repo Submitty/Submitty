@@ -6,6 +6,10 @@
     padding: 5px 10px;
 }
 
+#grading-popup-number {
+    font-weight: bolder;
+}
+
 .rubric-popup-panel {
     flex: 1;
     position: relative;

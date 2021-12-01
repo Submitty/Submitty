@@ -522,6 +522,15 @@ progress::-webkit-progress-value {
     top: 5px;
 }
 
+#grading-panel-popup-number {
+    position: absolute;
+    overflow-y: auto;
+    border-left: 1px solid var(--standard-light-medium-gray);
+    right: 5px;
+    top: 5px;
+    font-weight: bolder;
+}
+
 #grading-scroll-message {
     color: var(--standard-medium-gray);
     margin-left: 5px;

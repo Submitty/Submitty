@@ -20,12 +20,43 @@
     {# {% if use_mobile_viewport %}
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endif %} #}
+    <script>
+        var TA_GRADING_DO_NOT_LOAD_PANELS = true;
+    </script>
 
     {% for js_ref in js %}
     <script src='{{ js_ref }}'></script>
     {% endfor %}
+    <script>
+            //determines if the user has a set theme
+        function detectColorScheme(){
+            document.documentElement.setAttribute("data-theme", "");
+            document.documentElement.setAttribute("data-black_mode", "");
+            let theme="light";    //default to light
+            //local storage is used to override OS theme settings
+            if(localStorage.getItem("theme")){
+                if(localStorage.getItem("theme") === "dark"){
+                    theme = "dark";
+                }
+            } else if(!window.matchMedia) {
+                //matchMedia method not supported
+                return false;
+            } else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                //OS theme setting detected as dark
+                theme = "dark";
+            }
+            //dark theme preferred, set document with a `data-theme` attribute
+            if (theme === "dark") {
+                 document.documentElement.setAttribute("data-theme", "dark");
+                 if(localStorage.getItem("black_mode") === "black"){
+                   document.documentElement.setAttribute("data-black_mode", "black");
+                 }
+            }
+        }
+        detectColorScheme();
+    </script>
 </head>
-<body class="flex-column" data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}">
+<body class="flex-column" data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" data-panel-type="{{ panel_type }}">
     <div id="grading-popup-header">
         {% include 'grading/electronic/StudentName.twig' with {
             "student_name_id": "grading-popup-student-name"

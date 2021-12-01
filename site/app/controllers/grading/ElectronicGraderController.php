@@ -1417,7 +1417,6 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalJs('websocket.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPopup', $gradeable, $graded_gradeable, $panel, $display_version, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $rollbackSubmission, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $window_id);
-        // $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPopup', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
     }

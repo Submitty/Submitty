@@ -44,6 +44,10 @@ const taLayoutDet = {
   bottomFourPanelRightHeight: "50%",
 };
 
+let currentActivePopups = {};
+
+let isNavigating = false;
+
 let settingsCallbacks = {
   "general-setting-arrow-function": changeStudentArrowTooltips,
   "general-setting-navigate-assigned-students-only": function(value) {
@@ -54,6 +58,8 @@ let settingsCallbacks = {
     }
   }
 }
+
+const MAX_WINDOW_ID = 100;
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
@@ -82,20 +88,6 @@ function updateThePanelsElements(panelsAvailabilityObj) {
 }
 
 $(function () {
-  Object.assign(taLayoutDet, getSavedTaLayoutDetails());
-  // Check initially if its the mobile screen view or not
-  isMobileView = window.innerWidth <= MOBILE_WIDTH;
-  initializeTaLayout();
-
-  window.addEventListener('resize', () => {
-    let wasMobileView = isMobileView;
-    isMobileView = window.innerWidth <= MOBILE_WIDTH;
-    // if the width is switched between smaller and bigger screens, re-initialize the layout
-    if (wasMobileView !== isMobileView) {
-      initializeTaLayout();
-    }
-  });
-
   loadTAGradingSettingData();
 
   for (let i = 0; i < settingsData.length; i++) {
@@ -108,97 +100,122 @@ $(function () {
     }
   }
 
-  $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
-    var storageCode = $(this).attr('data-storage-code');
-    if(storageCode) {
-      localStorage.setItem(storageCode, this.value);
-      if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
-        settingsCallbacks[storageCode](this.value);
+  if (typeof TA_GRADING_DO_NOT_LOAD_PANELS === 'undefined' || !TA_GRADING_DO_NOT_LOAD_PANELS) {
+    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+    // Check initially if its the mobile screen view or not
+    isMobileView = window.innerWidth <= MOBILE_WIDTH;
+    initializeTaLayout();
+
+    window.addEventListener('resize', () => {
+      let wasMobileView = isMobileView;
+      isMobileView = window.innerWidth <= MOBILE_WIDTH;
+      // if the width is switched between smaller and bigger screens, re-initialize the layout
+      if (wasMobileView !== isMobileView) {
+        initializeTaLayout();
       }
-    }
-  })
+    });
 
-  // Progress bar value
-  let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
-  $(".progress-value").html("<b>" + value + '%</b>');
+    $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
+      var storageCode = $(this).attr('data-storage-code');
+      if(storageCode) {
+        localStorage.setItem(storageCode, this.value);
+        if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
+          settingsCallbacks[storageCode](this.value);
+        }
+      }
+    })
 
-  // Grading panel toggle buttons
-  $(".grade-panel button").click(function () {
-    const btnCont = $(this).parent();
-    let panelSpanId = btnCont.attr('id');
+    // Progress bar value
+    let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
+    $(".progress-value").html("<b>" + value + '%</b>');
 
-    if (!panelSpanId) {
-      return;
-    }
+    // Grading panel toggle buttons
+    $(".grade-panel button").click(function () {
+      const btnCont = $(this).parent();
+      let panelSpanId = btnCont.attr('id');
 
-    const panelId = panelSpanId.split(/(_|-)btn/)[0];
-    const selectEle =  $('select#' + panelId + '_select');
+      if (!panelSpanId) {
+        return;
+      }
 
-    // Hide all select dropdown except the current one
-    $('select.panel-position-cont').not(selectEle).hide();
-
-    const isPanelOpen = $('#' + panelId).is(':visible');
-    // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
-    // otherwise just toggle it
-    if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
-      setPanelsVisibilities(panelId);
-    } else {
-      // removing previously selected option
-      selectEle.val(0);
-      selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
-    }
-  });
-
-  // panel position selector change event
-  $(".grade-panel .panel-position-cont").change(function() {
-    let panelSpanId = $(this).parent().attr('id');
-    let position = $(this).val();
-    if (panelSpanId) {
       const panelId = panelSpanId.split(/(_|-)btn/)[0];
-      if (position === "popup") {
-        openPopup(panelId);
+      const selectEle =  $('select#' + panelId + '_select');
+
+      // Hide all select dropdown except the current one
+      $('select.panel-position-cont').not(selectEle).hide();
+
+      const isPanelOpen = $('#' + panelId).is(':visible');
+      // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
+      // otherwise just toggle it
+      if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
+        setPanelsVisibilities(panelId);
       } else {
-        setPanelsVisibilities(panelId, null, position);
-        checkNotebookScroll();
+        // removing previously selected option
+        selectEle.val(0);
+        selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
       }
-      $('select#' + panelId + '_select').hide();
-    }
-  });
-  notebookScrollLoad();
+    });
 
-  checkNotebookScroll();
+    // panel position selector change event
+    $(".grade-panel .panel-position-cont").change(function() {
+      let panelSpanId = $(this).parent().attr('id');
+      let position = $(this).val();
+      if (panelSpanId) {
+        const panelId = panelSpanId.split(/(_|-)btn/)[0];
+        if (position === "popup") {
+          openPopup(panelId);
+        } else {
+          setPanelsVisibilities(panelId, null, position);
+          checkNotebookScroll();
+        }
+        $('select#' + panelId + '_select').hide();
+      }
+    });
+    notebookScrollLoad();
 
-  if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
-    let notebookPanel = $('#notebook-view');
-    if(notebookPanel.length != 0) {
-      let notebookItems = notebookPanel.find('.openAllFilesubmissions');
-      for(var i = 0; i < notebookItems.length; i++) {
-        notebookItems[i].onclick();
+    checkNotebookScroll();
+
+    if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
+      let notebookPanel = $('#notebook-view');
+      if(notebookPanel.length != 0) {
+        let notebookItems = notebookPanel.find('.openAllFilesubmissions');
+        for(var i = 0; i < notebookItems.length; i++) {
+          notebookItems[i].onclick();
+        }
       }
     }
-  }
 
 
-  // Remove the select options which are open
-  function hidePanelPositionSelect() {
-    $('select.panel-position-cont').hide();
-    document.removeEventListener('click', hidePanelPositionSelect);
-  }
-  // Check for the panels status initially
-  adjustGradingPanelHeader();
-  const resizeObserver = new ResizeObserver(() => {
-      adjustGradingPanelHeader();
-  });
-  // calling it for the first time i.e initializing
-  adjustGradingPanelHeader();
-  resizeObserver.observe(document.getElementById('grading-panel-header'));
-
-  panelElements.forEach((panel) => {
-    if (sessionStorage.getItem("ta-grading-popup-open-" + panel.str) !== null) {
-      openPopup(panel.str);
+    // Remove the select options which are open
+    function hidePanelPositionSelect() {
+      $('select.panel-position-cont').hide();
+      document.removeEventListener('click', hidePanelPositionSelect);
     }
-  });
+    // Check for the panels status initially
+    adjustGradingPanelHeader();
+    const resizeObserver = new ResizeObserver(() => {
+        adjustGradingPanelHeader();
+    });
+    // calling it for the first time i.e initializing
+    adjustGradingPanelHeader();
+    resizeObserver.observe(document.getElementById('grading-panel-header'));
 
+    panelElements.forEach((panel) => {
+      if (sessionStorage.getItem("ta-grading-popup-open-" + panel.str) !== null) {
+        openPopup(panel.str);
+      }
+    });
+
+    $(window).on("message", function(e) {
+      let data = e.originalEvent.data;
+      if (data.type === "ta-grading-popup-removal") {
+        console.log("removing item");
+        sessionStorage.removeItem("ta-grading-popup-open-" + data.data);
+        //TODO: unpress button
+      }
+    });
+
+  }
 });
 
 function changeStudentArrowTooltips(data) {
@@ -803,6 +820,7 @@ function setMultiPanelModeVisiblities () {
           || taLayoutDet.currentTwoPanels.leftBottom === panel.str
           || taLayoutDet.currentTwoPanels.rightTop === panel.str
           || taLayoutDet.currentTwoPanels.rightBottom === panel.str
+          // || taLayoutDet.currentPopupPanels.includes(panel.str)
       ) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
@@ -1705,16 +1723,29 @@ function openPopup(panel) {
       } else {
         windowId = parseInt(windowId);
       }
+      if (windowId > MAX_WINDOW_ID) {
+        windowId = 1;
+      }
       localStorage.setItem("ta-grading-popup-next-window-id", windowId + 1);
+      sessionStorage.setItem("ta-grading-popup-window-id", windowId);
     }
-    
-    let url = buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'grade', 'popup']) + "?";
+
     let gradingPanelHeader = $("#grading-panel-header");
+    
+    let url = buildCourseUrl(['gradeable', gradingPanelHeader.attr("data-gradeable-id"), 'grading', 'grade', 'popup']) + "?";
     let urlParamData = {"who_id": gradingPanelHeader.attr("data-who-id"), "gradeable_version": gradingPanelHeader.attr("data-version"), "window_id": windowId, "panel": panel};
 
-    console.log(url + new URLSearchParams(urlParamData));
+    currentActivePopups[panel] = window.open(url + new URLSearchParams(urlParamData), "ta-grading-popup-" + panel + "-" + windowId, "popup");
+    sessionStorage.setItem("ta-grading-popup-open-" + panel, true);
+    $("#grading-panel-popup-number").text(windowId);
 
-    window.open(url + new URLSearchParams(urlParamData), "ta-grading-popup-" + panel + "-" + windowId, "popup");
-    sessionStorage.setItem("ta-grading-popup-open" + panel, true);
+  } else {
+    alert("You cannot use popups since your browser does not support localStorage/sessionStorage.");
   }
 }
+
+// function closeAllPopups() {
+//   Object.values(currentActivePopups).forEach((popup) => {
+//     popup.
+//   })
+// }
