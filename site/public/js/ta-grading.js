@@ -147,13 +147,17 @@ $(function () {
       const isPanelOpen = $('#' + panelId).is(':visible');
       // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
       // otherwise just toggle it
-      if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
+      if (panelId in currentActivePopups) {
+        closePopupPanel(panelId);
+        setPanelsVisibilities(panelId, false);
+      } else if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
         setPanelsVisibilities(panelId);
       } else {
         // removing previously selected option
         selectEle.val(0);
         selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
       }
+      
     });
 
     // panel position selector change event
@@ -164,12 +168,14 @@ $(function () {
         const panelId = panelSpanId.split(/(_|-)btn/)[0];
         if (position === "popup") {
           openPopup(panelId);
+          setPanelsVisibilities(panelId, false, position);
         } else {
           setPanelsVisibilities(panelId, null, position);
           checkNotebookScroll();
         }
         $('select#' + panelId + '_select').hide();
       }
+      $()
     });
     notebookScrollLoad();
 
@@ -203,15 +209,15 @@ $(function () {
     panelElements.forEach((panel) => {
       if (sessionStorage.getItem("ta-grading-popup-open-" + panel.str) !== null) {
         openPopup(panel.str);
+        setPanelsVisibilities(panel.str, false, "popup");
       }
     });
 
     $(window).on("message", function(e) {
       let data = e.originalEvent.data;
-      if (data.type === "ta-grading-popup-removal") {
-        console.log("removing item");
-        sessionStorage.removeItem("ta-grading-popup-open-" + data.data);
-        //TODO: unpress button
+      if (data.type === "ta-grading-popup-removal" && data.data.url === currentActivePopups[data.data.panel]["url"]) {
+        closePopupPanel(data.data.panel, true);
+        setPanelsVisibilities(data.data.panel, false);
       }
     });
 
@@ -825,6 +831,10 @@ function setMultiPanelModeVisiblities () {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
         $(id_str).toggleClass('active', true);
+      } else if (panel.str in currentActivePopups) {
+        $("#" + panel.str).toggle(false);
+        $(panel.icon).toggleClass('icon-selected', true);
+        $(id_str).toggleClass('active', true);
       } else {
         $("#" + panel.str).toggle(false);
         $(panel.icon).toggleClass('icon-selected', false);
@@ -837,10 +847,10 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
     let id_str = document.getElementById(panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
     if (panel.str === ele) {
-      const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
+      let eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
-      $(panel.icon).toggleClass('icon-selected', eleVisibility);
-      $(id_str).toggleClass('active', eleVisibility);
+      $(panel.icon).toggleClass('icon-selected', eleVisibility || position === "popup");
+      $(id_str).toggleClass('active', eleVisibility || position === "popup");
       $("#" + panel.str).find(".CodeMirror").each(function() {this.CodeMirror.refresh()});
 
       if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
@@ -850,11 +860,11 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
         $('.panels-container > .panel-instructions').toggle(!taLayoutDet.currentOpenPanel);
       }
-    } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
+    } else if (((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
       &&  taLayoutDet.currentTwoPanels.rightBottom !== panel.str
       && taLayoutDet.currentTwoPanels.leftTop !== panel.str
-      &&  taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele ) {
+      &&  taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele) && !(panel.str in currentActivePopups)) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
@@ -1734,14 +1744,22 @@ function openPopup(panel) {
     
     let url = buildCourseUrl(['gradeable', gradingPanelHeader.attr("data-gradeable-id"), 'grading', 'grade', 'popup']) + "?";
     let urlParamData = {"who_id": gradingPanelHeader.attr("data-who-id"), "gradeable_version": gradingPanelHeader.attr("data-version"), "window_id": windowId, "panel": panel};
-
-    currentActivePopups[panel] = window.open(url + new URLSearchParams(urlParamData), "ta-grading-popup-" + panel + "-" + windowId, "popup");
+    url = url + new URLSearchParams(urlParamData);
+    currentActivePopups[panel] = {panelWindow: window.open(url, "ta-grading-popup-" + panel + "-" + windowId, "popup"), url: url};
     sessionStorage.setItem("ta-grading-popup-open-" + panel, true);
     $("#grading-panel-popup-number").text(windowId);
 
   } else {
     alert("You cannot use popups since your browser does not support localStorage/sessionStorage.");
   }
+}
+
+function closePopupPanel(panel, already_closed=false) {
+  sessionStorage.removeItem("ta-grading-popup-open-" + panel);
+  if (!already_closed) {
+    currentActivePopups[panel]["panelWindow"].close();
+  }
+  delete currentActivePopups[panel]["panelWindow"];
 }
 
 // function closeAllPopups() {

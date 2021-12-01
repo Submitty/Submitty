@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ page_title }}</title>
+    <title>[{{ window_id }}][{% if not isBlind and not anon_mode and (peer_blind_grading is same as('unblind') or peer_blind_grading is same as('single')) %}{% if team_assignment %}Team{% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName()}}{% endif %}{% else %}{{ submitter.getId() }}{% endif %}{% endif %}] - {{ gradeable_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
 
     <script>
