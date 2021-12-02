@@ -2,7 +2,6 @@
 
 namespace app\libraries;
 
-use app\controllers\MiscController;
 use app\entities\course\CourseMaterial;
 use app\entities\course\CourseMaterialAccess;
 use app\exceptions\MalformedDataException;
@@ -74,7 +73,7 @@ class CourseMaterialsUtils {
         $course_material_access = new CourseMaterialAccess(
             $course_material,
             $core->getUser()->getId(),
-            $core->getDateTimeNow()
+            DateUtils::getDateTimeNow()
         );
         $course_material->addAccess($course_material_access);
         $core->getCourseEntityManager()->persist($course_material_access);

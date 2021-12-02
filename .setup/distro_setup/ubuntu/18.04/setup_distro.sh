@@ -20,7 +20,7 @@ fi
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
-apt-get install -qqy python python-dev python3 python3-dev libpython3.6 python3-pip
+apt-get install -qqy python python-dev python3 python3-dev libpython3.6 python3-pip libjpeg-dev
 
 ############################
 # NTP: Network Time Protocol
@@ -73,7 +73,7 @@ poppler-utils
 apt-get install -qqy ninja-build
 
 # NodeJS
-curl -sL https://deb.nodesource.com/setup_10.x | bash -
+curl -sL https://deb.nodesource.com/setup_16.x | bash -
 apt-get install -y nodejs
 
 #CMAKE
@@ -130,12 +130,3 @@ apt-get -qqy autoremove
 add-apt-repository ppa:git-core/ppa -y
 apt-get install git -y
 # ------------------------------------------------------------------
-
-# necessary to install these to support the older version of pip
-# that Ubuntu-18.04
-# cryptography>=3.4 includes rust which requires additional stuff
-# to work on ubuntu-18.04, easier to pin to older version
-pip3 install cryptography==3.3.2
-# newer versions of opencv require a very length compile step
-# or newer version of pip, easier to install this older version
-pip3 install opencv-python==3.4.9.33

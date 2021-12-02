@@ -8,7 +8,6 @@ use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
-use app\models\gradeable\GradeableList;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -54,7 +53,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
-     * @param Gradeable $gradeable
+     * @param string|null $template_id
      * @Route("/courses/{_semester}/{_course}/gradeable", methods={"GET"})
      */
     public function newPage($template_id = null) {
@@ -147,7 +146,7 @@ class AdminGradeableController extends AbstractController {
             }
             $directory_queue = [$config_repo_name];
             $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue, $repository_error_messages, $repo_id_number);
-            if (isset($repo_paths)) {
+            if (!empty($repo_paths)) {
                 $all_repository_config_paths = array_merge($all_repository_config_paths, $repo_paths);
             }
             $repo_id_number++;
@@ -283,7 +282,8 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
-            'has_custom_marks' => $hasCustomMarks
+            'has_custom_marks' => $hasCustomMarks,
+            'is_exam' => $gradeable->isScannedExam()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -395,7 +395,7 @@ class AdminGradeableController extends AbstractController {
             'max_value' => 0,
             'upper_clamp' => 0,
             'text' => false,
-            'peer' => false,
+            'peer_component' => false,
             'order' => -1,
             'page' => Component::PDF_PAGE_NONE,
             'is_itempool_linked' => false,
@@ -983,7 +983,6 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setAutogradingConfigPath(
                 FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
             );
-            $gradeable->setHasDueDate(false);
         }
 
         // Generate a blank component to make the rubric UI work properly
@@ -1071,8 +1070,8 @@ class AdminGradeableController extends AbstractController {
             'depends_on_points'
         ];
         // Date properties all need to be set at once
-        //$dates = $gradeable->getDates();
-        $dates = [];
+        $dates = $gradeable->getDates();
+
         $date_set = false;
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {
@@ -1213,11 +1212,11 @@ class AdminGradeableController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable == false) {
             $this->core->addErrorMessage("Invalid gradeable id");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
         if (!$gradeable->canDelete()) {
             $this->core->addErrorMessage("Gradeable " . $gradeable_id . " cannot be deleted.");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $this->core->getQueries()->deleteGradeable($gradeable_id);

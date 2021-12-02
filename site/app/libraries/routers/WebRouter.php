@@ -102,7 +102,7 @@ class WebRouter {
             // prevent user that is not logged in from going anywhere except AuthenticationController
             if (
                 !$logged_in
-                && !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')
+                && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
@@ -116,6 +116,11 @@ class WebRouter {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint.")
                 );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
             }
 
             if (!$router->checkFeatureFlag()) {
@@ -178,6 +183,15 @@ class WebRouter {
                 return new MultiResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                $errorString = "The {$enabled->getFeature()} feature is not enabled.";
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($errorString),
+                    new WebResponse("Error", "courseErrorPage", $errorString)
                 );
             }
 
@@ -254,11 +268,6 @@ class WebRouter {
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
-
-            if ($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
-                /** @noinspection PhpUnhandledExceptionInspection */
-                $this->core->loadForum();
-            }
         }
     }
 
@@ -268,7 +277,7 @@ class WebRouter {
      * @return MultiResponse|bool
      */
     private function loginRedirectCheck(bool $logged_in) {
-        if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+        if (!$logged_in && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
 
             $query_obj = $this->request->query->all();
@@ -287,7 +296,7 @@ class WebRouter {
         elseif (
             $this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
-            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {
             return MultiResponse::RedirectOnlyResponse(
@@ -296,7 +305,7 @@ class WebRouter {
         }
         elseif (
             $logged_in
-            && Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'logout'
         ) {
             return MultiResponse::RedirectOnlyResponse(
@@ -304,7 +313,7 @@ class WebRouter {
             );
         }
 
-        if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
+        if (!$this->core->getConfig()->isCourseLoaded() && !str_ends_with($this->parameters['_controller'], 'MiscController')) {
             if ($logged_in) {
                 if (isset($this->parameters['_semester']) && isset($this->parameters['_course'])) {
                     return MultiResponse::RedirectOnlyResponse(
@@ -312,7 +321,7 @@ class WebRouter {
                     );
                 }
             }
-            elseif (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+            elseif (!str_ends_with($this->parameters['_controller'], 'AuthenticationController')) {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
                 );
@@ -329,7 +338,7 @@ class WebRouter {
     private function csrfCheck() {
         if (
             $this->request->isMethod('POST')
-            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && !$this->core->checkCsrfToken()
         ) {
             $msg = "Invalid CSRF token.";
@@ -433,5 +442,17 @@ class WebRouter {
         }
 
         return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag->getFlag());
+    }
+
+    private function getEnabled(): ?Enabled {
+        return $this->reader->getClassAnnotation(
+            new \ReflectionClass($this->parameters['_controller']),
+            Enabled::class
+        );
+    }
+
+    private function checkEnabled(Enabled $enabled): bool {
+        $method = "is" . ucFirst($enabled->getFeature()) . "Enabled";
+        return $this->core->getConfig()->$method();
     }
 }

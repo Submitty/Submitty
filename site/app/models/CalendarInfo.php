@@ -7,7 +7,6 @@ use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradeableList;
 use app\views\NavigationView;
-use DateTime;
 
 /**
  * Class CalendarInfo
