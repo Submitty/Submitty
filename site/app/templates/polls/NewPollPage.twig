@@ -406,7 +406,7 @@
             const date_string = `${year}-${month}-${day}`;
             $("#poll-date").flatpickr({
                 defaultDate: date_string
-            })
+            });
         {% endif %}
         setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
