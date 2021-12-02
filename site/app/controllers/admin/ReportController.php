@@ -8,6 +8,8 @@ use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\PollUtils;
 use app\models\gradeable\AutoGradedGradeable;
@@ -44,8 +46,12 @@ class ReportController extends AbstractController {
 
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
-
-        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run);
+        $json = null;
+        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "customization.json");
+        if (file_exists($customization_path)) {
+            $json = file_get_contents($customization_path);
+        }
+        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run, $json);
     }
 
     /**
@@ -603,8 +609,58 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getCourse(),
                     $this->core->getConfig()->getSemester()
                 ),
+                'csrfToken' => $this->core->getCsrfToken(),
             ]);
         }
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
+     */
+    public function uploadRainbowConfig() {
+        $redirect_url =  $this->core->buildCourseUrl((['reports']));
+        if (empty($_FILES) || !isset($_FILES['config_upload'])) {
+            $msg = 'Upload failed: No file to upload';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        $upload = $_FILES['config_upload'];
+        if (empty($upload['tmp_name'])) {
+            $msg = 'Upload failed: Empty tmp name for file';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+
+        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'customization.json'))) {
+            $msg = 'Upload failed: Could not copy file';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        $msg = 'Rainbow Grades Customization uploaded';
+        $this->core->addSuccessMessage($msg);
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
+                'customization_path' => $rainbow_grades_dir
+            ]),
+            null,
+            new RedirectResponse($redirect_url)
+        );
     }
 
     /**
