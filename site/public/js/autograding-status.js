@@ -124,13 +124,16 @@ function toggleUpdate() {
 }
 
 function updateStackTrace() {
+    $('.stack-refresh-btn').prop("disabled", true);
     $.ajax({
         url: buildUrl(['autograding_status', 'get_stack']),
         type: 'GET',
         success: function (response) {
+            $('.stack-refresh-btn').prop("disabled", false);
             const json = JSON.parse(response);
             const error_log = $('.stack-trace');
             if (json.status === "success") {
+                error_log.empty();
                 error_log.append('<div class="stack-trace-wrapper"></div>');
                 error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>')
                 const wrapper = $('.stack-trace-wrapper');
@@ -176,6 +179,7 @@ function updateStackTrace() {
 $(document).ready(() => {
     $('#toggle-btn').text('Pause Update');
     $('#toggle-btn').on('click', toggleUpdate);
+    $('.stack-refresh-btn').on('click', updateStackTrace);
     time_id = setTimeout(updateTable, refresh_freq);
     updateStackTrace();
 });

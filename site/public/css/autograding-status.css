@@ -32,6 +32,7 @@
     overflow-y: scroll;
     height: 100vh;
     padding: 1em;
+    background-color: var(--standard-dark-gray);
 }
 
 div.stack-trace-wrapper {
@@ -40,7 +41,7 @@ div.stack-trace-wrapper {
 }
 
 div.stack-trace-wrapper > .tab {
-    color: var(--standard-medium-dark-gray);
+    color: var(--text-black);
     padding: 0.5em 1em 0.5em 1em;
     border-radius: 6px 6px 0 0;
     text-decoration: none;
