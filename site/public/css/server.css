@@ -138,8 +138,6 @@ input[type="color"] {
     background-color: var(--standard-input-background);
     vertical-align: middle;
     border: 1px solid var(--standard-light-gray);
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     width: auto;
 }
@@ -169,7 +167,7 @@ input.readonly {
     color: var(--btn-text-black);
 }
 
-[data-theme="dark"] input[type=text].readonly {
+[data-theme="dark"] input[type="text"].readonly {
     background-color: var(--standard-deep-dark-gray);
     color: var(--text-black);
 }
@@ -185,8 +183,6 @@ select {
 
 input[type="checkbox"] {
     cursor: pointer;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
     background: var(--default-white);
     box-sizing: border-box;
@@ -194,8 +190,6 @@ input[type="checkbox"] {
     height: 20px;
     border: 1px solid var(--text-black);
     transition: all 0.2s linear;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     min-width: 20px;
 }
@@ -207,7 +201,7 @@ input[type="checkbox"]:checked {
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
 input[type="checkbox"]:checked::before {
     /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: 'Font Awesome\ 5 Free';
+    font-family: "Font Awesome\ 5 Free";
     content: "\f00c";
     color: var(--always-default-white);
     font-size: 18px;
@@ -216,7 +210,7 @@ input[type="checkbox"]:checked::before {
 
 .fa-question-circle {
     /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: 'Font Awesome 5 Free';
+    font-family: "Font Awesome 5 Free";
     content: "\f059";
     color: var(--external-link-blue);
     font-weight: 300;
@@ -228,7 +222,7 @@ input[type="checkbox"]:checked::before {
 .disabled > .fa-question-circle,
 [disabled] > .fa-question-circle {
     /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: 'Font Awesome 5 Free';
+    font-family: "Font Awesome 5 Free";
     color: var(--standard-light-gray);
     content: "\f059";
     font-weight: 300;
@@ -245,7 +239,7 @@ button,
 [type="button"],
 [type="reset"],
 [type="submit"] {
-    -webkit-appearance: button;
+    appearance: button;
 }
 
 /****************************
@@ -277,8 +271,6 @@ table tr.table-header {
 .table-bordered {
     border: 1px solid var(--standard-medium-gray);
     border-collapse: separate;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
 }
 
@@ -797,8 +789,6 @@ td > a.active-sort {
 
 .fade {
     opacity: 0;
-    -webkit-transition: opacity 0.15s linear;
-    -o-transition: opacity 0.15s linear;
     transition: opacity 0.15s linear;
 }
 
@@ -840,7 +830,7 @@ tbody.collapse.in {
     text-decoration: none;
     clear: both;
     font-weight: normal;
-    line-height: 1.42857143;
+    line-height: 1.4286;
     color: var(--text-black) !important;
     white-space: nowrap;
 }
@@ -1011,7 +1001,6 @@ table .instructor .two-options {
 }
 
 div.full-height {
-    position: -webkit-sticky; /* Safari */
     position: sticky;
     max-height: 95vh;
     top: 10px;
@@ -1054,25 +1043,25 @@ div.full-height {
 .peer-feedback-negative-unselected {
     margin-top: 5px;
     background-color: var(--default-white);
-    color: rgba(128, 64, 64);
+    color: rgb(128 64 64);
 }
 
 .peer-feedback-positive-unselected {
     margin-top: 5px;
     background-color: var(--default-white);
-    color: rgba(0, 128, 0);
+    color: rgb(0 128 0);
 }
 
 .peer-feedback-positive-selected {
     margin-top: 5px;
-    background-color: rgba(0, 128, 0);
-    color: rgba(0, 0, 0);
+    background-color: rgb(0 128 0);
+    color: rgb(0 0 0);
 }
 
 .peer-feedback-negative-selected {
     margin-top: 5px;
-    background-color: rgba(128, 0, 0, 0.7);
-    color: rgba(0, 0, 0);
+    background-color: rgb(128 0 0 / 70%);
+    color: rgb(0 0 0);
 }
 
 #ui-category-list {
@@ -1087,7 +1076,7 @@ div.full-height {
     border-color: var(--standard-light-gray);
     border-width: thin;
     border-radius: 0.3em;
-    margin: 0.3em 0.1em 0.3em 0.1em;
+    margin: 0.3em 0.1em;
     padding: 0.2em;
 }
 
@@ -1100,30 +1089,25 @@ div.full-height {
     cursor: move;
 }
 
+#rainbow-mode {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 999999999;
+    pointer-events: none;
+}
+
 .rainbow {
     background:
-        -moz-linear-gradient(
-            left,
-            rgba(255, 0, 0, 1) 0%,
-            rgba(255, 255, 0, 1) 15%,
-            rgba(0, 255, 0, 1) 30%,
-            rgba(0, 255, 255, 1) 50%,
-            rgba(0, 0, 255, 1) 65%,
-            rgba(255, 0, 255, 1) 80%,
-            rgba(255, 0, 0, 1) 100%
-        );
-    background:
-        #337ab7 -webkit-gradient(
-            linear,
-            left top,
-            right bottom,
-            color-stop(0%, rgba(255, 0, 0, 0.4)),
-            color-stop(15%, rgba(255, 255, 0, 0.4)),
-            color-stop(30%, rgba(0, 255, 0, 0.4)),
-            color-stop(50%, rgba(0, 255, 155, 0.4)),
-            color-stop(65%, rgba(0, 0, 255, 0.4)),
-            color-stop(80%, rgba(255, 0, 255, 0.4)),
-            color-stop(100%, rgba(255, 0, 0, 0.4))
+        linear-gradient(
+            135deg,
+            rgb(255 0 0 / 30%),
+            rgb(255 255 0 / 30%),
+            rgb(0 255 0 / 30%),
+            rgb(0 255 155 / 30%),
+            rgb(0 0 255 / 30%),
+            rgb(255 0 255 / 30%),
+            rgb(255 0 0 / 30%)
         );
 }
 
@@ -1145,7 +1129,7 @@ div.full-height {
     height: 100%;
     top: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgb(0 0 0 / 50%);
 }
 
 .popup-box {
@@ -1243,9 +1227,6 @@ div.full-height {
 
 .fill-available {
     width: 100%;
-    width: -webkit-fill-available;
-    width: -moz-available;
-    width: fill-available;
 }
 
 /* Makes the cursor change to a hand on the checkpoints so that it is clear they can be clicked on */
@@ -1268,10 +1249,7 @@ div.full-height {
 .late-box {
     background: var(--danger-red);
     padding: 3px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    margin-left: 5%;
-    margin-right: 5%;
+    margin: 3px 5%;
     border-radius: 4px;
 }
 
@@ -1394,7 +1372,6 @@ end of styles used in the admin gradeable page
     color: transparent;
 
     /* chrome & safari */
-    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -1466,10 +1443,8 @@ end of styles used in the admin gradeable page
     color: var(--badge-backgroud-red);
 }
 
-.required::-webkit-input-placeholder { color: var(--error-alert-dark-red); }
-.required:-moz-placeholder { color: var(--error-alert-dark-red); }
-.required::-moz-placeholder { color: var(--error-alert-dark-red); }
-.required:-ms-input-placeholder { color: var(--error-alert-dark-red); }
+.required:placeholder { color: var(--error-alert-dark-red); }
+.required::placeholder { color: var(--error-alert-dark-red); }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .required_type {
@@ -1492,7 +1467,7 @@ end of styles used in the admin gradeable page
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgb(0 0 0 / 40%);
 }
 
 .modal-content {
@@ -1677,7 +1652,6 @@ end of styles used in the admin gradeable page
     width: 108px;
     border: 2px solid #2627ee;
     height: min-content;
-    height: -moz-min-content;
     position: absolute;
     z-index: 999;
 }
@@ -1908,9 +1882,7 @@ header > * {
         min-width: 680px;
         max-width: 80%;
         height: min-content;
-        height: -moz-min-content;
         width: min-content;
-        width: -moz-min-content;
     }
 
     #add-new-term .popup-window {
@@ -1944,7 +1916,7 @@ header > * {
     align-content: center;
     animation: spin 2s linear infinite;
     position: fixed; /* Sit on top of the page content */
-    background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+    background-color: rgb(0 0 0 / 50%); /* Black background with opacity */
     z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
     cursor: pointer; /* Add a pointer on hover */
 }
@@ -1959,7 +1931,7 @@ header > * {
 }
 
 .custom-file-input::before {
-    content: 'Select CSV';
+    content: "Select CSV";
     display: inline-block;
     background: var(--actionable-blue);
     border: 1px var(--actionable-blue);
@@ -1968,7 +1940,7 @@ header > * {
     padding: 5px 8px;
     outline: none;
     white-space: nowrap;
-    -webkit-user-select: none;
+    user-select: none;
     cursor: pointer;
     font-size: 10pt;
 }
@@ -1978,7 +1950,7 @@ header > * {
 }
 
 .custom-file-input:active::before {
-    background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+    background: linear-gradient(to bottom, #e3e3e3, #f9f9f9);
 }
 
 .mermaid-element {

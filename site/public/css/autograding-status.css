@@ -12,7 +12,7 @@
 }
 
 #toggle-btn {
-    margin: 1em 0 1em 0;
+    margin: 1em 0;
 }
 
 #course-table td:nth-of-type(1)::before { content: "Semester"; }

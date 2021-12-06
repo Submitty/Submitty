@@ -23,8 +23,8 @@
     --hover-light-border-actionable-blue: #2e6da4;
     --hover-border-actionable-blue: #204d74;
     --hover-dark-border-actionable-blue: #122b40;
-    --standard-lightskyblue: rgb(135, 206, 250);
-    --standard-mediumorchid: rgb(186, 85, 211);
+    --standard-lightskyblue: rgb(135 206 250);
+    --standard-mediumorchid: rgb(186 85 211);
     --info-blue: #5bc0de;
     --hover-focus-info-blue: #31b0d5;
     --hover-active-all-info-blue: #269abc;
@@ -79,7 +79,7 @@
     --standard-medium-orange: #ec971f;
     --standard-vibrant-orange: #ffa500;
     --standard-creamsicle-orange: #ff8040;
-    --standard-peachpuff: rgb(255, 218, 185);
+    --standard-peachpuff: rgb(255 218 185);
     --standard-vibrant-yellow: #ffff00;
     --standard-vibrant-purple: #cc66ff;
     --standard-plum-purple: #72518a;
@@ -104,7 +104,7 @@
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #eac73d;
-    --standard-beige: rgb(245, 245, 220);
+    --standard-beige: rgb(245 245 220);
     --standard-light-gold: #fff3cd;
     --standard-light-green: #99ff99;
     --standard-pastel-blue: #d9edf7;
@@ -196,8 +196,8 @@
     --category-color-20: #c0c246;
 
     /* other */
-    --box-shadow-very-transparent: rgba(0, 0, 0, 0.12);
-    --box-shadow-slightly-transparent: rgba(0, 0, 0, 0.2);
+    --box-shadow-very-transparent: rgb(0 0 0 / 12%);
+    --box-shadow-slightly-transparent: rgb(0 0 0 / 20%);
     --no-image-available: #595959;
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
@@ -296,7 +296,7 @@
     --standard-medium-orange: #ec971f;
     --standard-vibrant-orange: #ffa500;
     --standard-creamsicle-orange: #ff8040;
-    --standard-peachpuff: rgb(153, 112, 76);
+    --standard-peachpuff: rgb(153 112 76);
     --standard-vibrant-yellow: #757500;
     --standard-vibrant-purple: #cc66ff;
     --standard-plum-purple: #72518a;
@@ -321,7 +321,7 @@
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #8e7306;
-    --standard-beige: rgb(119, 119, 106);
+    --standard-beige: rgb(119 119 106);
     --standard-light-gold: #fff3cd;
     --standard-light-green: #427742;
     --standard-pastel-blue: #2f6580;
@@ -386,8 +386,8 @@
     --notebook-builder-itempool-green: #50826a;
 
     /* other */
-    --box-shadow-very-transparent: rgba(255, 255, 255, 0);
-    --box-shadow-slightly-transparent: rgba(255, 255, 255, 0);
+    --box-shadow-very-transparent: rgb(255 255 255 / 0%);
+    --box-shadow-slightly-transparent: rgb(255 255 255 / 0%);
     --no-image-available: #adadad;
     --standard-input-background: #4a4a4a;
     --checkbox-black: #5296db;

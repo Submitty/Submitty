@@ -2506,6 +2506,44 @@ function open_overall_comment_tab(user) {
     $('#overall-comment-tabs').children().removeClass('active-btn');
     comment_root.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
+
+    //if the tab is for the main user of the page
+    if(!textarea.hasClass('markdown-preview')){
+        if($(`#overall-comment-markdown-preview-${user}`).is(':hidden')){
+            textarea.show();
+        }
+    } else {
+        textarea.show();
+    }
+
+    let attachmentsListUser = $(`#attachments-list-${user}`);
+    if (attachmentsListUser.length !== 0) {
+        let attachmentsList = $("#attachments-list");
+        $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
+        
+        let isUser = false;
+        if (attachmentsList.attr("data-user") === user) {
+            $("#attachment-upload-form").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+            isUser = true;
+        } else {
+            $("#attachment-upload-form").css("display", "none");
+        }
+        if (attachmentsListUser.children().length === 0) {
+            attachmentsListUser.css("display", "none")
+            $("#attachments-header").css("display", "none");
+            if (!isUser) {
+                $("#overall-comments-attachments").css("display", "none");
+            }
+        } else {
+            attachmentsListUser.css("display", "")
+            $("#attachments-header").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+        }
+        
+        attachmentsList.attr("data-active-user", user);
+    }
+
 }
 
 /**

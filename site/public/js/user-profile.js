@@ -194,7 +194,18 @@ $(document).ready(function() {
 
     $('#theme_change_select').change(function() {
         updateTheme();
+        if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+          $(document.body).find('#rainbow-mode').remove();
+          localStorage.removeItem('rainbow-mode');
+          const theme_picker = $('#theme_change_select');
+          theme_picker.find('[value="rainbow"]').remove();
+        }
     });
+
+    if(JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+      const theme_picker = $('#theme_change_select');
+      theme_picker.append(`<option value="rainbow" selected="selected">Rainbow Mode</option>`);
+    }
 
     if ($('#flagged-message').data('flagged') === "flagged") {
       $('#flagged-message').addClass('show');

@@ -257,7 +257,7 @@ def send_email():
 def main():
     if not EMAIL_ENABLED:
         return
-    """Send queued Submitty emails and log any errors."""
+    # Send queued Submitty emails and log any errors.
     try:
         send_email()
     except Exception as email_send_error:
