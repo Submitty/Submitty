@@ -937,9 +937,9 @@ def checkout_vcs_repo(config, my_file):
                             shutil.move(
                                         os.path.join(
                                                      checkout_path,
-                                                     vcs_subdirectory, 
+                                                     vcs_subdirectory,
                                                      f),
-                                                     tmp_checkout)
+                                        tmp_checkout)
                     else:
                         subprocess.check_call('not_a_commadn')
                     shutil.rmtree(checkout_path, ignore_errors=True)
