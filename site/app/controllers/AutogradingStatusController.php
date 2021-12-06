@@ -64,7 +64,7 @@ class AutogradingStatusController extends AbstractController {
             if ($f === '.' || $f === '..') {
                 continue;
             }
-            $file_path =FileUtils::joinPaths($stack_trace_path, $f);
+            $file_path = FileUtils::joinPaths($stack_trace_path, $f);
             if (is_readable($file_path)) {
                 $info[$f] = file_get_contents($file_path);
             }
