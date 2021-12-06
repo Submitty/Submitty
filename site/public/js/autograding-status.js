@@ -134,13 +134,13 @@ function updateStackTrace() {
             const error_log = $('.stack-trace');
             if (json.status === 'success') {
                 error_log.empty();
-                error_log.append(`<div class='stack-trace-wrapper'></div>`);
-                error_log.append(`<pre class='stack-trace-info custom-scrollbar'></pre>`);
+                error_log.append('<div class="stack-trace-wrapper"></div>');
+                error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>');
                 const wrapper = $('.stack-trace-wrapper');
                 const info = $('.stack-trace-info');
+                // Empty 'Exception' object used to break out of foreach
+                const BreakException = {};
                 try {
-                    // Empty 'Exception' object used to break out of foreach
-                    const BreakException = {};
                     Object.keys(json.data).forEach((key, i) => {
                         // Work around to break not working in foreach, throw and catch the error to exit the foreach
                         if (i === 7) {
@@ -148,11 +148,11 @@ function updateStackTrace() {
                         }
                         let new_tab = null;
                         if (i === 0) {
-                            new_tab = $(`<a class='tab active-tab'></a>`).text(key);
+                            new_tab = $('<a class="tab active-tab"></a>').text(key);
                             info.text(json.data[key]);
                         }
                         else {
-                            new_tab = $(`<a class='tab'></a>`).text(key);
+                            new_tab = $('<a class="tab"></a>').text(key);
                         }
                         wrapper.append(new_tab);
                         new_tab.attr('data', json.data[key]);
