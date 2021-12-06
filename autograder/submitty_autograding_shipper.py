@@ -934,7 +934,12 @@ def checkout_vcs_repo(config, my_file):
                     files = os.listdir(os.path.join(checkout_path, vcs_subdirectory))
                     if files:
                         for f in files:
-                            shutil.move(os.path.join(checkout_path, vcs_subdirectory, f), tmp_checkout)
+                            shutil.move(
+                                        os.path.join(
+                                                     checkout_path,
+                                                     vcs_subdirectory, 
+                                                     f),
+                                                     tmp_checkout)
                     else:
                         subprocess.check_call('not_a_commadn')
                     shutil.rmtree(checkout_path, ignore_errors=True)
