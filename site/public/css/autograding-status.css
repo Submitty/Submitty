@@ -48,7 +48,7 @@ div.stack-trace-wrapper > .tab {
     display: inline-block;
 }
 
-div.stack-trace-wrapper > .active-tab{
+div.stack-trace-wrapper > .active-tab {
     background-color: var(--submitty-logo-blue);
     color: var(--btn-text-white);
 }
