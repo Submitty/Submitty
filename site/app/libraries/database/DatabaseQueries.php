@@ -5797,6 +5797,12 @@ AND gc_id IN (
 
     private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
         $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
+        if ($comment === "") {
+            $this->deleteOverallComment($g_id, $grader_id);
+            $ta_graded_gradeable->removeOverallComment($grader_id);
+            return;
+        }
+
         $user_id = null;
         $team_id = null;
 
@@ -5824,14 +5830,8 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
-    public function deleteOverallComment($gradeable_id, $grader_id, $is_team) {
+    public function deleteOverallComment($gradeable_id, $grader_id) {
         $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
-        if ($is_team) {
-            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_team_id=?", [$gradeable_id, $grader_id]);
-        }
-        else {
-            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_user_id=?", [$gradeable_id, $grader_id]);
-        }
     }
 
     /**
@@ -5880,17 +5880,15 @@ AND gc_id IN (
             $is_team ? null : $submitter_id,
             $is_team ? $submitter_id : null,
             $ta_graded_gradeable->getUserViewedDate() !== null ?
-                DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
-            ""
+                DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null
         ];
         $query = "
             INSERT INTO gradeable_data (
                 g_id,
                 gd_user_id,
                 gd_team_id,
-                gd_user_viewed_date,
-                gd_overall_comment)
-            VALUES(?, ?, ?, ?, ?)";
+                gd_user_viewed_date)
+            VALUES(?, ?, ?, ?)";
         $this->course_db->query($query, $params);
 
         // Setup the graded gradeable with its new id
