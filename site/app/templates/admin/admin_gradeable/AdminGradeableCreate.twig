@@ -267,7 +267,7 @@
                             {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Submitty hosted - single repository per user per course, assignments in subdirectories</label>
 
-                        <div id="vcs_self_set_url_content" name="vcs_content" style="margin-left: 5%">
+                        <div id="vcs_self_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
                                 <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
                                 <input style='width: 30%' type='text' name="vcs_url" id="vcs_self_url" class="required auto_save" placeholder="(Required)"
@@ -460,6 +460,7 @@
     function onVCSTypeChange() {
         disableElementChildren('[id=vcs_submitty_set_url_content]', true);
         disableElementChildren('[id=vcs_submitty_url_content]', true);
+        disableElementChildren('[id=vcs_self_set_url_content]', true);
 
         if($('#vcs_radio_submitty_hosted').is(':checked')) {
             disableElementChildren('#vcs_submitty_url_content', false);
@@ -471,6 +472,14 @@
         }
         else {
             $('#vcs_submitty_url').prop('required', false);
+        }
+
+        if($('#vcs_radio_self_hosted_set_url').is(':checked')) {
+            disableElementChildren('#vcs_self_set_url_content', false);
+            $('#vcs_self_url').prop('required', true);
+        }
+        else {
+            $('#vcs_self_url').prop('required', false);
         }
     }
 
