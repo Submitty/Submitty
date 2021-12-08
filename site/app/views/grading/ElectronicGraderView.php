@@ -59,14 +59,19 @@ class ElectronicGraderView extends AbstractView {
         $peer = $gradeable->hasPeerComponent();
 
         $graded = 0;
+        $non_late_graded = 0;
         $total = 0;
+        $non_late_total = 0;
         $no_team_total = 0;
         $team_total = 0;
         $team_percentage = 0;
         $total_students = 0;
         $graded_total = 0;
+        $non_late_graded_total = 0;
         $submitted_total = 0;
+        $non_late_submitted_total = 0;
         $submitted_percentage = 0;
+        $non_late_submitted_percentage = 0;
         $submitted_percentage_peer = 0;
         $peer_total = 0;
         $peer_graded = 0;
@@ -74,6 +79,7 @@ class ElectronicGraderView extends AbstractView {
         $entire_peer_graded = 0;
         $entire_peer_total = 0;
         $total_grading_percentage = 0;
+        $non_late_total_grading_percentage = 0;
         $entire_peer_percentage = 0;
         $viewed_total = 0;
         $viewed_percent = 0;
@@ -95,6 +101,8 @@ class ElectronicGraderView extends AbstractView {
             }
             $graded += $section['graded_components'];
             $total += $section['total_components'];
+            $non_late_graded += $section['non_late_graded_components'];
+            $non_late_total += $section['non_late_total_components'];
             if ($gradeable->isTeamAssignment()) {
                 $no_team_total += $section['no_team'];
                 $team_total += $section['team'];
@@ -121,12 +129,21 @@ class ElectronicGraderView extends AbstractView {
             $num_non_peer_components = count($gradeable->getNonPeerComponents());
             $num_components = $num_peer_components + $num_non_peer_components;
             $submitted_total = $num_components > 0 ? $total : 0;
+            $non_late_submitted_total = $num_components > 0 ? $non_late_total : 0;
             $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
+            $non_late_graded_total = $num_components > 0 ? round($non_late_graded / $num_components, 2) : 0;
             if ($submitted_total > 0) {
                 $total_grading_percentage =  number_format(($graded_total / $submitted_total ) * 100, 1);
             }
             else {
                 $total_grading_percentage = 0;
+            }
+
+            if ($non_late_submitted_total > 0) {
+                $non_late_total_grading_percentage =  number_format(($non_late_graded_total / $non_late_submitted_total ) * 100, 1);
+            }
+            else {
+                $non_late_total_grading_percentage = 0;
             }
             if ($peer) {
                 $num_peer_components = count($gradeable->getPeerComponents());
@@ -137,6 +154,7 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round((($submitted_total) / $total_submissions) * 100, 1);
+                $non_late_submitted_percentage = $non_late_submitted_total > 0 ? round((($non_late_submitted_total) / $total_submissions) * 100, 1) : 0;
             }
             //Add warnings to the warnings array to display them to the instructor.
             if ($section_type === "rotating_section" && $show_warnings) {
@@ -197,11 +215,21 @@ class ElectronicGraderView extends AbstractView {
                 $non_zero_non_peer_components_count = $non_peer_components_count != 0 ? $non_peer_components_count : 1;
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
+                $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
+                $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
+
                 if ($section['total_components'] == 0) {
                     $section['percentage'] = 0;
                 }
                 else {
                     $section['percentage'] = number_format(($section['graded'] / $section['total']) * 100, 1);
+                }
+
+                if ($section['non_late_total'] == 0) {
+                    $section['non_late_percentage'] = 0;
+                }
+                else {
+                    $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
                 }
             }
                 unset($section); // Clean up reference
@@ -261,6 +289,19 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
+
+
+        $filters = [
+            "grade_overriddes",
+            "late_submissions"
+        ];
+
+        $f = array_map(function ($filter) {
+            return array_key_exists("include_".$filter, $_COOKIE) ? $_COOKIE["include_".$filter] === 'true' : true;
+        }, $filters);
+
+        $filters = array_combine($filters, $f);
+
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
@@ -279,15 +320,19 @@ class ElectronicGraderView extends AbstractView {
             "total_submissions" => $total_submissions,
             "no_team_total"   => $no_team_total,
             "submitted_total" => $submitted_total,
+            "non_late_submitted_total" => $non_late_submitted_total,
             "submitted_percentage" => $submitted_percentage,
+            "non_late_submitted_percentage" => $non_late_submitted_percentage,
             "submitted_percentage_peer" => $submitted_percentage_peer,
             "graded_total" => $graded_total,
+            "non_late_graded_total" => $non_late_graded_total,
             "graded_percentage" => $graded_percentage,
             "peer_total" => $peer_total,
             "peer_graded" => $peer_graded,
             "peer_percentage" => $peer_percentage,
             "entire_peer_total" => $entire_peer_total,
             "total_grading_percentage" => $total_grading_percentage,
+            "non_late_total_grading_percentage" => $non_late_total_grading_percentage, //****
             "entire_peer_graded" => $entire_peer_graded,
             "entire_peer_percentage" => $entire_peer_percentage,
             "sections" => $sections,
@@ -315,8 +360,8 @@ class ElectronicGraderView extends AbstractView {
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
-            "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
+            "filters" => $filters,
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -567,13 +612,18 @@ HTML;
             }
         }
 
+        // Generate late days
+        // $late_days = $this->core->getQueries()->generateLateDayCacheForUsers();
+        // TO DO: Add bulk LateDays creation from database
+
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
             $info = [
-                "graded_gradeable" => $row
+                "graded_gradeable" => $row,
+                "late_day_info" => $this->core->getQueries()->getLateDayInfoForUserGradeable($row->getSubmitter()->getUser(), $row)
             ];
 
             if ($peer) {

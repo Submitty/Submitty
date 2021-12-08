@@ -432,8 +432,13 @@
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
-        {% set contents = "Grade" %}
-        {% set btn_class = "btn-primary" %}
+        {% if info.late_day_info.isOnTimeSubmission() %}
+            {% set contents = "Grade" %}
+            {% set btn_class = "btn-primary" %}
+        {% else %}
+            {% set contents = "Too Many Days Late" %}
+            {% set btn_class = "btn-danger" %}
+        {% endif %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
@@ -587,7 +592,7 @@
 
 {# Total Point Summary #}
 {% macro render_column_total(context, section, graded_gradeable, index, info, column) %}
-    {% set box_background = (graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getDaysLate() > graded_gradeable.getGradeable().getLateDays()) ? "late-box" : "" %}
+    {% set box_background = (info.late_day_info.isOnTimeSubmission() == false) ? "late-box" : "" %}
 
     {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
 

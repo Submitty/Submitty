@@ -157,6 +157,12 @@
             </ul>
         {% endif %}
     </div>
+
+    {% if not peer %}
+        <a class="btn btn-default" style="float: right" onclick="showStatusFilterForm()">
+            Edit Filters
+        </a>
+    {% endif %}
     {# /Top Button #}
 </div>
 
@@ -342,16 +348,27 @@
         }
     }
 
-    function changeOverride() {
-        var status = '{{ include_overridden }}';
+    function updateFilters() {
+        var filters = {{ filters|json_encode|replace({"'": "&#39;"})|raw}};
 
-        if (status == 'omit') {
-            document.cookie = "include_overridden=include;";
+        for (var filter_id in filters) {
+            var filter_id_name = filter_id.replace("_", "-");
+            var cookie_name = "include_" + filter_id.replace('-', '_');
+        
+            var check = document.getElementById("toggle-filter-"+filter_id_name);
+            document.cookie = cookie_name + (check.checked ? "=true;" : "=false;");
         }
-        else {
-            document.cookie = "include_overridden=omit;";
-        }
+
         location.reload();
+    }
+
+    function showStatusFilterForm() {
+        $('.popup-form').css('display', 'none');
+        var form = $("#edit-status-filter-form");
+        form.css("display", "block");
+        form.find('.form-body').scrollTop(0);
     }
     
 </script>
+
+{% include 'grading/electronic/ta_status/StatusFilterModal.twig' %}
