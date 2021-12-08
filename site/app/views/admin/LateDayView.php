@@ -51,7 +51,7 @@ class LateDayView extends AbstractView {
 
         $late_day_cache = $this->core->getQueries()->getLateDayCache();
         $late_day_update_dates = $this->core->getQueries()->getLateDayUpdateTimestamps();
-        $last_late_day_events = $this->core->getQueries()->getLastLateDayUpdatesFOrUsers();
+        $last_late_day_events = $this->core->getQueries()->getLastLateDayUpdatesForUsers();
         $gradeables_iterator = $this->core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date', 'g_id']);
 
         $gradeables = [];

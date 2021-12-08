@@ -1474,6 +1474,22 @@ WHERE semester=? AND course=? AND user_id=?",
         return $row;
     }
 
+    public function generateLateDayCacheForUsers() {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    (SELECT (cache_row).* 
+                    FROM 
+                        (SELECT
+                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
+                        FROM users
+                        ) calculated_cache
+                    )";
+
+        $this->course_db->query($query, $params);
+    }
+
     public function generateLateDayCacheForUser($user_id) {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
@@ -1554,7 +1570,7 @@ WHERE semester=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getLastLateDayUpdatesFOrUsers() {
+    public function getLastLateDayUpdatesForUsers() {
         $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
         $this->course_db->query($query);
         $return = [];

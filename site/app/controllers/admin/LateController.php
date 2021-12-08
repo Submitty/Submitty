@@ -81,19 +81,7 @@ class LateController extends AbstractController {
      * @return MultiResponse
      */
     public function calculateLateDayCache() {
-        $users = $this->core->getQueries()->getAllUsers();
-        $late_day_cache = [];
-
-        foreach ($users as $user) {
-            $late_days = LateDays::fromUser($this->core, $user);
-
-            foreach ($late_days->getLateDayInfo() as $ldi) {
-                $late_day_cache[] = $ldi->generateEventInfo();
-            }
-        }
-
-        $this->core->getQueries()->flushAllLateDayCache();
-        $this->core->getQueries()->bulkUploadLateDayCache($late_day_cache);
+        $this->core->getQueries()->generateLateDayCacheForUsers();
 
         $this->core->addSuccessMessage("Late day cache calculated!");
 
