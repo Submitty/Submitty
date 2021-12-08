@@ -613,7 +613,7 @@ HTML;
         }
 
         // Generate late days
-        // $late_days = $this->core->getQueries()->generateLateDayCacheForUsers();
+        $this->core->getQueries()->generateLateDayCacheForUsers();
         // TO DO: Add bulk LateDays creation from database
 
         //Convert rows into sections and prepare extra row info for things that
