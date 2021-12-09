@@ -536,6 +536,7 @@ class ElectronicGraderController extends AbstractController {
         $my_grading = 0;
         $num_components = 0;
         $graded_components = [];
+        $late_components = [];
         $ta_graded_components = [];
         $graders = [];
         $average_scores = [];
@@ -556,6 +557,9 @@ class ElectronicGraderController extends AbstractController {
         $peers_to_grade = 0;
         $peer_graded_components = 0;
         $total_users_who_submitted = [];
+
+        // Assure late day cache is calculated
+        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable_id);
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
@@ -1608,6 +1612,10 @@ class ElectronicGraderController extends AbstractController {
         $total_submitted = 0;
         $non_late_total_submitted = 0;
         $non_late_graded = 0;
+        
+        // Assure late day cache is calculated
+        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable_id);
+
         if ($peer) {
             $section_key = 'registration_section';
             $total = $gradeable->getPeerGradeSet();
@@ -1653,14 +1661,17 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($team) {
                 //$total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
+                $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($gradeable_id, $sections, 'rotating_section');
                 $total_submitted = array_sum($this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
             }
             else {
+                $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($gradeable_id, $sections, 'rotating_section');
                 $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, 'rotating_section'));
             }
-            $non_late_total_submitted = $total_submitted - array_sum($gradeable->getBadSubmissionsByGradingSection('rotating_section'));
+            $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section', $gradeable->isTeamAssignment());
+            $non_late_total_submitted = $total_submitted - array_sum($late_submitted);
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section', $team));
-            $non_late_graded = $graded - array_sum($gradeable->getBadGradedComponents('rotating_section'));
+            $non_late_graded = $graded - array_sum($late_graded);
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
