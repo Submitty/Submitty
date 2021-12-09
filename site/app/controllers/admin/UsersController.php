@@ -878,12 +878,13 @@ class UsersController extends AbstractController {
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
+        $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
         $bad_columns = []; //Tracks columns in which errors occured
 
         // Mapping column with its validation formats
         $column_formats = [
-            'column_count' => 'Only 5 to 9 columns are allowed',
+            'column_count' => 'Only 5 to 10 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
             'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
@@ -892,7 +893,9 @@ class UsersController extends AbstractController {
             'grader_group' => 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
             'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
-            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.'
+            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
+            'grading_section_assignments' => 'Grading section assignments must be comma-separated course registration sections, ' . 
+                'enclosed in double quotes (e.g. "1,3,STAFF").'
         ];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
@@ -903,7 +906,7 @@ class UsersController extends AbstractController {
                 continue;
             }
             // Bounds check to ensure minimum required number of rows is present.
-            if (count($vals) < 5 || count($vals) > 9) {
+            if (count($vals) < 5 || count($vals) > 10) {
                 $bad_row_details[$row_num + 1][] = 'column Count';
                 if (!in_array('column_count', $bad_columns)) {
                     $bad_columns[] = 'column_count';
@@ -984,6 +987,37 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
+            /* Grading assignments must be valid, comma-separated course registration sections, enclosed in double quotes.
+               Automatically validate if not set (this field is optional) */
+            if (!(empty($vals[$grading_assignments_idx]))) {
+                if (!User::validateUserData('grading_section_assignments', $vals[$grading_assignments_idx])) {
+                    $bad_row_details[$row_num + 1][] = 'grading section assignments';
+                    if (!in_array('grading_section_assignments', $bad_columns)) {
+                        $bad_columns[] = 'grading_section_assignments';
+                    }
+                } else {
+                    // TODO: perhaps we should move this to when we process the reg sections, and can remove it from toast message
+                        // TODO: also need to convert null strings to actual null; actually maybe not
+                        // TODO: prevent duplicates?
+                    // If grading assignments pass regex check, still need to confirm entered registration sections are valid,
+                    // pre-existing registration sections within the course.
+                    $existing_registration_sections = $this->core->getQueries()->getRegistrationSections();
+                    foreach ($existing_registration_sections as $i => $section) {
+                        $existing_registration_sections[$i] = $section['sections_registration_id'];
+                    }
+                    /* $data_registration_sections = explode(',',trim($vals[$grading_assignments_idx],"\""));
+                    $unrecognized_data_registration_sections = array_diff($data_registration_sections, $existing_registration_sections);
+                    if (count($unrecognized_data_registration_sections) > 0); {
+                        $bad_row_details[$row_num + 1][] = 'grading section assignments';
+                        if (!in_array('grading_section_assignments', $bad_columns)) {
+                            $bad_columns[] = 'grading_section_assignments';
+                        }
+                        $this->core->addErrorMessage('Invalid registration sections specified in grading assignments:- ' . implode(', ', $unrecognized_data_registration_sections));
+                    } */
+                }
+            }
+            // ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data
+            $uploaded_data[$row_num] = $vals;
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
