@@ -1481,18 +1481,32 @@ WHERE semester=? AND course=? AND user_id=?",
         return $ldi;
     }
 
-    public function generateLateDayCacheForUsers() {
+    /**
+     * Calculates the remaining cache for all the users. If a g_id is procided,
+     * it will only calculate the cache for the uses who DO NOT already have 
+     * late day cache calculated
+     */
+    public function generateLateDayCacheForUsers($g_id = null) {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
-        $params = [$default_late_days];
+        $params = [$g_id, $default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
-                    (SELECT (cache_row).* 
+        $query = "WITH existing_cache AS (
+                    SELECT DISTINCT user_id
+                    FROM late_day_cache
+                    WHERE g_id=?
+                )
+                (SELECT (cache_row).* 
+                FROM 
+                    (SELECT
+                        public.calculate_remaining_cache_for_user(users.user_id::text, ?) as cache_row
                     FROM 
-                        (SELECT
-                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
-                        FROM users
-                        ) calculated_cache
-                    )";
+                        users
+                        LEFT JOIN existing_cache
+                        ON existing_cache.user_id = users.user_id
+                    WHERE 
+                        existing_cache.user_id IS NULL
+                    ) calculated_cache
+                );";
 
         $this->course_db->query($query, $params);
     }
