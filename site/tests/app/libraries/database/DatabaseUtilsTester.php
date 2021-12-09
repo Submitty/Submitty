@@ -22,7 +22,7 @@ class DatabaseUtilsTester extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider formatQueryProvider
      */
-    public function testFormatQuery(string $sql, array $params, string $expected): void {
+    public function testFormatQuery(string $sql, ?array $params, string $expected): void {
         $this->assertEquals($expected, DatabaseUtils::formatQuery($sql, $params));
     }
 }
