@@ -1530,13 +1530,17 @@ WHERE semester=? AND course=? AND user_id=?",
     public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
         $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
         $cache['graded_gradeable'] = $graded_gradeable;
-        $ldi = $cache !== null ? new LateDayInfo($this->core, $user, $cache) : null;
+        $ldi = null;
+
+        if ($cache !== null) {
+            $ldi = new LateDayInfo($this->core, $user, $cache);
+        }
         return $ldi;
     }
 
     /**
      * Calculates the remaining cache for all the users. If a g_id is procided,
-     * it will only calculate the cache for the uses who DO NOT already have 
+     * it will only calculate the cache for the uses who DO NOT already have
      * late day cache calculated
      */
     public function generateLateDayCacheForUsers($g_id = null) {

@@ -21,7 +21,7 @@
                     <b>Number of teams:</b> {{ total_submissions }}
                     <br/>
                     <br/>
-                    {% if filters['late_submissions'] %}
+                    {% if filters['late_submissions'].enabled %}
                         <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                     {% else %}
                         <b>Teams who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
@@ -35,7 +35,7 @@
                         <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
                     {% else %}
                         <br/>
-                        {% if filters['late_submissions'] %}
+                        {% if filters['late_submissions'].enabled %}
                             <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             <br/>
                             <br/>
@@ -62,7 +62,7 @@
                 <div style="margin-left: 20px">
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
-                            {% if filters['late_submissions'] %}
+                            {% if filters['late_submissions'].enabled %}
                                 Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
                             {% else %}
                                 Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />

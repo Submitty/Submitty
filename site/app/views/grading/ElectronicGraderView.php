@@ -290,17 +290,22 @@ class ElectronicGraderView extends AbstractView {
             }
         }
 
-
+        // (filter_id => [filter_title, default])
         $filters = [
-            "grade_overriddes",
-            "late_submissions"
+            "grade_overriddes" => ["Grade Overrides", false],
+            "late_submissions" => ["Bad Late Submissions", true]
         ];
 
-        $f = array_map(function ($filter) {
-            return array_key_exists("include_".$filter, $_COOKIE) ? $_COOKIE["include_".$filter] === 'true' : true;
-        }, $filters);
-
-        $filters = array_combine($filters, $f);
+        // (filter_id => [title => filter_title, default => boolean, enabled => boolean])
+        // Note: cookie will be names "include_" + filter_id
+        $f = array_map(function ($filter) use ($filters) {
+            $cookie_name = "include_" . $filter;
+            return [
+                'title' => $filters[$filter][0],
+                'enabled' => array_key_exists($cookie_name, $_COOKIE) ? $_COOKIE[$cookie_name] === 'true' : $filters[$filter][1]
+            ];
+        }, array_keys($filters));
+        $filters = array_combine(array_keys($filters), $f);
 
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
