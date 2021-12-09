@@ -1438,7 +1438,7 @@ class ElectronicGraderController extends AbstractController {
         $total_submitted = 0;
         $non_late_total_submitted = 0;
         $non_late_graded = 0;
-        
+
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers($gradeable_id);
 
