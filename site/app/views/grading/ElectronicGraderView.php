@@ -96,7 +96,9 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
+            // If we allow NULL sections, use any.
+            // If not, make sure $key is not NULL
+            if ($key === "NULL" && (!array_key_exists('include_null_registration', $_COOKIE) || $_COOKIE['include_null_registration'] === 'false')) {
                 continue;
             }
             $graded += $section['graded_components'];
@@ -293,7 +295,8 @@ class ElectronicGraderView extends AbstractView {
         // (filter_id => [filter_title, default])
         $filters = [
             "grade_overriddes" => ["Grade Overrides", false],
-            "late_submissions" => ["Bad Late Submissions", true]
+            "late_submissions" => ["Bad Late Submissions", true],
+            "null_registration" => ["NULL Registration Sections", false]
         ];
 
         // (filter_id => [title => filter_title, default => boolean, enabled => boolean])

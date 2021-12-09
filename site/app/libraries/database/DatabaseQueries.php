@@ -1665,7 +1665,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $params = [];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE ({$section_key} IN " . $this->createParamaterList(count($sections)) . ") IS NOT FALSE";
             $params = $sections;
         }
         if ($section_key === 'registration_section') {
@@ -1708,7 +1708,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParamaterList(count($sections_keys));
-            $where = "WHERE {$section_key} IN {$placeholders}";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -1724,7 +1724,6 @@ ORDER BY {$orderby}",
             INNER JOIN electronic_gradeable_version
             ON
             users.user_id = electronic_gradeable_version.user_id
-            AND users." . $section_key . " IS NOT NULL
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
@@ -1747,6 +1746,9 @@ ORDER BY {$orderby}",
         }
 
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
 
@@ -1761,7 +1763,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParamaterList(count($sections_keys));
-            $where = "WHERE {$section_key} IN {$placeholders}";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -1777,7 +1779,6 @@ FROM users
 INNER JOIN electronic_gradeable_version
 ON
 users.user_id = electronic_gradeable_version.user_id
-AND users." . $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
 AND electronic_gradeable_version.g_id=?
 {$where}
@@ -1787,6 +1788,9 @@ ORDER BY {$orderby}",
         );
 
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
 
@@ -1930,7 +1934,7 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParamaterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -1969,8 +1973,6 @@ ORDER BY {$u_or_t}.{$section_key}",
      * @return int[] with a key representing a section and value representing the number of bad submissions
      */
     public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
-        //getBadTeamSubmissionsByGradingSection
-        //getBadUserSubmissionsByGradingSection
          $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -1983,7 +1985,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         $params = [$g_id,$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE ({$section_key} IN " . $this->createParamaterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -2029,15 +2031,34 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
-    public function getAverageComponentScores($g_id, $section_key, $is_team) {
+    public function getAverageComponentScores($g_id, $section_key, $is_team, $options) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
+        $null_section = "";
+        $late_submissions = "";
+        $params = [$g_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
+
+        // Check if we want to include null sections within the average
+        if (!$options['null_section']) {
+            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+
+        // Check if we want to include late (bad) submissions into the average
+        if (!$options['late_submissions']) {
+            $late_submissions = "INNER JOIN(
+                SELECT ldc.{$user_or_team_id}, ldc.late_day_status
+                FROM late_day_cache AS ldc
+                WHERE ldc.g_id=? AND ldc.late_day_status<>3
+              ) AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params[] = $g_id;
+        }
+        
         $return = [];
         $this->course_db->query("
 SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
@@ -2071,7 +2092,8 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
       FROM electronic_gradeable_version AS egv
       WHERE egv.g_id=? AND egv.active_version>0
     ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-    WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+    {$late_submissions}
+    WHERE g_id=? {$null_section}
   )AS parts_of_comp
 )AS comp
 LEFT JOIN (
@@ -2082,7 +2104,7 @@ LEFT JOIN (
 ) AS rr ON rr.gc_id=comp.gc_id
 GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
 ORDER BY gc_order
-        ", [$g_id, $g_id, $g_id, $g_id]);
+        ", $params);
         foreach ($this->course_db->rows() as $row) {
             $info = ['g_id' => $g_id, 'section_key' => $section_key, 'team' => $is_team];
             $return[] = new SimpleStat($this->core, array_merge($row, $info));
@@ -2227,7 +2249,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         );
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
-    public function getAverageForGradeable($g_id, $section_key, $is_team, $override) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team, $options) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2246,17 +2268,29 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         $exclude = '';
         $include = '';
+        $null_section = '';
+        $late_submissions = '';
         $params = [$g_id, $count];
 
         // Check if we want to exlcude grade overridden gradeables
-        if (!$is_team && $override == 'include') {
+        if (!$is_team && $options['override']) {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
                         WHERE u.user_id = grade_override.user_id
                         AND grade_override.g_id=gc.g_id)";
         }
 
+        // Check if we want to include null sections within the average
+        if (!$options['null_section']) {
+            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+
+        // Check if we want to include late (bad) submissions into the average
+        if (!$options['late_submissions']) {
+            $late_submissions = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND ldc.late_day_status<>3";
+        }
+
         // Check if we want to combine grade overridden marks within averages
-        if (!$is_team && $override == 'include') {
+        if (!$is_team && $options['override']) {
             $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
                 FROM grade_override
                 INNER JOIN users as u ON u.user_id = grade_override.user_id
@@ -2296,7 +2330,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           )AS auto
         ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
         INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
-        WHERE gc.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+        {$late_submissions}
+        WHERE gc.g_id=? {$null_section}
         " . $exclude . "
       )AS parts_of_comp
     )AS comp
@@ -2319,7 +2354,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections)) . " IS NOT FALSE";
             $params = array_merge($sections, $params);
         }
 
@@ -3693,7 +3728,7 @@ ORDER BY {$section_key}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParamaterList(count($sections_keys));
-            $where = "WHERE {$section_key} IN {$placeholders}";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query(
@@ -3703,7 +3738,6 @@ FROM gradeable_teams
 INNER JOIN electronic_gradeable_version
 ON
 gradeable_teams.team_id = electronic_gradeable_version.team_id
-AND gradeable_teams." . $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
 AND electronic_gradeable_version.g_id=?
 {$where}
@@ -3713,6 +3747,9 @@ ORDER BY {$section_key}",
         );
 
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
 
@@ -3735,7 +3772,7 @@ ORDER BY {$section_key}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParamaterList(count($sections_keys));
-            $where = "WHERE {$section_key} IN {$placeholders}";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
 
@@ -3746,7 +3783,6 @@ ORDER BY {$section_key}",
             INNER JOIN electronic_gradeable_version
             ON
             gradeable_teams.team_id = electronic_gradeable_version.team_id
-            AND gradeable_teams." . $section_key . " IS NOT NULL
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
@@ -3768,6 +3804,9 @@ ORDER BY {$section_key}",
         }
 
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
 
