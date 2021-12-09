@@ -1501,7 +1501,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $progress = round(($graded / $total_submitted) * 100, 1);
             
-            if (array_key_exists('include_late', $_COOKIE) && $_COOKIE['include_late'] == 'false') {
+            if (array_key_exists('include_late_submissions', $_COOKIE) && $_COOKIE['include_late_submissions'] == 'false') {
                 $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
             }
         }

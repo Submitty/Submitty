@@ -16,16 +16,15 @@
 
         <tbody>
             {% for filter_id,val in filters %}
-                {% set filter_title = filter_id|replace({'_': ' '})|title %}
                 {% set filter_id_name = filter_id|replace({'_': '-'}) %}
 
                 <tr>
                     <td style="text-align: left;">
-                        {{ filter_title }}
+                        {{ filters[filter_id].title }}
                     </td>
 
                     <td>
-                        <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle {{filter_title}}" id="toggle-filter-{{filter_id_name}}" {% if filters[filter_id] %} checked {% endif %} />
+                        <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle {{filters[filter_id].title}}" id="toggle-filter-{{filter_id_name}}" {% if filters[filter_id].enabled %} checked {% endif %} />
                     </td>
                 </tr>
             {% endfor %}
