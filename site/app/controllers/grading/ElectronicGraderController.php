@@ -649,13 +649,18 @@ class ElectronicGraderController extends AbstractController {
                 $team_users = [];
                 $individual_viewed_grade = 0;
             }
+            $cookie_options = [
+                'override' => array_key_exists('include_grade_overrides', $_COOKIE) ? $_COOKIE['include_grade_overrides'] === 'true' : false,
+                'null_section' => array_key_exists('include_null_registration', $_COOKIE) ? $_COOKIE['include_null_registration'] === 'true' : false,
+                'late_submissions' => array_key_exists('include_late_submissions', $_COOKIE) ? $_COOKIE['include_late_submissions'] === 'true' : true
+            ];
+
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
+            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $cookie_options);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            $override_cookie = array_key_exists('include_grade_overrides', $_COOKIE) ? $_COOKIE['include_grade_overrides'] === 'true' : false;
-            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie);
+            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $cookie_options);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
@@ -669,13 +674,17 @@ class ElectronicGraderController extends AbstractController {
         $total_submissions = 0;
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
-                if ($key == 'NULL') {
+                // If we allow NULL sections, use any.
+                // If not, make sure $key is not NULL
+                if ($key == 'NULL' && (!array_key_exists('include_null_registration', $_COOKIE) || $_COOKIE['include_null_registration'] === 'false')) {
                     continue;
                 }
                 $total_submissions += $value;
             }
             foreach ($total_users_who_submitted as $key => $value) {
-                if ($key === 'NULL') {
+                // If we allow NULL sections, use any.
+                // If not, make sure $key is not NULL
+                if ($key == 'NULL' && (!array_key_exists('include_null_registration', $_COOKIE) || $_COOKIE['include_null_registration'] === 'false')) {
                     continue;
                 }
                 $total_who_submitted += $value;
@@ -802,7 +811,9 @@ class ElectronicGraderController extends AbstractController {
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];
 
-                        if ($key !== "NULL") {
+                        // If we allow NULL sections, use any.
+                        // If not, make sure $key is not NULL
+                        if ((array_key_exists('include_null_registration', $_COOKIE) && $_COOKIE['include_null_registration'] === 'true') || $key !== "NULL") {
                             $valid_graders = [];
                             foreach ($graders[$key] as $valid_grader) {
                                 /* @var User $valid_grader */
