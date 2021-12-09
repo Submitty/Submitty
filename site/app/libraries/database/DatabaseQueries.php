@@ -3685,9 +3685,6 @@ ORDER BY {$section_key}",
             $params = array_merge($params, $sections_keys);
         }
 
-        // Assure late day cache is calculated
-        $this->generateLateDayCacheForUser($user_id);
-
         $this->course_db->query(
             "
             SELECT count(*) as cnt, {$section_key}
