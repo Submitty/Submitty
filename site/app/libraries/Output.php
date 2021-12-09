@@ -7,7 +7,15 @@ use app\exceptions\OutputException;
 use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
-use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
+use League\CommonMark\Extension\Autolink\AutolinkExtension;
+use League\CommonMark\Extension\Table\TableExtension;
+use League\CommonMark\Block\Element\FencedCode;
+use League\CommonMark\Block\Element\IndentedCode;
+use League\CommonMark\Inline\Element\Code;
+use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\Environment;
+use app\libraries\CustomCodeInlineRenderer;
+use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
 use Ds\Set;
 
@@ -35,6 +43,8 @@ class Output {
     private $css;
     /** @var Set */
     private $js;
+    /** @var Set */
+    private $module_js;
 
     private $use_header = true;
     private $use_footer = true;
@@ -61,6 +71,7 @@ class Output {
 
         $this->css = new Set();
         $this->js = new Set();
+        $this->module_js = new Set();
     }
 
     /**
@@ -87,7 +98,8 @@ class Output {
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
             'cache' => $debug ? false : $cache_path,
-            'debug' => $debug
+            'debug' => $debug,
+            'strict_variables' => $debug
         ]);
 
         if ($debug) {
@@ -124,8 +136,17 @@ HTML;
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
-        $engine = new ParsedownEngine();
-        $engine->setSafeMode(true);
+
+        $environment = Environment::createCommonMarkEnvironment();
+        $environment->addExtension(new AutolinkExtension());
+        $environment->addExtension(new TableExtension());
+        $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
+        $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
+        $environment->mergeConfig([]);
+
+        $converter = new CommonMarkConverter(['html_input' => 'escape'], $environment);
+        $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
 
@@ -188,7 +209,7 @@ HTML;
      * Output()->renderTemplate(array("submission", "Global"), "header")
      * Would load views\submission\GlobalView->header()
      *
-     * @return string
+     * @return null|string
      */
     public function renderTemplate($view, string $function, ...$args) {
         if (!$this->render) {
@@ -209,7 +230,7 @@ HTML;
      * Please avoid using this function unless absolutely necessary.
      * Please use renderJsonSuccess, renderJsonFail and renderJsonError
      * instead to ensure JSON responses have consistent format.
-     * @param $json
+     * @param mixed $json
      */
     public function renderJson($json) {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
@@ -289,7 +310,7 @@ HTML;
 
     /**
      * Renders success/error messages and/or JSON responses.
-     * @param $message
+     * @param string $message
      * @param bool $success
      * @param bool $show_msg
      * @return array
@@ -361,12 +382,12 @@ HTML;
      * All views inheriet from BaseView which make them be a singleton and have the
      * getInstance method.
      *
-     * @param string $view
+     * @param string $class
      *
      * @return string
      */
     private function getView($class) {
-        if (!Utils::startsWith($class, "app\\views")) {
+        if (!str_starts_with($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
         if (!isset($this->loaded_views[$class])) {
@@ -419,8 +440,6 @@ HTML;
 
     /**
      * Returns the stored output buffer that we've been building
-     *
-     * @return string
      */
     public function displayOutput() {
         echo($this->getOutput());
@@ -446,8 +465,9 @@ HTML;
         if ($this->twig === null) {
             $this->loadTwig(false);
         }
-        /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = $this->getView(ErrorView::class)->exceptionPage($exception);
+        /** @var \app\views\ErrorView $view */
+        $view = $this->getView(ErrorView::class);
+        $exceptionPage = $view->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -492,6 +512,10 @@ HTML;
         $this->css->add($url);
     }
 
+    public function addInternalModuleJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs'));
+    }
+
     public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
@@ -502,6 +526,10 @@ HTML;
 
     public function addJs(string $url): void {
         $this->js->add($url);
+    }
+
+    public function addModuleJs(string $url): void {
+        $this->module_js->add($url);
     }
 
     public function timestampResource($file, $folder) {
@@ -555,18 +583,16 @@ HTML;
         return end($this->breadcrumbs)->getTitle();
     }
 
-    /**
-     * @return array
-     */
     public function getCss(): Set {
         return $this->css;
     }
 
-    /**
-     * @return array
-     */
     public function getJs(): Set {
         return $this->js;
+    }
+
+    public function getModuleJs(): Set {
+        return $this->module_js;
     }
 
     /**
@@ -600,6 +626,8 @@ HTML;
      */
     public function setTwigTimeZone(string $time_zone): void {
         $tz = $time_zone === 'NOT_SET/NOT_SET' ? $this->core->getConfig()->getTimezone() : $time_zone;
-        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone($tz);
+        /** @var \Twig\Extension\CoreExtension $extension */
+        $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
+        $extension->setTimezone($tz);
     }
 }

@@ -4,15 +4,10 @@ namespace tests\app\libraries;
 
 use app\libraries\Access;
 use app\libraries\Core;
-use app\models\Gradeable;
-use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
-use app\models\gradeable\TaGradedGradeable;
 use app\models\Team;
 use app\models\User;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use tests\BaseUnitTest;
 
 class AccessTester extends BaseUnitTest {
@@ -51,7 +46,7 @@ class AccessTester extends BaseUnitTest {
         $su1 = new Submitter($this->core, $user1);
         $g1 = $this->createMockModel(\app\models\gradeable\Gradeable::class);
         $g1->method("getId")->willReturn("g1");
-        $g1->method("isPeerGrading")->willReturn(true);
+        $g1->method("hasPeerComponent")->willReturn(true);
         $gg1 = $this->createMockModel(GradedGradeable::class);
         $gg1->method("getSubmitter")->willReturn($su1);
         $gg1->method("getGradeable")->willReturn($g1);
@@ -59,7 +54,7 @@ class AccessTester extends BaseUnitTest {
         $su2 = new Submitter($this->core, $user2);
         $g2 = $this->createMockModel(\app\models\gradeable\Gradeable::class);
         $g2->method("getId")->willReturn("g1");
-        $g2->method("isPeerGrading")->willReturn(true);
+        $g2->method("hasPeerComponent")->willReturn(true);
         $gg2 = $this->createMockModel(GradedGradeable::class);
         $gg2->method("getSubmitter")->willReturn($su2);
         $gg2->method("getGradeable")->willReturn($g2);
@@ -67,7 +62,7 @@ class AccessTester extends BaseUnitTest {
         $su3 = new Submitter($this->core, $user3);
         $g3 = $this->createMockModel(\app\models\gradeable\Gradeable::class);
         $g3->method("getId")->willReturn("g1");
-        $g3->method("isPeerGrading")->willReturn(true);
+        $g3->method("hasPeerComponent")->willReturn(true);
         $gg3 = $this->createMockModel(GradedGradeable::class);
         $gg3->method("getSubmitter")->willReturn($su3);
         $gg3->method("getGradeable")->willReturn($g3);

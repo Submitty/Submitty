@@ -10,6 +10,7 @@ if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://localhost:1501'
     export SUBMISSION_PORT=1501
     export DATABASE_PORT=16432
+    export WEBSOCKET_PORT=8433
 fi
 
 #################################################################
@@ -19,7 +20,7 @@ fi
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
-apt-get install -qqy python python-dev python3 python3-dev libpython3.6
+apt-get install -qqy python python-dev python3 python3-dev libpython3.6 python3-pip libjpeg-dev
 
 ############################
 # NTP: Network Time Protocol
@@ -72,7 +73,7 @@ poppler-utils
 apt-get install -qqy ninja-build
 
 # NodeJS
-curl -sL https://deb.nodesource.com/setup_10.x | bash -
+curl -sL https://deb.nodesource.com/setup_16.x | bash -
 apt-get install -y nodejs
 
 #CMAKE
@@ -92,6 +93,9 @@ apt-get install -qqy imagemagick
 
 # miscellaneous usability
 apt-get install -qqy emacs
+
+# necessary for onnxruntime to install
+apt-get install -qqy protobuf-compiler libprotoc-dev
 
 # fix networking on vagrants
 # https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1768560
@@ -126,3 +130,23 @@ apt-get -qqy autoremove
 add-apt-repository ppa:git-core/ppa -y
 apt-get install git -y
 # ------------------------------------------------------------------
+
+# Install OpenLDAP for testing on Vagrant
+if [ ${VAGRANT} == 1 ]; then
+    apt-get install -qqy php-ldap
+    echo 'slapd/root_password password password' | debconf-set-selections &&\
+        echo 'slapd/root_password_again password password' | debconf-set-selections && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -qqy slapd ldap-utils
+
+    echo "slapd slapd/no_configuration boolean false" | debconf-set-selections
+    echo "slapd slapd/domain string vagrant.local" | debconf-set-selections
+    echo "slapd shared/organization string 'Vagrant LDAP'" | debconf-set-selections
+    echo "slapd slapd/password1 password root_password" | debconf-set-selections
+    echo "slapd slapd/password2 password root_password" | debconf-set-selections
+    echo "slapd slapd/backend select HDB" | debconf-set-selections
+    echo "slapd slapd/purge_database boolean true" | debconf-set-selections
+    echo "slapd slapd/allow_ldap_v2 boolean false" | debconf-set-selections
+    echo "slapd slapd/move_old_database boolean true" | debconf-set-selections
+
+    dpkg-reconfigure -f noninteractive slapd
+fi

@@ -126,6 +126,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getAllQueues();
     }
 
+    public function getAllOpenQueues() {
+        return $this->core->getQueries()->getAllOpenQueues();
+    }
+
     public function timeToHM($time) {
         $date_time = new \DateTime($time);
         $date_time->setTimezone($this->core->getConfig()->getTimezone());
@@ -134,6 +138,10 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function timeToISO($time) {
         return date_format(date_create($time), "c");
+    }
+
+    public function intToStringTimePaused($int): string {
+        return DateUtils::timeIntToString($int);
     }
 
     public function getTimeBeingHelped($time_out, $time_helped) {
@@ -205,6 +213,14 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['time_in'];
     }
 
+    public function getCurrentTimePaused(): int {
+        return $this->current_queue_state['time_paused'];
+    }
+
+    public function getCurrentTimePausedStart(): ?string {
+        return $this->current_queue_state['time_paused_start'];
+    }
+
     public function cleanForId($str) {
         return $this->core->getQueries()->getQueueId($str);
     }
@@ -223,10 +239,6 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getColorFromCode($code) {
         return $this->colors[$this->getIndexFromCode($code)];
-    }
-
-    public function isContactInfoEnabled() {
-        return $this->core->getConfig()->getQueueContactInfo();
     }
 
     public function getQueueMessage() {

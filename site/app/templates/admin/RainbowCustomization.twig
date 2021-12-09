@@ -65,7 +65,9 @@
                 <h2>Messages</h2>
                 <div id="cust_messages_collapse" class="collapsible_area">
                     <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
+                    {% if 0 in messages|keys %}
                     <textarea id="cust_messages_textarea">{{ messages[0] }}</textarea>
+                    {% endif %}
                 </div>
             </div>
             <div id="section_labels" class="customization_item">
@@ -96,7 +98,7 @@
                                 </li>
                             {% endfor %}
                         </ol>
-                        Total: <span id="used_percentage">{{ bucket_percentages['used_percentage'] }}%</span>
+                        Total: <span id="used_percentage">{% if 'used_percentage' in bucket_percentages|keys %}{{ bucket_percentages['used_percentage'] }}{% else %}0{% endif %}%</span>
                     </div>
                     <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
                         <h3>Available Buckets</h3>
@@ -125,13 +127,25 @@
                                                 <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                     <input type="text"
                                                            aria-label="{{gradeable["title"]}} max score"
-                                                           value="{{ gradeable["max_score"] }}"
+                                                           class="{{ gradeable["override"] ? "override" : "" }}"
+                                                           placeholder="{{ gradeable["max_score"] }}"
+                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
                                                            id="maxscore-{{ gradeable["id"] }}"
                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
                                                            style="margin-right: 10px;"
-                                                           onblur="ClampPoints(this);">
+                                                           onblur="ClampPoints(this);"
+                                                           onkeyup="DetectMaxOverride(this);">
                                                     <div class="gradeable-li-right-of-input">
-                                                        <div class="gradeable-li-info">
+                                                            <div class="gradeable-li-info">
+                                                            <i class="fas fa-exclamation-triangle fa-rb tooltip">
+                                                                <span class="tooltiptext tooltipbottom">
+                                                                    WARNING: Max Score has been overridden in Rainbow Grades
+                                                                    <br><br>
+                                                                    Actual Max Score: {{ gradeable["max_score"] }}
+                                                                    <br>
+                                                                    Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"><span>
+                                                                </span>
+                                                            </i>
                                                             <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                             {{ gradeable["title"] }}
                                                             <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
@@ -178,6 +192,13 @@ To remove a curve simply blank all boxes."></i>
     </div>
 
     <script>
+        $('.gradeable-li-info .tooltip').on('mouseenter', function(){
+            const gradeable = $(this).closest('.gradeable-li');
+            const override = gradeable.find('.override');
+            const gradeable_id = override.attr('id');
+            $(`#override-${gradeable_id}`).html(override.val());
+        });
+
         var old_index;
         var new_index;
         var old_parent;

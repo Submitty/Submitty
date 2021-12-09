@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "python",
+
     "testcases" : [
         {
             "title" : "Lab 1 Checkpoint 1",

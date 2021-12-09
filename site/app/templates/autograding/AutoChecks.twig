@@ -2,44 +2,61 @@
 
 {% set actions_id = "actions_" ~ index %}
 {% for check in checks %}
+    <p>
+      {% if check.metrics is defined %}
+        {% if check['metrics']['elapsed_time'] is not null %}
+          {% if check['metrics']['elapsed_time'] >= 0.1 %}
+            Grading time: <span style="font-style: italic">{{check['metrics']['elapsed_time'] | round(1)}}s</span>
+          {% else %}
+          {# Grading times of 0 really mean it ran in under .1 second #}
+            Grading time: <span style="font-style: italic">&lt;.1s</span>
+          {% endif %}
+        {% endif %}
+
+        {# Dont show memory if it is 0 or null which both evaluate to false here #}
+        {% if check['metrics']['max_rss_size'] %}
+          Memory: <span style="font-style: italic">{{ (check['metrics']["max_rss_size"] / 1000) | round }}MB</span>
+        {% endif %}
+      {% endif %}
+    </p>
     {% if loop.index0 != 0 %}
         <div class="clear"></div>
     {% endif %}
-    {% if check.pdf %}
+    {% if check.pdf is defined %}
         <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <div class="autocheck-header">
-          {% if check.actual %}
+          {% if check.actual is defined and check.actual.type == "text" %}
             <div class="autocheck-header-button">
                 <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ who }}', '{{ display_version }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
             </div>
           {% endif %}
-          {% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and loop.index0 == 0 and publish_actions %}
+          {% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and loop.index0 == 0 and publish_actions is defined and publish_actions %}
             <div class="autocheck-header-button">
                 <a id="show_actions_{{ index }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="openActionsPopup('{{ popup_css_file }}', '{{ actions_id }}');">View test procedure</a>
             </div>
           {% endif %}
         </div>
         <div class="box-block">
-            {% if not check.actual %}
+            {% if not check.actual is defined and check.description is defined and check.messages is defined%}
                <h4 style="margin-bottom: 0">{{ check.description }}</h4>
                <div>
                {{ self.render_messages(check.messages) }}
                </div>
-            {% else %}
-               {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
+            {% elseif check.actual is defined %}
+               {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0, display_version, gradeable_id, who) }}
             {% endif %}
-            {% if check.expected %}
-                {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
+            {% if check.expected is defined %}
+                {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0, display_version, gradeable_id, who) }}
             {% endif %}
-            {% if check.difference %}
-                {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0) }}
+            {% if check.difference is defined %}
+                {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0, display_version, gradeable_id, who) }}
             {% endif %}
 
         </div>
     {% endif %}
 
-{% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and publish_actions %}
+{% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and publish_actions is defined and publish_actions %}
   {% include('autograding/ActionView.twig') with {
       'testcase_name': testcase_name,
       'element_id': actions_id,
@@ -50,7 +67,7 @@
 
 {% endfor %}
 
-{% macro render_diff_element(check, element, side, popup_css_file, index, check_index) %}
+{% macro render_diff_element(check, element, side, popup_css_file, index, check_index, display_version, gradeable_id, who) %}
     <!-- Readded css here so the popups have the css -->
     <div class=
       {% if element.type != "sequence_diagram" %}
@@ -64,6 +81,12 @@
                 <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ check_index }}, {{ side }});" class="key_to_click" tabindex="0">
                     <i class="fas fa-window-restore" style="cursor: pointer;"></i>
                 </span>
+                {% if side == 0 %}
+                <span onclick="downloadTestCaseResult({{ index }}, '{{ check.filename }}', {{ display_version }}, '{{ gradeable_id }}', '{{ who }}')" tabindex="0"
+                title="Downloads your test case result file">
+                    <i class="fas fa-download" style="cursor: pointer;"></i>
+                </span>
+                {% endif %}
             {% endif %}
         </h4>
 

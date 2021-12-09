@@ -2,11 +2,14 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message markdown'>{{ gradeable_message | markdown }}</div>
+    {% include "misc/Markdown.twig" with {
+        "content" : gradeable_message,
+        "class" : "content gradeable_message"
+    } only %}
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden_message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
+    <div class='content overridden-message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
 {% endif %}
 
 <div class="content" id="gradeable-submission-cont">
@@ -19,6 +22,15 @@
                 </a>
             {% endif %}
         </h1>
+        {% if is_timed %}
+            <div id="gradeable-timer">
+                <div id="gradeable-progress">
+                    <div id="gradeable-progress-bar"></div>
+                </div>
+                <h2 id="time-remaining-text">Your Time Remaining: </h2>
+            </div>
+
+        {% endif %}
         {% if has_due_date %}
             {% set diff_time_zone = server_time_zone_string != user_time_zone_string %}
 
@@ -33,6 +45,7 @@
                 {% if diff_time_zone %}
                     <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
                 {% endif %}
+                <h2 id="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
             </div>
         {% endif %}
         <div class="loading-bar-wrapper">
@@ -50,23 +63,22 @@
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
-
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submission-form" method="post">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission_type" checked="checked">
+                    <input type='radio' id="radio-normal" name="submission-type" checked="checked">
                     Normal Submission
                 </label>
                 <label for="radio-student">
-                    <input type='radio' id="radio-student" name="submission_type">
+                    <input type='radio' id="radio-student" name="submission-type">
                     Make Submission for a Student
                 </label>
                 {% if part_names|length == 1 and not is_vcs %}
                     <label for="radio-bulk">
-                        <input type='radio' id="radio-bulk" name="submission_type">
+                        <input type='radio' id="radio-bulk" name="submission-type">
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
@@ -113,6 +125,9 @@
                 </div>
             </div>
         </form>
+
+        <div id="submission-mode-warning" class="text-center">
+        </div>
 
         <script>
             $(function() {
@@ -235,6 +250,7 @@
                 $("#user_id").autocomplete({
                     source: students_full
                 });
+
             });
         </script>
     {% endif %}
@@ -262,7 +278,7 @@
             {% endif %}
 
         {% endif %}
-        <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
+        <input type="submit" id="submit" class="submit-gradeable btn btn-primary" value="Grade My Repository" />
     {% else %}
 
     {% if is_notebook %}
@@ -275,7 +291,11 @@
             "gradeable_id" : gradeable_id,
             "highest_version" : highest_version,
             "max_file_uploads" : max_file_uploads,
-            "old_files" : old_files
+            "old_files" : old_files,
+            "viewing_inactive_version" : viewing_inactive_version,
+            "is_timed" : is_timed,
+            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
+            "is_grader_view" : false
         } %}
     {% endif %}
 
@@ -291,21 +311,28 @@
                      role="text"
                      aria-label="Press enter to upload your {{ part }} file"
                 >
-                    <h2 class="label" id="label{{ loop.index }}">
+                    <h2 class="label" id="label{{ loop.index }}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} file(s) here or click to open file browser
                         {% else %}
                             Drag your file(s) here or click to open file browser
                         {% endif %}
                     </h2>
-                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
+                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload"
+                            {% if viewing_inactive_version %}
+                                disabled="disabled"
+                            {% endif %}/>
                     <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
                       <tr style="background:transparent; display:none;">
                         <th>File Name:</th>
                         <th>Size:</th>
                       </tr>
                     </table>
-                    <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                    {% if viewing_inactive_version %}
+                        <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
+                    {% else %}
+                        <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -322,14 +349,22 @@
             </form>
         {% endif %}
         {# /Page selector #}
-
-        <div class="upload-message">
-            <p>
-                {{ upload_message | markdown}}
-            </p>
-        </div>
-
-        <button type="button" id="submit" class="btn btn-success">Submit</button>
+        
+        {% if can_student_submit %}
+            <div class="upload-message">
+                {% include "misc/Markdown.twig" with {
+                    "content" : upload_message
+                } only %}
+            </div>
+            <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
+                Submit
+            </button>
+            {% if viewing_inactive_version %}
+                <a href="{{ recent_version_url }}" class="btn btn-primary">
+                    Switch to Most Recent Version
+                </a>
+            {% endif %}
+        {% endif %}
 
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
@@ -343,6 +378,26 @@
                             addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
                             readPrevious('{{ file.name }}', {{ file.part }});
                         {% endfor %}
+
+                        //TODO: move logic for loading submission mode from session storage into module file
+                        const selected_radio_id = document.querySelector('input[name="submission-type"]:checked').id;
+                        if(selected_radio_id !== 'radio-normal'){
+                            for(let idx = 1; idx <= window.num_submission_boxes; idx++){
+                                window.deleteFiles(idx);
+                            }
+
+                            const warning_banner = document.getElementById('submission-mode-warning');
+                            if (!warning_banner.hasChildNodes()){
+                                warning_banner.appendChild( document.createElement('h2') );
+                                warning_banner.firstChild.classList.add('warning');
+                            }
+
+                            message = selected_radio_id === 'radio-bulk' ? 'Warning: Submitting files for bulk upload!' :
+                                'Warning: Submitting files for a student!';
+                            warning_banner.firstChild.textContent = message;
+
+                        }
+
                     });
                 </script>
             {% endif %}
@@ -350,7 +405,7 @@
 
         <script>
             $(function() {
-                setButtonStatus();
+                setButtonStatus({{ viewing_inactive_version }});
                 initMaxNoFiles({{ max_file_uploads }});
             });
 
@@ -361,9 +416,11 @@
             createArray(num_parts);
             var assignment_version = {{ display_version }};
             var highest_version = {{ highest_version }};
-            for (var i = 1; i <= num_parts; i++ ){
-                initializeDropZone("upload" + String(i));
-            }
+            {% if not viewing_inactive_version %}
+                for (var i = 1; i <= num_parts; i++ ){
+                    initializeDropZone("upload" + String(i));
+                }
+            {% endif %}
 
 
             $("#startnew").click(function(e){ // Clear all the selected files in the buckets
@@ -376,16 +433,24 @@
             // GET FILES OF THE HIGHEST VERSION
             if (assignment_version == highest_version && highest_version > 0) {
                 $("#getprev").click(function(e){
-                    $("#startnew").click();
+                    loadPreviousFilesOnDropBoxes();
+                    e.stopPropagation();
+                });
+            }
+
+            function loadPreviousFilesOnDropBoxes(){
+                $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
                         readPrevious('{{ file.name }}', {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
-                    e.stopPropagation();
-                });
             }
+
+            window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
+            //TODO: move the logic on loading submission mode into a module
+
         </script>
     {% endif %}
 </div>
@@ -396,12 +461,15 @@
 {% endif %}
 
 <script>
+    window.num_submission_boxes = {{ part_names | length }};
+
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
+
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
@@ -419,7 +487,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
         else {
@@ -438,12 +507,15 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ viewing_inactive_version }}
             );
         }
     }
     $(function() {
-        $("#submit").click(function(e){ // Submit button
+        $(".submit-gradeable").click(function(e){ // Submit button
+            $(".submit-gradeable").prop('disabled',true);
+            window.onbeforeunload = null;
             var user_id = "";
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
@@ -472,15 +544,15 @@
             // bulk upload
             if ($("#radio-bulk").is(":checked")) {
                 handleBulk("{{ gradeable_id }}",
-                            {{ max_post_size }},
                             {{ max_file_size }},
+                            {{ max_post_size }},
                             num_pages, use_qr,
                             use_ocr, qr_prefix, qr_suffix
                           );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_user_id, git_repo_id);
             }
             // user id entered, need to validate first
             else {
@@ -518,6 +590,7 @@
             e.stopPropagation();
         });
     });
+    initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
 
 

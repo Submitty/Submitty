@@ -90,13 +90,13 @@
             {{ self.renderPanelPositionSelector('discussion_browser') }}
             </span>
         {% endif %}
-        {% if isRegradePanel %}
+        {% if isRegradePanel and not student_grader %}
             <span class="grade-panel" id="regrade_info_btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
                 >
-                   <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
+                   <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    <span>Grade Inquiry</span>
                 </button>
             {{ self.renderPanelPositionSelector('regrade_info') }}
@@ -117,6 +117,12 @@
 
     </div>
 </div>
+{% if error_message != "" %}
+    {% include "grading/electronic/ErrorMessage.twig" with {
+            "color" : error_color,
+            "message" : error_message
+    } only %}
+{% endif %}
 
 {% macro renderPanelPositionSelector(panelId) %}
     <select class="panel-position-cont" id="{{ panelId }}_select" size="4">

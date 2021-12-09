@@ -8,9 +8,12 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\database\DatabaseUtils;
 use app\models\Config;
-use app\models\forum\Forum;
 use app\models\User;
+use Doctrine\DBAL\Logging\DebugStack;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -30,6 +33,18 @@ class Core {
 
     /** @var AbstractDatabase */
     private $course_db = null;
+
+    /** @var EntityManager */
+    private $submitty_entity_manager;
+
+    /** @var DebugStack */
+    private $submitty_debug_stack;
+
+    /** @var EntityManager */
+    private $course_entity_manager;
+
+    /** @var DebugStack */
+    private $course_debug_stack;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -57,9 +72,6 @@ class Core {
 
     /** @var Access $access */
     private $access = null;
-
-    /** @var Forum $forum */
-    private $forum  = null;
 
     /** @var NotificationFactory */
     private $notification_factory;
@@ -114,8 +126,8 @@ class Core {
      *
      * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
      * @throws \Exception
      */
     public function loadCourseConfig($semester, $course) {
@@ -162,6 +174,26 @@ class Core {
         $this->session_manager = $manager;
     }
 
+    private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
+        $config = Setup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
+            null,
+            null,
+            false
+        );
+
+        if ($debug_stack) {
+            $config->setSQLLogger($debug_stack);
+        }
+
+        $conn = [
+            'driver' => 'pdo_pgsql',
+            'pdo' => $database->getConnection(),
+        ];
+        return EntityManager::create($conn, $config);
+    }
+
     /**
      * Create a connection to the database using the details loaded from the config files. Additionally, we make
      * available queries that all parts of the application should go through. It should never be allowed to directly
@@ -170,7 +202,7 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadMasterDatabase() {
+    public function loadMasterDatabase(): void {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
@@ -181,23 +213,62 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
+        $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
     }
 
-    public function loadCourseDatabase() {
-        if ($this->config->isCourseLoaded()) {
-            $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
-            $this->course_db->connect();
-
-            $this->database_queries = $this->database_factory->getQueries($this);
-        }
+    public function setMasterDatabase(AbstractDatabase $database): void {
+        $this->submitty_db = $database;
     }
 
-    public function loadForum() {
-        if ($this->config === null) {
-            throw new \Exception("Need to load the config before we can create a forum instance.");
-        }
+    public function getSubmittyEntityManager(): EntityManager {
+        return $this->submitty_entity_manager;
+    }
 
-        $this->forum = new Forum($this);
+    public function getSubmittyQueries(): array {
+        if (!$this->config->isDebug() || !$this->submitty_db) {
+            return [];
+        }
+        $queries = $this->submitty_db->getPrintQueries();
+        foreach ($this->submitty_debug_stack->queries as $query) {
+            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
+        }
+        return $queries;
+    }
+
+    public function loadCourseDatabase(): void {
+        if (!$this->config->isCourseLoaded()) {
+            return;
+        }
+        $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
+        $this->course_db->connect();
+
+        $this->setQueries($this->database_factory->getQueries($this));
+        $this->course_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
+        $this->course_entity_manager = $this->createEntityManager($this->course_db, $this->course_debug_stack);
+    }
+
+    public function setCourseDatabase(AbstractDatabase $database): void {
+        $this->course_db = $database;
+    }
+
+    public function setCourseEntityManager(EntityManager $entity_manager): void {
+        $this->course_entity_manager = $entity_manager;
+    }
+
+    public function getCourseEntityManager(): EntityManager {
+        return $this->course_entity_manager;
+    }
+
+    public function getCourseQueries(): array {
+        if (!$this->config->isDebug() || !$this->course_db) {
+            return [];
+        }
+        $queries = $this->course_db->getPrintQueries();
+        foreach ($this->course_debug_stack->queries as $query) {
+            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
+        }
+        return $queries;
     }
 
     /**
@@ -286,13 +357,6 @@ class Core {
      */
     public function getQueries() {
         return $this->database_queries;
-    }
-
-    /**
-     * @return Forum
-     */
-    public function getForum() {
-        return $this->forum;
     }
 
     public function loadUser(string $user_id) {
@@ -387,6 +451,16 @@ class Core {
     }
 
     /**
+     * Initializes the token manager to be used. This should be called
+     * after the config has been loaded.
+     *
+     * @return void
+     */
+    public function initializeTokenManager(): void {
+        TokenManager::initialize($this->config->getSecretSession(), $this->config->getBaseUrl());
+    }
+
+    /**
      * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
      * within the app/authentication folder. The username and password for the user being authenticated are passed
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
@@ -405,11 +479,9 @@ class Core {
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),
                     $user_id,
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession(),
                     $persistent_cookie
                 );
-                return Utils::setCookie('submitty_session', (string) $token, $token->getClaim('expire_time'));
+                return Utils::setCookie('submitty_session', (string) $token, $token->claims()->get('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -436,9 +508,7 @@ class Core {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
                 return (string) TokenManager::generateApiToken(
-                    $this->database_queries->getSubmittyUserApiKey($user_id),
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession()
+                    $this->database_queries->getSubmittyUserApiKey($user_id)
                 );
             }
         }
@@ -520,8 +590,8 @@ class Core {
     }
 
     /**
-     * @param     $url
-     * @param int $status_code
+     * @param string $url
+     * @param int $http_response_code
      */
     public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
@@ -694,13 +764,11 @@ class Core {
         if (isset($_COOKIE[$cookie_key])) {
             try {
                 $token = TokenManager::parseSessionToken(
-                    $_COOKIE[$cookie_key],
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession()
+                    $_COOKIE[$cookie_key]
                 );
-                $session_id = $token->getClaim('session_id');
-                $expire_time = $token->getClaim('expire_time');
-                $logged_in = $this->getSession($session_id, $token->getClaim('sub'));
+                $session_id = $token->claims()->get('session_id');
+                $expire_time = $token->claims()->get('expire_time');
+                $logged_in = $this->getSession($session_id, $token->claims()->get('sub'));
                 // make sure that the session exists and it's for the user they're claiming
                 // to be
                 if (!$logged_in) {
@@ -713,9 +781,7 @@ class Core {
                             $cookie_key,
                             (string) TokenManager::generateSessionToken(
                                 $session_id,
-                                $token->getClaim('sub'),
-                                $this->getConfig()->getBaseUrl(),
-                                $this->getConfig()->getSecretSession()
+                                $token->claims()->get('sub')
                             ),
                             $expire_time
                         );
@@ -742,11 +808,9 @@ class Core {
         if (!empty($jwt)) {
             try {
                 $token = TokenManager::parseApiToken(
-                    $request->headers->get("authorization"),
-                    $this->getConfig()->getBaseUrl(),
-                    $this->getConfig()->getSecretSession()
+                    $request->headers->get("authorization")
                 );
-                $api_key = $token->getClaim('api_key');
+                $api_key = $token->claims()->get('api_key');
                 $logged_in = $this->loadApiUser($api_key);
             }
             catch (\InvalidArgumentException $exc) {

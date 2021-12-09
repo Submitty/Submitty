@@ -2,40 +2,17 @@
 
 namespace app\libraries;
 
-use app\models\User;
 use Ds\Set;
 
 /**
  * Class Utils
  */
 class Utils {
-    /**
-     * Recursively removes a string from any value in an array.
-     *
-     * @param string $needle
-     * @param array  $haystack
-     *
-     * @return array
-     */
-    public static function stripStringFromArray($needle, $haystack) {
-        if (!is_array($haystack) || !is_string($needle)) {
-            return null;
-        }
-        foreach ($haystack as $key => $value) {
-            if (is_array($value)) {
-                $haystack[$key] = Utils::stripStringFromArray($needle, $value);
-            }
-            else {
-                $haystack[$key] = str_replace($needle, "", $value);
-            }
-        }
-        return $haystack;
-    }
 
     /**
      * Defines a new default str_pad that's useful for things like parts of a datetime
      *
-     * @param        $string
+     * @param mixed  $string
      * @param int    $pad_width  [optional]
      * @param string $pad_string [optional]
      * @param int    $pad_type   [optional]
@@ -100,7 +77,6 @@ class Utils {
      * for associative arrays that do not have numeric keys or the keys are out of order and we can't just use indices
      * as in other languages.
      *
-     * @param $array
      * @return mixed|null
      */
     public static function getLastArrayElement(array $array) {
@@ -112,7 +88,6 @@ class Utils {
      * Gets the first element of an array. This can be used for associate arrays like the above
      * getLastArrayElement defined above.
      *
-     * @param $array
      * @return mixed|null
      */
     public static function getFirstArrayElement(array $array) {
@@ -120,30 +95,6 @@ class Utils {
             return $value;
         }
         return null;
-    }
-
-
-
-    /**
-     * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
-     */
-    public static function startsWith(string $haystack, string $needle): bool {
-        return substr($haystack, 0, strlen($needle)) === $needle;
-    }
-
-    /**
-     * Checks if string $haystack ends with the string $needle, returning TRUE if it does or FALSE otherwise.
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
-     */
-    public static function endsWith(string $haystack, string $needle): bool {
-        return substr($haystack, (-1 * strlen($needle)), strlen($needle)) === $needle;
     }
 
     /**

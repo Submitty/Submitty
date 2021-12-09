@@ -5,9 +5,11 @@
     <h3>This student has one or more teammates, should this apply to them as well?</h3>
     <p>Team member list: </p>
     <ul>
-    {% for id, user in member_list %}
-        <li>{{ user }} ({{ id }})</li>
-    {% endfor %}
+    {% if member_list is defined %}
+        {% for id, user in member_list %}
+            <li>{{ user }} ({{ id }})</li>
+        {% endfor %}
+    {% endif %}
     </ul>
 {% endblock %}
 {% block close_button_id %}id="team-extension-cancel"{% endblock %}

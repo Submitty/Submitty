@@ -27,7 +27,9 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
             'user_id' => 'test',
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
-            'user_email' => null
+            'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
         ];
         for ($i = 4; $i > 0; $i--) {
             $user_details['user_group'] = $i;

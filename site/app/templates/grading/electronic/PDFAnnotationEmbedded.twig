@@ -5,8 +5,20 @@
     <script src="{{ script }}"></script>
 {% endfor %}
 <div id="content-wrapper">
+    <div id="grading-pdf-repair" hidden>
+        <p><em>There is a problem with this pdf. Please repair to try and automatically fix any issues.</em></p>
+    </div>
     <div id="viewer" class="pdfViewer"></div>
 </div>
+
+<!-- Provide template of download button to copy over to toolbar since this page is the only one that gets the necessary info -->
+<template id="download-annotations-btn-template">
+    {% if can_download is defined and can_download %}
+        <button id="download-annotations-btn" class='btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ download_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs")' aria-label="Download the file">
+            Download <i class="fas fa-download" title="Download the file"></i>
+        </button>
+    {% endif %}
+</template>
 
 <script>
     window['csrfToken'] = "{{ csrfToken }}";
@@ -27,11 +39,18 @@
         console.error(err);
         alert("Can't fetch annotations");
     }
-    {% if student_download %}
+    {% if student_download is defined and student_download %}
     download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}" , "{{ rerender_annotated_pdf }}");
-    {% elseif student_popup %}
+    {% elseif student_popup is defined and student_popup %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}");
     {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
     {% endif %}
+
+    //render download annotations button on toolbar
+    $(function() {
+        if (!$('#pdf-buttons').has('#download-annotations-btn').length) {
+            $('#pdf-buttons').append(document.getElementById('download-annotations-btn-template').content.cloneNode(true));
+        }
+    });
 </script>

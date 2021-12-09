@@ -34,6 +34,7 @@ fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
 
 source ${THIS_DIR}/bin/versions.sh
 
@@ -58,7 +59,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
        && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
-    echo -e "   ./INSTALL_SUBMITTY.sh clean"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean quick"
     echo -e "   ./INSTALL_SUBMITTY.sh clean test"
     echo -e "   ./INSTALL_SUBMITTY.sh clean skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
@@ -177,12 +178,29 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
-    rm -rf ${SUBMITTY_INSTALL_DIR}/site
-    rm -rf ${SUBMITTY_INSTALL_DIR}/src
+    if [[ "$#" -ge 1 && $1 == "quick" ]] ; then
+        # pop this argument from the list of arguments...
+        shift
+
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/app
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cache
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/config
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cypress
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/public
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/room_templates
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/socket
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/tests
+        find ${SUBMITTY_INSTALL_DIR}/site -maxdepth 1 -type f -exec rm {} \;
+    else
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site
+        rm -rf ${SUBMITTY_INSTALL_DIR}/src
+        rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
+        rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+    fi
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin
     rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
-    rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
 # set the permissions of the top level directory
@@ -230,6 +248,8 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/docker
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 fi
 # ------------------------------------------------------------------------
 
@@ -266,12 +286,16 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
     chown  -R postgres:${DAEMON_GROUP}                ${SUBMITTY_DATA_DIR}/logs/psql
+
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
     chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
+    chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/docker
+    chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 
-    # php needs to be able to read containers config
+    # php & daemon needs to be able to read workers & containers config
+    chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json
     chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json
 fi
 
@@ -323,6 +347,32 @@ chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 #  (--delete, but probably dont want)
 #  / trailing slash, copies contents into target
 #  no slash, copies the directory & contents to target
+
+########################################################################################################################
+########################################################################################################################
+# CHECKOUT & INSTALL THE NLOHMANN C++ JSON LIBRARY
+
+nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json
+
+# If we don't already have a copy of this repository, check it out
+if [ ! -d "${nlohmann_dir}" ]; then
+    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
+fi
+
+# TODO: We aren't checking / enforcing a specific/minimum version of this library...
+
+# Add read & traverse permissions for RainbowGrades and vendor repos
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
+
+# "install" the nlohmann json library
+mkdir -p ${SUBMITTY_INSTALL_DIR}/vendor
+sudo chown -R root:submitty_course_builders ${SUBMITTY_INSTALL_DIR}/vendor
+sudo chown -R root:submitty_course_builders ${SUBMITTY_INSTALL_DIR}/vendor
+rsync -rtz ${SUBMITTY_REPOSITORY}/../vendor/nlohmann/json/include ${SUBMITTY_INSTALL_DIR}/vendor/
+chown -R  root:root ${SUBMITTY_INSTALL_DIR}/vendor
+find ${SUBMITTY_INSTALL_DIR}/vendor -type d -exec chmod 555 {} \;
+find ${SUBMITTY_INSTALL_DIR}/vendor -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -383,39 +433,41 @@ if [ "${WORKER}" == 0 ]; then
 fi
 ########################################################################################################################
 ########################################################################################################################
-# BUILD JUNIT TEST RUNNER (.java file)
+# BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-echo -e "Build the junit test runner"
+if [ -x "$(command -v javac)" ]; then
+    echo -e "Build the junit test runner"
 
-# copy the file from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
+    # copy the file from the repo
+    rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
 
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-# root will be owner & group of the source file
-chown  root:root  TestRunner.java
-# everyone can read this file
-chmod  444 TestRunner.java
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+    # root will be owner & group of the source file
+    chown  root:root  TestRunner.java
+    # everyone can read this file
+    chmod  444 TestRunner.java
 
-# compile the executable using the javac we use in the execute.cpp safelist
-/usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
+    # compile the executable using the javac we use in the execute.cpp safelist
+    /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
-# everyone can read the compiled file
-chown root:root TestRunner.class
-chmod 444 TestRunner.class
+    # everyone can read the compiled file
+    chown root:root TestRunner.class
+    chmod 444 TestRunner.class
 
-popd > /dev/null
+    popd > /dev/null
 
 
-# fix all java_tools permissions
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+    # fix all java_tools permissions
+    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+fi
 
 
 ########################################################################################################################
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
+bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -476,7 +528,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
 fi
 
 ################################################################################################################
@@ -558,22 +610,10 @@ chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 
 #####################################
-# Checkout the NLohmann C++ json library
-
-nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json
-
-if [ ! -d "${nlohmann_dir}" ]; then
-    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
-fi
-
-#####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
 
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type d -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type f -exec chmod o+r {} \;
-
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
 # Obtain API auth token for submitty-admin user

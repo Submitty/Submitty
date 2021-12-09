@@ -95,10 +95,19 @@
       "grading_parameters" : {
         "type" : "object",
         "properties" : {
+          "TOTAL_POINTS" : {
+            "type" : "number"
+          },
           "AUTO_POINTS" : {
             "type" : "number"
           },
+          "TA_POINTS" : {
+            "type" : "number"
+          },
           "EXTRA_CREDIT_POINTS" : {
+            "type" : "number"
+          },
+          "PENALTY_POINTS" : {
             "type" : "number"
           }
         }
@@ -411,6 +420,10 @@
           "type" : "string"
         }
       },
+      "display_testcase_runtime_memory": {
+        "type": "boolean",
+        "description": "Specifies whether the amount of time to run/memory used by each testcase should be displayed to students"
+      },
       "testcases" : {
         "description" : "The array of testcases which will be run against the student code",
         "type" : "array",
@@ -427,6 +440,39 @@
             }
           ]
         }
+      },
+      "leaderboards": {
+        "description" : "Configuration to enable a student leaderboard",
+        "type":"array",
+        "items":{
+          "description" : "Information about the specific leaderboard",
+          "type":"object",
+          "items":{
+            "required" : ["top_visible_students", "title", "tags"],
+            "items":{
+              "additionalProperties" : false,
+              "properties":{
+                "top_visible_students":{
+                  "description" : "The number of top students to show on the leaderboard.  If 0, all students will be shown",
+                  "type" : "integer"
+                },
+                "title":{
+                  "description" : "A human readable title for the leaderboard",
+                  "type" : "string"
+                },
+                "tag":{
+                  "description" : "A unique tag for the leaderboard",
+                  "type" : "string"
+                },
+                "description":{
+                  "description": "A short description of what testcases the leaderboard covers, displayed to students",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "minItems" : 1
       },
       "notebook" : {
         "description" : "The definition of a notebook consisting of messages and inputs.",
@@ -588,8 +634,12 @@
         "details" : {
           "type" : "string"
         },
-        "penalty-points" : {
-          "type" : "integer"
+        "leaderboard_tags": {
+          "type": "array",
+          "description": "Specifies which leaderboards this testcase applies to",
+          "items": {
+            "type": "string"
+          }
         },
         "containers" : {
           "type": "array",
@@ -860,7 +910,7 @@
                 "description" : "The standard version of click and drag starts either at the mouse’s current position or at a position specified by the user. If a mouse button has been specified, that button is pressed down at that position, otherwise, the left mouse button is pressed. The mouse is then moved to coordinates specified by the end position, and the held button is released.",
                 "type": "object",
                 "additionalProperties" : false,
-                "required" : ["action", "start_x", "start_y", "end_x", "end_y", "mouse_button"],
+                "required" : ["action"],
                 "properties" : {
                   "action" : {
                     "type" : "string",
@@ -989,13 +1039,13 @@
                     "type" : "string",
                     "enum" : ["move mouse"]
                   },
-                  "action" : {
-                    "type" : "integer",
-                    "enum" : ["end_x"]
+                  "end_x" : {
+                    "description" : "(Optional) An integer ending x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer"
                   },
-                  "action" : {
-                    "type" : "integer",
-                    "enum" : ["end_y"]
+                  "end_y" : {
+                    "description" : "(Optional) An integer ending y position for the mouse in window coordinates.Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer"
                   }
                 }
               }
@@ -1032,6 +1082,7 @@
                     "type" : "string"
                   },
                   "pattern" : {
+                    "type": "string"
                   },
                   "source" : {
                     "type" : "string"
@@ -1255,30 +1306,6 @@
           "properties" : {
             "method" : {
               "type" : "string",
-              "enum" : ["EmmaInstrumentationGrader"]
-            }
-          }
-        },
-        {
-          "type" : "object",
-          "required" : ["method", "coverage_threshold"],
-          "properties" : {
-            "method" : {
-              "type" : "string",
-              "enum" : ["EmmaCoverageReportGrader_doit"]
-            },
-            "coverage_threshold" : {
-              "type" : "number",
-              "minimum" : 0
-            }
-          }
-        },
-        {
-          "type" : "object",
-          "required" : ["method"],
-          "properties" : {
-            "method" : {
-              "type" : "string",
               "enum" : ["DrMemoryGrader"]
             }
           }
@@ -1366,6 +1393,7 @@
               "enum" : ["fileExists"]
             },
             "one_of" : {
+              "description": "Whether or not submitted file can be one of any of the files listed in actual_files",
               "type" : "boolean"
             },
             "sequence_diagram" : {
@@ -1457,11 +1485,25 @@
           "properties" : {
             "method" : {
               "type" : "string",
-              "not" : {"enum":["JUnitTestGrader", "EmmaInstrumentationGrader", "MultipleJUnitTestGrader",
-                       "EmmaCoverageReportGrader", "JaCoCoCoverageReportGrader", "DrMemoryGrader",
-                       "PacmanGrader", "searchToken", "intComparison", "diff", "fileExists",
-                       "warnIfNotEmpty", "warnIfEmpty", "errorIfNotEmpty", "errorIfEmpty", "ImageDiff",
-                       "custom_validator"]}
+              "not" : {
+                "enum": [
+                  "JUnitTestGrader",
+                  "MultipleJUnitTestGrader",
+                  "JaCoCoCoverageReportGrader",
+                  "DrMemoryGrader",
+                  "PacmanGrader",
+                  "searchToken",
+                  "intComparison",
+                  "diff",
+                  "fileExists",
+                  "warnIfNotEmpty",
+                  "warnIfEmpty",
+                  "errorIfNotEmpty",
+                  "errorIfEmpty",
+                  "ImageDiff",
+                  "custom_validator"
+                ]
+              }
             }
           }
         }

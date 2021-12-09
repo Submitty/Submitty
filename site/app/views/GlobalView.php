@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\models\Breadcrumb;
-
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name) {
         $messages = [];
@@ -27,14 +25,14 @@ class GlobalView extends AbstractView {
 
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
-            $page_title = "Submitty Login";
+            $page_title = "Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
-            $page_title = "Submitty " . $course_name . " " . $page_name;
+            $page_title = $page_name . " - " . $course_name;
         }
         elseif (!empty($page_name) && $page_name !== "Submitty") {
             // $page_name !== "Submitty" is needed so we dont end up with pages with the title "Submitty Submitty"
-            $page_title = "Submitty " . $page_name;
+            $page_title = $page_name;
         }
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
@@ -47,6 +45,7 @@ class GlobalView extends AbstractView {
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
+            "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
@@ -55,6 +54,7 @@ class GlobalView extends AbstractView {
             "enable_banner" => $this->core->getConfig()->isDuckBannerEnabled(),
             "duck_img" => $duck_img,
             "use_mobile_viewport" => $this->output->useMobileViewport(),
+            "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) ? $_COOKIE['collapse_sidebar'] === 'true' : false
         ]);
     }
@@ -64,12 +64,13 @@ class GlobalView extends AbstractView {
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
-            "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
-            "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
+            "submitty_queries" => $this->core->getSubmittyQueries(),
+            "course_queries" => $this->core->getCourseQueries(),
             "wrapper_urls" => $wrapper_urls,
             "latest_tag" => $this->core->getConfig()->getLatestTag(),
             "latest_commit" => $this->core->getConfig()->getLatestCommit(),
-            "footer_links" => $footer_links
+            "footer_links" => $footer_links,
+            "module_js" => $this->output->getModuleJs(),
         ]);
     }
 }

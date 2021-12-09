@@ -2,13 +2,15 @@
 
 namespace app\views;
 
-use app\models\User;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
+use app\models\PollModel;
+use app\libraries\PollUtils;
 
 class PollView extends AbstractView {
 
     public function showPollsInstructor($todays_polls, $older_polls, $future_polls, $dropdown_states) {
-        $this->core->getOutput()->addBreadcrumb("Polls");
+        $this->core->getOutput()->addBreadcrumb("Submini Polls");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         $this->core->getOutput()->enableMobileViewport();
@@ -25,7 +27,7 @@ class PollView extends AbstractView {
     }
 
     public function showPollsStudent($todays_polls, $older_polls) {
-        $this->core->getOutput()->addBreadcrumb("Polls");
+        $this->core->getOutput()->addBreadcrumb("Submini Polls");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         $this->core->getOutput()->enableMobileViewport();
@@ -39,9 +41,10 @@ class PollView extends AbstractView {
     }
 
     public function showNewPollPage() {
-        $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
+        $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("New Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -50,11 +53,13 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
+            'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'poll_type' => 'single-response'
           ]);
     }
 
     public function showPollStudent($poll) {
-        $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
+        $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->enableMobileViewport();
@@ -64,33 +69,39 @@ class PollView extends AbstractView {
             $file_data = base64_encode(file_get_contents($image_path));
             $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
         }
+        $poll_type = PollUtils::isSingleResponse($poll->getQuestionType()) ? "single-response" : "multiple-response";
         return $this->core->getOutput()->renderTwigTemplate("polls/PollPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
+            'poll_type' => $poll_type,
             'user_id' => $this->core->getUser()->getId(),
             'file_data' => $file_data
           ]);
     }
 
-    public function editPoll($poll) {
-        $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
+    public function editPoll(PollModel $poll) {
+        $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("Edit Poll");
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->enableMobileViewport();
+        $poll_type = PollUtils::isSingleResponse($poll->getQuestionType()) ? "single-response" : "multiple-response";
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'poll' => $poll
+            'poll' => $poll,
+            'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'poll_type' => $poll_type
           ]);
     }
 
     public function viewResults($poll, $results) {
-        $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(["polls"]));
+        $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(["polls"]));
         $this->core->getOutput()->addBreadcrumb("View Results");
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));

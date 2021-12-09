@@ -846,7 +846,7 @@ void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
       assert(source_name.find("\'") == std::string::npos);
 
       if(!pre_command["pattern"].is_string()){
-         (*my_testcase)["pattern"] = "";
+         pre_command["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
         //The pattern must not container .. or $
@@ -1250,12 +1250,13 @@ void General_Helper(nlohmann::json &single_testcase) {
 }
 
 void FileCheck_Helper(nlohmann::json &single_testcase) {
-  nlohmann::json::iterator f_itr,v_itr,m_itr,itr;
+  nlohmann::json::iterator f_itr,v_itr,m_itr,o_itr,itr;
 
   // Check the required fields for all test types
   f_itr = single_testcase.find("actual_file");
   v_itr = single_testcase.find("validation");
   m_itr = single_testcase.find("max_submissions");
+  o_itr = single_testcase.find("one_of");
 
   if (f_itr != single_testcase.end()) {
     // need to rewrite to use a validation
@@ -1279,6 +1280,9 @@ void FileCheck_Helper(nlohmann::json &single_testcase) {
     }
     single_testcase["validation"].push_back(v);
     single_testcase.erase(f_itr);
+    if (o_itr != single_testcase.end()) {
+      single_testcase.erase(o_itr);
+    }
   } else if (v_itr != single_testcase.end()) {
     // already has a validation
   } else {
@@ -1412,12 +1416,8 @@ void Execution_Helper(nlohmann::json &single_testcase) {
     std::string method = j.value("method","");
     std::string description = j.value("description","");
     if (description=="") {
-      if (method == "EmmaInstrumentationGrader") {
-        j["description"] = "EMMA instrumentation output";
-      } else if (method =="JUnitTestGrader") {
+      if (method =="JUnitTestGrader") {
         j["description"] = "JUnit output";
-      } else if (method =="EmmaCoverageReportGrader") {
-        j["description"] = "EMMA coverage report";
       } else if (method =="JaCoCoCoverageReportGrader") {
         j["description"] = "JaCoCo coverage report";
       } else if (method =="MultipleJUnitTestGrader") {

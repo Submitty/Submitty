@@ -70,4 +70,21 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
         $this->expectException(\Exception::class);
         $diff->buildViewer();
     }
+
+    public function testLongDiff() {
+        $diff = new DiffViewer(
+            __TEST_DATA__ . "/diffs/diff_test_06/output_actual.txt",
+            __TEST_DATA__ . "/diffs/diff_test_06/output_expected.txt",
+            __TEST_DATA__ . "/diffs/diff_test_06/output_differences.json",
+            ""
+        );
+        $diff->buildViewer();
+        $diff_result_actual = $diff->getDisplayActual();
+        $this->assertStringStartsWith("<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please download it to see the full file.</b></p>", $diff_result_actual);
+        $this->assertStringEndsWith("<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please download it to see the full file.</b></p></div></div>\n", $diff_result_actual);
+
+        $diff_result_expected = $diff->getDisplayExpected();
+        $this->assertStringStartsWith("<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p>", $diff_result_expected);
+        $this->assertStringEndsWith("<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p></div></div>\n", $diff_result_expected);
+    }
 }

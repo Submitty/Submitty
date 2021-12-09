@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "cpp",
+
     "testcases" : [
 
         // *************** COMPILATION *****************

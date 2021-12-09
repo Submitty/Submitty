@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "cpp",
+
     "assignment_message" : "You should not modify the provided main.cpp",
 
     "testcases" : [

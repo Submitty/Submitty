@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -61,6 +62,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
+export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -77,6 +79,10 @@ while :; do
             export NO_SUBMISSIONS=1
             echo 'no_submissions'
             ;;
+        --worker-pair)
+            export WORKER_PAIR=1
+            echo "worker_pair"
+            ;;
         *) # No more options, so break out of the loop.
             break
     esac
@@ -84,12 +90,12 @@ while :; do
     shift
 done
 
-
 if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
-
     export DEBIAN_FRONTEND=noninteractive
+fi
 
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
@@ -107,14 +113,16 @@ The vagrant box comes with some handy aliases:
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
+    lichen_install               - runs Lichen/install_lichen.sh
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
     ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
-    SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
-    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP, CGI_USER,
-    CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
+    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
+    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
 EOF
 )
 
@@ -122,6 +130,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
 export DAEMON_USER=${DAEMON_USER}
@@ -135,6 +144,8 @@ export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+alias install_lichen='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
+alias lichen_install='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
 alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias submitty_install_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
@@ -158,6 +169,13 @@ else
 fi
 
 if [ ${WORKER} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
+        # Setting it up to allow SSH as root by default
+        mkdir -p -m 700 /root/.ssh
+        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+
+        sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+    fi
     echo "Installing Submitty in worker mode."
 else
     echo "Installing primary Submitty."
@@ -178,47 +196,14 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 # PYTHON PACKAGE SETUP
 #########################
 
-pip3 install -U pip
-pip3 install python-pam
-pip3 install PyYAML
-pip3 install psycopg2-binary
-pip3 install sqlalchemy
-pip3 install pylint
-pip3 install psutil
-pip3 install python-dateutil
-pip3 install watchdog
-pip3 install xlsx2csv
-pip3 install pause
-pip3 install paramiko
-pip3 install tzlocal
-pip3 install PyPDF2
-pip3 install distro
-pip3 install jsonschema
-pip3 install jsonref
-pip3 install docker
-
-# for Lichen / Plagiarism Detection
-pip3 install parso
-
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-pip3 install clang
-
 #libraries for QR code processing:
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
-#python libraries for QR bulk upload
-pip3 install pyzbar
-pip3 install pdf2image
-pip3 install opencv-python
-pip3 install numpy
+pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
-#python libraries for OCR for digit recognition
-pip3 install onnxruntime
-
-# Install an email catcher
-if [ ${VAGRANT} == 1 ]; then
-    pip3 install nullsmtpd
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
+    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
 #################################################################
@@ -233,7 +218,7 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
@@ -277,7 +262,7 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -314,6 +299,13 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
+    if [ ${WORKER_PAIR} == 1 ]; then
+        echo -e "attempting to create ssh key for submitty_daemon..."
+        su submitty_daemon -c "cd ~/"
+        su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
+        su submitty_daemon -c "echo 'successfully created ssh key'"
+        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@172.18.2.8"
+    fi
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
@@ -327,52 +319,51 @@ usermod -a -G docker "${DAEMON_USER}"
 #################################################################
 # JAR SETUP
 #################
+if [ -x "$(command -v javac)" ]; then
 
-# -----------------------------------------
-echo "Getting JUnit & Hamcrest..."
+    # -----------------------------------------
+    echo "Getting JUnit & Hamcrest..."
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
-if [ ${WORKER} == 0 ]; then
+    if [ ${WORKER} == 0 ]; then
+        chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+    fi
+    chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
+
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+    rm -rf junit*jar
+    wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    popd > /dev/null
+
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
+    rm -rf hamcrest*.jar
+    wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    popd > /dev/null
+
+    # TODO:  Want to Install JUnit 5.0
+    # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
+
+    echo "Getting JaCoCo..."
+
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
+    wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
+    mkdir jacoco-${JACOCO_VERSION}
+    unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
+    mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
+    mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
+    rm -rf jacoco-${JACOCO_VERSION}
+    rm -f jacoco-${JACOCO_VERSION}.zip
+    chmod o+r . *.jar
+    popd > /dev/null
+
+
+    # fix all java_tools permissions
     chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 fi
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-rm -rf junit*jar
-wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
-popd > /dev/null
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
-rm -rf hamcrest*.jar
-wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
-popd > /dev/null
-
-# TODO:  Want to Install JUnit 5.0
-# And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-
-# JaCoCo is a replacement for EMMA
-
-echo "Getting JaCoCo..."
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
-wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
-mkdir jacoco-${JACOCO_VERSION}
-unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
-mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
-mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
-rm -rf jacoco-${JACOCO_VERSION}
-rm -f jacoco-${JACOCO_VERSION}.zip
-chmod o+r . *.jar
-popd > /dev/null
-
-
-# fix all java_tools permissions
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 #################################################################
@@ -438,8 +429,8 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
-            echo "Listen 1501" >> /etc/apache2/ports.conf
+        if ! grep -E -q "Listen ${SUBMISSION_PORT}" /etc/apache2/ports.conf; then
+            echo "Listen ${SUBMISSION_PORT}" >> /etc/apache2/ports.conf
         fi
 
         # remove default sites which would cause server to mess up
@@ -457,7 +448,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-    	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
         # Enable xdebug support for debugging
         phpenmod xdebug
@@ -499,6 +490,9 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
+    if [ ${VAGRANT} == 1 ]; then
+        sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
+    fi
 
     #################################################################
     # PHP SETUP
@@ -509,9 +503,9 @@ EOF
     # post_max_filesize
 
     sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^post_max_size = 8M/post_max_size = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
@@ -636,8 +630,12 @@ echo Beginning Submitty Setup
 
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
-    echo  Running configure submitty in worker mode
-    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    echo "Running configure submitty in worker mode"
+    if [ ${VAGRANT} == 1]; then
+        "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    else
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    fi
 else
     if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
@@ -663,7 +661,13 @@ y
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+25
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
+
+        # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
+        sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        sed -i -e 's/"uid": ""/"uid": "uid"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -751,10 +755,11 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_emails.py
     fi
 fi
 
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -798,7 +803,7 @@ echo -e "Finished preferred_name_logging setup."
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""

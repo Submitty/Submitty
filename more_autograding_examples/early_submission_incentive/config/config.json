@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "et-cetera",
+
     // This is for assignments where students who reached x amounts of points y days before the submission deadline receive some kind of reward
     // such as another late day. This will not award the late days, it simply shows the given message to the student.
     "early_submission_incentive" : {

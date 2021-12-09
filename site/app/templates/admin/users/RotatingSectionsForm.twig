@@ -30,7 +30,7 @@
 <div class="content">
     <h1>Manage Registration Sections</h1>
     <p>
-        Large courses are often split into multiple <em>registrations sections</em> for laboratory or recitation class time.<br>
+        Large courses are often split into multiple <em>registration sections</em> for laboratory or recitation class time.<br>
         Courses that are cross-listed in different departments may have multiple course codes/prefixes.
     </p>
     <p>
@@ -57,7 +57,9 @@
                     </thead>
                     <tbody>
                         {% for section in reg_sections %}
-                            {% if reg_sections_count[section['sections_registration_id']] %}
+                            {% if 'sections_registration_id' in section|keys %}
+                            {% if section['sections_registration_id'] in reg_sections_count|keys and
+                                reg_sections_count[section['sections_registration_id']] %}
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }}</td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
@@ -67,6 +69,7 @@
                                 <td>Section {{ section['sections_registration_id'] }}</td>
                                 <td>0</td>
                             </tr>
+                            {% endif %}
                             {% endif %}
                         {% endfor %}
                         {% if reg_sections_count['NULL'] %}

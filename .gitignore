@@ -18,7 +18,9 @@ __pycache__/
 .coverage
 coverage.xml
 
+
 /site/cache/
+/site/coverage/
 /site/vendor/
 /site/node_modules/
 /site/public/vendor/
@@ -28,6 +30,8 @@ coverage.xml
 /site/cypress/downloads/
 /site/cypress/screenshots/
 /site/cypress/videos/
+/site/public/mjs/
+/site/report/
 
 db_update.php
 .setup/data/random_users.txt

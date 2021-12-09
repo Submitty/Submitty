@@ -9,8 +9,16 @@
         <script src='{{ script }}'></script>
     {% endfor %}
     <script>
-        $(document).ready(function() {
+        function iFrameInit() {
+            $('body').css("height", "auto");
+            $('.CodeMirror').height("auto");
+
+            $('.CodeMirror')[0].CodeMirror.setSize(null, null);
+
             $('body').css("height", ($('.CodeMirror').height()) + "px");
+        }
+        $(document).ready(function() {
+            iFrameInit();
         });
     </script>
 </head>

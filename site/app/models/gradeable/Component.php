@@ -28,8 +28,8 @@ use app\libraries\NumberUtils;
  * @method float getUpperClamp()
  * @method bool isText()
  * @method void setText($is_text)
- * @method bool isPeer()
- * @method void setPeer($is_peer)
+ * @method bool isPeerComponent()
+ * @method void setPeerComponent($is_peer_component)
  * @method int getOrder()
  * @method void setOrder($order)
  * @method int getPage()
@@ -61,7 +61,7 @@ class Component extends AbstractModel {
     /** @prop @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
     protected $text = false;
     /** @prop @var bool If this is a peer grading component */
-    protected $peer = false;
+    protected $peer_component = false;
     /** @prop @var int The order of this component in the gradeable */
     protected $order = -1;
     /** @prop @var int The pdf page this component will reside in */
@@ -89,7 +89,7 @@ class Component extends AbstractModel {
      * Component constructor.
      * @param Core $core
      * @param Gradeable $gradeable
-     * @param $details
+     * @param array $details
      * @throws \InvalidArgumentException if any of the details were not found or invalid, or the gradeable was null
      * @throws ValidationException If the provided point details are incompatible
      */
@@ -103,7 +103,7 @@ class Component extends AbstractModel {
         $this->setStudentComment($details['student_comment']);
         $this->setPoints($details);
         $this->setText($details['text']);
-        $this->setPeer($details['peer']);
+        $this->setPeerComponent($details['peer_component'] ?? false);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
         $this->setIsItempoolLinked($details['is_itempool_linked'] ?? false);
@@ -188,7 +188,7 @@ class Component extends AbstractModel {
      * @return int
      */
     public function getGradingSet() {
-        return $this->peer ? $this->gradeable->getPeerGradeSet() : 1;
+        return $this->peer_component ? $this->gradeable->getPeerGradeSet() : 1;
     }
 
     /**
@@ -305,9 +305,11 @@ class Component extends AbstractModel {
         // Assert that the point values are valid
         $this->assertPoints($points);
 
+        $precision = $this->gradeable->getPrecision();
+
         // Round after validation because of potential floating point weirdness
         foreach (self::point_properties as $property) {
-            $this->$property = NumberUtils::roundPointValue($points[$property], $this->getGradeable()->getPrecision());
+            $this->$property = NumberUtils::roundPointValue($points[$property], $precision);
         }
         $this->modified = true;
     }
@@ -370,7 +372,7 @@ class Component extends AbstractModel {
 
     /**
      * Imports a mark into the component via array
-     * @param $details
+     * @param array $details
      * @return Mark
      */
     public function importMark($details) {

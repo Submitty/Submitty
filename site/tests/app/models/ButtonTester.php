@@ -2,12 +2,12 @@
 
 namespace tests\app\models;
 
+use app\libraries\Core;
 use app\models\Button;
-use tests\BaseUnitTest;
 
-class ButtonTester extends BaseUnitTest {
+class ButtonTester extends \PHPUnit\Framework\TestCase {
     public function testDefaults() {
-        $button = new Button($this->createMockCore(), []);
+        $button = new Button(new Core(), []);
         $this->assertNull($button->getTitle());
         $this->assertEquals('', $button->getHref());
         $this->assertEquals('btn', $button->getClass());
@@ -33,7 +33,7 @@ class ButtonTester extends BaseUnitTest {
             'date' => new \DateTime(),
             'prefix' => 'foo'
         ];
-        $button = new Button($this->createMockCore(), $details);
+        $button = new Button(new Core(), $details);
         $this->assertEquals($details['title'], $button->getTitle());
         $this->assertEquals($details['href'], $button->getHref());
         $this->assertEquals($details['class'], $button->getClass());
@@ -47,12 +47,12 @@ class ButtonTester extends BaseUnitTest {
     }
 
     public function testWrongTypeProgress() {
-        $button = new Button($this->createMockCore(), ['progress' => 'a']);
+        $button = new Button(new Core(), ['progress' => 'a']);
         $this->assertEquals(0, $button->getProgress());
     }
 
     public function testDate() {
-        $button = new Button($this->createMockCore(), []);
+        $button = new Button(new Core(), []);
         $date = new \DateTime();
         $button->setDate($date);
         $this->assertEquals($date, $button->getDate());

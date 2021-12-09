@@ -20,10 +20,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SimpleGraderController extends AbstractController {
     /**
-     * @param $gradeable_id
-     * @param $section
-     * @param $section_type
-     * @param $sort
+     * @param string $gradeable_id
+     * @param int|string|null $section
+     * @param string|null $section_type
+     * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return MultiResponse
      */
@@ -93,13 +93,13 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
-     * @param $view
-     * @param $sort
+     * @param string $gradeable_id
+     * @param null|string $view
+     * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return MultiResponse
      */
-    public function gradePage($gradeable_id, $view = null, $sort = null) {
+    public function gradePage($gradeable_id, $view = null, $sort = "section_subsection") {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
@@ -124,8 +124,11 @@ class SimpleGraderController extends AbstractController {
         elseif ($sort === "first") {
             $sort_key = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
-        else {
+        elseif ($sort === "last") {
             $sort_key = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
+        }
+        else {
+            $sort_key = "u.registration_subsection";
         }
 
         if ($gradeable->isGradeByRegistration()) {
@@ -172,7 +175,7 @@ class SimpleGraderController extends AbstractController {
             $graders[$section->getName()] = $section->getGraders();
         }
 
-        $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, "u.registration_subsection", $sort_key]);
+        $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key, "u.user_id"]);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['grading', 'SimpleGrader'],
@@ -189,7 +192,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return MultiResponse
      */
@@ -276,7 +279,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
      * @return MultiResponse
      */

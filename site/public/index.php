@@ -2,6 +2,7 @@
 
 use app\exceptions\BaseException;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
@@ -60,7 +61,7 @@ set_exception_handler("exception_handler");
 
 function error_handler() {
     $error = error_get_last();
-    if ($error['type'] === E_ERROR) {
+    if (!is_null($error) && $error['type'] === E_ERROR) {
         exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file
         " . $error['file'] . " on line " . $error['line']));
     }
@@ -75,6 +76,8 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
+DateUtils::setTimezone($core->getConfig()->getTimezone());
+$core->initializeTokenManager();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
@@ -119,7 +122,7 @@ if (empty($_COOKIE['submitty_token'])) {
 
 $is_api = explode('/', $request->getPathInfo())[1] === 'api';
 if ($is_api) {
-    if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
+    if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
         $_POST = json_decode(file_get_contents('php://input'), true);
     }
     $response = WebRouter::getApiResponse($request, $core);

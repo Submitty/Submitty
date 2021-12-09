@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DateUtils;
 
 /**
  *
@@ -12,6 +11,7 @@ use app\libraries\DateUtils;
  * @method int getId()
  * @method string getName()
  * @method string getQuestion()
+ * @method string getQuestionType()
  * @method array getAnswers()
  * @method array getUserResponses()
  * @method string|null getImagePath()
@@ -23,6 +23,8 @@ class PollModel extends AbstractModel {
     protected $name;
     /** @prop-read string */
     protected $question;
+    /** @prop-read string */
+    protected $question_type;
     protected $responses;
     /** @prop-read array */
     protected $answers;
@@ -32,18 +34,22 @@ class PollModel extends AbstractModel {
     protected $status;
     /** @prop-read string|null */
     protected $image_path;
+    /** @prop-read string */
+    protected $release_histogram;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path) {
+    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path, $release_histogram) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
         $this->question = $question;
+        $this->question_type = $question_type;
         $this->responses = $responses;
         $this->answers = $answers;
         $this->status = $status;
         $this->user_responses = $user_responses;
         $this->release_date = $release_date;
         $this->image_path = $image_path;
+        $this->release_histogram = $release_histogram;
     }
 
     public function getResponses() {
@@ -71,7 +77,7 @@ class PollModel extends AbstractModel {
     }
 
     public function getUserResponse($user_id) {
-        if (!isset($this->user_responses[$user_id])) {
+        if (!isset($this->user_responses[$user_id][0])) {
             return null;
         }
         return $this->user_responses[$user_id];
@@ -82,6 +88,28 @@ class PollModel extends AbstractModel {
             return $this->responses[$response_id];
         }
         return "No Response";
+    }
+
+    public function getAllResponsesString($response_id) {
+        if (count($this->responses) == 1) {
+            return $this->responses[$response_id[0]];
+        }
+        else {
+            $ret_string = "";
+            $first_answer = true;
+            foreach ($this->responses as $id => $response) {
+                if (in_array($id, $response_id)) {
+                    if (!$first_answer) {
+                        $ret_string .= ", " . $response;
+                    }
+                    else {
+                        $first_answer = false;
+                        $ret_string .= $response;
+                    }
+                }
+            }
+            return $ret_string;
+        }
     }
 
     public function getReleaseDate() {
@@ -102,5 +130,21 @@ class PollModel extends AbstractModel {
 
     public function isToday() {
         return date("Y-m-d") == $this->release_date;
+    }
+
+    public function isHistogramAvailableNever() {
+        return $this->release_histogram == "never";
+    }
+
+    public function isHistogramAvailableWhenEnded() {
+        return $this->release_histogram == "when_ended";
+    }
+
+    public function isHistogramAvailableAlways() {
+        return $this->release_histogram == "always";
+    }
+
+    public function isHistogramAvailable() {
+        return ($this->isHistogramAvailableAlways() && !$this->isClosed()) || ($this->isHistogramAvailableWhenEnded() && $this->isEnded());
     }
 }

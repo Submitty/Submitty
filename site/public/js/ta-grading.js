@@ -32,11 +32,28 @@ const taLayoutDet = {
     rightTop: null,
     rightBottom: null,
   },
+  currentActivePanels: {
+    leftTop: false,
+    leftBottom: false,
+    rightTop: false,
+    rightBottom: false,
+  },
   dividedColName: "LEFT",
   leftPanelWidth: "50%",
   bottomPanelHeight: "50%",
   bottomFourPanelRightHeight: "50%",
 };
+
+let settingsCallbacks = {
+  "general-setting-arrow-function": changeStudentArrowTooltips,
+  "general-setting-navigate-assigned-students-only": function(value) {
+    if (value == 'true') {
+      document.cookie = "view=assigned; path=/;";
+    } else {
+      document.cookie = "view=all; path=/;";
+    }
+  }
+}
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
@@ -78,6 +95,28 @@ $(function () {
       initializeTaLayout();
     }
   });
+
+  loadTAGradingSettingData();
+
+  for (let i = 0; i < settingsData.length; i++) {
+    for (let x = 0; x < settingsData[i].values.length; x++) {
+      let storageCode = settingsData[i].values[x].storageCode;
+      let item = localStorage.getItem(storageCode);
+      if (item && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](item);
+      }
+    }
+  }
+
+  $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
+    var storageCode = $(this).attr('data-storage-code');
+    if(storageCode) {
+      localStorage.setItem(storageCode, this.value);
+      if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](this.value);
+      }
+    }
+  })
 
   // Progress bar value
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
@@ -125,6 +164,17 @@ $(function () {
 
   checkNotebookScroll();
 
+  if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
+    let notebookPanel = $('#notebook-view');
+    if(notebookPanel.length != 0) {
+      let notebookItems = notebookPanel.find('.openAllFilesubmissions');
+      for(var i = 0; i < notebookItems.length; i++) {
+        notebookItems[i].onclick();
+      }
+    }
+  }
+
+
   // Remove the select options which are open
   function hidePanelPositionSelect() {
     $('select.panel-position-cont').hide();
@@ -138,18 +188,81 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
-
-  // Dynamically resize the textarea height as per the provided content
-  document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
-    textarea.addEventListener('keyup', function () {
-      setTimeout(function() {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-      },0);
-    });
-  });
-
 });
+
+function changeStudentArrowTooltips(data) {
+  let component_id = NO_COMPONENT_ID;
+  switch(data) {
+    case "ungraded":
+      component_id = getFirstOpenComponentId(false);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+        if(component_id === NO_COMPONENT_ID) {
+          $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student");
+          $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student");
+        } else {
+          $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+          $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        }
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next ungraded student (item " + $('#component-' + component_id).attr('data-itempool_id') + "; " + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    case "active-inquiry":
+      component_id = getFirstOpenComponentId();
+      if(component_id === NO_COMPONENT_ID) {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry");
+      } else {
+        $('#prev-student-navlink').find("i").first().attr("title", "Previous student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+        $('#next-student-navlink').find("i").first().attr("title", "Next student with active inquiry (" + $("#component-" + component_id).find(".component-title").text().trim() + ")");
+      }
+      break;
+    default:
+      $('#prev-student-navlink').find("i").first().attr("title", "Previous student");
+      $('#next-student-navlink').find("i").first().attr("title", "Next student");
+      break;
+  }
+}
+
+let orig_toggleComponent = window.toggleComponent;
+window.toggleComponent = function(component_id, saveChanges) {
+  let ret = orig_toggleComponent(component_id, saveChanges);
+  return ret.then(function() {
+    changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  });
+}
 
 function checkNotebookScroll() {
   if (taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
@@ -204,7 +317,7 @@ function notebookScrollSave() {
     var notebookTop = $('#notebook-view').offset().top;
     var element = $('#content_0');
     if(notebookView.scrollTop() + notebookView.innerHeight() + 1 > notebookView[0].scrollHeight) {
-      element = $('[id^=content_').last();
+      element = $('[id^=content_]').last();
     } else {
       while (element.length !== 0) {
         if (element.offset().top > notebookTop) {
@@ -213,7 +326,7 @@ function notebookScrollSave() {
         element = element.next();
       }
     }
-    
+
     if (element.length !== 0) {
       if (element.attr('data-item-ref') === undefined) {
         localStorage.setItem('ta-grading-notebook-view-scroll-id', element.attr('data-non-item-ref'));
@@ -289,6 +402,7 @@ function initializeTaLayout() {
   }
   updateLayoutDimensions();
   updatePanelOptions();
+  readCookies();
 }
 
 function updateLayoutDimensions() {
@@ -384,9 +498,16 @@ function adjustGradingPanelHeader () {
   } else {
     navBarBox.removeClass('mobile-view');
   }
-  // From the complete content remove the height occupied by navigation-bar and panel-header element
-  // 6 is used for adding some space in the bottom
-  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight() +6) + "px)";
+
+  // From the complete content remove the height occupied by other elements
+  let height = 0;
+  $(".panels-container").first().siblings().each(function() {
+    if ($(this).css("display") !== 'none') {
+      height += $(this).outerHeight(true);
+    }
+  });
+  
+  document.querySelector('.panels-container').style.height = "calc(100% - " + (height) + "px)";
 }
 
 function onAjaxInit() {}
@@ -413,6 +534,7 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
+    $('#autoscroll_id')[0].checked = true;
     let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
       let file_path = element.split('#$SPLIT#$');
@@ -486,22 +608,37 @@ function gotoMainPage() {
   }
 }
 
-function gotoPrevStudent(to_ungraded = false) {
+function gotoPrevStudent() {
 
-  let selector;
-  let window_location;
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
-  if(to_ungraded === true) {
-    selector = "#prev-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let selector = "#prev-student";
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
-
+  switch(filter) {
+    case "ungraded":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+      }
+      break;
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "active-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
   }
-  else {
-    selector = "#prev-student";
-    window_location = $(selector)[0].dataset.href
+
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {
@@ -518,21 +655,37 @@ function gotoPrevStudent(to_ungraded = false) {
   }
 }
 
-function gotoNextStudent(to_ungraded = false) {
+function gotoNextStudent() {
 
-  let selector;
-  let window_location;
+  let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
-  if(to_ungraded === true) {
-    selector = "#next-ungraded-student";
-    window_location = $(selector)[0].dataset.href;
+  let selector = "#next-student";
+  let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
-    // Append extra get param
-    window_location += '&component_id=' + getFirstOpenComponentId();
+  switch(filter) {
+    case "ungraded":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "itempool":
+      window_location += "&component_id=" + getFirstOpenComponentId(true);
+      break;
+    case "ungraded-itempool":
+      component_id = getFirstOpenComponentId(true);
+      if(component_id === NO_COMPONENT_ID) {
+        component_id = getFirstOpenComponentId();
+      }
+      break;
+    case "inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
+    case "active-inquiry":
+      window_location += "&component_id=" + getFirstOpenComponentId();
+      break;
   }
-  else {
-    selector = "#next-student";
-    window_location = $(selector)[0].dataset.href
+
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {
@@ -556,14 +709,6 @@ registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
   gotoNextStudent();
 });
 
-//Navigate to the prev / next student buttons
-registerKeyHandler({name: "Previous Ungraded Student", code: "Shift ArrowLeft"}, function() {
-  gotoPrevStudent(true);
-});
-registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, function() {
-  gotoNextStudent(true);
-});
-
 //-----------------------------------------------------------------------------
 // Panel show/hide
 //
@@ -573,6 +718,7 @@ function resetSinglePanelLayout() {
   $('.two-panel-cont').removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
 
+  $('.panels-container').append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
@@ -670,6 +816,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
+        $('.panels-container > .panel-instructions').toggle(!taLayoutDet.currentOpenPanel);
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
@@ -714,6 +861,9 @@ function toggleFullLeftColumnMode (forceVal = false) {
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   panelsContSelector = newPanelsContSelector;
+
+  $("#grading-panel-student-name").hide();
+
 }
 
 /**
@@ -733,6 +883,9 @@ function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
   initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
   initializeHorizontalTwoPanelDrag();
   togglePanelSelectorModal(false);
+  if (!taLayoutDet.isFullLeftColumnMode) {
+    $("#grading-panel-student-name").show();
+  }
 }
 
 function togglePanelLayoutModes(forceVal = false) {
@@ -746,85 +899,36 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    // If there is any panel opened just use that and fetch the next one for left side...
-    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
-      taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
-      panelElements.every((panel, idx) => {
-        if (taLayoutDet.currentTwoPanels.leftTop === panel.str) {
-          let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          taLayoutDet.currentTwoPanels.rightTop = panelElements[nextIdx].str;
-          return false;
-        }
-        return true;
-      });
-
-    } else if(!taLayoutDet.currentOpenPanel) {
-      // if there is no currently opened panel fill the panels with the first two
-      taLayoutDet.currentTwoPanels = {
-        leftTop: panelElements[0].str,
-        leftBottom: null,
-        rightTop: panelElements[1].str,
-        rightBottom: null,
-      };
+    
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: false,
+      rightTop: true,
+      rightBottom: false,
     }
+
     updatePanelLayoutModes();
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    let topPanel = taLayoutDet.currentTwoPanels.leftTop;
-    let bottomPanel = taLayoutDet.currentTwoPanels.leftBottom;
 
-    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
-    let prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.rightTop;
-
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: false,
+      rightTop: true,
+      rightBottom: false,
+    }
+  
     if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
-      topPanel = taLayoutDet.currentTwoPanels.rightTop;
-      bottomPanel = taLayoutDet.currentTwoPanels.rightBottom;
-      taLayoutDet.currentTwoPanels.leftBottom = null;
-      prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.leftTop;
+      taLayoutDet.currentActivePanels.rightBottom = true;
     }
     else {
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").removeClass("active");
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
-      taLayoutDet.currentTwoPanels.rightBottom = null;
-    }
-
-    let nextIdx = -1;
-    if (!bottomPanel) {
-      panelElements.every((panel, idx) => {
-        if (prevPanel === panel.str) {
-            nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-            // Now check if panel indexed with nextIdx is already open in somewhere
-            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.rightTop === panelElements[nextIdx].str) {
-              // If yes update the nextIdx
-              nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
-            }
-            if (taLayoutDet.dividedColName === "RIGHT") {
-              taLayoutDet.currentTwoPanels.rightBottom = panelElements[nextIdx].str;
-            }
-            else {
-              taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
-            }
-            return false; // Break the loop
-        }
-        return true;
-      })
-      if (nextIdx === -1) {
-        taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
-          leftTop: panelElements[0].str,
-          leftBottom: panelElements[1].str,
-          rightTop: panelElements[2].str,
-          rightBottom: null,
-        } : {
-          leftTop: panelElements[0].str,
-            leftBottom: null,
-            rightTop: panelElements[1].str,
-            rightBottom: panelElements[2].str,
-        };
-      }
+      taLayoutDet.currentActivePanels.leftBottom = true;
     }
 
     initializeHorizontalTwoPanelDrag();
@@ -832,6 +936,13 @@ function togglePanelLayoutModes(forceVal = false) {
   } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+    
+    taLayoutDet.currentActivePanels = {
+      leftTop: true,
+      leftBottom: true,
+      rightTop: true,
+      rightBottom: true,
+    }
 
     $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
@@ -859,6 +970,8 @@ function updatePanelLayoutModes () {
   const rightTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightTop);
   const rightBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightBottom);
 
+  //remove all panel instructions
+  $('.panel-instructions').remove();
   setMultiPanelModeVisiblities();
   for (const panelIdx in panelsBucket) {
     const panelCont = document.querySelector(panelsBucket[panelIdx]).childNodes;
@@ -867,18 +980,24 @@ function updatePanelLayoutModes () {
       document.querySelector(".panels-container").append(panelCont[idx]);
     }
   }
-  // finally append the latest panels to their respective buckets
-  if (leftTopPanel) {
-    document.querySelector(panelsBucket.leftTopSelector).append(leftTopPanel);
-  }
-  if (leftBottomPanel) {
-    document.querySelector(panelsBucket.leftBottomSelector).append(leftBottomPanel);
-  }
-  if (rightTopPanel) {
-    document.querySelector(panelsBucket.rightTopSelector).append(rightTopPanel);
-  }
-  if (rightBottomPanel) {
-    document.querySelector(panelsBucket.rightBottomSelector).append(rightBottomPanel);
+
+  //loop through panel positions (topLeft, topRight, etc)
+  for (let panel in taLayoutDet.currentTwoPanels) {
+    //if the panel isn't active, skip it
+    if(!taLayoutDet.currentActivePanels[panel]) {
+      continue;
+    }
+    const panel_type = taLayoutDet.currentTwoPanels[panel];
+    //get panel corresponding with the layout position
+    const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
+    //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
+    const dom_panel = document.getElementById(`${panel_type}`);
+    if (dom_panel) {
+      $(layout_panel).append(dom_panel);
+    }
+    else {
+      $(layout_panel).append('<h3 class="panel-instructions">Click above to select a panel for display</h3>');
+    }
   }
   saveTaLayoutDetails();
 }
@@ -954,7 +1073,7 @@ registerKeyHandler({name: "Toggle Solution/TA-Notes Panel", code: "KeyT"}, funct
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -966,10 +1085,12 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     });
   }
   else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
-    // Last component is open, scroll to general comment for easier access
-    //TODO: Add "Overall Comment" focusing, control
+    // Last component is open, close it and then open and scroll to first component
     closeComponent(openComponentId, true).then(function () {
-      scrollToOverallComment();
+      let componentId = getComponentIdByOrder(0);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
     });
   }
   else {
@@ -984,7 +1105,7 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
   let openComponentId = getFirstOpenComponentId();
-  let numComponents = getComponentCount();
+  let numComponents = $('#component-list').find('.component-container').length;
 
   // Note: we use the 'toggle' functions instead of the 'open' functions
   //  Since the 'open' functions don't close any components
@@ -995,8 +1116,13 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
       scrollToOverallComment();
   }
   else if (openComponentId === getComponentIdByOrder(0)) {
-    // First component is open, so close it
-    closeAllComponents(true);
+    // First component is open, close it and then open and scroll to the last one
+    closeComponent(openComponentId, true).then(function () {
+      let componentId = getComponentIdByOrder(numComponents - 1);
+      toggleComponent(componentId, true).then(function () {
+        scrollToComponent(componentId);
+      });
+    });
   }
   else {
     // Any other case, open the previous one
@@ -1070,11 +1196,18 @@ function checkOpenComponentMark(index) {
 
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
-  $("."+click_class + class_modifier).each(function(){
+
+  let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
+  
+  $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
-    let innerText = Object.values($(this))[0].innerText;
-    if (innerText.slice(-4) !== ".pdf") {
-      $(this).click();
+    let viewerID = $(this).attr("data-viewer_id");
+    if(($(this).parent().hasClass("file-viewer") && $("#file_viewer_" + viewerID).hasClass("shown") === toClose) ||
+        ($(this).parent().hasClass("div-viewer") && $("#div_viewer_" + viewerID).hasClass("open") === toClose)) {
+      let innerText = Object.values($(this))[0].innerText;
+      if (innerText.slice(-4) !== ".pdf") {
+        $(this).click();
+      }
     }
   });
 }
@@ -1274,7 +1407,98 @@ function newEditPeerComponentsForm() {
   captureTabInModal("edit-peer-components-form");
 }
 
-function openFrame(html_file, url_file, num) {
+function rotateImage(url, rotateBy) {
+  let rotate = sessionStorage.getItem("image-rotate-" + url);
+  if (rotate) {
+    rotate = parseInt(rotate);
+    if (rotate === NaN) {
+      rotate = 0;
+    }
+  } else {
+    rotate = 0;
+  }
+  if (rotateBy === "cw") {
+    rotate = (rotate + 90) % 360;
+  } else if (rotateBy === "ccw") {
+    rotate = (rotate - 90) % 360;
+  }
+  $('iframe[src="' + url + '"]').each(function() {
+    let img = $(this).contents().find('img');
+    if (img && $(this).data('rotate') !== rotate) {
+      $(this).data('rotate', rotate);
+      if ($(this).data('observingImageResize') === undefined) {
+        $(this).data('observingImageResize', false);
+      }
+      resizeImageIFrame(img, $(this));
+      if ($(this).data('observingImageResize') === false) {
+        let iFrameTarget = $(this);
+        let observer = new ResizeObserver(function(entries, obs) {
+          resizeImageIFrame(img, iFrameTarget);
+        });
+        observer.observe($(this)[0]);
+        $(this).data('observingImageResize', true);
+      }
+    }
+  });
+  sessionStorage.setItem("image-rotate-" + url, rotate);
+}
+
+function resizeImageIFrame(imageTarget, iFrameTarget) {
+  if (imageTarget.parent().is(":visible")) {
+    let rotateAngle = iFrameTarget.data('rotate');
+    if (rotateAngle === 0) {
+      imageTarget.css("transform", "");
+    } else {
+      imageTarget.css("transform", "rotate(" + rotateAngle + "deg)");
+    }
+    imageTarget.css("transform", "translateY(" + (-imageTarget.get(0).getBoundingClientRect().top) + "px) rotate(" + rotateAngle + "deg)");
+    let iFrameBody = iFrameTarget.contents().find("body").first();
+    boundsHeight = iFrameBody[0].scrollHeight;
+    let height = 500;
+    if (iFrameTarget.css("max-height").length !== 0 && parseInt(iFrameTarget.css("max-height")) >= 0) {
+      height = parseInt(iFrameTarget.css("max-height"));      
+    }
+    if (boundsHeight > height) {
+      iFrameBody.css("overflow-y", "");
+      iFrameTarget.height(height);
+    } else {
+      iFrameBody.css("overflow-y", "hidden");
+      iFrameTarget.height(boundsHeight);
+    }
+  }
+}
+
+function imageRotateIcons(iframe) {
+  let iframeTarget = $('iframe#' + iframe);
+  let contentType = iframeTarget.contents().get(0).contentType;
+  
+  if (contentType != undefined && contentType.startsWith('image')) {
+    if (iframeTarget.attr("id").endsWith("_full_panel_iframe")) {
+      let imageRotateBar = iframeTarget.parent().parent().parent().find(".image-rotate-bar").first();
+      imageRotateBar.show();
+      imageRotateBar.find(".image-rotate-icon-ccw").first().attr("onclick", "rotateImage('" + iframeTarget.attr('src') + "', 'ccw')");
+      imageRotateBar.find(".image-rotate-icon-cw").first().attr("onclick", "rotateImage('" + iframeTarget.attr('src') + "', 'cw')");
+      if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
+        rotateImage(iframeTarget.attr("src"), "none");
+      }
+    } else if(iframeTarget.parent().data("image-rotate-icons") !== true) {
+      iframeTarget.parent().data("image-rotate-icons", true);
+      iframeTarget.before(`<div class="image-rotate-bar">
+                              <a class="image-rotate-icon-ccw" onclick="rotateImage('${iframeTarget.attr('src')}', 'ccw')">
+                              <i class="fas fa-undo" title="Rotate image counterclockwise"></i></a>
+                              <a class="image-rotate-icon-cw" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
+                              <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
+                              </div>`);
+      
+      if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
+        rotateImage(iframeTarget.attr("src"), "none");
+      }
+    }
+    
+  }
+}
+
+function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submission") {
   let iframe = $('#file_viewer_' + num);
   let display_file_url = buildCourseUrl(['display_file']);
   if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
@@ -1293,27 +1517,29 @@ function openFrame(html_file, url_file, num) {
     else if (url_file.includes("checkout")) {
       directory = "checkout";
     }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
     // handle pdf
-    if (url_file.substring(url_file.length - 3) === "pdf") {
-      viewFileFullPanel(html_file, url_file).then(function(){
+    if (pdf_full_panel && url_file.substring(url_file.length - 3) === "pdf") {
+      viewFileFullPanel(html_file, url_file, 0, panel).then(function(){
         loadPDFToolbar();
       });
     }
     else {
+      let forceFull = url_file.substring(url_file.length - 3) === "pdf" ? 500 : -1;
+      let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
-        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}');" 
-                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true" 
+        <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull}); imageRotateIcons('${iframeId}');"
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
                 width="95%">
         </iframe>
       `;
       iframe.html(frameHtml);
-      if(iframe.hasClass("full_panel")){
-        $('#'+iframeId).attr("height", "1200px");
-      }
       iframe.addClass('open');
     }
   }
-  if (!iframe.hasClass("full_panel") && url_file.substring(url_file.length - 3) !== "pdf") {
+  if (!iframe.hasClass("full_panel") && (!pdf_full_panel || url_file.substring(url_file.length - 3) !== "pdf")) {
     if (!iframe.hasClass('shown')) {
       iframe.show();
       iframe.addClass('shown');
@@ -1328,52 +1554,59 @@ function openFrame(html_file, url_file, num) {
   return false;
 }
 
-function popOutSubmittedFile(html_file, url_file) {
-  var directory = "";
-  let display_file_url = buildCourseUrl(['display_file']);
-  if (url_file.includes("submissions")) {
-    directory = "submissions";
-    url_file = url_file;
+let fileFullPanelOptions = {
+  submission: { //Main viewer (submission panel)
+    viewer: "#viewer",
+    fileView: "#file-view",
+    gradingFileName: "#grading_file_name",
+    panel: "#submission_browser",
+    innerPanel: "#directory_view",
+    pdfAnnotationBar: "#pdf_annotation_bar",
+    saveStatus: "#save_status",
+    fileContent: "#file-content",
+    fullPanel: "full_panel",
+    imageRotateBar: "#image-rotate-icons-bar",
+    pdf: true
+  },
+  notebook: { //Notebook panel
+    viewer: "#notebook-viewer",
+    fileView: "#notebook-file-view",
+    gradingFileName: "#notebook_grading_file_name",
+    panel: "#notebook_view",
+    innerPanel: "#notebook-main-view",
+    pdfAnnotationBar: "#notebook_pdf_annotation_bar", //TODO
+    saveStatus: "#notebook_save_status", //TODO
+    fileContent: "#notebook-file-content",
+    fullPanel: "notebook_full_panel",
+    imageRotateBar: "#notebook-image-rotate-icons-bar",
+    pdf: false
   }
-  else if (url_file.includes("results_public")) {
-    directory = "results_public";
-  }
-  else if (url_file.includes("results")) {
-    directory = "results";
-  }
-  else if (url_file.includes("checkout")) {
-    directory = "checkout";
-  }
-  else if (url_file.includes("split_pdf")) {
-    directory = "split_pdf";
-  }
-  window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-  return false;
 }
 
-
-function viewFileFullPanel(name, path, page_num = 0) {
+function viewFileFullPanel(name, path, page_num = 0, panel="submission") {
   // debugger;
-  if($('#viewer').length != 0){
-    $('#viewer').remove();
+  if($(fileFullPanelOptions[panel]["viewer"]).length != 0){
+    $(fileFullPanelOptions[panel]["viewer"]).remove();
   }
 
-  let promise = loadPDF(name, path, page_num);
-  $('#file-view').show();
-  $("#grading_file_name").html(name);
-  let precision = $("#submission_browser").width()-$("#directory_view").width();
-  let offset = $("#submission_browser").width()-precision;
-  $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
-  $("#directory_view").hide();
-  $("#file-view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
+  $(fileFullPanelOptions[panel]["imageRotateBar"]).hide();
+
+  let promise = loadPDF(name, path, page_num, panel);
+  $(fileFullPanelOptions[panel]["fileView"]).show();
+  $(fileFullPanelOptions[panel]["gradingFileName"]).html(name);
+  let precision = $(fileFullPanelOptions[panel]["panel"]).width()-$(fileFullPanelOptions[panel]["innerPanel"]).width();
+  let offset = $(fileFullPanelOptions[panel]["panel"]).width()-precision;
+  $(fileFullPanelOptions[panel]["innerPanel"]).animate({'left': '+=' + -offset + 'px'}, 200);
+  $(fileFullPanelOptions[panel]["innerPanel"]).hide();
+  $(fileFullPanelOptions[panel]["fileView"]).animate({'left': '+=' + -offset + 'px'}, 200).promise();
   return promise;
 }
 
-function loadPDF(name, path, page_num) {
+function loadPDF(name, path, page_num, panel="submission") {
   let extension = name.split('.').pop();
-  let gradeable_id = document.getElementById('submission_browser').dataset.gradeableId;
-  let anon_submitter_id = document.getElementById('submission_browser').dataset.anonSubmitterId;
-  if (extension == "pdf") {
+  if (fileFullPanelOptions[panel]["pdf"] && extension == "pdf") {
+    let gradeable_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.gradeableId;
+    let anon_submitter_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.anonSubmitterId;
     $('#pdf_annotation_bar').show();
     $('#save_status').show();
     return $.ajax({
@@ -1393,31 +1626,141 @@ function loadPDF(name, path, page_num) {
     });
   }
   else {
-    $('#save_status').hide();
-    $('#file-content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
-    $("#file_viewer_full_panel").empty();
-    $("#file_viewer_full_panel").attr("data-file_name", "");
-    $("#file_viewer_full_panel").attr("data-file_url", "");
-    $("#file_viewer_full_panel").attr("data-file_name", name);
-    $("#file_viewer_full_panel").attr("data-file_url", path);
-    openFrame(name, path, "full_panel");
-    $("#file_viewer_full_panel_iframe").height("100%");
+    $(fileFullPanelOptions[panel]["saveStatus"]).hide();
+    $(fileFullPanelOptions[panel]["fileContent"]).append("<div id=\"file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).empty();
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_name", "");
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_url", "");
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_name", name);
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).attr("data-file_url", path);
+    openFrame(name, path, fileFullPanelOptions[panel]["fullPanel"], false);
+    $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").css("max-height", "1200px");
+    // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
   }
 }
 
-function collapseFile(){
+function collapseFile(panel = "submission"){
   //Removing these two to reset the full panel viewer.
-  $("#file_viewer_full_panel").remove();
-  $("#content-wrapper").remove();
-  if($("#pdf_annotation_bar").is(":visible")){
-    $("#pdf_annotation_bar").hide();
+  $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).remove();
+  if(fileFullPanelOptions[panel]["pdf"]) {
+    $("#content-wrapper").remove();
+    if($("#pdf_annotation_bar").is(":visible")){
+      $("#pdf_annotation_bar").hide();
+    }
   }
-  $("#directory_view").show();
-  var offset1 = $("#directory_view").css('left');
-  var offset2 = $("#directory_view").width();
-  $("#directory_view").animate({'left': '-=' + offset1}, 200);
-  $("#file-view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
-    $('#file-view').css('left', "");
-    $('#file-view').hide();
+  $(fileFullPanelOptions[panel]["innerPanel"]).show();
+  var offset1 = $(fileFullPanelOptions[panel]["innerPanel"]).css('left');
+  var offset2 = $(fileFullPanelOptions[panel]["innerPanel"]).width();
+  $(fileFullPanelOptions[panel]["innerPanel"]).animate({'left': '-=' + offset1}, 200);
+  $(fileFullPanelOptions[panel]["fileView"]).animate({'left': '+=' + offset2 + 'px'}, 200, function(){
+    $(fileFullPanelOptions[panel]["fileView"]).css('left', "");
+    $(fileFullPanelOptions[panel]["fileView"]).hide();
   });
+}
+
+Twig.twig({
+  id: "Attachments",
+  href: "/templates/grading/Attachments.twig",
+  async: true
+});
+
+var uploadedAttachmentIndex = 1;
+
+function uploadAttachment() {
+  let fileInput = $("#attachment-upload");
+  if (fileInput[0].files.length === 1) {
+    let formData = new FormData();
+    formData.append('attachment', fileInput[0].files[0]);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    let callAjax = true;
+    let userAttachmentList = $("#attachments-list").children().first();
+    let origAttachment = userAttachmentList.find("[data-file_name='" + CSS.escape(fileInput[0].files[0].name) + "']");
+    if (origAttachment.length !== 0) {
+      callAjax = confirm("The file '" + fileInput[0].files[0].name + "' already exists; do you want to overwrite it?");
+    }
+    if (callAjax) {
+      fileInput.prop("disabled", true);
+      $.ajax({
+        url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "upload"]),
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function(data) {
+          if (!("status" in data) || data["status"] !== "success") {
+            alert("An error has occured trying to upload the attachment: " + data["message"]);
+          } else {
+            let renderedData = Twig.twig({
+              ref: "Attachments"
+            }).render({
+                file: data["data"],
+                id: "a-up-" + uploadedAttachmentIndex,
+                is_grader_view: true,
+                can_modify: true
+            });
+            uploadedAttachmentIndex++;
+            if (origAttachment.length === 0) {
+              userAttachmentList.append(renderedData);
+            } else {
+              origAttachment.first().parent().replaceWith(renderedData);
+            }
+            if (userAttachmentList.children().length === 0) {
+              userAttachmentList.css("display", "none")
+              $("#attachments-header").css("display", "none");
+            } else {
+              userAttachmentList.css("display", "")
+              $("#attachments-header").css("display", "");
+            }
+          }
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          alert("An error has occured trying to upload the attachment: " + errorThrown);
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        }
+      });
+    } else {
+      fileInput[0].value = "";
+    }
+  }
+}
+
+function deleteAttachment(target, file_name) {
+  let confirmation = confirm("Are you sure you want to delete attachment '" + decodeURIComponent(file_name) +"'?");
+  if (confirmation) {
+    let formData = new FormData();
+    formData.append('attachment', file_name);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    $.ajax({
+      url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "delete"]),
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function(data) {
+        if (!("status" in data) || data["status"] !== "success") {
+          alert("An error has occured trying to delete the attachment: " + data["message"]);
+        } else {
+          $(target).parent().parent().remove();
+          let userAttachmentList = $("#attachments-list").children().first();
+          if (userAttachmentList.children().length === 0) {
+            userAttachmentList.css("display", "none")
+            $("#attachments-header").css("display", "none");
+          } else {
+            userAttachmentList.css("display", "")
+            $("#attachments-header").css("display", "");
+          }
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert("An error has occured trying to upload the attachment: " + errorThrown);
+      }
+    });
+  }
 }

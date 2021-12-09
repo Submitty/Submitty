@@ -10,10 +10,15 @@
     padding-left: 20px;
 }
 
-.expand-icon, .collapse-icon {
+#details-table tbody.details-content td {
+    text-align: center;
+}
+
+.expand-icon,
+.collapse-icon {
     display: none;
     position: absolute;
-    transform: translate(50%,-50%);
+    transform: translate(50%, -50%);
     font-size: 1rem;
     top: 33%;
     left: 0;
@@ -41,6 +46,20 @@
     flex-direction: column-reverse;
 }
 
+.details-warning-box {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.details-warning-highlight {
+    background-color: var(--standard-vibrant-orange);
+}
+
+.details-warning-neutral {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .details-action-box > * {
     margin-top: 0;
     white-space: initial;
@@ -59,7 +78,7 @@
 }
 
 .action-btn-cont {
-    display:flex;
+    display: flex;
     width: 100%;
     flex-direction: row;
     justify-self: flex-end;
@@ -94,6 +113,7 @@
         display: block;
         border: none;
     }
+
     /* Hide table headers */
     #details-table thead tr {
         background: none;
@@ -103,7 +123,7 @@
         padding: 0;
         margin: -1px;
         overflow: hidden;
-        clip: rect(0,0,0,0);
+        clip: rect(0, 0, 0, 0);
         border: 0;
     }
 
@@ -128,15 +148,18 @@
         color: white;
     }
 
-    .panel-head-active .expand-icon, .collapse-icon {
+    .panel-head-active .expand-icon,
+    .collapse-icon {
         display: inline;
     }
 
-    .panel-head-active .collapse-icon, .expand-icon {
+    .panel-head-active .collapse-icon,
+    .expand-icon {
         display: none;
     }
 
     #details-table .details-content td:nth-of-type(1) { display: none; }
+
     /*
         The content for the ':before' will be added through details.js
         That is ...
@@ -151,7 +174,7 @@
         background: var(--standard-light-gray);
     }
 
-    #details-table td:before {
+    #details-table td::before {
         padding-right: 1em;
         font-weight: bold;
     }
@@ -190,6 +213,7 @@
         display: block;
         background: transparent;
     }
+
     #details-table .info {
         margin-top: 0;
     }
@@ -208,7 +232,8 @@
         padding: 0 25px;
     }
 
-    .expand-icon, .collapse-icon {
+    .expand-icon,
+    .collapse-icon {
         font-size: 30px;
         top: 50%;
         left: 3%;
@@ -263,7 +288,7 @@
         margin-right: 5px;
     }
 
-    #details-table td:before {
+    #details-table td::before {
         content: none !important;
     }
 
@@ -278,6 +303,11 @@
     }
 }
 
-.randomize_cancel_btn{
+.randomize_cancel_btn {
     float: left;
+}
+
+.gradeable_message li {
+    margin-left:30px;
+    margin-bottom:10px;
 }

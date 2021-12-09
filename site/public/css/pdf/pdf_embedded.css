@@ -16,6 +16,7 @@
 .pdfViewer .canvasWrapper {
     box-shadow: 0 0 3px var(--standard-light-medium-gray);
 }
+
 .pdfViewer .page {
     /* describe all css properties independantly so js can read it easily across all platforms */
     margin-top: 5px !important;

@@ -1,0 +1,4 @@
+jsonschema==3.2.0
+jsonref==0.2
+pytz==2021.1
+tzlocal==2.1

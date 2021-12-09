@@ -1,0 +1,9 @@
+test01: One Of True - Both Match                             5 /  5  
+test02: One Of True - One Match                              5 /  5  
+test03: One Of True - No Match                               0 /  5  
+test04: One Of False - Both Match                            5 /  5  
+test05: One Of False - One Match                             0 /  5  
+test06: One Of False - No Match                              0 /  5  
+SubmissionLimit: Submission Limit                                             
+Automatic grading total:                                         15 / 30
+Non-hidden automatic grading total:                              15 / 30

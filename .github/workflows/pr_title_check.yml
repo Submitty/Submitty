@@ -1,0 +1,20 @@
+name: 'Submitty PR Title Check'
+on:
+  pull_request:
+    # check when PR
+    # * is created,
+    # * title is edited, and
+    # * new commits are added (to ensure failing title blocks merging)
+    types: [ opened, reopened, edited, synchronize ]
+
+jobs:
+  title-check:
+    runs-on: ubuntu-latest
+    steps:
+      #
+      # pull request titles format rules here:
+      # https://submitty.org/developer/how_to_contribute#how-to-make-a-pull-request-pr-to-submitty
+      #
+      # [<TYPE>:<MODULE>] <SUBJECT>
+      #
+      - uses: submitty/action-pr-title@main

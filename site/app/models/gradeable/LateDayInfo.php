@@ -22,7 +22,7 @@ class LateDayInfo extends AbstractModel {
     const STATUS_LATE = 2;
     const STATUS_BAD = 3;
 
-    public static function isValidStatus($status) {
+    public static function isValidStatus(int $status): bool {
         return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
     }
 
@@ -60,7 +60,7 @@ class LateDayInfo extends AbstractModel {
     public function toArray() {
         return [
             'gradeable_title' => $this->graded_gradeable->getGradeable()->getTitle(),
-            'submission_due_date' => $this->graded_gradeable->getGradeable()->getSubmissionDueDate()->format('m/d/y'),
+            'submission_due_date' => $this->graded_gradeable->getGradeable()->hasDueDate() ? $this->graded_gradeable->getGradeable()->getSubmissionDueDate()->format('m/d/y') : null,
             'g_allowed_late_days' => $this->graded_gradeable->getGradeable()->getLateDays(),
             'exceptions' => $this->getLateDayException(),
             'status' => $this->getStatus(),

@@ -68,6 +68,7 @@ Form
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
 <br />
+{% if electronic %}
 <fieldset>
     <legend>
         How should grading be anonymized for limited access graders?
@@ -79,6 +80,7 @@ Form
         {{ (gradeable.getLimitedAccessBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_limited_access_grading">Blinded Grading</label>
 
 </fieldset>
+{% endif %}
 
 {% if peer %}
 
@@ -153,8 +155,10 @@ Form
                 {% endfor %}
             </tr>
             <!-- Instructors -->
+            {% if 1 in graders_from_usertypes|keys %}
             {{ self.display_graders(graders_from_usertypes[1], 'g1',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
+            {% endif %}
             <tr class="g2">
                 <th>Full Access Graders</th>
                 <th>All</th>
@@ -163,8 +167,10 @@ Form
                 {% endfor %}
             </tr>
             <!-- Full Access Graders -->
+            {% if 2 in graders_from_usertypes|keys %}
             {{ self.display_graders(graders_from_usertypes[2], 'g2',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
+            {% endif %}
             <tr class="g3">
                 <th>Limited Access Graders</th>
                 <th>All</th>
@@ -173,8 +179,10 @@ Form
                 {% endfor %}
             </tr>
             <!-- Limited Access Graders -->
+            {% if 3 in graders_from_usertypes|keys %}
             {{ self.display_graders(graders_from_usertypes[3], 'g3',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
+            {% endif %}
         {% elseif num_rotating_sections == 0 %}
             <br/>
             <p><b>Rotating Sections have not been set up yet. <br/> You can set up Rotating Sections using the "Manage Sections" option on the sidebar.</b></p>
@@ -264,15 +272,21 @@ Form
         $('#minimum_grading_group').change(onMinGraderChange);
         
         // update "all" check boxes
+        {% if 1 in graders_from_usertypes|keys %}
         {% for grader in graders_from_usertypes[1] %}
         updateCheckBoxes('g1', "{{ grader[0] }}", 1);
         {% endfor %}
+        {% endif %}
+        {% if 2 in graders_from_usertypes|keys %}
         {% for grader in graders_from_usertypes[2] %}
         updateCheckBoxes('g2', "{{ grader[0] }}", 1);
         {% endfor %}
+        {% endif %}
+        {% if 3 in graders_from_usertypes|keys %}
         {% for grader in graders_from_usertypes[3] %}
         updateCheckBoxes('g3', "{{ grader[0] }}", 1);
         {% endfor %}
+        {% endif %}
 
     });
 

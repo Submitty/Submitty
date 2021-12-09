@@ -24,6 +24,13 @@ function showUpdateProfilePhotoForm() {
   form.find('.form-body').scrollTop(0);
 }
 
+function showUpdateSecondaryEmailForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-secondary-email-form")
+    form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
+}
+
 /**
  * Gets the list of all available time zones as an array
  * @returns {string[]}
@@ -57,8 +64,9 @@ function updateUserPreferredNames () {
           const {data} = response;
           displaySuccessMessage(data.message);
           //update the preferred names
-          $("#firstname-row .value").text(data.first_name);
-          $("#lastname-row .value").text(data.last_name);
+          const icon = '<i class="fas fa-pencil-alt"></i>';
+          $("#firstname-row .icon").html(icon + ' ' + data.first_name);
+          $("#lastname-row .icon").html(icon + ' ' + data.last_name);
           //update the data attributes
           first_name_field.data('current-name', data.first_name);
           last_name_field.data('current-name', data.last_name);
@@ -121,11 +129,83 @@ function updateUserProfilePhoto () {
   return false;
 }
 
+function updateUserSecondaryEmail () {
+    const second_email = $('#user-secondary-email-change');
+    const second_email_notify = $('#user-secondary-email-notify-change');
+    if (second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)) {
+        displayErrorMessage('No changes detected to secondary email');
+    }
+    else {
+        if (second_email.val() === '' && second_email_notify.get(0).checked) {
+            displayErrorMessage('Please disable second email notifications or add a valid second email');
+        }
+        else {
+            let data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('secondary_email', second_email.val());
+            data.append('secondary_email_notify', second_email_notify.get(0).checked);
+            let url = buildUrl(['user_profile', 'change_secondary_email']);
+            $.ajax({
+                url,
+                type: "POST",
+                data,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    const response = JSON.parse(res);
+                    if (response.status === "success") {
+                        const { data } = response;
+                        displaySuccessMessage(data.message);
+                        const icon = '<i class="fas fa-pencil-alt"></i>';
+                        $('#secondary-email-row .icon').html(icon + ' ' + data.secondary_email);
+                        $('#secondary-email-notify-row .icon').html(icon + ' ' + data.secondary_email_notify);
+                        second_email.data('current-second-email', data.secondary_email);
+                        second_email_notify.data('current-second-email-notify', data.secondary_email_notify === "True" ? 1 : 0);
+                    }
+                    else if (response.status === "error") {
+                        displayErrorMessage(response.message);
+                    }
+                },
+                error: function() {
+                    // display error message
+                    displayErrorMessage("Something went wrong while updating secondary email address!");
+                }
+            });
+        }
+    }
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
+function changeSecondaryEmail() {
+    const email = $('#user-secondary-email-change').val();
+    const checkbox = $('#user-secondary-email-notify-change');
+
+    if (email.length > 0) {
+        checkbox.prop('disabled', false);
+    }
+    else {
+        checkbox.prop('disabled', true);
+        checkbox.prop('checked', false);
+    }
+}
+
 $(document).ready(function() {
 
     $('#theme_change_select').change(function() {
         updateTheme();
+        if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+          $(document.body).find('#rainbow-mode').remove();
+          localStorage.removeItem('rainbow-mode');
+          const theme_picker = $('#theme_change_select');
+          theme_picker.find('[value="rainbow"]').remove();
+        }
     });
+
+    if(JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+      const theme_picker = $('#theme_change_select');
+      theme_picker.append(`<option value="rainbow" selected="selected">Rainbow Mode</option>`);
+    }
 
     if ($('#flagged-message').data('flagged') === "flagged") {
       $('#flagged-message').addClass('show');

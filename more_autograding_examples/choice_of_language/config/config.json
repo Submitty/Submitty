@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "et-cetera",
+
     "assignment_message" : "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
     "part_names" : [ "Python 2", "Python 3", "C", "C++" ],
 

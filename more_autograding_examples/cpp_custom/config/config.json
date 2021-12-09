@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "cpp",
+
     "grading_parameters" : {
         "AUTO_POINTS" : 20
     },

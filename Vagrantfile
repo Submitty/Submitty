@@ -7,6 +7,8 @@
 #   NO_SUBMISSIONS=1 vagrant up
 #       or
 #   EXTRA=rpi vagrant up
+#       or
+#   WORKER_PAIR=1 vagrant up
 #
 #
 # If you want to install extra packages (such as rpi or matlab), you need to have the environment
@@ -24,12 +26,18 @@ $stdout.sync = true
 $stderr.sync = true
 
 extra_command = ''
+autostart_worker = false
 if ENV.has_key?('NO_SUBMISSIONS')
     extra_command << '--no_submissions '
 end
 if ENV.has_key?('EXTRA')
     extra_command << ENV['EXTRA']
 end
+if ENV.has_key?('WORKER_PAIR')
+    autostart_worker = true
+    extra_command << '--worker-pair '
+end
+  
 
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
@@ -38,9 +46,12 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
-unless Vagrant.has_plugin?('vagrant-vbguest')
-  raise 'vagrant-vbguest is not installed! To install, run: vagrant plugin install vagrant-vbguest'
-end
+$worker_script = <<SCRIPT
+GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
+DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
+SCRIPT
 
 Vagrant.configure(2) do |config|
   # Specify the various machines that we might develop on. After defining a name, we
@@ -48,12 +59,32 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  # Our primary development target, this is what RPI uses as of Fall 2018
-  config.vm.define 'ubuntu-18.04', primary: true do |ubuntu|
+  config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-20.04'
+    # If this IP address changes, it must be changed in install_system.sh and 
+    # CONFIGURE_SUBMITTY.py to allow the ssh connection
+    ubuntu.vm.network "private_network", ip: "172.18.2.8"
+    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
+    ubuntu.vm.provision 'shell', inline: $worker_script
+  end
+
+  # This is what RPI uses as of Fall 2018, though currently migrating to 20.04
+  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 8433, host: 8433   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
+    ubuntu.vm.provision 'shell', inline: $script
+  end
+
+  # Our primary development target, RPI uses it as of Fall 2021
+  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-20.04'
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
+    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
+    ubuntu.vm.provision 'shell', inline: $script
   end
 
   config.vm.provider 'virtualbox' do |vb|
@@ -91,7 +122,7 @@ Vagrant.configure(2) do |config|
   mount_options = %w(dmode=775 fmode=664)
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
 
-  optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial CrashCourseCPPSyntax)
+  optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
@@ -99,11 +130,10 @@ Vagrant.configure(2) do |config|
     end
   }
 
-  config.vm.provision 'shell', inline: $script
-
   if ARGV.include?('ssh')
     config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
     config.ssh.insert_key = 'true'
+    config.ssh.timeout = 20
   end
 end

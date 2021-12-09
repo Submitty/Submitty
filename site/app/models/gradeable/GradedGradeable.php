@@ -2,13 +2,9 @@
 
 namespace app\models\gradeable;
 
-use app\exceptions\AuthorizationException;
 use app\libraries\Core;
 use app\models\AbstractModel;
 use app\models\User;
-use app\libraries\FileUtils;
-use app\exceptions\FileNotFoundException;
-use app\exceptions\IOException;
 
 /**
  * Class GradedGradeable
@@ -128,7 +124,7 @@ class GradedGradeable extends AbstractModel {
      */
     public function isPeerGradingComplete() {
         foreach ($this->ta_graded_gradeable->getGradedComponentContainers() as $container) {
-            if (!$container->isComplete() && $container->getComponent() != null && $container->getComponent()->isPeer()) {
+            if (!$container->isComplete() && $container->getComponent() != null && $container->getComponent()->isPeerComponent()) {
                 return false;
             }
         }
@@ -172,7 +168,7 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Gets the grade inquiry assigned to the gradeable's component supplied
-     * @param $gc_id int Gradeable Component id
+     * @param int $gc_id Gradeable Component id
      */
     public function getGradeInquiryByGcId($gc_id) {
         foreach ($this->regrade_requests as $grade_inquiry) {

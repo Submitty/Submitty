@@ -22,9 +22,10 @@
                         <br/>
                     {% endif %}
                 </div>
-                <div>
+                <div style="padding-left:10px;">
                     <b>
                         {% if team_assignment %}
+                            Team Name: {% if submitter.getTeam().getTeamName() is not null %}{{ submitter.getTeam().getTeamName() }}{% else %}Not Set{% endif %}<br/>
                             Team:<br/>
 
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
@@ -39,9 +40,11 @@
                         Submitted: {{ submission_time|date("m/d/Y H:i:s T") }}<br/>
                     </b>
                 </div>
-                {% for table in tables %}
-                    {{ table|raw }}
-                {% endfor %}
+                <div style="padding-left:10px; padding-right:10px;">
+                        {% for table in tables %}
+                            {{ table|raw }}
+                        {% endfor %}
+                </div>
             </div>
         </div>
     </div>

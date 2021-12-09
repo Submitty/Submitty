@@ -1,12 +1,13 @@
 body {
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: "Source Sans Pro", sans-serif;
     margin: 0;
     min-height: 100vh;
     position: relative;
     display: flex;
     background: var(--background-blue);
     color: var(--text-black);
-    /*overflow-x: hidden;*/
+
+    /* overflow-x: hidden; */
 }
 
 #submitty-body {
@@ -19,7 +20,6 @@ nav {
     font-size: 1.5em;
     font-weight: bold;
     min-height: min-content;
-    min-height: -moz-min-content;
 }
 
 nav a,
@@ -58,6 +58,7 @@ nav a > i.f {
     padding-left: 20px;
     padding-right: 70px;
 }
+
 @media (max-width: 541px) {
     #breadcrumbs {
         padding-left: 0;
@@ -70,12 +71,16 @@ nav a > i.f {
     display: none;
 }
 
+.centered-icon {
+    line-height: inherit;
+}
+
 .external-breadcrumb {
     padding-left: 7px;
 }
 
-.breadcrumb_heading{
-  font-size: 24px
+.breadcrumb-heading {
+    font-size: 24px;
 }
 
 #logout-button {
@@ -112,7 +117,6 @@ main {
     width: 100%;
     min-width: 0;
     position: relative;
-    min-width: 0;
 }
 
 footer {
@@ -121,6 +125,7 @@ footer {
     padding: 10px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 footer a {
     text-decoration: none !important;
 }
@@ -129,21 +134,23 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
-#moorthy-duck{
+#moorthy-duck {
     display: block;
 }
 
 @media (max-width: 541px) {
-    #moorthy-duck{
+    #moorthy-duck {
         display: none;
     }
+
     footer {
         font-size: 14px;
     }
 }
 
 @media (min-width: 541px) {
-    #home-button, #logout-button {
+    #home-button,
+    #logout-button {
         display: none;
     }
 
@@ -151,8 +158,9 @@ footer .footer-separator {
         display: block;
     }
 
-    #logo-submitty, #logo-submitty-light {
-      height: 80px;
+    #logo-submitty,
+    #logo-submitty-light {
+        height: 80px;
     }
 
     /* specificity less than no @media since :not stated (for speed) */
@@ -171,12 +179,12 @@ footer .footer-separator {
     }
 }
 
-.loading-bar-wrapper{
+.loading-bar-wrapper {
     padding-left: 3px;
     margin-bottom: 5px;
     display: none;
 }
 
-#loading-bar-percentage{
+#loading-bar-percentage {
     margin-left: 10px;
 }

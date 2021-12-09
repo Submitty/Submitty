@@ -6,7 +6,10 @@ Required Parameters:
   - overall_comment["logged_in_user"]["user_id"],
   - overall_comment["logged_in_user"]["comment"]
   - overall_comment["other_graders"][<user_id>] = <comment>
-
+-attachments: array with the following keys/values:
+  - attachments["logged_in_user"]["user_id"],
+  - attachments["logged_in_user"]["attachments"] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
+  - attachments["other_graders"][<user_id>] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
 #}
 <div class="box general-comment container key_to_click" tabindex="0">
     <div class="row overall-comment-top-row">
@@ -27,24 +30,77 @@ Required Parameters:
         </div>
     </div>
     <div class="row" id="overall-comments">
-        <textarea
-                id="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}"
-                rows="5"
-                data-previous-comment="{{overall_comment["logged_in_user"]["comment"]|escape }}"
-                class="general-comment-entry noscroll key_to_click" tabindex="0"
-                onkeyup="auto_grow(this)"
-                onchange="{{ grading_disabled ? '' : 'onChangeOverallComment()'}}"
-                placeholder="Overall message for student about the gradeable...">{{overall_comment["logged_in_user"]["comment"]|escape }}</textarea>
-
+        {% include "../misc/MarkdownArea.twig" with {
+            markdown_area_id : "overall-comment-" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ,
+            markdown_area_name : '',
+            markdown_area_value : (overall_comment["logged_in_user"]["comment"]|escape),
+            root_class : "general-comment-entry",
+            placeholder : "Overall message for student about the gradeable...",
+            preview_div_id : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
+            preview_div_name : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
+            preview_button_id : "overall-comment-markdown-preview-button",
+            onclick : "previewOverallCommentMarkdown.bind(this, '" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ~ "')", 
+            render_header : true,
+            min_height : "100px",
+            max_height : "150px",
+            textarea_onchange : grading_disabled ? '' : 'onChangeOverallComment()',
+            data_previous_comment : (overall_comment["logged_in_user"]["comment"]|escape)
+        } only %}
         {% for user, comment in overall_comment["other_graders"] %}
-            <textarea disabled
-                    id="overall-comment-{{user | escape }}"
-                    style="display:none;"
-                    rows="5"
-                    class="general-comment-entry noscroll key_to_click" tabindex="0">{{comment|escape }}</textarea>
+            <div
+              id="overall-comment-{{user | escape }}"
+              style="display:none;"
+              class="general-comment-entry markdown-preview overall-comment-other noscroll key_to_click" tabindex="0"
+            >
+              {{comment|escape }}
+            </div>
         {% endfor %}
     </div>
+    <div class="row box" id="overall-comments-attachments">
+        <div class="col">
+        <form id="attachment-upload-form" name="attachment-upload-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <label for="attachment-upload">Upload an attachment: </label>
+            <input type="file" id="attachment-upload" name="attachment-upload" onchange="uploadAttachment();">
+        </form>
+        <h4 id="attachments-header" {% if attachments["logged_in_user"]["attachments"]|length == 0 %}style="display: none;"{% endif %}>
+            Current Attachments
+        </h4>
+        <div id="attachments-list" data-user="{{ attachments["logged_in_user"]["user_id"]}}" data-active-user="{{ attachments["logged_in_user"]["user_id"]}}">
+            <div id="attachments-list-{{ attachments["logged_in_user"]["user_id"] | escape }}" {% if attachments["logged_in_user"]["attachments"]|length == 0 %}style="display: none;"{% endif %}>
+            {% for file in attachments["logged_in_user"]["attachments"] %}
+                {% include "Attachments.twig" with {
+                    file: file,
+                    id: "a-0-" ~ loop.index,
+                    is_grader_view: true,
+                    can_modify: true
+                } only %}
+            {% endfor %}
+            </div> 
+            
+            {% for grader, attachment_list in attachments["other_graders"] %}
+            <div id="attachments-list-{{ grader | escape }}" style="display: none;">
+                {% for file in attachment_list %}
+                    {% include "Attachments.twig" with {
+                        file: file,
+                        id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
+                        is_grader_view: true,
+                        can_modify: false
+                    } only %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
     <script>
+        $(document).ready(function(){
+            $('.overall-comment-other').each(function() {
+                const content = $(this).html().trim();
+                const url = buildURL(["markdown"]);
+                renderMarkdown($(this), url, content);
+            });
+        });
         var grader = "{{overall_comment["logged_in_user"]["user_id"] | escape('js') }}";
         $(document).on('input','#overall-comment-' + grader,function () {
             var currentOverallComment  = $('textarea#overall-comment-' + grader).val();

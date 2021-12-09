@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "python",
+
     "grading_parameters" : {
         "TOTAL_POINTS" : 90,
         "AUTO_POINTS" : 90

@@ -16,7 +16,12 @@ class Client extends WebSocket\Client {
         ]);
     }
 
-    public function send($payload, string $opcode = 'text', bool $masked = true): void {
-        parent::send(json_encode($payload), $opcode, $masked);
+    /**
+     * Send a JSON encoded payload
+     *
+     * @param mixed $json
+     */
+    public function json_send($json): void {
+        $this->send(json_encode($json));
     }
 }

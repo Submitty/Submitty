@@ -4,13 +4,8 @@ includes:
 parameters:
     ignoreErrors:
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
-    level: 3
-    excludes_analyse:
-        # these should be unignored once put into production
-        - %rootDir%/../../../app/controllers/forum/ForumController2.php
-        - %rootDir%/../../../app/libraries/database/ForumQueries.php
-        - %rootDir%/../../../app/models/forum/Thread.php
-
+        - '#Access to an undefined property Ratchet\\ConnectionInterface::\$httpRequest\.#'
+    level: 4
 
 services:
     - class: tests\phpstan\ModelClassExtension

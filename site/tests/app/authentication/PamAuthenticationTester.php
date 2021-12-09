@@ -6,8 +6,6 @@ use app\authentication\PamAuthentication;
 use app\exceptions\CurlException;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
 use tests\BaseUnitTest;
@@ -23,6 +21,8 @@ class PamAuthenticationTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
         ]);
         $queries->method('getSubmittyUser')->willReturn($user);
         $core->method('getConfig')->willReturn($config);
@@ -116,6 +116,8 @@ class PamAuthenticationTester extends BaseUnitTest {
             'user_firstname' => 'Test',
             'user_lastname' => 'Person',
             'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
         ]);
         $queries->method('getSubmittyUser')->willReturn($user);
         $core->method('getConfig')->willReturn($config);

@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "cpp",
+
     "assignment_message" : "This configuration has an (intentionally) broken custom grader... ",
 
     "testcases" : [

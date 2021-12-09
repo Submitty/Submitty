@@ -3,7 +3,6 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-use app\libraries\Utils;
 
 abstract class AbstractDatabase {
 
@@ -65,6 +64,13 @@ abstract class AbstractDatabase {
     }
 
     abstract public function getDSN();
+
+    public function getConnection(): \PDO {
+        if ($this->link === null) {
+            throw new DatabaseException("Database not yet connected");
+        }
+        return $this->link;
+    }
 
     /**
      * Given a string representation of an array from the database, convert it to a PHP
@@ -156,17 +162,15 @@ abstract class AbstractDatabase {
             $this->all_queries[] = [$query, $parameters];
             $statement = $this->link->prepare($query);
             $result = $statement->execute($parameters);
-            $lower = trim(strtolower($query));
 
             $this->row_count = null;
+            $identity = QueryIdentifier::identify($query);
             if (
-                Utils::startsWith($lower, 'update')
-                || Utils::startsWith($lower, 'delete')
-                || Utils::startsWith($lower, 'insert')
+                in_array($identity, [QueryIdentifier::UPDATE, QueryIdentifier::DELETE, QueryIdentifier::INSERT])
             ) {
                 $this->row_count = $statement->rowCount();
             }
-            elseif (Utils::startsWith($lower, 'select')) {
+            elseif ($identity === QueryIdentifier::SELECT) {
                 $columns = $this->getColumnData($statement);
                 $this->results = $statement->fetchAll(\PDO::FETCH_ASSOC);
                 // Under normal circumstances, we don't really need to worry about $this->results being false.
@@ -204,7 +208,7 @@ abstract class AbstractDatabase {
      */
     public function queryIterator(string $query, array $parameters = [], $callback = null) {
         $lower = trim(strtolower($query));
-        if (!Utils::startsWith($lower, "select")) {
+        if (!str_starts_with($lower, "select")) {
             return $this->query($query, $parameters);
         }
         try {
@@ -347,10 +351,7 @@ abstract class AbstractDatabase {
     public function getPrintQueries(): array {
         $print = [];
         foreach ($this->all_queries as $query) {
-            foreach ($query[1] as $parameter) {
-                $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
-            }
-            $print[] = $query[0];
+            $print[] = DatabaseUtils::formatQuery($query[0], $query[1]);
         }
         return $print;
     }

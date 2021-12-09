@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "python",
+
     "autograding_method" : "docker",
     "container_options" : {
       //States that a given testcase uses a router by default. (Default value is true)

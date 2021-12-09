@@ -61,7 +61,7 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' --exclude '/site/.eslintrc.json' --exclude '/site/.eslintignore' --exclude '/site/cypress/' --exclude '/site/cypress.json' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+result=$(rsync -rtz -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
 
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
@@ -86,6 +86,19 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
+# clear old annotation cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
+fi
+# create annotation cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/annotations
+
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
+fi
+# create output dir for esbuild
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+
 # Update ownership to PHP_USER for affected files and folders
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
@@ -98,6 +111,8 @@ chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
+
+chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # set the mask for composer so that it'll run properly and be able to delete/modify
 # files under it
@@ -135,6 +150,9 @@ else
 fi
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
+NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
+
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
 if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
@@ -151,9 +169,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
         chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
     fi
 
-    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error"
+    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error --no-save"
 
-    NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
     VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
 
     chown -R ${PHP_USER}:${PHP_USER} ${NODE_FOLDER}
@@ -180,6 +197,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/codemirror/theme/monokai.css ${VENDOR_FOLDER}/codemirror/theme
     cp ${NODE_FOLDER}/codemirror/theme/eclipse.css ${VENDOR_FOLDER}/codemirror/theme
     cp -R ${NODE_FOLDER}/codemirror/addon ${VENDOR_FOLDER}/codemirror/addon
+    # codemirror-spell-checker
+    mkdir ${VENDOR_FOLDER}/codemirror-spell-checker
+    cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.js ${VENDOR_FOLDER}/codemirror-spell-checker
+    cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.css ${VENDOR_FOLDER}/codemirror-spell-checker
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
@@ -217,7 +238,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
     # jspdf
     mkdir ${VENDOR_FOLDER}/jspdf
-    cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js.map ${VENDOR_FOLDER}/jspdf/jspdf.min.js.map
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
@@ -231,6 +253,18 @@ chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
 chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
+
+echo "Running esbuild"
+chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+
+chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+for file in ${SUBMITTY_INSTALL_DIR}/site/public/mjs/*; do
+    set_permissions $file
+done
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;

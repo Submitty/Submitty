@@ -27,6 +27,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *                                        otherwise return the legal last name field for the user.
  * @method string getEmail()
  * @method void setEmail(string $email)
+ * @method string getSecondaryEmail()
+ * @method void setSecondaryEmail(string $email)
+ * @method bool getEmailBoth()
+ * @method void setEmailBoth(bool $flag)
  * @method int getGroup()
  * @method int getAccessLevel()
  * @method void setGroup(integer $group)
@@ -88,8 +92,12 @@ class User extends AbstractModel {
     protected $preferred_last_name = "";
     /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
-    /** @prop @var string The email of the user */
+    /** @prop @var string The primary email of the user */
     protected $email;
+    /** @prop @var string The secondary email of the user */
+    protected $secondary_email;
+    /** @prop @var string Determines whether or not user chose to receive emails to secondary email */
+    protected $email_both;
     /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
     /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
@@ -101,7 +109,7 @@ class User extends AbstractModel {
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
-    protected $registration_subsection = null;
+    protected $registration_subsection = "";
 
     /**
      * @prop
@@ -173,6 +181,8 @@ class User extends AbstractModel {
         }
 
         $this->email = $details['user_email'];
+        $this->secondary_email = $details['user_email_secondary'];
+        $this->email_both = $details['user_email_secondary_notify'];
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
@@ -477,6 +487,7 @@ class User extends AbstractModel {
                 //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
+            case 'user_email_secondary':
                 // emails are allowed to be the empty string...
                 if ($data === "") {
                     return true;

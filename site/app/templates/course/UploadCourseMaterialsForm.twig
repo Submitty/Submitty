@@ -5,13 +5,13 @@
     <div id="material-upload-form" class="flex-col flex-col-space">
         <p>
             <strong>Path to directory containing course materials file(s):</strong><br />
-            {{ folderPath~'/'~courseMaterial }}
+            {{ base_course_material_path~"/" }}
         </p>
         <label id="cm_path">
             <span>
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
-                {{ folderPath~'/'~courseMaterial }}optional/subdirectory
+                {{ base_course_material_path }}/optional/subdirectory
             </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
@@ -115,8 +115,8 @@
         </div>
     </div>
     <script>
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -147,7 +147,8 @@
                 }
                 var cmPath = document.getElementById('cm_path').innerHTML;
                 var requestedPath = document.getElementById("input-provide-full-path").value;
-                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections);
+                var sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
+                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
                 e.stopPropagation();
             });
         });
@@ -155,6 +156,9 @@
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
+                                {
+                                    label: "Beginning of time"
+                                },
                                 {
                                     label: "Now"
                                 },
@@ -169,13 +173,16 @@
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date();
+                                        date = new Date("1001-01-01 00:00:00");
                                         break;
                                     case 1:
                                         date = new Date();
-                                        date.setDate(date.getDate() + 1);
                                         break;
                                     case 2:
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
+                                        break;
+                                    case 3:
                                         date = new Date("9998-01-01 00:00:00");
                                         break;
                                 }

@@ -4,11 +4,12 @@ namespace tests;
 
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\DateUtils;
 use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\Access;
 use app\models\Config;
 use app\models\User;
+use Doctrine\ORM\EntityManager;
 use ReflectionException;
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
@@ -39,8 +40,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @return Core
      */
     protected function createMockCore($config_values = [], $user_config = [], $queries = [], $access = []) {
+        /** @var Core&\PHPUnit\Framework\MockObject\MockObject $core */
         $core = $this->createMock(Core::class);
 
+        /** @var Config&\PHPUnit\Framework\MockObject\MockObject $config */
         $config = $this->createMockModel(Config::class);
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
@@ -62,7 +65,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
+        $config->method('isDebug')->willReturn($config_values['debug'] ?? true);
+
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
+        DateUtils::setTimezone($config->getTimezone());
 
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true) {
             $core->method('getDateTimeNow')->willReturn(new \DateTime('2001-01-01', $config->getTimezone()));
@@ -109,6 +115,12 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
         $core->method('getQueries')->willReturn($mock_queries);
 
+        $course_entity_manger = $this->createMock(EntityManager::class);
+        $core->method('getCourseEntityManager')->willReturn($course_entity_manger);
+
+        $submitty_entity_manager = $this->createMock(EntityManager::class);
+        $core->method('getSubmittyEntityManager')->willReturn($submitty_entity_manager);
+
         if (!isset($user_config['no_user'])) {
             /** @noinspection PhpUnhandledExceptionInspection */
             $user = $this->createMockModel(User::class);
@@ -142,7 +154,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $core->method('getUser')->willReturn($user);
         }
 
-        /** @noinspection PhpParamsInspection */
+        /** @var Output&\PHPUnit\Framework\MockObject\MockObject $output */
         $output = $this->getMockBuilder(Output::class)
             ->setConstructorArgs([$core])
             ->setMethods(['addBreadcrumb'])
@@ -152,7 +164,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $core->method('getOutput')->willReturn($output);
 
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $core;
     }
 
@@ -190,7 +201,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                 }
             }
             foreach ($reflection->getMethods() as $method) {
-                if (!Utils::startsWith($method->getName(), "__")) {
+                if (!str_starts_with($method->getName(), "__")) {
                     $methods[] = $method->getName();
                 }
             }

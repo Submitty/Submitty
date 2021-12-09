@@ -28,7 +28,7 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/gradeable/future_no_tas_test/grading?view=all',
         '/courses/{}/{}/gradeable/open_homework/grading/status',
         '/courses/{}/{}/gradeable/open_homework/bulk_stats',
-        '/courses/{}/{}/gradeable/open_homework/grading/details?view=all',
+        '/courses/{}/{}/gradeable/open_homework/grading/details',
         '/courses/{}/{}/gradeable/open_homework',
         '/courses/{}/{}/gradeable/open_team_homework/team',
         '/courses/{}/{}/gradeable/grades_released_homework_autota',
@@ -57,6 +57,8 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/grades',
         '/courses/{}/{}/polls',
         '/courses/{}/{}/polls/newPoll',
+        '/courses/{}/{}/sql_toolbox',
+        '/admin/docker',
     ]
 
     urls_formatted = []
@@ -116,7 +118,7 @@ class TestAccessibility(BaseTestCase):
                         if skip_error:
                             continue
 
-                        if error['message'] not in baseline[self.urls[url_index]] and error['message'] not in foundErrorMessages:
+                        if (self.urls[url_index] not in baseline or error['message'] not in baseline[self.urls[url_index]]) and error['message'] not in foundErrorMessages:
                             foundErrorMessages.append(error['message'])
                             clean_error = {
                                 "error": error['message'].replace('\u201c', "'").replace('\u201d', "'").strip(),

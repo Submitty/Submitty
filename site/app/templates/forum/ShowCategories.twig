@@ -1,16 +1,16 @@
 <div class="content forum_content">
 
     {% include "forum/ForumBar.twig" with {
-        "forum_bar_buttons_right" : forumBarData.forum_bar_buttons_right,
-        "forum_bar_buttons_left" : forumBarData.forum_bar_buttons_left,
-        "show_threads" : forumBarData.show_threads,
+        "forum_bar_buttons_right" : forumBarData is defined ? forumBarData.forum_bar_buttons_right : null,
+        "forum_bar_buttons_left" : forumBarData is defined ? forumBarData.forum_bar_buttons_left : null,
+        "show_threads" : forumBarData is defined ? forumBarData.show_threads : false,
         "thread_exists" : false,
-        "show_filter": false
+        "show_filter": false,
+        "show_more": false
     } %}
 
-    <h3 style="margin-bottom:10px;"> Manage Categories </h3>
-
-    <div id="manage_categories_view" style="margin: 0 auto; max-width: 750px;">
+    <div id="manage-categories-view" style="margin: 0 auto; max-width: 750px; padding-bottom: 20px">
+        <h3 style="margin-bottom:10px;"> Manage Categories </h3>
         <div>
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -23,23 +23,28 @@
         <pre>(Drag to re-order)</pre><br>
         {% if categories|length == 0 %}
             <span class='category-list-no-element' style="margin-left: 1em;" >
-                    No categories exists please create one.
+                    No categories exist, please create one.
                 </span>
         {% endif %}
 
-        <ul id='ui-category-list' style="padding-left: 1em;">
+        <ul id="ui-category-list" style="padding-left: 0em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
-                <li id="categorylistitem-{{ category.category_id }}" class="category-sortable" style="color: {{ category.color }};">
+                <li id="categorylistitem-{{ category.category_id }}" 
+                    class="category-sortable category-item-box" 
+                    style="color: {{ category.color }};"
+                    data-category_desc="{{ category.category_desc }}"
+                    data-category_id="{{ category.category_id }}"
+                >
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
-                            <span style="word-wrap: break-word;">{{ category.category_desc }}</span>
-                            <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit"></i></a>
+                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }}</span>
+                            <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit category-button edit-category-desc-button"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
-                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
-                            <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check"></i></a>
-                            <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times"></i></a>
+                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" class="edit-category-desc-input" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
+                            <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check category-button save-desc-button"></i></a>
+                            <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times category-button cancel-desc-button"></i></a>
                         </span>
                     <div style="float: right;width: auto;">
                         <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
@@ -48,7 +53,7 @@
                             {% endfor %}
                         </select>
                         &nbsp;
-                        <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash"></i></a>
+                        <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash category-button delete-category-button"></i></a>
                     </div>
                 </li>
             {% endfor %}
@@ -56,30 +61,6 @@
 
         </div>
     </div>
-    {# Template Category used to display new categoreis on the client side #}
-    <ul id='ui-category-template' style="padding-left: 1em; display: none;">
-        <li id="categorylistitem-0" class="category-sortable" style="color: #000000; display: none;">
-            <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
-            <span class="categorylistitem-desc">
-                <span style="word-wrap: break-word;">Template</span>
-                <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit"></i></a>
-                </span>
-            <span class="categorylistitem-editdesc" style="display: none;">
-                <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
-                <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check"></i></a>
-                <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times"></i></a>
-                </span>
-            <div style="float: right;width: auto;">
-                <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
-                    {% for color_name, color_code in category_colors %}
-                        <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
-                    {% endfor %}
-                </select>
-                &nbsp;
-                <a class="post_button" title="Delete Category" aria-label="Delete Category"><i class="fas fa-trash"></i></a>
-            </div>
-        </li>
-    </ul>
 </div>
 
 <script>
@@ -91,33 +72,40 @@
                 reorderCategories('{{ csrf_token }}');
             }
         });
-        $("#ui-category-list").find(".fa-trash").click(function() {
-            var item = $(this).parent().parent().parent();
-            var category_id = parseInt(item.attr('id').split("-")[1]);
-            var category_desc = item.find(".categorylistitem-desc span").text().trim();
+
+        function getItem(input) {
+            return $(input).closest('.category-item-box');
+        }
+        
+        $(".delete-category-button").click(function() {
+            const item = getItem(this);
+            const category_id = item.data('category_id');
+            const category_desc = item.data('category_desc');
             deleteCategory(category_id, category_desc, '{{ csrf_token }}');
         });
-        $("#ui-category-list").find(".fa-edit").click(function() {
-            var item = $(this).parent().parent().parent();
-            var category_desc = item.find(".categorylistitem-desc span").text().trim();
+
+        $(".edit-category-desc-button").click(function() {
+            const item = getItem(this);
+            const category_desc = item.data('category_desc');
             item.find(".categorylistitem-editdesc input").val(category_desc);
             item.find(".categorylistitem-desc").hide();
             item.find(".categorylistitem-editdesc").show();
 
         });
-        $("#ui-category-list").find(".fa-times").click(function() {
-            var item = $(this).parent().parent().parent();
+        $(".cancel-desc-button").click(function() {
+            const item = getItem(this);
             item.find(".categorylistitem-editdesc").hide();
             item.find(".categorylistitem-desc").show();
         });
 
-        $("#ui-category-list").find(".fa-check").click(function() {
-            var item = $(this).parent().parent().parent();
-            var category_id = parseInt(item.attr('id').split("-")[1]);
-            var category_desc_original = item.find(".categorylistitem-desc span").text().trim();
-            var category_desc = item.find("input").val().trim();
+        $(".save-desc-button").click(function() {
+            const item = getItem(this);
+            const category_id = item.data('category_id');
+            const category_desc_original = item.data('category_desc');
+            const category_desc = item.find(".edit-category-desc-input").val().trim();
+            item.data('category_desc', category_desc);
             if(category_desc != category_desc_original) {
-                editCategory(category_id, category_desc, null, '{{ csrf_token }}');
+                editCategory(category_id, category_desc, null, 'desc', '{{ csrf_token }}');
             }
             item.find(".categorylistitem-editdesc").hide();
             item.find(".categorylistitem-desc").show();
@@ -126,9 +114,11 @@
             $(element).css("background-color",$(element).val());
         }
         $(".category-color-picker").change(function(color) {
-            var category_id = parseInt($(this).parent().parent().attr('id').split("-")[1]);
-            var category_color = $(this).val();
-            editCategory(category_id, null, category_color, '{{ csrf_token }}');
+            const item = getItem(this);
+            const category_id = item.data('category_id');
+            const category_desc = item.data('category_desc');
+            const category_color = $(this).val();
+            editCategory(category_id, category_desc, category_color, 'color', '{{ csrf_token }}');
             refresh_color_select($(this));
         });
         $(".category-color-picker").each(function(){

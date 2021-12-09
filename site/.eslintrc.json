@@ -30,9 +30,51 @@
         "prefer-arrow-callback": ["error"],
         "prefer-const": ["error"],
         "prefer-template": ["error"],
-        "quotes": ["error", "single"],
+        "quotes": ["error", "single", {"avoidEscape": true}],
         "semi": ["error", "always"],
         "semi-style": ["error", "last"],
         "template-curly-spacing": ["error", "never"]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["./ts/**/*.js"],
+            "parserOptions": {
+                "sourceType": "module"
+            }
+        },
+        {
+            "files": ["./ts/**/*.ts"],
+            "extends" : [
+                "eslint:recommended",
+                "plugin:@typescript-eslint/eslint-recommended",
+                "plugin:@typescript-eslint/recommended"
+            ],
+            "parserOptions":{
+                "sourceType": "module"
+            },
+            "parser": "@typescript-eslint/parser",
+            "parserOptions": {
+                "project" : "./tsconfig.json"
+            }
+        },
+        {
+            "files": ["./tests/ts/*.js"],
+            "plugins": ["jest"],
+            "parserOptions": {
+                "sourceType": "module"
+            },
+            "env": {
+                "jest/globals": true
+            },
+            "globals": {
+                "global": "readonly"
+            }
+        },
+        {
+            "files": ["jest.config.js"],
+            "env": {
+                "node": true
+            }
+        }
+    ]
 }

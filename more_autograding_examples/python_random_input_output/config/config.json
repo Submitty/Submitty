@@ -1,4 +1,6 @@
 {
+	"required_capabilities": "python",
+
     "testcases" : [
         {
             "title" : "Simple Test Case -- No Additional Input",
