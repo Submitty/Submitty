@@ -613,7 +613,7 @@ HTML;
         }
 
         // Generate late days
-        $this->core->getQueries()->generateLateDayCacheForUsers();
+        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable->getId());
         // TO DO: Add bulk LateDays creation from database
 
         //Convert rows into sections and prepare extra row info for things that
