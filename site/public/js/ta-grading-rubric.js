@@ -2500,10 +2500,11 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
 
 function open_overall_comment_tab(user) {
     const textarea = $(`#overall-comment-${user}`);
+    const comment_root = textarea.closest('.general-comment-entry');
 
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    textarea.parent().show();
+    comment_root.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
 
     //if the tab is for the main user of the page
@@ -2514,15 +2515,35 @@ function open_overall_comment_tab(user) {
     } else {
         textarea.show();
     }
-}
 
-function previewOverallCommentMarkdown(user){
-    const markdown_area = $(`#overall-comment-${user}`);
-    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
-    const preview_button = $(this);
-    const markdown_content = markdown_area.val();
+    let attachmentsListUser = $(`#attachments-list-${user}`);
+    if (attachmentsListUser.length !== 0) {
+        let attachmentsList = $("#attachments-list");
+        $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
+        
+        let isUser = false;
+        if (attachmentsList.attr("data-user") === user) {
+            $("#attachment-upload-form").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+            isUser = true;
+        } else {
+            $("#attachment-upload-form").css("display", "none");
+        }
+        if (attachmentsListUser.children().length === 0) {
+            attachmentsListUser.css("display", "none")
+            $("#attachments-header").css("display", "none");
+            if (!isUser) {
+                $("#overall-comments-attachments").css("display", "none");
+            }
+        } else {
+            attachmentsListUser.css("display", "")
+            $("#attachments-header").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+        }
+        
+        attachmentsList.attr("data-active-user", user);
+    }
 
-    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**

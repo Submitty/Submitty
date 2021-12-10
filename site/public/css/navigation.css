@@ -81,6 +81,7 @@
 
 .seating-chart-table {
     border:2px solid black;
+    background: var(--standard-focus-cornflowe-blue);
 }
 
 @media (max-width: 401px) {

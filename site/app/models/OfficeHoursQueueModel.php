@@ -5,7 +5,6 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use DateTime;
-use DateInterval;
 
 class OfficeHoursQueueModel extends AbstractModel {
 
@@ -127,6 +126,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getAllQueues();
     }
 
+    public function getAllOpenQueues() {
+        return $this->core->getQueries()->getAllOpenQueues();
+    }
+
     public function timeToHM($time) {
         $date_time = new \DateTime($time);
         $date_time->setTimezone($this->core->getConfig()->getTimezone());
@@ -236,10 +239,6 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getColorFromCode($code) {
         return $this->colors[$this->getIndexFromCode($code)];
-    }
-
-    public function isContactInfoEnabled() {
-        return $this->core->getConfig()->getQueueContactInfo();
     }
 
     public function getQueueMessage() {
