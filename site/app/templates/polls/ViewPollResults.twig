@@ -10,8 +10,8 @@
             },
           }
         ];
-        {% for response, attributes in results %}
-            data[0].x.push("{{ poll.getResponseString(response)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+        {% for option_id, attributes in results %}
+            data[0].x.push("{{ poll.getResponseString(option_id)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
             data[0].y.push({{ attributes['count'] }});
             data[0].marker.color.push("{{ attributes['is_correct'] ? '#2ca02c' : '#1f77b4' }}");
         {% endfor %}
