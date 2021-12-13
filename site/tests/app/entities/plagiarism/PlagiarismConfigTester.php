@@ -7,8 +7,6 @@ namespace tests\app\entities\plagiarism;
 use app\entities\plagiarism\PlagiarismConfig;
 use app\exceptions\ValidationException;
 use app\exceptions\FileNotFoundException;
-use Doctrine\ORM\Mapping as ORM;
-use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
