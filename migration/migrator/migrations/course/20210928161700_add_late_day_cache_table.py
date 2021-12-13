@@ -19,7 +19,6 @@ def up(config, database, semester, course):
             g_id VARCHAR(255),
             user_id VARCHAR(255), 
             team_id VARCHAR(255),
-            g_title VARCHAR(255),
             late_day_date TIMESTAMP WITHOUT TIME zone NOT NULL,
             late_days_remaining INTEGER NOT NULL,
             late_days_allowed INTEGER,
@@ -37,7 +36,7 @@ def up(config, database, semester, course):
     database.execute('''ALTER TABLE late_day_cache ADD CONSTRAINT ldc_gradeable_info CHECK (
         g_id IS NULL
         OR
-        ((g_title IS NOT NULL) AND (submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))
+        ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))
     );''')
     database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;')
     database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE;')

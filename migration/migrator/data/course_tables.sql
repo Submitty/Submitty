@@ -639,7 +639,6 @@ CREATE TABLE public.late_day_cache (
     g_id character varying(255),
     user_id character varying(255),
     team_id character varying(255),
-    g_title character varying(255),
     late_day_date timestamp without time zone NOT NULL,
     late_days_remaining integer NOT NULL,
     late_days_allowed integer,
@@ -647,7 +646,7 @@ CREATE TABLE public.late_day_cache (
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
-    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((g_title IS NOT NULL) AND (submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
     CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
