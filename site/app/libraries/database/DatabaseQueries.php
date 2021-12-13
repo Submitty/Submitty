@@ -1409,8 +1409,10 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     public function getLateDayCache() {
-        $query = "SELECT * FROM late_day_cache
-                  ORDER BY late_day_date NULLS LAST, g_id NULLS FIRST";
+        $query = "SELECT * FROM 
+                    late_day_cache AS ldc
+                    LEFT JOIN gradeable g ON g.g_id=ldc.g_id
+                  ORDER BY late_day_date NULLS LAST, g.g_id NULLS FIRST";
         $this->course_db->query($query);
         $return = [];
 
@@ -1534,7 +1536,6 @@ WHERE semester=? AND course=? AND user_id=?",
                       (value->>'g_id') AS g_id,
                       (value->>'user_id') AS user_id,
                       (value->>'team_id') AS team_id,
-                      (value->>'g_title') AS g_title,
                       (value->>'late_day_date')::timestamp AS late_day_date,
                       (value->>'late_days_remaining')::integer AS late_days_remaining,
                       (value->>'late_days_allowed')::integer AS late_days_allowed,
