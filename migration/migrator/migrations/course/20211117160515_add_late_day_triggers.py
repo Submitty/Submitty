@@ -82,7 +82,6 @@ def up(config, database, semester, course):
         ) LOOP
             returnrow.g_id = var_row.g_id;
             returnrow.user_id = var_row.user_id;
-            returnrow.g_title = var_row.g_title;
             returnrow.late_days_allowed = var_row.late_days_allowed;
             returnrow.late_day_date = var_row.late_day_date;
             returnrow.submission_days_late = var_row.submission_days_late;
