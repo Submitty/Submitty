@@ -17,7 +17,6 @@ from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from pathlib import Path
 from shutil import copyfile
 import glob
 import grp
@@ -500,6 +499,15 @@ def parse_args():
     return parser.parse_args()
 
 
+def create_user(user_id):
+    if not user_exists(id):
+        print("Creating user {}...".format(user_id))
+        os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                  "-M --shell /bin/false {}".format(user_id))
+        print("Setting password for user {}...".format(user_id))
+        os.system("echo {}:{} | chpasswd".format(user_id, user_id))
+
+
 def create_gradeable_submission(src, dst):
     """
     Given a source and a destination, copy the files from the source to the destination. First, before
@@ -616,44 +624,28 @@ class User(object):
             self.password = user['user_password']
 
     def create(self, force_ssh=False):
-        if not DB_ONLY and not user_exists(self.id):
+        if not DB_ONLY:
             if self.group > 2 and not force_ssh:
-                self.create_non_ssh()
+                self._create_non_ssh()
             else:
-                self.create_ssh()
-            self.create_ldap()
-
+                self._create_ssh()
         if self.group <= 1:
             add_to_group("submitty_course_builders", self.id)
         if self.sudo:
             add_to_group("sudo", self.id)
 
-    def create_ssh(self):
-        print("Creating user {}...".format(self.id))
-        os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
-        self.set_password()
+    def _create_ssh(self):
+        if not user_exists(self.id):
+            print("Creating user {}...".format(self.id))
+            os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
+            self.set_password()
 
-    def create_non_ssh(self):
-        print("Creating user {}...".format(self.id))
-        os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
-                    "-M --shell /bin/false {}".format(self.id))
-        self.set_password()
-
-    def create_ldap(self):
-        print(f"Creating LDAP user {self.id}...")
-        path = Path("/tmp", self.id)
-        path.write_text(f"""
-dn: uid={self.id},ou=users,dc=vagrant,dc=local
-objectClass: top
-objectClass: account
-objectClass: shadowAccount
-uid: {self.id}
-userPassword: {self.id}
-shadowLastChange: 0
-shadowMax: 0
-shadowWarning: 0""")
-        os.system(f'ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f {path}')
-        path.unlink()
+    def _create_non_ssh(self):
+        if not DB_ONLY and not user_exists(self.id):
+            print("Creating user {}...".format(self.id))
+            os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                      "-M --shell /bin/false {}".format(self.id))
+            self.set_password()
 
     def set_password(self):
         print("Setting password for user {}...".format(self.id))
