@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\models\Button;
 use app\libraries\GradeableType;
 use app\models\User;
@@ -336,7 +337,7 @@ class NavigationView extends AbstractView {
      */
     public static function getTeamButton(Core $core, Gradeable $gradeable, ?GradedGradeable $graded_gradeable) {
         // Team management button, only visible on team assignments
-        $date = $core->getDateTimeNow();
+        $date = DateUtils::getDateTimeNow();
         $past_lock_date = $date < $gradeable->getTeamLockDate();
         $date_time = null;
 
@@ -534,8 +535,8 @@ class NavigationView extends AbstractView {
                 }
                 $title = "VIEW GRADE OR RESUBMIT";
             }
-            elseif ($gradeable->isStudentSubmit() && $graded_gradeable->isTaGradingComplete() && $ta_graded_gradeable->getUserViewedDate() === null) {
-                $title = "RESUBMIT";
+            elseif ($gradeable->isStudentSubmit() && $grade_ready_for_view && $ta_graded_gradeable->getUserViewedDate() === null) {
+                $title = "VIEW GRADE";
                 $class = "btn-success";
             }
             elseif ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
@@ -853,13 +854,15 @@ class NavigationView extends AbstractView {
                 ]);
             }
             else {
-                $button = new Button($this->core, [
-                    "subtitle" => "RELEASE GRADES NOW",
-                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
-                        . http_build_query(['action' => 'release_grades_now']),
-                    "class" => "btn btn-primary btn-nav btn-nav-open",
-                    "name" => "quick-link-btn"
-                ]);
+                if ($gradeable->hasReleaseDate()) {
+                    $button = new Button($this->core, [
+                        "subtitle" => "RELEASE GRADES NOW",
+                        "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                            . http_build_query(['action' => 'release_grades_now']),
+                        "class" => "btn btn-primary btn-nav btn-nav-open",
+                        "name" => "quick-link-btn"
+                    ]);
+                }
             }
         }
         elseif ($list_section === GradeableList::OPEN && $gradeable->hasDueDate()) {

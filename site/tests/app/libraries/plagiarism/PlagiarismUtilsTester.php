@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace tests\app\libraries\plagiarism;
 
-use app\libraries\FileUtils;
-use app\libraries\plagiarism\Interval;
-use app\libraries\plagiarism\PlagiarismUtils;
-use app\libraries\plagiarism\Stack;
-use app\libraries\Utils;
-
 class PlagiarismUtilsTester extends \PHPUnit\Framework\TestCase {
     public function testConstructIntervals(): void {
         // TODO: Write *correct* tests for the PlagiarismUtils file

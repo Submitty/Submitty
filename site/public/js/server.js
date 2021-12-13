@@ -689,13 +689,33 @@ function downloadCourseMaterialZip(id) {
 }
 
 function checkColorActivated() {
-    var pos = 0;
-    var seq = "&&((%'%'BA\r";
+    pos = 0;
+    seq = "&&((%'%'BA\r";
+    const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
+    
+    function inject() {
+        $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
+    }
+    function remove() {
+        $(document.body).find('#rainbow-mode').remove();
+    }
+
+    function toggle(flag) {
+        if (flag) inject();
+        else remove();
+    }
+
+    if (rainbow_mode === true) {
+        inject();
+    }
+
     $(document.body).keyup(function colorEvent(e) {
         pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
-            setInterval(function() { $("*").addClass("rainbow"); }, 100);
-            $(document.body).off('keyup', colorEvent);
+            flag = JSON.parse(localStorage.getItem('rainbow-mode')) === true;
+            localStorage.setItem('rainbow-mode', !flag);
+            toggle(!flag);
+            pos = 0;
         }
     });
 }
@@ -831,6 +851,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             }
             else if (url.includes("checkout")) {
                 directory = "checkout";
+            }
+            else if (url.includes("attachments")) {
+                directory = "attachments";
             }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
@@ -1032,8 +1055,8 @@ function enableTabsInTextArea(jQuerySelector) {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t) {
-        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+    t.keydown(function(event) {
+        if (event.which == 27) {  //ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
@@ -1042,7 +1065,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!t.shiftKey && t.code === "Tab") { //TAB was pressed without SHIFT, text indent
+        else if (!event.shiftKey && event.code === "Tab") { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1461,6 +1484,9 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes("split_pdf")) {
       directory = "split_pdf";
     }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
     window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
   }
@@ -1561,48 +1587,64 @@ function getFocusableElements() {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
- * @param preview_element JQuery element of the span the markdown will be inserted into
- * @param preview_button JQuery element of the "Preview Markdown" button
- *                       Should have title="Preview Markdown"
- * @param data Object whose properties will get sent through a POST request
+ * @param {string} mode String representing what mode to switch the markdown area to.
+ *                      - `'preview'` activates preview mode
+ *                      - Anything else will activate write/edit mode
  */
-function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
-    const enablePreview = preview_element.is(':hidden');
+function previewMarkdown(mode) {
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    const markdown_toolbar = markdown_area.find('.markdown-area-toolbar');
+    const markdown_textarea = markdown_area.find('.markdown-textarea');
+    const markdown_preview = markdown_area.find('.markdown-preview');
+    const markdown_preview_load_spinner = markdown_area.find('.markdown-preview-load-spinner');
+    const accessibility_message = markdown_area.find('.accessibility-message');
 
-    $.ajax({
-        url: buildCourseUrl(['markdown', 'preview']),
-        type: 'POST',
-        data: {
-            enablePreview: enablePreview,
-            ...data,
-            csrf_token: csrfToken
-        },
-        success: function(data){
-            if (enablePreview) {
-                preview_element.empty();
-                preview_element.append(data);
-                preview_element.show();
-                markdown_textarea.hide();
+    const data = {
+        content: markdown_textarea.val()
+    }
 
-                preview_button.empty();
-                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
-                preview_button.attr('data-mode', 'preview');
+    //basic sanity checking
+    if (!(typeof mode === 'string'))   throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
+    if (!(typeof data === 'object'))   throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
+    if (!markdown_area.length)         throw new Error(`Could not obtain markdown_area.`);
+    if (!markdown_header.length)       throw new Error(`Could not obtain markdown_header.`);
+    if (!markdown_textarea.length)     throw new Error(`Could not obtain markdown_textarea`);
+    if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
+    if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
+    if (mode === 'preview') { 
+        if (markdown_header.attr('data-mode') === 'preview') return;
+        accessibility_message.hide();
+        markdown_textarea.hide();
+        markdown_preview.show();
+        markdown_preview_load_spinner.show();
+        markdown_toolbar.hide();
+        $.ajax({
+            url: buildUrl(['markdown']),
+            type: 'POST',
+            data: {
+                ...data,
+                csrf_token: csrfToken
+            },
+            success: function(markdown_data){
+                markdown_preview_load_spinner.hide();
+                markdown_preview.html(markdown_data);
+                markdown_header.attr('data-mode', 'preview');
+            },
+            error: function() {
+                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             }
-            else {
-                preview_element.hide();
-                markdown_textarea.show();
-
-                preview_button.empty();
-                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
-                preview_button.attr('data-mode', 'edit');
-            }
-        },
-        error: function() {
-            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
-        }
-    });
+        });
+    }
+    else {
+        markdown_preview.empty();
+        markdown_preview.hide();
+        markdown_textarea.show();
+        markdown_toolbar.show();
+        markdown_header.attr('data-mode', 'edit');
+        accessibility_message.show();
+    }
 }
 
 /**
@@ -1634,29 +1676,40 @@ function renderMarkdown(markdownContainer, url, content) {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param type Number representing the type of markdown preset to insert
- *             0: code
- *             1: link
- *             2: bold text
- *             3: italic text
- * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ * @param {string} type string representing what type of markdown preset to insert.
+ *                      * `'code'`
+ *                      * `'link'`
+ *                      * `'bold'`
+ *                      * `'italic'`
  */
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
+function addMarkdownCode(type){
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    //don't allow markdown insertion if we are in preview mode
+    if (markdown_header.attr('data-mode') === 'preview') return;
+
+    const cursor = $(this).prop('selectionStart');
+    const text = $(this).val();
+    let insert = '';
+    switch (type) {
+        case 'code':
+            const last_newline_pos = text.substring(0, cursor).split('').lastIndexOf('\n');
+            if (text.substring(last_newline_pos, cursor).length !== 1) {
+                insert = '\n';
+            }
+            insert += '```\ncode\n```\n';
+            break;
+        case 'link':
+            insert = '[display text](url)';
+            break;
+        case 'bold':
+            insert = '__bold text__';
+            break;
+        case 'italic':
+            insert = '_italic text_';
+            break;
     }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).focus();
+    $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }

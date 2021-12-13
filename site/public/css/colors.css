@@ -196,8 +196,8 @@
     --category-color-20: #c0c246;
 
     /* other */
-    --box-shadow-very-transparent: rgba(0, 0, 0, 0.12);
-    --box-shadow-slightly-transparent: rgba(0, 0, 0, 0.2);
+    --box-shadow-very-transparent: rgb(0 0 0 / 12%);
+    --box-shadow-slightly-transparent: rgb(0 0 0 / 20%);
     --no-image-available: #595959;
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
@@ -300,8 +300,8 @@
     --notebook-builder-itempool-green: #50826a;
 
     /* other */
-    --box-shadow-very-transparent: rgba(255, 255, 255, 0);
-    --box-shadow-slightly-transparent: rgba(255, 255, 255, 0);
+    --box-shadow-very-transparent: rgb(255 255 255 / 0%);
+    --box-shadow-slightly-transparent: rgb(255 255 255 / 0%);
     --no-image-available: #adadad;
     --standard-input-background: #4a4a4a;
     --checkbox-black: #5296db;

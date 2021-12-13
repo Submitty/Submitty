@@ -19,11 +19,14 @@
                         <th>Gradeable</th>
                         <th>Config #</th>
                         <th></th>
+                        <th></th>
+                        <th></th>
                         <th>Last Run</th>
-                        <th>Submissions</th>
-                        <th>Students Matched</th>
+                        <th>Submissions<br>Matched</th>
+                        <th>Top Match</th>
                         {# <th>Nightly<br/>Re-run</th> #}
                         <th>Run Log</th>
+                        <th>Download<br>Config</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,7 +84,7 @@
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 
 {% macro renderPlagiarismRow(row) %}
-    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
+    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row" {% if not row['has_been_viewed'] %}class="unviewed"{% endif %}>
         <td>
             {% if row['ranking_available'] %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
@@ -95,7 +98,7 @@
             {{ row['config_id'] }}
         </td>
         {% if row['in_queue'] %}
-            <td colspan=4>
+            <td colspan=6>
                 {% if row['processing'] %}
                     <i>Running</i>
                 {% else %}
@@ -103,27 +106,29 @@
                 {% endif %}
             </td>
         {% else %}
-            <td>
-                <span class="plag-action-btn-cont">
-                    <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}">
-                        <i class="fas fa-pencil-alt"></i>
-                    </a>
-                    <a href="{{ row['rerun_plagiarism_link'] }}" aria-label="Rerun {{ row['title'] }}">
-                        <i class="fas fa-sync"></i>
-                    </a>
-                    <a aria-label="Delete {{ row['title'] }}" onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');">
-                        <i class="fas fa-trash"></i>
-                    </a>
-                </span>
+            <td class="padded-icon-column">
+                <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}">
+                    <i class="fas fa-pencil-alt"></i>
+                </a>
+            </td>
+            <td class="padded-icon-column">
+                <a href="{{ row['rerun_plagiarism_link'] }}" aria-label="Rerun {{ row['title'] }}">
+                    <i class="fas fa-sync"></i>
+                </a>
+            </td>
+            <td class="padded-icon-column">
+                <a aria-label="Delete {{ row['title'] }}" onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');">
+                    <i class="fas fa-trash"></i>
+                </a>
             </td>
             <td>
                 {{ row['timestamp'] }}
             </td>
             <td>
-                {{ row['students'] }} students, {{ row['submissions'] }} submissions
+                {{ row['matching_submission_count'] }} of {{ row['submissions'] }}
             </td>
             <td>
-                {{ row['matches_and_topmatch'] }}
+                {{ row['top_match_percent'] }}
             </td>
         {% endif %}
         {#
@@ -134,7 +139,12 @@
         </td>
         #}
         <td>
-            <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
+            <button class="btn btn-secondary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
+        </td>
+        <td>
+            <a href="{{ row['download_config_file_link'] }}" aria-label="Download {{ row['title'] }} config.json" download="config.json">
+                <i class="fas fa-download"></i>
+            </a>
         </td>
     </tr>
 {% endmacro %}
@@ -176,7 +186,7 @@
         else {
             $(`
                 <tr class="run-log-results">
-                    <td colspan="8" class="run-log-data">
+                    <td colspan="10" class="run-log-data">
                         <pre style="width:${originalTableWidth}px"></pre>
                     </td>
                 </tr>
