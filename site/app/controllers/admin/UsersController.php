@@ -902,7 +902,7 @@ class UsersController extends AbstractController {
             'user_password' => 'user_password cannot be blank',
             'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
             'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
-            'grading_assignments_format' => 'Grading assignments must be comma-separated course registration sections, ' . 
+            'grading_assignments_format' => 'Grading assignments must be comma-separated course registration sections, ' .
                 'enclosed in double quotes (e.g. "1,3,STAFF").',
             'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
             'invalid_grading_assignments' => 'Grading assignments must be valid course registration sections.',
@@ -1006,15 +1006,17 @@ class UsersController extends AbstractController {
                     if (!in_array('grading_assignments_format', $bad_columns)) {
                         $bad_columns[] = 'grading_assignments_format';
                     }
-                } else {
-                    $grading_assignments = explode(',',trim($vals[$grading_assignments_idx],"\""));
+                }
+                else {
+                    $grading_assignments = explode(',', trim($vals[$grading_assignments_idx],"\""));
                     if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
                         // Prevent duplicate registration sections from being specified for assignment.
                         $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
                         if (!in_array('grading_assignments_format', $bad_columns)) {
                             $bad_columns[] = 'grading_assignments_duplicate';
                         }
-                    } else {
+                    }
+                    else {
                         // Confirm entered registration sections are valid, pre-existing sections within the course.
                         $unrecognized_sections = array_diff($grading_assignments, $valid_sections);
                         if (count($unrecognized_sections) > 0) {
@@ -1128,7 +1130,7 @@ class UsersController extends AbstractController {
                     $user->setPassword($row[5]);
                 }
                 if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
-                    $grading_assignments = explode(',',trim($row[$grading_assignments_idx],"\""));
+                    $grading_assignments = explode(',', trim($row[$grading_assignments_idx], "\""));
                     $sorted_grading_assignments = sort($grading_assignments);
                     $user->setGradingRegistrationSections($grading_assignments);
                 }
@@ -1154,7 +1156,7 @@ class UsersController extends AbstractController {
                 }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
                 if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
-                    $grading_assignments = explode(',',trim($row[$grading_assignments_idx],"\""));
+                    $grading_assignments = explode(',', trim($row[$grading_assignments_idx], "\""));
                     $sorted_grading_assignments = sort($grading_assignments);
                     $user->setGradingRegistrationSections($grading_assignments);
                 }
