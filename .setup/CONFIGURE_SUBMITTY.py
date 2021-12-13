@@ -164,15 +164,8 @@ SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
-AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
 
 ##############################################################################
-
-authentication_methods = [
-    'PamAuthentication',
-    'DatabaseAuthentication',
-    'LdapAuthentication',
-]
 
 defaults = {
     'database_host': 'localhost',
@@ -181,7 +174,7 @@ defaults = {
     'submission_url': '',
     'supervisor_user': 'submitty',
     'vcs_url': '',
-    'authentication_method': 0,
+    'authentication_method': 1,
     'institution_name' : '',
     'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
     'institution_homepage' : '',
@@ -197,12 +190,7 @@ defaults = {
     'email_internal_domain': 'example.com',
     'course_code_requirements': "Please follow your school's convention for course code.",
     'sys_admin_email': '',
-    'sys_admin_url': '',
-    'ldap_options': {
-        'url': '',
-        'uid': '',
-        'bind_dn': ''
-    }
+    'sys_admin_url': ''
 }
 
 loaded_defaults = {}
@@ -216,14 +204,13 @@ if os.path.isfile(EMAIL_JSON):
     with open(EMAIL_JSON) as email_file:
         loaded_defaults.update(json.load(email_file))
 
-if os.path.isfile(AUTHENTICATION_JSON):
-    with open(AUTHENTICATION_JSON) as authentication_file:
-        loaded_defaults.update(json.load(authentication_file))
 
-# no need to authenticate on a worker machine (no website)
-if not args.worker:
-    if 'authentication_method' in loaded_defaults:
-        loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method'])
+    #no need to authenticate on a worker machine (no website)
+    if not args.worker:
+        if 'authentication_method' in loaded_defaults:
+            loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+        else:
+            loaded_defaults['authentication_method'] = 2
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that
 # is not in an existing config file.)
@@ -298,34 +285,21 @@ else:
 
     USERNAME_TEXT = defaults['username_change_text']
 
-    print('What authentication method to use:')
-    for i in range(len(authentication_methods)):
-        print(f"{i + 1}. {authentication_methods[i]}")
-
+    print("What authentication method to use:\n1. PAM\n2. Database\n")
     while True:
         try:
-            auth = int(get_input('Enter number?', defaults['authentication_method'])) - 1
+            auth = int(get_input('Enter number?', defaults['authentication_method']))
         except ValueError:
-            auth = -1
-        if auth in range(len(authentication_methods)):
+            auth = 0
+        if 0 < auth < 3:
             break
-        print(f'Number must in between 1 - {len(authentication_methods)} (inclusive)!')
+        print('Number must be between 0 and 3')
     print()
 
-    AUTHENTICATION_METHOD = authentication_methods[auth]
-
-    default_auth_options = defaults.get('ldap_options', dict())
-    LDAP_OPTIONS = {
-        'url': default_auth_options.get('url', ''),
-        'uid': default_auth_options.get('uid', ''),
-        'bind_dn': default_auth_options.get('bind_dn', '')
-    }
-
-    if AUTHENTICATION_METHOD == 'LdapAuthentication':
-        LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
-        LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
-        LDAP_OPTIONS['bind_dn'] = get_input('Enter LDAP bind_dn?', LDAP_OPTIONS['bind_dn'])
-
+    if auth == 1:
+        AUTHENTICATION_METHOD = 'PamAuthentication'
+    else:
+        AUTHENTICATION_METHOD = 'DatabaseAuthentication'
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
@@ -564,18 +538,6 @@ if not args.worker:
         json.dump(config, json_file, indent=2)
     shutil.chown(DATABASE_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
-
-##############################################################################
-# Write authentication json
-if not args.worker:
-    config = OrderedDict()
-    config['authentication_method'] = AUTHENTICATION_METHOD
-    config['ldap_options'] = LDAP_OPTIONS
-
-    with open(AUTHENTICATION_JSON, 'w') as json_file:
-        json.dump(config, json_file, indent=4)
-    shutil.chown(AUTHENTICATION_JSON, 'root', DAEMONPHP_GROUP)
-    os.chmod(AUTHENTICATION_JSON, 0o440)
 
 ##############################################################################
 # Write submitty json
