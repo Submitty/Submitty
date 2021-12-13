@@ -305,10 +305,10 @@ function recreateUser1Dropdown(state) {
         if (state.anon_mode_enabled) {
             const hashedDisplayName = element.display_name !== '' ? hashString(element.display_name) : '';
             const hashedUserID = hashString(element.user_id);
-            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}, ${element.match_count} hashes) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
         }
         else {
-            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${element.display_name} &lt;${element.user_id}&gt;</option>`);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}, ${element.match_count} hashes) ${element.display_name} &lt;${element.user_id}&gt;</option>`);
         }
     });
 }
