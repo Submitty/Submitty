@@ -24,7 +24,7 @@
     "jspdf": "^2.4.0",
     "mermaid": "8.13.5",
     "pdfjs-dist": "2.10.377",
-    "plotly.js-dist": "2.7.0",
+    "plotly.js-dist": "2.8.0",
     "shortcut-buttons-flatpickr": "0.3.1",
     "twig": "1.15.4"
   },
@@ -39,7 +39,7 @@
     "babel-jest": "^27.2.5",
     "cypress": "^9.1.1",
     "cypress-file-upload": "^5.0.8",
-    "esbuild": "^0.14.2",
+    "esbuild": "^0.14.3",
     "eslint": "^8.4.1",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jest": "^25.3.0",
